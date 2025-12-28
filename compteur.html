@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Compteur Élèves</title>
+
+    <script>
+        (function() {
+            const mode = localStorage.getItem('theme_mode');
+            if (mode === 'light') {
+                document.documentElement.classList.add('light-mode-init');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -16,7 +26,7 @@
         }
 
         /* Mode Clair */
-        body.light-mode {
+        body.light-mode, html.light-mode-init body {
             --bg-page: #f3f4f6;
             --text-main: #111827;
             --card-student: #ffffff;
@@ -54,7 +64,7 @@
         }
 
         /* Bordure sombre en mode clair sur les noms */
-        body.light-mode .student-item {
+        body.light-mode .student-item, html.light-mode-init .student-item {
             border-color: #374151;
         }
 
@@ -127,8 +137,9 @@
         // GESTION DU THÈME
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
+            document.documentElement.classList.remove('light-mode-init');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('compt_theme_mode', isLight ? 'light' : 'dark');
+            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
             updateThemeUI(isLight);
         }
 
@@ -137,6 +148,15 @@
         }
 
         function appliquerTheme() {
+            const savedMode = localStorage.getItem('theme_mode');
+            if (savedMode === 'light') {
+                document.body.classList.add('light-mode');
+                updateThemeUI(true);
+            } else {
+                document.body.classList.remove('light-mode');
+                updateThemeUI(false);
+            }
+
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const nomCouleur = prefs['compt'] || 'sky';
             const couleurHexa = mapCouleurs[nomCouleur] || '#0ea5e9';
@@ -144,12 +164,6 @@
             const btnRetour = document.getElementById('btn-retour');
             if (titre) titre.style.color = couleurHexa;
             if (btnRetour) btnRetour.style.backgroundColor = couleurHexa;
-
-            // Charger le mode sombre/clair sauvegardé
-            if (localStorage.getItem('compt_theme_mode') === 'light') {
-                document.body.classList.add('light-mode');
-                updateThemeUI(true);
-            }
         }
 
         function formatNameDisplay(fullName) {
