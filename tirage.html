@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tirage au Sort</title>
+    
+    <script>
+        (function() {
+            const mode = localStorage.getItem('theme_mode');
+            if (mode === 'light') {
+                document.documentElement.classList.add('light-mode-init');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -18,7 +28,7 @@
             --result-border: #9ca3af;
         }
 
-        body.light-mode {
+        body.light-mode, html.light-mode-init body {
             --bg-page: #f3f4f6;
             --text-page: #111827;
             --card-bg: #ffffff;
@@ -40,7 +50,7 @@
         }
 
         /* Bordure sombre pour les noms en mode clair uniquement */
-        body.light-mode .student-item {
+        body.light-mode .student-item, html.light-mode-init .student-item {
             border: 1.5px solid #374151; /* Gris sombre/anthracite */
         }
 
@@ -116,7 +126,7 @@
             text-decoration: line-through;
             opacity: 0.7;
             transform: scale(0.9);
-            border-color: #333 !important; /* Force la bordure sombre même en mode clair quand tiré */
+            border-color: #333 !important; 
         }
 
         .main-btn {
@@ -167,8 +177,9 @@
     <script>
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
+            document.documentElement.classList.remove('light-mode-init');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('tirage_theme_mode', isLight ? 'light' : 'dark');
+            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
             updateThemeUI(isLight);
         }
 
@@ -180,6 +191,16 @@
         const couleurTirage = themePrefs.tirage || 'pink';
 
         function appliquerTheme() {
+            // Synchronisation du mode au démarrage
+            const savedMode = localStorage.getItem('theme_mode');
+            if (savedMode === 'light') {
+                document.body.classList.add('light-mode');
+                updateThemeUI(true);
+            } else {
+                document.body.classList.remove('light-mode');
+                updateThemeUI(false);
+            }
+
             const title = document.getElementById('page-title');
             const btn = document.getElementById('draw-btn');
             const display = document.getElementById('result-display');
@@ -191,11 +212,6 @@
             btn.classList.add(`bg-${couleurTirage}-600`);
             btn.classList.add(['yellow', 'lime', 'amber', 'cyan'].includes(couleurTirage) ? 'text-black' : 'text-white');
             display.classList.add(`text-${couleurTirage}-600`);
-
-            if (localStorage.getItem('tirage_theme_mode') === 'light') {
-                document.body.classList.add('light-mode');
-                updateThemeUI(true);
-            }
         }
 
         function formatName(fullName) {
