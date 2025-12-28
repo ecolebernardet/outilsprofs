@@ -4,12 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mes Notes - CE2/CM2</title>
+
+    <script>
+        (function() {
+            const mode = localStorage.getItem('theme_mode');
+            if (mode === 'light') {
+                document.documentElement.classList.add('light-mode-init');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
-        /* Variables de Thème */
         :root {
             --bg-page: #000;
             --text-page: #eee;
@@ -17,10 +26,11 @@
             --card-text: #111827;
             --input-bg: #ffffff;
             --input-text: #111827;
-            --search-bg: #18181b; /* zinc-900 */
+            --search-bg: #18181b; 
         }
 
-        body.light-mode {
+        /* Mode clair synchronisé avec index.html */
+        body.light-mode, html.light-mode-init body {
             --bg-page: #f3f4f6;
             --text-page: #111827;
             --card-bg: #ffffff;
@@ -39,45 +49,26 @@
         }
 
         .container { max-width: 600px; margin: 0 auto; }
-
         .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; transition: background 0.3s; }
         .input-field { background: var(--input-bg); border: 1px solid #9ca3af; color: var(--input-text); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.8rem; font-weight: 600; width: 100%; }
-
         #searchInput { background: var(--search-bg) !important; color: var(--text-page) !important; border-color: #3f3f46; }
-
         .header-nav { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px; }
         #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
-
         .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, 0.2); transition: all 0.2s; flex-shrink: 0; }
         .color-dot.active { border: 2.5px solid white !important; box-shadow: 0 0 8px rgba(0,0,0,0.3); }
-
         .note-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 480px) { .note-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
-
         .note-card { border-radius: 12px; padding: 10px; min-height: 90px; color: #121212; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; cursor: pointer; }
         .note-card.dark-note { color: #ffffff; }
-        
-        .drag-handle {
-            display: grid; grid-template-columns: repeat(3, 2px); gap: 2px;
-            opacity: 0.3; cursor: grab; padding: 4px; margin-left: 8px; flex-shrink: 0;
-        }
+        .drag-handle { display: grid; grid-template-columns: repeat(3, 2px); gap: 2px; opacity: 0.3; cursor: grab; padding: 4px; margin-left: 8px; flex-shrink: 0; }
         .drag-handle span { width: 2px; height: 2px; background-color: currentColor; border-radius: 50%; }
-
         .note-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 4px; margin-bottom: 6px; }
         .dark-note .note-header { border-bottom: 1px solid rgba(255,255,255,0.2); }
-        
-        .note-title { 
-            font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; white-space: pre-wrap; word-break: break-word;
-        }
-
+        .note-title { font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; word-break: break-word; }
         .note-card-content { font-size: 11px; font-weight: 500; line-height: 1.3; white-space: pre-wrap; word-break: break-word; }
         .sortable-ghost { opacity: 0.2; transform: scale(0.95); }
-
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
-
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
         .modal-content { background: white; padding: 18px; border-radius: 15px; width: 100%; max-width: 350px; color: #111; max-height: 90vh; overflow-y: auto; }
         .modal-content textarea { width: 100%; margin-bottom: 10px; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; background: #f4f4f4; color: #000 !important; }
@@ -119,7 +110,6 @@
         </div>
 
         <input type="text" id="searchInput" class="input-field mb-6" placeholder="Rechercher une note..." onkeyup="renderNotes()">
-
         <div id="notesGrid" class="note-grid mb-6"></div>
 
         <footer class="bottom-nav flex flex-col gap-2">
@@ -150,11 +140,12 @@
     </div>
 
     <script>
-        // --- GESTION DU MODE SOMBRE/CLAIR ---
+        // --- GESTION DU MODE SOMBRE/CLAIR (SYNCHRONISÉ) ---
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
+            document.documentElement.classList.remove('light-mode-init');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('notes_theme_mode', isLight ? 'light' : 'dark');
+            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
             updateThemeUI(isLight);
         }
 
@@ -162,7 +153,6 @@
             document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
         }
 
-        // --- LOGIQUE ORIGINALE ---
         const mapCouleurs = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
@@ -172,9 +162,21 @@
         };
 
         function appliquerTheme() {
+            // Synchronisation du mode au démarrage
+            const savedMode = localStorage.getItem('theme_mode');
+            if (savedMode === 'light') {
+                document.body.classList.add('light-mode');
+                updateThemeUI(true);
+            } else {
+                document.body.classList.remove('light-mode');
+                updateThemeUI(false);
+            }
+
+            // Couleurs dynamiques basées sur index.html
             const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const nomCouleur = themePrefs.memos || 'yellow';
-            const hex = mapCouleurs[nomCouleur] || '#eab308';
+            const nomCouleur = themePrefs.memos || 'purple';
+            const hex = mapCouleurs[nomCouleur] || '#a855f7';
+            
             const title = document.getElementById('pageTitle');
             const btn = document.getElementById('addBtn');
             const modalBtn = document.getElementById('modalSaveBtn');
@@ -192,14 +194,9 @@
                     if (el.id !== 'addBtn') el.style.color = isLightColor ? 'black' : 'white'; 
                 }
             });
-
-            // Charger le mode sombre/clair sauvegardé
-            if (localStorage.getItem('notes_theme_mode') === 'light') {
-                document.body.classList.add('light-mode');
-                updateThemeUI(true);
-            }
         }
 
+        // --- LOGIQUE MÉMOS ---
         let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
         let currentNoteIndex = -1;
         let selectedColorForNew = '#fef08a';
