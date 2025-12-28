@@ -124,6 +124,8 @@
         .bottom-nav { width: 100%; max-width: 400px; align-self: center; display: flex; flex-direction: column; gap: 6px; margin-top: 20px; padding-bottom: 20px; }
         .nav-group { display: flex; gap: 5px; width: 100%; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 8px; flex: 1; text-align: center; background: #27272a; color: white; border: none; }
+        /* Espaceur pour équilibrer le titre maintenant que le bouton de thème est parti */
+        .header-spacer { width: 40px; }
     </style>
 </head>
 <body>
@@ -136,9 +138,7 @@
             </svg>
         </a>
         <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Gestion des Liens</h1>
-        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl no-select">
-            <span id="theme-icon">🌙</span>
-        </button> 
+        <div class="header-spacer"></div>
     </div>
 
     <div class="light-card">
@@ -182,19 +182,13 @@
 </div>
 
 <script>
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-        document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
-        const svg = document.querySelector('#btn-retour svg');
-        svg.style.color = isLight ? '#000' : '#fff';
-    }
-
+    // Appliquer le mode sombre/clair sauvegardé au chargement
     if (localStorage.getItem('theme_mode') === 'light') {
         document.body.classList.add('light-mode');
-        document.getElementById('theme-icon').innerText = '☀️';
-        setTimeout(() => { document.querySelector('#btn-retour svg').style.color = '#000'; }, 10);
+        setTimeout(() => { 
+            const svg = document.querySelector('#btn-retour svg');
+            if(svg) svg.style.color = '#000'; 
+        }, 10);
     }
 
     const mapCouleurs = {

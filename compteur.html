@@ -47,6 +47,9 @@
         #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
 
+        /* Placeholder pour équilibrer le flexbox suite au retrait du bouton */
+        .header-spacer { width: 40px; }
+
         .columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; align-items: start; }
         .level-group { margin-bottom: 1px; }
 
@@ -63,7 +66,6 @@
             border: 1.5px solid transparent;
         }
 
-        /* Bordure sombre en mode clair sur les noms */
         body.light-mode .student-item, html.light-mode-init .student-item {
             border-color: #374151;
         }
@@ -106,9 +108,7 @@
             </svg>
         </a>
         <h1 id="mainTitle">Suivi du comportement</h1>
-        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl no-select">
-            <span id="theme-icon">🌙</span>
-        </button>
+        <div class="header-spacer"></div>
     </header>
 
     <div id="mainContent" class="columns-container"></div>
@@ -134,27 +134,12 @@
             "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
         };
 
-        // GESTION DU THÈME
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            document.documentElement.classList.remove('light-mode-init');
-            const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-            updateThemeUI(isLight);
-        }
-
-        function updateThemeUI(isLight) {
-            document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
-        }
-
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             if (savedMode === 'light') {
                 document.body.classList.add('light-mode');
-                updateThemeUI(true);
             } else {
                 document.body.classList.remove('light-mode');
-                updateThemeUI(false);
             }
 
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};

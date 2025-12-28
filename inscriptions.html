@@ -98,6 +98,8 @@
         .input-field { background: var(--input-bg); border: 1px solid #9ca3af; color: #111827; border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
         
         .btn-delete-svg { color: var(--zinc-text); }
+        /* Espaceur pour équilibrer le titre */
+        .header-spacer { width: 40px; }
     </style>
 </head>
 <body class="pb-10">
@@ -112,9 +114,7 @@
             
             <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Enregistrement des élèves</h1>
             
-            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl no-select">
-                <span id="theme-icon">🌙</span>
-            </button> 
+            <div class="header-spacer"></div>
         </header>
         
         <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-6 shadow-2xl">
@@ -155,17 +155,9 @@
     </div>
 
     <script>
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-            updateThemeUI(isLight);
-        }
-
         function updateThemeUI(isLight) {
-            document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
             const backSvg = document.querySelector('#btn-retour svg');
-            backSvg.style.color = isLight ? '#000' : '#fff';
+            if (backSvg) backSvg.style.color = isLight ? '#000' : '#fff';
             render();
         }
 
@@ -270,6 +262,7 @@
 
         function render() {
             const container = document.getElementById('listeContainer');
+            if (!container) return;
             container.innerHTML = "";
             if (eleves.length === 0) {
                 container.innerHTML = `<p class="text-center text-xs py-10 italic" style="color:var(--zinc-text)">Aucun élève inscrit.</p>`;

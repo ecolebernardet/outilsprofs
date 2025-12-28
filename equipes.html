@@ -111,6 +111,9 @@
         
         .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; }
         .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
+        
+        /* Espaceur pour centrer le titre suite au retrait du bouton */
+        .header-spacer { width: 40px; }
     </style>
 </head>
 <body class="flex flex-col items-center">
@@ -122,9 +125,7 @@
             </svg>
         </a>
         <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase">Générer des équipes</h1>
-        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl">
-            <span id="theme-icon">🌙</span>
-        </button>
+        <div class="header-spacer"></div>
     </div>
 
     <div id="attendance-container"></div>
@@ -141,19 +142,6 @@
     </div>
 
 <script>
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        document.documentElement.classList.remove('light-mode-init');
-        const isLight = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-        updateThemeUI(isLight);
-        selectNum(selectedNumTeams);
-    }
-
-    function updateThemeUI(isLight) {
-        document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
-    }
-
     const mapCouleurs = {
         'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
         'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
@@ -175,10 +163,8 @@
         const savedMode = localStorage.getItem('theme_mode');
         if (savedMode === 'light') {
             document.body.classList.add('light-mode');
-            updateThemeUI(true);
         } else {
             document.body.classList.remove('light-mode');
-            updateThemeUI(false);
         }
 
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};

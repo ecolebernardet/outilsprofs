@@ -75,6 +75,8 @@
         .btns { display: flex; gap: 8px; }
         .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-cancel { background: #eee; color: #555; }
+        /* Spacer pour équilibrer le titre sans le bouton */
+        .header-spacer { width: 40px; }
     </style>
 </head>
 <body>
@@ -87,9 +89,7 @@
                 </svg>
             </a>
             <h1 id="pageTitle" class="font-black text-lg uppercase tracking-normal">Mémos et pense-bêtes</h1>
-            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl">
-                <span id="theme-icon">🌙</span>
-            </button>
+            <div class="header-spacer"></div>
         </header>
 
         <div class="light-card p-4 mb-4 shadow-xl">
@@ -140,19 +140,6 @@
     </div>
 
     <script>
-        // --- GESTION DU MODE SOMBRE/CLAIR (SYNCHRONISÉ) ---
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            document.documentElement.classList.remove('light-mode-init');
-            const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-            updateThemeUI(isLight);
-        }
-
-        function updateThemeUI(isLight) {
-            document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
-        }
-
         const mapCouleurs = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
@@ -162,17 +149,13 @@
         };
 
         function appliquerTheme() {
-            // Synchronisation du mode au démarrage
             const savedMode = localStorage.getItem('theme_mode');
             if (savedMode === 'light') {
                 document.body.classList.add('light-mode');
-                updateThemeUI(true);
             } else {
                 document.body.classList.remove('light-mode');
-                updateThemeUI(false);
             }
 
-            // Couleurs dynamiques basées sur index.html
             const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const nomCouleur = themePrefs.memos || 'purple';
             const hex = mapCouleurs[nomCouleur] || '#a855f7';
@@ -196,7 +179,6 @@
             });
         }
 
-        // --- LOGIQUE MÉMOS ---
         let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
         let currentNoteIndex = -1;
         let selectedColorForNew = '#fef08a';

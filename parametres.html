@@ -213,23 +213,27 @@
     </div>
 
     <script>
-        function toggleTheme() {
-            const isLight = document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme_pref', isLight ? 'light' : 'dark');
-            updateThemeIcons(isLight);
-        }
-
+        // Fonction pour mettre à jour l'apparence selon le thème
         function updateThemeIcons(isLight) {
             document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
             const svgRetour = document.querySelector('#btn-retour svg');
             if (svgRetour) svgRetour.style.color = isLight ? '#111' : '#fff';
         }
 
+        // Basculer le thème manuellement
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme_pref', isLight ? 'light' : 'dark');
+            updateThemeIcons(isLight);
+        }
+
+        // CHARGEMENT INITIAL DU THÈME
         const savedTheme = localStorage.getItem('theme_pref');
         if (savedTheme === 'light') {
             document.body.classList.add('light-mode');
             updateThemeIcons(true);
         } else {
+            document.body.classList.remove('light-mode');
             updateThemeIcons(false);
         }
 

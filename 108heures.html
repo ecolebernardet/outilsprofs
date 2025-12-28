@@ -94,6 +94,8 @@
         .pdf-table th { background: #f0f0f0; text-align: left; padding: 8px; font-size: 11px; border: 1px solid #ddd; }
         .pdf-table td { padding: 8px; font-size: 10px; border: 1px solid #ddd; vertical-align: top; }
         .pdf-cat-header { background: #e2e8f0; font-weight: bold; font-size: 12px; padding: 10px; margin-top: 20px; border-radius: 4px; }
+        /* Spacer pour équilibrer le titre */
+        .header-spacer { width: 40px; }
     </style>
 </head>
 <body>
@@ -105,9 +107,7 @@
                 </svg>
             </a>
             <h1 id="main-title" class="text-lg font-black uppercase tracking-normal">108 heures</h1>
-            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-xl">
-                <span id="theme-icon">🌙</span>
-            </button> 
+            <div class="header-spacer"></div>
         </div>
         
         <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-6 shadow-2xl">
@@ -165,18 +165,10 @@
     <div id="pdf-template"></div>
 
     <script>
-    // --- GESTION DU THÈME ---
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
-        updateThemeUI(isLight);
-    }
-
+    // --- GESTION DU THÈME AUTOMATIQUE ---
     function updateThemeUI(isLight) {
-        document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
         const backSvg = document.querySelector('#btn-retour svg');
-        backSvg.style.color = isLight ? '#000' : '#fff';
+        if(backSvg) backSvg.style.color = isLight ? '#000' : '#fff';
     }
 
     // --- LOGIQUE ORIGINALE ---
@@ -195,6 +187,8 @@
         if (localStorage.getItem('theme_mode') === 'light') {
             document.body.classList.add('light-mode');
             updateThemeUI(true);
+        } else {
+            updateThemeUI(false);
         }
 
         const titrePage = document.getElementById('main-title');
