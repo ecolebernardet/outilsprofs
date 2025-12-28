@@ -62,12 +62,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
-        /* Mode sombre par défaut */
-        body:not(.light-mode) .menu-card {
-            background-color: var(--card-bg);
-            border-color: var(--card-border);
-        }
-
         .menu-card:active { transform: scale(0.95); }
         
         .drag-handle {
@@ -217,7 +211,6 @@
 
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
-        // On nettoie la classe d'initialisation du HTML si elle existe
         document.documentElement.classList.remove('light-mode-init');
         const mode = document.body.classList.contains('light-mode') ? 'light' : 'dark';
         localStorage.setItem('theme_mode', mode);
@@ -254,7 +247,8 @@
                 if (subtitle) subtitle.style.color = 'rgba(0,0,0,0.6)';
             } else {
                 el.className = 'menu-card flex flex-col items-center justify-center text-center p-3 pt-5';
-                el.style.backgroundColor = 'var(--card-bg)';
+                // Couleur dynamique estompée pour le fond en mode sombre
+                el.style.backgroundColor = hexToRgba(hexColor, 0.1);
                 el.style.borderColor = 'var(--card-border)';
                 
                 if (iconCircle) {
@@ -268,13 +262,11 @@
         });
     }
 
-    // Synchronisation finale au chargement du DOM
     if (localStorage.getItem('theme_mode') === 'light') {
         document.body.classList.add('light-mode');
     }
     updateThemeUI();
 
-    // Gestion du Sortable
     const gridMenu = document.getElementById('grid-menu');
     const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
     if (savedOrder) {
