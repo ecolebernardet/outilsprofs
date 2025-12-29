@@ -22,71 +22,60 @@
             --primary: #ff637e; 
             --bg: #000000; 
             --text: #ffffff; 
-            --card-bg: #333333; 
-            --blue-light: #40c4ff; 
-            --pink: #ff80ab;
-            --btn-num-bg: #222;
-            --btn-num-border: #444;
-            --title-gray: #555;
+            --card-bg: #111827; 
+            --blue-light: #60a5fa; 
+            --pink: #f472b6;
+            --btn-num-bg: #111827;
+            --btn-num-border: #374151;
+            --title-gray: #9ca3af;
             --header-bg: #000;
             --header-border: #1f2937;
+            --pill-bg: #1f2937;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg: #dddddd;
+            --bg: #f3f4f6; 
             --text: #111827;
             --card-bg: #ffffff;
             --btn-num-bg: #e5e7eb;
             --btn-num-border: #d1d5db;
             --title-gray: #6b7280;
             --header-bg: #ffffff;
-            --header-border: #ddd;
+            --header-border: #e5e7eb;
+            --pill-bg: #ffffff;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg); 
             color: var(--text); 
-            margin: 0; 
-            padding: 0; 
-            min-height: 100vh;
+            margin: 0; padding: 0; min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         header { 
-            width: 100%; 
-            background: var(--header-bg); 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 10px;
-            border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            margin-bottom: 10px;
+            width: 100%; background: var(--header-bg); display: flex; align-items: center; 
+            justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 50; margin-bottom: 10px;
         }
 
-        body.light-mode .student-item, html.light-mode-init .student-item {
-            border: 1.5px solid #374151;
-        }
-        
         .section-title { font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
         #attendance-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 10px; }
+        
         .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 20px; width: 100%; }
+        
         .level-label { text-align: center; font-size: 10px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
 
         .student-item { 
             padding: 5px 2px; 
-            border-radius: 10px; 
+            border-radius: 999px; 
             font-size: 0.55rem; 
             font-weight: 800; 
             text-align: center; 
             cursor: pointer; 
-            border: 1px solid transparent; 
+            background-color: var(--pill-bg);
+            border: 1px solid var(--btn-num-border); 
             transition: all 0.2s; 
             white-space: nowrap; 
             overflow: hidden; 
@@ -94,36 +83,45 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+
+        .bg-f { color: var(--pink) !important; } 
+        .bg-m { color: var(--blue-light) !important; } 
+
+        /* Mode Foncé - Étiquettes des absents */
+        .absent { 
+            background-color: #0a0a0a !important; 
+            color: #374151 !important; 
+            text-decoration: line-through; 
+            border-color: #1f2937 !important;
+            opacity: 0.8;
+            transform: scale(0.96);
+        }
+
+        /* Mode Clair - Couleurs spécifiques */
+        body.light-mode .bg-f, html.light-mode-init .bg-f { background-color: #fce7f3 !important; color: #831843 !important; border-color: #f9a8d4 !important; } 
+        body.light-mode .bg-m, html.light-mode-init .bg-m { background-color: #dbeafe !important; color: #1e3a8a !important; border-color: #93c5fd !important; } 
         
-        .bg-f { background: #fce7f3; color: #831843; } 
-        .bg-m { background: #dbeafe; color: #1e3a8a; } 
-        
-        .absent { background: #2a2a2a !important; color: #777777 !important; text-decoration: line-through; opacity: 0.7; transform: scale(0.9); border-color: #333 !important; }
-        
-        .num-btn { 
-            background: var(--btn-num-bg); 
-            color: var(--text); 
-            border: 1px solid var(--btn-num-border); 
-            width: 34px; height: 34px; border-radius: 50%; 
-            font-weight: 800; cursor: pointer; transition: all 0.2s; 
+        body.light-mode .absent, html.light-mode-init .absent { 
+            background: #e5e7eb !important; 
+            color: #9ca3af !important; 
+            border-color: #d1d5db !important;
         }
         
+        .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; transition: all 0.2s; }
         .generate-btn { width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
         
         .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; padding: 0 10px; }
-        .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid #aaa; transition: background-color 0.3s; }
-        .team-header { border-bottom: 1px solid #333; margin-bottom: 5px; padding-bottom: 2px; }
-        
+        .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid var(--header-border); }
+        .team-header { border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px; }
         .team-title { font-weight: 900; font-size: 0.65rem; color: var(--text); text-transform: uppercase; }
         .team-stats { font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4; }
         
-        .tag { font-size: 0.45rem; font-weight: 700; margin-right: 10px; padding: 2px 2px; border-radius: 3px; color: #000; min-width: 25px; text-align: center; }
+        .tag { font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; border-radius: 999px; color: #000; min-width: 35px; text-align: center; }
         
         .name-f { color: var(--pink); } 
         .name-g { color: var(--blue-light); }
-
-        body.light-mode .name-f, html.light-mode-init .name-f { color: #d81b60; }
-        body.light-mode .name-g, html.light-mode-init .name-g { color: #0288d1; }
+        body.light-mode .name-f { color: #db2777; }
+        body.light-mode .name-g { color: #2563eb; }
         
         .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
         .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
@@ -138,9 +136,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">
-            Générer des équipes
-        </h1>
+        <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Générer des équipes</h1>
         <div class="header-spacer"></div>
     </header>
 
@@ -178,12 +174,7 @@
     function appliquerTheme() {
         const savedMode = localStorage.getItem('theme_mode');
         const isLight = savedMode === 'light';
-        
-        if (isLight) {
-            document.body.classList.add('light-mode');
-        } else {
-            document.body.classList.remove('light-mode');
-        }
+        document.body.classList.toggle('light-mode', isLight);
 
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const couleurNom = themePrefs.equipes || 'pink';
@@ -194,10 +185,7 @@
         const btnRetour = document.getElementById('btn-retour');
         const svgRetour = document.querySelector('#btn-retour svg');
         
-        // Titre noir en clair / blanc en sombre
         if(title) title.style.color = isLight ? '#000000' : '#ffffff';
-
-        // Éléments thématiques
         const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
         
         if(btnRetour) {
@@ -215,10 +203,7 @@
         const parts = eleve.identite.trim().split(" ");
         const prenom = parts[0];
         const nom = parts.slice(1).join(" ");
-        const aUnDoublon = allStudents.some(s => 
-            s.id !== eleve.id && 
-            s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase()
-        );
+        const aUnDoublon = allStudents.some(s => s.id !== eleve.id && s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase());
         return aUnDoublon && nom ? `${prenom} ${nom.charAt(0)}.` : prenom;
     }
 
@@ -249,8 +234,8 @@
         const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
 
         document.querySelectorAll('.num-btn').forEach(b => {
-            b.style.backgroundColor = isLight ? "#e5e7eb" : "#222";
-            b.style.borderColor = isLight ? "#d1d5db" : "#444";
+            b.style.backgroundColor = isLight ? "#e5e7eb" : "#111827";
+            b.style.borderColor = isLight ? "#d1d5db" : "#374151";
             b.style.color = isLight ? "#111827" : "#ffffff";
         });
         const activeBtn = document.getElementById('btn-' + n);
