@@ -29,7 +29,6 @@
             --card-border: #333;
         }
 
-        /* Utilisation de .light-mode sur le body ET .light-mode-init sur le html pour la rapidité */
         body.light-mode, html.light-mode-init body {
             --bg-body: #f3f4f6;
             --text-title: #111827;
@@ -91,9 +90,7 @@
         <header class="mb-8 px-1">
             <a href="parametres.html" class="ui-btn text-xl active:scale-90">⚙️</a>
             <h1 class="text-base font-black uppercase tracking-tighter text-center" style="color: var(--text-title)">Outils Profs</h1>
-            <button onclick="toggleTheme()" class="ui-btn active:scale-90">
-                <span id="theme-icon" class="text-lg">🌙</span>
-            </button>
+            <div></div> 
         </header>
 
         <nav id="grid-menu" class="grid grid-cols-2 gap-4 mb-6">
@@ -204,17 +201,7 @@
     }
 
     function updateThemeUI() {
-        const isLight = document.body.classList.contains('light-mode');
-        document.getElementById('theme-icon').innerText = isLight ? '☀️' : '🌙';
         applyColors();
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        document.documentElement.classList.remove('light-mode-init');
-        const mode = document.body.classList.contains('light-mode') ? 'light' : 'dark';
-        localStorage.setItem('theme_mode', mode);
-        updateThemeUI();
     }
 
     function applyColors() {
@@ -247,7 +234,6 @@
                 if (subtitle) subtitle.style.color = 'rgba(0,0,0,0.6)';
             } else {
                 el.className = 'menu-card flex flex-col items-center justify-center text-center p-3 pt-5';
-                // Couleur dynamique estompée pour le fond en mode sombre
                 el.style.backgroundColor = hexToRgba(hexColor, 0.1);
                 el.style.borderColor = 'var(--card-border)';
                 

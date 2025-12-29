@@ -99,6 +99,11 @@
     </style>
 </head>
 <body>
+	<script>
+        if (localStorage.getItem('theme_mode') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
     <div id="capture-area" class="max-w-4xl mx-auto">
         <div class="flex items-center justify-between py-4 mb-2">
             <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300">
