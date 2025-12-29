@@ -361,15 +361,24 @@
     }
 
     function exportData() {
+        if (reunions.length === 0) return alert("Aucune donnée à exporter !");
+
+        // Génération de la date au format AAAA-MM-JJ (ex: 2025-12-29)
+        const date = new Date().toISOString().split('T')[0];
+        const fileName = `export_108h_${date}.txt`;
         const contenu = JSON.stringify(reunions, null, 2);
+        
         if (window.Android && window.Android.exportTxt) {
+            // Pour l'intégration Android Studio
             Android.exportTxt(contenu);
         } else {
+            // Pour le téléchargement via navigateur
             const blob = new Blob([contenu], { type: 'text/plain' });
-            const a = document.createElement('a'); 
+            const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `108heures.txt`; 
+            a.download = fileName;
             a.click();
+            URL.revokeObjectURL(a.href);
         }
     }
 

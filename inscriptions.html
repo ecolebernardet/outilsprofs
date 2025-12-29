@@ -357,39 +357,31 @@
 
         function exporterListe() {
             if (eleves.length === 0) return alert("Liste vide !");
+            
+            // Préparation du contenu textuel
             let contenu = "";
             eleves.forEach(el => {
                 const parts = el.identite.split(" ");
                 contenu += `${parts[0]};${parts.slice(1).join(" ")};${el.sexe};${el.niveau}\n`;
             });
 
-            const overlay = document.createElement('div');
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
-            overlay.style.zIndex = '1000';
-            overlay.style.display = 'flex';
-            overlay.style.flexDirection = 'column';
-            overlay.style.padding = '20px';
-            overlay.style.boxSizing = 'border-box';
+            // Génération de la date au format AAAA-MM-JJ (ex: 2025-12-29)
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `export_eleves_${date}.txt`;
 
-            overlay.innerHTML = `
-                <h2 style="color:white; margin-bottom:10px; font-weight:bold;">Copiez votre liste :</h2>
-                <textarea id="copyArea" readonly style="flex-grow:1; width:100%; padding:15px; border-radius:10px; font-family:monospace; font-size:14px; border:none;">${contenu}</textarea>
-                <button id="closeOverlay" style="margin-top:15px; background:#ef4444; color:white; font-weight:bold; padding:15px; border-radius:50px; border:none;">FERMER</button>
-            `;
-
-            document.body.appendChild(overlay);
-
-            document.getElementById('closeOverlay').onclick = function() {
-                document.body.removeChild(overlay);
-            };
-
-            document.getElementById('copyArea').select();
-            document.getElementById('copyArea').setSelectionRange(0, 99999);
+            // Logique d'exportation
+            if (window.Android && window.Android.exportTxt) {
+                // Pour l'intégration Android Studio
+                Android.exportTxt(contenu);
+            } else {
+                // Pour le téléchargement via navigateur
+                const blob = new Blob([contenu], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
         }
 
         document.getElementById('fileInput').addEventListener('change', function(e) {

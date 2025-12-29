@@ -375,13 +375,25 @@
         }
 
         function exportNotesToFile() {
-            const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `mes_notes_${new Date().toISOString().split('T')[0]}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
+            if (notes.length === 0) return alert("Aucune note à exporter !");
+
+            // Génération de la date au format AAAA-MM-JJ (ex: 2025-12-29)
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `export_memos_${date}.txt`;
+            const contenu = JSON.stringify(notes, null, 2);
+            
+            if (window.Android && window.Android.exportTxt) {
+                // Pour l'intégration Android Studio
+                Android.exportTxt(contenu);
+            } else {
+                // Pour le téléchargement via navigateur
+                const blob = new Blob([contenu], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
         }
 
         document.getElementById('importNotesFile').addEventListener('change', function(e) {

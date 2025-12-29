@@ -6,7 +6,6 @@
     <title>Observations</title>
     
     <script>
-    
         (function() {
             const mode = localStorage.getItem('theme_mode');
             if (mode === 'light') {
@@ -23,8 +22,8 @@
             --primary: #ff637e; 
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #374151; /* Gris en mode sombre */
-            --header-bg: #111828;
+            --card-student: #374151; 
+            --header-bg: #000;
             --header-border: #1f2937;
         }
 
@@ -37,7 +36,6 @@
             --header-border: #ddd;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
@@ -52,7 +50,6 @@
             padding-bottom: 20px;
         }
 
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -110,6 +107,12 @@
         .btn-save { background: var(--primary); color: white; }
         .btn-cancel { background: #333; color: #ccc; }
 
+        /* Correction lisibilité Mode Clair */
+        body.light-mode .modal-content { background: #ffffff; border-color: #d1d5db; }
+        body.light-mode #modalTitle { color: #111827 !important; }
+        body.light-mode textarea { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+        body.light-mode .btn-cancel { background: #e5e7eb; color: #374151; }
+
         .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -131,11 +134,11 @@
 
     <footer class="bottom-nav flex flex-col gap-3 px-2">
         <div class="flex gap-2">
-            <label class="nav-btn bg-zinc-800 text-white cursor-pointer text-center">
+            <label class="nav-btn bg-neutral-800 text-white cursor-pointer text-center">
                 👇importer .txt👇
                 <input type="file" id="importFile" class="hidden" accept=".txt">
             </label>
-            <button onclick="exportToFile()" class="nav-btn bg-zinc-800 text-white ">👆exporter .txt👆</button>
+            <button onclick="exportToFile()" class="nav-btn bg-neutral-800 text-white ">👆exporter .txt👆</button>
         </div>
         <button onclick="toutEffacer()" class="nav-btn bg-red-500 text-red-100">⚠️ effacer les données</button>
     </footer>
@@ -219,7 +222,7 @@
             container.innerHTML = "";
             
             if (elevesInscrits.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center p-10 text-zinc-500 text-[10px] font-bold uppercase">Aucun élève inscrit.</div>`;
+                container.innerHTML = `<div class="col-span-2 text-center p-10 text-neutral-500 text-[10px] font-bold uppercase">Aucun élève inscrit.</div>`;
                 return;
             }
 
@@ -287,46 +290,49 @@
         }
 
         function exportToFile() {
-    try {
-        const eleves = typeof elevesInscrits !== 'undefined' ? elevesInscrits : [];
-        const observations = typeof savedComments !== 'undefined' ? savedComments : {};
+            try {
+                const eleves = typeof elevesInscrits !== 'undefined' ? elevesInscrits : [];
+                const observations = typeof savedComments !== 'undefined' ? savedComments : {};
 
-        let cleanedComments = {};
-        eleves.forEach(s => { 
-            const sId = String(s.id);
-            if(observations[sId] && observations[sId].trim() !== "") {
-                cleanedComments[sId] = observations[sId]; 
+                let cleanedComments = {};
+                eleves.forEach(s => { 
+                    const sId = String(s.id);
+                    if(observations[sId] && observations[sId].trim() !== "") {
+                        cleanedComments[sId] = observations[sId]; 
+                    }
+                });
+
+                const dateStr = new Date().toISOString().split('T')[0];
+                const fileName = `export_observations_${dateStr}.txt`;
+                const bundle = {
+                    eleves: eleves,
+                    observations: cleanedComments,
+                    date: new Date().toLocaleDateString(),
+                    type: "export_observations"
+                };
+
+                const jsonString = JSON.stringify(bundle, null, 2);
+
+                if (window.Android && window.Android.exportTxt) {
+                    window.Android.exportTxt(jsonString, fileName);
+                } else {
+                    const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+                }
+            } catch (err) {
+                alert("Erreur technique lors de l'export : " + err.message);
             }
-        });
-
-        const bundle = {
-            eleves: eleves,
-            observations: cleanedComments,
-            date: new Date().toLocaleDateString(),
-            type: "export_observations"
-        };
-
-        const jsonString = JSON.stringify(bundle, null, 2);
-        const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `observations_${new Date().toISOString().split('T')[0]}.txt`;
-
-        document.body.appendChild(a);
-        a.click();
-
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
-
-    } catch (err) {
-        alert("Erreur technique lors de l'export : " + err.message);
-    }
-}
+        }
 
         document.getElementById('importFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -336,17 +342,26 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.eleves && confirm("Importer les données du fichier ?")) {
+                        // Correction : Conversion forcée des IDs en String pour l'importation
+                        const normalizedEleves = data.eleves.map(el => ({
+                            ...el,
+                            id: String(el.id)
+                        }));
+                        
                         let normalizedObs = {};
                         if(data.observations) {
                             Object.keys(data.observations).forEach(key => {
                                 normalizedObs[String(key)] = data.observations[key];
                             });
                         }
-                        localStorage.setItem('maListeEleves', JSON.stringify(data.eleves));
+                        
+                        localStorage.setItem('maListeEleves', JSON.stringify(normalizedEleves));
                         localStorage.setItem('studentObservations', JSON.stringify(normalizedObs));
                         window.location.reload();
                     }
-                } catch (err) { alert("Fichier invalide."); }
+                } catch (err) { 
+                    alert("Erreur lors de l'import : " + err.message); 
+                }
             };
             reader.readAsText(file);
         });
@@ -355,9 +370,6 @@
             appliquerTheme();
             renderList();
         };
-
-        (function() {
-        })();
     </script>
 </body>
 </html>
