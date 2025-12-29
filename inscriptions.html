@@ -89,21 +89,19 @@
             transition: border-color 0.3s;
         }
 
-        /* Accentuation du cadre en mode clair */
         body.light-mode .student-item {
             border: 1.5px solid #374151;
         }
 
-        .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; }
+        .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; cursor: pointer; }
         .input-field { background: var(--input-bg); border: 1px solid #9ca3af; color: #111827; border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
         
         .btn-delete-svg { color: var(--zinc-text); }
-        /* Espaceur pour équilibrer le titre */
         .header-spacer { width: 40px; }
     </style>
 </head>
 <body class="pb-10">
-	<script>
+    <script>
         if (localStorage.getItem('theme_mode') === 'light') {
             document.body.classList.add('light-mode');
         }
@@ -143,18 +141,19 @@
                 </div>
 
                 <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
-
-                <div class="pt-2 border-t border-gray-300 text-center">
-                    <label id="label-import" class="text-[10px] font-bold block mb-0">Importer un fichier .txt</label>
-                    <input type="file" id="fileInput" accept=".txt,.csv" class="text-[10px] text-gray-600">
-                </div>
             </form>
         </div>
 
         <div id="listeContainer"></div>
 
         <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
-            <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆exporter la liste .txt👆 </button>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">
+                    👇 importer une liste .txt 👇
+                    <input type="file" id="fileInput" accept=".txt,.csv" class="hidden">
+                </label>
+                <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter la liste .txt 👆 </button>
+            </div>
             <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
         </div>
     </div>
@@ -185,7 +184,6 @@
 
         function appliquerCouleursTheme() {
             document.getElementById('page-title').style.color = hexaTheme;
-            document.getElementById('label-import').style.color = hexaTheme;
             document.getElementById('btn-retour').style.backgroundColor = hexaTheme;
             const btnSubmit = document.getElementById('btn-submit');
             btnSubmit.style.backgroundColor = hexaTheme;
