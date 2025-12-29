@@ -8,49 +8,49 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
-        /* Variables de thème */
         :root {
             --bg-body: #000;
             --text-main: #eee;
+            --header-bg: #000;
+            --border-color: #1f2937;
             --column-bg: rgba(24, 24, 27, 0.6);
             --card-bg: #e5e7eb;
             --card-text: #111827;
             --input-bg: #ffffff;
-            --zinc-text: #52525b;
+            --sub-text: #9ca3af;
         }
 
         body.light-mode {
             --bg-body: #f3f4f6;
-            --text-main: #111827;
+            --text-main: #111;
+            --header-bg: #ffffff;
+            --border-color: #ddd;
             --column-bg: #ffffff;
             --card-bg: #ffffff;
             --card-text: #111827;
             --input-bg: #f9fafb;
-            --zinc-text: #71717a;
+            --sub-text: #71717a;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-body); 
             color: var(--text-main); 
-            padding: 10px; margin: 0; 
+            padding: 0; margin: 0; 
             transition: background 0.3s;
         }
         
+        header { background: var(--header-bg); border-bottom: 1px solid var(--border-color); }
+
         .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; transition: background 0.3s; }
 
         .card-input { display: none; }
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
             background: #d1d5db; border: 2px solid #9ca3af; color: #374151;
-            padding: 4px 4px; border-radius: 0.75rem; cursor: pointer;
+            padding: 4px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
             transition: all 0.2s; 
-        }
-
-        .level-circle {
-            border-radius: 9999px; aspect-ratio: 1 / 1; width: 80%; margin: 0 auto; 
-            padding: 0; font-size: 0.55rem; display: flex; align-items: center; justify-content: center;
         }
 
         .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; }
@@ -63,19 +63,13 @@
         .input-cm2:checked + .card-label { background: #22c55e; border-color: #22c55e; color: #fff; } 
         .input-autre:checked + .card-label { background: #8b5cf6; border-color: #8b5cf6; color: #fff; } 
 
-        .card-input:checked + .card-label { transform: scale(0.90); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-
         .level-column { 
             background: var(--column-bg); 
-            border: 1px solid transparent; 
             border-radius: 1.25rem; padding: 10px; height: fit-content; 
             transition: background 0.3s;
         }
-        body.light-mode .level-column { border-color: #d4d4d4; }
+        body.light-mode .level-column { border: 1px solid #d4d4d4; }
 
-        .text-m { color: #2563eb; } 
-        .text-f { color: #db2777; } 
-        
         .student-item { 
             background: #fff; 
             padding: 6px 10px; 
@@ -84,87 +78,68 @@
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 4px; 
-            cursor: pointer; 
             border: 1px solid #e5e7eb; 
             transition: border-color 0.3s;
         }
-
-        body.light-mode .student-item {
-            border: 1.5px solid #374151;
-        }
+        body.light-mode .student-item { border: 1.5px solid #374151; }
 
         .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; cursor: pointer; }
         .input-field { background: var(--input-bg); border: 1px solid #9ca3af; color: #111827; border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
-        
-        .btn-delete-svg { color: var(--zinc-text); }
-        .header-spacer { width: 40px; }
     </style>
 </head>
 <body class="pb-10">
-    <script>
-        if (localStorage.getItem('theme_mode') === 'light') {
-            document.body.classList.add('light-mode');
-        }
-    </script>
     <div class="max-w-4xl mx-auto">
         
-        <header class="flex items-center justify-between py-2 mb-2 max-w-500 mx-auto px-2">
-            <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-transform active:scale-90">
+        <header class="flex items-center justify-between p-4 sticky top-0 z-50">
+            <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 shadow-lg active:scale-90">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
-            
             <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Enregistrement des élèves</h1>
-            
-            <div class="header-spacer"></div>
+            <div class="header-spacer w-10"></div>
         </header>
         
-        <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-6 shadow-2xl">
-            <form id="eleveForm" class="flex flex-col gap-3">
-                <input type="hidden" id="edit-id" value="">
-                
-                <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
-                    <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
-                </div>
+        <div class="p-4">
+            <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-6 shadow-2xl">
+                <form id="eleveForm" class="flex flex-col gap-3">
+                    <input type="hidden" id="edit-id" value="">
+                    <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
+                        <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
+                    </div>
 
-                <div class="grid grid-cols-6 gap-1 items-center justify-items-center">
-                    <label class="w-full"><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label level-circle">CP</div></label>
-                    <label class="w-full"><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label level-circle">CE1</div></label>
-                    <label class="w-full"><input type="radio" name="niveau" value="CE2" class="card-input input-ce2" checked><div class="card-label level-circle">CE2</div></label>
-                    <label class="w-full"><input type="radio" name="niveau" value="CM1" class="card-input input-cm1"><div class="card-label level-circle">CM1</div></label>
-                    <label class="w-full"><input type="radio" name="niveau" value="CM2" class="card-input input-cm2"><div class="card-label level-circle">CM2</div></label>
-                    <label class="w-full"><input type="radio" name="niveau" value="AUTRE" class="card-input input-autre"><div class="card-label level-circle">Autre</div></label>
-                </div>
+                    <div class="grid grid-cols-6 gap-1">
+                        <label><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label">CP</div></label>
+                        <label><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label">CE1</div></label>
+                        <label><input type="radio" name="niveau" value="CE2" class="card-input input-ce2" checked><div class="card-label">CE2</div></label>
+                        <label><input type="radio" name="niveau" value="CM1" class="card-input input-cm1"><div class="card-label">CM1</div></label>
+                        <label><input type="radio" name="niveau" value="CM2" class="card-input input-cm2"><div class="card-label">CM2</div></label>
+                        <label><input type="radio" name="niveau" value="AUTRE" class="card-input input-autre"><div class="card-label">Autre</div></label>
+                    </div>
 
-                <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
-            </form>
-        </div>
-
-        <div id="listeContainer"></div>
-
-        <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
-            <div class="grid grid-cols-2 gap-3">
-                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">
-                    👇 importer une liste .txt 👇
-                    <input type="file" id="fileInput" accept=".txt,.csv" class="hidden">
-                </label>
-                <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter la liste .txt 👆 </button>
+                    <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
+                </form>
             </div>
-            <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
+
+            <div id="listeContainer"></div>
+
+            <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">
+                        👇 importer .txt
+                        <input type="file" id="fileInput" accept=".txt,.csv" class="hidden">
+                    </label>
+                    <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter .txt</button>
+                </div>
+                <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
+            </div>
         </div>
     </div>
 
     <script>
-        function updateThemeUI(isLight) {
-            const backSvg = document.querySelector('#btn-retour svg');
-            if (backSvg) backSvg.style.color = isLight ? '#000' : '#fff';
-            render();
-        }
-
         const mapCouleurs = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
@@ -183,11 +158,22 @@
         const hexaTheme = mapCouleurs[couleurInscr];
 
         function appliquerCouleursTheme() {
-            document.getElementById('page-title').style.color = hexaTheme;
-            document.getElementById('btn-retour').style.backgroundColor = hexaTheme;
+            const isLight = localStorage.getItem('theme_mode') === 'light';
+            if (isLight) document.body.classList.add('light-mode');
+
+            // Couleur dynamique sur le bouton de retour
+            const btnRetour = document.getElementById('btn-retour');
+            btnRetour.style.backgroundColor = hexaTheme;
+
             const btnSubmit = document.getElementById('btn-submit');
             btnSubmit.style.backgroundColor = hexaTheme;
             btnSubmit.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr) ? '#000' : '#fff';
+
+            const backSvg = document.querySelector('#btn-retour svg');
+            if (backSvg) {
+                // Couleur de la flèche : noire si fond clair, sinon blanc
+                backSvg.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr) ? '#000' : '#fff';
+            }
         }
 
         let eleves = JSON.parse(localStorage.getItem('maListeEleves')) || [];
@@ -198,18 +184,46 @@
             return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() + " " + n;
         }
 
-        function preparerModification(id) {
-            const el = eleves.find(e => e.id === id);
-            if (!el) return;
-            document.getElementById('edit-id').value = el.id;
-            document.getElementById('nomComplet').value = el.identite;
-            document.querySelector(`input[name="sexe"][value="${el.sexe}"]`).checked = true;
-            document.querySelector(`input[name="niveau"][value="${el.niveau}"]`).checked = true;
-            const btn = document.getElementById('btn-submit');
-            btn.innerText = "Mettre à jour l'élève";
-            btn.style.backgroundColor = "#f97316";
-            document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
-            document.getElementById('nomComplet').focus();
+        function render() {
+            const container = document.getElementById('listeContainer');
+            if (!container) return;
+            container.innerHTML = "";
+            if (eleves.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>`;
+                return;
+            }
+            const groupes = {};
+            eleves.forEach(el => {
+                const niv = el.niveau.toUpperCase();
+                if (!groupes[niv]) groupes[niv] = [];
+                groupes[niv].push(el);
+            });
+            const nomsNiveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+            
+            container.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 items-start";
+
+            nomsNiveauxPresents.forEach(niv => {
+                const col = document.createElement('div');
+                col.className = "level-column shadow-lg";
+                const colColor = couleurParNiveau[niv] || hexaTheme;
+                col.innerHTML = `<h3 class="text-[11px] font-black uppercase mb-1 text-center tracking-widest pb-1" style="color:${colColor}">${niv} — ${groupes[niv].length}</h3>`;
+                const list = document.createElement('div');
+                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item shadow-sm';
+                    item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
+                    item.innerHTML = `
+                        <span class="text-[9px] font-bold pr-2 text-${el.sexe === 'f' ? 'pink-600' : 'blue-600'} whitespace-normal break-words leading-tight">${el.identite}</span>
+                        <button onclick="supprimer(${el.id})" class="opacity-40 hover:opacity-100 transition-opacity p-1 flex-shrink-0" style="color:var(--sub-text)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>`;
+                    list.appendChild(item);
+                });
+                col.appendChild(list);
+                container.appendChild(col);
+            });
         }
 
         document.getElementById('eleveForm').addEventListener('submit', (e) => {
@@ -226,98 +240,40 @@
                 eleves[index] = { ...eleves[index], identite: formaterIdentite(prenom, nom), sexe, niveau };
                 document.getElementById('edit-id').value = "";
                 document.getElementById('btn-submit').innerText = "Enregistrer";
-                appliquerCouleursTheme();
             } else {
                 eleves.push({ id: Date.now(), identite: formaterIdentite(prenom, nom), sexe, niveau });
             }
-            sauvegarder();
+            localStorage.setItem('maListeEleves', JSON.stringify(eleves));
+            render();
             e.target.reset();
         });
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lignes = e.target.result.split(/\r?\n/);
-                lignes.forEach(l => {
-                    const clean = l.trim();
-                    if (!clean) return;
-                    const p = clean.split(';'); 
-                    if(p.length >= 4) {
-                        eleves.push({
-                            id: Date.now() + Math.random(),
-                            identite: formaterIdentite(p[0], p[1]),
-                            sexe: p[2].trim().toLowerCase(),
-                            niveau: p[3].trim().toUpperCase()
-                        });
-                    }
-                });
-                sauvegarder();
-            };
-            reader.readAsText(file);
-        });
-
-        function sauvegarder() {
-            localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-            render();
-        }
-
-        function render() {
-            const container = document.getElementById('listeContainer');
-            if (!container) return;
-            container.innerHTML = "";
-            if (eleves.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs py-10 italic" style="color:var(--zinc-text)">Aucun élève inscrit.</p>`;
-                return;
-            }
-            const groupes = {};
-            eleves.forEach(el => {
-                const niv = el.niveau.toUpperCase();
-                if (!groupes[niv]) groupes[niv] = [];
-                groupes[niv].push(el);
-            });
-            const nomsNiveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            
-            if (nomsNiveauxPresents.length === 2) container.className = "grid grid-cols-2 gap-3 items-start";
-            else if (nomsNiveauxPresents.length >= 3) container.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-start";
-            else container.className = "flex flex-col gap-4 max-w-md mx-auto";
-
-            nomsNiveauxPresents.forEach(niv => {
-                const col = document.createElement('div');
-                col.className = "level-column shadow-lg";
-                const colColor = couleurParNiveau[niv] || hexaTheme;
-                col.innerHTML = `<h3 class="text-[11px] font-black uppercase mb-1 text-center tracking-widest pb-1" style="color:${colColor}">${niv} — ${groupes[niv].length}</h3>`;
-                const list = document.createElement('div');
-                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
-                    const item = document.createElement('div');
-                    item.className = 'student-item shadow-sm';
-                    item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
-                    item.innerHTML = `
-                        <span class="text-[9px] font-bold pr-2 text-${el.sexe} whitespace-normal break-words leading-tight">${el.identite}</span>
-                        <button onclick="supprimer(${el.id})" class="opacity-40 hover:opacity-100 transition-opacity p-1 flex-shrink-0" style="color:var(--zinc-text)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>`;
-                    list.appendChild(item);
-                });
-                col.appendChild(list);
-                container.appendChild(col);
-            });
+        function preparerModification(id) {
+            const el = eleves.find(e => e.id === id);
+            if (!el) return;
+            document.getElementById('edit-id').value = el.id;
+            document.getElementById('nomComplet').value = el.identite;
+            document.querySelector(`input[name="sexe"][value="${el.sexe}"]`).checked = true;
+            document.querySelector(`input[name="niveau"][value="${el.niveau}"]`).checked = true;
+            const btn = document.getElementById('btn-submit');
+            btn.innerText = "Mettre à jour";
+            document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('nomComplet').focus();
         }
 
         function supprimer(id) {
             if(confirm("Supprimer cet élève ?")) {
                 eleves = eleves.filter(e => e.id !== id);
-                sauvegarder();
+                localStorage.setItem('maListeEleves', JSON.stringify(eleves));
+                render();
             }
         }
 
         function toutEffacer() {
             if(confirm("Attention : Supprimer toute la liste d'élèves ?")) {
                 eleves = [];
-                sauvegarder();
+                localStorage.setItem('maListeEleves', JSON.stringify(eleves));
+                render();
             }
         }
 
@@ -337,10 +293,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('theme_mode') === 'light') {
-                document.body.classList.add('light-mode');
-                updateThemeUI(true);
-            }
             appliquerCouleursTheme();
             render();
         });
