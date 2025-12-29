@@ -22,14 +22,14 @@
             --primary: #ff637e; 
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #ffffff;
+            --card-student: #374151; /* Gris en mode sombre */
             --header-bg: #000;
             --header-border: #1f2937;
         }
 
         /* Mode Clair */
         body.light-mode, html.light-mode-init body {
-            --bg-page: #dddddd;
+            --bg-page: #eeeeee;
             --text-main: #111827;
             --card-student: #ffffff;
             --header-bg: #ffffff;
@@ -88,8 +88,13 @@
             border-color: #374151;
         }
 
-        .text-girl { color: #db2777; } 
-        .text-boy { color: #2563eb; } 
+        /* Couleurs de texte adaptées au mode sombre (plus claires pour la lisibilité sur fond gris) */
+        .text-girl { color: #f9a8d4; } 
+        .text-boy { color: #93c5fd; } 
+        
+        /* En mode clair, on garde les couleurs originales */
+        body.light-mode .text-girl, html.light-mode-init .text-girl { color: #db2777; } 
+        body.light-mode .text-boy, html.light-mode-init .text-boy { color: #2563eb; } 
         
         .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .status-icon { font-size: 0.65rem; opacity: 0.8; }
@@ -182,7 +187,6 @@
             const svgRetour = document.querySelector('#btn-retour svg');
             const btnSave = document.querySelector('.btn-save');
 
-            // Couleur du titre (Noir en clair / Blanc en sombre)
             if(mainTitle) mainTitle.style.color = isLight ? '#000000' : '#ffffff';
 
             const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
