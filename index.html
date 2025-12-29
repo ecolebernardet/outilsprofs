@@ -25,7 +25,7 @@
             --text-title: #ffffff;
             --btn-bg: #333333;
             --btn-border: #666666;
-            --card-bg: #333333; /* Couleur grise pour le fond des tuiles */
+            --card-bg: #333333; 
             --card-border: #666666;
         }
 
@@ -58,7 +58,7 @@
             border-radius: 30% 0% 30% 0%; 
             border-width: 2px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.5);
         }
         
         .menu-card:active { transform: scale(0.95); }
@@ -193,10 +193,6 @@
         'rose': '#f43f5e', 'gray': '#6b7280'
     };
 
-    function updateThemeUI() {
-        applyColors();
-    }
-
     function applyColors() {
         const isLight = document.body.classList.contains('light-mode');
         const defaultColors = {
@@ -215,31 +211,35 @@
             const subtitle = el.querySelector('.tile-subtitle');
 
             if (isLight) {
+                // MODE CLAIR
                 el.style.backgroundColor = ''; 
                 el.style.borderColor = '';
+                el.style.boxShadow = '6px 6px 10px -1px rgba(0, 0, 0, 0.5)'; // Ombre noire d'origine
                 el.className = `menu-card flex flex-col items-center justify-center text-center p-3 pt-5 bg-${colorName}-200 border-${colorName}-900`;
                 
                 if (iconCircle) {
                     iconCircle.style.backgroundColor = '';
                     iconCircle.className = `icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner bg-${colorName}-400 border-${colorName}-900`;
                     iconCircle.style.borderColor = 'rgba(1,1,1,0.1)';
-					iconCircle.style.boxShadow = '0px 0px 10px rgba(0,0,0)'; // Légère ombre
+                    iconCircle.style.boxShadow = '0px 0px 10px rgba(0,0,0)'; 
                 }
                 if (title) title.style.color = '#000';
                 if (subtitle) subtitle.style.color = 'rgba(0,0,0,0.6)';
             } else {
                 // MODE SOMBRE
                 el.className = 'menu-card flex flex-col items-center justify-center text-center p-3 pt-5';
-                el.style.backgroundColor = 'var(--card-bg)'; // Fond gris
+                el.style.backgroundColor = 'var(--card-bg)';
                 el.style.borderColor = 'var(--card-border)';
+                // Ajout de l'ombre blanche subtile demandée
+                el.style.boxShadow = '6px 6px 12px -1px rgba(255, 255, 255, 0.15)'; 
                 
                 if (iconCircle) {
                     iconCircle.className = 'icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner';
-                    iconCircle.style.backgroundColor = '#000'; // Rond noir
+                    iconCircle.style.backgroundColor = '#000'; 
                     iconCircle.style.borderColor = 'rgba(255,255,255,0.1)';
-                    iconCircle.style.boxShadow = '0px 0px 10px rgba(102,102,102)'; // Légère ombre
+                    iconCircle.style.boxShadow = '0px 0px 10px rgba(102,102,102)'; 
                 }
-                if (title) title.style.color = hexColor; // Garde la couleur personnalisée pour le titre
+                if (title) title.style.color = hexColor; 
                 if (subtitle) subtitle.style.color = '#666';
             }
         });
@@ -248,7 +248,7 @@
     if (localStorage.getItem('theme_mode') === 'light') {
         document.body.classList.add('light-mode');
     }
-    updateThemeUI();
+    applyColors();
 
     const gridMenu = document.getElementById('grid-menu');
     const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
