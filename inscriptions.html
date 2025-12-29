@@ -15,10 +15,14 @@
             --header-border: #1f2937;
             --border-color: #1f2937;
             --column-bg: rgba(24, 24, 27, 0.6);
-            --card-bg: #e5e7eb;
-            --card-text: #111827;
-            --input-bg: #ffffff;
+            /* Couleurs du formulaire ajustées pour le mode sombre */
+            --card-bg: #111827; 
+            --card-text: #ffffff;
+            --input-bg: #1f2937;
             --sub-text: #9ca3af;
+            --student-item-bg: #374151;
+            --student-name-girl: #f9a8d4;
+            --student-name-boy: #93c5fd;
         }
 
         body.light-mode {
@@ -32,6 +36,9 @@
             --card-text: #111827;
             --input-bg: #f9fafb;
             --sub-text: #71717a;
+            --student-item-bg: #ffffff;
+            --student-name-girl: #db2777;
+            --student-name-boy: #2563eb;
         }
 
         body { 
@@ -40,6 +47,10 @@
             color: var(--text-main); 
             padding: 0; margin: 0; 
             transition: background 0.3s;
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
         
         header { 
@@ -55,19 +66,30 @@
             width: 100%;
         }
 
-        .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; transition: background 0.3s; }
+        /* Styles du formulaire */
+        .light-card { 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
+            transition: background 0.3s;
+            border: 1px solid var(--header-border);
+        }
 
         .card-input { display: none; }
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #d1d5db; border: 2px solid #9ca3af; color: #374151;
+            background: #374151; border: 1px solid #4b5563; color: #d1d5db;
             padding: 4px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
             transition: all 0.2s; 
         }
+        
+        body.light-mode .card-label {
+            background: #d1d5db; border: 2px solid #9ca3af; color: #374151;
+        }
 
-        .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; }
-        .input-fille:checked + .card-label { color: #db2777; border-color: #db2777; font-weight: 900; }
+        .input-garcon:checked + .card-label { color: #93c5fd; border-color: #3b82f6; font-weight: 900; background: rgba(59, 130, 246, 0.2); }
+        .input-fille:checked + .card-label { color: #f9a8d4; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.2); }
 
         .input-cp:checked + .card-label { background: #ec4899; border-color: #ec4899; color: #fff; } 
         .input-ce1:checked + .card-label { background: #3b82f6; border-color: #3b82f6; color: #fff; } 
@@ -84,20 +106,38 @@
         body.light-mode .level-column { border: 1px solid #d4d4d4; }
 
         .student-item { 
-            background: #fff; 
+            background: var(--student-item-bg); 
             padding: 6px 10px; 
             border-radius: 0.75rem; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 4px; 
-            border: 1px solid #e5e7eb; 
+            border: 1px solid transparent; 
             transition: border-color 0.3s;
         }
         body.light-mode .student-item { border: 1.5px solid #374151; }
 
+        .text-girl-custom { color: var(--student-name-girl); }
+        .text-boy-custom { color: var(--student-name-boy); }
+
         .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; cursor: pointer; }
-        .input-field { background: var(--input-bg); border: 1px solid #9ca3af; color: #111827; border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
+        
+        .input-field { 
+            background: var(--input-bg); 
+            border: 1px solid var(--header-border); 
+            color: var(--text-main); 
+            border-radius: 0.75rem; 
+            padding: 10px; 
+            outline: none; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+        }
+        
+        body.light-mode .input-field {
+            color: #111827;
+            border-color: #9ca3af;
+        }
         
         .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
         .header-spacer { width: 40px; }
@@ -119,7 +159,7 @@
         <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-4 shadow-2xl">
             <form id="eleveForm" class="flex flex-col gap-3">
                 <input type="hidden" id="edit-id" value="">
-                <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required>
+                <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
                 
                 <div class="grid grid-cols-2 gap-2">
                     <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
@@ -181,15 +221,11 @@
             const pageTitle = document.getElementById('page-title');
             const btnSubmit = document.getElementById('btn-submit');
             
-            // Appliquer la couleur thématique au bouton retour et au bouton valider
             if (btnRetour) btnRetour.style.backgroundColor = hexaTheme;
             if (btnSubmit) btnSubmit.style.backgroundColor = hexaTheme;
 
-            // Couleur du texte du bouton (noir ou blanc selon le contraste)
             const textContrast = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr) ? '#000000' : '#ffffff';
             if (btnSubmit) btnSubmit.style.color = textContrast;
-
-            // Titre : Noir en mode clair, Blanc en mode sombre
             if (pageTitle) pageTitle.style.color = isLight ? '#000000' : '#ffffff';
 
             const backSvg = document.querySelector('#btn-retour svg');
@@ -254,7 +290,7 @@
                     item.className = 'student-item shadow-sm';
                     item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
                     item.innerHTML = `
-                        <span class="text-[9px] font-bold pr-2 ${el.sexe === 'f' ? 'text-pink-600' : 'text-blue-600'} whitespace-normal break-words leading-tight">${el.identite}</span>
+                        <span class="text-[9px] font-bold pr-2 ${el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom'} whitespace-normal break-words leading-tight">${el.identite}</span>
                         <button onclick="supprimer(${el.id})" class="opacity-40 hover:opacity-100 transition-opacity p-1 flex-shrink-0" style="color:var(--sub-text)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

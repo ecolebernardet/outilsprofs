@@ -16,6 +16,16 @@
             --column-border: #222;
             --header-bg: #000;
             --border-color: #1f2937;
+            /* Formulaire */
+            --card-bg: #111827; 
+            --card-text: #ffffff;
+            --input-bg: #1f2937;
+            --input-border: #374151;
+            --input-text: #ffffff;
+            /* Étiquettes des liens (Mode sombre) */
+            --item-bg: #1f2937;
+            --item-text-url: #9ca3af;
+            --item-border: transparent;
         }
 
         body.light-mode {
@@ -25,6 +35,15 @@
             --column-border: #d4d4d4;
             --header-bg: #ffffff;
             --border-color: #ddd;
+            --card-bg: #e5e7eb;
+            --card-text: #111827;
+            --input-bg: #ffffff;
+            --input-border: #9ca3af;
+            --input-text: #111827;
+            /* Étiquettes des liens (Mode clair) */
+            --item-bg: #f3f4f6;
+            --item-text-url: #6b7280;
+            --item-border: #374151;
         }
 
         body { 
@@ -34,6 +53,10 @@
             display: flex; flex-direction: column; align-items: center; 
             overflow-x: hidden;
             transition: background 0.3s;
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header { 
@@ -52,17 +75,24 @@
         .main-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; }
 
         .light-card { 
-            background: #e5e7eb; color: #ffffff; 
+            background: var(--card-bg); 
+            color: var(--card-text); 
             border-radius: 1.2rem; padding: 10px; 
-            margin: 15px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            margin: 15px auto; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             width: 95%;
+            border: 1px solid var(--border-color);
+            transition: background 0.3s;
         }
 
         .input-field { 
-            background: #ffffff; border: 1px solid #9ca3af; 
+            background: var(--input-bg); 
+            border: 1px solid var(--input-border); 
             border-radius: 0.6rem; padding: 6px; 
             font-size: 0.75rem; font-weight: 600; 
-            width: 100%; margin-bottom: 5px; color: #111827;
+            width: 100%; margin-bottom: 5px; 
+            color: var(--input-text);
+            outline: none;
         }
 
         .columns-container {
@@ -97,17 +127,16 @@
         }
 
         .link-item {
-            background: #f3f4f6; border-radius: 0.5rem; 
+            background: var(--item-bg); 
+            border-radius: 0.5rem; 
             padding: 5px; display: flex; 
             justify-content: space-between; align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 5px;
             min-width: 0;
-            border: 1px solid transparent;
-            transition: border-color 0.3s;
+            border: 1px solid var(--item-border);
+            transition: all 0.3s;
         }
-
-        body.light-mode .link-item { border: 1.5px solid #374151; }
 
         .drag-handle {
             cursor: grab;
@@ -126,15 +155,13 @@
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
         }
         .link-url { 
-            font-size: 6px; color: #6b7280; display: block; 
+            font-size: 6px; color: var(--item-text-url); display: block; 
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
         }
 
         .btn-add { width: 100%; padding: 10px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
         .btn-del { color: #9ca3af; padding-left: 2px; flex-shrink: 0; cursor: pointer; transition: color 0.2s; }
-        .btn-del:hover { color: #6b7280; }
 
-        .sortable-ghost { opacity: 0.3; background: #d1d5db; }
         .bottom-nav { width: 100%; max-width: 400px; align-self: center; display: flex; flex-direction: column; gap: 6px; margin-top: 20px; padding-bottom: 20px; }
         .nav-group { display: flex; gap: 5px; width: 100%; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 8px; flex: 1; text-align: center; background: #27272a; color: white; border: none; }
@@ -163,7 +190,7 @@
             <option value="Autre">🌍 Autres</option>
             <option value="Ressources">🧰 Ressources</option>
         </select>
-        <button id="mainAddBtn" onclick="addLink()" class="btn-add mt-1">Ajouter</button>
+        <button id="mainAddBtn" onclick="addLink()" class="btn-add mt-1 active:scale-95 transition-transform">Ajouter</button>
     </div>
 
     <div class="columns-container" id="columnsBoard">
@@ -196,9 +223,7 @@
 
 <script>
     const isLightMode = localStorage.getItem('theme_mode') === 'light';
-    if (isLightMode) {
-        document.body.classList.add('light-mode');
-    }
+    if (isLightMode) { document.body.classList.add('light-mode'); }
 
     const mapCouleurs = {
         'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
@@ -211,35 +236,24 @@
     let links = JSON.parse(localStorage.getItem('eduLinksList')) || [];
 
     const configCouleurs = {
-        'École': { text: 'text-rose-500', hex: '#ff2056' },
-        'Institutionnel': { text: 'text-purple-600', hex: '#9333ea' },
-        'Autre': { text: 'text-emerald-600', hex: '#10b981' },
-        'Ressources': { text: 'text-blue-600', hex: '#2563eb' }
+        'École': { text: 'text-rose-500' },
+        'Institutionnel': { text: 'text-purple-600' },
+        'Autre': { text: 'text-emerald-600' },
+        'Ressources': { text: 'text-blue-600' }
     };
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const nomCouleur = themePrefs['liens'] || 'emerald'; 
         const couleurHexa = mapCouleurs[nomCouleur] || '#10b981';
-
         const btn = document.getElementById('mainAddBtn');
         const btnRetour = document.getElementById('btn-retour');
         const svgRetour = document.querySelector('#btn-retour svg');
         const mainTitle = document.getElementById('mainTitle');
 
-        // 3) Titre : Noir en mode clair, Blanc en sombre
-        if(mainTitle) {
-            mainTitle.style.color = isLightMode ? '#000000' : '#ffffff';
-        }
-
-        // 2) Couleur dynamique pour le bouton retour
+        if(mainTitle) mainTitle.style.color = isLightMode ? '#000000' : '#ffffff';
         if(btnRetour) btnRetour.style.backgroundColor = couleurHexa;
-        
-        // Couleur de la flèche selon la clarté du thème
-        if(svgRetour) {
-            svgRetour.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? '#000' : '#fff';
-        }
-
+        if(svgRetour) svgRetour.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? '#000' : '#fff';
         if(btn) {
             btn.style.backgroundColor = couleurHexa;
             btn.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? 'black' : 'white';

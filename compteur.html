@@ -22,7 +22,7 @@
             --primary: #0ea5e9; 
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #ffffff;
+            --card-student: #374151; /* Gris identique à observations.html */
             --header-bg: #000;
             --header-border: #1f2937;
         }
@@ -48,6 +48,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* --- MARGE DE SÉCURITÉ POUR LA BARRE DE NOTIFICATIONS --- */
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header { 
@@ -84,12 +89,17 @@
             border: 1.5px solid transparent;
         }
 
-        body.light-mode .student-item, html.light-mode-init .student-item {
+        body.light-mode .student-item, html.light-mode-init body .student-item {
             border-color: #374151;
         }
 
-        .text-girl { color: #db2777; } 
-        .text-boy { color: #2563eb; } 
+        /* Couleurs adaptées au fond gris en mode sombre */
+        .text-girl { color: #f9a8d4; } 
+        .text-boy { color: #93c5fd; } 
+
+        /* Couleurs originales pour le mode clair */
+        body.light-mode .text-girl, html.light-mode-init body .text-girl { color: #db2777; } 
+        body.light-mode .text-boy, html.light-mode-init body .text-boy { color: #2563eb; } 
         
         .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -170,7 +180,6 @@
             const btnRetour = document.getElementById('btn-retour');
             const svgRetour = document.querySelector('#btn-retour svg');
 
-            // Couleur du titre (Noir en clair / Blanc en sombre)
             if (titre) titre.style.color = isLight ? '#000000' : '#ffffff';
 
             if (btnRetour) {

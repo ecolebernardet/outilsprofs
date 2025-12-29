@@ -21,12 +21,15 @@
         :root {
             --bg-page: #000;
             --text-page: #eee;
-            --card-bg: #111827;
-            --card-text: #ffffff;
-            --result-bg: #ffffff;
-            --result-border: #9ca3af;
             --header-bg: #000;
             --header-border: #1f2937;
+            --border-color: #1f2937;
+            /* Carte de tirage */
+            --card-bg: #111827;
+            --card-text: #ffffff;
+            --result-bg: #1f2937;
+            --result-border: #374151;
+            /* Éléments */
             --blue-light: #60a5fa; 
             --pink: #f472b6;
             --pill-bg: #1f2937;
@@ -35,12 +38,15 @@
         body.light-mode, html.light-mode-init body {
             --bg-page: #eeeeee;
             --text-page: #111827;
+            --header-bg: #ffffff;
+            --header-border: #e5e7eb;
+            --border-color: #ddd;
+            /* Carte de tirage */
             --card-bg: #ffffff;
             --card-text: #111827;
             --result-bg: #f9fafb;
             --result-border: #d1d5db;
-            --header-bg: #ffffff;
-            --header-border: #e5e7eb;
+            /* Éléments */
             --pill-bg: #ffffff;
         }
 
@@ -51,6 +57,10 @@
             margin: 0; padding: 0; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
             transition: background-color 0.3s, color 0.3s;
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header { 
@@ -59,7 +69,6 @@
             position: sticky; top: 0; z-index: 50; margin-bottom: 10px;
         }
 
-        /* --- HARMONISATION ÉTIQUETTES (Comme equipes.html) --- */
         .student-grid { 
             display: grid; grid-template-columns: repeat(5, 1fr); 
             gap: 5px; margin-bottom: 20px; width: 100%; padding: 0 10px;
@@ -82,7 +91,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Mode Sombre - Couleurs de texte */
         .bg-f { color: var(--pink) !important; } 
         .bg-m { color: var(--blue-light) !important; } 
 
@@ -95,7 +103,6 @@
             transform: scale(0.96);
         }
 
-        /* Mode Clair - Fonds colorés */
         body.light-mode .bg-f, html.light-mode-init .bg-f { 
             background-color: #fce7f3 !important; color: #831843 !important; border-color: #f9a8d4 !important; 
         } 
@@ -106,21 +113,24 @@
             background: #e5e7eb !important; color: #9ca3af !important; border-color: #d1d5db !important;
         }
 
-        /* --- INTERFACE TIRAGE --- */
         .level-title { 
             text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; 
             text-transform: uppercase; letter-spacing: 1px; color: var(--text-page);
         }
 
         .light-card { 
-            background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
             width: 95%; max-width: 400px; padding: 20px; text-align: center; 
-            margin: 20px 0; border: 1px solid var(--header-border);
+            margin: 20px 0; border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
         
         .result-box { 
-            background: var(--result-bg); border: 1px solid var(--result-border); 
-            color: #111827; border-radius: 0.75rem; height: 60px;
+            background: var(--result-bg); 
+            border: 1px solid var(--result-border); 
+            border-radius: 0.75rem; height: 60px;
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 12px; font-size: 1.4rem; font-weight: 800;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -206,7 +216,6 @@
             if (display) display.style.color = hexaTheme;
         }
 
-        // Gestion des doublons (Identique à equipes.html)
         function formatName(fullName) {
             const parts = fullName.trim().split(" ");
             const prenom = parts[0];

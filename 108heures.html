@@ -6,6 +6,7 @@
     <title>108 heures</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
@@ -15,11 +16,18 @@
             --header-bg: #000;
             --header-border: #1f2937;
             --border-color: #1f2937;
-            --card-bg: #e5e7eb;
-            --card-text: #111827;
-            --column-bg: #f3f4f6;
-            --column-text: #111827;
-            --item-bg: #ffffff;
+            /* Formulaire et Stats */
+            --card-bg: #111827; 
+            --card-text: #ffffff;
+            --input-bg: #1f2937;
+            --input-border: #374151;
+            --input-text: #ffffff;
+            /* Colonnes et Items */
+            --column-bg: #111827;
+            --column-text: #ffffff;
+            --item-bg: #1f2937;
+            --item-text: #ffffff;
+            --item-subtext: #9ca3af;
         }
 
         body.light-mode {
@@ -28,11 +36,18 @@
             --header-bg: #ffffff;
             --header-border: #ddd;
             --border-color: #ddd;
+            /* Formulaire et Stats */
             --card-bg: #ffffff;
             --card-text: #111827;
+            --input-bg: #ffffff;
+            --input-border: #9ca3af;
+            --input-text: #111827;
+            /* Colonnes et Items */
             --column-bg: #ffffff;
             --column-text: #111827;
             --item-bg: #ffffff;
+            --item-text: #111827;
+            --item-subtext: #6b7280;
         }
 
         body { 
@@ -41,6 +56,10 @@
             color: var(--text-page); 
             padding: 0; margin: 0; 
             transition: background 0.3s, color 0.3s;
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header { 
@@ -56,38 +75,44 @@
             width: 100%;
         }
         
-        .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; transition: background 0.3s; }
+        .light-card { 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
+            border: 1px solid var(--border-color);
+            transition: all 0.3s; 
+        }
 
         .card-input { display: none; }
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #d1d5db; border: 2px solid #9ca3af; color: #374151;
+            background: var(--input-bg); border: 1px solid var(--input-border); color: var(--item-subtext);
             padding: 6px 4px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.6rem; font-weight: 800;
             transition: all 0.2s; height: 100%;
         }
-        .card-input:checked + .card-label { background: #111827; border-color: #111827; color: #fff; transform: scale(0.98); }
+        .card-input:checked + .card-label { background: var(--text-page); border-color: var(--text-page); color: var(--bg-page); transform: scale(0.98); }
 
         .level-column { 
             background: var(--column-bg); color: var(--column-text); border-radius: 1.2rem; 
-            padding: 10px; border: 1px solid #ffffff; 
+            padding: 10px; border: 1px solid var(--border-color); 
             display: flex; flex-direction: column; 
             justify-content: flex-start;
             align-self: start;
             transition: background 0.3s;
         }
-        body.light-mode .level-column { border: 1px solid #d4d4d4; }
         
-        .progress-container { width: 100%; background: #d1d5db; height: 7px; border-radius: 10px; margin: 6px 0; overflow: hidden; }
+        .progress-container { width: 100%; background: var(--input-border); height: 7px; border-radius: 10px; margin: 6px 0; overflow: hidden; }
         .progress-bar { height: 100%; transition: width 0.5s ease-in-out; }
 
         .reunion-item { 
             background: var(--item-bg); padding: 6px 8px; border-radius: 0.4rem; 
             margin-bottom: 4px; border-left-width: 3px;
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); cursor: pointer;
+            border: 1px solid var(--border-color);
+            border-left-width: 4px;
         }
-        body.light-mode .reunion-item { border: 1.5px solid #374151; border-left-width: 4px; }
 
         .quota-badge {
             font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 50px;
@@ -98,11 +123,15 @@
         .nav-group { display: flex; gap: 8px; width: 100%; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
 
-        .input-field { background: #ffffff; border: 1px solid #9ca3af; color: #111827; border-radius: 0.75rem; padding: 8px; outline: none; font-size: 0.75rem; font-weight: 600; }
+        .input-field { 
+            background: var(--input-bg); border: 1px solid var(--input-border); 
+            color: var(--input-text); border-radius: 0.75rem; padding: 8px; 
+            outline: none; font-size: 0.75rem; font-weight: 600; 
+        }
         
         .toggle-list-btn {
             width: 100%; font-size: 7px; font-weight: 800; text-transform: uppercase;
-            color: #4b5563; padding: 5px; border: 1px dashed #9ca3af;
+            color: var(--item-subtext); padding: 5px; border: 1px dashed var(--input-border);
             border-radius: 0.5rem; margin-top: 4px;
         }
 
@@ -305,11 +334,11 @@
                         <div class="flex-1 overflow-hidden">
                             <div class="flex items-center gap-2">
                                 <span class="font-black text-[10px]" style="color: ${hexaTheme}">${dateFmt}</span>
-                                <span class="font-bold text-[10px] text-gray-900">${formatDuree(r.minutes)}</span>
+                                <span class="font-bold text-[10px]" style="color: var(--item-text)">${formatDuree(r.minutes)}</span>
                             </div>
-                            ${r.comm ? `<div class="text-gray-400 italic text-[9px] truncate mt-0.5 leading-tight">${r.comm}</div>` : ''}
+                            ${r.comm ? `<div class="italic text-[9px] truncate mt-0.5 leading-tight" style="color: var(--item-subtext)">${r.comm}</div>` : ''}
                         </div>
-                        <button onclick="supprimer(${r.id}); event.stopPropagation();" class="text-gray-300 ml-2">
+                        <button onclick="supprimer(${r.id}); event.stopPropagation();" class="text-gray-400 ml-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>

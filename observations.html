@@ -47,6 +47,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+			            /* --- MARGE DE SÉCURITÉ POUR LA BARRE DE NOTIFICATIONS --- */
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header { 

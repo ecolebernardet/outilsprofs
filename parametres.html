@@ -37,6 +37,11 @@
             padding: 0; margin: 0; 
             overflow-x: hidden; 
             transition: background 0.3s ease;
+			            /* --- MARGE DE SÉCURITÉ POUR LA BARRE DE NOTIFICATIONS --- */
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
         
         header { 
@@ -115,8 +120,8 @@
         .handle-dot { width: 3px; height: 3px; background-color: #64748b; border-radius: 50%; }
 
         .card-warning { 
-            background: #fef3c7; border: 2px solid #f59e0b; border-radius: 1.2rem; 
-            padding: 15px; margin-bottom: 15px; color: #92400e;
+            background: #5c594c; border: 2px solid #f59e0b; border-radius: 1.2rem; 
+            padding: 15px; margin-bottom: 15px; color: #eeeeee;
         }
         
         .card-info p, .card-info li { color: var(--card-sub); }
@@ -233,7 +238,7 @@
                 
                 <div class="card-warning">
                     <h3 class="font-black text-xs uppercase mb-2">⚠️ Attention</h3>
-                    <p class="text-xs leading-relaxed">Les données sont stockées uniquement en local sur ce navigateur.</p>
+                    <p class="text-xs leading-relaxed">Les données sont stockées uniquement en local sur ce navigateur.<br> Il est conseillé de les exporter puis dans les importer dans un autre environnement pour les réutiliser.</p>
                 </div>
             </div>
 
@@ -246,10 +251,10 @@
 
             <div id="propos" class="tab-content text-center py-6">
                 <div class="card-info flex flex-col items-center">
-                    <img src="logo-ecole-jean-rostand-v2-006.png" class="w-32 h-auto mb-6 drop-shadow-lg" alt="Logo">
-                    <p class="text-sm font-bold">Conçu par Nicolas B. avec l'aide de Gemini</p>
+                    <img src="outils-profs.png" class="w-32 h-auto mb-6 drop-shadow-lg">
+                    <p class="text-sm font-bold">Application conçue par Nicolas B. avec la grande aide de Gemini pour la programmation.</p>
                     <div class="h-[1px] bg-gray-700 w-full my-6"></div>
-                    <p class="text-[10px] text-gray-500 uppercase">École Jean Rostand - Chambéry</p>
+                    <p class="text-[15px] font-black text-gray-500 uppercase">Outils pour les profs</p>
                 </div>
             </div>
         </div>

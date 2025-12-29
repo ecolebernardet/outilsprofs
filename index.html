@@ -2,9 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Outils pour les profs d'école</title>
-    
     <script>
         (function() {
             const mode = localStorage.getItem('theme_mode');
@@ -42,6 +41,12 @@
             color: var(--text-title);
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.2s ease;
+            
+            /* --- MARGE DE SÉCURITÉ POUR LA BARRE DE NOTIFICATIONS --- */
+            padding-top: calc(env(safe-area-inset-top) + 30px);
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
         }
 
         header {
@@ -84,7 +89,7 @@
         .sortable-ghost { opacity: 0.1; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-start min-h-screen p-2 pt-4">
+<body class="flex flex-col items-center justify-start min-h-screen">
   
     <div class="w-full max-w-[340px]">
         <header class="mb-8 px-1">
@@ -211,10 +216,9 @@
             const subtitle = el.querySelector('.tile-subtitle');
 
             if (isLight) {
-                // MODE CLAIR
                 el.style.backgroundColor = ''; 
                 el.style.borderColor = '';
-                el.style.boxShadow = '6px 6px 10px -1px rgba(0, 0, 0, 0.5)'; // Ombre noire d'origine
+                el.style.boxShadow = '6px 6px 10px -1px rgba(0, 0, 0, 0.5)';
                 el.className = `menu-card flex flex-col items-center justify-center text-center p-3 pt-5 bg-${colorName}-200 border-${colorName}-900`;
                 
                 if (iconCircle) {
@@ -226,11 +230,9 @@
                 if (title) title.style.color = '#000';
                 if (subtitle) subtitle.style.color = 'rgba(0,0,0,0.6)';
             } else {
-                // MODE SOMBRE
                 el.className = 'menu-card flex flex-col items-center justify-center text-center p-3 pt-5';
                 el.style.backgroundColor = 'var(--card-bg)';
                 el.style.borderColor = 'var(--card-border)';
-                // Ajout de l'ombre blanche subtile demandée
                 el.style.boxShadow = '6px 6px 12px -1px rgba(255, 255, 255, 0.15)'; 
                 
                 if (iconCircle) {
