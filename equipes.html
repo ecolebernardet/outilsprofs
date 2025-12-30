@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur Équilibre Absolu</title>
+    <title>Générateur d'équipes équilibrées</title>
     
     <script>
-    
         (function() {
             const mode = localStorage.getItem('theme_mode');
             if (mode === 'light') {
@@ -17,7 +16,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
             --primary: #ff637e; 
@@ -46,7 +45,6 @@
             --pill-bg: #ffffff;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg); 
@@ -59,7 +57,6 @@
             padding-bottom: 20px;
         }
 
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -139,6 +136,28 @@
         .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
         .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
         .header-spacer { width: 40px; }
+
+        /* MODALE ALERTE */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; z-index: 1000; padding: 20px; 
+        }
+        .modal-content { 
+            background: white; padding: 24px; border-radius: 24px; 
+            width: 100%; max-width: 360px; color: #111; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
+        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        .btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 16px; 
+            font-weight: 900; font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-cancel { background: #f3f4f6; color: #4b5563; }
+        .btn-only-ok { max-width: 150px; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -163,7 +182,18 @@
     <div id="results" class="grid-teams"></div>
 
     <div class="bottom-nav">
-        <button onclick="resetTeams()" class="btn-nav bg-red-500 text-rose-100">Effacer les équipes</button>
+        <button onclick="resetTeams()" class="btn-nav bg-red-500 text-rose-100 shadow-lg">⚠️ effacer les équipes</button>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            <div class="btns" id="modalBtns">
+                <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
+            </div>
+        </div>
     </div>
 
 <script>
@@ -183,6 +213,32 @@
     let selectedNumTeams = 4;
     let ALL_STUDENTS = JSON.parse(localStorage.getItem('maListeEleves')) || [];
     let absents = new Set(JSON.parse(localStorage.getItem('absents_session_equipes')) || []);
+
+    function showAlert(title, text, onConfirm, showCancel = true) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertText').innerText = text;
+        const confirmBtn = document.getElementById('alertConfirmBtn');
+        const cancelBtn = document.getElementById('alertCancelBtn');
+        
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const couleurHex = mapCouleurs[themePrefs.equipes || 'pink'] || '#ec4899';
+        confirmBtn.style.backgroundColor = couleurHex;
+
+        cancelBtn.style.display = showCancel ? 'block' : 'none';
+        
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        
+        newBtn.onclick = () => {
+            closeModal();
+            if(onConfirm) onConfirm();
+        };
+        document.getElementById('alertModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('alertModal').style.display = 'none';
+    }
 
     function appliquerTheme() {
         const savedMode = localStorage.getItem('theme_mode');
@@ -315,7 +371,9 @@
 
     function generateAndFix() {
         let presents = ALL_STUDENTS.filter(s => !absents.has(String(s.id)));
-        if (presents.length < selectedNumTeams) return alert("Effectif insuffisant.");
+        if (presents.length < selectedNumTeams) {
+            return showAlert("Effectif insuffisant", "Il n'y a pas assez d'élèves présents pour créer " + selectedNumTeams + " équipes.", null, false);
+        }
 
         let teams = Array.from({ length: selectedNumTeams }, () => []);
         presents.sort(() => Math.random() - 0.5);
@@ -377,10 +435,10 @@
     }
 
     function resetTeams() {
-        if(confirm("Effacer les résultats ?")) {
+        showAlert("Effacer les résultats ?", "Les équipes générées seront supprimées de l'écran.", () => {
             localStorage.removeItem('savedTeams');
             document.getElementById('results').innerHTML = '';
-        }
+        });
     }
     window.onload = init;
 </script>

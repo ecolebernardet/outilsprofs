@@ -16,7 +16,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
             --bg-page: #000;
@@ -24,12 +24,10 @@
             --header-bg: #111828;
             --header-border: #1f2937;
             --border-color: #1f2937;
-            /* Carte de tirage */
             --card-bg: #111827;
             --card-text: #ffffff;
             --result-bg: #1f2937;
             --result-border: #374151;
-            /* Éléments */
             --blue-light: #60a5fa; 
             --pink: #f472b6;
             --pill-bg: #1f2937;
@@ -41,16 +39,13 @@
             --header-bg: #ffffff;
             --header-border: #e5e7eb;
             --border-color: #ddd;
-            /* Carte de tirage */
             --card-bg: #ffffff;
             --card-text: #111827;
             --result-bg: #f9fafb;
             --result-border: #d1d5db;
-            /* Éléments */
             --pill-bg: #ffffff;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
@@ -63,7 +58,6 @@
             padding-bottom: 20px;
         }
 
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -157,6 +151,27 @@
         .btn-nav { width: 100%; max-width: 400px; font-weight: 800; padding: 14px; border-radius: 50px; font-size: 10px; cursor: pointer; border: none; }
         .stats { margin-top: 8px; font-size: 0.6rem; color: #6b7280; text-transform: uppercase; font-weight: 800; }
         .header-spacer { width: 40px; }
+
+        /* MODALE ALERTE HARMONISÉE */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; z-index: 1000; padding: 20px; 
+        }
+        .modal-content { 
+            background: white; padding: 24px; border-radius: 24px; 
+            width: 100%; max-width: 360px; color: #111; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
+        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        .btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 16px; 
+            font-weight: 900; font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-cancel { background: #f3f4f6; color: #4b5563; }
     </style>
 </head>
 <body>
@@ -182,7 +197,18 @@
     </div>
 
     <div class="max-w-md mx-auto flex justify-center mt-4 mb-10 w-full px-4">
-        <button class="btn-nav bg-red-500 text-rose-100" onclick="resetDrawing()">⚠️ RàZ du tirage</button>
+        <button class="btn-nav bg-red-500 text-white shadow-lg" onclick="resetDrawing()">⚠️ RàZ du tirage</button>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            <div class="btns">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -197,6 +223,26 @@
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const nomCouleur = themePrefs.tirage || 'pink';
         const hexaTheme = mapCouleurs[nomCouleur] || '#ec4899';
+
+        function showAlert(title, text, onConfirm) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertText').innerText = text;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.style.backgroundColor = hexaTheme;
+            
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.onclick = () => {
+                closeModal();
+                onConfirm();
+            };
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
 
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
@@ -329,13 +375,13 @@
         }
 
         function resetDrawing() {
-            if(confirm("Remettre tous les élèves en jeu ?")) {
+            showAlert("Remettre à zéro ?", "Tous les élèves seront à nouveau disponibles pour le tirage.", () => {
                 remaining = rawData.map(el => el.id);
                 localStorage.removeItem('remainingStudents');
                 document.getElementById('result-display').innerText = "PRÊT";
                 document.getElementById('result-display').style.color = hexaTheme;
                 renderList();
-            }
+            });
         }
 
         window.onload = () => { appliquerTheme(); renderList(); };

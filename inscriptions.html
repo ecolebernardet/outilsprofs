@@ -32,9 +32,9 @@
             --student-item-bg: #374151;
             --student-name-girl: #f9a8d4;
             --student-name-boy: #93c5fd;
+            --modal-bg: rgba(0, 0, 0, 0.85);
         }
 
-        /* Synchronisation avec l'index (light-mode-init) */
         body.light-mode, html.light-mode-init body {
             --bg-body: #eeeeee;
             --text-main: #111827;
@@ -49,6 +49,7 @@
             --student-item-bg: #ffffff;
             --student-name-girl: #db2777;
             --student-name-boy: #2563eb;
+            --modal-bg: rgba(255, 255, 255, 0.8);
         }
 
         body { 
@@ -57,24 +58,16 @@
             color: var(--text-main); 
             padding: 0; margin: 0; 
             transition: background-color 0.2s ease;
-            padding-top: 0;
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
         
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
             padding: calc(env(safe-area-inset-top) + 10px) 10px 10px 10px;
-            width: calc(100% + 30px);
-            margin-left: -15px;
+            width: calc(100% + 30px); margin-left: -15px;
         }
 
         .light-card { 
@@ -82,7 +75,6 @@
             color: var(--card-text); 
             border-radius: 1.5rem; 
             border: 1px solid var(--header-border);
-            transition: background 0.3s;
         }
 
         .card-input { display: none; }
@@ -91,7 +83,6 @@
             background: #374151; border: 1px solid #4b5563; color: #d1d5db;
             padding: 4px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
-            transition: all 0.2s; 
         }
         
         body.light-mode .card-label, html.light-mode-init .card-label {
@@ -100,7 +91,6 @@
 
         .input-garcon:checked + .card-label { color: #93c5fd; border-color: #3b82f6; font-weight: 900; background: rgba(59, 130, 246, 0.2); }
         .input-fille:checked + .card-label { color: #f9a8d4; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.2); }
-
         .input-cp:checked + .card-label { background: #ec4899; border-color: #ec4899; color: #fff; } 
         .input-ce1:checked + .card-label { background: #3b82f6; border-color: #3b82f6; color: #fff; } 
         .input-ce2:checked + .card-label { background: #eab308; border-color: #eab308; color: #000; } 
@@ -108,23 +98,12 @@
         .input-cm2:checked + .card-label { background: #22c55e; border-color: #22c55e; color: #fff; } 
         .input-autre:checked + .card-label { background: #8b5cf6; border-color: #8b5cf6; color: #fff; } 
 
-        .level-column { 
-            background: var(--column-bg); 
-            border-radius: 1.25rem; padding: 10px; height: fit-content; 
-            transition: background 0.3s;
-        }
+        .level-column { background: var(--column-bg); border-radius: 1.25rem; padding: 10px; height: fit-content; }
         body.light-mode .level-column, html.light-mode-init .level-column { border: 1px solid #d4d4d4; }
 
         .student-item { 
-            background: var(--student-item-bg); 
-            padding: 6px 10px; 
-            border-radius: 0.75rem; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 4px; 
-            border: 1px solid transparent; 
-            transition: border-color 0.3s;
+            background: var(--student-item-bg); padding: 6px 10px; border-radius: 0.75rem; 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; 
         }
         body.light-mode .student-item, html.light-mode-init .student-item { border: 1.5px solid #374151; }
 
@@ -134,31 +113,39 @@
         .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; cursor: pointer; }
         
         .input-field { 
-            background: var(--input-bg); 
-            border: 1px solid var(--header-border); 
-            color: var(--text-main); 
-            border-radius: 0.75rem; 
-            padding: 10px; 
-            outline: none; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-        }
-        
-        body.light-mode .input-field, html.light-mode-init .input-field {
-            color: #111827;
-            border-color: #9ca3af;
+            background: var(--input-bg); border: 1px solid var(--header-border); 
+            color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; 
         }
         
         .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
-        .header-spacer { width: 40px; }
-        #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
+        #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
+
+        /* MODAL DE CONFIRMATION PERSO */
+        #custom-confirm {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: var(--modal-bg); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .confirm-card {
+            background: var(--card-bg); border: 1px solid var(--header-border);
+            width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center;
+        }
     </style>
 </head>
 <body class="pb-10">
+    <div id="custom-confirm">
+        <div class="confirm-card">
+            <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirm(false)" class="flex-1 py-3 rounded-full bg-neutral-500 text-white text-[10px] font-black uppercase">Annuler</button>
+                <button id="confirm-yes" class="flex-1 py-3 rounded-full text-white text-[10px] font-black uppercase shadow-lg">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        if (localStorage.getItem('theme_mode') === 'light') {
-            document.body.classList.add('light-mode');
-        }
+        if (localStorage.getItem('theme_mode') === 'light') { document.body.classList.add('light-mode'); }
     </script>
 
     <header>
@@ -168,7 +155,7 @@
             </svg>
         </a>
         <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Inscriptions</h1>
-        <div class="header-spacer"></div>
+        <div style="width:40px"></div>
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-4">
@@ -176,12 +163,10 @@
             <form id="eleveForm" class="flex flex-col gap-3">
                 <input type="hidden" id="edit-id" value="">
                 <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
-                
                 <div class="grid grid-cols-2 gap-2">
                     <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
                     <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
                 </div>
-
                 <div class="grid grid-cols-6 gap-1">
                     <label><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label">CP</div></label>
                     <label><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label">CE1</div></label>
@@ -190,7 +175,6 @@
                     <label><input type="radio" name="niveau" value="CM2" class="card-input input-cm2"><div class="card-label">CM2</div></label>
                     <label><input type="radio" name="niveau" value="AUTRE" class="card-input input-autre"><div class="card-label">Autre</div></label>
                 </div>
-
                 <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
             </form>
         </div>
@@ -200,10 +184,7 @@
 
         <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
             <div class="grid grid-cols-2 gap-3">
-                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">
-                    👇 importer .txt
-                    <input type="file" id="fileInput" accept=".txt,.csv" class="hidden">
-                </label>
+                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">👇 importer .txt<input type="file" id="fileInput" accept=".txt,.csv" class="hidden"></label>
                 <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter .txt</button>
             </div>
             <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
@@ -219,10 +200,7 @@
             'rose': '#f43f5e', 'gray': '#6b7280'
         };
 
-        const couleurParNiveau = {
-            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6'
-        };
-
+        const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
         const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const couleurInscr = themePrefs.inscr || 'lime';
@@ -230,40 +208,50 @@
 
         function appliquerCouleursTheme() {
             const isLight = localStorage.getItem('theme_mode') === 'light';
-            
             const btnRetour = document.getElementById('btn-retour');
             const pageTitle = document.getElementById('page-title');
             const btnSubmit = document.getElementById('btn-submit');
+            const btnConfirm = document.getElementById('confirm-yes');
             
             if (btnRetour) btnRetour.style.backgroundColor = hexaTheme;
             if (btnSubmit) btnSubmit.style.backgroundColor = hexaTheme;
+            if (btnConfirm) btnConfirm.style.backgroundColor = hexaTheme;
 
             const textContrast = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr) ? '#000000' : '#ffffff';
             if (btnSubmit) btnSubmit.style.color = textContrast;
+            if (btnConfirm) btnConfirm.style.color = textContrast;
             if (pageTitle) pageTitle.style.color = isLight ? '#222222' : '#ffffff';
-
             const backSvg = document.querySelector('#btn-retour svg');
             if (backSvg) backSvg.style.color = textContrast;
         }
 
         let eleves = JSON.parse(localStorage.getItem('maListeEleves')) || [];
+        let confirmAction = null;
+
+        // --- GESTION MODAL PERSO ---
+        function customConfirm(msg, onConfirm) {
+            document.getElementById('confirm-msg').innerText = msg;
+            document.getElementById('custom-confirm').style.display = 'flex';
+            confirmAction = onConfirm;
+        }
+        function closeConfirm(confirmed) {
+            document.getElementById('custom-confirm').style.display = 'none';
+            if (confirmed && confirmAction) confirmAction();
+            confirmAction = null;
+        }
+        document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
 
         function formaterIdentite(prenom, nom) {
-            const p = prenom.trim();
-            const n = nom.trim().toUpperCase();
-            return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() + " " + n;
+            return prenom.trim().charAt(0).toUpperCase() + prenom.trim().slice(1).toLowerCase() + " " + nom.trim().toUpperCase();
         }
 
         function renderStats() {
             const statsDiv = document.getElementById('stats-container');
             if (eleves.length === 0) { statsDiv.innerHTML = ""; return; }
-            const total = eleves.length;
-            const garcons = eleves.filter(e => e.sexe === 'm').length;
-            const filles = eleves.filter(e => e.sexe === 'f').length;
             statsDiv.innerHTML = `
-                <div class="stat-pill bg-gray-200 text-gray-800 border border-gray-300">Total: ${total}</div>
-                <div class="stat-pill bg-blue-100 text-blue-700 border border-blue-200">♂ ${garcons}</div>
-                <div class="stat-pill bg-pink-100 text-pink-700 border border-pink-200">♀ ${filles}</div>
+                <div class="stat-pill bg-gray-200 text-gray-800 border border-gray-300">Total: ${eleves.length}</div>
+                <div class="stat-pill bg-blue-100 text-blue-700 border border-blue-200">♂ ${eleves.filter(e => e.sexe === 'm').length}</div>
+                <div class="stat-pill bg-pink-100 text-pink-700 border border-pink-200">♀ ${eleves.filter(e => e.sexe === 'f').length}</div>
             `;
         }
 
@@ -278,19 +266,16 @@
             }
             const groupes = {};
             eleves.forEach(el => {
-                const niv = el.niveau.toUpperCase();
-                if (!groupes[niv]) groupes[niv] = [];
-                groupes[niv].push(el);
+                if (!groupes[el.niveau]) groupes[el.niveau] = [];
+                groupes[el.niveau].push(el);
             });
-            const nomsNiveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            
-            container.className = nomsNiveauxPresents.length === 2 ? "grid grid-cols-2 gap-3 items-start" : "grid grid-cols-1 sm:grid-cols-2 gap-3 items-start";
+            const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+            container.className = présents.length === 2 ? "grid grid-cols-2 gap-3 items-start" : "grid grid-cols-1 sm:grid-cols-2 gap-3 items-start";
 
-            nomsNiveauxPresents.forEach(niv => {
+            présents.forEach(niv => {
                 const col = document.createElement('div');
                 col.className = "level-column shadow-lg";
-                const colColor = couleurParNiveau[niv] || hexaTheme;
-                col.innerHTML = `<h3 class="text-[11px] font-black uppercase mb-1 text-center tracking-widest pb-1" style="color:${colColor}">${niv} — ${groupes[niv].length}</h3>`;
+                col.innerHTML = `<h3 class="text-[11px] font-black uppercase mb-1 text-center tracking-widest pb-1" style="color:${couleurParNiveau[niv] || hexaTheme}">${niv} — ${groupes[niv].length}</h3>`;
                 const list = document.createElement('div');
                 groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
                     const item = document.createElement('div');
@@ -298,10 +283,8 @@
                     item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
                     item.innerHTML = `
                         <span class="text-[9px] font-bold pr-2 ${el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom'} whitespace-normal break-words leading-tight">${el.identite}</span>
-                        <button onclick="supprimer(${el.id})" class="opacity-40 hover:opacity-100 transition-opacity p-1 flex-shrink-0" style="color:var(--sub-text)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                        <button onclick="supprimer('${el.id}')" class="opacity-40 hover:opacity-100 p-1" style="color:var(--sub-text)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>`;
                     list.appendChild(item);
                 });
@@ -310,30 +293,28 @@
             });
         }
 
-        document.getElementById('eleveForm').addEventListener('submit', (e) => {
+        document.getElementById('eleveForm').onsubmit = (e) => {
             e.preventDefault();
             const editId = document.getElementById('edit-id').value;
             const saisie = document.getElementById('nomComplet').value.trim().split(" ");
-            const prenom = saisie[0] || "";
-            const nom = saisie.slice(1).join(" ") || "";
+            const prenom = saisie[0], nom = saisie.slice(1).join(" ");
             const sexe = document.querySelector('input[name="sexe"]:checked').value;
             const niveau = document.querySelector('input[name="niveau"]:checked').value;
             
             if (editId) {
-                const index = eleves.findIndex(el => el.id == editId);
-                eleves[index] = { ...eleves[index], identite: formaterIdentite(prenom, nom), sexe, niveau };
+                const idx = eleves.findIndex(el => String(el.id) === String(editId));
+                if(idx !== -1) eleves[idx] = { ...eleves[idx], identite: formaterIdentite(prenom, nom), sexe, niveau };
                 document.getElementById('edit-id').value = "";
                 document.getElementById('btn-submit').innerText = "Enregistrer";
             } else {
-                eleves.push({ id: Date.now(), identite: formaterIdentite(prenom, nom), sexe, niveau });
+                eleves.push({ id: String(Date.now()), identite: formaterIdentite(prenom, nom), sexe, niveau });
             }
             localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-            render();
-            e.target.reset();
-        });
+            render(); e.target.reset();
+        };
 
         function preparerModification(id) {
-            const el = eleves.find(e => e.id === id);
+            const el = eleves.find(e => String(e.id) === String(id));
             if (!el) return;
             document.getElementById('edit-id').value = el.id;
             document.getElementById('nomComplet').value = el.identite;
@@ -341,65 +322,56 @@
             document.querySelector(`input[name="niveau"][value="${el.niveau}"]`).checked = true;
             document.getElementById('btn-submit').innerText = "Mettre à jour";
             document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
-            document.getElementById('nomComplet').focus();
         }
 
         function supprimer(id) {
-            if(confirm("Supprimer cet élève ?")) {
-                eleves = eleves.filter(e => e.id !== id);
+            customConfirm("Supprimer cet élève ?", () => {
+                eleves = eleves.filter(e => String(e.id) !== String(id));
                 localStorage.setItem('maListeEleves', JSON.stringify(eleves));
                 render();
-            }
+            });
         }
 
         function toutEffacer() {
-            if(confirm("Attention : Supprimer toute la liste d'élèves ?")) {
+            customConfirm("⚠️ Supprimer toute la liste d'élèves ? ️Cette action est irréversible si vous n'avez pas créé de sauvegarde.", () => {
                 eleves = [];
                 localStorage.setItem('maListeEleves', JSON.stringify(eleves));
                 render();
-            }
+            });
         }
 
         function exporterListe() {
             if (eleves.length === 0) return alert("Liste vide !");
-            let contenu = "";
-            eleves.forEach(el => {
+            let contenu = eleves.map(el => {
                 const parts = el.identite.split(" ");
-                contenu += `${parts[0]};${parts.slice(1).join(" ")};${el.sexe};${el.niveau}\n`;
-            });
-            const date = new Date().toISOString().split('T')[0];
-            const fileName = `export_eleves_${date}.txt`;
-            const blob = new Blob([contenu], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = fileName;
-            a.click();
+                return `${parts[0]};${parts.slice(1).join(" ")};${el.sexe};${el.niveau}`;
+            }).join("\n");
+            const fileName = `export_eleves_${new Date().toISOString().split('T')[0]}.txt`;
+            if (window.Android && typeof window.Android.exportTxt === 'function') {
+                window.Android.exportTxt(contenu, fileName);
+            } else {
+                const blob = new Blob([contenu], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
+            }
         }
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
+        document.getElementById('fileInput').onchange = function(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const lignes = e.target.result.split(/\r?\n/);
-                lignes.forEach(l => {
-                    const clean = l.trim();
-                    if (!clean) return;
-                    const p = clean.split(';'); 
-                    if(p.length >= 4) {
-                        eleves.push({ id: Date.now() + Math.random(), identite: formaterIdentite(p[0], p[1]), sexe: p[2].trim().toLowerCase(), niveau: p[3].trim().toUpperCase() });
-                    }
+                e.target.result.split(/\r?\n/).forEach(l => {
+                    const p = l.trim().split(';'); 
+                    if(p.length >= 4) eleves.push({ id: String(Date.now() + Math.random()), identite: formaterIdentite(p[0], p[1]), sexe: p[2].trim().toLowerCase(), niveau: p[3].trim().toUpperCase() });
                 });
                 localStorage.setItem('maListeEleves', JSON.stringify(eleves));
                 render();
             };
             reader.readAsText(file);
-        });
+        };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            appliquerCouleursTheme();
-            render();
-        });
+        window.addEventListener('DOMContentLoaded', () => { appliquerCouleursTheme(); render(); });
     </script>
 </body>
 </html>

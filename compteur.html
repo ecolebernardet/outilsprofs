@@ -6,7 +6,6 @@
     <title>Compteur Élèves</title>
 
     <script>
-    
         (function() {
             const mode = localStorage.getItem('theme_mode');
             if (mode === 'light') {
@@ -17,13 +16,13 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         :root { 
             --primary: #0ea5e9; 
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #374151; /* Gris identique à observations.html */
+            --card-student: #374151;
             --header-bg: #111828;
             --header-border: #1f2937;
         }
@@ -37,7 +36,6 @@
             --header-border: #ddd;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
@@ -53,7 +51,6 @@
             touch-action: manipulation;
         }
 
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -90,14 +87,12 @@
         }
 
         body.light-mode .student-item, html.light-mode-init body .student-item {
-            border-color: #374151;
+            border-color: #e5e7eb;
         }
 
-        /* Couleurs adaptées au fond gris en mode sombre */
         .text-girl { color: #f9a8d4; } 
         .text-boy { color: #93c5fd; } 
 
-        /* Couleurs originales pour le mode clair */
         body.light-mode .text-girl, html.light-mode-init body .text-girl { color: #db2777; } 
         body.light-mode .text-boy, html.light-mode-init body .text-boy { color: #2563eb; } 
         
@@ -123,6 +118,15 @@
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
         .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
 
+        /* MODALE ALERTE */
+        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
+        .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; color: #000; }
+        .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 600; color: #4b5563; }
+        .alert-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-alert { flex: 1; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
+        .btn-alert-cancel { background: #f3f4f6; color: #4b5563; }
+
         .bottom-nav { width: 100%; max-width: 350px; margin: 25px auto 0 auto; padding-bottom: 60px; padding-left: 10px; padding-right: 10px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
     </style>
@@ -147,6 +151,17 @@
         </button>
     </div>
 
+    <div id="alertModal" class="alert-overlay">
+        <div class="alert-content">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Message</p>
+            <div class="alert-btns">
+                <button id="alertCancelBtn" class="btn-alert btn-alert-cancel" onclick="closeAlert()">Annuler</button>
+                <button id="alertConfirmBtn" class="btn-alert text-white">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const STORAGE_KEY = 'studentCounterState';
         const mapCouleurs = {
@@ -162,15 +177,28 @@
             "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
         };
 
+        function showAlert(title, text, onConfirm) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertText').innerText = text;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const colorHex = mapCouleurs[themePrefs.compt || 'sky'] || '#0ea5e9';
+            confirmBtn.style.backgroundColor = colorHex;
+
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
+
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
-            
-            if (isLight) {
-                document.body.classList.add('light-mode');
-            } else {
-                document.body.classList.remove('light-mode');
-            }
+            document.body.classList.toggle('light-mode', isLight);
 
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const nomCouleur = prefs['compt'] || 'sky';
@@ -327,13 +355,13 @@
         }
 
         document.getElementById('reset-button').onclick = () => {
-            if(confirm("Remettre tous les compteurs à zéro ?")) {
+            showAlert("Remise à zéro ?", "Voulez-vous remettre tous les compteurs à zéro ?", () => {
                 document.querySelectorAll('.counter-val').forEach(span => {
                     span.innerText = '0';
                     updateBadgeStyle(span.parentElement, 0);
                 });
                 localStorage.removeItem(STORAGE_KEY);
-            }
+            });
         };
 
         window.onload = initApp;

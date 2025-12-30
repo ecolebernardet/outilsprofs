@@ -17,7 +17,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
             --bg-page: #000;
@@ -47,7 +47,6 @@
             --search-bg: #ffffff;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
@@ -60,7 +59,6 @@
             padding-bottom: 20px;
         }
 
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -124,13 +122,47 @@
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
-        .modal-content { background: white; padding: 18px; border-radius: 15px; width: 100%; max-width: 350px; color: #111; max-height: 90vh; overflow-y: auto; }
-        .modal-content textarea { width: 100%; margin-bottom: 10px; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; background: #f4f4f4; color: #000 !important; }
+        /* MODALES */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(4px);
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
+            padding: 20px; 
+        }
+        .modal-content { 
+            background: white; 
+            padding: 24px; 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 360px; 
+            color: #111; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content textarea { 
+            width: 100%; margin-bottom: 12px; padding: 14px; 
+            border-radius: 14px; border: 1px solid #ddd; 
+            font-size: 14px; background: #f9f9f9; color: #000 !important; 
+        }
         
-        .btns { display: flex; gap: 8px; }
-        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .btn-cancel { background: #eee; color: #555; }
+        .btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; 
+            border-radius: 16px; font-weight: 900; 
+            font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .modal-btn:active { transform: scale(0.95); }
+        .btn-cancel { background: #f3f4f6; color: #4b5563; }
+        
+        /* Style spécifique Alerte */
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
+        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        
         .header-spacer { width: 40px; }
     </style>
 </head>
@@ -160,7 +192,7 @@
                     <div class="color-dot" style="background-color: #ffffff;" data-color="#ffffff"></div>
                     <div class="color-dot" style="background-color: #4b5563;" data-color="#4b5563"></div>
                 </div>
-                <button id="addBtn" onclick="addNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform !text-white">Ajouter</button>
+                <button id="addBtn" onclick="addNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
             </div>
         </div>
 
@@ -175,22 +207,33 @@
                 </label>
                 <button onclick="exportNotesToFile()" class="nav-btn bg-zinc-800 text-white flex-1">👆exporter .txt👆</button>
             </div>
-            <button onclick="resetAllNotes()" class="nav-btn bg-red-500 text-rose-100 border border-rose-900/50 w-full">⚠️ effacer tous les mémos</button>
+            <button onclick="confirmResetAll()" class="nav-btn bg-red-500 text-white border border-rose-900/20 w-full shadow-lg">⚠️ effacer tous les mémos</button>
         </footer>
     </div>
 
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
-            <h2 class="text-gray-800 font-black text-xs uppercase tracking-widest mb-1">Modifier</h2>
-            <textarea id="editNoteTitle" rows="2" placeholder="Titre" class="resize-none"></textarea>
+            <h2 class="text-gray-400 font-black text-[10px] uppercase tracking-widest mb-3">Modifier la note</h2>
+            <textarea id="editNoteTitle" rows="2" placeholder="Titre"></textarea>
             <textarea id="editNoteInput" rows="5" placeholder="Note"></textarea>
-            <p class="text-[9px] text-gray-400 uppercase font-bold mb-2">Couleur :</p>
-            <div class="flex flex-wrap gap-2 mb-6" id="editColorPicker"></div>
+            <p class="text-[9px] text-gray-400 uppercase font-black mb-2">Couleur de fond :</p>
+            <div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div>
             <div class="btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button>
                 <button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button>
             </div>
-            <button onclick="deleteNoteFromModal()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase">Supprimer la note</button>
+            <button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase tracking-widest">Supprimer définitivement</button>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            <div class="btns">
+                <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
+            </div>
         </div>
     </div>
 
@@ -203,39 +246,55 @@
             'rose': '#f43f5e', 'gray': '#6b7280'
         };
 
+        function showAlert(title, text, onConfirm = null, isAlertOnly = false) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertText').innerText = text;
+            
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            const cancelBtn = document.getElementById('alertCancelBtn');
+            
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const hex = mapCouleurs[themePrefs.memos || 'purple'] || '#a855f7';
+            confirmBtn.style.backgroundColor = hex;
+            
+            cancelBtn.style.display = isAlertOnly ? 'none' : 'block';
+            
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            newConfirmBtn.onclick = () => {
+                closeModal('alertModal');
+                if (onConfirm) onConfirm();
+            };
+            
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
-            
-            if (isLight) {
-                document.body.classList.add('light-mode');
-            } else {
-                document.body.classList.remove('light-mode');
-            }
+            document.body.classList.toggle('light-mode', isLight);
 
             const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const nomCouleur = themePrefs.memos || 'purple';
             const hex = mapCouleurs[nomCouleur] || '#a855f7';
-            
-            const title = document.getElementById('pageTitle');
-            const btn = document.getElementById('addBtn');
-            const modalBtn = document.getElementById('modalSaveBtn');
-            const btnRetour = document.getElementById('btn-retour');
             const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
 
-            if(title) {
-                title.style.color = isLight ? '#000000' : '#ffffff';
-            }
-
+            const btnRetour = document.getElementById('btn-retour');
             if(btnRetour) {
                 btnRetour.style.backgroundColor = hex;
                 btnRetour.style.color = isLightColor ? 'black' : 'white';
             }
 
-            [btn, modalBtn].forEach(el => {
-                if(el) { 
-                    el.style.backgroundColor = hex; 
-                    if (el.id !== 'addBtn') el.style.color = isLightColor ? 'black' : 'white'; 
+            const elementsToTheme = [
+                document.getElementById('addBtn'),
+                document.getElementById('modalSaveBtn')
+            ];
+
+            elementsToTheme.forEach(el => {
+                if(el) {
+                    el.style.backgroundColor = hex;
+                    el.style.color = isLightColor ? 'black' : 'white';
                 }
             });
         }
@@ -246,20 +305,124 @@
         let selectedColorForEdit = '#fef08a';
         const palette = ['#fef08a', '#fca5a5', '#fdba74', '#86efac', '#7dd3fc', '#ffffff', '#4b5563'];
 
-        function setupSortable() {
+        function confirmResetAll() {
+            showAlert("Tout effacer ?", "Cette action supprimera définitivement tous vos mémos. Voulez-vous continuer ?", () => {
+                notes = [];
+                saveAndRender();
+            });
+        }
+
+        function confirmDeleteNote() {
+            showAlert("Supprimer ?", "Voulez-vous vraiment supprimer cette note ?", () => {
+                notes.splice(currentNoteIndex, 1);
+                saveAndRender();
+                closeModal('editModal');
+            });
+        }
+
+        function exportNotesToFile() {
+            if (notes.length === 0) {
+                showAlert("Attention", "Il n'y a aucune note à exporter.", null, true);
+                return;
+            }
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `export_memos_${date}.txt`;
+            const contenu = JSON.stringify(notes, null, 2);
+            
+            if (window.Android && window.Android.exportTxt) {
+                window.Android.exportTxt(contenu, fileName);
+            } else {
+                const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+            }
+        }
+
+        document.getElementById('importNotesFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        showAlert("Importer ?", "Les notes du fichier vont remplacer vos notes actuelles. Continuer ?", () => {
+                            notes = data; 
+                            saveAndRender();
+                        });
+                    } else { throw new Error(); }
+                } catch (err) { 
+                    showAlert("Erreur", "Le fichier sélectionné n'est pas un fichier de notes valide.", null, true);
+                }
+            };
+            reader.readAsText(file);
+            this.value = ''; 
+        });
+
+        function renderNotes() {
             const grid = document.getElementById('notesGrid');
-            new Sortable(grid, {
-                handle: '.drag-handle',
-                animation: 150,
-                ghostClass: 'sortable-ghost',
+            grid.innerHTML = '';
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            notes.forEach((note, index) => {
+                const searchStr = ((note.title || '') + (note.content || '')).toLowerCase();
+                if (searchStr.includes(search)) {
+                    const card = document.createElement('div');
+                    card.className = 'note-card shadow-sm active:scale-95 transition-transform';
+                    card.dataset.index = index;
+                    if(note.color === '#4b5563') card.classList.add('dark-note');
+                    card.style.backgroundColor = note.color || '#fef08a';
+                    card.onclick = (e) => { if (!e.target.closest('.drag-handle')) openEditModal(index); };
+                    card.innerHTML = `
+                        <div class="note-header">
+                            <div class="note-title">${note.title || ''}</div>
+                            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                        </div>
+                        <div class="note-card-content">${note.content}</div>`;
+                    grid.appendChild(card);
+                }
+            });
+        }
+
+        function addNote() {
+            const titleInput = document.getElementById('newNoteTitle');
+            const contentInput = document.getElementById('newNoteInput');
+            if (contentInput.value.trim()) {
+                notes.unshift({ title: titleInput.value.trim(), content: contentInput.value.trim(), color: selectedColorForNew });
+                saveAndRender();
+                titleInput.value = ''; contentInput.value = ''; contentInput.style.height = '60px';
+            }
+        }
+
+        function openEditModal(index) {
+            currentNoteIndex = index;
+            const note = notes[index];
+            document.getElementById('editNoteTitle').value = note.title || '';
+            document.getElementById('editNoteInput').value = note.content;
+            selectedColorForEdit = note.color || '#fef08a';
+            document.querySelectorAll('#editColorPicker .color-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.color === selectedColorForEdit);
+            });
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function saveEditedNote() {
+            notes[currentNoteIndex].title = document.getElementById('editNoteTitle').value;
+            notes[currentNoteIndex].content = document.getElementById('editNoteInput').value;
+            notes[currentNoteIndex].color = selectedColorForEdit;
+            saveAndRender(); closeModal('editModal');
+        }
+
+        function setupSortable() {
+            new Sortable(document.getElementById('notesGrid'), {
+                handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost',
                 onEnd: function() {
                     const newOrder = [];
-                    grid.querySelectorAll('.note-card').forEach(card => {
-                        newOrder.push(notes[card.dataset.index]);
-                    });
-                    notes = newOrder;
-                    localStorage.setItem('myKeepNotes', JSON.stringify(notes));
-                    renderNotes();
+                    document.querySelectorAll('.note-card').forEach(card => newOrder.push(notes[card.dataset.index]));
+                    notes = newOrder; saveAndRender();
                 }
             });
         }
@@ -288,142 +451,10 @@
             textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
         }
 
-        function renderNotes() {
-            const grid = document.getElementById('notesGrid');
-            grid.innerHTML = '';
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            
-            notes.forEach((note, index) => {
-                const searchStr = ((note.title || '') + note.content).toLowerCase();
-                if (searchStr.includes(search)) {
-                    const card = document.createElement('div');
-                    card.className = 'note-card shadow-sm active:scale-95 transition-transform';
-                    card.dataset.index = index;
-                    if(note.color === '#4b5563') card.classList.add('dark-note');
-                    card.style.backgroundColor = note.color || '#fef08a';
-                    
-                    card.onclick = (e) => {
-                        if (!e.target.closest('.drag-handle')) {
-                            openEditModal(index);
-                        }
-                    };
-                    
-                    card.innerHTML = `
-                        <div class="note-header">
-                            <div class="note-title">${note.title || ''}</div>
-                            <div class="drag-handle">
-                                <span></span><span></span><span></span>
-                                <span></span><span></span><span></span>
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                        <div class="note-card-content">${note.content}</div>
-                    `;
-                    grid.appendChild(card);
-                }
-            });
-        }
-
-        function addNote() {
-            const titleInput = document.getElementById('newNoteTitle');
-            const contentInput = document.getElementById('newNoteInput');
-            if (contentInput.value.trim()) {
-                notes.unshift({ 
-                    title: titleInput.value.trim(), 
-                    content: contentInput.value.trim(), 
-                    color: selectedColorForNew 
-                });
-                saveAndRender();
-                titleInput.value = ''; contentInput.value = ''; contentInput.style.height = '60px';
-            }
-        }
-
-        function resetAllNotes() {
-            if(confirm("Voulez-vous vraiment effacer TOUTES vos notes ?")) {
-                if(confirm("Dernière confirmation : cette action est irréversible.")) {
-                    notes = [];
-                    saveAndRender();
-                }
-            }
-        }
-
-        function openEditModal(index) {
-            currentNoteIndex = index;
-            const note = notes[index];
-            document.getElementById('editNoteTitle').value = note.title || '';
-            document.getElementById('editNoteInput').value = note.content;
-            selectedColorForEdit = note.color || '#fef08a';
-            document.querySelectorAll('#editColorPicker .color-dot').forEach(dot => {
-                dot.classList.remove('active');
-                if(dot.dataset.color === selectedColorForEdit) dot.classList.add('active');
-            });
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function saveEditedNote() {
-            notes[currentNoteIndex].title = document.getElementById('editNoteTitle').value;
-            notes[currentNoteIndex].content = document.getElementById('editNoteInput').value;
-            notes[currentNoteIndex].color = selectedColorForEdit;
-            saveAndRender(); closeModal('editModal');
-        }
-
-        function deleteNoteFromModal() {
-            if(confirm("Supprimer cette note ?")) {
-                notes.splice(currentNoteIndex, 1);
-                saveAndRender(); closeModal('editModal');
-            }
-        }
-
-        function exportNotesToFile() {
-            if (notes.length === 0) return alert("Aucune note à exporter !");
-
-            // Génération de la date au format AAAA-MM-JJ (ex: 2025-12-29)
-            const date = new Date().toISOString().split('T')[0];
-            const fileName = `export_memos_${date}.txt`;
-            const contenu = JSON.stringify(notes, null, 2);
-            
-            if (window.Android && window.Android.exportTxt) {
-                // Pour l'intégration Android Studio
-                Android.exportTxt(contenu);
-            } else {
-                // Pour le téléchargement via navigateur
-                const blob = new Blob([contenu], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = fileName;
-                a.click();
-                URL.revokeObjectURL(a.href);
-            }
-        }
-
-        document.getElementById('importNotesFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data) && confirm("Importer ces notes ?")) {
-                        notes = data; saveAndRender();
-                    }
-                } catch (err) { alert("Fichier invalide."); }
-            };
-            reader.readAsText(file);
-        });
-
         function saveAndRender() { localStorage.setItem('myKeepNotes', JSON.stringify(notes)); renderNotes(); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
-        window.onload = () => {
-            appliquerTheme();
-            setupColorPickers();
-            renderNotes();
-            setupSortable();
-        };
-
-        (function() {
-            // Placeholder for future script expansions
-        })();
+        window.onload = () => { appliquerTheme(); setupColorPickers(); renderNotes(); setupSortable(); };
     </script>
 </body>
-</html>```
+</html>

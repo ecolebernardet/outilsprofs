@@ -16,7 +16,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
             --primary: #ff637e; 
@@ -87,7 +87,7 @@
         }
 
         body.light-mode .student-item, html.light-mode-init .student-item {
-            border-color: #374151;
+            border-color: #e5e7eb;
         }
 
         .text-girl { color: #f9a8d4; } 
@@ -99,6 +99,7 @@
         .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .status-icon { font-size: 0.65rem; opacity: 0.8; }
 
+        /* MODALE OBSERVATION */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 92%; max-width: 400px; border: 1px solid #333; }
         textarea { width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; border: 1px solid #333; font-size: 0.8rem; background: #000; color: #fff; outline: none; }
@@ -107,11 +108,20 @@
         .btn-save { background: var(--primary); color: white; }
         .btn-cancel { background: #333; color: #ccc; }
 
-        /* Correction lisibilité Mode Clair */
+        /* Correction lisibilité Mode Clair Modale */
         body.light-mode .modal-content { background: #ffffff; border-color: #d1d5db; }
         body.light-mode #modalTitle { color: #111827 !important; }
         body.light-mode textarea { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
         body.light-mode .btn-cancel { background: #e5e7eb; color: #374151; }
+
+        /* MODALE ALERTE (Système) */
+        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; color: #000; }
+        .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 600; color: #4b5563; }
+        .alert-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-alert { flex: 1; padding: 14px; border-radius: 15px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
+        .btn-alert-cancel { background: #f3f4f6; color: #4b5563; }
 
         .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -140,7 +150,7 @@
             </label>
             <button onclick="exportToFile()" class="nav-btn bg-neutral-800 text-white ">👆exporter .txt👆</button>
         </div>
-        <button onclick="toutEffacer()" class="nav-btn bg-red-500 text-red-100">⚠️ effacer les données</button>
+        <button onclick="toutEffacer()" class="nav-btn bg-red-500 text-red-100 shadow-lg">⚠️ effacer les données</button>
     </footer>
 
     <div id="modal" class="modal-overlay">
@@ -150,6 +160,17 @@
             <div class="btns">
                 <button class="modal-btn btn-cancel" onclick="closeAllModals()">Fermer</button>
                 <button class="modal-btn btn-save" onclick="saveData()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="alert-overlay">
+        <div class="alert-content">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Message</p>
+            <div class="alert-btns">
+                <button id="alertCancelBtn" class="btn-alert btn-alert-cancel" onclick="closeAlert()">Annuler</button>
+                <button id="alertConfirmBtn" class="btn-alert text-white">Confirmer</button>
             </div>
         </div>
     </div>
@@ -174,15 +195,30 @@
             'rose': '#f43f5e', 'gray': '#6b7280'
         };
 
+        function showAlert(title, text, onConfirm, showCancel = true) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertText').innerText = text;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            const cancelBtn = document.getElementById('alertCancelBtn');
+            
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const colorHex = mapCouleurs[themePrefs.obs || 'green'] || '#22c55e';
+            confirmBtn.style.backgroundColor = colorHex;
+
+            cancelBtn.style.display = showCancel ? 'block' : 'none';
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
+
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
-            
-            if (isLight) {
-                document.body.classList.add('light-mode');
-            } else {
-                document.body.classList.remove('light-mode');
-            }
+            document.body.classList.toggle('light-mode', isLight);
 
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const nomCouleur = prefs['obs'] || 'green';
@@ -194,7 +230,6 @@
             const btnSave = document.querySelector('.btn-save');
 
             if(mainTitle) mainTitle.style.color = isLight ? '#000000' : '#ffffff';
-
             const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
 
             if(btnRetour) {
@@ -233,9 +268,7 @@
                 groupes[niv].push(el);
             });
 
-            const niveauxPresents = Object.keys(groupes).sort((a, b) => {
-                return ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b);
-            });
+            const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
 
             niveauxPresents.forEach(niv => {
                 const levelWrapper = document.createElement('div');
@@ -280,20 +313,17 @@
         }
 
         function toutEffacer() {
-            if(confirm("Attention : Supprimer tous les élèves et toutes les observations ?")) {
-                localStorage.removeItem('maListeEleves');
-                localStorage.removeItem('studentObservations');
-                elevesInscrits = [];
+            showAlert("Tout effacer ?", "Supprimer toutes les observations ? (La liste des élèves sera conservée)", () => {
                 savedComments = {};
+                localStorage.setItem('studentObservations', JSON.stringify(savedComments));
                 renderList();
-            }
+            });
         }
 
         function exportToFile() {
             try {
-                const eleves = typeof elevesInscrits !== 'undefined' ? elevesInscrits : [];
-                const observations = typeof savedComments !== 'undefined' ? savedComments : {};
-
+                const eleves = elevesInscrits || [];
+                const observations = savedComments || {};
                 let cleanedComments = {};
                 eleves.forEach(s => { 
                     const sId = String(s.id);
@@ -304,34 +334,19 @@
 
                 const dateStr = new Date().toISOString().split('T')[0];
                 const fileName = `export_observations_${dateStr}.txt`;
-                const bundle = {
-                    eleves: eleves,
-                    observations: cleanedComments,
-                    date: new Date().toLocaleDateString(),
-                    type: "export_observations"
-                };
-
+                const bundle = { eleves, observations: cleanedComments, date: new Date().toLocaleDateString(), type: "export_observations" };
                 const jsonString = JSON.stringify(bundle, null, 2);
 
-                if (window.Android && window.Android.exportTxt) {
+                if (window.Android && typeof window.Android.exportTxt === 'function') {
                     window.Android.exportTxt(jsonString, fileName);
                 } else {
                     const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
+                    a.href = url; a.download = fileName; a.click();
+                    setTimeout(() => window.URL.revokeObjectURL(url), 100);
                 }
-            } catch (err) {
-                alert("Erreur technique lors de l'export : " + err.message);
-            }
+            } catch (err) { showAlert("Erreur", "Erreur technique : " + err.message, null, false); }
         }
 
         document.getElementById('importFile').addEventListener('change', function(e) {
@@ -341,35 +356,35 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (data.eleves && confirm("Importer les données du fichier ?")) {
-                        // Correction : Conversion forcée des IDs en String pour l'importation
-                        const normalizedEleves = data.eleves.map(el => ({
-                            ...el,
-                            id: String(el.id)
-                        }));
-                        
-                        let normalizedObs = {};
-                        if(data.observations) {
-                            Object.keys(data.observations).forEach(key => {
-                                normalizedObs[String(key)] = data.observations[key];
-                            });
+                    if (data.eleves) {
+                        const currentIds = elevesInscrits.map(el => String(el.id)).sort().join(',');
+                        const importIds = data.eleves.map(el => String(el.id)).sort().join(',');
+
+                        let message = "Voulez-vous importer les observations de ce fichier ?";
+                        if (currentIds !== importIds && elevesInscrits.length > 0) {
+                            message = "ATTENTION : La liste des élèves du fichier diffère de l'actuelle. Votre classe sera remplacée. Continuer ?";
                         }
-                        
-                        localStorage.setItem('maListeEleves', JSON.stringify(normalizedEleves));
-                        localStorage.setItem('studentObservations', JSON.stringify(normalizedObs));
-                        window.location.reload();
+
+                        showAlert("Importer ?", message, () => {
+                            const normalizedEleves = data.eleves.map(el => ({ ...el, id: String(el.id) }));
+                            let normalizedObs = {};
+                            if(data.observations) {
+                                Object.keys(data.observations).forEach(key => normalizedObs[String(key)] = data.observations[key]);
+                            }
+                            localStorage.setItem('maListeEleves', JSON.stringify(normalizedEleves));
+                            localStorage.setItem('studentObservations', JSON.stringify(normalizedObs));
+                            window.location.reload();
+                        });
                     }
                 } catch (err) { 
-                    alert("Erreur lors de l'import : " + err.message); 
+                    showAlert("Erreur d'import", "Format de fichier invalide.", null, false);
+                    e.target.value = "";
                 }
             };
             reader.readAsText(file);
         });
 
-        window.onload = () => {
-            appliquerTheme();
-            renderList();
-        };
+        window.onload = () => { appliquerTheme(); renderList(); };
     </script>
 </body>
 </html>

@@ -16,16 +16,15 @@
             --column-border: #222;
             --header-bg: #000;
             --border-color: #1f2937;
-            /* Formulaire */
             --card-bg: #111827; 
             --card-text: #ffffff;
             --input-bg: #1f2937;
             --input-border: #374151;
             --input-text: #ffffff;
-            /* Étiquettes des liens (Mode sombre) */
             --item-bg: #1f2937;
             --item-text-url: #9ca3af;
             --item-border: transparent;
+            --modal-bg: rgba(0, 0, 0, 0.85);
         }
 
         body.light-mode {
@@ -40,10 +39,10 @@
             --input-bg: #ffffff;
             --input-border: #9ca3af;
             --input-text: #111827;
-            /* Étiquettes des liens (Mode clair) */
             --item-bg: #f3f4f6;
             --item-text-url: #6b7280;
             --item-border: #374151;
+            --modal-bg: rgba(255, 255, 255, 0.8);
         }
 
         body { 
@@ -53,124 +52,96 @@
             display: flex; flex-direction: column; align-items: center; 
             overflow-x: hidden;
             transition: background 0.3s;
-            /* Suppression du padding-top fixe */
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
 
         header { 
-            width: calc(100% + 30px); /* Ajusté pour couvrir les marges du body */
+            width: calc(100% + 30px);
             background: var(--header-bg); 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            /* Padding de sécurité intégré */
+            display: flex; align-items: center; justify-content: space-between; 
             padding: calc(env(safe-area-inset-top) + 10px) 10px 10px 10px;
             border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            margin-left: -15px; /* Compense le padding du body */
+            position: sticky; top: 0; z-index: 100; margin-left: -15px;
         }
 
         .main-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; }
 
         .light-card { 
-            background: var(--card-bg); 
-            color: var(--card-text); 
-            border-radius: 1.2rem; padding: 10px; 
-            margin: 15px auto; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            width: 95%;
-            border: 1px solid var(--border-color);
-            transition: background 0.3s;
+            background: var(--card-bg); color: var(--card-text); border-radius: 1.2rem; padding: 10px; 
+            margin: 15px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            width: 95%; border: 1px solid var(--border-color);
         }
 
         .input-field { 
-            background: var(--input-bg); 
-            border: 1px solid var(--input-border); 
-            border-radius: 0.6rem; padding: 6px; 
-            font-size: 0.75rem; font-weight: 600; 
-            width: 100%; margin-bottom: 5px; 
-            color: var(--input-text);
-            outline: none;
+            background: var(--input-bg); border: 1px solid var(--input-border); 
+            border-radius: 0.6rem; padding: 6px; font-size: 0.75rem; font-weight: 600; 
+            width: 100%; margin-bottom: 5px; color: var(--input-text); outline: none;
         }
 
         .columns-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px; 
-            width: 100%;
-            padding: 0 10px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; 
+            width: 100%; padding: 0 10px;
         }
 
         .column {
-            background: var(--column-bg);
-            border-radius: 0.8rem;
-            padding: 6px;
-            border: 1px solid var(--column-border);
-            min-height: 100px;
-            min-width: 0;
+            background: var(--column-bg); border-radius: 0.8rem; padding: 6px;
+            border: 1px solid var(--column-border); min-height: 100px; min-width: 0;
         }
 
         .column-header {
-            font-size: 8px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 2px solid;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            white-space: nowrap;
+            font-size: 8px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 4px;
+            border-bottom: 2px solid; display: flex; align-items: center; gap: 3px;
         }
 
         .link-item {
-            background: var(--item-bg); 
-            border-radius: 0.5rem; 
-            padding: 5px; display: flex; 
-            justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 5px;
-            min-width: 0;
+            background: var(--item-bg); border-radius: 0.5rem; 
+            padding: 5px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 5px;
             border: 1px solid var(--item-border);
-            transition: all 0.3s;
         }
 
         .drag-handle {
-            cursor: grab;
-            padding: 3px 10px 3px 5px;
-            display: grid;
-            grid-template-columns: repeat(3, 3px); 
-            gap: 4px;
-            flex-shrink: 0;
+            cursor: grab; padding: 3px 10px 3px 5px; display: grid;
+            grid-template-columns: repeat(3, 3px); gap: 4px; flex-shrink: 0;
         }
         .drag-handle span { width:2px; height: 2px; background-color: #9ca3af; border-radius: 50%; }
 
         .link-info { flex: 1; cursor: pointer; min-width: 0; overflow: hidden; }
-        .link-name { 
-            font-weight: 800; font-size: 9px; display: block; 
-            text-transform: uppercase; line-height: 1; 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
-        }
-        .link-url { 
-            font-size: 6px; color: var(--item-text-url); display: block; 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
-        }
+        .link-name { font-weight: 800; font-size: 9px; display: block; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-url { font-size: 6px; color: var(--item-text-url); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .btn-add { width: 100%; padding: 10px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
-        .btn-del { color: #9ca3af; padding-left: 2px; flex-shrink: 0; cursor: pointer; transition: color 0.2s; }
+        .btn-del { color: #9ca3af; padding-left: 2px; flex-shrink: 0; cursor: pointer; }
 
         .bottom-nav { width: 100%; max-width: 400px; align-self: center; display: flex; flex-direction: column; gap: 6px; margin-top: 20px; padding-bottom: 20px; }
         .nav-group { display: flex; gap: 5px; width: 100%; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 8px; flex: 1; text-align: center; background: #27272a; color: white; border: none; }
-        .header-spacer { width: 40px; }
+
+        /* MODAL DE CONFIRMATION PERSO */
+        #custom-confirm {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: var(--modal-bg); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .confirm-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center;
+        }
     </style>
 </head>
 <body>
+
+<div id="custom-confirm">
+    <div class="confirm-card">
+        <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
+        <div class="flex gap-3">
+            <button onclick="closeConfirm(false)" class="flex-1 py-3 rounded-full bg-neutral-500 text-white text-[10px] font-black uppercase">Annuler</button>
+            <button id="confirm-yes" class="flex-1 py-3 rounded-full text-white text-[10px] font-black uppercase shadow-lg">Confirmer</button>
+        </div>
+    </div>
+</div>
 
 <header>
     <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-transform active:scale-90">
@@ -179,10 +150,11 @@
         </svg>
     </a>
     <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Gestion des Liens</h1>
-    <div class="header-spacer"></div>
+    <div style="width:40px"></div>
 </header>
 
-<div class="main-wrapper mt-4"> <div class="light-card">
+<div class="main-wrapper mt-4"> 
+    <div class="light-card">
         <input type="text" id="linkName" class="input-field" placeholder="Nom...">
         <input type="text" id="linkUrl" class="input-field" placeholder="URL">
         <select id="linkCat" class="input-field">
@@ -235,6 +207,7 @@
     };
 
     let links = JSON.parse(localStorage.getItem('eduLinksList')) || [];
+    let confirmAction = null;
 
     const configCouleurs = {
         'École': { text: 'text-rose-500' },
@@ -249,17 +222,35 @@
         const couleurHexa = mapCouleurs[nomCouleur] || '#10b981';
         const btn = document.getElementById('mainAddBtn');
         const btnRetour = document.getElementById('btn-retour');
+        const btnConfirm = document.getElementById('confirm-yes');
         const svgRetour = document.querySelector('#btn-retour svg');
         const mainTitle = document.getElementById('mainTitle');
 
         if(mainTitle) mainTitle.style.color = isLightMode ? '#000000' : '#ffffff';
         if(btnRetour) btnRetour.style.backgroundColor = couleurHexa;
-        if(svgRetour) svgRetour.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? '#000' : '#fff';
+        if(btnConfirm) btnConfirm.style.backgroundColor = couleurHexa;
+        
+        const darkText = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+        if(svgRetour) svgRetour.style.color = darkText ? '#000' : '#fff';
+        if(btnConfirm) btnConfirm.style.color = darkText ? '#000' : '#fff';
         if(btn) {
             btn.style.backgroundColor = couleurHexa;
-            btn.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? 'black' : 'white';
+            btn.style.color = darkText ? 'black' : 'white';
         }
     }
+
+    // --- GESTION MODAL PERSO ---
+    function customConfirm(msg, onConfirm) {
+        document.getElementById('confirm-msg').innerText = msg;
+        document.getElementById('custom-confirm').style.display = 'flex';
+        confirmAction = onConfirm;
+    }
+    function closeConfirm(confirmed) {
+        document.getElementById('custom-confirm').style.display = 'none';
+        if (confirmed && confirmAction) confirmAction();
+        confirmAction = null;
+    }
+    document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
 
     function initSortables() {
         ['École', 'Institutionnel', 'Autre', 'Ressources'].forEach(cat => {
@@ -321,23 +312,26 @@
     }
 
     function deleteLink(id) {
-        if(confirm("Supprimer ?")) {
+        customConfirm("Supprimer ce lien ?", () => {
             links = links.filter(l => l.id !== id);
             localStorage.setItem('eduLinksList', JSON.stringify(links));
             render();
-        }
+        });
     }
 
     function exportData() {
+        if (links.length === 0) return alert("Aucun lien à exporter !");
+        const date = new Date().toISOString().split('T')[0];
+        const fileName = `export_liens_${date}.txt`;
         const contenu = JSON.stringify(links, null, 2);
+
         if (window.Android && window.Android.exportTxt) {
-            Android.exportTxt(contenu);
+            window.Android.exportTxt(contenu, fileName);
         } else {
-            const blob = new Blob([contenu], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `liens.txt`;
-            a.click();
+            const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
+            window.URL.revokeObjectURL(url);
         }
     }
 
@@ -353,7 +347,13 @@
         reader.readAsText(e.target.files[0]);
     });
 
-    function resetLinks() { if(confirm("Tout effacer ?")) { links = []; localStorage.setItem('eduLinksList', JSON.stringify(links)); render(); } }
+    function resetLinks() { 
+        customConfirm("⚠️ Supprimer tous les liens ? Cette action est irréversible si vous n'avez pas créé de sauvegarde.", () => { 
+            links = []; 
+            localStorage.setItem('eduLinksList', JSON.stringify(links)); 
+            render(); 
+        }); 
+    }
 
     window.onload = () => { appliquerTheme(); render(); initSortables(); };
 </script>
