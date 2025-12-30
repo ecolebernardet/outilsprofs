@@ -30,7 +30,6 @@
             --btn-back-bg: #e5e7eb;
         }
 
-        /* MODIFICATION 1 : Le Body */
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
@@ -43,7 +42,6 @@
             overflow-x: hidden;
         }
         
-        /* MODIFICATION 2 : Le Header */
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
@@ -56,7 +54,7 @@
             padding: calc(env(safe-area-inset-top) + 10px) 10px 10px 10px; 
             width: calc(100% + 30px); 
             margin-left: -15px;
-            height: auto; /* Ajusté pour le nouveau padding */
+            height: auto;
         }
 
         #btn-retour { 
@@ -141,6 +139,13 @@
             color: var(--card-text);
         }
         .theme-choice-btn:active { transform: scale(0.95); }
+
+        #avatar-propos {
+            width: 128px;
+            height: auto;
+            margin-bottom: 24px;
+            transition: filter 0.3s ease;
+        }
     </style>
 </head>
 <body class="pb-10">
@@ -163,21 +168,21 @@
         <div class="p-4">
             <div id="emploi" class="tab-content active">
                 <div class="card-info">
-    <div class="flex items-center gap-2 mb-4">
-        <span class="text-lg">🌓</span>
-        <h3 class="font-black text-xs uppercase">Apparence</h3>
-    </div>
-    <div class="flex gap-4">
-        <button onclick="selectTheme('light')" class="theme-choice-btn border-white/20 bg-[#666666] text-white [.light-mode_&]:bg-transparent [.light-mode_&]:text-inherit [.light-mode_&]:border-[var(--header-border)]">
-            <span class="text-2xl">☀️</span>
-            <span class="text-[10px] font-bold uppercase">Mode Clair</span>
-        </button>
-        <button onclick="selectTheme('dark')" class="theme-choice-btn [.light-mode_&]:bg-[#666666] [.light-mode_&]:text-white [.light-mode_&]:border-black">
-            <span class="text-2xl">🌙</span>
-            <span class="text-[10px] font-bold uppercase">Mode Sombre</span>
-        </button>
-    </div>
-</div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-lg">🌓</span>
+                        <h3 class="font-black text-xs uppercase">Apparence</h3>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="selectTheme('light')" class="theme-choice-btn border-white/20 bg-[#dddddd] text-black [.light-mode_&]:bg-transparent [.light-mode_&]:text-inherit [.light-mode_&]:border-[var(--header-border)]">
+                            <span class="text-2xl">☀️</span>
+                            <span class="text-[10px] font-bold uppercase">Mode Clair</span>
+                        </button>
+                        <button onclick="selectTheme('dark')" class="theme-choice-btn [.light-mode_&]:bg-[#666666] [.light-mode_&]:text-white [.light-mode_&]:border-black">
+                            <span class="text-2xl">🌙</span>
+                            <span class="text-[10px] font-bold uppercase">Mode Sombre</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="card-info">
                     <div class="flex items-center gap-2 mb-3">
@@ -188,13 +193,10 @@
                     </div>
                     <p class="text-xs leading-relaxed mb-3">Vous pouvez changer l'ordre des rubriques sur la page d'accueil.</p>
                     <div class="bg-black/20 rounded-lg p-3 border border-white/5 flex items-center gap-4">
-                        <div class="flex flex-col items-center gap-1">
-                             <div class="handle-preview">
-                                <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
-                                <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
-                                <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
-                             </div>
-                             <span class="text-[7px] text-gray-500 uppercase font-bold">Poignée</span>
+                        <div class="handle-preview">
+                            <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
+                            <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
+                            <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
                         </div>
                         <p class="text-[11px] leading-snug">
                             Maintenez votre doigt ou votre souris appuyé sur les <strong>petites poignées</strong> situées en haut à droite de chaque tuile.
@@ -207,38 +209,21 @@
                     <p class="text-[11px] font-bold mb-1">C'est ici que vous créez votre base d'élèves.</p>
                     <ul class="text-xs space-y-2 leading-relaxed">
                         <li>• <strong>Ajout :</strong> Saisissez le nom, choisissez le genre et le niveau, puis enregistrez.</li>
-                        <li>• <strong>Import/Export :</strong> Utilisez ces boutons pour sauvegarder votre liste sur votre appareil ou la transférer vers un autre navigateur au format <em>Prénom;NOM;genre;niveau</em>.</li>
-                        <li>• <strong>Gestion :</strong> La liste est triée par ordre alphabétique. Vous pouvez supprimer un élève avec l'icône poubelle ou vider la liste complète.</li>
-                        <li>La liste générée sera utilisée dans les autres rubriques de l'application.</li>
+                        <li>• <strong>Import/Export :</strong> Utilisez ces boutons pour sauvegarder votre liste sur votre appareil ou la transférer vers un autre navigateur.</li>
                     </ul>
                 </div>
 
-                <div class="card-info"><h3 id="title-liens" class="font-black text-xs uppercase mb-2">🔗️ Liens</h3><p class="text-xs leading-relaxed">Accès rapide à vos sites favoris rangés par rubriques.</p></div>
-                <div class="card-info"><h3 id="title-h108" class="font-black text-xs uppercase mb-2">⏲️ 108 Heures</h3>
-                    <p class="text-xs leading-relaxed">
-                        Gérez vos forfaits annuels (APC, Conseils, etc.) :<br>
-                        • Saisissez une durée pour chaque événement.<br>
-                        • Suivez vos totaux et le reliquat d'heures restant par catégorie.<br>
-                        • Utilisez l'<strong>exportation</strong> pour conserver votre bilan officiel.<br>
-                        • Corriger une information en cliquant sur la réunion en question.
-                    </p>
-                </div>
-                <div class="card-info"><h3 id="title-memos" class="font-black text-xs uppercase mb-2">📒️ Mémos</h3><p class="text-xs leading-relaxed">Enregistrez des notes sous forme de pense-bête avec des couleurs personnalisables.</p></div>
-                <div class="card-info"><h3 id="title-tirage" class="font-black text-xs uppercase mb-2">🎲 Tirage</h3><p class="text-xs leading-relaxed">Décochez les élèves absents puis tirez un prénom d'élève au hasard parmi les présents.</p></div>
-                <div class="card-info"><h3 id="title-equipes" class="font-black text-xs uppercase mb-2">👥 Équipes</h3><p class="text-xs leading-relaxed">Décochez les élèves absents et générez des groupes mixtes et équilibrés par genre et par niveau automatiquement.</p></div>
-                <div class="card-info"><h3 id="title-obs" class="font-black text-xs uppercase mb-2">✏️ Observations</h3><p class="text-xs leading-relaxed">Notez des informations sur chaque élève et sauvegardez vos données.</p></div>
-                <div class="card-info"><h3 id="title-compt" class="font-black text-xs uppercase mb-2">🚥 Compteur</h3>
-                    <p class="text-xs leading-relaxed">
-                        Suivi rapide des points de comportement (jusqu'à 5 points) :<br>
-                        • <strong>Un clic :</strong> Ajoute 1 point.<br>
-                        • <strong>Double-clic :</strong> Enlève 1 point.<br>
-                        Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.
-                    </p>
-                </div>
+                <div class="card-info"><h3 id="title-liens" class="font-black text-xs uppercase mb-2">🔗️ Liens</h3><p class="text-xs leading-relaxed">Accès rapide à vos sites favoris.</p></div>
+                <div class="card-info"><h3 id="title-h108" class="font-black text-xs uppercase mb-2">⏲️ 108 Heures</h3><p class="text-xs leading-relaxed">Gérez vos forfaits annuels.</p></div>
+                <div class="card-info"><h3 id="title-memos" class="font-black text-xs uppercase mb-2">📒️ Mémos</h3><p class="text-xs leading-relaxed">Enregistrez des notes.</p></div>
+                <div class="card-info"><h3 id="title-tirage" class="font-black text-xs uppercase mb-2">🎲 Tirage</h3><p class="text-xs leading-relaxed">Tirez un prénom au hasard.</p></div>
+                <div class="card-info"><h3 id="title-equipes" class="font-black text-xs uppercase mb-2">👥 Équipes</h3><p class="text-xs leading-relaxed">Générez des groupes mixtes.</p></div>
+                <div class="card-info"><h3 id="title-obs" class="font-black text-xs uppercase mb-2">✏️ Observations</h3><p class="text-xs leading-relaxed">Notez des infos sur chaque élève.</p></div>
+                <div class="card-info"><h3 id="title-compt" class="font-black text-xs uppercase mb-2">🚥 Compteur</h3><p class="text-xs leading-relaxed">Suivi des points de comportement.</p></div>
                 
                 <div class="card-warning">
                     <h3 class="font-black text-xs uppercase mb-2">⚠️ Attention</h3>
-                    <p class="text-xs leading-relaxed">Les infos enregistrées sur un appareil (PC, smartphone, tablette...) et/ou sur un navigateur (Firefox, DuckDuckGo, Chrome...) ne sont enregistrées que dans la <strong>mémoire locale</strong>.<br>Pour retrouver vos infos, <strong>exportez-les</strong> d'abord puis <strong>importez-les</strong> sur le nouvel appareil. </p>
+                    <p class="text-xs leading-relaxed">Les infos ne sont enregistrées que dans la <strong>mémoire locale</strong>.</p>
                 </div>
             </div>
 
@@ -251,7 +236,7 @@
 
             <div id="propos" class="tab-content text-center py-6">
                 <div class="card-info flex flex-col items-center">
-                    <img src="outilsprofs_icone.png" class="w-32 h-auto mb-6 drop-shadow-lg">
+                    <img src="outilsprofs_icone.png" id="avatar-propos" alt="Avatar">
                     <p class="text-sm font-bold">Application conçue par Nicolas B. avec la grande aide de Gemini pour la programmation.</p>
                     <div class="h-[1px] bg-gray-700 w-full my-6"></div>
                     <p class="text-[15px] font-black text-gray-500 uppercase">Outils pour les profs</p>
@@ -308,6 +293,16 @@
         };
 
         function appliquerCouleursGlobales() {
+            const isLight = document.body.classList.contains('light-mode');
+            
+            // --- GESTION OMBRE AVATAR À PROPOS ---
+            const avatarPropos = document.getElementById('avatar-propos');
+            if (avatarPropos) {
+                avatarPropos.style.filter = isLight 
+                    ? 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))' 
+                    : 'drop-shadow(4px 4px 8px rgba(255,255,255,0.3))';
+            }
+
             const mapping = {
                 'title-inscr': 'inscr', 'title-liens': 'liens', 'title-h108': 'h108',
                 'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
@@ -356,7 +351,6 @@
             renderSettings();
         }
 
-        // CHARGEMENT INITIAL
         const savedTheme = localStorage.getItem('theme_mode');
         if (savedTheme === 'light') document.body.classList.add('light-mode');
         renderSettings();
