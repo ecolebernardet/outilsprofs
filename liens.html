@@ -335,16 +335,24 @@
         }
     }
 
+    // --- MODIFICATION ICI : IMPORT AVEC CONFIRMATION ---
     document.getElementById('importFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
         const reader = new FileReader();
         reader.onload = (ev) => {
             try {
-                links = JSON.parse(ev.target.result);
-                localStorage.setItem('eduLinksList', JSON.stringify(links));
-                render();
+                const data = JSON.parse(ev.target.result);
+                customConfirm("Les liens du fichier vont remplacer vos liens actuels. Continuer ?", () => {
+                    links = data;
+                    localStorage.setItem('eduLinksList', JSON.stringify(links));
+                    render();
+                });
             } catch(err) { alert("Erreur de fichier."); }
         };
-        reader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
+        e.target.value = ''; // Réinitialisation
     });
 
     function resetLinks() { 

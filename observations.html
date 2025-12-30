@@ -360,7 +360,7 @@
                         const currentIds = elevesInscrits.map(el => String(el.id)).sort().join(',');
                         const importIds = data.eleves.map(el => String(el.id)).sort().join(',');
 
-                        let message = "Voulez-vous importer les observations de ce fichier ?";
+                        let message = "Les commentaires du fichier vont remplacer vos commentaires actuels. Continuer ?";
                         if (currentIds !== importIds && elevesInscrits.length > 0) {
                             message = "ATTENTION : La liste des élèves du fichier diffère de l'actuelle. Votre classe sera remplacée. Continuer ?";
                         }

@@ -333,7 +333,7 @@
         }
 
         function toutEffacer() {
-            customConfirm("⚠️ Supprimer toute la liste d'élèves ? ️Cette action est irréversible si vous n'avez pas créé de sauvegarde.", () => {
+            customConfirm("⚠️ Supprimer toute la liste d'élèves ? Cette action est irréversible.", () => {
                 eleves = [];
                 localStorage.setItem('maListeEleves', JSON.stringify(eleves));
                 render();
@@ -359,16 +359,36 @@
         document.getElementById('fileInput').onchange = function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                e.target.result.split(/\r?\n/).forEach(l => {
-                    const p = l.trim().split(';'); 
-                    if(p.length >= 4) eleves.push({ id: String(Date.now() + Math.random()), identite: formaterIdentite(p[0], p[1]), sexe: p[2].trim().toLowerCase(), niveau: p[3].trim().toUpperCase() });
-                });
-                localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-                render();
-            };
-            reader.readAsText(file);
+
+            const msg = eleves.length > 0 
+                ? "L'importation va écraser votre liste actuelle. Continuer ?" 
+                : "Importer cette liste d'élèves ?";
+
+            customConfirm(msg, () => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const nouvellesDonnees = [];
+                    event.target.result.split(/\r?\n/).forEach(l => {
+                        const p = l.trim().split(';'); 
+                        if(p.length >= 4) {
+                            nouvellesDonnees.push({ 
+                                id: String(Date.now() + Math.random()), 
+                                identite: formaterIdentite(p[0], p[1]), 
+                                sexe: p[2].trim().toLowerCase(), 
+                                niveau: p[3].trim().toUpperCase() 
+                            });
+                        }
+                    });
+
+                    if (nouvellesDonnees.length > 0) {
+                        eleves = nouvellesDonnees;
+                        localStorage.setItem('maListeEleves', JSON.stringify(eleves));
+                        render();
+                    }
+                    document.getElementById('fileInput').value = "";
+                };
+                reader.readAsText(file);
+            });
         };
 
         window.addEventListener('DOMContentLoaded', () => { appliquerCouleursTheme(); render(); });

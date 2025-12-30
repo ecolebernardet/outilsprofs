@@ -433,20 +433,24 @@
         }
     }
 
+    // --- IMPORTATION AVEC CONFIRMATION ---
     document.getElementById('importFile').addEventListener('change', function(e) {
         const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function(ev) {
             try { 
-                const data = JSON.parse(e.target.result); 
+                const data = JSON.parse(ev.target.result); 
                 if (Array.isArray(data)) { 
-                    reunions = data; 
-                    localStorage.setItem('mesHeuresReu', JSON.stringify(reunions));
-                    render();
+                    customConfirm("Les données du fichier vont remplacer votre suivi actuel. Continuer ?", () => {
+                        reunions = data; 
+                        localStorage.setItem('mesHeuresReu', JSON.stringify(reunions));
+                        render();
+                    });
                 } 
-            } catch (err) { alert("Erreur."); }
+            } catch (err) { alert("Erreur de format de fichier."); }
         };
         reader.readAsText(file);
+        e.target.value = ''; // Réinitialise l'input
     });
 
     function initDate() { 
