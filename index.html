@@ -49,20 +49,21 @@
 
         header {
             display: grid;
-            grid-template-columns: 40px 1fr 40px; /* Colonnes pour bouton / titre / image */
+            grid-template-columns: 40px 1fr 40px;
             align-items: center;
             gap: 10px;
             width: 100%;
+            overflow: visible; /* Permet à l'ombre de dépasser */
         }
 
-        /* Style de la petite image à droite */
         .header-avatar {
-            width: 38px;
-            height: 38px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--btn-border);
-            background: #fff;
+            border: none !important;
+            background: transparent !important;
+            display: block;
         }
 
         .menu-card { 
@@ -214,6 +215,19 @@
         };
         const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
 
+        // --- GESTION DE L'IMAGE FLOTTANTE (SANS CERCLE) ---
+        const headerAvatar = document.querySelector('.header-avatar');
+        if (headerAvatar) {
+            headerAvatar.style.backgroundColor = 'transparent';
+            headerAvatar.style.border = 'none';
+            // Utilisation de drop-shadow pour suivre la forme circulaire de l'image
+            headerAvatar.style.filter = isLight 
+                ? 'drop-shadow(4px 4px 4px rgba(0,0,0,0.6))' 
+                : 'drop-shadow(3px 3px 6px rgba(255,255,255,0.3))';
+            // On retire le box-shadow s'il restait
+            headerAvatar.style.boxShadow = 'none';
+        }
+        
         document.querySelectorAll('.menu-card').forEach(el => {
             const id = el.getAttribute('data-id');
             const colorName = prefs[id] || 'gray';
