@@ -50,9 +50,20 @@
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
             background: #e5e7eb; border: 1px solid #d1d5db; color: #374151;
-            height: 42px; border-radius: 0.75rem; cursor: pointer;
+            height: 40px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
         }
+		
+		.columns-container {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 15px;
+			width: 100%;
+			max-width: 600px;
+			margin: 0 auto;
+			align-items: start;
+			padding: 0 10px;
+		}
 
         .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; background: rgba(59, 130, 246, 0.1); }
         .input-fille:checked + .card-label { color: #db2777; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.1); }
@@ -68,14 +79,14 @@
         
         .student-item { 
             background: #ffffff; 
-            padding: 6px 18px; 
+            padding: 8px 12px; 
             border-radius: 40px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 6px; 
+            margin-bottom: 4px; 
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             cursor: pointer;
         }
 
@@ -87,16 +98,9 @@
         .input-field { background: #f3f4f6; border: 1px solid #d1d5db; color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
         
         .select-date { 
-            background: #e5e7eb; 
-            border: 1px solid #d1d5db; 
-            color: #374151; 
-            border-radius: 0.75rem; 
-            height: 42px;
-            outline: none; 
-            font-size: 0.75rem; 
-            font-weight: 600;
-            appearance: none;
-            text-align: center;
+            background: #e5e7eb; border: 1px solid #d1d5db; color: #374151; 
+            border-radius: 0.75rem; height: 42px; outline: none; 
+            font-size: 0.75rem; font-weight: 600; appearance: none; text-align: center;
         }
 
         .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
@@ -112,6 +116,7 @@
             width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center;
         }
+		
     </style>
 </head>
 <body class="pb-10">
@@ -202,7 +207,6 @@
             const monthSel = document.getElementById('birth-month');
             const yearSel = document.getElementById('birth-year');
             const derniereAnnee = localStorage.getItem('derniereAnneeSaisie') || "";
-
             daySel.innerHTML = ''; monthSel.innerHTML = ''; yearSel.innerHTML = '';
             for(let i=1; i<=31; i++) {
                 let val = i < 10 ? '0'+i : i;
@@ -288,45 +292,71 @@
         }
 
         function render() {
-            renderStats();
-            const container = document.getElementById('listeContainer');
-            if (!container) return;
-            container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
-            const groupes = {};
-            eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
-            const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            container.className = présents.length === 2 ? "grid grid-cols-2 gap-3 items-start" : "grid grid-cols-1 sm:grid-cols-2 gap-3 items-start";
+    renderStats();
+    const container = document.getElementById('listeContainer');
+    if (!container) return;
+    
+    container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
+    
+    const groupes = {};
+    eleves.forEach(el => { 
+        if (!groupes[el.niveau]) groupes[el.niveau] = []; 
+        groupes[el.niveau].push(el); 
+    });
+
+    const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+
+    // Affichage sur 2 colonnes
+    container.className = "grid grid-cols-2 gap-3 items-start w-full"; 
+
+    présents.forEach(niv => {
+        const levelColumn = document.createElement('div');
+        levelColumn.className = "flex flex-col";
+        
+        const couleurNiveau = couleurParNiveau[niv] || hexaTheme;
+        levelColumn.innerHTML = `<h3 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-3">${niv}</h3>`;
+        
+        const list = document.createElement('div');
+        list.className = "flex flex-col gap-1.5";
+        
+        groupes[niv].sort((a, b) => {
+            const partsA = a.identite.split(" ");
+            const partsB = b.identite.split(" ");
+            const pA = partsA[0], nA = partsA.slice(1).join(" ");
+            const pB = partsB[0], nB = partsB.slice(1).join(" ");
+            return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+        }).forEach(el => {
+            const item = document.createElement('div');
+            const genderClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
+            item.className = `student-item ${genderClass}`;
             
-            présents.forEach(niv => {
-                const col = document.createElement('div'); col.className = "level-column";
-                col.innerHTML = `<h3 class="text-[12px] font-black uppercase mb-3 text-center tracking-widest" style="color:${couleurParNiveau[niv] || hexaTheme}">${niv}</h3>`;
-                const list = document.createElement('div');
-                groupes[niv].sort((a,b) => {
-                    const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
-                    const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
-                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
-                }).forEach(el => {
-                    const item = document.createElement('div'); item.className = 'student-item';
-                    item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
-                    let identiteAffiche = el.identite;
-                    if (modeTriApp === 'nom') {
-                        const parts = el.identite.split(" ");
-                        identiteAffiche = `${parts.slice(1).join(" ")} ${parts[0]}`;
-                    }
-                    const colorClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
-                    item.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-bold ${colorClass}">${identiteAffiche}</span>
-                            ${el.dateNaissance ? `<span class="text-[7.5px] opacity-60 italic leading-none">${el.dateNaissance}</span>` : ""}
-                        </div>
-                        <button onclick="supprimer('${el.id}')" class="opacity-30 hover:opacity-100 p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>`;
-                    list.appendChild(item);
-                });
-                col.appendChild(list); container.appendChild(col);
-            });
-        }
+            // Formatage de l'identité : Prénom (Majuscule puis minuscules) + NOM (Majuscules)
+            const parts = el.identite.split(" ");
+            const prenomRaw = parts[0];
+            const nomRaw = parts.slice(1).join(" ");
+            
+            const prenomPropre = prenomRaw.charAt(0).toUpperCase() + prenomRaw.slice(1).toLowerCase();
+            const nomPropre = nomRaw.toUpperCase();
+
+            let identiteAffiche = modeTriApp === 'nom' ? `${nomPropre} ${prenomPropre}` : `${prenomPropre} ${nomPropre}`;
+
+            item.innerHTML = `
+                <div class="flex flex-col flex-grow overflow-hidden" onclick="preparerModification('${el.id}')">
+                    <span class="text-[10px] font-black truncate leading-tight">${identiteAffiche}</span>
+                    ${el.dateNaissance ? `<span class="text-[8px] text-gray-400 italic leading-none mt-0.5">${el.dateNaissance}</span>` : ""}
+                </div>
+                <button onclick="supprimer('${el.id}')" class="ml-1 opacity-20 hover:opacity-100 transition-opacity p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>`;
+            list.appendChild(item);
+        });
+
+        levelColumn.appendChild(list);
+        container.appendChild(levelColumn);
+    });
+}
 
         document.getElementById('eleveForm').onsubmit = (e) => {
             e.preventDefault();
@@ -398,6 +428,20 @@
             const a = document.createElement('a'); a.href = url; a.download = `export_eleves_${new Date().toISOString().split('T')[0]}.txt`; a.click();
         }
 
+        // FONCTION POUR RENDRE LES COULEURS TRÈS CLAIRES (PASTEL)
+        function estomperCouleur(hex, facteur = 0.3) {
+            let r = 0, g = 0, b = 0;
+            if (hex.length == 4) {
+                r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
+            } else {
+                r = parseInt(hex[1] + hex[2], 16); g = parseInt(hex[3] + hex[4], 16); b = parseInt(hex[5] + hex[6], 16);
+            }
+            r = Math.round(r * facteur + 255 * (1 - facteur));
+            g = Math.round(g * facteur + 255 * (1 - facteur));
+            b = Math.round(b * facteur + 255 * (1 - facteur));
+            return [r, g, b];
+        }
+
         function genererPDF() {
     if (eleves.length === 0) return alert("La liste est vide !");
     
@@ -416,7 +460,6 @@
     doc.setFontSize(9); doc.text(`Enseignant : ${nomEns}`, 14, 28); 
     doc.text(`Date : ${dateExport}`, 196, 28, { align: "right" });
     
-    // On trie d'abord par niveau (ordre scolaire), puis par le mode choisi (nom ou prénom)
     const elevesTries = [...eleves].sort((a, b) => {
         if (a.niveau !== b.niveau) return ordreNiveaux.indexOf(a.niveau) - ordreNiveaux.indexOf(b.niveau);
         const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
@@ -427,24 +470,23 @@
 
     const headColName = parNom ? "NOM Prénom" : "Prénom NOM";
     const body = [];
+    
+    body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
+
     let currentNiveau = null;
     let compteurGlobal = 0;
     
     elevesTries.forEach((el) => {
-        // AJOUT DE LA LIGNE DE SÉPARATION SI LE NIVEAU CHANGE
         if (el.niveau !== currentNiveau) {
+            if (currentNiveau !== null) {
+                body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
+            }
             currentNiveau = el.niveau;
-            // On ajoute une ligne spéciale qui traverse tout le tableau
+            const couleurPastel = estomperCouleur(couleurParNiveau[currentNiveau] || '#cccccc', 0.3);
             body.push([{ 
                 content: `NIVEAU : ${currentNiveau}`, 
-                colSpan: 2, 
-                styles: { 
-                    fillColor: couleurParNiveau[currentNiveau] || [200, 200, 200], 
-                    textColor: [255, 255, 255], 
-                    fontStyle: 'bold', 
-                    halign: 'center',
-                    fontSize: 9
-                } 
+                colSpan: 5, 
+                styles: { fillColor: couleurPastel, textColor: [80, 80, 80], fontStyle: 'bold', halign: 'center', fontSize: 7.5, cellPadding: 0.8 } 
             }]);
         }
         
@@ -455,38 +497,23 @@
             nomAffichage = parts.slice(1).join(" ") + " " + parts[0];
         }
         
-        body.push([
-            compteurGlobal, 
-            nomAffichage, 
-            el.dateNaissance || '-', 
-            el.sexe === 'm' ? 'M' : 'F', 
-            el.niveau
-        ]);
+        body.push([compteurGlobal, nomAffichage, el.dateNaissance || '-', el.sexe === 'm' ? 'M' : 'F', el.niveau]);
     });
 
     doc.autoTable({
         startY: 35,
         head: [['#', headColName, 'Date Naiss.', 'S.', 'Niveau']],
         body: body,
-        headStyles: { 
-            fillColor: hexaTheme || [100, 100, 100], 
-            textColor: 255, 
-            fontStyle: 'bold', 
-            fontSize: 9 
-        },
-        styles: { fontSize: 8, cellPadding: 2 },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
+        headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' }, // overflow linebreak évite les coupures
+        alternateRowStyles: { fillColor: [250, 250, 250] },
         margin: { top: 35 },
         columnStyles: { 
-            0: { cellWidth: 10, halign: 'center' }, 
-            3: { cellWidth: 10, halign: 'center' },
-            4: { cellWidth: 20, halign: 'center' }
-        },
-        // Empêche la ligne de séparation d'être coupée en fin de page
-        didParseCell: function(data) {
-            if (data.row.raw[0] && data.row.raw[0].colSpan) {
-                data.cell.styles.fontStyle = 'bold';
-            }
+            0: { cellWidth: 8, halign: 'center' },   // # réduit
+            1: { cellWidth: 'auto' },                // Nom prend l'espace nécessaire
+            2: { cellWidth: 25, halign: 'center' },  // Date Naissance fixe et serrée
+            3: { cellWidth: 8, halign: 'center' },   // Sexe réduit
+            4: { cellWidth: 15, halign: 'center' }   // Niveau réduit
         }
     });
 
