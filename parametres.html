@@ -146,6 +146,19 @@
             margin-bottom: 24px;
             transition: filter 0.3s ease;
         }
+
+        /* Style pour l'input nom */
+        #nomEnseignant {
+            background: rgba(128, 128, 128, 0.1);
+            color: var(--text-main);
+            border: 1px solid var(--header-border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+        }
+        #nomEnseignant:focus { border-color: #22c55e; }
     </style>
 </head>
 <body class="pb-10">
@@ -158,7 +171,16 @@
         <h1 class="text-lg font-black tracking-normal uppercase flex-grow text-center mr-[40px]">infos et paramètres</h1>
     </header>
 
-    <div class="max-w-md mx-auto">
+    <div class="max-w-md mx-auto mt-4">
+        <div class="card-info mx-2">
+            <div class="flex items-center gap-1 mb-3">
+                <span class="text-lg">🎓</span>
+                <h3 class="font-black text-xs uppercase">Profil Enseignant</h3>
+            </div>
+            <input type="text" id="nomEnseignant" placeholder="Saisissez votre nom..." oninput="saveNom()">
+            <p class="text-[10px] mt-2 opacity-50 italic text-center">Ce nom sera utilisé pour personnaliser vos documents.</p>
+        </div>
+
         <div class="flex border-b border-gray-800 sticky top-0 bg-[var(--bg-page)] z-40" id="tabs-nav">
             <button class="tab-btn active" onclick="openTab(event, 'emploi')">Mode d'emploi</button>
             <button class="tab-btn" onclick="openTab(event, 'perso')">Couleurs</button>
@@ -234,7 +256,7 @@
                         Suivi rapide des points de comportement (jusqu'à 5 points) :<br>
                         • <strong>Un clic :</strong> Ajoute 1 point.<br>
                         • <strong>Double-clic :</strong> Enlève 1 point.<br>
-                        Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.
+                        • <strong>Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.</strong>
                     </p>
                 </div>
                 
@@ -272,6 +294,17 @@
             'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
             'rose': '#f43f5e', 'gray': '#6b7280'
         };
+
+        // --- GESTION NOM ENSEIGNANT ---
+        function saveNom() {
+            const nom = document.getElementById('nomEnseignant').value;
+            localStorage.setItem('nom_enseignant', nom);
+        }
+
+        function loadNom() {
+            const savedNom = localStorage.getItem('nom_enseignant');
+            if (savedNom) document.getElementById('nomEnseignant').value = savedNom;
+        }
 
         function selectTheme(mode) {
             if (mode === 'light') {
@@ -314,7 +347,6 @@
         function appliquerCouleursGlobales() {
             const isLight = document.body.classList.contains('light-mode');
             
-            // --- GESTION OMBRE AVATAR À PROPOS ---
             const avatarPropos = document.getElementById('avatar-propos');
             if (avatarPropos) {
                 avatarPropos.style.filter = isLight 
@@ -372,6 +404,8 @@
 
         const savedTheme = localStorage.getItem('theme_mode');
         if (savedTheme === 'light') document.body.classList.add('light-mode');
+        
+        loadNom();
         renderSettings();
     </script>
 </body>

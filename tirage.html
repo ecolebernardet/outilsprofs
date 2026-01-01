@@ -114,7 +114,6 @@
             background-color: #dbeafe !important; color: #1e3a8a !important; border-color: #93c5fd !important; 
         } 
         
-        /* Modification : Gris foncé pour les étiquettes tirées en mode clair */
         body.light-mode .drawn, html.light-mode-init .drawn { 
             background: #eeeeee !important; color: #999999 !important; border-color: #cccccc !important;
         }
@@ -279,9 +278,10 @@
             const nom = parts.slice(1).join(" ");
             const aUnDoublon = rawData.some(s => 
                 s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase() && 
-                s.identite !== fullName
+                s.identite.trim() !== fullName.trim()
             );
-            return aUnDoublon && nom ? `${prenom} ${nom.charAt(0)}.` : prenom;
+            // CORRECTION : Affiche le nom de famille complet en cas de doublon de prénom
+            return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
         }
 
         let rawData = JSON.parse(localStorage.getItem('maListeEleves')) || [];

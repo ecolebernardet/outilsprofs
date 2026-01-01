@@ -428,17 +428,26 @@
         }
     }
 
-    // FONCTION EXPORT PDF MODIFIÉE : RESTE AFFICHÉE
     function exportPDF() {
         if (reunions.length === 0) return alert("Aucune donnée à exporter !");
+
+        // Récupération du nom de l'enseignant
+        const nomEnseignant = localStorage.getItem('nom_enseignant') || "Enseignant non renseigné";
 
         const overlay = document.getElementById('print-overlay');
         const content = document.getElementById('print-content');
         let totalGlobal = 0;
         
         let html = `
-            <h1 style="text-align:center; font-size:20px; text-decoration:underline; margin-bottom:5px;">BILAN DES 108 HEURES</h1>
-            <p style="text-align:center; font-size:10px; margin-bottom:20px;">Document de synthèse — ${new Date().toLocaleDateString('fr-FR')}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <div style="font-size: 11px; font-weight: bold; border-left: 3px solid #000; padding-left: 8px;">
+                    Enseignant : ${nomEnseignant}
+                </div>
+                <div style="font-size: 10px; color: #666;">
+                    Généré le ${new Date().toLocaleDateString('fr-FR')}
+                </div>
+            </div>
+            <h1 style="text-align:center; font-size:20px; text-decoration:underline; margin-bottom:30px; font-weight: 800;">BILAN DES 108 HEURES</h1>
         `;
 
         Object.keys(QUOTAS).forEach(catKey => {
@@ -470,18 +479,19 @@
             TOTAL GÉNÉRAL : ${formatDuree(totalGlobal)} / 108h
         </div>`;
 
-        // On affiche la liste propre
         content.innerHTML = html;
         overlay.style.display = 'block';
 
-        // On déclenche l'appel Android. L'overlay RESTE affiché.
         setTimeout(() => {
             if (window.Android && typeof window.Android.exportPdf === 'function') {
                 window.Android.exportPdf();
             } else {
-                // Pour PC/Navigateur
-                const opt = { margin: 10, filename: 'Bilan_108h.pdf', jsPDF: { unit: 'mm', format: 'a4' } };
-                html2pdf().from(overlay).set(opt).save();
+                const opt = { 
+                    margin: 10, 
+                    filename: `Bilan_108h_${nomEnseignant.replace(/\s+/g, '_')}.pdf`, 
+                    jsPDF: { unit: 'mm', format: 'a4' } 
+                };
+                html2pdf().from(content).set(opt).save();
             }
         }, 300);
     }

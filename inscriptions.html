@@ -5,46 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Inscriptions - Outils Profs</title>
     
-    <script>
-        (function() {
-            const mode = localStorage.getItem('theme_mode');
-            if (mode === 'light') {
-                document.documentElement.classList.add('light-mode-init');
-            }
-        })();
-    </script>
-
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-body: #000;
-            --text-main: #ffffff;
-            --header-bg: #111828;
-            --header-border: #1f2937;
-            --border-color: #1f2937;
-            --column-bg: rgba(24, 24, 27, 0.6);
-            --card-bg: #111827; 
-            --card-text: #ffffff;
-            --input-bg: #1f2937;
-            --sub-text: #9ca3af;
-            --student-item-bg: #374151;
-            --student-name-girl: #f9a8d4;
-            --student-name-boy: #93c5fd;
-            --modal-bg: rgba(0, 0, 0, 0.85);
-        }
-
-        body.light-mode, html.light-mode-init body {
             --bg-body: #eeeeee;
             --text-main: #111827;
             --header-bg: #ffffff;
             --header-border: #ddd;
-            --border-color: #ddd;
-            --column-bg: #ffffff;
-            --card-bg: #ffffff;
-            --card-text: #111827;
-            --input-bg: #f9fafb;
+            --card-bg: #ffffff; 
+            --input-bg: #ffffff;
             --sub-text: #71717a;
             --student-item-bg: #ffffff;
             --student-name-girl: #db2777;
@@ -56,9 +30,8 @@
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-body); 
             color: var(--text-main); 
-            padding: 0; margin: 0; 
+            padding: 0 15px 20px 15px; margin: 0; 
             transition: background-color 0.2s ease;
-            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
         
         header { 
@@ -70,27 +43,20 @@
             width: calc(100% + 30px); margin-left: -15px;
         }
 
-        .light-card { 
-            background: var(--card-bg); 
-            color: var(--card-text); 
-            border-radius: 1.5rem; 
-            border: 1px solid var(--header-border);
-        }
+        .light-card { background: var(--card-bg); border-radius: 1.5rem; border: 1px solid var(--header-border); }
 
         .card-input { display: none; }
+        
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #374151; border: 1px solid #4b5563; color: #d1d5db;
-            padding: 4px; border-radius: 0.75rem; cursor: pointer;
-            font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
-        }
-        
-        body.light-mode .card-label, html.light-mode-init .card-label {
-            background: #d1d5db; border: 2px solid #9ca3af; color: #374151;
+            background: #e5e7eb; border: 1px solid #d1d5db; color: #374151;
+            height: 42px; border-radius: 0.75rem; cursor: pointer;
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
         }
 
-        .input-garcon:checked + .card-label { color: #93c5fd; border-color: #3b82f6; font-weight: 900; background: rgba(59, 130, 246, 0.2); }
-        .input-fille:checked + .card-label { color: #f9a8d4; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.2); }
+        .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; background: rgba(59, 130, 246, 0.1); }
+        .input-fille:checked + .card-label { color: #db2777; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.1); }
+
         .input-cp:checked + .card-label { background: #ec4899; border-color: #ec4899; color: #fff; } 
         .input-ce1:checked + .card-label { background: #3b82f6; border-color: #3b82f6; color: #fff; } 
         .input-ce2:checked + .card-label { background: #eab308; border-color: #eab308; color: #000; } 
@@ -98,29 +64,44 @@
         .input-cm2:checked + .card-label { background: #22c55e; border-color: #22c55e; color: #fff; } 
         .input-autre:checked + .card-label { background: #8b5cf6; border-color: #8b5cf6; color: #fff; } 
 
-        .level-column { background: var(--column-bg); border-radius: 1.25rem; padding: 10px; height: fit-content; }
-        body.light-mode .level-column, html.light-mode-init .level-column { border: 1px solid #d4d4d4; }
-
+        .level-column { background: transparent; border: none; padding: 10px; height: fit-content; }
+        
         .student-item { 
-            background: var(--student-item-bg); padding: 6px 10px; border-radius: 0.75rem; 
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; 
+            background: #ffffff; 
+            padding: 6px 18px; 
+            border-radius: 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 6px; 
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: pointer;
         }
-        body.light-mode .student-item, html.light-mode-init .student-item { border: 1.5px solid #374151; }
 
         .text-girl-custom { color: var(--student-name-girl); }
         .text-boy-custom { color: var(--student-name-boy); }
-
-        .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 9px; text-align: center; width: 100%; cursor: pointer; }
         
-        .input-field { 
-            background: var(--input-bg); border: 1px solid var(--header-border); 
-            color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; 
+        .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 8px; text-align: center; width: 100%; cursor: pointer; }
+        
+        .input-field { background: #f3f4f6; border: 1px solid #d1d5db; color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
+        
+        .select-date { 
+            background: #e5e7eb; 
+            border: 1px solid #d1d5db; 
+            color: #374151; 
+            border-radius: 0.75rem; 
+            height: 42px;
+            outline: none; 
+            font-size: 0.75rem; 
+            font-weight: 600;
+            appearance: none;
+            text-align: center;
         }
-        
+
         .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
         #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
 
-        /* MODAL DE CONFIRMATION PERSO */
         #custom-confirm {
             display: none; position: fixed; inset: 0; z-index: 9999;
             background: var(--modal-bg); backdrop-filter: blur(4px);
@@ -129,7 +110,7 @@
         .confirm-card {
             background: var(--card-bg); border: 1px solid var(--header-border);
             width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center;
         }
     </style>
 </head>
@@ -137,36 +118,40 @@
     <div id="custom-confirm">
         <div class="confirm-card">
             <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirm(false)" class="flex-1 py-3 rounded-full bg-neutral-500 text-white text-[10px] font-black uppercase">Annuler</button>
-                <button id="confirm-yes" class="flex-1 py-3 rounded-full text-white text-[10px] font-black uppercase shadow-lg">Confirmer</button>
-            </div>
+            <div id="confirm-buttons" class="flex flex-col gap-2"></div>
         </div>
     </div>
 
-    <script>
-        if (localStorage.getItem('theme_mode') === 'light') { document.body.classList.add('light-mode'); }
-    </script>
-
     <header>
         <a href="index.html" id="btn-retour" class="shadow-lg active:scale-90">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
         </a>
         <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Inscriptions</h1>
         <div style="width:40px"></div>
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-4">
-        <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-4 shadow-2xl">
+        <div id="scroll-target"></div>
+        
+        <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-4 shadow-xl">
             <form id="eleveForm" class="flex flex-col gap-3">
                 <input type="hidden" id="edit-id" value="">
                 <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
-                <div class="grid grid-cols-2 gap-2">
-                    <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
-                    <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
+                
+                <div class="flex flex-col gap-1">
+                    <label class="text-[9px] font-bold uppercase ml-2" style="color:var(--sub-text)">Date de naissance (optionnel)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="birth-day" class="select-date"></select>
+                        <select id="birth-month" class="select-date"></select>
+                        <select id="birth-year" class="select-date"></select>
+                    </div>
                 </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
+                    <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
+                </div>
+                
                 <div class="grid grid-cols-6 gap-1">
                     <label><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label">CP</div></label>
                     <label><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label">CE1</div></label>
@@ -179,117 +164,167 @@
             </form>
         </div>
 
-        <div id="stats-container" class="max-w-md mx-auto mb-6 flex flex-wrap justify-center gap-2"></div>
+        <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
+
+        <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center gap-4 bg-white/50 p-2 rounded-xl border border-gray-200">
+            <span class="text-[9px] font-black uppercase opacity-60">Trier par :</span>
+            <div class="flex gap-5">
+                <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-gray-300">Prénom</button>
+                <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-gray-300">Nom</button>
+            </div>
+        </div>
+
         <div id="listeContainer"></div>
 
         <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
-            <div class="grid grid-cols-2 gap-3">
-                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">👇 importer .txt<input type="file" id="fileInput" accept=".txt,.csv" class="hidden"></label>
-                <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter .txt</button>
+            <div class="grid grid-cols-3 gap-2">
+                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">👇 importer .txt 👇<input type="file" id="fileInput" accept=".txt,.csv" class="hidden"></label>
+                <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
+                <button onclick="genererPDF()" class="btn-nav bg-neutral-800 text-white shadow-md">📄 .pdf</button>
             </div>
             <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
         </div>
     </div>
 
     <script>
-        const mapCouleurs = {
-            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
-        };
-
+        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
         const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
         const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const couleurInscr = themePrefs.inscr || 'lime';
         const hexaTheme = mapCouleurs[couleurInscr];
 
-        function appliquerCouleursTheme() {
-            const isLight = localStorage.getItem('theme_mode') === 'light';
-            const btnRetour = document.getElementById('btn-retour');
-            const pageTitle = document.getElementById('page-title');
-            const btnSubmit = document.getElementById('btn-submit');
-            const btnConfirm = document.getElementById('confirm-yes');
-            
-            if (btnRetour) btnRetour.style.backgroundColor = hexaTheme;
-            if (btnSubmit) btnSubmit.style.backgroundColor = hexaTheme;
-            if (btnConfirm) btnConfirm.style.backgroundColor = hexaTheme;
-
-            const textContrast = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr) ? '#000000' : '#ffffff';
-            if (btnSubmit) btnSubmit.style.color = textContrast;
-            if (btnConfirm) btnConfirm.style.color = textContrast;
-            if (pageTitle) pageTitle.style.color = isLight ? '#222222' : '#ffffff';
-            const backSvg = document.querySelector('#btn-retour svg');
-            if (backSvg) backSvg.style.color = textContrast;
-        }
-
+        let modeTriApp = localStorage.getItem('tri_eleves_app') || 'prenom';
         let eleves = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-        let confirmAction = null;
 
-        // --- GESTION MODAL PERSO ---
-        function customConfirm(msg, onConfirm) {
+        function initDateSelectors() {
+            const daySel = document.getElementById('birth-day');
+            const monthSel = document.getElementById('birth-month');
+            const yearSel = document.getElementById('birth-year');
+            const derniereAnnee = localStorage.getItem('derniereAnneeSaisie') || "";
+
+            daySel.innerHTML = ''; monthSel.innerHTML = ''; yearSel.innerHTML = '';
+            for(let i=1; i<=31; i++) {
+                let val = i < 10 ? '0'+i : i;
+                daySel.innerHTML += `<option value="${val}">${i}</option>`;
+            }
+            const mois = ["Jan.", "Fév.", "Mar.", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sep.", "Oct.", "Nov.", "Déc."];
+            mois.forEach((m, index) => {
+                let val = (index + 1) < 10 ? '0'+(index+1) : (index+1);
+                monthSel.innerHTML += `<option value="${val}">${m}</option>`;
+            });
+            const currentYear = new Date().getFullYear();
+            for(let i=currentYear; i>=currentYear-20; i--) {
+                const selected = (String(i) === derniereAnnee) ? "selected" : "";
+                yearSel.innerHTML += `<option value="${i}" ${selected}>${i}</option>`;
+            }
+        }
+
+        function nettoyerDatesFormat() {
+            let modifie = false;
+            eleves = eleves.map(el => {
+                if (el.dateNaissance && el.dateNaissance.includes('-')) {
+                    const parts = el.dateNaissance.split('-');
+                    if (parts[0].length === 4) {
+                        el.dateNaissance = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                        modifie = true;
+                    }
+                }
+                return el;
+            });
+            if (modifie) localStorage.setItem('maListeEleves', JSON.stringify(eleves));
+        }
+
+        function appliquerCouleursTheme() {
+            const btnSubmit = document.getElementById('btn-submit');
+            const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
+            if (btnSubmit) { btnSubmit.style.backgroundColor = hexaTheme; btnSubmit.style.color = isDarkTxt ? '#000' : '#fff'; }
+            majBoutonsTri();
+        }
+
+        function majBoutonsTri() {
+            const btnP = document.getElementById('sort-prenom');
+            const btnN = document.getElementById('sort-nom');
+            const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
+            [btnP, btnN].forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = 'inherit'; b.style.opacity = '0.4'; b.style.borderColor = '#ddd'; });
+            const actif = modeTriApp === 'prenom' ? btnP : btnN;
+            actif.style.opacity = '1'; actif.style.backgroundColor = hexaTheme; actif.style.borderColor = hexaTheme; actif.style.color = isDarkTxt ? '#000' : '#fff';
+        }
+
+        function changerTriApp(mode) {
+            modeTriApp = mode;
+            localStorage.setItem('tri_eleves_app', mode);
+            majBoutonsTri();
+            render();
+        }
+
+        function customConfirm(msg, onAction, buttons) {
             document.getElementById('confirm-msg').innerText = msg;
+            const container = document.getElementById('confirm-buttons');
+            container.innerHTML = "";
+            const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
+            buttons.forEach(btn => {
+                const b = document.createElement('button');
+                b.className = "w-full py-3 rounded-full text-[10px] font-black uppercase shadow-sm transition-transform active:scale-95";
+                b.innerText = btn.text;
+                if (btn.type === 'primary') { b.style.backgroundColor = hexaTheme; b.style.color = isDarkTxt ? '#000' : '#fff'; }
+                else { b.className += " bg-neutral-500 text-white"; }
+                b.onclick = () => { document.getElementById('custom-confirm').style.display = 'none'; onAction(btn.value); };
+                container.appendChild(b);
+            });
             document.getElementById('custom-confirm').style.display = 'flex';
-            confirmAction = onConfirm;
         }
-        function closeConfirm(confirmed) {
-            document.getElementById('custom-confirm').style.display = 'none';
-            if (confirmed && confirmAction) confirmAction();
-            confirmAction = null;
-        }
-        document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
 
-        function formaterIdentite(prenom, nom) {
-            return prenom.trim().charAt(0).toUpperCase() + prenom.trim().slice(1).toLowerCase() + " " + nom.trim().toUpperCase();
+        function formaterIdentite(prenom, nom) { 
+            const p = prenom.trim();
+            const formatedPrenom = p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+            return formatedPrenom + " " + nom.trim().toUpperCase(); 
         }
 
         function renderStats() {
             const statsDiv = document.getElementById('stats-container');
             if (eleves.length === 0) { statsDiv.innerHTML = ""; return; }
-            statsDiv.innerHTML = `
-                <div class="stat-pill bg-gray-200 text-gray-800 border border-gray-300">Total: ${eleves.length}</div>
-                <div class="stat-pill bg-blue-100 text-blue-700 border border-blue-200">♂ ${eleves.filter(e => e.sexe === 'm').length}</div>
-                <div class="stat-pill bg-pink-100 text-pink-700 border border-pink-200">♀ ${eleves.filter(e => e.sexe === 'f').length}</div>
-            `;
+            statsDiv.innerHTML = `<div class="stat-pill bg-white text-gray-800 border border-gray-300">Total: ${eleves.length}</div><div class="stat-pill bg-blue-100 text-blue-700 border border-blue-200">♂ ${eleves.filter(e => e.sexe === 'm').length}</div><div class="stat-pill bg-pink-100 text-pink-700 border border-pink-200">♀ ${eleves.filter(e => e.sexe === 'f').length}</div>`;
         }
 
         function render() {
             renderStats();
             const container = document.getElementById('listeContainer');
             if (!container) return;
-            container.innerHTML = "";
-            if (eleves.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>`;
-                return;
-            }
+            container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
             const groupes = {};
-            eleves.forEach(el => {
-                if (!groupes[el.niveau]) groupes[el.niveau] = [];
-                groupes[el.niveau].push(el);
-            });
+            eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
             const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
             container.className = présents.length === 2 ? "grid grid-cols-2 gap-3 items-start" : "grid grid-cols-1 sm:grid-cols-2 gap-3 items-start";
-
+            
             présents.forEach(niv => {
-                const col = document.createElement('div');
-                col.className = "level-column shadow-lg";
-                col.innerHTML = `<h3 class="text-[11px] font-black uppercase mb-1 text-center tracking-widest pb-1" style="color:${couleurParNiveau[niv] || hexaTheme}">${niv} — ${groupes[niv].length}</h3>`;
+                const col = document.createElement('div'); col.className = "level-column";
+                col.innerHTML = `<h3 class="text-[12px] font-black uppercase mb-3 text-center tracking-widest" style="color:${couleurParNiveau[niv] || hexaTheme}">${niv}</h3>`;
                 const list = document.createElement('div');
-                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
-                    const item = document.createElement('div');
-                    item.className = 'student-item shadow-sm';
+                groupes[niv].sort((a,b) => {
+                    const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+                    const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+                }).forEach(el => {
+                    const item = document.createElement('div'); item.className = 'student-item';
                     item.onclick = (e) => { if (!e.target.closest('button')) preparerModification(el.id); };
+                    let identiteAffiche = el.identite;
+                    if (modeTriApp === 'nom') {
+                        const parts = el.identite.split(" ");
+                        identiteAffiche = `${parts.slice(1).join(" ")} ${parts[0]}`;
+                    }
+                    const colorClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
                     item.innerHTML = `
-                        <span class="text-[9px] font-bold pr-2 ${el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom'} whitespace-normal break-words leading-tight">${el.identite}</span>
-                        <button onclick="supprimer('${el.id}')" class="opacity-40 hover:opacity-100 p-1" style="color:var(--sub-text)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold ${colorClass}">${identiteAffiche}</span>
+                            ${el.dateNaissance ? `<span class="text-[7.5px] opacity-60 italic leading-none">${el.dateNaissance}</span>` : ""}
+                        </div>
+                        <button onclick="supprimer('${el.id}')" class="opacity-30 hover:opacity-100 p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>`;
                     list.appendChild(item);
                 });
-                col.appendChild(list);
-                container.appendChild(col);
+                col.appendChild(list); container.appendChild(col);
             });
         }
 
@@ -297,101 +332,194 @@
             e.preventDefault();
             const editId = document.getElementById('edit-id').value;
             const saisie = document.getElementById('nomComplet').value.trim().split(" ");
-            const prenom = saisie[0], nom = saisie.slice(1).join(" ");
-            const sexe = document.querySelector('input[name="sexe"]:checked').value;
-            const niveau = document.querySelector('input[name="niveau"]:checked').value;
-            
-            if (editId) {
-                const idx = eleves.findIndex(el => String(el.id) === String(editId));
-                if(idx !== -1) eleves[idx] = { ...eleves[idx], identite: formaterIdentite(prenom, nom), sexe, niveau };
-                document.getElementById('edit-id').value = "";
-                document.getElementById('btn-submit').innerText = "Enregistrer";
-            } else {
-                eleves.push({ id: String(Date.now()), identite: formaterIdentite(prenom, nom), sexe, niveau });
+            const day = document.getElementById('birth-day').value;
+            const month = document.getElementById('birth-month').value;
+            const year = document.getElementById('birth-year').value;
+            let dateStockee = (day && month && year) ? `${day}-${month}-${year}` : "";
+            if (year) localStorage.setItem('derniereAnneeSaisie', year);
+            const data = { 
+                identite: formaterIdentite(saisie[0], saisie.slice(1).join(" ")), 
+                sexe: document.querySelector('input[name="sexe"]:checked').value, 
+                niveau: document.querySelector('input[name="niveau"]:checked').value, 
+                dateNaissance: dateStockee 
+            };
+            if (editId) { 
+                const idx = eleves.findIndex(el => String(el.id) === String(editId)); 
+                if(idx !== -1) eleves[idx] = { ...eleves[idx], ...data }; 
+                document.getElementById('edit-id').value = ""; 
+                document.getElementById('btn-submit').innerText = "Enregistrer"; 
             }
-            localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-            render(); e.target.reset();
+            else { eleves.push({ id: String(Date.now()), ...data }); }
+            localStorage.setItem('maListeEleves', JSON.stringify(eleves)); 
+            render(); e.target.reset(); initDateSelectors(); majBoutonsTri();
         };
 
         function preparerModification(id) {
-            const el = eleves.find(e => String(e.id) === String(id));
-            if (!el) return;
-            document.getElementById('edit-id').value = el.id;
-            document.getElementById('nomComplet').value = el.identite;
-            document.querySelector(`input[name="sexe"][value="${el.sexe}"]`).checked = true;
+            const el = eleves.find(e => String(e.id) === String(id)); if (!el) return;
+            document.getElementById('edit-id').value = el.id; 
+            document.getElementById('nomComplet').value = el.identite; 
+            if (el.dateNaissance) {
+                const parts = el.dateNaissance.split('-');
+                if (parts[0].length === 4) {
+                    document.getElementById('birth-day').value = parts[2];
+                    document.getElementById('birth-month').value = parts[1];
+                    document.getElementById('birth-year').value = parts[0];
+                } else {
+                    document.getElementById('birth-day').value = parts[0];
+                    document.getElementById('birth-month').value = parts[1];
+                    document.getElementById('birth-year').value = parts[2];
+                }
+            } else {
+                document.getElementById('birth-day').value = "01";
+                document.getElementById('birth-month').value = "01";
+                document.getElementById('birth-year').value = localStorage.getItem('derniereAnneeSaisie') || "";
+            }
+            document.querySelector(`input[name="sexe"][value="${el.sexe}"]`).checked = true; 
             document.querySelector(`input[name="niveau"][value="${el.niveau}"]`).checked = true;
-            document.getElementById('btn-submit').innerText = "Mettre à jour";
-            document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('btn-submit').innerText = "Mettre à jour"; 
+            const target = document.getElementById('scroll-target');
+            const headerOffset = 100; const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
         }
 
-        function supprimer(id) {
-            customConfirm("Supprimer cet élève ?", () => {
-                eleves = eleves.filter(e => String(e.id) !== String(id));
-                localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-                render();
-            });
+        function supprimer(id) { 
+            customConfirm("Supprimer cet élève ?", (val) => { if(val === 'yes') { eleves = eleves.filter(e => String(e.id) !== String(id)); localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }}, [{text: 'Supprimer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); 
         }
 
-        function toutEffacer() {
-            customConfirm("⚠️ Supprimer toute la liste d'élèves ? Cette action est irréversible.", () => {
-                eleves = [];
-                localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-                render();
-            });
+        function toutEffacer() { 
+            customConfirm("⚠️ Supprimer toute la liste ?", (val) => { if(val === 'yes') { eleves = []; localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }}, [{text: 'Tout effacer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); 
         }
 
         function exporterListe() {
             if (eleves.length === 0) return alert("Liste vide !");
-            let contenu = eleves.map(el => {
-                const parts = el.identite.split(" ");
-                return `${parts[0]};${parts.slice(1).join(" ")};${el.sexe};${el.niveau}`;
-            }).join("\n");
-            const fileName = `export_eleves_${new Date().toISOString().split('T')[0]}.txt`;
-            if (window.Android && typeof window.Android.exportTxt === 'function') {
-                window.Android.exportTxt(contenu, fileName);
-            } else {
-                const blob = new Blob([contenu], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
-            }
+            let contenu = eleves.map(el => { const p = el.identite.split(" "); return `${p[0]};${p.slice(1).join(" ")};${el.sexe};${el.niveau};${el.dateNaissance||''}`; }).join("\n");
+            const blob = new Blob([contenu], { type: 'text/plain' }); const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `export_eleves_${new Date().toISOString().split('T')[0]}.txt`; a.click();
         }
 
+        function genererPDF() {
+    if (eleves.length === 0) return alert("La liste est vide !");
+    
+    const parNom = (modeTriApp === 'nom');
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF();
+    
+    const nomEns = localStorage.getItem('nom_enseignant') || "Non renseigné";
+    const dateExport = new Date().toLocaleDateString('fr-FR');
+    const niveauxUniques = [...new Set(eleves.map(e => e.niveau))]
+        .sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b))
+        .join(" / ");
+    
+    doc.setFontSize(16); doc.text("LISTE DES ÉLÈVES", 105, 15, { align: "center" });
+    doc.setFontSize(11); doc.text(niveauxUniques, 105, 21, { align: "center" });
+    doc.setFontSize(9); doc.text(`Enseignant : ${nomEns}`, 14, 28); 
+    doc.text(`Date : ${dateExport}`, 196, 28, { align: "right" });
+    
+    // On trie d'abord par niveau (ordre scolaire), puis par le mode choisi (nom ou prénom)
+    const elevesTries = [...eleves].sort((a, b) => {
+        if (a.niveau !== b.niveau) return ordreNiveaux.indexOf(a.niveau) - ordreNiveaux.indexOf(b.niveau);
+        const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
+        const prenomA = partsA[0], nomA = partsA.slice(1).join(" ");
+        const prenomB = partsB[0], nomB = partsB.slice(1).join(" ");
+        return parNom ? nomA.localeCompare(nomB) : prenomA.localeCompare(prenomB);
+    });
+
+    const headColName = parNom ? "NOM Prénom" : "Prénom NOM";
+    const body = [];
+    let currentNiveau = null;
+    let compteurGlobal = 0;
+    
+    elevesTries.forEach((el) => {
+        // AJOUT DE LA LIGNE DE SÉPARATION SI LE NIVEAU CHANGE
+        if (el.niveau !== currentNiveau) {
+            currentNiveau = el.niveau;
+            // On ajoute une ligne spéciale qui traverse tout le tableau
+            body.push([{ 
+                content: `NIVEAU : ${currentNiveau}`, 
+                colSpan: 2, 
+                styles: { 
+                    fillColor: couleurParNiveau[currentNiveau] || [200, 200, 200], 
+                    textColor: [255, 255, 255], 
+                    fontStyle: 'bold', 
+                    halign: 'center',
+                    fontSize: 9
+                } 
+            }]);
+        }
+        
+        compteurGlobal++;
+        let nomAffichage = el.identite;
+        if (parNom) {
+            const parts = el.identite.split(" ");
+            nomAffichage = parts.slice(1).join(" ") + " " + parts[0];
+        }
+        
+        body.push([
+            compteurGlobal, 
+            nomAffichage, 
+            el.dateNaissance || '-', 
+            el.sexe === 'm' ? 'M' : 'F', 
+            el.niveau
+        ]);
+    });
+
+    doc.autoTable({
+        startY: 35,
+        head: [['#', headColName, 'Date Naiss.', 'S.', 'Niveau']],
+        body: body,
+        headStyles: { 
+            fillColor: hexaTheme || [100, 100, 100], 
+            textColor: 255, 
+            fontStyle: 'bold', 
+            fontSize: 9 
+        },
+        styles: { fontSize: 8, cellPadding: 2 },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { top: 35 },
+        columnStyles: { 
+            0: { cellWidth: 10, halign: 'center' }, 
+            3: { cellWidth: 10, halign: 'center' },
+            4: { cellWidth: 20, halign: 'center' }
+        },
+        // Empêche la ligne de séparation d'être coupée en fin de page
+        didParseCell: function(data) {
+            if (data.row.raw[0] && data.row.raw[0].colSpan) {
+                data.cell.styles.fontStyle = 'bold';
+            }
+        }
+    });
+
+    doc.save(`Liste_Eleves_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
         document.getElementById('fileInput').onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const msg = eleves.length > 0 
-                ? "L'importation va écraser votre liste actuelle. Continuer ?" 
-                : "Importer cette liste d'élèves ?";
-
-            customConfirm(msg, () => {
+            const file = e.target.files[0]; if (!file) return;
+            customConfirm("Importer cette liste ?", (val) => { if(val === 'yes') {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const nouvellesDonnees = [];
+                    const data = [];
                     event.target.result.split(/\r?\n/).forEach(l => {
                         const p = l.trim().split(';'); 
                         if(p.length >= 4) {
-                            nouvellesDonnees.push({ 
-                                id: String(Date.now() + Math.random()), 
-                                identite: formaterIdentite(p[0], p[1]), 
-                                sexe: p[2].trim().toLowerCase(), 
-                                niveau: p[3].trim().toUpperCase() 
-                            });
+                            let dateImp = p[4] || "";
+                            if (dateImp.includes('-')) {
+                                const pts = dateImp.split('-');
+                                if (pts[0].length === 4) dateImp = `${pts[2]}-${pts[1]}-${pts[0]}`;
+                            }
+                            data.push({ id: String(Date.now() + Math.random()), identite: formaterIdentite(p[0], p[1]), sexe: p[2].trim().toLowerCase(), niveau: p[3].trim().toUpperCase(), dateNaissance: dateImp });
                         }
                     });
-
-                    if (nouvellesDonnees.length > 0) {
-                        eleves = nouvellesDonnees;
-                        localStorage.setItem('maListeEleves', JSON.stringify(eleves));
-                        render();
-                    }
-                    document.getElementById('fileInput').value = "";
+                    if (data.length > 0) { eleves = data; localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }
+                    majBoutonsTri();
                 };
                 reader.readAsText(file);
-            });
+            }}, [{text: 'Importer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]);
         };
 
-        window.addEventListener('DOMContentLoaded', () => { appliquerCouleursTheme(); render(); });
+        window.addEventListener('DOMContentLoaded', () => { 
+            nettoyerDatesFormat(); initDateSelectors(); appliquerCouleursTheme(); render(); 
+        });
     </script>
 </body>
 </html>
