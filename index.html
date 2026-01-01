@@ -3,196 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Outils pour les profs d'école</title>
-    <script>
-        (function() {
-            const mode = localStorage.getItem('theme_mode');
-            if (mode === 'light') {
-                document.documentElement.classList.add('light-mode-init');
-            }
-        })();
-    </script>
-
+    <title>Outils Profs 3D</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap');
         
         :root {
-            --bg-body: #000;
-            --text-title: #ffffff;
-            --btn-bg: #333333;
-            --btn-border: #666666;
-            --card-bg: #333333; 
-            --card-border: #666666;
+            /* Mode Sombre : Contrastes profonds */
+            --bg-body: #1a1a1a;
+            --card-bg: #1a1a1a;
+            --sh-dark: #0d0d0d;
+            --sh-light: #272727;
+            --text-main: #e2e8f0;
         }
 
-        body.light-mode, html.light-mode-init body {
-            --bg-body: #eeeeee;
-            --text-title: #222222;
-            --btn-bg: #ffffff;
-            --btn-border: #d4d4d4;
+        body.light-mode {
+            /* Mode Clair : Soft Neumorphism */
+            --bg-body: #e0e5ec;
+            --card-bg: #e0e5ec;
+            --sh-dark: #a3b1c6;
+            --sh-light: #ffffff;
+            --text-main: #475569;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-body); 
-            color: var(--text-title);
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.2s ease;
-            padding-top: calc(env(safe-area-inset-top) + 30px);
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
+            color: var(--text-main);
+            transition: background-color 0.3s ease;
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 40px;
         }
 
-        header {
-            display: grid;
-            grid-template-columns: 40px 1fr 40px;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            overflow: visible; /* Permet à l'ombre de dépasser */
+        /* --- TUILES EN RELIEF (NEUMORPHISME) --- */
+        .menu-card { 
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 30px;
+            /* L'ombre magique qui crée la 3D */
+            box-shadow: 8px 8px 16px var(--sh-dark), 
+                       -8px -8px 16px var(--sh-light);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        /* Effet de pression : la tuile s'enfonce */
+        .menu-card:active { 
+            transform: scale(0.96);
+            box-shadow: inset 6px 6px 12px var(--sh-dark), 
+                        inset -6px -6px 12px var(--sh-light);
+        }
+        
+        .icon-box {
+            width: 56px; height: 56px;
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--card-bg);
+            box-shadow: 4px 4px 8px var(--sh-dark), 
+                       -4px -4px 8px var(--sh-light);
+            margin-bottom: 12px;
+            font-size: 26px;
+        }
+
+        .drag-handle {
+            position: absolute;
+            top: 15px; right: 15px;
+            display: flex; flex-direction: column; gap: 3px;
+            opacity: 0.3; cursor: grab; padding: 5px;
+        }
+        .drag-handle span { width: 4px; height: 4px; background: currentColor; border-radius: 50%; }
+
+        .ui-btn {
+            width: 46px; height: 46px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 16px;
+            background: var(--card-bg);
+            box-shadow: 5px 5px 10px var(--sh-dark), 
+                       -5px -5px 10px var(--sh-light);
         }
 
         .header-avatar {
-            width: 35px;
-            height: 35px;
+            width: 42px; height: 42px;
             border-radius: 50%;
-            object-fit: cover;
-            border: none !important;
-            background: transparent !important;
-            display: block;
+            border: 3px solid var(--card-bg);
+            box-shadow: 4px 4px 8px var(--sh-dark);
         }
-
-        .menu-card { 
-            position: relative;
-            transition: transform 0.1s; 
-            border-radius: 20% 0% 20% 0%; 
-            border-width: 2px;
-            overflow: hidden;
-            box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.5);
-        }
-        
-        .menu-card:active { transform: scale(0.95); }
-        
-        .drag-handle {
-            position: absolute;
-            top: 8px; right: 8px;
-            display: grid; grid-template-columns: repeat(3, 2px); gap: 3px;
-            opacity: 0.3; cursor: grab; z-index: 30; padding: 4px;
-        }
-        .drag-handle span { width: 2px; height: 2px; background-color: #888; border-radius: 50%; }
-
-        .ui-btn {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%;
-            background: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-
-        .sortable-ghost { opacity: 0.1; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-start min-h-screen">
-  
-    <div class="w-full max-w-[340px]">
-        <header class="mb-8 px-1">
+<body class="flex flex-col items-center">
+
+    <div class="w-full max-w-[360px]">
+        <header class="flex justify-between items-center mb-12 px-1">
             <a href="parametres.html" class="ui-btn text-xl active:scale-90">⚙️</a>
-            <h1 class="text-base font-black uppercase tracking-tighter text-center" style="color: var(--text-title)">Outils pour les Profs</h1>
+            <h1 class="text-sm font-extrabold tracking-[0.2em] uppercase opacity-60">Outils Profs</h1>
             <img src="outilsprofs_icone30.png" alt="Avatar" class="header-avatar">
         </header>
 
-        <nav id="grid-menu" class="grid grid-cols-2 gap-4 mb-6">
-            <div data-id="inscr" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="inscriptions.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">📝</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Inscriptions</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Enregistrement des élèves</h3>
+        <nav id="grid-menu" class="grid grid-cols-2 gap-7">
+            <div data-id="inscr" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="inscriptions.html" class="flex flex-col items-center">
+                    <div class="icon-box">📝</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Élèves</h2>
                 </a>
             </div>
 
-            <div data-id="liens" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="liens.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">🔗</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Liens</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Bibliothèque de favoris</h3>
+            <div data-id="liens" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="liens.html" class="flex flex-col items-center">
+                    <div class="icon-box">🔗</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Liens</h2>
                 </a>
             </div>
 
-            <div data-id="h108" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="108heures.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">⏲️</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">108 heures</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Suivi des réunions</h3>
+            <div data-id="h108" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="108heures.html" class="flex flex-col items-center">
+                    <div class="icon-box">⏲️</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">108h</h2>
                 </a>
             </div>
 
-            <div data-id="memos" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="memos.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">📒</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Mémos</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Pense-bêtes</h3>
+            <div data-id="memos" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="memos.html" class="flex flex-col items-center">
+                    <div class="icon-box">📒</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Mémos</h2>
                 </a>
             </div>
 
-            <div data-id="tirage" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="tirage.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">🎲</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Tirage</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Prénom au hasard</h3>
+            <div data-id="tirage" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="tirage.html" class="flex flex-col items-center">
+                    <div class="icon-box">🎲</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Tirage</h2>
                 </a>
             </div>
 
-            <div data-id="equipes" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="equipes.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">👥</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Équipes</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Groupes mixtes</h3>
+            <div data-id="equipes" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="equipes.html" class="flex flex-col items-center">
+                    <div class="icon-box">👥</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Équipes</h2>
                 </a>
             </div>
 
-            <div data-id="obs" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="observations.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">✏️</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Observations</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Infos élèves</h3>
+            <div data-id="obs" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="observations.html" class="flex flex-col items-center">
+                    <div class="icon-box">✏️</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Infos</h2>
                 </a>
             </div>
 
-            <div data-id="compt" class="menu-card flex flex-col items-center justify-center text-center p-3 pt-5">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="compteur.html" class="w-full h-full flex flex-col items-center no-underline">
-                    <div class="icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner">
-                        <span class="text-2xl">🚥</span>
-                    </div>
-                    <h2 class="tile-title font-extrabold text-[11px] uppercase tracking-tighter">Compteur</h2>
-                    <h3 class="tile-subtitle text-[8px] font-bold ">Suivi du comportement</h3>
+            <div data-id="compt" class="menu-card p-6">
+                <div class="drag-handle"><span></span><span></span></div>
+                <a href="compteur.html" class="flex flex-col items-center">
+                    <div class="icon-box">🚥</div>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Suivi</h2>
                 </a>
             </div>
         </nav>
@@ -200,11 +170,11 @@
 
 <script>
     const colorMap = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e', 'gray': '#6b7280'
+        'red': '#ff4444', 'orange': '#fb923c', 'amber': '#fbbf24', 'yellow': '#facc15',
+        'lime': '#a3e635', 'green': '#4ade80', 'emerald': '#34d399', 'teal': '#2dd4bf',
+        'cyan': '#22d3ee', 'sky': '#38bdf8', 'blue': '#60a5fa', 'indigo': '#818cf8',
+        'violet': '#a78bfa', 'purple': '#c084fc', 'fuchsia': '#e879f9', 'pink': '#f472b6',
+        'rose': '#fb7185'
     };
 
     function applyColors() {
@@ -215,65 +185,36 @@
         };
         const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
 
-        // --- GESTION DE L'IMAGE FLOTTANTE (SANS CERCLE) ---
-        const headerAvatar = document.querySelector('.header-avatar');
-        if (headerAvatar) {
-            headerAvatar.style.backgroundColor = 'transparent';
-            headerAvatar.style.border = 'none';
-            // Utilisation de drop-shadow pour suivre la forme circulaire de l'image
-            headerAvatar.style.filter = isLight 
-                ? 'drop-shadow(4px 4px 4px rgba(0,0,0,0.6))' 
-                : 'drop-shadow(3px 3px 6px rgba(255,255,255,0.4))';
-            // On retire le box-shadow s'il restait
-            headerAvatar.style.boxShadow = 'none';
-        }
-        
         document.querySelectorAll('.menu-card').forEach(el => {
             const id = el.getAttribute('data-id');
-            const colorName = prefs[id] || 'gray';
+            const colorName = prefs[id] || 'blue';
             const hexColor = colorMap[colorName];
             
-            const iconCircle = el.querySelector('.icon-bg');
-            const title = el.querySelector('.tile-title');
-            const subtitle = el.querySelector('.tile-subtitle');
+            const iconBox = el.querySelector('.icon-box');
+            const title = el.querySelector('h2');
 
-            if (isLight) {
-                el.style.backgroundColor = ''; 
-                el.style.borderColor = '';
-                el.style.boxShadow = '6px 6px 10px -1px rgba(0, 0, 0, 0.5)';
-                el.className = `menu-card flex flex-col items-center justify-center text-center p-3 pt-5 bg-${colorName}-200 border-${colorName}-900`;
-                
-                if (iconCircle) {
-                    iconCircle.style.backgroundColor = '';
-                    iconCircle.className = `icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner bg-${colorName}-400 border-${colorName}-900`;
-                    iconCircle.style.borderColor = 'rgba(1,1,1,0.1)';
-                    iconCircle.style.boxShadow = '0px 0px 10px rgba(0,0,0)'; 
+            // En mode 3D, la couleur est plus élégante en "accent"
+            if (iconBox) {
+                iconBox.style.color = hexColor;
+                // Petit halo coloré uniquement en mode sombre
+                if (!isLight) {
+                    iconBox.style.textShadow = `0 0 12px ${hexColor}66`;
+                } else {
+                    iconBox.style.textShadow = 'none';
                 }
-                if (title) title.style.color = '#000';
-                if (subtitle) subtitle.style.color = 'rgba(0,0,0,0.6)';
-            } else {
-                el.className = 'menu-card flex flex-col items-center justify-center text-center p-3 pt-5';
-                el.style.backgroundColor = 'var(--card-bg)';
-                el.style.borderColor = 'var(--card-border)';
-                el.style.boxShadow = '6px 6px 12px -1px rgba(255, 255, 255, 0.15)'; 
-                
-                if (iconCircle) {
-                    iconCircle.className = 'icon-bg w-12 h-12 flex items-center justify-center rounded-full mb-1 border shadow-inner';
-                    iconCircle.style.backgroundColor = '#000'; 
-                    iconCircle.style.borderColor = 'rgba(255,255,255,0.1)';
-                    iconCircle.style.boxShadow = '0px 0px 10px rgba(102,102,102)'; 
-                }
-                if (title) title.style.color = hexColor; 
-                if (subtitle) subtitle.style.color = '#666';
+            }
+            if (title) {
+                title.style.color = isLight ? 'var(--text-main)' : hexColor;
+                title.style.opacity = isLight ? '0.8' : '1';
             }
         });
     }
 
-    if (localStorage.getItem('theme_mode') === 'light') {
-        document.body.classList.add('light-mode');
-    }
+    // Gestion du thème
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     applyColors();
 
+    // Ordre des tuiles
     const gridMenu = document.getElementById('grid-menu');
     const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
     if (savedOrder) {
@@ -283,10 +224,11 @@
         });
     }
 
+    // Drag & Drop
     new Sortable(gridMenu, {
         handle: '.drag-handle',
-        animation: 150,
-        ghostClass: 'sortable-ghost',
+        animation: 200,
+        ghostClass: 'opacity-0',
         onEnd: function() {
             const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
             localStorage.setItem('menu_order', JSON.stringify(order));
