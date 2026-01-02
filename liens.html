@@ -25,6 +25,8 @@
             --item-text-url: #9ca3af;
             --item-border: transparent;
             --modal-bg: rgba(0, 0, 0, 0.85);
+            --shadow-custom: 0 4px 20px rgba(0,0,0,0.5);
+            --btn-active-gray: #4b5563; /* Gris pour le bouton actif */
         }
 
         body.light-mode {
@@ -34,92 +36,127 @@
             --column-border: #d4d4d4;
             --header-bg: #ffffff;
             --border-color: #ddd;
-            --card-bg: #e5e7eb;
+            --card-bg: #ffffff;
             --card-text: #111827;
-            --input-bg: #ffffff;
-            --input-border: #9ca3af;
+            --input-bg: #f3f4f6;
+            --input-border: #dddddd;
             --input-text: #111827;
             --item-bg: #f3f4f6;
             --item-text-url: #6b7280;
             --item-border: #374151;
             --modal-bg: rgba(255, 255, 255, 0.8);
+            --shadow-custom: 0 4px 15px rgba(0,0,0,0.1);
+            --btn-active-gray: #9ca3af; /* Gris plus clair en mode light */
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); color: var(--text-page); 
-            margin: 0; padding: 0;
+            margin: 0; padding: 0 15px 40px 15px;
             display: flex; flex-direction: column; align-items: center; 
-            overflow-x: hidden;
-            transition: background 0.3s;
-            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+            overflow-x: hidden; transition: background 0.3s;
         }
 
         header { 
-            width: calc(100% + 30px);
-            background: var(--header-bg); 
+            width: calc(100% + 30px); background: var(--header-bg); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: calc(env(safe-area-inset-top) + 10px) 10px 10px 10px;
             border-bottom: 1px solid var(--border-color);
             position: sticky; top: 0; z-index: 100; margin-left: -15px;
         }
 
-        .main-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; }
+        .main-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; }
 
         .light-card { 
-            background: var(--card-bg); color: var(--card-text); border-radius: 1.2rem; padding: 10px; 
-            margin: 15px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            background: var(--card-bg); border-radius: 1.2rem; padding: 15px; 
+            margin: 15px auto; box-shadow: var(--shadow-custom);
             width: 95%; border: 1px solid var(--border-color);
         }
 
         .input-field { 
             background: var(--input-bg); border: 1px solid var(--input-border); 
-            border-radius: 0.6rem; padding: 6px; font-size: 0.75rem; font-weight: 600; 
-            width: 100%; margin-bottom: 5px; color: var(--input-text); outline: none;
+            border-radius: 0.6rem; padding: 12px; font-size: 0.8rem; font-weight: 600; 
+            width: 100%; margin-bottom: 12px; color: var(--input-text); outline: none;
+        }
+
+        /* Boutons de catégories en GRIS quand actifs */
+        .cat-selector { display: flex; gap: 4px; margin-bottom: 15px; width: 100%; }
+        .cat-btn {
+            flex: 1; padding: 10px 4px; border-radius: 8px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; background: var(--input-bg); color: var(--item-text-url);
+            border: 1px solid var(--input-border); transition: all 0.2s; text-align: center;
+        }
+        .cat-btn.active { 
+            background: var(--btn-active-gray) !important; 
+            color: white !important; 
+            border-color: transparent; 
         }
 
         .columns-container {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; 
-            width: 100%; padding: 0 10px;
+            column-count: 2; column-gap: 12px; width: 100%; padding: 0 5px;
+            margin-top: 25px;
         }
 
         .column {
-            background: var(--column-bg); border-radius: 0.8rem; padding: 6px;
-            border: 1px solid var(--column-border); min-height: 100px; min-width: 0;
+            break-inside: avoid; display: inline-block; width: 100%;
+            background: var(--column-bg); border-radius: 1rem; padding: 12px;
+            border: 1px solid var(--column-border); 
+            margin-bottom: 18px; position: relative;
+            box-shadow: var(--shadow-custom);
         }
 
         .column-header {
-            font-size: 8px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 4px;
-            border-bottom: 2px solid; display: flex; align-items: center; gap: 3px;
+            font-size: 9px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 6px;
+            border-bottom: 2px solid; display: flex; align-items: center; justify-content: space-between;
         }
 
+        .grid-dots {
+            display: grid; grid-template-columns: repeat(3, 2.5px);
+            grid-template-rows: repeat(3, 2.5px); gap: 2.5px;
+            opacity: 0.4; cursor: grab;
+        }
+        .grid-dots span { width: 2.5px; height: 2.5px; background-color: #9ca3af; border-radius: 50%; }
+
         .link-item {
-            background: var(--item-bg); border-radius: 0.5rem; 
-            padding: 5px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 5px;
+            background: var(--item-bg); border-radius: 0.6rem; padding: 10px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 8px;
             border: 1px solid var(--item-border);
         }
 
-        .drag-handle {
-            cursor: grab; padding: 3px 10px 3px 5px; display: grid;
-            grid-template-columns: repeat(3, 3px); gap: 4px; flex-shrink: 0;
+        .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 8px; }
+        .link-name { font-weight: 800; font-size: 10px; display: block; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-url { font-size: 7px; color: var(--item-text-url); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .actions-group { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .btn-edit, .btn-del { color: #9ca3af; cursor: pointer; }
+        
+        .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
+
+        /* Correction Centrage Footer */
+        .bottom-nav { 
+            width: 100%; 
+            max-width: 400px; 
+            margin: 30px auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            align-items: center; /* Centre les éléments enfants */
         }
-        .drag-handle span { width:2px; height: 2px; background-color: #9ca3af; border-radius: 50%; }
+        .nav-group { 
+            display: flex; 
+            gap: 8px; 
+            width: 95%; /* Légèrement moins que 100% pour respirer */
+            justify-content: center; 
+        }
+        .nav-btn { 
+            font-weight: 900; border-radius: 50px; font-size: 8px; 
+            padding: 10px; flex: 1; text-align: center; 
+            background: #27272a; color: white; border: none;
+            cursor: pointer;
+        }
 
-        .link-info { flex: 1; cursor: pointer; min-width: 0; overflow: hidden; }
-        .link-name { font-weight: 800; font-size: 9px; display: block; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .link-url { font-size: 6px; color: var(--item-text-url); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .btn-add { width: 100%; padding: 10px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
-        .btn-del { color: #9ca3af; padding-left: 2px; flex-shrink: 0; cursor: pointer; }
-        .btn-edit { color: #9ca3af; padding-left: 8px; flex-shrink: 0; cursor: pointer; }
-
-        .bottom-nav { width: 100%; max-width: 400px; align-self: center; display: flex; flex-direction: column; gap: 6px; margin-top: 20px; padding-bottom: 20px; }
-        .nav-group { display: flex; gap: 5px; width: 100%; }
-        .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 8px; flex: 1; text-align: center; background: #27272a; color: white; border: none; }
-
-        /* STYLE COMMUN DES MODALES */
         .modal-overlay {
             display: none; position: fixed; inset: 0; z-index: 9999;
             background: var(--modal-bg); backdrop-filter: blur(4px);
@@ -128,14 +165,13 @@
         .modal-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center;
         }
     </style>
 </head>
 <body>
 
 <div id="custom-confirm" class="modal-overlay">
-    <div class="modal-card">
+    <div class="modal-card text-center">
         <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
         <div class="flex gap-3">
             <button onclick="closeConfirm(false)" class="flex-1 py-3 rounded-full bg-neutral-500 text-white text-[10px] font-black uppercase">Annuler</button>
@@ -145,10 +181,10 @@
 </div>
 
 <div id="modal-edit" class="modal-overlay">
-    <div class="modal-card">
+    <div class="modal-card text-center">
         <h2 class="font-black text-[10px] uppercase mb-4 opacity-50 tracking-widest">Modifier le lien</h2>
-        <input type="text" id="editLinkName" class="input-field mb-2" placeholder="Nom...">
-        <input type="text" id="editLinkUrl" class="input-field mb-6" placeholder="URL...">
+        <input type="text" id="editLinkName" class="input-field" placeholder="Nom...">
+        <input type="text" id="editLinkUrl" class="input-field" placeholder="URL...">
         <div class="flex gap-3">
             <button onclick="closeEditModal()" class="flex-1 py-3 rounded-full bg-neutral-500 text-white text-[10px] font-black uppercase">Annuler</button>
             <button id="edit-save" class="confirm-btn-style flex-1 py-3 rounded-full text-white text-[10px] font-black uppercase shadow-lg">Enregistrer</button>
@@ -168,46 +204,61 @@
 
 <div class="main-wrapper mt-4"> 
     <div class="light-card">
-        <input type="text" id="linkName" class="input-field" placeholder="Nom...">
-        <input type="text" id="linkUrl" class="input-field" placeholder="URL">
-        <select id="linkCat" class="input-field">
-            <option value="École">🏫 École</option>
-            <option value="Institutionnel">🧑🏻‍💼 Institutionnel</option>
-            <option value="Autre">🌍 Autres</option>
-            <option value="Ressources">🧰 Ressources</option>
-        </select>
-        <button id="mainAddBtn" onclick="addLink()" class="btn-add mt-1 active:scale-95 transition-transform">Ajouter</button>
+        <input type="text" id="linkName" class="input-field" placeholder="Nom du lien...">
+        <input type="text" id="linkUrl" class="input-field" placeholder="URL (ex: google.com)">
+        
+        <div class="cat-selector" id="catSelector">
+            <button class="cat-btn active" data-value="École">École</button>
+            <button class="cat-btn" data-value="Institutionnel">Institutionnel</button>
+            <button class="cat-btn" data-value="Ressources">Ressources</button>
+			<button class="cat-btn" data-value="Autre">Autres</button>
+        </div>
+
+        <button id="mainAddBtn" onclick="addLink()" class="btn-add active:scale-95 transition-transform">Ajouter le lien</button>
     </div>
 
     <div class="columns-container" id="columnsBoard">
-        <div class="column">
-            <div class="column-header text-rose-500 border-rose-500"><span>🏫</span> École</div>
-            <div class="links-list min-h-[40px]" id="list-École"></div>
+        <div class="column" data-cat="École">
+            <div class="column-header text-rose-500 border-rose-500">
+                <div class="flex items-center gap-2"><span>🏫</span> École</div>
+                <div class="grid-dots handle-rubrique"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="links-list min-h-[30px]" id="list-École"></div>
         </div>
-        <div class="column">
-            <div class="column-header text-purple-500 border-purple-500"><span>🧑🏻‍💼</span> Institutionnel</div>
-            <div class="links-list min-h-[40px]" id="list-Institutionnel"></div>
+        <div class="column" data-cat="Institutionnel">
+            <div class="column-header text-purple-500 border-purple-500">
+                <div class="flex items-center gap-2"><span>🧑🏻‍💼</span> Institutionnel</div>
+                <div class="grid-dots handle-rubrique"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="links-list min-h-[30px]" id="list-Institutionnel"></div>
         </div>
-        <div class="column">
-            <div class="column-header text-emerald-500 border-emerald-500"><span>🌍</span> Autres</div>
-            <div class="links-list min-h-[40px]" id="list-Autre"></div>
+        <div class="column" data-cat="Autre">
+            <div class="column-header text-emerald-500 border-emerald-500">
+                <div class="flex items-center gap-2"><span>🌍</span> Autres</div>
+                <div class="grid-dots handle-rubrique"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="links-list min-h-[30px]" id="list-Autre"></div>
         </div>
-        <div class="column">
-            <div class="column-header text-blue-500 border-blue-500"><span>🧰</span> Ressources</div>
-            <div class="links-list min-h-[40px]" id="list-Ressources"></div>
+        <div class="column" data-cat="Ressources">
+            <div class="column-header text-blue-500 border-blue-500">
+                <div class="flex items-center gap-2"><span>🧰</span> Ressources</div>
+                <div class="grid-dots handle-rubrique"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="links-list min-h-[30px]" id="list-Ressources"></div>
         </div>
     </div>
 
-    <footer class="bottom-nav px-2">
+    <footer class="bottom-nav">
         <div class="nav-group">
-            <label class="nav-btn bg-neutral-800 text-white cursor-pointer text-center">👇importer .txt👇<input type="file" id="importFile" class="hidden" accept=".txt"></label>
-            <button onclick="exportData()" class="nav-btn bg-neutral-800 text-white">👆exporter .txt 👆</button>
+            <label class="nav-btn">👇 importer .txt👇<input type="file" id="importFile" class="hidden" accept=".txt"></label>
+            <button onclick="exportData()" class="nav-btn">👆 exporter .txt 👆<button>
         </div>
-        <button onclick="resetLinks()" class="nav-btn bg-red-500 text-red-50">⚠️ effacer tous les liens</button>
+        <button onclick="resetLinks()" class="nav-btn bg-red-500 text-white w-[92%]">⚠️ effacer tous les liens</button>
     </footer>
 </div>
 
 <script>
+    let currentSelectedCat = "École";
     const isLightMode = localStorage.getItem('theme_mode') === 'light';
     if (isLightMode) { document.body.classList.add('light-mode'); }
 
@@ -229,6 +280,14 @@
         'Autre': { text: 'text-emerald-600' },
         'Ressources': { text: 'text-blue-600' }
     };
+
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSelectedCat = btn.getAttribute('data-value');
+        };
+    });
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
@@ -257,51 +316,30 @@
         }
     }
 
-    // --- GESTION MODALES ---
-    function customConfirm(msg, onConfirm) {
-        document.getElementById('confirm-msg').innerText = msg;
-        document.getElementById('custom-confirm').style.display = 'flex';
-        confirmAction = onConfirm;
-    }
-    function closeConfirm(confirmed) {
-        document.getElementById('custom-confirm').style.display = 'none';
-        if (confirmed && confirmAction) confirmAction();
-        confirmAction = null;
-    }
-    document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
-
-    function openEditModal(id) {
-        const link = links.find(l => l.id === id);
-        if (!link) return;
-        editingLinkId = id;
-        document.getElementById('editLinkName').value = link.name;
-        document.getElementById('editLinkUrl').value = link.url;
-        document.getElementById('modal-edit').style.display = 'flex';
-    }
-    function closeEditModal() {
-        document.getElementById('modal-edit').style.display = 'none';
-        editingLinkId = null;
-    }
-    document.getElementById('edit-save').onclick = () => {
-        const link = links.find(l => l.id === editingLinkId);
-        const newName = document.getElementById('editLinkName').value.trim();
-        const newUrl = document.getElementById('editLinkUrl').value.trim();
-        
-        if (link && newName && newUrl) {
-            link.name = newName;
-            link.url = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
-            localStorage.setItem('eduLinksList', JSON.stringify(links));
-            render();
-            closeEditModal();
-        }
-    };
-
     function initSortables() {
         ['École', 'Institutionnel', 'Autre', 'Ressources'].forEach(cat => {
             new Sortable(document.getElementById(`list-${cat}`), {
-                group: 'sharedLinks', animation: 150, handle: '.drag-handle', onEnd: saveOrder
+                group: 'sharedLinks', animation: 150, handle: '.grid-dots', onEnd: saveOrder
             });
         });
+
+        new Sortable(document.getElementById('columnsBoard'), {
+            animation: 150, handle: '.handle-rubrique', onEnd: () => {
+                const order = Array.from(document.querySelectorAll('.column')).map(c => c.getAttribute('data-cat'));
+                localStorage.setItem('rubriquesOrder', JSON.stringify(order));
+            }
+        });
+    }
+
+    function restoreRubriquesOrder() {
+        const order = JSON.parse(localStorage.getItem('rubriquesOrder'));
+        if (order) {
+            const board = document.getElementById('columnsBoard');
+            order.forEach(cat => {
+                const col = board.querySelector(`.column[data-cat="${cat}"]`);
+                if (col) board.appendChild(col);
+            });
+        }
     }
 
     function saveOrder() {
@@ -327,20 +365,20 @@
             item.className = 'link-item';
             item.setAttribute('data-id', link.id || Date.now() + index);
             item.innerHTML = `
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="grid-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <div class="link-info" onclick="window.open('${link.url}', '_blank')">
                     <span class="link-name ${styleCat.text}">${link.name}</span>
                     <span class="link-url">${link.url}</span>
                 </div>
-                <div class="flex items-center">
+                <div class="actions-group">
                     <div class="btn-edit" onclick="event.stopPropagation(); openEditModal(${link.id})">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </div>
                     <div class="btn-del" onclick="event.stopPropagation(); deleteLink(${link.id})">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </div>
                 </div>`;
@@ -351,7 +389,7 @@
     function addLink() {
         const name = document.getElementById('linkName').value.trim();
         const urlInput = document.getElementById('linkUrl').value.trim();
-        const cat = document.getElementById('linkCat').value;
+        const cat = currentSelectedCat;
         if (name && urlInput) {
             const url = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
             links.push({ id: Date.now(), name, url, cat });
@@ -370,50 +408,76 @@
         });
     }
 
+    function openEditModal(id) {
+        const link = links.find(l => l.id === id);
+        if (!link) return;
+        editingLinkId = id;
+        document.getElementById('editLinkName').value = link.name;
+        document.getElementById('editLinkUrl').value = link.url;
+        document.getElementById('modal-edit').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('modal-edit').style.display = 'none';
+        editingLinkId = null;
+    }
+
+    document.getElementById('edit-save').onclick = () => {
+        const link = links.find(l => l.id === editingLinkId);
+        const newName = document.getElementById('editLinkName').value.trim();
+        const newUrl = document.getElementById('editLinkUrl').value.trim();
+        if (link && newName && newUrl) {
+            link.name = newName;
+            link.url = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+            localStorage.setItem('eduLinksList', JSON.stringify(links));
+            render();
+            closeEditModal();
+        }
+    };
+
+    function customConfirm(msg, onConfirm) {
+        document.getElementById('confirm-msg').innerText = msg;
+        document.getElementById('custom-confirm').style.display = 'flex';
+        confirmAction = onConfirm;
+    }
+
+    function closeConfirm(confirmed) {
+        document.getElementById('custom-confirm').style.display = 'none';
+        if (confirmed && confirmAction) confirmAction();
+        confirmAction = null;
+    }
+    document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
+
     function exportData() {
         if (links.length === 0) return alert("Aucun lien à exporter !");
-        const date = new Date().toISOString().split('T')[0];
-        const fileName = `export_liens_${date}.txt`;
         const contenu = JSON.stringify(links, null, 2);
-
-        if (window.Android && window.Android.exportTxt) {
-            window.Android.exportTxt(contenu, fileName);
-        } else {
-            const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
-            window.URL.revokeObjectURL(url);
-        }
+        const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `liens_${new Date().toISOString().split('T')[0]}.txt`; a.click();
     }
 
     document.getElementById('importFile').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (ev) => {
             try {
                 const data = JSON.parse(ev.target.result);
-                customConfirm("Les liens du fichier vont remplacer vos liens actuels. Continuer ?", () => {
-                    links = data;
-                    localStorage.setItem('eduLinksList', JSON.stringify(links));
-                    render();
-                });
-            } catch(err) { alert("Erreur de fichier."); }
+                links = data;
+                localStorage.setItem('eduLinksList', JSON.stringify(links));
+                render();
+            } catch(err) { alert("Erreur."); }
         };
         reader.readAsText(file);
-        e.target.value = ''; 
     });
 
     function resetLinks() { 
-        customConfirm("⚠️ Supprimer tous les liens ? Cette action est irréversible si vous n'avez pas créé de sauvegarde.", () => { 
-            links = []; 
-            localStorage.setItem('eduLinksList', JSON.stringify(links)); 
-            render(); 
+        customConfirm("⚠️ Tout effacer ?", () => { 
+            links = []; localStorage.setItem('eduLinksList', JSON.stringify(links)); render(); 
         }); 
     }
 
-    window.onload = () => { appliquerTheme(); render(); initSortables(); };
+    window.onload = () => { appliquerTheme(); restoreRubriquesOrder(); render(); initSortables(); };
 </script>
 </body>
 </html>
