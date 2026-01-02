@@ -88,13 +88,13 @@
         .cat-btn.active { background: var(--btn-active-gray) !important; color: white !important; border-color: transparent; }
 
         .columns-container {
-            column-count: 2; column-gap: 12px; width: 100%; padding: 0 5px; margin-top: 5px; 
+            column-count: 2; column-gap: 8px; width: 100%; padding: 0 5px; margin-top: 5px; 
         }
 
         .column {
             break-inside: avoid; display: inline-block; width: 100%;
             background: var(--column-bg); border-radius: 1rem; padding: 12px;
-            border: 1px solid var(--column-border); margin-bottom: 18px; position: relative;
+            border: 1px solid var(--column-border); margin-bottom: 8px; position: relative;
             box-shadow: var(--shadow-custom);
         }
 
@@ -113,11 +113,17 @@
 
         /* --- STYLES DES LIENS : LIMITÉ À 2 LIGNES --- */
         .link-item {
-            background: var(--item-bg); border-radius: 0.6rem; padding: 10px 8px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 8px;
-            border: 1px solid var(--item-border); min-height: 54px;
-        }
+    background: var(--item-bg); 
+    border-radius: 0.6rem; 
+    padding: 4px 8px; /* Réduit de 10px à 4px en haut/bas */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    margin-bottom: 6px; /* Espace entre deux étiquettes réduit */
+    border: 1px solid var(--item-border);
+    /* min-height supprimé pour laisser l'étiquette se serrer au texte */
+}
 
         .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 8px; }
         
