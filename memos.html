@@ -81,7 +81,6 @@
             color: var(--card-text); 
             border-radius: 1.5rem; 
             border: 1px solid var(--border-color);
-            transition: background 0.3s; 
         }
 
         .input-field { 
@@ -98,15 +97,34 @@
 
         #searchInput { background: var(--search-bg) !important; color: var(--text-page) !important; border-color: var(--input-border); }
         
-        #btn-retour, #btn-search-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        #btn-retour, #btn-search-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         
-        .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, 0.2); transition: all 0.2s; flex-shrink: 0; }
+        .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, 0.2); flex-shrink: 0; }
         .color-dot.active { border: 2.5px solid white !important; box-shadow: 0 0 8px rgba(0,0,0,0.3); }
         
-        .note-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        @media (min-width: 480px) { .note-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
+        /* SYSTÈME MASONRY (COLONNES) */
+        .note-grid { 
+            column-count: 2; 
+            column-gap: 10px; 
+            width: 100%;
+        }
+        @media (min-width: 600px) { 
+            .note-grid { column-count: 3; } 
+        }
         
-        .note-card { border-radius: 12px; padding: 10px; min-height: 90px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+        .note-card { 
+            break-inside: avoid; /* Empêche de couper un mémo entre deux colonnes */
+            display: inline-block; /* Nécessaire pour le système de colonnes */
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 12px; 
+            padding: 10px; 
+            border: 1px solid rgba(0,0,0,0.1); 
+            position: relative; 
+            cursor: pointer; 
+            transition: background 0.3s, transform 0.2s; 
+        }
+        
         .note-card.dark-text { color: #121212; }
         .note-card.light-text { color: #ffffff; }
 
@@ -116,25 +134,19 @@
         .note-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 4px; margin-bottom: 6px; }
         .light-text .note-header { border-bottom: 1px solid rgba(255,255,255,0.2); }
         
-        .note-title { font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; word-break: break-word; }
+        .note-title { font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2; white-space: pre-wrap; word-break: break-word; }
         .note-card-content { font-size: 11px; font-weight: 500; line-height: 1.3; white-space: pre-wrap; word-break: break-word; }
         
         .sortable-ghost { opacity: 0.2; transform: scale(0.95); }
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
-        /* MODALES */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; }
         .modal-content textarea { width: 100%; margin-bottom: 12px; padding: 14px; border-radius: 14px; border: 1px solid #ddd; font-size: 14px; background: #f9f9f9; color: #000 !important; }
         
         .btns { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; transition: transform 0.2s; }
-        .modal-btn:active { transform: scale(0.95); }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; }
-        
-        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
-        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; }
         
         #searchContainer { overflow: hidden; max-height: 0; transition: max-height 0.3s ease-out, margin-bottom 0.3s ease; }
         #searchContainer.open { max-height: 100px; margin-bottom: 1.5rem; }
@@ -158,11 +170,11 @@
 
     <div class="container">
         <div id="searchContainer">
-            <input type="text" id="searchInput" class="input-field shadow-sm" placeholder="🔍 Rechercher un mémo par son titre ou son texte..." onkeyup="renderNotes()">
+            <input type="text" id="searchInput" class="input-field shadow-sm" placeholder="🔍 Rechercher un mémo..." onkeyup="renderNotes()">
         </div>
 
         <div class="light-card p-4 mb-4 shadow-xl">
-            <textarea id="newNoteTitle" class="input-field mb-1 resize-none h-[45px]" placeholder="Titre (max 2 lignes)..."></textarea>
+            <textarea id="newNoteTitle" class="input-field mb-1 resize-none h-[45px]" placeholder="Titre..."></textarea>
             <textarea id="newNoteInput" class="input-field mb-1 min-h-[60px] resize-none" placeholder="Saisir une note..." oninput="autoExpand(this)"></textarea>
             <div class="flex justify-between items-end">
                 <div class="flex flex-wrap gap-1.5 max-w-[65%]" id="newColorPicker">
@@ -192,23 +204,15 @@
         </footer>
     </div>
 
-    <div id="editModal" class="modal-overlay"><div class="modal-content"><h2 class="text-gray-400 font-black text-[10px] uppercase tracking-widest mb-3">Modifier la note</h2><textarea id="editNoteTitle" rows="2" placeholder="Titre"></textarea><textarea id="editNoteInput" rows="5" placeholder="Note"></textarea><p class="text-[9px] text-gray-400 uppercase font-black mb-2">Couleur de fond :</p><div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div><div class="btns"><button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button><button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button></div><button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase tracking-widest">Supprimer définitivement</button></div></div>
-    <div id="alertModal" class="modal-overlay"><div class="modal-content"><h3 id="alertTitle" class="alert-title">Confirmation</h3><p id="alertText" class="alert-text">Voulez-vous continuer ?</p><div class="btns"><button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button><button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button></div></div></div>
+    <div id="editModal" class="modal-overlay"><div class="modal-content"><h2 class="text-gray-400 font-black text-[10px] uppercase mb-3">Modifier</h2><textarea id="editNoteTitle" rows="2"></textarea><textarea id="editNoteInput" rows="5"></textarea><div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div><div class="btns"><button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button><button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button></div><button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase">Supprimer</button></div></div>
+    <div id="alertModal" class="modal-overlay"><div class="modal-content"><h3 id="alertTitle" class="font-black uppercase text-center mb-2"></h3><p id="alertText" class="text-center mb-4"></p><div class="btns"><button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button><button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button></div></div></div>
 
     <script>
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
 
-        // FONCTION CRUCIALE : Assombrit une couleur Hex
         function shadeColor(color, percent) {
             let f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
             return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
-        }
-
-        function toggleSearch() {
-            const container = document.getElementById('searchContainer');
-            const input = document.getElementById('searchInput');
-            container.classList.toggle('open');
-            if (container.classList.contains('open')) { setTimeout(() => input.focus(), 300); } else { input.value = ''; renderNotes(); }
         }
 
         function appliquerTheme() {
@@ -240,13 +244,12 @@
                 const searchStr = ((note.title || '') + (note.content || '')).toLowerCase();
                 if (searchStr.includes(search)) {
                     const card = document.createElement('div');
-                    card.className = 'note-card shadow-xl active:scale-95';
+                    card.className = 'note-card shadow-xl';
                     card.dataset.index = index;
                     
-                    // On force la couleur sombre si on est en mode sombre
                     let finalColor = note.color || '#fef9c3';
                     if (isDarkMode) {
-                        finalColor = shadeColor(finalColor, -0.6); // Assombrit de 60%
+                        finalColor = shadeColor(finalColor, -0.6);
                         card.classList.add('light-text');
                     } else {
                         card.classList.add(note.color === '#6b7280' ? 'light-text' : 'dark-text');
@@ -260,7 +263,13 @@
             });
         }
 
-        // Reste des fonctions (addNote, closeModal, etc.) identiques à votre version fonctionnelle
+        function toggleSearch() {
+            const container = document.getElementById('searchContainer');
+            const input = document.getElementById('searchInput');
+            container.classList.toggle('open');
+            if (container.classList.contains('open')) { setTimeout(() => input.focus(), 300); } else { input.value = ''; renderNotes(); }
+        }
+
         function addNote() { const t=document.getElementById('newNoteTitle'), c=document.getElementById('newNoteInput'); if(c.value.trim()){ notes.unshift({title:t.value.trim(), content:c.value.trim(), color:selectedColorForNew}); saveAndRender(); t.value=''; c.value=''; c.style.height='60px'; } }
         function openEditModal(index) { currentNoteIndex=index; const n=notes[index]; document.getElementById('editNoteTitle').value=n.title||''; document.getElementById('editNoteInput').value=n.content; selectedColorForEdit=n.color||'#fef9c3'; document.querySelectorAll('#editColorPicker .color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color===selectedColorForEdit)); document.getElementById('editModal').style.display='flex'; }
         function saveEditedNote() { notes[currentNoteIndex].title=document.getElementById('editNoteTitle').value; notes[currentNoteIndex].content=document.getElementById('editNoteInput').value; notes[currentNoteIndex].color=selectedColorForEdit; saveAndRender(); closeModal('editModal'); }
