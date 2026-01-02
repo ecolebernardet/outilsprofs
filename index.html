@@ -12,21 +12,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap');
         
         :root {
-            /* Mode Sombre : Contrastes profonds */
             --bg-body: #1a1a1a;
             --card-bg: #1a1a1a;
             --sh-dark: #0d0d0d;
             --sh-light: #272727;
             --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
         }
 
         body.light-mode {
-            /* Mode Clair : Soft Neumorphism */
             --bg-body: #e0e5ec;
             --card-bg: #e0e5ec;
             --sh-dark: #a3b1c6;
             --sh-light: #ffffff;
             --text-main: #475569;
+            --text-muted: #64748b;
         }
 
         body { 
@@ -37,43 +37,57 @@
             padding: calc(env(safe-area-inset-top) + 20px) 20px 40px;
         }
 
-        /* --- TUILES EN RELIEF (NEUMORPHISME) --- */
         .menu-card { 
             position: relative;
             background: var(--card-bg);
             border-radius: 30px;
-            /* L'ombre magique qui crée la 3D */
             box-shadow: 8px 8px 16px var(--sh-dark), 
                        -8px -8px 16px var(--sh-light);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255, 255, 255, 0.03);
         }
         
-        /* Effet de pression : la tuile s'enfonce */
-        .menu-card:active { 
-            transform: scale(0.96);
-            box-shadow: inset 6px 6px 12px var(--sh-dark), 
-                        inset -6px -6px 12px var(--sh-light);
-        }
+        .menu-card:active { transform: scale(0.96); }
         
         .icon-box {
             width: 56px; height: 56px;
             border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
-            background: var(--card-bg);
             box-shadow: 4px 4px 8px var(--sh-dark), 
                        -4px -4px 8px var(--sh-light);
             margin-bottom: 12px;
             font-size: 26px;
+            transition: background 0.3s ease;
         }
 
+        .tile-subtitle {
+            color: var(--text-muted);
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        /* --- STYLE DU HANDLE PLAT 3x3 POINTS --- */
         .drag-handle {
             position: absolute;
             top: 15px; right: 15px;
-            display: flex; flex-direction: column; gap: 3px;
-            opacity: 0.3; cursor: grab; padding: 5px;
+            display: grid;
+            grid-template-columns: repeat(3, 3px);
+            gap: 3px;
+            cursor: grab;
+            opacity: 0.3; /* Très discret par défaut */
+            transition: opacity 0.2s;
         }
-        .drag-handle span { width: 4px; height: 4px; background: currentColor; border-radius: 50%; }
+
+        .drag-handle:hover { opacity: 0.7; }
+
+        .drag-handle span {
+            width: 3px;
+            height: 3px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+        }
+        
+        .drag-handle:active { cursor: grabbing; }
 
         .ui-btn {
             width: 46px; height: 46px;
@@ -95,74 +109,114 @@
 <body class="flex flex-col items-center">
 
     <div class="w-full max-w-[360px]">
-        <header class="flex justify-between items-center mb-12 px-1">
+        <header class="flex justify-between items-center mb-5 px-1">
             <a href="parametres.html" class="ui-btn text-xl active:scale-90">⚙️</a>
             <h1 class="text-sm font-extrabold tracking-[0.2em] uppercase opacity-60">Outils Profs</h1>
             <img src="outilsprofs_icone30.png" alt="Avatar" class="header-avatar">
         </header>
 
-        <nav id="grid-menu" class="grid grid-cols-2 gap-7">
-            <div data-id="inscr" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="inscriptions.html" class="flex flex-col items-center">
+        <nav id="grid-menu" class="grid grid-cols-2 gap-5">
+            <div data-id="inscr" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="inscriptions.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📝</div>
-                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Élèves</h2>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Inscriptions</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Enregistrement élèves</span>
                 </a>
             </div>
 
-            <div data-id="liens" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="liens.html" class="flex flex-col items-center">
+            <div data-id="liens" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="liens.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🔗</div>
                     <h2 class="font-bold text-[12px] uppercase tracking-wider">Liens</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Bibliothèque favoris</span>
                 </a>
             </div>
 
-            <div data-id="h108" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="108heures.html" class="flex flex-col items-center">
+            <div data-id="h108" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="108heures.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">⏲️</div>
-                    <h2 class="font-bold text-[12px] uppercase tracking-wider">108h</h2>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">108 heures</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Suivi des réunions</span>
                 </a>
             </div>
 
-            <div data-id="memos" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="memos.html" class="flex flex-col items-center">
+            <div data-id="memos" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="memos.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📒</div>
                     <h2 class="font-bold text-[12px] uppercase tracking-wider">Mémos</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Pense-bêtes</span>
                 </a>
             </div>
 
-            <div data-id="tirage" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="tirage.html" class="flex flex-col items-center">
+            <div data-id="tirage" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="tirage.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🎲</div>
                     <h2 class="font-bold text-[12px] uppercase tracking-wider">Tirage</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Prénom au hasard</span>
                 </a>
             </div>
 
-            <div data-id="equipes" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="equipes.html" class="flex flex-col items-center">
+            <div data-id="equipes" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="equipes.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">👥</div>
                     <h2 class="font-bold text-[12px] uppercase tracking-wider">Équipes</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Groupes mixtes</span>
                 </a>
             </div>
 
-            <div data-id="obs" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="observations.html" class="flex flex-col items-center">
+            <div data-id="obs" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="observations.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">✏️</div>
-                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Infos</h2>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Observations</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Infos élèves</span>
                 </a>
             </div>
 
-            <div data-id="compt" class="menu-card p-6">
-                <div class="drag-handle"><span></span><span></span></div>
-                <a href="compteur.html" class="flex flex-col items-center">
+            <div data-id="compt" class="menu-card p-3">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="compteur.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🚥</div>
-                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Suivi</h2>
+                    <h2 class="font-bold text-[12px] uppercase tracking-wider">Compteur</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold uppercase tracking-tight">Suivi comportement</span>
                 </a>
             </div>
         </nav>
@@ -192,29 +246,33 @@
             
             const iconBox = el.querySelector('.icon-box');
             const title = el.querySelector('h2');
+            const subtitle = el.querySelector('.tile-subtitle');
 
-            // En mode 3D, la couleur est plus élégante en "accent"
             if (iconBox) {
+                iconBox.style.backgroundColor = `${hexColor}33`; 
                 iconBox.style.color = hexColor;
-                // Petit halo coloré uniquement en mode sombre
+
                 if (!isLight) {
-                    iconBox.style.textShadow = `0 0 12px ${hexColor}66`;
+                    iconBox.style.textShadow = `0 0 10px ${hexColor}aa`;
+                    iconBox.style.border = `1px solid ${hexColor}44`;
                 } else {
                     iconBox.style.textShadow = 'none';
+                    iconBox.style.border = `1px solid ${hexColor}22`;
                 }
             }
             if (title) {
                 title.style.color = isLight ? 'var(--text-main)' : hexColor;
                 title.style.opacity = isLight ? '0.8' : '1';
             }
+            if (subtitle) {
+                subtitle.style.color = 'var(--text-muted)';
+            }
         });
     }
 
-    // Gestion du thème
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     applyColors();
 
-    // Ordre des tuiles
     const gridMenu = document.getElementById('grid-menu');
     const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
     if (savedOrder) {
@@ -224,7 +282,6 @@
         });
     }
 
-    // Drag & Drop
     new Sortable(gridMenu, {
         handle: '.drag-handle',
         animation: 200,
