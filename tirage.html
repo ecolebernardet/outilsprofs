@@ -151,7 +151,6 @@
 
         .btn-nav { width: 100%; max-width: 400px; font-weight: 800; padding: 14px; border-radius: 50px; font-size: 10px; cursor: pointer; border: none; }
         .stats { margin-top: 8px; font-size: 0.6rem; color: #6b7280; text-transform: uppercase; font-weight: 800; }
-        .header-spacer { width: 40px; }
 
         .modal-overlay { 
             display: none; position: fixed; inset: 0; 
@@ -185,7 +184,11 @@
         <h1 id="page-title" class="font-black text-lg tracking-normal uppercase text-center flex-grow">
             Tirage au sort
         </h1>
-        <div class="header-spacer"></div>
+        <button id="btn-aide" onclick="openHelp()" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </button>
     </header>
 
     <div class="w-full max-w-md" id="listeContainer"></div>
@@ -202,10 +205,12 @@
 
     <div id="alertModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
-            <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            <div id="modal-body-content">
+                <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+                <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            </div>
             <div class="btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
+                <button id="btn-secondary" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
                 <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
@@ -224,12 +229,40 @@
         const nomCouleur = themePrefs.tirage || 'pink';
         const hexaTheme = mapCouleurs[nomCouleur] || '#ec4899';
 
-        function showAlert(title, text, onConfirm) {
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertText').innerText = text;
+        function openHelp() {
+            // Récupère l'aide spécifique depuis le localStorage (page paramètres)
+            const helpHTML = localStorage.getItem('aide_title-tirage');
+            const container = document.getElementById('modal-body-content');
+            
+            if (helpHTML) {
+                container.innerHTML = helpHTML;
+            } else {
+                container.innerHTML = `
+                    <h3 class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">🎲 Tirage</h3>
+                    <p class="text-xs leading-relaxed text-gray-600">
+                        Décochez les élèves absents puis tirez un prénom d'élève au hasard parmi les présents.
+                    </p>
+                `;
+            }
+
             const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.innerText = "Fermer";
+            confirmBtn.style.backgroundColor = hexaTheme;
+            confirmBtn.onclick = closeModal;
+
+            document.getElementById('btn-secondary').style.display = 'none';
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function showAlert(title, text, onConfirm) {
+            const container = document.getElementById('modal-body-content');
+            container.innerHTML = `<h3 class="alert-title">${title}</h3><p class="alert-text">${text}</p>`;
+            
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.innerText = "Confirmer";
             confirmBtn.style.backgroundColor = hexaTheme;
             
+            // Reset button to avoid event listener accumulation
             const newBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
             
@@ -237,6 +270,9 @@
                 closeModal();
                 onConfirm();
             };
+
+            document.getElementById('btn-secondary').style.display = 'block';
+            document.getElementById('btn-secondary').innerText = "Annuler";
             document.getElementById('alertModal').style.display = 'flex';
         }
 
@@ -253,21 +289,21 @@
             const btn = document.getElementById('draw-btn');
             const display = document.getElementById('result-display');
             const btnRetour = document.getElementById('btn-retour');
-            const svgRetour = document.querySelector('#btn-retour svg');
+            const btnAide = document.getElementById('btn-aide');
+
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+            const contrastColor = isLightColor ? 'black' : 'white';
 
             if (title) title.style.color = isLight ? '#000000' : '#ffffff';
 
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
-            
-            if (btnRetour) {
-                btnRetour.style.backgroundColor = hexaTheme;
-                if (svgRetour) svgRetour.style.color = isLightColor ? 'black' : 'white';
-            }
-
-            if (btn) {
-                btn.style.backgroundColor = hexaTheme;
-                btn.style.color = isLightColor ? 'black' : 'white';
-            }
+            [btnRetour, btnAide, btn].forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = hexaTheme;
+                    const svg = el.querySelector('svg');
+                    if (svg) svg.style.color = contrastColor;
+                    if (el === btn) el.style.color = contrastColor;
+                }
+            });
 
             if (display) display.style.color = hexaTheme;
         }
@@ -280,7 +316,6 @@
                 s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase() && 
                 s.identite.trim() !== fullName.trim()
             );
-            // CORRECTION : Affiche le nom de famille complet en cas de doublon de prénom
             return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
         }
 

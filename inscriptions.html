@@ -13,17 +13,33 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
+            --bg-body: #121212;
+            --text-main: #ffffff;
+            --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e; 
+            --input-bg: #2a2a2a;
+            --sub-text: #a1a1aa;
+            --student-item-bg: #1e1e1e;
+            --student-name-girl: #f472b6;
+            --student-name-boy: #60a5fa;
+            --modal-bg: rgba(0, 0, 0, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode {
             --bg-body: #eeeeee;
             --text-main: #111827;
             --header-bg: #ffffff;
             --header-border: #ddd;
             --card-bg: #ffffff; 
-            --input-bg: #ffffff;
+            --input-bg: #f3f4f6;
             --sub-text: #71717a;
             --student-item-bg: #ffffff;
             --student-name-girl: #db2777;
             --student-name-boy: #2563eb;
             --modal-bg: rgba(255, 255, 255, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
         body { 
@@ -31,7 +47,7 @@
             background-color: var(--bg-body); 
             color: var(--text-main); 
             padding: 0 15px 20px 15px; margin: 0; 
-            transition: background-color 0.2s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         header { 
@@ -43,30 +59,25 @@
             width: calc(100% + 30px); margin-left: -15px;
         }
 
-        .light-card { background: var(--card-bg); border-radius: 1.5rem; border: 1px solid var(--header-border); }
+        .light-card { 
+            background: var(--card-bg); 
+            border-radius: 1.5rem; 
+            border: 1px solid var(--header-border);
+            box-shadow: 0 10px 25px -5px var(--shadow-color);
+        }
 
         .card-input { display: none; }
         
         .card-label {
             display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #e5e7eb; border: 1px solid #d1d5db; color: #374151;
+            background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main);
             height: 40px; border-radius: 0.75rem; cursor: pointer;
             font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+            transition: all 0.2s ease;
         }
-		
-		.columns-container {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 15px;
-			width: 100%;
-			max-width: 600px;
-			margin: 0 auto;
-			align-items: start;
-			padding: 0 10px;
-		}
-
-        .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; background: rgba(59, 130, 246, 0.1); }
-        .input-fille:checked + .card-label { color: #db2777; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.1); }
+        
+        .input-garcon:checked + .card-label { color: #2563eb; border-color: #2563eb; font-weight: 900; background: rgba(59, 130, 246, 0.15); }
+        .input-fille:checked + .card-label { color: #db2777; border-color: #db2777; font-weight: 900; background: rgba(219, 39, 119, 0.15); }
 
         .input-cp:checked + .card-label { background: #ec4899; border-color: #ec4899; color: #fff; } 
         .input-ce1:checked + .card-label { background: #3b82f6; border-color: #3b82f6; color: #fff; } 
@@ -75,18 +86,16 @@
         .input-cm2:checked + .card-label { background: #22c55e; border-color: #22c55e; color: #fff; } 
         .input-autre:checked + .card-label { background: #8b5cf6; border-color: #8b5cf6; color: #fff; } 
 
-        .level-column { background: transparent; border: none; padding: 10px; height: fit-content; }
-        
         .student-item { 
-            background: #ffffff; 
+            background: var(--student-item-bg); 
             padding: 8px 12px; 
             border-radius: 40px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 4px; 
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 6px; 
+            border: 1px solid var(--header-border);
+            box-shadow: 0 2px 5px var(--shadow-color);
             cursor: pointer;
         }
 
@@ -95,16 +104,22 @@
         
         .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 8px; text-align: center; width: 100%; cursor: pointer; }
         
-        .input-field { background: #f3f4f6; border: 1px solid #d1d5db; color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
         
         .select-date { 
-            background: #e5e7eb; border: 1px solid #d1d5db; color: #374151; 
+            background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main); 
             border-radius: 0.75rem; height: 42px; outline: none; 
             font-size: 0.75rem; font-weight: 600; appearance: none; text-align: center;
         }
 
         .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
-        #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
+        
+        .header-btn { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 1px solid var(--header-border); 
+            transition: transform 0.1s ease, background-color 0.3s ease;
+        }
 
         #custom-confirm {
             display: none; position: fixed; inset: 0; z-index: 9999;
@@ -114,12 +129,29 @@
         .confirm-card {
             background: var(--card-bg); border: 1px solid var(--header-border);
             width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); text-align: center;
         }
-		
+
+        /* MODALE D'AIDE */
+        #modal-aide { 
+            display: none; position: fixed; inset: 0; z-index: 10000; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content { 
+            background: var(--card-bg); width: 100%; max-width: 400px; 
+            border-radius: 1.5rem; border: 1px solid var(--header-border);
+            padding: 25px; position: relative; box-shadow: 0 10px 25px -5px var(--shadow-color);
+        }
     </style>
 </head>
 <body class="pb-10">
+    <script>
+        if (localStorage.getItem('theme_mode') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
     <div id="custom-confirm">
         <div class="confirm-card">
             <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
@@ -127,18 +159,27 @@
         </div>
     </div>
 
+    <div id="modal-aide" onclick="fermerAide()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="contenu-aide-dynamique"></div>
+            <button onclick="fermerAide()" class="mt-6 w-full py-3 bg-zinc-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
+        </div>
+    </div>
+
     <header>
-        <a href="index.html" id="btn-retour" class="shadow-lg active:scale-90">
+        <a href="index.html" id="btn-retour" class="header-btn shadow-lg active:scale-90">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
         </a>
         <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Inscriptions</h1>
-        <div style="width:40px"></div>
+        <button id="btn-aide" onclick="ouvrirAide('title-inscriptions')" class="header-btn shadow-lg active:scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </button>
     </header>
 
     <div class="max-w-4xl mx-auto p-4 mt-4">
         <div id="scroll-target"></div>
         
-        <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-4 shadow-xl">
+        <div id="form-container" class="max-w-md mx-auto light-card p-4 mb-4">
             <form id="eleveForm" class="flex flex-col gap-3">
                 <input type="hidden" id="edit-id" value="">
                 <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
@@ -171,11 +212,11 @@
 
         <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
 
-        <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center gap-4 bg-white/50 p-2 rounded-xl border border-gray-200">
+        <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center gap-4 p-2 rounded-xl border border-white/10" style="background: var(--card-bg);">
             <span class="text-[9px] font-black uppercase opacity-60">Trier par :</span>
             <div class="flex gap-5">
-                <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-gray-300">Prénom</button>
-                <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-gray-300">Nom</button>
+                <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-white/10">Prénom</button>
+                <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border border-white/10">Nom</button>
             </div>
         </div>
 
@@ -242,7 +283,21 @@
         function appliquerCouleursTheme() {
             const btnSubmit = document.getElementById('btn-submit');
             const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
-            if (btnSubmit) { btnSubmit.style.backgroundColor = hexaTheme; btnSubmit.style.color = isDarkTxt ? '#000' : '#fff'; }
+            
+            if (btnSubmit) { 
+                btnSubmit.style.backgroundColor = hexaTheme; 
+                btnSubmit.style.color = isDarkTxt ? '#000' : '#fff'; 
+            }
+
+            // Boutons Header dynamiques
+            const headerBtns = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
+            headerBtns.forEach(btn => {
+                if(btn) {
+                    btn.style.backgroundColor = hexaTheme;
+                    btn.style.color = isDarkTxt ? '#000' : '#fff';
+                }
+            });
+
             majBoutonsTri();
         }
 
@@ -250,7 +305,7 @@
             const btnP = document.getElementById('sort-prenom');
             const btnN = document.getElementById('sort-nom');
             const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
-            [btnP, btnN].forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = 'inherit'; b.style.opacity = '0.4'; b.style.borderColor = '#ddd'; });
+            [btnP, btnN].forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = 'inherit'; b.style.opacity = '0.4'; b.style.borderColor = 'rgba(255,255,255,0.1)'; });
             const actif = modeTriApp === 'prenom' ? btnP : btnN;
             actif.style.opacity = '1'; actif.style.backgroundColor = hexaTheme; actif.style.borderColor = hexaTheme; actif.style.color = isDarkTxt ? '#000' : '#fff';
         }
@@ -292,71 +347,64 @@
         }
 
         function render() {
-    renderStats();
-    const container = document.getElementById('listeContainer');
-    if (!container) return;
-    
-    container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
-    
-    const groupes = {};
-    eleves.forEach(el => { 
-        if (!groupes[el.niveau]) groupes[el.niveau] = []; 
-        groupes[el.niveau].push(el); 
-    });
-
-    const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-
-    // Affichage sur 2 colonnes
-    container.className = "grid grid-cols-2 gap-3 items-start w-full"; 
-
-    présents.forEach(niv => {
-        const levelColumn = document.createElement('div');
-        levelColumn.className = "flex flex-col";
-        
-        const couleurNiveau = couleurParNiveau[niv] || hexaTheme;
-        levelColumn.innerHTML = `<h3 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-3">${niv}</h3>`;
-        
-        const list = document.createElement('div');
-        list.className = "flex flex-col gap-1.5";
-        
-        groupes[niv].sort((a, b) => {
-            const partsA = a.identite.split(" ");
-            const partsB = b.identite.split(" ");
-            const pA = partsA[0], nA = partsA.slice(1).join(" ");
-            const pB = partsB[0], nB = partsB.slice(1).join(" ");
-            return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
-        }).forEach(el => {
-            const item = document.createElement('div');
-            const genderClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
-            item.className = `student-item ${genderClass}`;
+            renderStats();
+            const container = document.getElementById('listeContainer');
+            if (!container) return;
             
-            // Formatage de l'identité : Prénom (Majuscule puis minuscules) + NOM (Majuscules)
-            const parts = el.identite.split(" ");
-            const prenomRaw = parts[0];
-            const nomRaw = parts.slice(1).join(" ");
+            container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
             
-            const prenomPropre = prenomRaw.charAt(0).toUpperCase() + prenomRaw.slice(1).toLowerCase();
-            const nomPropre = nomRaw.toUpperCase();
+            const groupes = {};
+            eleves.forEach(el => { 
+                if (!groupes[el.niveau]) groupes[el.niveau] = []; 
+                groupes[el.niveau].push(el); 
+            });
 
-            let identiteAffiche = modeTriApp === 'nom' ? `${nomPropre} ${prenomPropre}` : `${prenomPropre} ${nomPropre}`;
+            const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+            container.className = "grid grid-cols-2 gap-3 items-start w-full"; 
 
-            item.innerHTML = `
-                <div class="flex flex-col flex-grow overflow-hidden" onclick="preparerModification('${el.id}')">
-                    <span class="text-[10px] font-black truncate leading-tight">${identiteAffiche}</span>
-                    ${el.dateNaissance ? `<span class="text-[8px] text-gray-400 italic leading-none mt-0.5">${el.dateNaissance}</span>` : ""}
-                </div>
-                <button onclick="supprimer('${el.id}')" class="ml-1 opacity-20 hover:opacity-100 transition-opacity p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                </button>`;
-            list.appendChild(item);
-        });
+            présents.forEach(niv => {
+                const levelColumn = document.createElement('div');
+                levelColumn.className = "flex flex-col";
+                const couleurNiveau = couleurParNiveau[niv] || hexaTheme;
+                levelColumn.innerHTML = `<h3 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-3">${niv}</h3>`;
+                
+                const list = document.createElement('div');
+                list.className = "flex flex-col gap-1.5";
+                
+                groupes[niv].sort((a, b) => {
+                    const partsA = a.identite.split(" ");
+                    const partsB = b.identite.split(" ");
+                    const pA = partsA[0], nA = partsA.slice(1).join(" ");
+                    const pB = partsB[0], nB = partsB.slice(1).join(" ");
+                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+                }).forEach(el => {
+                    const item = document.createElement('div');
+                    const genderClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
+                    item.className = `student-item ${genderClass}`;
+                    
+                    const parts = el.identite.split(" ");
+                    const prenomRaw = parts[0];
+                    const nomRaw = parts.slice(1).join(" ");
+                    const prenomPropre = prenomRaw.charAt(0).toUpperCase() + prenomRaw.slice(1).toLowerCase();
+                    const nomPropre = nomRaw.toUpperCase();
+                    let identiteAffiche = modeTriApp === 'nom' ? `${nomPropre} ${prenomPropre}` : `${prenomPropre} ${nomPropre}`;
 
-        levelColumn.appendChild(list);
-        container.appendChild(levelColumn);
-    });
-}
+                    item.innerHTML = `
+                        <div class="flex flex-col flex-grow overflow-hidden" onclick="preparerModification('${el.id}')">
+                            <span class="text-[10px] font-black truncate leading-tight">${identiteAffiche}</span>
+                            ${el.dateNaissance ? `<span class="text-[8px] italic leading-none mt-0.5" style="color:var(--sub-text)">${el.dateNaissance}</span>` : ""}
+                        </div>
+                        <button onclick="supprimer('${el.id}')" class="ml-1 opacity-20 hover:opacity-100 transition-opacity p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>`;
+                    list.appendChild(item);
+                });
+                levelColumn.appendChild(list);
+                container.appendChild(levelColumn);
+            });
+        }
 
         document.getElementById('eleveForm').onsubmit = (e) => {
             e.preventDefault();
@@ -428,7 +476,6 @@
             const a = document.createElement('a'); a.href = url; a.download = `export_eleves_${new Date().toISOString().split('T')[0]}.txt`; a.click();
         }
 
-        // FONCTION POUR RENDRE LES COULEURS TRÈS CLAIRES (PASTEL)
         function estomperCouleur(hex, facteur = 0.3) {
             let r = 0, g = 0, b = 0;
             if (hex.length == 4) {
@@ -443,82 +490,49 @@
         }
 
         function genererPDF() {
-    if (eleves.length === 0) return alert("La liste est vide !");
-    
-    const parNom = (modeTriApp === 'nom');
-    const { jsPDF } = window.jspdf; 
-    const doc = new jsPDF();
-    
-    const nomEns = localStorage.getItem('nom_enseignant') || "Non renseigné";
-    const dateExport = new Date().toLocaleDateString('fr-FR');
-    const niveauxUniques = [...new Set(eleves.map(e => e.niveau))]
-        .sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b))
-        .join(" / ");
-    
-    doc.setFontSize(16); doc.text("LISTE DES ÉLÈVES", 105, 15, { align: "center" });
-    doc.setFontSize(11); doc.text(niveauxUniques, 105, 21, { align: "center" });
-    doc.setFontSize(9); doc.text(`Enseignant : ${nomEns}`, 14, 28); 
-    doc.text(`Date : ${dateExport}`, 196, 28, { align: "right" });
-    
-    const elevesTries = [...eleves].sort((a, b) => {
-        if (a.niveau !== b.niveau) return ordreNiveaux.indexOf(a.niveau) - ordreNiveaux.indexOf(b.niveau);
-        const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-        const prenomA = partsA[0], nomA = partsA.slice(1).join(" ");
-        const prenomB = partsB[0], nomB = partsB.slice(1).join(" ");
-        return parNom ? nomA.localeCompare(nomB) : prenomA.localeCompare(prenomB);
-    });
-
-    const headColName = parNom ? "NOM Prénom" : "Prénom NOM";
-    const body = [];
-    
-    body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
-
-    let currentNiveau = null;
-    let compteurGlobal = 0;
-    
-    elevesTries.forEach((el) => {
-        if (el.niveau !== currentNiveau) {
-            if (currentNiveau !== null) {
-                body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
-            }
-            currentNiveau = el.niveau;
-            const couleurPastel = estomperCouleur(couleurParNiveau[currentNiveau] || '#cccccc', 0.3);
-            body.push([{ 
-                content: `NIVEAU : ${currentNiveau}`, 
-                colSpan: 5, 
-                styles: { fillColor: couleurPastel, textColor: [80, 80, 80], fontStyle: 'bold', halign: 'center', fontSize: 7.5, cellPadding: 0.8 } 
-            }]);
+            if (eleves.length === 0) return alert("La liste est vide !");
+            const parNom = (modeTriApp === 'nom');
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF();
+            const nomEns = localStorage.getItem('nom_enseignant') || "Non renseigné";
+            const dateExport = new Date().toLocaleDateString('fr-FR');
+            const niveauxUniques = [...new Set(eleves.map(e => e.niveau))].sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b)).join(" / ");
+            doc.setFontSize(16); doc.text("LISTE DES ÉLÈVES", 105, 15, { align: "center" });
+            doc.setFontSize(11); doc.text(niveauxUniques, 105, 21, { align: "center" });
+            doc.setFontSize(9); doc.text(`Enseignant : ${nomEns}`, 14, 28); 
+            doc.text(`Date : ${dateExport}`, 196, 28, { align: "right" });
+            const elevesTries = [...eleves].sort((a, b) => {
+                if (a.niveau !== b.niveau) return ordreNiveaux.indexOf(a.niveau) - ordreNiveaux.indexOf(b.niveau);
+                const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
+                const prenomA = partsA[0], nomA = partsA.slice(1).join(" ");
+                const prenomB = partsB[0], nomB = partsB.slice(1).join(" ");
+                return parNom ? nomA.localeCompare(nomB) : prenomA.localeCompare(prenomB);
+            });
+            const headColName = parNom ? "NOM Prénom" : "Prénom NOM";
+            const body = [];
+            body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
+            let currentNiveau = null; let compteurGlobal = 0;
+            elevesTries.forEach((el) => {
+                if (el.niveau !== currentNiveau) {
+                    if (currentNiveau !== null) body.push([{ content: '', colSpan: 5, styles: { cellPadding: 0.5, fillColor: [255, 255, 255] } }]);
+                    currentNiveau = el.niveau;
+                    const couleurPastel = estomperCouleur(couleurParNiveau[currentNiveau] || '#cccccc', 0.3);
+                    body.push([{ content: `NIVEAU : ${currentNiveau}`, colSpan: 5, styles: { fillColor: couleurPastel, textColor: [80, 80, 80], fontStyle: 'bold', halign: 'center', fontSize: 7.5, cellPadding: 0.8 } }]);
+                }
+                compteurGlobal++;
+                let nomAffichage = el.identite;
+                if (parNom) { const parts = el.identite.split(" "); nomAffichage = parts.slice(1).join(" ") + " " + parts[0]; }
+                body.push([compteurGlobal, nomAffichage, el.dateNaissance || '-', el.sexe === 'm' ? 'M' : 'F', el.niveau]);
+            });
+            doc.autoTable({
+                startY: 35, head: [['#', headColName, 'Date Naiss.', 'S.', 'Niveau']], body: body,
+                headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+                alternateRowStyles: { fillColor: [250, 250, 250] }, margin: { top: 35 },
+                columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 2: { cellWidth: 25, halign: 'center' }, 3: { cellWidth: 8, halign: 'center' }, 4: { cellWidth: 15, halign: 'center' } }
+            });
+            doc.save(`Liste_Eleves_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-        
-        compteurGlobal++;
-        let nomAffichage = el.identite;
-        if (parNom) {
-            const parts = el.identite.split(" ");
-            nomAffichage = parts.slice(1).join(" ") + " " + parts[0];
-        }
-        
-        body.push([compteurGlobal, nomAffichage, el.dateNaissance || '-', el.sexe === 'm' ? 'M' : 'F', el.niveau]);
-    });
-
-    doc.autoTable({
-        startY: 35,
-        head: [['#', headColName, 'Date Naiss.', 'S.', 'Niveau']],
-        body: body,
-        headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' }, // overflow linebreak évite les coupures
-        alternateRowStyles: { fillColor: [250, 250, 250] },
-        margin: { top: 35 },
-        columnStyles: { 
-            0: { cellWidth: 8, halign: 'center' },   // # réduit
-            1: { cellWidth: 'auto' },                // Nom prend l'espace nécessaire
-            2: { cellWidth: 25, halign: 'center' },  // Date Naissance fixe et serrée
-            3: { cellWidth: 8, halign: 'center' },   // Sexe réduit
-            4: { cellWidth: 15, halign: 'center' }   // Niveau réduit
-        }
-    });
-
-    doc.save(`Liste_Eleves_${new Date().toISOString().split('T')[0]}.pdf`);
-}
 
         document.getElementById('fileInput').onchange = function(e) {
             const file = e.target.files[0]; if (!file) return;
@@ -530,10 +544,7 @@
                         const p = l.trim().split(';'); 
                         if(p.length >= 4) {
                             let dateImp = p[4] || "";
-                            if (dateImp.includes('-')) {
-                                const pts = dateImp.split('-');
-                                if (pts[0].length === 4) dateImp = `${pts[2]}-${pts[1]}-${pts[0]}`;
-                            }
+                            if (dateImp.includes('-')) { const pts = dateImp.split('-'); if (pts[0].length === 4) dateImp = `${pts[2]}-${pts[1]}-${pts[0]}`; }
                             data.push({ id: String(Date.now() + Math.random()), identite: formaterIdentite(p[0], p[1]), sexe: p[2].trim().toLowerCase(), niveau: p[3].trim().toUpperCase(), dateNaissance: dateImp });
                         }
                     });
@@ -543,6 +554,29 @@
                 reader.readAsText(file);
             }}, [{text: 'Importer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]);
         };
+
+        // FONCTIONS D'AIDE
+        function ouvrirAide(rubriqueId) {
+            const modal = document.getElementById('modal-aide');
+            const container = document.getElementById('contenu-aide-dynamique');
+            const aideStockee = localStorage.getItem('aide_' + rubriqueId);
+            
+            if (aideStockee) {
+                container.innerHTML = aideStockee;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-xs italic opacity-50">
+                            Mode d'emploi non chargé.<br>Ouvrez la page "Paramètres" pour synchroniser.
+                        </p>
+                    </div>`;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function fermerAide() {
+            document.getElementById('modal-aide').style.display = 'none';
+        }
 
         window.addEventListener('DOMContentLoaded', () => { 
             nettoyerDatesFormat(); initDateSelectors(); appliquerCouleursTheme(); render(); 

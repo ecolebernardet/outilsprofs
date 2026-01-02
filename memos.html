@@ -72,6 +72,7 @@
             width: calc(100% + 30px); 
             margin-left: -15px;
             margin-bottom: 12px;
+            gap: 8px;
         }
 
         .container { width: 100%; max-width: 600px; padding: 0 12px; }
@@ -97,12 +98,11 @@
 
         #searchInput { background: var(--search-bg) !important; color: var(--text-page) !important; border-color: var(--input-border); }
         
-        #btn-retour, #btn-search-toggle { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
+        #btn-retour, #btn-search-toggle, #btn-aide { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: all 0.3s ease; flex-shrink: 0; }
         
         .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, 0.2); flex-shrink: 0; }
         .color-dot.active { border: 2.5px solid white !important; box-shadow: 0 0 8px rgba(0,0,0,0.3); }
         
-        /* SYSTÈME MASONRY (COLONNES) */
         .note-grid { 
             column-count: 2; 
             column-gap: 10px; 
@@ -113,8 +113,8 @@
         }
         
         .note-card { 
-            break-inside: avoid; /* Empêche de couper un mémo entre deux colonnes */
-            display: inline-block; /* Nécessaire pour le système de colonnes */
+            break-inside: avoid; 
+            display: inline-block; 
             width: 100%;
             margin-bottom: 10px;
             border-radius: 12px; 
@@ -141,13 +141,15 @@
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
+        /* MODALS */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; }
-        .modal-content textarea { width: 100%; margin-bottom: 12px; padding: 14px; border-radius: 14px; border: 1px solid #ddd; font-size: 14px; background: #f9f9f9; color: #000 !important; }
+        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         
+        .modal-content textarea { width: 100%; margin-bottom: 12px; padding: 14px; border-radius: 14px; border: 1px solid #ddd; font-size: 14px; background: #f9f9f9; color: #000 !important; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; }
-        
+        .btn-cancel { background: #f3f4f6; color: #4b5563; }
+
         #searchContainer { overflow: hidden; max-height: 0; transition: max-height 0.3s ease-out, margin-bottom 0.3s ease; }
         #searchContainer.open { max-height: 100px; margin-bottom: 1.5rem; }
     </style>
@@ -160,12 +162,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h1 id="pageTitle" class="font-black text-lg uppercase tracking-normal text-center flex-grow">Mémos et pense-bêtes</h1>
-        <button id="btn-search-toggle" onclick="toggleSearch()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        </button>
+        <h1 id="pageTitle" class="font-black text-lg uppercase tracking-normal text-center flex-grow">Mémos</h1>
+        
+        <div class="flex gap-2">
+            <button id="btn-aide" onclick="openHelp()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            <button id="btn-search-toggle" onclick="toggleSearch()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
+        </div>
     </header>
 
     <div class="container">
@@ -204,11 +214,39 @@
         </footer>
     </div>
 
-    <div id="editModal" class="modal-overlay"><div class="modal-content"><h2 class="text-gray-400 font-black text-[10px] uppercase mb-3">Modifier</h2><textarea id="editNoteTitle" rows="2"></textarea><textarea id="editNoteInput" rows="5"></textarea><div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div><div class="btns"><button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button><button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button></div><button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase">Supprimer</button></div></div>
-    <div id="alertModal" class="modal-overlay"><div class="modal-content"><h3 id="alertTitle" class="font-black uppercase text-center mb-2"></h3><p id="alertText" class="text-center mb-4"></p><div class="btns"><button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button><button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button></div></div></div>
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-gray-400 font-black text-[10px] uppercase mb-3">Modifier</h2>
+            <textarea id="editNoteTitle" rows="2"></textarea>
+            <textarea id="editNoteInput" rows="5"></textarea>
+            <div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div>
+            <div class="btns">
+                <button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button>
+                <button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button>
+            </div>
+            <button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase">Supprimer</button>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="modal-body-content">
+                <h3 id="alertTitle" class="font-black uppercase text-center mb-2">Confirmation</h3>
+                <p id="alertText" class="text-center mb-4"></p>
+            </div>
+            <div class="btns">
+                <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+        
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const nomCouleurTheme = themePrefs.memos || 'purple';
+        const hexaTheme = mapCouleurs[nomCouleurTheme] || '#a855f7';
 
         function shadeColor(color, percent) {
             let f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
@@ -219,13 +257,39 @@
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
             document.body.classList.toggle('light-mode', isLight);
-            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const hex = mapCouleurs[themePrefs.memos || 'purple'] || '#a855f7';
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.memos || 'purple');
-            [document.getElementById('btn-retour'), document.getElementById('btn-search-toggle'), document.getElementById('addBtn'), document.getElementById('modalSaveBtn')].forEach(el => {
-                if(el) { el.style.backgroundColor = hex; el.style.color = isLightColor ? 'black' : 'white'; }
+            
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleurTheme);
+            const contrast = isLightColor ? 'black' : 'white';
+            
+            [document.getElementById('btn-retour'), document.getElementById('btn-search-toggle'), document.getElementById('btn-aide'), document.getElementById('addBtn'), document.getElementById('modalSaveBtn')].forEach(el => {
+                if(el) { el.style.backgroundColor = hexaTheme; el.style.color = contrast; }
             });
             renderNotes();
+        }
+
+        // --- GESTION DU MODAL D'AIDE (CORRIGÉ) ---
+        function openHelp() {
+            const container = document.getElementById('modal-body-content');
+            const helpHTML = localStorage.getItem('aide_title-memos');
+            
+            if (helpHTML) {
+                container.innerHTML = helpHTML;
+            } else {
+                container.innerHTML = `
+                    <h3 class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">📌 Mémos</h3>
+                    <p class="text-xs leading-relaxed text-gray-600">
+                        Créez, organisez et recherchez vos notes. Vous pouvez glisser-déposer les mémos pour changer leur ordre et les exporter en fichier .txt.
+                    </p>
+                `;
+            }
+
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.innerText = "Fermer";
+            confirmBtn.style.backgroundColor = hexaTheme;
+            confirmBtn.onclick = () => closeModal('alertModal');
+
+            document.getElementById('alertCancelBtn').style.display = 'none';
+            document.getElementById('alertModal').style.display = 'flex';
         }
 
         let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
@@ -276,9 +340,35 @@
         function saveAndRender() { localStorage.setItem('myKeepNotes', JSON.stringify(notes)); renderNotes(); }
         function closeModal(id) { document.getElementById(id).style.display='none'; }
         function autoExpand(t) { t.style.height='auto'; t.style.height=Math.min(t.scrollHeight, 200)+'px'; }
-        function setupColorPickers() { document.querySelectorAll('#newColorPicker .color-dot').forEach(d=>{ d.onclick=function(){ document.querySelectorAll('#newColorPicker .color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForNew=this.dataset.color; }; }); const p=document.getElementById('editColorPicker'); p.innerHTML=palette.map(c=>`<div class="color-dot" style="background-color: ${c};" data-color="${c}"></div>`).join(''); p.querySelectorAll('.color-dot').forEach(d=>{ d.onclick=function(){ p.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForEdit=this.dataset.color; }; }); }
+        
+        function setupColorPickers() { 
+            document.querySelectorAll('#newColorPicker .color-dot').forEach(d=>{ 
+                d.onclick=function(){ document.querySelectorAll('#newColorPicker .color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForNew=this.dataset.color; }; 
+            }); 
+            const p=document.getElementById('editColorPicker'); 
+            p.innerHTML=palette.map(c=>`<div class="color-dot" style="background-color: ${c};" data-color="${c}"></div>`).join(''); 
+            p.querySelectorAll('.color-dot').forEach(d=>{ 
+                d.onclick=function(){ p.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForEdit=this.dataset.color; }; 
+            }); 
+        }
+
         function setupSortable() { new Sortable(document.getElementById('notesGrid'), { handle: '.drag-handle', animation: 150, onEnd: function(){ const n=[]; document.querySelectorAll('.note-card').forEach(c=>n.push(notes[c.dataset.index])); notes=n; saveAndRender(); } }); }
-        function showAlert(t, tx, f, a=false) { document.getElementById('alertTitle').innerText=t; document.getElementById('alertText').innerText=tx; const c=document.getElementById('alertConfirmBtn'), x=document.getElementById('alertCancelBtn'); const h=mapCouleurs[(JSON.parse(localStorage.getItem('theme_tuiles'))||{}).memos||'purple']||'#a855f7'; c.style.backgroundColor=h; x.style.display=a?'none':'block'; const n=c.cloneNode(true); c.parentNode.replaceChild(n,c); n.onclick=()=>{closeModal('alertModal'); if(f) f();}; document.getElementById('alertModal').style.display='flex'; }
+        
+        function showAlert(t, tx, f) { 
+            const container = document.getElementById('modal-body-content');
+            container.innerHTML = `<h3 class="alert-title font-black uppercase text-center mb-2">${t}</h3><p class="alert-text text-center mb-4">${tx}</p>`;
+            
+            const c=document.getElementById('alertConfirmBtn'), x=document.getElementById('alertCancelBtn');
+            c.innerText = "Confirmer";
+            c.style.backgroundColor = hexaTheme;
+            x.style.display = 'block';
+            
+            const n=c.cloneNode(true);
+            c.parentNode.replaceChild(n,c);
+            n.onclick=()=>{closeModal('alertModal'); if(f) f();};
+            document.getElementById('alertModal').style.display='flex'; 
+        }
+
         function confirmResetAll() { showAlert("Tout effacer ?", "Supprimer définitivement tous vos mémos ?", () => { notes=[]; saveAndRender(); }); }
         function confirmDeleteNote() { showAlert("Supprimer ?", "Voulez-vous vraiment supprimer cette note ?", () => { notes.splice(currentNoteIndex, 1); saveAndRender(); closeModal('editModal'); }); }
         function exportNotesToFile() { if(notes.length===0) return; const d=new Date().toISOString().split('T')[0], n=`export_memos_${d}.txt`, c=JSON.stringify(notes,null,2); const b=new Blob([c],{type:'text/plain'}); const u=window.URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=n; a.click(); }

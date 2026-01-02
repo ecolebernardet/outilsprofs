@@ -25,6 +25,7 @@
             --card-student: #374151;
             --header-bg: #111828;
             --header-border: #1f2937;
+            --card-sub: #9ca3af;
         }
 
         /* Mode Clair */
@@ -34,6 +35,7 @@
             --card-student: #ffffff;
             --header-bg: #ffffff;
             --header-border: #ddd;
+            --card-sub: #4b5563;
         }
 
         body { 
@@ -66,9 +68,8 @@
             margin-bottom: 20px;
         }
 
-        #btn-retour { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
+        #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
-        .header-spacer { width: 40px; }
 
         .columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; align-items: start; padding: 0 10px; }
         .level-group { margin-bottom: 1px; }
@@ -118,6 +119,11 @@
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
         .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
 
+        /* STYLE AIDE */
+        #modal-aide .modal-card { background-color: var(--card-student); border: 1px solid var(--header-border); }
+        #aide-content h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        #aide-content p, #aide-content li { font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); margin-bottom: 8px; }
+
         /* MODALE ALERTE */
         .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
         .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
@@ -140,7 +146,11 @@
             </svg>
         </a>
         <h1 id="mainTitle">Suivi du comportement</h1>
-        <div class="header-spacer"></div>
+        <button id="btn-aide" onclick="ouvrirAide()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </button>
     </header>
 
     <div id="mainContent" class="columns-container"></div>
@@ -149,6 +159,15 @@
         <button id="reset-button" class="nav-btn bg-red-500 text-red-50 shadow-lg active:scale-95">
             ⚠️ RàZ des données
         </button>
+    </div>
+
+    <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6">
+        <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <div id="aide-content"></div>
+            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-4 mt-2 font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-all">
+                Fermer
+            </button>
+        </div>
     </div>
 
     <div id="alertModal" class="alert-overlay">
@@ -177,23 +196,25 @@
             "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
         };
 
-        function showAlert(title, text, onConfirm) {
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertText').innerText = text;
-            const confirmBtn = document.getElementById('alertConfirmBtn');
+        // GESTION AIDE
+        function ouvrirAide() {
+            // Va chercher le texte stocké depuis la rubrique "Compter" de parametres.html
+            const content = localStorage.getItem('aide_compt_text');
+            const display = document.getElementById('aide-content');
             
-            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const colorHex = mapCouleurs[themePrefs.compt || 'sky'] || '#0ea5e9';
-            confirmBtn.style.backgroundColor = colorHex;
-
-            const newBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-            
-            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
-            document.getElementById('alertModal').style.display = 'flex';
+            if (content) {
+                display.innerHTML = content;
+                const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+                const couleurCompt = mapCouleurs[prefs.compt] || '#0ea5e9';
+                const title = display.querySelector('h3');
+                if (title) title.style.color = couleurCompt;
+            } else {
+                display.innerHTML = "<p>Aucune aide disponible.</p>";
+            }
+            document.getElementById('modal-aide').style.display = 'flex';
         }
 
-        function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
+        function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
@@ -206,16 +227,22 @@
             
             const titre = document.getElementById('mainTitle');
             const btnRetour = document.getElementById('btn-retour');
-            const svgRetour = document.querySelector('#btn-retour svg');
+            const btnAide = document.getElementById('btn-aide');
+            const btnFermerAide = document.getElementById('btn-fermer-aide');
 
             if (titre) titre.style.color = isLight ? '#000000' : '#ffffff';
 
-            if (btnRetour) {
-                btnRetour.style.backgroundColor = couleurHexa;
-                if(svgRetour) {
-                    svgRetour.style.color = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur) ? 'black' : 'white';
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+            const textColor = isLightColor ? 'black' : 'white';
+
+            [btnRetour, btnAide, btnFermerAide].forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = couleurHexa;
+                    el.style.color = textColor;
+                    const svg = el.querySelector('svg');
+                    if(svg) svg.style.color = textColor;
                 }
-            }
+            });
         }
 
         function formatNameDisplay(fullName) {
@@ -352,6 +379,19 @@
             });
 
             loadState();
+        }
+
+        function showAlert(title, text, onConfirm) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertText').innerText = text;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const colorHex = mapCouleurs[themePrefs.compt || 'sky'] || '#0ea5e9';
+            confirmBtn.style.backgroundColor = colorHex;
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            document.getElementById('alertModal').style.display = 'flex';
         }
 
         document.getElementById('reset-button').onclick = () => {

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -135,7 +136,7 @@
         
         .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
         .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
-        .header-spacer { width: 40px; }
+        .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s; }
 
         /* MODALE ALERTE */
         .modal-overlay { 
@@ -163,13 +164,17 @@
 <body>
 
     <header>
-        <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300">
+        <a href="index.html" id="btn-retour" class="header-btn">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
         <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Générer des équipes</h1>
-        <div class="header-spacer"></div>
+        <button id="btn-aide" onclick="openHelp()" class="header-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </button>
     </header>
 
     <div id="attendance-container"></div>
@@ -187,8 +192,10 @@
 
     <div id="alertModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
-            <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            <div id="modal-body-content">
+                <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+                <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
+            </div>
             <div class="btns" id="modalBtns">
                 <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
                 <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
@@ -214,16 +221,45 @@
     let ALL_STUDENTS = JSON.parse(localStorage.getItem('maListeEleves')) || [];
     let absents = new Set(JSON.parse(localStorage.getItem('absents_session_equipes')) || []);
 
+    function openHelp() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const couleurHex = mapCouleurs[themePrefs.equipes || 'pink'] || '#ec4899';
+        
+        const container = document.getElementById('modal-body-content');
+        const helpHTML = localStorage.getItem('aide_title-equipes'); // Récupération de l'aide depuis les paramètres
+
+        if (helpHTML) {
+            container.innerHTML = helpHTML;
+        } else {
+            container.innerHTML = `
+                <h3 class="alert-title" style="color: ${couleurHex}">📌 Aide : Équipes</h3>
+                <p class="alert-text">
+                    Touchez un élève pour le marquer comme absent (barré). Sélectionnez le nombre d'équipes souhaité et cliquez sur "Générer". L'algorithme équilibre les équipes par sexe et par niveau.
+                </p>
+            `;
+        }
+
+        const confirmBtn = document.getElementById('alertConfirmBtn');
+        confirmBtn.innerText = "Fermer";
+        confirmBtn.style.backgroundColor = couleurHex;
+        confirmBtn.onclick = closeModal;
+
+        document.getElementById('alertCancelBtn').style.display = 'none';
+        document.getElementById('alertModal').style.display = 'flex';
+    }
+
     function showAlert(title, text, onConfirm, showCancel = true) {
-        document.getElementById('alertTitle').innerText = title;
-        document.getElementById('alertText').innerText = text;
+        const container = document.getElementById('modal-body-content');
+        container.innerHTML = `<h3 id="alertTitle" class="alert-title">${title}</h3><p id="alertText" class="alert-text">${text}</p>`;
+        
         const confirmBtn = document.getElementById('alertConfirmBtn');
         const cancelBtn = document.getElementById('alertCancelBtn');
         
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const couleurHex = mapCouleurs[themePrefs.equipes || 'pink'] || '#ec4899';
+        
+        confirmBtn.innerText = "Confirmer";
         confirmBtn.style.backgroundColor = couleurHex;
-
         cancelBtn.style.display = showCancel ? 'block' : 'none';
         
         const newBtn = confirmBtn.cloneNode(true);
@@ -252,20 +288,25 @@
         const title = document.getElementById('mainTitle');
         const genBtn = document.getElementById('main-generate-btn');
         const btnRetour = document.getElementById('btn-retour');
-        const svgRetour = document.querySelector('#btn-retour svg');
+        const btnAide = document.getElementById('btn-aide');
         
-        if(title) title.style.color = isLight ? '#000000' : '#ffffff';
         const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
-        
-        if(btnRetour) {
-            btnRetour.style.backgroundColor = couleurHex;
-            if(svgRetour) svgRetour.style.color = isLightColor ? 'black' : 'white';
-        }
+        const iconColor = isLightColor ? 'black' : 'white';
+
+        [btnRetour, btnAide].forEach(btn => {
+            if(btn) {
+                btn.style.backgroundColor = couleurHex;
+                const svg = btn.querySelector('svg');
+                if(svg) svg.style.color = iconColor;
+            }
+        });
 
         if(genBtn) {
             genBtn.style.backgroundColor = couleurHex;
-            genBtn.style.color = isLightColor ? 'black' : 'white';
+            genBtn.style.color = iconColor;
         }
+        
+        if(title) title.style.color = isLight ? '#000000' : '#ffffff';
     }
 
     function getDisplayName(eleve, allStudents) {
@@ -273,8 +314,6 @@
         const prenom = parts[0];
         const nom = parts.slice(1).join(" ");
         const aUnDoublon = allStudents.some(s => s.id !== eleve.id && s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase());
-        
-        // CORRECTION : Retourne le nom complet au lieu de l'initiale en cas de doublon
         return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
     }
 
@@ -420,24 +459,17 @@
         const results = document.getElementById('results');
         const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
         results.innerHTML = '';
-        
-        // CORRECTION : Ordre de tri spécifique
         const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
 
         teams.forEach((team, i) => {
-            // TRI : Niveau, puis Prénom, puis Nom
             team.sort((a, b) => {
                 const nivA = a.niveau.trim().toUpperCase();
                 const nivB = b.niveau.trim().toUpperCase();
-
                 let indexA = ordreNiveaux.indexOf(nivA);
                 let indexB = ordreNiveaux.indexOf(nivB);
                 if (indexA === -1) indexA = 99;
                 if (indexB === -1) indexB = 99;
-
                 if (indexA !== indexB) return indexA - indexB;
-                
-                // Si même niveau, tri alphabétique (Prénom puis Nom via identite)
                 return a.identite.trim().localeCompare(b.identite.trim());
             });
 
@@ -451,8 +483,6 @@
                 const niv = eleve.niveau.toUpperCase();
                 const displayName = getDisplayName(eleve, ALL_STUDENTS);
                 const bgTag = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursDecidees[niv] || '#555';
-                
-                // Utilisation de items-start pour un meilleur rendu si le nom passe à la ligne
                 html += `<div class="flex items-start mb-1 text-[0.65rem] font-bold">
                             <span class="tag" style="background-color: ${bgTag}">${niv}</span>
                             <span class="${eleve.sexe.toLowerCase().startsWith('f')?'name-f':'name-g'}">${displayName}</span>

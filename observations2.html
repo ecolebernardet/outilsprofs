@@ -22,10 +22,9 @@
             --primary: #ff637e; 
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #1a1a1a; 
+            --card-student: #374151; 
             --header-bg: #000;
             --header-border: #1f2937;
-            --card-sub: #9ca3af;
         }
 
         /* Mode Clair */
@@ -35,7 +34,6 @@
             --card-student: #ffffff;
             --header-bg: #ffffff;
             --header-border: #ddd;
-            --card-sub: #4b5563;
         }
 
         body { 
@@ -67,10 +65,11 @@
             margin-bottom: 20px;
         }
 
-        #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
+        .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
 
         .columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; align-items: start; padding: 0 10px; }
+        
         .level-group { margin-bottom: 1px; }
 
         .student-item { 
@@ -86,56 +85,35 @@
             border: 1.5px solid transparent;
         }
 
-        body.light-mode .student-item, html.light-mode-init .student-item { border-color: #e5e7eb; }
+        body.light-mode .student-item, html.light-mode-init .student-item {
+            border-color: #e5e7eb;
+        }
 
         .text-girl { color: #f9a8d4; } 
         .text-boy { color: #93c5fd; } 
+        
         body.light-mode .text-girl, html.light-mode-init .text-girl { color: #db2777; } 
         body.light-mode .text-boy, html.light-mode-init .text-boy { color: #2563eb; } 
         
         .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .status-icon { font-size: 0.65rem; opacity: 0.8; }
 
-        /* MODALES */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
-        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 92%; max-width: 400px; border: 1px solid #333; }
+        /* MODALE OBSERVATION & ALERTE */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); padding: 20px; }
+        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #333; }
         textarea { width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; border: 1px solid #333; font-size: 0.8rem; background: #000; color: #fff; outline: none; }
         .btns { display: flex; gap: 10px; }
         .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .btn-save { background: var(--primary); color: white; }
         .btn-cancel { background: #333; color: #ccc; }
 
-        /* --- STYLE FIXE POUR LA MODALE D'AIDE --- */
-        #modal-aide .modal-card {
-            background-color: var(--card-student); /* Utilise la couleur de carte du thème */
-            border: 1px solid var(--header-border);
-        }
-
-        #aide-content h3 {
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #aide-content p, #aide-content li {
-            font-size: 0.75rem;
-            line-height: 1.5;
-            color: var(--card-sub);
-            margin-bottom: 8px;
-        }
-
-        #aide-content ul { list-style: none; padding: 0; }
-
-        /* Correction Mode Clair Modale */
-        body.light-mode .modal-content, body.light-mode #modal-aide .modal-card { background: #ffffff; border-color: #d1d5db; }
+        /* Correction lisibilité Mode Clair Modale */
+        body.light-mode .modal-content { background: #ffffff; border-color: #d1d5db; }
+        body.light-mode #modalTitle { color: #111827 !important; }
         body.light-mode textarea { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+        body.light-mode .btn-cancel { background: #e5e7eb; color: #374151; }
 
-        /* ALERTES */
-        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        /* MODALE ALERTE */
         .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
         .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; color: #000; }
         .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 600; color: #4b5563; }
@@ -151,13 +129,13 @@
 <body>
 
     <header>
-        <a href="index.html" id="btn-retour">
+        <a href="index.html" id="btn-retour" class="header-btn">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
         <h1 id="mainTitle">OBSERVATIONS</h1>
-        <button id="btn-aide" onclick="ouvrirAide()">
+        <button id="btn-aide" onclick="openHelp()" class="header-btn">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -179,25 +157,18 @@
 
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
-            <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800;">Élève</h2>
-            <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
-            <div class="btns">
-                <button class="modal-btn btn-cancel" onclick="closeAllModals()">Fermer</button>
-                <button class="modal-btn btn-save" onclick="saveData()">Enregistrer</button>
+            <div id="modal-body-content">
+                <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800; color: white;">Élève</h2>
+                <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
+            </div>
+            <div class="btns" id="modalBtns">
+                <button id="modalCancelBtn" class="modal-btn btn-cancel" onclick="closeAllModals()">Fermer</button>
+                <button id="modalSaveBtn" class="modal-btn btn-save" onclick="saveData()">Enregistrer</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6">
-        <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-            <div id="aide-content"></div>
-            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-4 mt-2 font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-all">
-                Fermer
-            </button>
-        </div>
-    </div>
-
-    <div id="alertModal" class="alert-overlay">
+    <div id="alertModal" class="modal-overlay">
         <div class="alert-content">
             <h3 id="alertTitle" class="alert-title">Confirmation</h3>
             <p id="alertText" class="alert-text">Message</p>
@@ -214,49 +185,69 @@
         let currentStudentId = "";
 
         const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
-        const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
-        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
 
-        // GESTION AIDE
-        function ouvrirAide() {
-            const content = localStorage.getItem('aide_title-observations');
-            const display = document.getElementById('aide-content');
+        const couleurParNiveau = {
+            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
+            'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6'
+        };
+
+        const mapCouleurs = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#6b7280'
+        };
+
+        function openHelp() {
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const couleurNom = themePrefs.obs || 'green';
+            const couleurHex = mapCouleurs[couleurNom] || '#22c55e';
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
             
-            if (content) {
-                display.innerHTML = content;
-                // Colorer le titre injecté
-                const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-                const couleurObs = mapCouleurs[prefs.obs] || '#22c55e';
-                const title = display.querySelector('h3');
-                if (title) title.style.color = couleurObs;
+            const bodyContent = document.getElementById('modal-body-content');
+            const helpHTML = localStorage.getItem('aide_parametres_observations'); 
+
+            if (helpHTML) {
+                bodyContent.innerHTML = helpHTML;
             } else {
-                display.innerHTML = "<p>Notez des informations sur chaque élève et sauvegardez vos données.</p>";
+                bodyContent.innerHTML = `
+                    <h2 style="margin:0; font-size: 1.1rem; font-weight: 800; color: ${couleurHex}">📌 Aide</h2>
+                    <p style="color: ${document.body.classList.contains('light-mode') ? '#374151' : '#ccc'}; font-size: 13px; margin-top:10px; line-height:1.4;">
+                        Cliquez sur un élève pour ajouter ou modifier une observation. Les élèves avec une observation sont marqués par l'icône 🔎. Utilisez les boutons en bas pour exporter ou importer vos données.
+                    </p>
+                `;
             }
-            document.getElementById('modal-aide').style.display = 'flex';
+
+            document.getElementById('modalSaveBtn').style.display = 'none';
+            const closeBtn = document.getElementById('modalCancelBtn');
+            closeBtn.innerText = "Fermer";
+            closeBtn.style.backgroundColor = couleurHex;
+            closeBtn.style.color = isLightColor ? 'black' : 'white';
+            
+            document.getElementById('modal').style.display = 'flex';
         }
 
-        function fermerAide() {
-            document.getElementById('modal-aide').style.display = 'none';
-        }
-
-        // SYSTÈME ALERTES
         function showAlert(title, text, onConfirm, showCancel = true) {
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertText').innerText = text;
             const confirmBtn = document.getElementById('alertConfirmBtn');
             const cancelBtn = document.getElementById('alertCancelBtn');
+            
             const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const colorHex = mapCouleurs[themePrefs.obs || 'green'] || '#22c55e';
             confirmBtn.style.backgroundColor = colorHex;
+
             cancelBtn.style.display = showCancel ? 'block' : 'none';
             const newBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
             newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
             document.getElementById('alertModal').style.display = 'flex';
         }
+
         function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
 
-        // THEME ET RENDU
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
@@ -270,20 +261,24 @@
             const btnRetour = document.getElementById('btn-retour');
             const btnAide = document.getElementById('btn-aide');
             const btnSave = document.querySelector('.btn-save');
-            const btnFermerAide = document.getElementById('btn-fermer-aide');
+
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+            const iconColor = isLightColor ? 'black' : 'white';
 
             if(mainTitle) mainTitle.style.color = isLight ? '#000000' : '#ffffff';
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
-            const textColor = isLightColor ? 'black' : 'white';
 
-            [btnRetour, btnAide, btnSave, btnFermerAide].forEach(el => {
-                if(el) {
-                    el.style.backgroundColor = couleurHexa;
-                    el.style.color = textColor;
-                    const svg = el.querySelector('svg');
-                    if(svg) svg.style.color = textColor;
+            [btnRetour, btnAide].forEach(btn => {
+                if(btn) {
+                    btn.style.backgroundColor = couleurHexa;
+                    const svg = btn.querySelector('svg');
+                    if(svg) svg.style.color = iconColor;
                 }
             });
+
+            if(btnSave) {
+                btnSave.style.backgroundColor = couleurHexa;
+                btnSave.style.color = iconColor;
+            }
             document.documentElement.style.setProperty('--primary', couleurHexa);
         }
 
@@ -298,29 +293,37 @@
         function renderList() {
             const container = document.getElementById('listeContainer');
             container.innerHTML = "";
+            
             if (elevesInscrits.length === 0) {
                 container.innerHTML = `<div class="col-span-2 text-center p-10 text-neutral-500 text-[10px] font-bold uppercase">Aucun élève inscrit.</div>`;
                 return;
             }
+
             const groupes = {};
             elevesInscrits.forEach(el => {
                 const niv = el.niveau.toUpperCase();
                 if (!groupes[niv]) groupes[niv] = [];
                 groupes[niv].push(el);
             });
+
             const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+
             niveauxPresents.forEach(niv => {
                 const levelWrapper = document.createElement('div');
                 levelWrapper.className = "level-group";
                 const colorTitle = couleurParNiveau[niv] || '#ffffff';
                 levelWrapper.innerHTML = `<h2 style="color:${colorTitle}" class="text-[11px] font-black uppercase tracking-widest text-center mb-2">${niv}</h2>`;
+                
                 const list = document.createElement('div');
                 groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
                     const genderClass = (el.sexe.toLowerCase() === 'f') ? 'text-girl' : 'text-boy';
                     const item = document.createElement('div');
                     item.className = `student-item no-select ${genderClass}`;
                     const hasNote = (savedComments[String(el.id)] || "").trim().length > 0;
-                    item.innerHTML = `<span class="student-name">${formatName(el.identite)}</span><span class="status-icon">${hasNote ? '🔎' : '＋'}</span>`;
+                    item.innerHTML = `
+                        <span class="student-name">${formatName(el.identite)}</span>
+                        <span class="status-icon">${hasNote ? '🔎' : '＋'}</span>
+                    `;
                     item.onclick = () => openCommentModal(String(el.id), formatName(el.identite));
                     list.appendChild(item);
                 });
@@ -331,7 +334,20 @@
 
         function openCommentModal(id, nom) {
             currentStudentId = String(id);
-            document.getElementById('modalTitle').innerText = nom;
+            const bodyContent = document.getElementById('modal-body-content');
+            
+            // Restauration du contenu de saisie
+            bodyContent.innerHTML = `
+                <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800; color: white;">${nom}</h2>
+                <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
+            `;
+            
+            document.getElementById('modalSaveBtn').style.display = 'block';
+            const closeBtn = document.getElementById('modalCancelBtn');
+            closeBtn.innerText = "Fermer";
+            closeBtn.style.backgroundColor = "#333";
+            closeBtn.style.color = "#ccc";
+
             document.getElementById('commentInput').value = savedComments[currentStudentId] || "";
             document.getElementById('modal').style.display = 'flex';
             setTimeout(() => document.getElementById('commentInput').focus(), 100);
@@ -348,7 +364,7 @@
         }
 
         function toutEffacer() {
-            showAlert("Tout effacer ?", "Supprimer toutes les observations ?", () => {
+            showAlert("Tout effacer ?", "Supprimer toutes les observations ? (La liste des élèves sera conservée)", () => {
                 savedComments = {};
                 localStorage.setItem('studentObservations', JSON.stringify(savedComments));
                 renderList();
@@ -356,28 +372,67 @@
         }
 
         function exportToFile() {
-            const bundle = { eleves: elevesInscrits, observations: savedComments, date: new Date().toLocaleDateString(), type: "export_observations" };
-            const jsonString = JSON.stringify(bundle, null, 2);
-            const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `export_obs_${new Date().toISOString().split('T')[0]}.txt`; a.click();
+            try {
+                const eleves = elevesInscrits || [];
+                const observations = savedComments || {};
+                let cleanedComments = {};
+                eleves.forEach(s => { 
+                    const sId = String(s.id);
+                    if(observations[sId] && observations[sId].trim() !== "") {
+                        cleanedComments[sId] = observations[sId]; 
+                    }
+                });
+
+                const dateStr = new Date().toISOString().split('T')[0];
+                const fileName = `export_observations_${dateStr}.txt`;
+                const bundle = { eleves, observations: cleanedComments, date: new Date().toLocaleDateString(), type: "export_observations" };
+                const jsonString = JSON.stringify(bundle, null, 2);
+
+                if (window.Android && typeof window.Android.exportTxt === 'function') {
+                    window.Android.exportTxt(jsonString, fileName);
+                } else {
+                    const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = fileName; a.click();
+                    setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                }
+            } catch (err) { showAlert("Erreur", "Erreur technique : " + err.message, null, false); }
         }
 
         document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.eleves) {
-                        showAlert("Importer ?", "Remplacer les observations actuelles ?", () => {
-                            localStorage.setItem('studentObservations', JSON.stringify(data.observations || {}));
+                        const currentIds = elevesInscrits.map(el => String(el.id)).sort().join(',');
+                        const importIds = data.eleves.map(el => String(el.id)).sort().join(',');
+
+                        let message = "Les commentaires du fichier vont remplacer vos commentaires actuels. Continuer ?";
+                        if (currentIds !== importIds && elevesInscrits.length > 0) {
+                            message = "ATTENTION : La liste des élèves du fichier diffère de l'actuelle. Votre classe sera remplacée. Continuer ?";
+                        }
+
+                        showAlert("Importer ?", message, () => {
+                            const normalizedEleves = data.eleves.map(el => ({ ...el, id: String(el.id) }));
+                            let normalizedObs = {};
+                            if(data.observations) {
+                                Object.keys(data.observations).forEach(key => normalizedObs[String(key)] = data.observations[key]);
+                            }
+                            localStorage.setItem('maListeEleves', JSON.stringify(normalizedEleves));
+                            localStorage.setItem('studentObservations', JSON.stringify(normalizedObs));
                             window.location.reload();
                         });
                     }
-                } catch (err) { showAlert("Erreur", "Fichier invalide", null, false); }
+                } catch (err) { 
+                    showAlert("Erreur d'import", "Format de fichier invalide.", null, false);
+                    e.target.value = "";
+                }
             };
-            if(e.target.files[0]) reader.readAsText(e.target.files[0]);
+            reader.readAsText(file);
         });
 
         window.onload = () => { appliquerTheme(); renderList(); };

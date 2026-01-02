@@ -227,7 +227,7 @@
                 </div>
 
                 <div class="card-info">
-                    <h3 id="title-inscr" class="font-black text-xs uppercase mb-2">📌 Inscriptions</h3>
+                    <h3 id="title-inscriptions" class="font-black text-xs uppercase mb-2">📌 Inscriptions</h3>
                     <p class="text-[11px] font-bold mb-1">C'est ici que vous créez votre base d'élèves.</p>
                     <ul class="text-xs space-y-2 leading-relaxed">
                         <li>• <strong>Ajout :</strong> Saisissez le nom, la date de naissance (optionnel), choisissez le genre et le niveau, puis enregistrez.</li>
@@ -242,14 +242,15 @@
 					<h3 id="title-liens" class="font-black text-xs uppercase mb-2">🔗️ Liens</h3>
 					<p class="text-xs leading-relaxed">
 						Accès rapide à vos sites favoris rangés par rubriques.<br>
-						• Cliquez sur la poignée pour réorganiser les catégories de liens.<br>
-						• Cliquez sur la double flèche pour agrandir une catégorie et réorganiser les liens au sein de la catégorie.<br>
+						• Cliquez sur la poignée pour réorganiser les liens et les catégories.<br>
+						• Cliquez sur une catégorie du formulaire pour y accéder rapidement.<br>
 						• Cliquez sur le crayon pour modifier un lien.<br>
 						• Cliquez sur la poubelle pour supprimer un lien.
 					</p>
 					</div>
                 
-				<div class="card-info"><h3 id="title-h108" class="font-black text-xs uppercase mb-2">⏱️ 108 Heures</h3>
+				<div class="card-info">
+					<h3 id="title-108h" class="font-black text-xs uppercase mb-2">⏱️ 108 Heures</h3>
                     <p class="text-xs leading-relaxed">
                         Gérez vos forfaits annuels (APC, Conseils, etc.) :<br>
                         • Saisissez une durée pour chaque événement.<br>
@@ -282,13 +283,13 @@
 					</div>
 
                 <div class="card-info">
-					<h3 id="title-obs" class="font-black text-xs uppercase mb-2">✏️ Observations</h3>
+					<h3 id="title-observations" class="font-black text-xs uppercase mb-2">✏️ Observations</h3>
 					<p class="text-xs leading-relaxed">
 						Notez des informations sur chaque élève et sauvegardez vos données.
 					</p>
 					</div>
 
-                <div class="card-info"><h3 id="title-compt" class="font-black text-xs uppercase mb-2">🚥 Compteur</h3>
+                <div class="card-info"><h3 id="title-compteur" class="font-black text-xs uppercase mb-2">🚥 Compteur</h3>
                     <p class="text-xs leading-relaxed">
                         Suivi rapide des points de comportement (jusqu'à 5 points) :<br>
                         • Un clic : Ajoute 1 point.<br>
@@ -439,6 +440,33 @@
             localStorage.setItem('theme_tuiles', JSON.stringify(prefs));
             renderSettings();
         }
+		
+
+function sauvegarderToutesLesAides() {
+    const rubriques = [
+        { id: 'title-liens', key: 'aide_liens' },
+        { id: 'title-inscriptions', key: 'aide_inscr' },
+        { id: 'title-memos', key: 'aide_memos' },
+        { id: 'title-108h', key: 'aide_h108' },
+        { id: 'title-tirage', key: 'aide_tirage' },
+        { id: 'title-equipes', key: 'aide_equipes' },
+        { id: 'title-observations', key: 'aide_obs' },
+        { id: 'title-compteur', key: 'aide_compt_text' } // On utilise la clé attendue par le compteur
+    ];
+
+    rubriques.forEach(item => {
+        const titreEl = document.getElementById(item.id);
+        if (titreEl) {
+            const blocAide = titreEl.closest('.card-info');
+            if (blocAide) {
+                localStorage.setItem(item.key, blocAide.innerHTML);
+            }
+        }
+    });
+}
+
+// On sauvegarde dès que la page est chargée
+window.addEventListener('load', sauvegarderToutesLesAides);
 
         const savedTheme = localStorage.getItem('theme_mode');
         if (savedTheme === 'light') document.body.classList.add('light-mode');
