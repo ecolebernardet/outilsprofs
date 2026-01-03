@@ -19,19 +19,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            /* Couleurs Mode Sombre - Nettoyées du bleu nuit */
+            /* Mode Sombre - Noir Pur & Gris Neutres (Pas de bleu nuit/ardoise/pierre) */
             --bg-page: #000000;
             --text-page: #ffffff;
-            --header-bg: #0a0a0a;
-            --header-border: #222222;
-            --border-color: #222222;
+            --header-bg: #000000;
+            --header-border: #262626;
+            --border-color: #262626;
             --card-bg: #0a0a0a;
             --card-text: #ffffff;
             --result-bg: #111111;
-            --result-border: #222222;
-            --blue-light: #60a5fa; 
-            --pink: #f472b6;
-            --pill-bg: #111111;
+            --result-border: #262626;
+            
+            /* Étiquettes prénoms plus claires en sombre */
+            --pill-bg: #1a1a1a; 
+            --blue-light: #93c5fd; 
+            --pink: #f9a8d4;
         }
 
         body.light-mode, html.light-mode-init body {
@@ -46,6 +48,8 @@
             --result-bg: #f5f5f5;
             --result-border: #dddddd;
             --pill-bg: #ffffff;
+            --blue-light: #1e3a8a;
+            --pink: #831843;
         }
 
         body { 
@@ -77,11 +81,11 @@
 
         .student-grid { 
             display: grid; grid-template-columns: repeat(5, 1fr); 
-            gap: 5px; margin-bottom: 20px; width: 100%; padding: 0 10px;
+            gap: 6px; margin-bottom: 20px; width: 100%; padding: 0 10px;
         }
 
         .student-item { 
-            padding: 5px 2px; 
+            padding: 6px 2px; 
             border-radius: 999px; 
             font-size: 0.55rem; 
             font-weight: 800; 
@@ -101,19 +105,19 @@
         .bg-m { color: var(--blue-light) !important; } 
 
         .drawn { 
-            background-color: #050505 !important; 
+            background-color: #0a0a0a !important; 
             color: #444444 !important; 
             text-decoration: line-through; 
-            border-color: #111111 !important;
-            opacity: 0.6;
+            border-color: #1a1a1a !important;
+            opacity: 0.5;
             transform: scale(0.96);
         }
 
         body.light-mode .bg-f, html.light-mode-init .bg-f { 
-            background-color: #fce7f3 !important; color: #831843 !important; border-color: #f9a8d4 !important; 
+            background-color: #fce7f3 !important; border-color: #f9a8d4 !important; 
         } 
         body.light-mode .bg-m, html.light-mode-init .bg-m { 
-            background-color: #dbeafe !important; color: #1e3a8a !important; border-color: #93c5fd !important; 
+            background-color: #dbeafe !important; border-color: #93c5fd !important; 
         } 
         
         body.light-mode .drawn, html.light-mode-init .drawn { 
@@ -131,7 +135,7 @@
             border-radius: 1.5rem; 
             width: 95%; max-width: 400px; padding: 20px; text-align: center; 
             margin: 20px 0; border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
         }
         
         .result-box { 

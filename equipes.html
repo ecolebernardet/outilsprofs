@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur d'équipes équilibrées</title>
+    <title>Tirage au Sort</title>
     
     <script>
         (function() {
@@ -18,37 +18,44 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
-        :root { 
-            --primary: #ff637e; 
-            --bg: #000000; 
-            --text: #ffffff; 
-            --card-bg: #0a0a0a; 
-            --blue-light: #60a5fa; 
-            --pink: #f472b6;
-            --btn-num-bg: #0a0a0a;
-            --btn-num-border: #222222;
-            --title-gray: #888888;
+        :root {
+            /* Mode Sombre - Noir Pur & Gris Neutres (Pas de bleu nuit/ardoise/pierre) */
+            --bg-page: #000000;
+            --text-page: #ffffff;
             --header-bg: #000000;
-            --header-border: #222222;
-            --pill-bg: #111111;
+            --header-border: #262626;
+            --border-color: #262626;
+            --card-bg: #0a0a0a;
+            --card-text: #ffffff;
+            --result-bg: #111111;
+            --result-border: #262626;
+            
+            /* Étiquettes prénoms plus claires en sombre */
+            --pill-bg: #1a1a1a; 
+            --blue-light: #93c5fd; 
+            --pink: #f9a8d4;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg: #eeeeee; 
-            --text: #000000;
-            --card-bg: #ffffff;
-            --btn-num-bg: #e5e7eb;
-            --btn-num-border: #d1d5db;
-            --title-gray: #666666;
+            /* Couleurs Mode Clair */
+            --bg-page: #eeeeee;
+            --text-page: #000000;
             --header-bg: #ffffff;
-            --header-border: #e5e7eb;
+            --header-border: #dddddd;
+            --border-color: #cccccc;
+            --card-bg: #ffffff;
+            --card-text: #000000;
+            --result-bg: #f5f5f5;
+            --result-border: #dddddd;
             --pill-bg: #ffffff;
+            --blue-light: #1e3a8a;
+            --pink: #831843;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
+            background: var(--bg-page); 
+            color: var(--text-page); 
             padding: 0; margin: 0; 
             transition: background 0.3s;
             display: flex; flex-direction: column; align-items: center;
@@ -72,22 +79,20 @@
             margin-bottom: 10px;
         }
 
-        .section-title { font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
-        #attendance-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 10px; }
-        
-        .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 20px; width: 100%; }
-        
-        .level-label { text-align: center; font-size: 10px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .student-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); 
+            gap: 6px; margin-bottom: 20px; width: 100%; padding: 0 10px;
+        }
 
         .student-item { 
-            padding: 5px 2px; 
+            padding: 6px 2px; 
             border-radius: 999px; 
             font-size: 0.55rem; 
             font-weight: 800; 
             text-align: center; 
             cursor: pointer; 
             background-color: var(--pill-bg);
-            border: 1px solid var(--btn-num-border); 
+            border: 1px solid var(--header-border); 
             transition: all 0.2s; 
             white-space: nowrap; 
             overflow: hidden; 
@@ -99,43 +104,59 @@
         .bg-f { color: var(--pink) !important; } 
         .bg-m { color: var(--blue-light) !important; } 
 
-        .absent { 
-            background-color: #050505 !important; 
+        .drawn { 
+            background-color: #0a0a0a !important; 
             color: #444444 !important; 
             text-decoration: line-through; 
-            border-color: #111111 !important;
-            opacity: 0.8;
+            border-color: #1a1a1a !important;
+            opacity: 0.5;
             transform: scale(0.96);
         }
 
-        body.light-mode .bg-f, html.light-mode-init .bg-f { background-color: #fce7f3 !important; color: #831843 !important; border-color: #f9a8d4 !important; } 
-        body.light-mode .bg-m, html.light-mode-init .bg-m { background-color: #dbeafe !important; color: #1e3a8a !important; border-color: #93c5fd !important; } 
+        body.light-mode .bg-f, html.light-mode-init .bg-f { 
+            background-color: #fce7f3 !important; border-color: #f9a8d4 !important; 
+        } 
+        body.light-mode .bg-m, html.light-mode-init .bg-m { 
+            background-color: #dbeafe !important; border-color: #93c5fd !important; 
+        } 
         
-        body.light-mode .absent, html.light-mode-init .absent { 
-            background: #eeeeee !important; 
-            color: #999999 !important; 
-            border-color: #cccccc !important;
+        body.light-mode .drawn, html.light-mode-init .drawn { 
+            background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important;
+        }
+
+        .level-title { 
+            text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; 
+            text-transform: uppercase; letter-spacing: 1px; color: var(--text-page);
+        }
+
+        .light-card { 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
+            width: 95%; max-width: 400px; padding: 20px; text-align: center; 
+            margin: 20px 0; border: 1px solid var(--border-color);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
         }
         
-        .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; transition: all 0.2s; }
-        .generate-btn { width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
-        
-        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; padding: 0 10px; }
-        .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid var(--header-border); }
-        .team-header { border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px; }
-        .team-title { font-weight: 900; font-size: 0.65rem; color: var(--text); text-transform: uppercase; }
-        .team-stats { font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4; }
-        
-        .tag { font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; border-radius: 999px; color: #000; min-width: 35px; text-align: center; }
-        
-        .name-f { color: var(--pink); } 
-        .name-g { color: var(--blue-light); }
-        body.light-mode .name-f { color: #db2777; }
-        body.light-mode .name-g { color: #2563eb; }
-        
-        .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
-        .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
-        .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s; }
+        .result-box { 
+            background: var(--result-bg); 
+            border: 1px solid var(--result-border); 
+            border-radius: 0.75rem; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; font-size: 1.4rem; font-weight: 800;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .main-btn {
+            width: 100%; padding: 14px; font-size: 10px; font-weight: 900;
+            border-radius: 50px; text-transform: uppercase; border: none;
+            cursor: pointer; transition: transform 0.1s, opacity 0.2s;
+        }
+        .main-btn:active { transform: scale(0.95); }
+        .main-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
+
+        .btn-nav { width: 100%; max-width: 400px; font-weight: 800; padding: 14px; border-radius: 50px; font-size: 10px; cursor: pointer; border: none; }
+        .stats { margin-top: 8px; font-size: 0.6rem; color: #888888; text-transform: uppercase; font-weight: 800; }
 
         .modal-overlay { 
             display: none; position: fixed; inset: 0; 
@@ -161,28 +182,29 @@
 <body>
 
     <header>
-        <a href="index.html" id="btn-retour" class="header-btn">
+        <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h1 id="mainTitle" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Générer des équipes</h1>
-        <button id="btn-aide" onclick="openHelp()" class="header-btn text-lg">
+        <h1 id="page-title" class="font-black text-lg tracking-normal uppercase text-center flex-grow">
+            Tirage au sort
+        </h1>
+        <button id="btn-aide" onclick="openHelp()" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 text-lg">
             💡
         </button>
     </header>
 
-    <div id="attendance-container"></div>
+    <div class="w-full" id="listeContainer" style="max-width: 400px; margin: 0 auto;"></div>
 
-    <p class="section-title">Nombre d'équipes</p>
-    <div class="flex gap-2 mb-4" id="selector"></div>
+    <div class="light-card mx-auto">
+        <div class="result-box" id="result-display">PRÊT</div>
+        <button id="draw-btn" class="main-btn" onclick="drawName()">Tirer un prénom</button>
+        <div class="stats" id="counter">--</div>
+    </div>
 
-    <button id="main-generate-btn" class="generate-btn !text-white" onclick="generateAndFix()">Générer les équipes</button>
-
-    <div id="results" class="grid-teams"></div>
-
-    <div class="bottom-nav">
-        <button onclick="resetTeams()" class="btn-nav bg-red-500 text-rose-100 shadow-lg">⚠️ effacer les équipes</button>
+    <div class="max-w-md mx-auto flex justify-center mt-4 mb-10 w-full px-4">
+        <button class="btn-nav bg-red-600 text-white shadow-lg" onclick="resetDrawing()">⚠️ RàZ du tirage</button>
     </div>
 
     <div id="alertModal" class="modal-overlay">
@@ -191,318 +213,215 @@
                 <h3 id="alertTitle" class="alert-title">Confirmation</h3>
                 <p id="alertText" class="alert-text">Voulez-vous continuer ?</p>
             </div>
-            <div class="btns" id="modalBtns">
-                <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
+            <div class="btns">
+                <button id="btn-secondary" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
                 <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
     </div>
 
-<script>
-    const mapCouleurs = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e', 'gray': '#666666'
-    };
-
-    const couleursDecidees = {
-        "CP": "#ec4899", "CE1": "#3b82f6", "CE2": "#eab308", 
-        "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
-    };
-
-    let selectedNumTeams = 4;
-    let ALL_STUDENTS = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-    let absents = new Set(JSON.parse(localStorage.getItem('absents_session_equipes')) || []);
-
-    function openHelp() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const couleurHex = mapCouleurs[themePrefs.equipes || 'pink'] || '#ec4899';
-        const container = document.getElementById('modal-body-content');
-        
-        container.innerHTML = `
-            <h3 class="alert-title" style="color: ${couleurHex}">💡 Équipes</h3>
-            <div class="text-[13px] leading-relaxed space-y-3 opacity-90 mb-2" style="color: #111">
-                <p>• <b>Gestion des présents :</b> Cliquez sur le nom d'un élève pour le marquer comme absent (barré). Il ne sera pas inclus dans les équipes.</p>
-                <p>• <b>Configuration :</b> Choisissez le nombre d'équipes souhaité à l'aide des chiffres.</p>
-                <p>• <b>Équilibre :</b> L'algorithme répartit les élèves pour équilibrer automatiquement le nombre de filles/garçons et les différents niveaux au sein de chaque groupe.</p>
-            </div>
-        `;
-
-        const confirmBtn = document.getElementById('alertConfirmBtn');
-        confirmBtn.innerText = "Fermer";
-        confirmBtn.style.backgroundColor = couleurHex;
-        confirmBtn.onclick = closeModal;
-
-        document.getElementById('alertCancelBtn').style.display = 'none';
-        document.getElementById('alertModal').style.display = 'flex';
-    }
-
-    function showAlert(title, text, onConfirm, showCancel = true) {
-        const container = document.getElementById('modal-body-content');
-        container.innerHTML = `<h3 id="alertTitle" class="alert-title">${title}</h3><p id="alertText" class="alert-text">${text}</p>`;
-        
-        const confirmBtn = document.getElementById('alertConfirmBtn');
-        const cancelBtn = document.getElementById('alertCancelBtn');
-        
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const couleurHex = mapCouleurs[themePrefs.equipes || 'pink'] || '#ec4899';
-        
-        confirmBtn.innerText = "Confirmer";
-        confirmBtn.style.backgroundColor = couleurHex;
-        cancelBtn.style.display = showCancel ? 'block' : 'none';
-        
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        
-        newBtn.onclick = () => {
-            closeModal();
-            if(onConfirm) onConfirm();
+    <script>
+        const mapCouleurs = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#666666'
         };
-        document.getElementById('alertModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('alertModal').style.display = 'none';
-    }
-
-    function appliquerTheme() {
-        const savedMode = localStorage.getItem('theme_mode');
-        const isLight = savedMode === 'light';
-        document.body.classList.toggle('light-mode', isLight);
 
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const couleurNom = themePrefs.equipes || 'pink';
-        const couleurHex = mapCouleurs[couleurNom] || '#ec4899';
-        
-        const title = document.getElementById('mainTitle');
-        const genBtn = document.getElementById('main-generate-btn');
-        const btnRetour = document.getElementById('btn-retour');
-        const btnAide = document.getElementById('btn-aide');
-        
-        const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
-        const iconColor = isLightColor ? 'black' : 'white';
+        const nomCouleur = themePrefs.tirage || 'pink';
+        const hexaTheme = mapCouleurs[nomCouleur] || '#ec4899';
 
-        [btnRetour, btnAide].forEach(btn => {
-            if(btn) {
-                btn.style.backgroundColor = couleurHex;
-                const svg = btn.querySelector('svg');
-                if(svg) svg.style.color = iconColor;
-            }
-        });
-
-        if(genBtn) {
-            genBtn.style.backgroundColor = couleurHex;
-            genBtn.style.color = iconColor;
-        }
-        
-        if(title) title.style.color = isLight ? '#000000' : '#ffffff';
-    }
-
-    function getDisplayName(eleve, allStudents) {
-        const parts = eleve.identite.trim().split(" ");
-        const prenom = parts[0];
-        const nom = parts.slice(1).join(" ");
-        const aUnDoublon = allStudents.some(s => s.id !== eleve.id && s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase());
-        return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
-    }
-
-    function init() {
-        appliquerTheme();
-        const sel = document.getElementById('selector');
-        sel.innerHTML = '';
-        for(let i=2; i<=8; i++) {
-            const btn = document.createElement('button');
-            btn.className = `num-btn`;
-            btn.id = `btn-${i}`;
-            btn.innerText = i;
-            btn.onclick = () => selectNum(i);
-            sel.appendChild(btn);
-        }
-        selectNum(selectedNumTeams);
-        renderAttendance();
-        const saved = localStorage.getItem('savedTeams');
-        if (saved) renderTeams(JSON.parse(saved));
-    }
-
-    function selectNum(n) {
-        selectedNumTeams = n;
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const couleurNom = themePrefs.equipes || 'pink';
-        const activeColor = mapCouleurs[couleurNom] || '#ec4899';
-        const isLight = document.body.classList.contains('light-mode');
-        const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
-
-        document.querySelectorAll('.num-btn').forEach(b => {
-            b.style.backgroundColor = isLight ? "#e5e7eb" : "#0a0a0a";
-            b.style.borderColor = isLight ? "#d1d5db" : "#222222";
-            b.style.color = isLight ? "#000000" : "#ffffff";
-        });
-        const activeBtn = document.getElementById('btn-' + n);
-        if (activeBtn) {
-            activeBtn.style.backgroundColor = activeColor;
-            activeBtn.style.borderColor = activeColor;
-            activeBtn.style.color = isLightColor ? 'black' : 'white';
-        }
-    }
-
-    function renderAttendance() {
-        const container = document.getElementById('attendance-container');
-        container.innerHTML = '';
-        const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
-        const groupes = {};
-        ALL_STUDENTS.forEach(s => {
-            const niv = s.niveau.trim().toUpperCase();
-            if (!groupes[niv]) groupes[niv] = [];
-            groupes[niv].push(s);
-        });
-
-        const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
-        const niveauxTries = Object.keys(groupes).sort((a, b) => {
-            let indexA = ordreNiveaux.indexOf(a), indexB = ordreNiveaux.indexOf(b);
-            return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
-        });
-
-        niveauxTries.forEach(niv => {
-            const levelSection = document.createElement('div');
-            const couleurNiveau = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursDecidees[niv] || '#555';
-            levelSection.innerHTML = `<div class="level-label" style="color: ${couleurNiveau} !important;">${niv}</div>`;
-            const grid = document.createElement('div');
-            grid.className = "attendance-grid";
-
-            groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(s => {
-                const isAbs = absents.has(String(s.id));
-                const div = document.createElement('div');
-                div.className = `student-item bg-${s.sexe.toLowerCase().startsWith('f') ? 'f' : 'm'} ${isAbs ? 'absent' : ''}`;
-                div.innerText = getDisplayName(s, ALL_STUDENTS);
-                div.onclick = () => {
-                    const sid = String(s.id);
-                    if(absents.has(sid)) absents.delete(sid);
-                    else absents.add(sid);
-                    localStorage.setItem('absents_session_equipes', JSON.stringify(Array.from(absents)));
-                    renderAttendance();
-                };
-                grid.appendChild(div);
-            });
-            levelSection.appendChild(grid);
-            container.appendChild(levelSection);
-        });
-    }
-
-    const getStats = (team) => {
-        const stats = { f: 0, total: team.length };
-        Object.keys(couleursDecidees).forEach(n => stats[n.toLowerCase()] = 0);
-        team.forEach(s => {
-            if(s.sexe.toLowerCase().startsWith('f')) stats.f++;
-            const niv = s.niveau.toUpperCase();
-            if(stats[niv.toLowerCase()] !== undefined) stats[niv.toLowerCase()]++;
-        });
-        return stats;
-    };
-
-    function generateAndFix() {
-        let presents = ALL_STUDENTS.filter(s => !absents.has(String(s.id)));
-        if (presents.length < selectedNumTeams) {
-            return showAlert("Effectif insuffisant", "Il n'y a pas assez d'élèves présents pour créer " + selectedNumTeams + " équipes.", null, false);
+        function openHelp() {
+            const container = document.getElementById('modal-body-content');
+            container.innerHTML = `
+                <h3 class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">🎲 Tirage</h3>
+                <div class="text-[11px] leading-relaxed space-y-2 opacity-90 mb-2" style="color: #111">
+                    <p>• <b>Absences :</b> Cliquez sur le nom d'un élève pour le griser s'il est absent. Il ne sera pas tiré au sort.</p>
+                    <p>• <b>Le Tirage :</b> Cliquez sur le bouton pour lancer l'animation et désigner un élève présent.</p>
+                    <p>• <b>Suivi :</b> Les élèves déjà tirés sont barrés. Le compteur indique la progression.</p>
+                    <p>• <b>RàZ :</b> Le bouton rouge remet tous les élèves présents dans la liste de tirage.</p>
+                </div>
+            `;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.innerText = "Fermer";
+            confirmBtn.style.backgroundColor = hexaTheme;
+            confirmBtn.onclick = closeModal;
+            document.getElementById('btn-secondary').style.display = 'none';
+            document.getElementById('alertModal').style.display = 'flex';
         }
 
-        let teams = Array.from({ length: selectedNumTeams }, () => []);
-        presents.sort(() => Math.random() - 0.5);
-        presents.forEach((s, idx) => teams[idx % selectedNumTeams].push(s));
+        function showAlert(title, text, onConfirm) {
+            const container = document.getElementById('modal-body-content');
+            container.innerHTML = `<h3 class="alert-title">${title}</h3><p class="alert-text">${text}</p>`;
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            confirmBtn.innerText = "Confirmer";
+            confirmBtn.style.backgroundColor = hexaTheme;
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            newBtn.onclick = () => { closeModal(); onConfirm(); };
+            document.getElementById('btn-secondary').style.display = 'block';
+            document.getElementById('btn-secondary').innerText = "Annuler";
+            document.getElementById('alertModal').style.display = 'flex';
+        }
 
-        let improved = true, count = 0;
-        while(improved && count < 100) {
-            improved = false; count++;
-            for(let i=0; i < teams.length; i++) {
-                for(let j=0; j < teams.length; j++) {
-                    if(i === j) continue;
-                    let sI = getStats(teams[i]), sJ = getStats(teams[j]);
-                    let needsFix = Math.abs(sI.f - sJ.f) > 1;
-                    if(!needsFix) {
-                        for(let n in couleursDecidees) {
-                            if(Math.abs(sI[n.toLowerCase()] - sJ[n.toLowerCase()]) > 1) { needsFix = true; break; }
-                        }
-                    }
-                    if (needsFix) {
-                        for(let x=0; x<teams[i].length; x++) {
-                            for(let y=0; y<teams[j].length; y++) {
-                                let oldDiff = Math.abs(sI.f-sJ.f);
-                                for(let n in couleursDecidees) oldDiff += Math.abs(sI[n.toLowerCase()] - sJ[n.toLowerCase()]);
-                                [teams[i][x], teams[j][y]] = [teams[j][y], teams[i][x]];
-                                let nI = getStats(teams[i]), nJ = getStats(teams[j]);
-                                let newDiff = Math.abs(nI.f-nJ.f);
-                                for(let n in couleursDecidees) newDiff += Math.abs(nI[n.toLowerCase()] - nJ[n.toLowerCase()]);
-                                if(newDiff < oldDiff) { improved = true; break; }
-                                else { [teams[i][x], teams[j][y]] = [teams[j][y], teams[i][x]]; }
-                            }
-                            if(improved) break;
-                        }
-                    }
+        function closeModal() { document.getElementById('alertModal').style.display = 'none'; }
+
+        function appliquerTheme() {
+            const savedMode = localStorage.getItem('theme_mode');
+            const isLight = savedMode === 'light';
+            document.body.classList.toggle('light-mode', isLight);
+            
+            const title = document.getElementById('page-title');
+            const btn = document.getElementById('draw-btn');
+            const display = document.getElementById('result-display');
+            const btnRetour = document.getElementById('btn-retour');
+            const btnAide = document.getElementById('btn-aide');
+            
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+            const contrastColor = isLightColor ? 'black' : 'white';
+            
+            if (title) title.style.color = isLight ? '#000000' : '#ffffff';
+            
+            [btnRetour, btnAide, btn].forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = hexaTheme;
+                    if (el === btn) el.style.color = contrastColor;
+                    const svg = el.querySelector('svg');
+                    if (svg) svg.style.color = contrastColor;
                 }
+            });
+            
+            if (display) display.style.color = hexaTheme;
+        }
+
+        function formatName(fullName) {
+            const parts = fullName.trim().split(" ");
+            const prenom = parts[0];
+            const nom = parts.slice(1).join(" ");
+            const aUnDoublon = rawData.some(s => 
+                s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase() && 
+                s.identite.trim() !== fullName.trim()
+            );
+            return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
+        }
+
+        let rawData = JSON.parse(localStorage.getItem('maListeEleves')) || [];
+        let remaining = JSON.parse(localStorage.getItem('remainingStudents')) || rawData.map(el => el.id);
+
+        function saveState() { localStorage.setItem('remainingStudents', JSON.stringify(remaining)); }
+
+        function renderList() {
+            const container = document.getElementById('listeContainer');
+            container.innerHTML = "";
+            const couleursFixes = { "CP": "#ec4899", "CE1": "#3b82f6", "CE2": "#eab308", "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7" };
+            const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
+            const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
+            const groupes = {};
+            
+            rawData.forEach(el => {
+                const niv = el.niveau.trim().toUpperCase();
+                if (!groupes[niv]) groupes[niv] = [];
+                groupes[niv].push(el);
+            });
+            
+            const niveauxTries = Object.keys(groupes).sort((a, b) => {
+                let indexA = ordreNiveaux.indexOf(a), indexB = ordreNiveaux.indexOf(b);
+                return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+            });
+
+            niveauxTries.forEach(niv => {
+                const levelSection = document.createElement('div');
+                const couleurNiveau = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursFixes[niv] || '#888888';
+                levelSection.innerHTML = `<div class="level-title" style="color: ${couleurNiveau} !important;">${niv}</div>`;
+                
+                const grid = document.createElement('div');
+                grid.className = "student-grid";
+                
+                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
+                    const isDrawn = !remaining.includes(el.id);
+                    const item = document.createElement('div');
+                    item.className = `student-item bg-${el.sexe.toLowerCase().startsWith('f') ? 'f' : 'm'} ${isDrawn ? 'drawn' : ''}`;
+                    item.innerText = formatName(el.identite);
+                    item.onclick = () => toggleStudent(el.id);
+                    grid.appendChild(item);
+                });
+                
+                levelSection.appendChild(grid);
+                container.appendChild(levelSection);
+            });
+            
+            const total = rawData.length, restants = remaining.length;
+            document.getElementById('counter').innerText = `${restants} restant${restants > 1 ? 's' : ''} / ${total}`;
+            
+            const btn = document.getElementById('draw-btn');
+            if (restants === 0) { 
+                btn.disabled = true; 
+                btn.innerText = "Session terminée"; 
+            } else { 
+                btn.disabled = false; 
+                btn.innerText = "Tirer un prénom"; 
             }
         }
-        localStorage.setItem('savedTeams', JSON.stringify(teams));
-        renderTeams(teams);
-    }
 
-    function renderTeams(teams) {
-        const results = document.getElementById('results');
-        const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
-        results.innerHTML = '';
-        const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
+        function toggleStudent(id) {
+            remaining = remaining.includes(id) ? remaining.filter(item => item !== id) : [...remaining, id];
+            saveState(); 
+            renderList();
+        }
 
-        teams.forEach((team, i) => {
-            team.sort((a, b) => {
-                const nivA = a.niveau.trim().toUpperCase();
-                const nivB = b.niveau.trim().toUpperCase();
-                let indexA = ordreNiveaux.indexOf(nivA);
-                let indexB = ordreNiveaux.indexOf(nivB);
-                if (indexA === -1) indexA = 99;
-                if (indexB === -1) indexB = 99;
-                if (indexA !== indexB) return indexA - indexB;
-                return a.identite.trim().localeCompare(b.identite.trim());
-            });
-
-            const s = getStats(team);
-            let statsText = `${s.f}F/${s.total-s.f}G`;
-            Object.keys(couleursDecidees).forEach(n => { if(s[n.toLowerCase()] > 0) statsText += ` • ${s[n.toLowerCase()]}${n}`; });
+        function drawName() {
+            if (remaining.length === 0) return;
+            const display = document.getElementById('result-display'), btn = document.getElementById('draw-btn');
+            btn.disabled = true; 
+            display.style.color = "#666666";
+            display.style.transform = "scale(0.95)";
             
-            let html = `<div class="team-card"><div class="team-header"><span class="team-title">Équipe ${i+1}</span><span class="team-stats">${statsText}</span></div>`;
-            
-            team.forEach(eleve => {
-                const niv = eleve.niveau.toUpperCase();
-                const displayName = getDisplayName(eleve, ALL_STUDENTS);
-                const bgTag = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursDecidees[niv] || '#555';
-                html += `<div class="flex items-start mb-1 text-[0.65rem] font-bold">
-                            <span class="tag" style="background-color: ${bgTag}">${niv}</span>
-                            <span class="${eleve.sexe.toLowerCase().startsWith('f')?'name-f':'name-g'}">${displayName}</span>
-                         </div>`;
+            let iterations = 0;
+            const maxIter = 15;
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * remaining.length);
+                const tempStudent = rawData.find(s => s.id === remaining[randomIndex]);
+                display.innerText = formatName(tempStudent.identite);
+                
+                if (++iterations > maxIter) {
+                    clearInterval(interval);
+                    const finalIndex = Math.floor(Math.random() * remaining.length);
+                    const winnerId = remaining.splice(finalIndex, 1)[0];
+                    const winner = rawData.find(s => s.id === winnerId);
+                    
+                    display.innerText = formatName(winner.identite);
+                    display.style.color = hexaTheme;
+                    display.style.transform = "scale(1.1)";
+                    setTimeout(() => display.style.transform = "scale(1)", 200);
+                    
+                    saveState(); 
+                    renderList();
+                }
+            }, 70);
+        }
+
+        function resetDrawing() {
+            showAlert("Remettre à zéro ?", "Tous les élèves seront à nouveau disponibles pour le tirage.", () => {
+                remaining = rawData.map(el => el.id);
+                localStorage.removeItem('remainingStudents');
+                document.getElementById('result-display').innerText = "PRÊT";
+                document.getElementById('result-display').style.color = hexaTheme;
+                renderList();
             });
-            results.innerHTML += html + `</div>`;
-        });
-    }
+        }
 
-    function resetTeams() {
-        showAlert("Effacer les résultats ?", "Les équipes générées seront supprimées de l'écran.", () => {
-            localStorage.removeItem('savedTeams');
-            document.getElementById('results').innerHTML = '';
-        });
-    }
-    window.onload = init;
-    
-window.onclick = function(event) {
-    const modal = document.getElementById('alertModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
+        window.onload = () => { appliquerTheme(); renderList(); };
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('alertModal');
+            if (event.target === modal) closeModal();
+        }
 
-window.onkeydown = function(event) {
-    if (event.key === "Escape") {
-        closeModal();
-    }
-}
-</script>
+        window.onkeydown = function(event) {
+            if (event.key === "Escape") closeModal();
+        }
+    </script>
 </body>
 </html>
