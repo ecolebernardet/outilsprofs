@@ -383,6 +383,21 @@
         }
 
         window.onload = () => { appliquerTheme(); renderList(); };
+		
+		// Fermer la modal en cliquant sur l'overlay (fond sombre)
+window.onclick = function(event) {
+    const modal = document.getElementById('alertModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Optionnel : Fermer aussi avec la touche Échap
+window.onkeydown = function(event) {
+    if (event.key === "Escape") {
+        closeModal();
+    }
+}
     </script>
 </body>
 </html>
