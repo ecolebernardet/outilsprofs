@@ -19,13 +19,13 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         :root { 
-            --primary: #0ea5e9; 
+            --primary: #6366f1; /* Changé de sky à indigo */
             --bg-page: #000000; 
             --text-main: #ffffff;
-            --card-student: #374151;
-            --header-bg: #111828;
-            --header-border: #1f2937;
-            --card-sub: #9ca3af;
+            --card-student: #1a1a1a; /* Remplacé le gris bleuté par un gris neutre foncé */
+            --header-bg: #000000;    /* Noir pur */
+            --header-border: #262626; /* Gris neutre */
+            --card-sub: #a3a3a3;
         }
 
         /* Mode Clair */
@@ -137,7 +137,6 @@
         .bottom-nav { width: 100%; max-width: 350px; margin: 25px auto 0 auto; padding-bottom: 60px; padding-left: 10px; padding-right: 10px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
         
-        /* Correction Mode Clair Modale Aide */
         body.light-mode .modal-card, html.light-mode-init body .modal-card { background: #ffffff; border-color: #d1d5db; }
     </style>
 </head>
@@ -188,7 +187,7 @@
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
             'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
             'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
+            'rose': '#f43f5e'
         };
 
         const couleursDecidees = {
@@ -196,11 +195,10 @@
             "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
         };
 
-        // GESTION AIDE (Version fixe)
         function ouvrirAide() {
             const display = document.getElementById('aide-content');
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const couleurCompt = mapCouleurs[prefs.compt] || '#0ea5e9';
+            const couleurCompt = mapCouleurs[prefs.compt] || '#6366f1';
             
             display.innerHTML = `
                 <h3 style="color:${couleurCompt}">💡 Aide Comportement</h3>
@@ -216,7 +214,6 @@
         }
 
         function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
-
         function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
 
         function appliquerTheme() {
@@ -225,8 +222,8 @@
             document.body.classList.toggle('light-mode', isLight);
 
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const nomCouleur = prefs['compt'] || 'sky';
-            const couleurHexa = mapCouleurs[nomCouleur] || '#0ea5e9';
+            const nomCouleur = prefs['compt'] || 'indigo'; // Indigo par défaut au lieu de sky
+            const couleurHexa = mapCouleurs[nomCouleur] || '#6366f1';
             
             const titre = document.getElementById('mainTitle');
             const btnRetour = document.getElementById('btn-retour');
@@ -389,7 +386,7 @@
             document.getElementById('alertText').innerText = text;
             const confirmBtn = document.getElementById('alertConfirmBtn');
             const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const colorHex = mapCouleurs[themePrefs.compt || 'sky'] || '#0ea5e9';
+            const colorHex = mapCouleurs[themePrefs.compt || 'indigo'] || '#6366f1';
             confirmBtn.style.backgroundColor = colorHex;
             const newBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
@@ -408,28 +405,20 @@
         };
 
         window.onload = initApp;
-		
-		// Fermer les modales en cliquant sur l'arrière-plan (overlay)
-window.onclick = function(event) {
-    const modalAide = document.getElementById('modal-aide');
-    const modalAlert = document.getElementById('alertModal');
+        
+        window.onclick = function(event) {
+            const modalAide = document.getElementById('modal-aide');
+            const modalAlert = document.getElementById('alertModal');
+            if (event.target === modalAide) fermerAide();
+            if (event.target === modalAlert) closeAlert();
+        }
 
-    if (event.target === modalAide) {
-        fermerAide();
-    }
-    if (event.target === modalAlert) {
-        closeAlert();
-    }
-}
-
-// Fermer les modales avec la touche Échap
-window.onkeydown = function(event) {
-    if (event.key === "Escape") {
-        fermerAide();
-        closeAlert();
-    }
-}
-
+        window.onkeydown = function(event) {
+            if (event.key === "Escape") {
+                fermerAide();
+                closeAlert();
+            }
+        }
     </script>
 </body>
 </html>

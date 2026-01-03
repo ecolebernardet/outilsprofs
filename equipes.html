@@ -22,24 +22,24 @@
             --primary: #ff637e; 
             --bg: #000000; 
             --text: #ffffff; 
-            --card-bg: #111827; 
+            --card-bg: #0a0a0a; 
             --blue-light: #60a5fa; 
             --pink: #f472b6;
-            --btn-num-bg: #111827;
-            --btn-num-border: #374151;
-            --title-gray: #9ca3af;
-            --header-bg: #111828;
-            --header-border: #1f2937;
-            --pill-bg: #1f2937;
+            --btn-num-bg: #0a0a0a;
+            --btn-num-border: #222222;
+            --title-gray: #888888;
+            --header-bg: #000000;
+            --header-border: #222222;
+            --pill-bg: #111111;
         }
 
         body.light-mode, html.light-mode-init body {
             --bg: #eeeeee; 
-            --text: #111827;
+            --text: #000000;
             --card-bg: #ffffff;
             --btn-num-bg: #e5e7eb;
             --btn-num-border: #d1d5db;
-            --title-gray: #6b7280;
+            --title-gray: #666666;
             --header-bg: #ffffff;
             --header-border: #e5e7eb;
             --pill-bg: #ffffff;
@@ -100,10 +100,10 @@
         .bg-m { color: var(--blue-light) !important; } 
 
         .absent { 
-            background-color: #0a0a0a !important; 
-            color: #374151 !important; 
+            background-color: #050505 !important; 
+            color: #444444 !important; 
             text-decoration: line-through; 
-            border-color: #1f2937 !important;
+            border-color: #111111 !important;
             opacity: 0.8;
             transform: scale(0.96);
         }
@@ -139,7 +139,7 @@
 
         .modal-overlay { 
             display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
             align-items: center; justify-content: center; z-index: 1000; padding: 20px; 
         }
         .modal-content { 
@@ -148,14 +148,14 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
-        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        .alert-text { font-size: 14px; color: #444; text-align: center; line-height: 1.5; font-weight: 500; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { 
             flex: 1; padding: 14px; border: none; border-radius: 16px; 
             font-weight: 900; font-size: 11px; text-transform: uppercase; 
             cursor: pointer; transition: transform 0.2s;
         }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; }
+        .btn-cancel { background: #eeeeee; color: #444; }
     </style>
 </head>
 <body>
@@ -204,7 +204,7 @@
         'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
         'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
         'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e', 'gray': '#6b7280'
+        'rose': '#f43f5e', 'gray': '#666666'
     };
 
     const couleursDecidees = {
@@ -335,9 +335,9 @@
         const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurNom);
 
         document.querySelectorAll('.num-btn').forEach(b => {
-            b.style.backgroundColor = isLight ? "#e5e7eb" : "#111827";
-            b.style.borderColor = isLight ? "#d1d5db" : "#374151";
-            b.style.color = isLight ? "#111827" : "#ffffff";
+            b.style.backgroundColor = isLight ? "#e5e7eb" : "#0a0a0a";
+            b.style.borderColor = isLight ? "#d1d5db" : "#222222";
+            b.style.color = isLight ? "#000000" : "#ffffff";
         });
         const activeBtn = document.getElementById('btn-' + n);
         if (activeBtn) {
@@ -490,8 +490,7 @@
         });
     }
     window.onload = init;
-	
-	// Fermer la modal en cliquant sur l'overlay (fond sombre)
+    
 window.onclick = function(event) {
     const modal = document.getElementById('alertModal');
     if (event.target === modal) {
@@ -499,13 +498,11 @@ window.onclick = function(event) {
     }
 }
 
-// Fermer aussi avec la touche Échap pour plus d'accessibilité
 window.onkeydown = function(event) {
     if (event.key === "Escape") {
         closeModal();
     }
 }
-
 </script>
 </body>
 </html>

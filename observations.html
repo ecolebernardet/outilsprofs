@@ -183,11 +183,11 @@
     <script>
         let elevesInscrits = JSON.parse(localStorage.getItem('maListeEleves')) || [];
         let savedComments = JSON.parse(localStorage.getItem('studentObservations')) || {};
-        let currentStudentName = ""; // Utilisation du NOM comme référence
+        let currentStudentName = "";
 
         const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
         const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
-        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
 
         // --- THEME ---
         function appliquerTheme() {
@@ -254,7 +254,6 @@
                     const item = document.createElement('div');
                     item.className = `student-item no-select ${genderClass}`;
                     
-                    // Liaison par NOM (identite)
                     const hasNote = (savedComments[el.identite] || "").trim().length > 0;
                     
                     item.innerHTML = `<span class="student-name">${formatName(el.identite)}</span><span class="status-icon">${hasNote ? '🔎' : '＋'}</span>`;
@@ -314,7 +313,6 @@
                     const incomingObs = data.observations || data.studentObservations;
                     if (incomingObs) {
                         showAlert("Importer ?", "Fusionner les observations du fichier ?", () => {
-                            // On fusionne les données importées avec l'existant (priorité import)
                             savedComments = Object.assign({}, savedComments, incomingObs);
                             localStorage.setItem('studentObservations', JSON.stringify(savedComments));
                             renderList();
@@ -359,33 +357,23 @@
         function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
 
         window.onload = () => { appliquerTheme(); renderList(); };
-		
-		// Fermer les modales en cliquant sur l'overlay (fond sombre)
-window.onclick = function(event) {
-    const modalNote = document.getElementById('modal');
-    const modalAide = document.getElementById('modal-aide');
-    const modalAlert = document.getElementById('alertModal');
+        
+        window.onclick = function(event) {
+            const modalNote = document.getElementById('modal');
+            const modalAide = document.getElementById('modal-aide');
+            const modalAlert = document.getElementById('alertModal');
+            if (event.target === modalNote) closeAllModals();
+            if (event.target === modalAide) fermerAide();
+            if (event.target === modalAlert) closeAlert();
+        }
 
-    if (event.target === modalNote) {
-        closeAllModals();
-    }
-    if (event.target === modalAide) {
-        fermerAide();
-    }
-    if (event.target === modalAlert) {
-        closeAlert();
-    }
-}
-
-// Fermer avec la touche Échap
-window.onkeydown = function(event) {
-    if (event.key === "Escape") {
-        closeAllModals();
-        fermerAide();
-        closeAlert();
-    }
-}
-
+        window.onkeydown = function(event) {
+            if (event.key === "Escape") {
+                closeAllModals();
+                fermerAide();
+                closeAlert();
+            }
+        }
     </script>
 </body>
 </html>

@@ -20,17 +20,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #000;
-            --text-page: #eee;
-            --header-bg: #111828;
-            --header-border: #1f2937;
-            --border-color: #1f2937;
-            --card-bg: #111827;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e;
             --card-text: #ffffff;
-            --input-bg: #1f2937;
-            --input-border: #374151;
+            --input-bg: #2a2a2a;
+            --input-border: rgba(255, 255, 255, 0.1);
             --input-text: #ffffff;
-            --search-bg: #18181b; 
+            --search-bg: #1e1e1e; 
         }
 
         body.light-mode, html.light-mode-init body {
@@ -398,14 +398,12 @@
         }
         
         window.onload = () => { appliquerTheme(); setupColorPickers(); renderNotes(); setupSortable(); setupImport(); };
-		
-		// Fermer les modals en cliquant à l'extérieur (sur l'overlay)
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal-overlay')) {
-        event.target.style.display = 'none';
-    }
-}
-
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

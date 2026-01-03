@@ -19,30 +19,32 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #000;
-            --text-page: #eee;
-            --header-bg: #111828;
-            --header-border: #1f2937;
-            --border-color: #1f2937;
-            --card-bg: #111827;
+            /* Couleurs Mode Sombre - Nettoyées du bleu nuit */
+            --bg-page: #000000;
+            --text-page: #ffffff;
+            --header-bg: #0a0a0a;
+            --header-border: #222222;
+            --border-color: #222222;
+            --card-bg: #0a0a0a;
             --card-text: #ffffff;
-            --result-bg: #1f2937;
-            --result-border: #374151;
+            --result-bg: #111111;
+            --result-border: #222222;
             --blue-light: #60a5fa; 
             --pink: #f472b6;
-            --pill-bg: #1f2937;
+            --pill-bg: #111111;
         }
 
         body.light-mode, html.light-mode-init body {
+            /* Couleurs Mode Clair */
             --bg-page: #eeeeee;
-            --text-page: #111827;
+            --text-page: #000000;
             --header-bg: #ffffff;
-            --header-border: #e5e7eb;
-            --border-color: #ddd;
+            --header-border: #dddddd;
+            --border-color: #cccccc;
             --card-bg: #ffffff;
-            --card-text: #111827;
-            --result-bg: #f9fafb;
-            --result-border: #d1d5db;
+            --card-text: #000000;
+            --result-bg: #f5f5f5;
+            --result-border: #dddddd;
             --pill-bg: #ffffff;
         }
 
@@ -99,11 +101,11 @@
         .bg-m { color: var(--blue-light) !important; } 
 
         .drawn { 
-            background-color: #0a0a0a !important; 
-            color: #374151 !important; 
+            background-color: #050505 !important; 
+            color: #444444 !important; 
             text-decoration: line-through; 
-            border-color: #1f2937 !important;
-            opacity: 0.8;
+            border-color: #111111 !important;
+            opacity: 0.6;
             transform: scale(0.96);
         }
 
@@ -115,7 +117,7 @@
         } 
         
         body.light-mode .drawn, html.light-mode-init .drawn { 
-            background: #eeeeee !important; color: #999999 !important; border-color: #cccccc !important;
+            background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important;
         }
 
         .level-title { 
@@ -129,7 +131,7 @@
             border-radius: 1.5rem; 
             width: 95%; max-width: 400px; padding: 20px; text-align: center; 
             margin: 20px 0; border: 1px solid var(--border-color);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
         
         .result-box { 
@@ -150,11 +152,11 @@
         .main-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
 
         .btn-nav { width: 100%; max-width: 400px; font-weight: 800; padding: 14px; border-radius: 50px; font-size: 10px; cursor: pointer; border: none; }
-        .stats { margin-top: 8px; font-size: 0.6rem; color: #6b7280; text-transform: uppercase; font-weight: 800; }
+        .stats { margin-top: 8px; font-size: 0.6rem; color: #888888; text-transform: uppercase; font-weight: 800; }
 
         .modal-overlay { 
             display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
             align-items: center; justify-content: center; z-index: 1000; padding: 20px; 
         }
         .modal-content { 
@@ -163,14 +165,14 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
-        .alert-text { font-size: 14px; color: #4b5563; text-align: center; line-height: 1.5; font-weight: 500; }
+        .alert-text { font-size: 14px; color: #444; text-align: center; line-height: 1.5; font-weight: 500; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { 
             flex: 1; padding: 14px; border: none; border-radius: 16px; 
             font-weight: 900; font-size: 11px; text-transform: uppercase; 
             cursor: pointer; transition: transform 0.2s;
         }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; }
+        .btn-cancel { background: #eeeeee; color: #444; }
     </style>
 </head>
 <body>
@@ -198,7 +200,7 @@
     </div>
 
     <div class="max-w-md mx-auto flex justify-center mt-4 mb-10 w-full px-4">
-        <button class="btn-nav bg-red-500 text-white shadow-lg" onclick="resetDrawing()">⚠️ RàZ du tirage</button>
+        <button class="btn-nav bg-red-600 text-white shadow-lg" onclick="resetDrawing()">⚠️ RàZ du tirage</button>
     </div>
 
     <div id="alertModal" class="modal-overlay">
@@ -220,7 +222,7 @@
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
             'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
             'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
+            'rose': '#f43f5e', 'gray': '#666666'
         };
 
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
@@ -231,7 +233,7 @@
             const container = document.getElementById('modal-body-content');
             container.innerHTML = `
                 <h3 class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">🎲 Tirage</h3>
-                <div class="text-[11px] leading-relaxed space-y-2 opacity-80 mb-2" style="color: #111">
+                <div class="text-[11px] leading-relaxed space-y-2 opacity-90 mb-2" style="color: #111">
                     <p>• <b>Absences :</b> Cliquez sur le nom d'un élève pour le griser s'il est absent. Il ne sera pas tiré au sort.</p>
                     <p>• <b>Le Tirage :</b> Cliquez sur le bouton pour lancer l'animation et désigner un élève présent.</p>
                     <p>• <b>Suivi :</b> Les élèves déjà tirés sont barrés. Le compteur indique la progression.</p>
@@ -266,14 +268,18 @@
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
             document.body.classList.toggle('light-mode', isLight);
+            
             const title = document.getElementById('page-title');
             const btn = document.getElementById('draw-btn');
             const display = document.getElementById('result-display');
             const btnRetour = document.getElementById('btn-retour');
             const btnAide = document.getElementById('btn-aide');
+            
             const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
             const contrastColor = isLightColor ? 'black' : 'white';
+            
             if (title) title.style.color = isLight ? '#000000' : '#ffffff';
+            
             [btnRetour, btnAide, btn].forEach(el => {
                 if (el) {
                     el.style.backgroundColor = hexaTheme;
@@ -282,6 +288,7 @@
                     if (svg) svg.style.color = contrastColor;
                 }
             });
+            
             if (display) display.style.color = hexaTheme;
         }
 
@@ -308,21 +315,26 @@
             const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
             const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
             const groupes = {};
+            
             rawData.forEach(el => {
                 const niv = el.niveau.trim().toUpperCase();
                 if (!groupes[niv]) groupes[niv] = [];
                 groupes[niv].push(el);
             });
+            
             const niveauxTries = Object.keys(groupes).sort((a, b) => {
                 let indexA = ordreNiveaux.indexOf(a), indexB = ordreNiveaux.indexOf(b);
                 return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
             });
+
             niveauxTries.forEach(niv => {
                 const levelSection = document.createElement('div');
-                const couleurNiveau = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursFixes[niv] || '#9ca3af';
+                const couleurNiveau = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursFixes[niv] || '#888888';
                 levelSection.innerHTML = `<div class="level-title" style="color: ${couleurNiveau} !important;">${niv}</div>`;
+                
                 const grid = document.createElement('div');
                 grid.className = "student-grid";
+                
                 groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
                     const isDrawn = !remaining.includes(el.id);
                     const item = document.createElement('div');
@@ -331,43 +343,57 @@
                     item.onclick = () => toggleStudent(el.id);
                     grid.appendChild(item);
                 });
+                
                 levelSection.appendChild(grid);
                 container.appendChild(levelSection);
             });
+            
             const total = rawData.length, restants = remaining.length;
             document.getElementById('counter').innerText = `${restants} restant${restants > 1 ? 's' : ''} / ${total}`;
+            
             const btn = document.getElementById('draw-btn');
-            if (restants === 0) { btn.disabled = true; btn.innerText = "Session terminée"; } 
-            else { btn.disabled = false; btn.innerText = "Tirer un prénom"; }
+            if (restants === 0) { 
+                btn.disabled = true; 
+                btn.innerText = "Session terminée"; 
+            } else { 
+                btn.disabled = false; 
+                btn.innerText = "Tirer un prénom"; 
+            }
         }
 
         function toggleStudent(id) {
             remaining = remaining.includes(id) ? remaining.filter(item => item !== id) : [...remaining, id];
-            saveState(); renderList();
+            saveState(); 
+            renderList();
         }
 
         function drawName() {
             if (remaining.length === 0) return;
             const display = document.getElementById('result-display'), btn = document.getElementById('draw-btn');
             btn.disabled = true; 
-            display.style.color = "#9ca3af";
+            display.style.color = "#666666";
             display.style.transform = "scale(0.95)";
+            
             let iterations = 0;
             const maxIter = 15;
             const interval = setInterval(() => {
                 const randomIndex = Math.floor(Math.random() * remaining.length);
                 const tempStudent = rawData.find(s => s.id === remaining[randomIndex]);
                 display.innerText = formatName(tempStudent.identite);
+                
                 if (++iterations > maxIter) {
                     clearInterval(interval);
                     const finalIndex = Math.floor(Math.random() * remaining.length);
                     const winnerId = remaining.splice(finalIndex, 1)[0];
                     const winner = rawData.find(s => s.id === winnerId);
+                    
                     display.innerText = formatName(winner.identite);
                     display.style.color = hexaTheme;
                     display.style.transform = "scale(1.1)";
                     setTimeout(() => display.style.transform = "scale(1)", 200);
-                    saveState(); renderList();
+                    
+                    saveState(); 
+                    renderList();
                 }
             }, 70);
         }
@@ -383,21 +409,15 @@
         }
 
         window.onload = () => { appliquerTheme(); renderList(); };
-		
-		// Fermer la modal en cliquant sur l'overlay (fond sombre)
-window.onclick = function(event) {
-    const modal = document.getElementById('alertModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('alertModal');
+            if (event.target === modal) closeModal();
+        }
 
-// Optionnel : Fermer aussi avec la touche Échap
-window.onkeydown = function(event) {
-    if (event.key === "Escape") {
-        closeModal();
-    }
-}
+        window.onkeydown = function(event) {
+            if (event.key === "Escape") closeModal();
+        }
     </script>
 </body>
 </html>
