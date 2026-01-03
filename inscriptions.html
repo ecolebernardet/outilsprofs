@@ -132,7 +132,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); text-align: center;
         }
 
-        /* MODALE D'AIDE */
         #modal-aide { 
             display: none; position: fixed; inset: 0; z-index: 10000; 
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
@@ -234,13 +233,15 @@
 
         <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
             <div class="grid grid-cols-3 gap-2">
-                <label class="btn-nav bg-neutral-800 text-white shadow-md flex items-center justify-center">👇 importer .txt 👇<input type="file" id="fileInput" accept=".txt,.csv" class="hidden"></label>
+                <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
                 <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
                 <button onclick="genererPDF()" class="btn-nav bg-neutral-800 text-white shadow-md">📄 .pdf</button>
             </div>
             <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
         </div>
     </div>
+
+    <input type="file" id="fileInput" accept=".txt" style="display: none;">
 
     <script>
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
@@ -278,43 +279,20 @@
             }
         }
 
-        function ouvrirAide() { 
-            document.getElementById('modal-aide').style.display = 'flex'; 
-        }
-        function fermerAide() { 
-            document.getElementById('modal-aide').style.display = 'none'; 
-        }
+        function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+        function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
         function appliquerCouleursTheme() {
             const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
             const textClr = isDarkTxt ? '#000' : '#fff';
-
-            // Bouton soumission
             const btnSubmit = document.getElementById('btn-submit');
-            if (btnSubmit) { 
-                btnSubmit.style.backgroundColor = hexaTheme; 
-                btnSubmit.style.color = textClr; 
-            }
-
-            // Boutons Header
+            if (btnSubmit) { btnSubmit.style.backgroundColor = hexaTheme; btnSubmit.style.color = textClr; }
             const headerBtns = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
-            headerBtns.forEach(btn => {
-                if(btn) {
-                    btn.style.backgroundColor = hexaTheme;
-                    btn.style.color = textClr;
-                }
-            });
-
-            // --- NOUVEAU : PERSONNALISATION MODALE AIDE ---
+            headerBtns.forEach(btn => { if(btn) { btn.style.backgroundColor = hexaTheme; btn.style.color = textClr; } });
             const aideTitre = document.getElementById('aide-titre');
             if(aideTitre) aideTitre.style.color = hexaTheme;
-
             const btnFermerAide = document.getElementById('btn-fermer-aide');
-            if(btnFermerAide) {
-                btnFermerAide.style.backgroundColor = hexaTheme;
-                btnFermerAide.style.color = textClr;
-            }
-
+            if(btnFermerAide) { btnFermerAide.style.backgroundColor = hexaTheme; btnFermerAide.style.color = textClr; }
             majBoutonsTri();
         }
 
@@ -368,13 +346,8 @@
             const container = document.getElementById('listeContainer');
             if (!container) return;
             container.innerHTML = eleves.length === 0 ? `<p class="text-center text-xs py-10 italic" style="color:var(--sub-text)">Aucun élève inscrit.</p>` : "";
-            
             const groupes = {};
-            eleves.forEach(el => { 
-                if (!groupes[el.niveau]) groupes[el.niveau] = []; 
-                groupes[el.niveau].push(el); 
-            });
-
+            eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
             const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
             container.className = "grid grid-cols-2 gap-3 items-start w-full"; 
 
@@ -383,7 +356,6 @@
                 levelColumn.className = "flex flex-col";
                 const couleurNiveau = couleurParNiveau[niv] || hexaTheme;
                 levelColumn.innerHTML = `<h3 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-3">${niv}</h3>`;
-                
                 const list = document.createElement('div');
                 list.className = "flex flex-col gap-1.5";
                 
@@ -397,7 +369,6 @@
                     const item = document.createElement('div');
                     const genderClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
                     item.className = `student-item ${genderClass}`;
-                    
                     const parts = el.identite.split(" ");
                     const prenomRaw = parts[0];
                     const nomRaw = parts.slice(1).join(" ");
@@ -411,9 +382,7 @@
                             ${el.dateNaissance ? `<span class="text-[8px] italic leading-none mt-0.5" style="color:var(--sub-text)">${el.dateNaissance}</span>` : ""}
                         </div>
                         <button onclick="supprimer('${el.id}')" class="ml-1 opacity-20 hover:opacity-100 transition-opacity p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>`;
                     list.appendChild(item);
                 });
@@ -474,124 +443,105 @@
 
         function exporterListe() {
             if (eleves.length === 0) return alert("Liste vide !");
-            let contenu = eleves.map(el => { const p = el.identite.split(" "); return `${p[0]};${p.slice(1).join(" ")};${el.sexe};${el.niveau};${el.dateNaissance||''}`; }).join("\n");
-            const blob = new Blob([contenu], { type: 'text/plain' }); const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `export_eleves.txt`; a.click();
+            const dateJour = new Date().toISOString().split('T')[0];
+            let contenu = eleves.map(el => { 
+                const p = el.identite.split(" "); 
+                return `${p[0]};${p.slice(1).join(" ")};${el.sexe};${el.niveau};${el.dateNaissance||''}`; 
+            }).join("\n");
+            const blob = new Blob([contenu], { type: 'text/plain' }); 
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.href = url; a.download = `outilsprofs_eleves_${dateJour}.txt`; 
+            a.click(); URL.revokeObjectURL(url);
         }
+
+        function importerListe() { document.getElementById('fileInput').click(); }
 
         function genererPDF() {
             if (eleves.length === 0) return alert("La liste est vide !");
             const { jsPDF } = window.jspdf; 
             const doc = new jsPDF();
-            
-            // Formatage des dates
             const maintenant = new Date();
             const dateAffichage = maintenant.toLocaleDateString('fr-FR');
             const dateFichier = maintenant.toISOString().split('T')[0];
             
-            // --- 1. EN-TÊTE ---
             doc.setFont("helvetica", "bold");
             doc.setFontSize(18);
             doc.text("LISTE DES ÉLÈVES", 105, 15, { align: "center" });
-            
             const niveauxUniques = [...new Set(eleves.map(e => e.niveau))].sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
             doc.setFontSize(12);
             doc.text(niveauxUniques.join(" / "), 105, 22, { align: "center" });
-            
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
             doc.text("Enseignant : Nicolas BERNARDET", 14, 30);
             doc.text(`Date : ${dateAffichage}`, 196, 30, { align: "right" });
 
-            // --- 2. PRÉPARATION DES DONNÉES ---
             const tableBody = [];
             let globalIndex = 1;
-
             niveauxUniques.forEach(niv => {
-                // Couleur Pastel pour le niveau
-                let colorHex = (typeof couleurParNiveau !== 'undefined' && couleurParNiveau[niv]) ? couleurParNiveau[niv] : "#E0E0E0";
+                let colorHex = (couleurParNiveau[niv]) ? couleurParNiveau[niv] : "#E0E0E0";
+                const blend = (c) => Math.round(c + (255 - c) * 0.75);
+                const r = parseInt(colorHex.slice(1, 3), 16), g = parseInt(colorHex.slice(3, 5), 16), b = parseInt(colorHex.slice(5, 7), 16);
                 
-                const getPastelRGB = (hex) => {
-                    const r = parseInt(hex.slice(1, 3), 16);
-                    const g = parseInt(hex.slice(3, 5), 16);
-                    const b = parseInt(hex.slice(5, 7), 16);
-                    const blend = (c) => Math.round(c + (255 - c) * 0.75); 
-                    return [blend(r), blend(g), blend(b)];
-                };
+                tableBody.push([{ content: `NIVEAU : ${niv}`, colSpan: 5, styles: { fillColor: [blend(r), blend(g), blend(b)], fontStyle: 'bold', halign: 'center', fontSize: 7, cellPadding: 0.8, textColor: [100, 100, 100] } }]);
 
-                // Ligne de niveau fine
-                tableBody.push([
-                    { 
-                        content: `NIVEAU : ${niv}`, 
-                        colSpan: 5, 
-                        styles: { 
-                            fillColor: getPastelRGB(colorHex), 
-                            fontStyle: 'bold', 
-                            halign: 'center', 
-                            fontSize: 7,
-                            cellPadding: 0.8,
-                            textColor: [100, 100, 100]
-                        } 
-                    }
-                ]);
-
-                // Tri des élèves
-                const elevesDuNiveau = eleves.filter(e => e.niveau === niv).sort((a, b) => {
-                    const partsA = a.identite.split(" ");
-                    const partsB = b.identite.split(" ");
-                    const pA = partsA[0], nA = partsA.slice(1).join(" ");
-                    const pB = partsB[0], nB = partsB.slice(1).join(" ");
-                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
-                });
-
-                elevesDuNiveau.forEach(el => {
-                    const parts = el.identite.split(" ");
-                    const prenom = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-                    const nom = parts.slice(1).join(" ").toUpperCase();
-                    const identiteAffichee = modeTriApp === 'nom' ? `${nom} ${prenom}` : `${prenom} ${nom}`;
-
-                    tableBody.push([
-                        globalIndex++,
-                        identiteAffichee,
-                        el.dateNaissance ? el.dateNaissance.split('-').reverse().join('/') : '-',
-                        el.sexe.toUpperCase(),
-                        el.niveau
-                    ]);
+                eleves.filter(e => e.niveau === niv).sort((a, b) => {
+                    const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
+                    return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
+                }).forEach(el => {
+                    const p = el.identite.split(" ");
+                    const ident = modeTriApp === 'nom' ? `${p.slice(1).join(" ").toUpperCase()} ${p[0].charAt(0).toUpperCase()+p[0].slice(1).toLowerCase()}` : `${p[0].charAt(0).toUpperCase()+p[0].slice(1).toLowerCase()} ${p.slice(1).join(" ").toUpperCase()}`;
+                    tableBody.push([globalIndex++, ident, el.dateNaissance ? el.dateNaissance.split('-').reverse().join('/') : '-', el.sexe.toUpperCase(), el.niveau]);
                 });
             });
 
-            // --- 3. GÉNÉRATION DU TABLEAU ---
             doc.autoTable({
                 head: [['#', 'Prénom NOM', 'Date Naiss.', 'S.', 'Niveau']],
                 body: tableBody,
                 startY: 35,
                 theme: 'striped',
-                headStyles: { 
-                    fillColor: [30, 30, 30], 
-                    textColor: [255, 255, 255], 
-                    fontStyle: 'bold' 
-                },
-                styles: { 
-                    fontSize: 9, 
-                    cellPadding: 2.5,
-                    valign: 'middle'
-                },
-                // Zèbre légèrement plus sombre pour un meilleur contraste
-                alternateRowStyles: {
-                    fillColor: [235, 235, 235] 
-                },
-                columnStyles: {
-                    0: { cellWidth: 10, halign: 'center' },
-                    2: { cellWidth: 30, halign: 'center' },
-                    3: { cellWidth: 10, halign: 'center' },
-                    4: { cellWidth: 20, halign: 'center' }
-                },
+                headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255], fontStyle: 'bold' },
+                styles: { fontSize: 9, cellPadding: 2.5, valign: 'middle' },
+                alternateRowStyles: { fillColor: [235, 235, 235] },
+                columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 2: { cellWidth: 30, halign: 'center' }, 3: { cellWidth: 10, halign: 'center' }, 4: { cellWidth: 20, halign: 'center' } },
                 margin: { left: 14, right: 14 }
             });
-
             doc.save(`outilsprofs_liste_eleves_${dateFichier}.pdf`);
         }
-		
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const fichier = e.target.files[0];
+                    if (!fichier) return;
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const lignes = event.target.result.split(/\r?\n/);
+                        const nouveauxEleves = [];
+                        lignes.forEach(ligne => {
+                            if (ligne.trim() === "") return;
+                            const col = ligne.split(";");
+                            if (col.length >= 4) {
+                                nouveauxEleves.push({
+                                    id: String(Date.now() + Math.random()),
+                                    identite: formaterIdentite(col[0], col[1]),
+                                    sexe: col[2], niveau: col[3], dateNaissance: col[4] || ""
+                                });
+                            }
+                        });
+                        if (nouveauxEleves.length > 0) {
+                            customConfirm(`Importer ${nouveauxEleves.length} élèves ?`, (val) => {
+                                if (val === 'yes') { eleves = [...eleves, ...nouveauxEleves]; localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }
+                            }, [{text: 'Importer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]);
+                        } else { alert("Le fichier ne contient pas de données valides."); }
+                        fileInput.value = "";
+                    };
+                    reader.readAsText(fichier);
+                });
+            }
+        });
+
         window.onload = () => { initDateSelectors(); appliquerCouleursTheme(); render(); };
     </script>
 </body>
