@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Observations</title>
+    <title>Observations - Outils Profs</title>
     
     <script>
         (function() {
@@ -74,15 +74,16 @@
 
         .student-item { 
             background-color: var(--card-student); 
-            padding: 6px 10px; 
+            padding: 6px 12px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             cursor: pointer; 
             border-radius: 50px; 
-            margin-bottom: 3px; 
+            margin-bottom: 4px; 
             transition: all 0.1s;
             border: 1.5px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         body.light-mode .student-item, html.light-mode-init .student-item { border-color: #e5e7eb; }
@@ -93,31 +94,26 @@
         body.light-mode .text-boy, html.light-mode-init .text-boy { color: #2563eb; } 
         
         .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .status-icon { font-size: 0.65rem; opacity: 0.8; }
+        .status-icon { font-size: 0.65rem; opacity: 0.8; margin-left: 5px; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 92%; max-width: 400px; border: 1px solid #333; }
-        textarea { width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; border: 1px solid #333; font-size: 0.8rem; background: #000; color: #fff; outline: none; }
+        textarea { width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; border: 1px solid #333; font-size: 0.85rem; background: #000; color: #fff; outline: none; resize: none; }
         .btns { display: flex; gap: 10px; }
         .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .btn-save { background: var(--primary); color: white; }
         .btn-cancel { background: #333; color: #ccc; }
 
         #modal-aide .modal-card { background-color: var(--card-student); border: 1px solid var(--header-border); }
-        #aide-content h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        #aide-content h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; }
         #aide-content p, #aide-content li { font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); margin-bottom: 8px; }
-        #aide-content ul { list-style: none; padding: 0; }
 
         body.light-mode .modal-content, body.light-mode #modal-aide .modal-card { background: #ffffff; border-color: #d1d5db; }
         body.light-mode textarea { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
 
         .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
-        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; color: #000; }
-        .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 600; color: #4b5563; }
-        .alert-btns { display: flex; gap: 10px; margin-top: 20px; }
         .btn-alert { flex: 1; padding: 14px; border-radius: 15px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
-        .btn-alert-cancel { background: #f3f4f6; color: #4b5563; }
 
         .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -151,7 +147,7 @@
 
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
-            <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800;">Élève</h2>
+            <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);">Élève</h2>
             <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
             <div class="btns">
                 <button class="modal-btn btn-cancel" onclick="closeAllModals()">Fermer</button>
@@ -160,8 +156,8 @@
         </div>
     </div>
 
-    <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6">
-        <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6" onclick="fermerAide()">
+        <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div id="aide-content"></div>
             <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-4 mt-2 font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-all">
                 Fermer
@@ -171,10 +167,10 @@
 
     <div id="alertModal" class="alert-overlay">
         <div class="alert-content">
-            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
-            <p id="alertText" class="alert-text">Message</p>
-            <div class="alert-btns">
-                <button id="alertCancelBtn" class="btn-alert btn-alert-cancel" onclick="closeAlert()">Annuler</button>
+            <h3 id="alertTitle" class="text-lg font-black uppercase text-center mb-2" style="color:#000">Confirmation</h3>
+            <p id="alertText" class="text-sm font-semibold text-center text-gray-600 mb-6">Message</p>
+            <div class="alert-btns flex gap-2">
+                <button id="alertCancelBtn" class="btn-alert bg-gray-100 text-gray-500" onclick="closeAlert()">Annuler</button>
                 <button id="alertConfirmBtn" class="btn-alert text-white">Confirmer</button>
             </div>
         </div>
@@ -183,13 +179,13 @@
     <script>
         let elevesInscrits = JSON.parse(localStorage.getItem('maListeEleves')) || [];
         let savedComments = JSON.parse(localStorage.getItem('studentObservations')) || {};
+        let currentStudentId = "";
         let currentStudentName = "";
 
         const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
         const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
 
-        // --- THEME ---
         function appliquerTheme() {
             const savedMode = localStorage.getItem('theme_mode');
             const isLight = savedMode === 'light';
@@ -220,7 +216,6 @@
             document.documentElement.style.setProperty('--primary', couleurHexa);
         }
 
-        // --- RENDU ---
         function formatName(str) {
             if(!str) return "";
             const parts = str.trim().split(' ');
@@ -254,10 +249,12 @@
                     const item = document.createElement('div');
                     item.className = `student-item no-select ${genderClass}`;
                     
-                    const hasNote = (savedComments[el.identite] || "").trim().length > 0;
+                    // On vérifie la note soit par l'ID numérique, soit par le Nom
+                    const noteText = savedComments[el.id] || savedComments[el.identite] || "";
+                    const hasNote = noteText.trim().length > 0;
                     
                     item.innerHTML = `<span class="student-name">${formatName(el.identite)}</span><span class="status-icon">${hasNote ? '🔎' : '＋'}</span>`;
-                    item.onclick = () => openCommentModal(el.identite);
+                    item.onclick = () => openCommentModal(el);
                     list.appendChild(item);
                 });
                 levelWrapper.appendChild(list);
@@ -265,11 +262,12 @@
             });
         }
 
-        // --- MODALES ---
-        function openCommentModal(identite) {
-            currentStudentName = identite;
-            document.getElementById('modalTitle').innerText = formatName(identite);
-            document.getElementById('commentInput').value = savedComments[identite] || "";
+        function openCommentModal(el) {
+            currentStudentId = el.id;
+            currentStudentName = el.identite;
+            document.getElementById('modalTitle').innerText = formatName(el.identite);
+            // Charge la note depuis l'ID ou le Nom
+            document.getElementById('commentInput').value = savedComments[el.id] || savedComments[el.identite] || "";
             document.getElementById('modal').style.display = 'flex';
             setTimeout(() => document.getElementById('commentInput').focus(), 100);
         }
@@ -278,13 +276,18 @@
 
         function saveData() {
             const val = document.getElementById('commentInput').value;
-            if(val.trim() === "") delete savedComments[currentStudentName];
-            else savedComments[currentStudentName] = val;
+            if(val.trim() === "") {
+                delete savedComments[currentStudentId];
+                delete savedComments[currentStudentName];
+            } else {
+                // On privilégie l'enregistrement sur l'ID s'il existe
+                const key = currentStudentId || currentStudentName;
+                savedComments[key] = val;
+            }
             localStorage.setItem('studentObservations', JSON.stringify(savedComments));
             renderList(); closeAllModals();
         }
 
-        // --- ACTIONS ---
         function toutEffacer() {
             showAlert("Tout effacer ?", "Supprimer toutes les observations ?", () => {
                 savedComments = {};
@@ -294,47 +297,46 @@
         }
 
         function exportToFile() {
-            const bundle = { observations: savedComments, date: new Date().toLocaleDateString(), type: "export_observations" };
-            const jsonString = JSON.stringify(bundle, null, 2);
+            const jsonString = JSON.stringify(savedComments, null, 2);
             const blob = new Blob([jsonString], { type: 'text/plain;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; 
+            a.href = url;
             const dateStr = new Date().toISOString().split('T')[0];
-            a.download = `observations_${dateStr}.txt`; 
+            a.download = `outilsprofs_observations_${dateStr}.txt`; 
             a.click();
         }
 
         document.getElementById('importFile').addEventListener('change', function(e) {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = (event) => {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    const incomingObs = data.observations || data.studentObservations;
-                    if (incomingObs) {
-                        showAlert("Importer ?", "Fusionner les observations du fichier ?", () => {
-                            savedComments = Object.assign({}, savedComments, incomingObs);
+                    const incomingData = JSON.parse(event.target.result);
+                    if (typeof incomingData === 'object' && incomingData !== null) {
+                        showAlert("Importer ?", "Fusionner les notes du fichier avec vos notes actuelles ?", () => {
+                            savedComments = { ...savedComments, ...incomingData };
                             localStorage.setItem('studentObservations', JSON.stringify(savedComments));
                             renderList();
                         });
                     }
-                } catch (err) { showAlert("Erreur", "Fichier invalide", null, false); }
+                } catch (err) { showAlert("Erreur", "Fichier invalide. Assurez-vous d'importer un fichier .txt exporté par l'application.", null, false); }
             };
             if(e.target.files[0]) reader.readAsText(e.target.files[0]);
+            this.value = ""; // Reset
         });
 
-        // --- ALERTES & AIDE ---
         function ouvrirAide() {
             const display = document.getElementById('aide-content');
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const couleurObs = mapCouleurs[prefs.obs] || '#22c55e';
             display.innerHTML = `
                 <h3 style="color:${couleurObs}">💡 Aide Observations</h3>
-                <p>Gérez ici les remarques pédagogiques liées au nom de vos élèves.</p>
-                <ul>
-                    <li>• <strong>Lien :</strong> Les notes sont liées au nom. Si vous recréez un élève avec le même nom, sa note reviendra.</li>
-                    <li>• <strong>Statut :</strong> 🔎 (Note présente), ＋ (Vide).</li>
-                    <li>• <strong>Import :</strong> Fusionne le fichier avec vos notes actuelles.</li>
+                <p>Gérez ici les remarques liées à vos élèves.</p>
+                <ul class="space-y-2">
+                    <li>• <strong>Icone 🔎 :</strong> Indique qu'une note est enregistrée.</li>
+                    <li>• <strong>Icone ＋ :</strong> Aucune note pour cet élève.</li>
+                    <li>• <strong>Lien :</strong> Les notes sont liées à l'ID ou au Nom de l'élève.</li>
+                    <li>• <strong>Import :</strong> Fusionne le fichier avec vos données locales.</li>
                 </ul>`;
             document.getElementById('modal-aide').style.display = 'flex';
         }
@@ -357,22 +359,8 @@
         function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
 
         window.onload = () => { appliquerTheme(); renderList(); };
-        
         window.onclick = function(event) {
-            const modalNote = document.getElementById('modal');
-            const modalAide = document.getElementById('modal-aide');
-            const modalAlert = document.getElementById('alertModal');
-            if (event.target === modalNote) closeAllModals();
-            if (event.target === modalAide) fermerAide();
-            if (event.target === modalAlert) closeAlert();
-        }
-
-        window.onkeydown = function(event) {
-            if (event.key === "Escape") {
-                closeAllModals();
-                fermerAide();
-                closeAlert();
-            }
+            if (event.target.classList.contains('modal-overlay')) closeAllModals();
         }
     </script>
 </body>
