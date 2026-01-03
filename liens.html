@@ -307,7 +307,7 @@
 
     function exportLinks() {
         const date = new Date().toISOString().split('T')[0];
-        const fileName = `outilsprofs_lien_${date}.txt`;
+        const fileName = `outilsprofs_liens_${date}.txt`;
         const dataStr = JSON.stringify(links);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const linkElement = document.createElement('a');
