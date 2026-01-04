@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Mémos</title>
+    <title>Mémos - OutilsProfs</title>
 
     <script>
         (function() {
@@ -20,96 +20,40 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #121212;
-            --text-page: #ffffff;
-            --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: #1e1e1e;
-            --card-text: #ffffff;
-            --input-bg: #2a2a2a;
-            --input-border: rgba(255, 255, 255, 0.1);
-            --input-text: #ffffff;
-            --search-bg: #1e1e1e; 
+            --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e; --card-text: #ffffff; --input-bg: #2a2a2a;
+            --input-border: rgba(255, 255, 255, 0.1); --input-text: #ffffff;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee;
-            --text-page: #111827;
-            --header-bg: #ffffff;
-            --header-border: #ddd;
-            --border-color: #ddd;
-            --card-bg: #ffffff;
-            --card-text: #111827;
-            --input-bg: #f3f4f6;
-            --input-border: #9ca3af;
+            --bg-page: #eeeeee; --text-page: #111827; --header-bg: #ffffff;
+            --header-border: #ddd; --border-color: #ddd; --card-bg: #ffffff;
+            --card-text: #111827; --input-bg: #f3f4f6; --input-border: #9ca3af;
             --input-text: #111827;
-            --search-bg: #ffffff;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-page); 
-            color: var(--text-page); 
-            padding: 0; margin: 0; 
-            transition: background 0.3s, color 0.3s;
-            display: flex; flex-direction: column; align-items: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
+            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
+            padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
 
         header { 
-            background: var(--header-bg); 
-            border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0; 
-            z-index: 100; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 15px 15px; 
-            width: calc(100% + 30px); 
-            margin-left: -15px;
-            margin-bottom: 12px;
-            gap: 8px;
+            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 15px 15px; 
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 12px;
         }
 
         .container { width: 100%; max-width: 600px; padding: 0 4px; }
-        
-        .light-card { 
-            background: var(--card-bg); 
-            color: var(--card-text); 
-            border-radius: 1.5rem; 
-            border: 1px solid var(--border-color);
-        }
+        .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; border: 1px solid var(--border-color); }
+        .input-field { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.8rem; font-weight: 600; width: 100%; }
 
-        .input-field { 
-            background: var(--input-bg); 
-            border: 1px solid var(--input-border); 
-            color: var(--input-text); 
-            border-radius: 0.75rem; 
-            padding: 10px; 
-            outline: none; 
-            font-size: 0.8rem; 
-            font-weight: 600; 
-            width: 100%; 
-        }
-
-        #btn-retour, #btn-aide, #btn-search-trigger { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: all 0.3s ease; flex-shrink: 0; }
+        #btn-retour, #btn-aide, #btn-search-trigger { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
         
-        /* Animation du champ de recherche */
-        #searchWrapper {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s ease;
-            opacity: 0;
-        }
-        #searchWrapper.open {
-            max-height: 100px;
-            margin-bottom: 1.5rem;
-            opacity: 1;
-        }
+        #searchWrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s; opacity: 0; }
+        #searchWrapper.open { max-height: 100px; margin-bottom: 1.5rem; opacity: 1; }
 
         .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, 0.2); flex-shrink: 0; }
         .color-dot.active { border: 2.5px solid white !important; box-shadow: 0 0 8px rgba(0,0,0,0.3); }
@@ -117,30 +61,23 @@
         .note-grid { column-count: 2; column-gap: 10px; width: 100%; }
         @media (min-width: 600px) { .note-grid { column-count: 3; } }
         
-        .note-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 10px; border-radius: 12px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); position: relative; cursor: pointer; transition: background 0.3s, transform 0.2s; }
-        .note-card.dark-text { color: #121212; }
-        .note-card.light-text { color: #ffffff; }
-
+        .note-card { break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 10px; border-radius: 12px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); position: relative; cursor: pointer; transition: all 0.2s; }
+        .note-card.editing { ring: 3px solid var(--theme-color); transform: scale(0.98); }
+        
         .drag-handle { display: grid; grid-template-columns: repeat(3, 2px); gap: 2px; opacity: 0.3; cursor: grab; padding: 4px; margin-left: 8px; flex-shrink: 0; }
         .drag-handle span { width: 2px; height: 2px; background-color: currentColor; border-radius: 50%; }
         
         .note-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 4px; margin-bottom: 6px; }
-        .light-text .note-header { border-bottom: 1px solid rgba(255,255,255,0.2); }
-        
-        .note-title { font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2; white-space: pre-wrap; word-break: break-word; }
+        .note-title { font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.2; word-break: break-word; }
         .note-card-content { font-size: 11px; font-weight: 500; line-height: 1.3; white-space: pre-wrap; word-break: break-word; }
         
-        .sortable-ghost { opacity: 0.2; transform: scale(0.95); }
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
-        /* MODALS */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .modal-content textarea { width: 100%; margin-bottom: 12px; padding: 14px; border-radius: 14px; border: 1px solid #ddd; font-size: 14px; background: #f9f9f9; color: #000 !important; }
+        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: #111; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; }
     </style>
 </head>
 <body>
@@ -158,7 +95,7 @@
     <div class="container">
         <div class="light-card p-4 mb-4 shadow-xl">
             <div class="flex gap-2 mb-1 items-start">
-                <textarea id="newNoteTitle" class="input-field resize-none h-[45px]" placeholder="Titre..."></textarea>
+                <textarea id="noteTitle" class="input-field resize-none h-[45px]" placeholder="Titre..."></textarea>
                 <button id="btn-search-trigger" onclick="toggleSearch()" class="shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -166,10 +103,10 @@
                 </button>
             </div>
             
-            <textarea id="newNoteInput" class="input-field mb-1 min-h-[60px] resize-none" placeholder="Saisir une note..." oninput="autoExpand(this)"></textarea>
+            <textarea id="noteInput" class="input-field mb-1 min-h-[60px] resize-none" placeholder="Saisir une note..." oninput="autoExpand(this)"></textarea>
             
             <div class="flex justify-between items-end mt-1">
-                <div class="flex flex-wrap gap-1.5 max-w-[65%]" id="newColorPicker">
+                <div class="flex flex-wrap gap-1.5 max-w-[50%]" id="colorPicker">
                     <div class="color-dot active" style="background-color: #fef9c3;" data-color="#fef9c3"></div>
                     <div class="color-dot" style="background-color: #fee2e2;" data-color="#fee2e2"></div>
                     <div class="color-dot" style="background-color: #ffedd5;" data-color="#ffedd5"></div>
@@ -178,19 +115,15 @@
                     <div class="color-dot" style="background-color: #ffffff;" data-color="#ffffff"></div>
                     <div class="color-dot" style="background-color: #6b7280;" data-color="#6b7280"></div>
                 </div>
-                <button id="addBtn" onclick="addNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
+                <div class="flex gap-2">
+                    <button id="btnDelete" onclick="deleteSelectedNote()" class="hidden px-4 py-2.5 rounded-full bg-red-600 text-white text-[10px] font-black uppercase shadow-md active:scale-90">Effacer</button>
+                    <button id="btnAction" onclick="saveNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
+                </div>
             </div>
         </div>
 
         <div id="searchWrapper">
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 opacity-40">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </span>
-                <input type="text" id="searchInput" class="input-field shadow-sm pl-10" placeholder="Rechercher dans mes mémos..." onkeyup="renderNotes()">
-            </div>
+            <input type="text" id="searchInput" class="input-field shadow-sm mb-4" placeholder="Rechercher..." onkeyup="renderNotes()">
         </div>
 
         <div id="notesGrid" class="note-grid mb-6"></div>
@@ -203,32 +136,15 @@
                 </label>
                 <button onclick="exportNotesToFile()" class="nav-btn bg-black text-white flex-1">👆exporter .txt👆</button>
             </div>
-            <button onclick="confirmResetAll()" class="nav-btn bg-red-500 text-white border border-rose-900/20 w-full shadow-lg">⚠️ effacer tous les mémos</button>
+            <button onclick="confirmResetAll()" class="nav-btn bg-red-500 text-white w-full shadow-lg">⚠️ effacer tous les mémos</button>
         </footer>
-    </div>
-
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 class="text-gray-400 font-black text-[10px] uppercase mb-3">Modifier</h2>
-            <textarea id="editNoteTitle" rows="2"></textarea>
-            <textarea id="editNoteInput" rows="5"></textarea>
-            <div class="flex flex-wrap gap-2 mb-2" id="editColorPicker"></div>
-            <div class="btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('editModal')">Annuler</button>
-                <button id="modalSaveBtn" class="modal-btn text-white" onclick="saveEditedNote()">Valider</button>
-            </div>
-            <button onclick="confirmDeleteNote()" class="w-full mt-6 text-rose-500 text-[10px] font-black uppercase">Supprimer</button>
-        </div>
     </div>
 
     <div id="alertModal" class="modal-overlay">
         <div class="modal-content">
-            <div id="modal-body-content">
-                <h3 id="alertTitle" class="font-black uppercase text-center mb-2">Confirmation</h3>
-                <p id="alertText" class="text-center mb-4"></p>
-            </div>
+            <div id="modal-body-content"></div>
             <div class="btns">
-                <button id="alertCancelBtn" class="modal-btn btn-cancel" onclick="closeModal('alertModal')">Annuler</button>
+                <button id="alertCancelBtn" class="modal-btn bg-gray-100 text-gray-600" onclick="closeModal('alertModal')">Annuler</button>
                 <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
@@ -236,10 +152,13 @@
 
     <script>
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
-        
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const nomCouleurTheme = themePrefs.memos || 'purple';
         const hexaTheme = mapCouleurs[nomCouleurTheme] || '#a855f7';
+
+        let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
+        let editingIndex = -1;
+        let selectedColor = '#fef9c3';
 
         function shadeColor(color, percent) {
             let f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
@@ -247,55 +166,15 @@
         }
 
         function appliquerTheme() {
-            const savedMode = localStorage.getItem('theme_mode');
-            const isLight = savedMode === 'light';
+            const isLight = localStorage.getItem('theme_mode') === 'light';
             document.body.classList.toggle('light-mode', isLight);
-            
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleurTheme);
-            const contrast = isLightColor ? 'black' : 'white';
-            
-            [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-search-trigger'), document.getElementById('addBtn'), document.getElementById('modalSaveBtn')].forEach(el => {
+            const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleurTheme) ? 'black' : 'white';
+            document.documentElement.style.setProperty('--theme-color', hexaTheme);
+            [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-search-trigger'), document.getElementById('btnAction')].forEach(el => {
                 if(el) { el.style.backgroundColor = hexaTheme; el.style.color = contrast; }
             });
             renderNotes();
         }
-
-        function toggleSearch() {
-            const wrapper = document.getElementById('searchWrapper');
-            const input = document.getElementById('searchInput');
-            wrapper.classList.toggle('open');
-            if(wrapper.classList.contains('open')) {
-                setTimeout(() => input.focus(), 300);
-            } else {
-                input.value = '';
-                renderNotes();
-            }
-        }
-
-        function openHelp() {
-            const container = document.getElementById('modal-body-content');
-            container.innerHTML = `
-                <h3 id="titre-aide" class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">💡 Mémos</h3>
-                <div class="text-[11px] leading-relaxed space-y-2 opacity-80 mb-2" style="color: #111">
-                    <p>• <b>Saisie :</b> Ajoutez un titre et votre texte.</p>
-                    <p>• <b>Loupe :</b> Cliquez sur la loupe pour rechercher une note précise par mot clé.</p>
-                    <p>• <b>Couleurs :</b> Personnalisez chaque mémo.</p>
-                    <p>• <b>Ordre :</b> Réorganisez les mémos par simple glisser-déposer.</p>
-                </div>
-            `;
-            const confirmBtn = document.getElementById('alertConfirmBtn');
-            confirmBtn.innerText = "Fermer";
-            confirmBtn.style.backgroundColor = hexaTheme;
-            confirmBtn.onclick = () => closeModal('alertModal');
-            document.getElementById('alertCancelBtn').style.display = 'none';
-            document.getElementById('alertModal').style.display = 'flex';
-        }
-
-        let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
-        let currentNoteIndex = -1;
-        let selectedColorForNew = '#fef9c3';
-        let selectedColorForEdit = '#fef9c3';
-        const palette = ['#fef9c3', '#fee2e2', '#ffedd5', '#dcfce7', '#e0f2fe', '#ffffff', '#6b7280'];
 
         function renderNotes() {
             const grid = document.getElementById('notesGrid');
@@ -304,106 +183,151 @@
             const isDarkMode = !document.body.classList.contains('light-mode');
             
             notes.forEach((note, index) => {
-                const searchStr = ((note.title || '') + (note.content || '')).toLowerCase();
-                if (searchStr.includes(search)) {
+                if (((note.title || '') + (note.content || '')).toLowerCase().includes(search)) {
                     const card = document.createElement('div');
-                    card.className = 'note-card shadow-xl';
+                    card.className = `note-card shadow-lg ${editingIndex === index ? 'editing' : ''}`;
                     card.dataset.index = index;
                     let finalColor = note.color || '#fef9c3';
                     if (isDarkMode) {
                         finalColor = shadeColor(finalColor, -0.6);
-                        card.classList.add('light-text');
+                        card.style.color = 'white';
                     } else {
-                        card.classList.add(note.color === '#6b7280' ? 'light-text' : 'dark-text');
+                        card.style.color = (note.color === '#6b7280' ? 'white' : '#121212');
                     }
                     card.style.backgroundColor = finalColor;
-                    card.onclick = (e) => { if (!e.target.closest('.drag-handle')) openEditModal(index); };
+                    card.onclick = (e) => { if (!e.target.closest('.drag-handle')) selectNote(index); };
                     card.innerHTML = `<div class="note-header"><div class="note-title">${note.title || ''}</div><div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="note-card-content">${note.content}</div>`;
                     grid.appendChild(card);
                 }
             });
         }
 
-        function addNote() { const t=document.getElementById('newNoteTitle'), c=document.getElementById('newNoteInput'); if(c.value.trim()){ notes.unshift({title:t.value.trim(), content:c.value.trim(), color:selectedColorForNew}); saveAndRender(); t.value=''; c.value=''; c.style.height='60px'; } }
-        function openEditModal(index) { currentNoteIndex=index; const n=notes[index]; document.getElementById('editNoteTitle').value=n.title||''; document.getElementById('editNoteInput').value=n.content; selectedColorForEdit=n.color||'#fef9c3'; document.querySelectorAll('#editColorPicker .color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color===selectedColorForEdit)); document.getElementById('editModal').style.display='flex'; }
-        function saveEditedNote() { notes[currentNoteIndex].title=document.getElementById('editNoteTitle').value; notes[currentNoteIndex].content=document.getElementById('editNoteInput').value; notes[currentNoteIndex].color=selectedColorForEdit; saveAndRender(); closeModal('editModal'); }
-        function saveAndRender() { localStorage.setItem('myKeepNotes', JSON.stringify(notes)); renderNotes(); }
-        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function selectNote(index) {
+            editingIndex = index;
+            const note = notes[index];
+            document.getElementById('noteTitle').value = note.title || '';
+            document.getElementById('noteInput').value = note.content;
+            selectedColor = note.color;
+            
+            document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
+                d.classList.toggle('active', d.dataset.color === selectedColor);
+            });
+
+            document.getElementById('btnAction').innerText = "Modifier";
+            document.getElementById('btnDelete').classList.remove('hidden');
+            autoExpand(document.getElementById('noteInput'));
+            renderNotes();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteInput').value.trim();
+            if(!content) return;
+
+            if(editingIndex > -1) {
+                notes[editingIndex] = { title, content, color: selectedColor };
+            } else {
+                notes.unshift({ title, content, color: selectedColor });
+            }
+            cancelEdit();
+            saveAndRender();
+        }
+
+        function deleteSelectedNote() {
+            if(editingIndex === -1) return;
+            showAlert("Supprimer ?", "Voulez-vous supprimer ce mémo ?", () => {
+                notes.splice(editingIndex, 1);
+                cancelEdit();
+                saveAndRender();
+            });
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteInput').value = '';
+            document.getElementById('noteInput').style.height = '60px';
+            document.getElementById('btnAction').innerText = "Ajouter";
+            document.getElementById('btnDelete').classList.add('hidden');
+            renderNotes();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('myKeepNotes', JSON.stringify(notes));
+            renderNotes();
+        }
+
         function autoExpand(t) { t.style.height='auto'; t.style.height=Math.min(t.scrollHeight, 200)+'px'; }
-        
+
+        function toggleSearch() {
+            const w = document.getElementById('searchWrapper');
+            w.classList.toggle('open');
+            if(w.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 300);
+        }
+
         function setupColorPickers() { 
-            document.querySelectorAll('#newColorPicker .color-dot').forEach(d=>{ 
-                d.onclick=function(){ document.querySelectorAll('#newColorPicker .color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForNew=this.dataset.color; }; 
-            }); 
-            const p=document.getElementById('editColorPicker'); 
-            p.innerHTML=palette.map(c=>`<div class="color-dot" style="background-color: ${c};" data-color="${c}"></div>`).join(''); 
-            p.querySelectorAll('.color-dot').forEach(d=>{ 
-                d.onclick=function(){ p.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active')); this.classList.add('active'); selectedColorForEdit=this.dataset.color; }; 
+            document.querySelectorAll('#colorPicker .color-dot').forEach(d=>{ 
+                d.onclick=function(){ 
+                    document.querySelectorAll('#colorPicker .color-dot').forEach(x=>x.classList.remove('active')); 
+                    this.classList.add('active'); 
+                    selectedColor=this.dataset.color; 
+                }; 
             }); 
         }
 
         function setupSortable() { new Sortable(document.getElementById('notesGrid'), { handle: '.drag-handle', animation: 150, onEnd: function(){ const n=[]; document.querySelectorAll('.note-card').forEach(c=>n.push(notes[c.dataset.index])); notes=n; saveAndRender(); } }); }
-        
+
+        function showAlert(t, tx, f) { 
+            const container = document.getElementById('modal-body-content');
+            container.innerHTML = `<h3 class="font-black uppercase text-center mb-2">${t}</h3><p class="text-center text-xs mb-4">${tx}</p>`;
+            const c=document.getElementById('alertConfirmBtn');
+            c.style.backgroundColor = hexaTheme;
+            c.onclick=()=>{closeModal('alertModal'); if(f) f();};
+            document.getElementById('alertModal').style.display='flex'; 
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function confirmResetAll() { showAlert("Tout effacer ?", "Supprimer tous vos mémos ?", () => { notes=[]; saveAndRender(); }); }
+
         function setupImport() {
-            const importInput = document.getElementById('importNotesFile');
-            importInput.addEventListener('change', function(e) {
+            const input = document.getElementById('importNotesFile');
+            input.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     try {
-                        const importedNotes = JSON.parse(e.target.result);
-                        if (Array.isArray(importedNotes)) {
-                            notes = [...importedNotes, ...notes];
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            const existingKeys = new Set(notes.map(n => (n.title || '') + '|' + n.content));
+                            const toAdd = imported.filter(n => !existingKeys.has((n.title || '') + '|' + n.content));
+                            notes = [...toAdd, ...notes];
                             saveAndRender();
-                            showAlert("Succès", "Mémos importés !");
-                        } else { throw new Error(); }
-                    } catch (err) { showAlert("Erreur", "Fichier invalide."); }
-                    importInput.value = '';
+                        }
+                    } catch(err) {}
+                    input.value = '';
                 };
                 reader.readAsText(file);
             });
         }
 
-        function showAlert(t, tx, f) { 
-            const container = document.getElementById('modal-body-content');
-            container.innerHTML = `<h3 class="alert-title font-black uppercase text-center mb-2">${t}</h3><p class="alert-text text-center mb-4">${tx}</p>`;
-            const c=document.getElementById('alertConfirmBtn'), x=document.getElementById('alertCancelBtn');
-            c.innerText = "Confirmer";
-            c.style.backgroundColor = hexaTheme;
-            x.style.display = 'block';
-            const n=c.cloneNode(true);
-            c.parentNode.replaceChild(n,c);
-            n.onclick=()=>{closeModal('alertModal'); if(f) f();};
-            document.getElementById('alertModal').style.display='flex'; 
-        }
-
-        function confirmResetAll() { showAlert("Tout effacer ?", "Supprimer tous vos mémos ?", () => { notes=[]; saveAndRender(); }); }
-        function confirmDeleteNote() { showAlert("Supprimer ?", "Supprimer cette note ?", () => { notes.splice(currentNoteIndex, 1); saveAndRender(); closeModal('editModal'); }); }
-        
         function exportNotesToFile() { 
             if(notes.length === 0) return; 
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${day}`;
-            const fileName = `outilsprofs_memos_${formattedDate}.txt`;
             const content = JSON.stringify(notes, null, 2);
             const blob = new Blob([content], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = fileName; a.click();
-            window.URL.revokeObjectURL(url);
+            a.href = url; a.download = `outilsprofs_memos_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+            URL.revokeObjectURL(url);
         }
-        
-        window.onload = () => { appliquerTheme(); setupColorPickers(); renderNotes(); setupSortable(); setupImport(); };
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal-overlay')) {
-                event.target.style.display = 'none';
-            }
+
+        function openHelp() {
+            showAlert("💡 Aide", "Cliquez sur un mémo pour le modifier ou le supprimer. Faites glisser les points pour réorganiser.", null);
+            document.getElementById('alertCancelBtn').style.display = 'none';
         }
+
+        window.onload = () => { appliquerTheme(); setupColorPickers(); setupSortable(); setupImport(); };
     </script>
 </body>
 </html>
