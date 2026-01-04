@@ -10,31 +10,18 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #121212; 
-            --text-page: #ffffff; 
-            --column-bg: #1e1e1e; 
-            --column-border: rgba(255, 255, 255, 0.1);
-            --header-bg: #1e1e1e; 
-            --card-bg: #1e1e1e; 
-            --input-bg: #2a2a2a; 
-            --input-text: #ffffff;
-            --item-bg: #2a2a2a; 
-            --item-text-url: #a1a1aa; 
+            --bg-page: #121212; --text-page: #ffffff; --column-bg: #1e1e1e; 
+            --column-border: rgba(255, 255, 255, 0.1); --header-bg: #1e1e1e; 
+            --card-bg: #1e1e1e; --input-bg: #2a2a2a; --input-text: #ffffff;
+            --item-bg: #2a2a2a; --item-text-url: #a1a1aa; 
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; 
-            --text-page: #111827; 
-            --column-bg: #ffffff; 
-            --column-border: #ddd;
-            --header-bg: #ffffff; 
-            --card-bg: #ffffff;
-            --input-bg: #f3f4f6; 
-            --input-text: #111827;
-            --item-bg: #f3f4f6; 
-            --item-text-url: #71717a;
-            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --bg-page: #eeeeee; --text-page: #111827; --column-bg: #ffffff; 
+            --column-border: #ddd; --header-bg: #ffffff; --card-bg: #ffffff;
+            --input-bg: #f3f4f6; --input-text: #111827; --item-bg: #f3f4f6; 
+            --item-text-url: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
@@ -46,24 +33,17 @@
         }
 
         .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px 15px; }
-        
-        .light-card, .column { 
-            background: var(--card-bg); border-radius: 1.5rem; padding: 15px; 
-            border: 1px solid var(--column-border); box-shadow: var(--shadow-custom);
-            margin-bottom: 20px;
-        }
-
+        .light-card, .column { background: var(--card-bg); border-radius: 1.5rem; padding: 15px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
         .column { scroll-margin-top: 90px; }
         .column-header { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; align-items: center; }
 
-        .dots-handle { display: grid; grid-template-columns: repeat(3, 2.5px); grid-template-rows: repeat(3, 2.5px); gap: 2.2px; opacity: 0.3; cursor: grab; flex-shrink: 0; }
+        .dots-handle { display: grid; grid-template-columns: repeat(3, 2.5px); grid-template-rows: repeat(3, 2.5px); gap: 2.2px; opacity: 0.3; cursor: grab; flex-shrink: 0; padding: 10px; margin: -10px; }
         .dots-handle span { width: 2.5px; height: 2.5px; background-color: currentColor; border-radius: 50%; }
 
-        .link-item { background: var(--item-bg); border-radius: 0.75rem; padding: 6px 12px; display: flex; align-items: center; margin-bottom: 6px; border: 1px solid var(--column-border); }
+        .link-item { background: var(--item-bg); border-radius: 0.75rem; padding: 8px 12px; display: flex; align-items: center; margin-bottom: 6px; border: 1px solid var(--column-border); touch-action: none; }
         .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 10px; }
         .link-name { font-weight: 800; font-size: 11px; text-transform: uppercase; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
         .link-url { font-size: 9px; color: var(--item-text-url); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
         .link-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
         .btn-action { color: #6b7280; opacity: 0.8; cursor: pointer; padding: 4px; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
 
@@ -72,27 +52,12 @@
         .cat-btn.active { background: #4b5563 !important; color: white !important; }
         .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
 
-        .header-btn { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 40px; height: 40px; border-radius: 50%; 
-            border: 1px solid var(--column-border); 
-            transition: transform 0.1s ease, background-color 0.3s ease;
-        }
-
+        .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--column-border); }
         .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
-        .nav-group { display: flex; gap: 8px; width: 100%; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
-
-        .modal-overlay { 
-            display: none; position: fixed; inset: 0; z-index: 1000; 
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-content { 
-            background: var(--card-bg); width: 100%; max-width: 400px; 
-            border-radius: 1.5rem; border: 1px solid var(--column-border);
-            padding: 25px; position: relative; box-shadow: var(--shadow-custom);
-        }
+        
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
     </style>
 </head>
 <body class="pb-10">
@@ -105,22 +70,19 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Liens</h2>
         <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
-            <p>• <b>Ajouter :</b> Saisissez le nom, l'URL et choisissez une catégorie avant de valider.</p>
-            <p>• <b>Organiser :</b> Restez appuyé sur les petits points (⠿) pour faire glisser un lien ou une catégorie entière.</p>
-            <p>• <b>Modifier :</b> Cliquez sur le crayon pour recharger les infos dans le formulaire afin de modifier le lien.</p>
-            <p>• <b>Export/Import :</b> Utilisez les boutons en bas de page pour sauvegarder vos liens dans un fichier .txt.</p>
+            <p>• <b>Organiser :</b> Restez appuyé 1 seconde sur les points (⠿) pour déplacer.</p>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
+        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform">Fermer</button>
     </div>
 </div>
 
 <div id="modal-alerte" class="modal-overlay">
-    <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-content">
         <h2 id="alerte-titre" class="text-lg font-black uppercase mb-4">Alerte</h2>
         <div id="alerte-texte" class="text-[11px] leading-relaxed opacity-80 mb-6"></div>
         <div id="alerte-actions" class="flex gap-3">
-            <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Annuler</button>
-            <button id="alerte-confirm" class="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Confirmer</button>
+            <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
+            <button id="alerte-confirm" class="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Confirmer</button>
         </div>
     </div>
 </div>
@@ -143,22 +105,18 @@
             <button class="cat-btn" data-value="Ressources">Ressources</button>
             <button class="cat-btn" data-value="Autres">Autres</button>
         </div>
-        <button id="mainAddBtn" onclick="addLink()" class="btn-add active:scale-95 transition-transform">Ajouter</button>
+        <button id="mainAddBtn" onclick="addLink()" class="btn-add transition-transform">Ajouter</button>
     </div>
 
     <div id="categoriesContainer"></div>
 
     <footer class="bottom-nav">
-        <div class="nav-group">
-            <label for="importFile" class="nav-btn bg-neutral-800 text-white cursor-pointer text-center flex-1">
-                👇 importer .txt 👇
-            </label>
+        <div class="flex gap-2">
+            <label for="importFile" class="nav-btn bg-neutral-800 text-white cursor-pointer text-center flex-1">👇 importer .txt 👇</label>
             <input type="file" id="importFile" class="hidden" accept=".txt" onchange="importLinks(event)">
             <button onclick="exportLinks()" class="nav-btn bg-neutral-800 text-white flex-1">👆 exporter .txt 👆</button>
         </div>
-        <button onclick="resetLinks()" class="nav-btn bg-red-500 text-white shadow-md active:scale-95">
-            ⚠️ effacer tous les liens
-        </button>
+        <button onclick="resetLinks()" class="nav-btn bg-red-500 text-white shadow-md">⚠️ effacer tous les liens</button>
     </footer>
 </div>
 
@@ -176,22 +134,6 @@
         'Ressources': { text: 'text-blue-500', border: 'border-blue-500', emoji: '🧰' },
         'Autres': { text: 'text-emerald-500', border: 'border-emerald-500', emoji: '🌍' }
     };
-
-    function afficherMessage(titre, texte, callback = null) {
-        document.getElementById('alerte-titre').innerText = titre;
-        document.getElementById('alerte-texte').innerText = texte;
-        const modal = document.getElementById('modal-alerte');
-        const btnConfirm = document.getElementById('alerte-confirm');
-        const btnCancel = document.getElementById('alerte-cancel');
-        modal.style.display = 'flex';
-        if (callback) {
-            btnCancel.style.display = 'block';
-            btnConfirm.onclick = () => { modal.style.display = 'none'; callback(); };
-        } else {
-            btnCancel.style.display = 'none';
-            btnConfirm.onclick = () => modal.style.display = 'none';
-        }
-    }
 
     function render() {
         const container = document.getElementById('categoriesContainer');
@@ -217,12 +159,8 @@
                                 <span class="link-url">${link.url}</span>
                             </div>
                             <div class="link-actions">
-                                <div class="btn-action" onclick="editLink(${link.id})" title="Modifier">
-                                    ✏️
-                                </div>
-                                <div class="btn-action" onclick="deleteLink(${link.id})" title="Supprimer">
-                                    🗑️
-                                </div>
+                                <div class="btn-action" onclick="editLink(${link.id})">✏️</div>
+                                <div class="btn-action" onclick="deleteLink(${link.id})">🗑️</div>
                             </div>
                         </div>
                     `).join('')}
@@ -235,7 +173,7 @@
 
     function initSortables() {
         new Sortable(document.getElementById('categoriesContainer'), {
-            handle: '.handle-cat', animation: 200,
+            handle: '.handle-cat', animation: 150, delay: 150, delayOnTouchOnly: true,
             onEnd: () => {
                 catOrder = Array.from(document.querySelectorAll('.column')).map(el => el.getAttribute('data-cat'));
                 localStorage.setItem('eduCatOrder', JSON.stringify(catOrder));
@@ -244,6 +182,7 @@
         document.querySelectorAll('.links-list').forEach(listEl => {
             new Sortable(listEl, {
                 group: 'sharedLinks', handle: '.handle-link', animation: 150,
+                delay: 200, delayOnTouchOnly: true, touchStartThreshold: 3,
                 onEnd: () => {
                     const newLinks = [];
                     document.querySelectorAll('.column').forEach(col => {
@@ -288,9 +227,7 @@
             document.getElementById('linkName').value = link.name;
             document.getElementById('linkUrl').value = link.url;
             currentSelectedCat = link.cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat);
-            });
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat));
             editingLinkId = id;
             document.getElementById('mainAddBtn').innerText = "Mettre à jour";
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -306,13 +243,11 @@
     }
 
     function exportLinks() {
-        const date = new Date().toISOString().split('T')[0];
-        const fileName = `outilsprofs_liens_${date}.txt`;
         const dataStr = JSON.stringify(links);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', fileName);
+        linkElement.setAttribute('download', `liens_${new Date().toISOString().split('T')[0]}.txt`);
         linkElement.click();
     }
 
@@ -322,25 +257,37 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const importedLinks = JSON.parse(e.target.result);
-                if (Array.isArray(importedLinks)) {
-                    links = importedLinks;
-                    localStorage.setItem('eduLinksList', JSON.stringify(links));
-                    render();
-                    afficherMessage("Succès", "L'importation de vos liens a été réussie.");
-                } else {
-                    afficherMessage("Erreur", "Le format du fichier JSON n'est pas valide.");
-                }
-            } catch (err) { afficherMessage("Erreur", "Impossible de lire le fichier."); }
-            event.target.value = "";
+                links = JSON.parse(e.target.result);
+                localStorage.setItem('eduLinksList', JSON.stringify(links));
+                render();
+            } catch (err) {}
         };
         reader.readAsText(file);
     }
 
     function resetLinks() {
-        afficherMessage("Réinitialisation", "Voulez-vous vraiment effacer TOUS vos liens ?", () => {
+        afficherMessage("Réinitialisation", "Effacer TOUS vos liens ?", () => {
             links = []; localStorage.removeItem('eduLinksList'); render();
         });
+    }
+
+    function afficherMessage(titre, texte, callback) {
+        document.getElementById('alerte-titre').innerText = titre;
+        document.getElementById('alerte-texte').innerText = texte;
+        const modal = document.getElementById('modal-alerte');
+        modal.style.display = 'flex';
+        document.getElementById('alerte-confirm').onclick = () => { modal.style.display = 'none'; callback(); };
+    }
+
+    function appliquerTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colPref = themePrefs.liens || 'emerald';
+        const hexa = mapCouleurs[colPref];
+        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+        [document.getElementById('mainAddBtn'), document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
+            if(el) { el.style.backgroundColor = hexa; el.style.color = isDark ? '#000' : '#fff'; }
+        });
+        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
     }
 
     document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -351,45 +298,8 @@
         };
     });
 
-    function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.liens || 'emerald';
-        const hexa = mapCouleurs[colPref];
-        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
-        
-        const addBtn = document.getElementById('mainAddBtn');
-        if(addBtn) {
-            addBtn.style.backgroundColor = hexa;
-            addBtn.style.color = isDark ? '#000' : '#fff';
-        }
-        
-        const headerBtns = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
-        headerBtns.forEach(btn => {
-            if(btn) {
-                btn.style.backgroundColor = hexa;
-                btn.style.color = isDark ? '#000' : '#fff';
-            }
-        });
-
-        const btnFermerAide = document.getElementById('btn-fermer-aide');
-        if(btnFermerAide) {
-            btnFermerAide.style.backgroundColor = hexa;
-            btnFermerAide.style.color = isDark ? '#000' : '#fff';
-        }
-
-        const titreAide = document.getElementById('titre-aide');
-        if(titreAide) {
-            titreAide.style.color = hexa;
-        }
-    }
-
-    function ouvrirAide() { 
-        appliquerTheme();
-        document.getElementById('modal-aide').style.display = 'flex'; 
-    }
-    
+    function ouvrirAide() { appliquerTheme(); document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-
     window.onload = () => { appliquerTheme(); render(); };
 </script>
 </body>
