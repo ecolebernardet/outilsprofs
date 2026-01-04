@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Observations - Outils Profs</title>
+    <title>Observations - OutilsProfs</title>
     
     <script>
         (function() {
@@ -49,6 +49,7 @@
             padding-left: 15px;
             padding-right: 15px;
             padding-bottom: 20px;
+            overflow-x: hidden; /* Empêche le scroll horizontal accidentel */
         }
 
         header { 
@@ -69,8 +70,18 @@
         #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
 
-        .columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; align-items: start; padding: 0 10px; }
-        .level-group { margin-bottom: 1px; }
+        /* FIX: Utilisation de minmax(0, 1fr) pour forcer les colonnes à ne pas déborder */
+        .columns-container { 
+            display: grid; 
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            align-items: start;
+        }
+
+        .level-group { margin-bottom: 1px; min-width: 0; }
 
         .student-item { 
             background-color: var(--card-student); 
@@ -84,6 +95,7 @@
             transition: all 0.1s;
             border: 1.5px solid transparent;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 0; /* Permet au flexbox de rétrécir si besoin */
         }
 
         body.light-mode .student-item, html.light-mode-init .student-item { border-color: #e5e7eb; }
@@ -93,8 +105,23 @@
         body.light-mode .text-girl, html.light-mode-init .text-girl { color: #db2777; } 
         body.light-mode .text-boy, html.light-mode-init .text-boy { color: #2563eb; } 
         
-        .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .status-icon { font-size: 0.65rem; opacity: 0.8; margin-left: 5px; }
+        /* FIX: Tronquage du texte si le nom est trop long */
+        .student-name { 
+            font-weight: 800; 
+            font-size: 0.65rem; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            flex: 1; /* Prend tout l'espace disponible à gauche */
+            min-width: 0;
+        }
+        
+        .status-icon { 
+            font-size: 0.65rem; 
+            opacity: 0.8; 
+            margin-left: 5px; 
+            flex-shrink: 0; /* L'icône ne doit jamais être écrasée */
+        }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 92%; max-width: 400px; border: 1px solid #333; }
@@ -249,7 +276,6 @@
                     const item = document.createElement('div');
                     item.className = `student-item no-select ${genderClass}`;
                     
-                    // On vérifie la note soit par l'ID numérique, soit par le Nom
                     const noteText = savedComments[el.id] || savedComments[el.identite] || "";
                     const hasNote = noteText.trim().length > 0;
                     
@@ -266,7 +292,6 @@
             currentStudentId = el.id;
             currentStudentName = el.identite;
             document.getElementById('modalTitle').innerText = formatName(el.identite);
-            // Charge la note depuis l'ID ou le Nom
             document.getElementById('commentInput').value = savedComments[el.id] || savedComments[el.identite] || "";
             document.getElementById('modal').style.display = 'flex';
             setTimeout(() => document.getElementById('commentInput').focus(), 100);
@@ -280,7 +305,6 @@
                 delete savedComments[currentStudentId];
                 delete savedComments[currentStudentName];
             } else {
-                // On privilégie l'enregistrement sur l'ID s'il existe
                 const key = currentStudentId || currentStudentName;
                 savedComments[key] = val;
             }
@@ -319,10 +343,10 @@
                             renderList();
                         });
                     }
-                } catch (err) { showAlert("Erreur", "Fichier invalide. Assurez-vous d'importer un fichier .txt exporté par l'application.", null, false); }
+                } catch (err) { showAlert("Erreur", "Fichier invalide.", null, false); }
             };
             if(e.target.files[0]) reader.readAsText(e.target.files[0]);
-            this.value = ""; // Reset
+            this.value = "";
         });
 
         function ouvrirAide() {
@@ -335,8 +359,6 @@
                 <ul class="space-y-2">
                     <li>• <strong>Icone 🔎 :</strong> Indique qu'une note est enregistrée.</li>
                     <li>• <strong>Icone ＋ :</strong> Aucune note pour cet élève.</li>
-                    <li>• <strong>Lien :</strong> Les notes sont liées à l'ID ou au Nom de l'élève.</li>
-                    <li>• <strong>Import :</strong> Fusionne le fichier avec vos données locales.</li>
                 </ul>`;
             document.getElementById('modal-aide').style.display = 'flex';
         }
