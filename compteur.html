@@ -26,7 +26,6 @@
             --header-bg: #000000;    
             --header-border: #262626; 
             --card-sub: #a3a3a3;
-            /* Variables de couleurs dynamiques */
             --color-fille: #f9a8d4;
             --color-garcon: #93c5fd;
         }
@@ -73,8 +72,20 @@
         #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
 
-        .columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; align-items: start; padding: 0 10px; }
-        .level-group { margin-bottom: 1px; }
+        /* Modifié pour largeur égale stricte */
+        .columns-container { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            align-items: start; 
+            padding: 0 10px; 
+        }
+        
+        /* Important : min-width 0 permet au texte de se tronquer sans pousser la grille */
+        .level-group { margin-bottom: 1px; min-width: 0; }
 
         .student-item { 
             background-color: var(--card-student); 
@@ -87,17 +98,26 @@
             margin-bottom: 3px; 
             transition: all 0.1s;
             border: 1.5px solid transparent;
+            min-width: 0; /* Empêche l'item de s'élargir */
         }
 
         body.light-mode .student-item, html.light-mode-init body .student-item {
             border-color: #e5e7eb;
         }
 
-        /* Application stricte des variables */
         .text-girl { color: var(--color-fille) !important; } 
         .text-boy { color: var(--color-garcon) !important; } 
         
-        .student-name { font-weight: 800; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* Tronquage du nom avec points de suspension */
+        .student-name { 
+            font-weight: 800; 
+            font-size: 0.65rem; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            margin-right: 8px;
+            flex: 1; 
+        }
 
         .counter-badge {
             width: 1.1rem; height: 1.1rem; min-width: 1.1rem;
@@ -221,7 +241,6 @@
 
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             
-            // 1. Appliquer les couleurs Fille/Garçon personnalisées si elles existent
             if (prefs.fille && mapCouleurs[prefs.fille]) {
                 document.documentElement.style.setProperty('--color-fille', mapCouleurs[prefs.fille]);
             } else {
@@ -234,7 +253,6 @@
                 document.documentElement.style.setProperty('--color-garcon', isLight ? '#2563eb' : '#93c5fd');
             }
 
-            // 2. Couleur de l'interface
             const nomCouleur = prefs['compt'] || 'indigo'; 
             const couleurHexa = mapCouleurs[nomCouleur] || '#6366f1';
             
@@ -299,7 +317,6 @@
 
         function createRow(name, sexe) {
             const card = document.createElement('div');
-            // Détection du sexe
             const isF = (sexe && (sexe.toLowerCase() === 'f' || sexe.toLowerCase() === 'fille'));
             const genderClass = isF ? 'text-girl' : 'text-boy';
             
