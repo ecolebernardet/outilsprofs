@@ -25,7 +25,7 @@
             --card-student: #1a1a1a; 
             --header-bg: #1e1e1e;
             --header-border: rgba(255, 255, 255, 0.1);
-			--border-color: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
             --card-sub: #9ca3af;
             --student-name-girl: #f9a8d4;
             --student-name-boy: #93c5fd;
@@ -73,17 +73,21 @@
         #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
         #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
 
+        /* Pinterest Layout Fix */
         .columns-container { 
-            display: grid; 
-            grid-template-columns: repeat(2, minmax(0, 1fr)); 
-            gap: 12px; 
+            column-count: 2;
+            column-gap: 12px;
             width: 100%; 
             max-width: 600px; 
             margin: 0 auto; 
-            align-items: start;
         }
 
-        .level-group { margin-bottom: 1px; min-width: 0; }
+        .level-group { 
+            break-inside: avoid;
+            margin-bottom: 20px; 
+            display: inline-block;
+            width: 100%;
+        }
 
         .student-item { 
             background-color: var(--card-student); 
@@ -262,7 +266,7 @@
             const container = document.getElementById('listeContainer');
             container.innerHTML = "";
             if (elevesInscrits.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center p-10 text-neutral-500 text-[10px] font-bold uppercase">Aucun élève inscrit.</div>`;
+                container.innerHTML = `<div class="text-center p-10 text-neutral-500 text-[10px] font-bold uppercase w-full" style="column-span: all;">Aucun élève inscrit.</div>`;
                 return;
             }
             const groupes = {};
