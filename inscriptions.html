@@ -296,7 +296,7 @@
             statsDiv.innerHTML = `<div class="stat-pill bg-white text-gray-800 border border-gray-300">Total: ${eleves.length}</div><div class="stat-pill bg-blue-100 text-blue-700 border border-blue-200">♂ ${eleves.filter(e => e.sexe === 'm').length}</div><div class="stat-pill bg-pink-100 text-pink-700 border border-pink-200">♀ ${eleves.filter(e => e.sexe === 'f').length}</div>`;
         }
 
-        function render() {
+function render() {
             renderStats();
             const container = document.getElementById('listeContainer');
             if (!container) return;
@@ -305,12 +305,18 @@
             eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
             const présents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
             
-            // Correction pinterest
-            container.className = "pinterest-grid max-w-4xl mx-auto"; 
+            // Si 2 niveaux, on utilise une grille à 2 colonnes, sinon le mode pinterest
+            if (présents.length === 2) {
+                container.className = "grid grid-cols-2 gap-4 max-w-4xl mx-auto";
+            } else {
+                container.className = "pinterest-grid max-w-4xl mx-auto"; 
+            }
 
             présents.forEach(niv => {
                 const levelColumn = document.createElement('div');
-                levelColumn.className = "pinterest-item";
+                // On retire la classe pinterest-item si on est en mode 2 colonnes pour éviter les conflits de style
+                levelColumn.className = présents.length === 2 ? "w-full" : "pinterest-item";
+                
                 const couleurNiveau = couleurParNiveau[niv] || hexaTheme;
                 levelColumn.innerHTML = `<h3 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-3">${niv}</h3>`;
                 const list = document.createElement('div');
@@ -462,21 +468,97 @@
             reader.readAsText(fichier);
         });
 
-        function genererPDF() {
-            if (eleves.length === 0) return alert("La liste est vide !");
-            const { jsPDF } = window.jspdf; 
-            const doc = new jsPDF();
-            doc.text("LISTE DES ÉLÈVES", 105, 15, { align: "center" });
-            
-            const tableBody = eleves.map((el, i) => [i+1, el.identite, el.dateNaissance || '-', el.sexe.toUpperCase(), el.niveau]);
-            doc.autoTable({
-                head: [['#', 'Prénom NOM', 'Date Naiss.', 'S.', 'Niveau']],
-                body: tableBody,
-                startY: 25,
-                theme: 'striped'
-            });
-            doc.save(`liste_eleves.pdf`);
-        }
+function genererPDF() {
+    if (eleves.length === 0) return alert("La liste est vide !");
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF();
+    
+    // --- RÉCUPÉRATION DU NOM ---
+    const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
+    
+    // 1. Préparation des données groupées par niveau
+    const groupes = {};
+    eleves.forEach(el => {
+        if (!groupes[el.niveau]) groupes[el.niveau] = [];
+        groupes[el.niveau].push(el);
+    });
+
+    // 2. Tri des niveaux selon l'ordre défini
+    const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+    
+    // --- TITRE ET SOUS-TITRE ---
+    doc.setFontSize(18);
+    doc.text(`Liste de la classe de ${nomEnseignantBrut}`, 105, 15, { align: "center" });
+    
+    doc.setFontSize(12);
+    const texteNiveaux = niveauxPresents.join(" / ");
+    doc.text(texteNiveaux, 105, 22, { align: "center" });
+    
+    let finalBody = [];
+    let compteurGlobal = 1; // Numérotation continue
+
+    niveauxPresents.forEach(niv => {
+        // Ligne de titre pour le niveau
+        finalBody.push([
+            { content: niv, colSpan: 5, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', halign: 'center' } }
+        ]);
+
+        // 3. Tri des élèves au sein du niveau
+        const elevesTries = groupes[niv].sort((a, b) => {
+            const partsA = a.identite.split(" ");
+            const partsB = b.identite.split(" ");
+            const prenomA = partsA[0], nomA = partsA.slice(1).join(" ");
+            const prenomB = partsB[0], nomB = partsB.slice(1).join(" ");
+
+            if (modeTriApp === 'nom') {
+                return nomA.localeCompare(nomB);
+            } else {
+                return prenomA.localeCompare(prenomB);
+            }
+        });
+
+        // 4. Formatage de l'identité et numérotation
+        elevesTries.forEach((el) => {
+            const parts = el.identite.split(" ");
+            const identitePDF = modeTriApp === 'nom' 
+                ? `${parts.slice(1).join(" ")} ${parts[0]}` 
+                : `${parts[0]} ${parts.slice(1).join(" ")}`;
+
+            finalBody.push([
+                compteurGlobal++, 
+                identitePDF,
+                el.dateNaissance || '-',
+                el.sexe.toUpperCase(),
+                el.niveau
+            ]);
+        });
+    });
+
+    doc.autoTable({
+        head: [['#', 'Identité', 'Date Naiss.', 'S.', 'Niveau']],
+        body: finalBody,
+        startY: 30, // Ajusté pour ne pas chevaucher le sous-titre
+        theme: 'grid',
+        headStyles: { fillColor: [80, 80, 80] },
+        styles: { fontSize: 9 }
+    });
+
+    // Nettoyage pour le nom du fichier
+    const nomNettoye = nomEnseignantBrut
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, '_');
+    
+    // Date au format AAAA-MM-JJ
+    const d = new Date();
+    const dateJour = d.getFullYear() + '-' + 
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(d.getDate()).padStart(2, '0');
+    
+    doc.save(`outilsprofs_liste_classe_${nomNettoye}_${dateJour}.pdf`);
+}
 
         window.onload = () => { 
             initDateSelectors(); 

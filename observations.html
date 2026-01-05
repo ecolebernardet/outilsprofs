@@ -262,7 +262,7 @@
             return (first + ' ' + last).trim();
         }
 
-        function renderList() {
+function renderList() {
             const container = document.getElementById('listeContainer');
             container.innerHTML = "";
             if (elevesInscrits.length === 0) {
@@ -276,9 +276,19 @@
                 groupes[niv].push(el);
             });
             const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+            
+            // Si exactement 2 niveaux, on force les 2 colonnes via Grid, sinon mode Pinterest
+            if (niveauxPresents.length === 2) {
+                container.className = "grid grid-cols-2 gap-3 w-full max-w-[600px] mx-auto";
+            } else {
+                container.className = "columns-container";
+            }
+
             niveauxPresents.forEach(niv => {
                 const levelWrapper = document.createElement('div');
-                levelWrapper.className = "level-group";
+                // Adaptation de la classe selon le mode
+                levelWrapper.className = niveauxPresents.length === 2 ? "w-full" : "level-group";
+                
                 const colorTitle = couleurParNiveau[niv] || '#ffffff';
                 levelWrapper.innerHTML = `<h2 style="color:${colorTitle}" class="text-[11px] font-black uppercase tracking-widest text-center mb-2">${niv}</h2>`;
                 const list = document.createElement('div');

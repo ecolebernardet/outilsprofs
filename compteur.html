@@ -376,7 +376,7 @@
             return card;
         }
 
-        function initApp() {
+function initApp() {
             appliquerTheme();
             const mainContent = document.getElementById('mainContent');
             const allStudents = JSON.parse(localStorage.getItem('maListeEleves')) || [];
@@ -398,9 +398,18 @@
                 return indexA - indexB;
             });
 
+            // Gestion de l'affichage sur 2 colonnes si exactement 2 niveaux
+            if (niveauxTries.length === 2) {
+                mainContent.className = "grid grid-cols-2 gap-4 w-full max-w-[600px] mx-auto px-2";
+            } else {
+                mainContent.className = "columns-container";
+            }
+
             niveauxTries.forEach(niv => {
                 const levelWrapper = document.createElement('div');
-                levelWrapper.className = "level-group";
+                // Ajustement de la classe selon le mode
+                levelWrapper.className = niveauxTries.length === 2 ? "w-full" : "level-group";
+                
                 const couleurNiveau = paletteNiveaux[niv] || couleursDecidees[niv] || '#ffffff';
                 
                 levelWrapper.innerHTML = `<h2 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-2">${niv}</h2>`;
