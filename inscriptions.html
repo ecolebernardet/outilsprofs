@@ -376,6 +376,20 @@
         function supprimer(id) { customConfirm("Supprimer cet élève ?", (val) => { if(val === 'yes') { eleves = eleves.filter(e => String(e.id) !== String(id)); localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }}, [{text: 'Supprimer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
         function toutEffacer() { customConfirm("⚠️ Supprimer toute la liste ?", (val) => { if(val === 'yes') { eleves = []; localStorage.setItem('maListeEleves', JSON.stringify(eleves)); render(); }}, [{text: 'Tout effacer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
 
+function verifierDernierExport() {
+    const dernierExport = localStorage.getItem('last_export_inscr');
+    const maintenant = new Date().getTime();
+    const septJours = 7 * 24 * 60 * 60 * 1000;
+
+    if (!dernierExport || (maintenant - dernierExport > septJours)) {
+        const btnExport = document.querySelector('button[onclick="exporterListe()"]');
+        if (btnExport) {
+            btnExport.innerHTML = '👆 exporter.txt 🟠';
+            btnExport.classList.add('border-2', 'border-orange-500');
+        }
+    }
+}
+
 		function exporterListe() {
             if (eleves.length === 0) {
                 customConfirm("La liste est vide ! Ajoutez des élèves avant d'exporter.", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]);
@@ -405,7 +419,14 @@
             a.download = nomFichier; 
             a.click(); 
             URL.revokeObjectURL(url);
-        }
+			localStorage.setItem('last_export_inscr', new Date().getTime());
+    const btnExport = document.querySelector('button[onclick="exporterListe()"]');
+    if (btnExport) {
+        btnExport.innerHTML = '👆 exporter.txt 👆';
+        btnExport.classList.remove('border-2', 'border-orange-500');
+    }
+}
+
 
         function importerListe() { customConfirm("Importer une nouvelle liste ? Cela remplacera la liste actuelle.", (val) => { if(val === 'yes') { document.getElementById('fileInput').click(); }}, [{text: 'Importer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
 
@@ -657,6 +678,7 @@ function genererEtiquettes() {
             const nomStocke = localStorage.getItem('nom_enseignant') || "";
             document.getElementById('nomEnseignant').value = nomStocke;
             initDateSelectors(); appliquerCouleursSexe(); appliquerCouleursTheme(); render(); 
+			verifierDernierExport();
         };
     </script>
 </body>

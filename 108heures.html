@@ -296,13 +296,13 @@
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
-function resetHeures() {
+    function resetHeures() {
         customConfirm("Voulez-vous vraiment tout effacer ? Cette action est irréversible.", () => {
             reunions = [];
             saveAndRender();
         });
     }
-	
+    
     function customConfirm(msg, action) {
         document.getElementById('confirm-msg').innerText = msg;
         confirmAction = action;
@@ -402,13 +402,19 @@ function resetHeures() {
             const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
             minutesGlobales += fait;
             
+            const depasse = fait > QUOTAS[catKey];
+
             const col = document.createElement('div');
             col.className = "level-column";
             col.innerHTML = `
-                <div class="mb-1">
-                    <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS[catKey]}</h3>
+                <div class="mb-1 relative">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS[catKey]}</h3>
+                        ${depasse ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
+                    </div>
                     <div class="progress-container"><div class="progress-bar" style="width: ${Math.min((fait/QUOTAS[catKey])*100, 100)}%; background-color: ${hexaTheme}"></div></div>
                     <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])}</p>
+                    ${depasse ? `<p class="text-[7px] text-orange-500 font-bold mt-1 leading-tight uppercase">⚠️ Quota réglementaire dépassé</p>` : ''}
                 </div>
                 <button id="btn-${catKey}" onclick="toggleListe('${catKey}')" class="toggle-list-btn">Détails</button>
                 <div id="list-${catKey}" class="mt-2 space-y-1" style="display:none"></div>`;
@@ -471,7 +477,6 @@ function resetHeures() {
             try {
                 const imported = JSON.parse(e.target.result);
                 if (Array.isArray(imported)) {
-                    // Modification de l'avertissement et de la logique (remplacement au lieu de fusion)
                     customConfirm("Remplacer les données actuelles ? (L'ancienne liste sera écrasée)", () => {
                         reunions = imported; 
                         saveAndRender();
