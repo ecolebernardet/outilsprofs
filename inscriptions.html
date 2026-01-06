@@ -184,11 +184,12 @@
         <div id="listeContainer"></div>
 
         <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
-            <div class="grid grid-cols-3 gap-2">
-                <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
-                <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
-                <button onclick="genererPDF()" class="btn-nav bg-neutral-800 text-white shadow-md">📄 .pdf</button>
-            </div>
+<div class="grid grid-cols-2 gap-2"> <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
+    <button onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
+    <button onclick="genererPDF()" class="btn-nav bg-neutral-800 text-white shadow-md">📄 liste de la classe .pdf</button>
+    <button onclick="genererEmargement()" class="btn-nav bg-neutral-800 text-white shadow-md">📄 feuille de pointage .pdf</button>
+	<button onclick="genererEtiquettes()" class="btn-nav bg-neutral-800 text-white shadow-md">🏷️ étiquettes</button>
+</div>
             <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
         </div>
     </div>
@@ -420,63 +421,237 @@
             reader.readAsText(fichier);
         });
 
-function genererPDF() {
-            if (eleves.length === 0) {
-                customConfirm("La liste est vide ! Ajoutez des élèves avant de générer le PDF.", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]);
-                return;
+function genererEmargement() {
+    if (eleves.length === 0) {
+        customConfirm("La liste est vide ! Ajoutez des élèves avant de générer le pointage.", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]);
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
+    const maintenant = new Date();
+    const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
+    
+    const groupes = {};
+    eleves.forEach(el => {
+        if (!groupes[el.niveau]) groupes[el.niveau] = [];
+        groupes[el.niveau].push(el);
+    });
+    const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+    const texteNiveaux = niveauxPresents.join(" / ");
+
+    doc.setFontSize(16);
+    doc.text(`Feuille de pointage ${texteNiveaux} - ${nomEnseignantBrut}`, 105, 15, { align: "center" });
+    
+    let finalBody = [];
+    let compteurGlobal = 1;
+    
+    niveauxPresents.forEach(niv => {
+        // ColSpan de 17 (1 (#) + 1 (Identité) + 15 cases)
+        finalBody.push([{ 
+            content: niv, 
+            colSpan: 17, 
+            styles: { fillColor: [160, 160, 160], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'left' } 
+        }]);
+        
+        groupes[niv].sort((a, b) => {
+            const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+            const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+            return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+        }).forEach((el) => {
+            const pts = el.identite.split(" ");
+            const idAffiche = modeTriApp === 'nom' ? `${pts.slice(1).join(" ")} ${pts[0]}` : `${pts[0]} ${pts.slice(1).join(" ")}`;
+            // On génère la ligne avec 15 cases vides
+            finalBody.push([compteurGlobal++, idAffiche, ...Array(15).fill('')]);
+        });
+    });
+
+    doc.autoTable({
+        // En-tête avec 17 colonnes vides (2 masquées + 15 cases)
+        head: [[...Array(17).fill('')]],
+        body: finalBody,
+        startY: 25,
+        theme: 'grid',
+        alternateRowStyles: { fillColor: [230, 230, 230] }, 
+        headStyles: { 
+            fillColor: [255, 255, 255], 
+            lineWidth: 0.1, 
+            lineColor: [0, 0, 0],
+            minCellHeight: 16 
+        },
+        styles: { 
+            fontSize: 7, // On réduit un peu la police pour le confort
+            cellPadding: 1.5, 
+            lineColor: [0, 0, 0],
+            textColor: [0, 0, 0]
+        },
+        columnStyles: {
+            0: { cellWidth: 7, halign: 'center' },
+            1: { cellWidth: 'auto' },
+            // Les 15 cases (8mm chacune suffit pour tenir sur la largeur)
+            2: { cellWidth: 8 }, 3: { cellWidth: 8 }, 4: { cellWidth: 8 }, 5: { cellWidth: 8 }, 6: { cellWidth: 8 },
+            7: { cellWidth: 8 }, 8: { cellWidth: 8 }, 9: { cellWidth: 8 }, 10: { cellWidth: 8 }, 11: { cellWidth: 8 },
+            12: { cellWidth: 8 }, 13: { cellWidth: 8 }, 14: { cellWidth: 8 }, 15: { cellWidth: 8 }, 16: { cellWidth: 8 }
+        },
+        didParseCell: function (data) {
+            if (data.section === 'head' && (data.column.index === 0 || data.column.index === 1)) {
+                data.cell.styles.lineWidth = 0;
             }
-            const { jsPDF } = window.jspdf; 
-            const doc = new jsPDF();
-            
-            const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
-            const maintenant = new Date();
-            const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
-            
-            const groupes = {}; 
-            eleves.forEach(el => { 
-                if (!groupes[el.niveau]) groupes[el.niveau] = []; 
-                groupes[el.niveau].push(el); 
-            });
-            
-            const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            
-            doc.setFontSize(18); 
-            doc.text(`Liste de la classe de ${nomEnseignantBrut}`, 105, 15, { align: "center" });
-            doc.setFontSize(12); 
-            doc.text(niveauxPresents.join(" / "), 105, 22, { align: "center" });
-            
-            let finalBody = []; 
-            let compteurGlobal = 1;
-            
-            niveauxPresents.forEach(niv => {
-                finalBody.push([{ content: niv, colSpan: 5, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', halign: 'center' } }]);
-                groupes[niv].sort((a, b) => {
-                    const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
-                    const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
-                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
-                }).forEach((el) => {
-                    const pts = el.identite.split(" ");
-                    const idPDF = modeTriApp === 'nom' ? `${pts.slice(1).join(" ")} ${pts[0]}` : `${pts[0]} ${pts.slice(1).join(" ")}`;
-                    finalBody.push([compteurGlobal++, idPDF, el.dateNaissance || '-', el.sexe.toUpperCase(), el.niveau]);
-                });
-            });
-            
-            doc.autoTable({ 
-                head: [['#', 'Identité', 'Date Naiss.', 'S.', 'Niveau']], 
-                body: finalBody, 
-                startY: 30, 
-                theme: 'grid', 
-                headStyles: { fillColor: [80, 80, 80] }, 
-                styles: { fontSize: 9 } 
-            });
-            
-            const nomNettoye = nomEnseignantBrut.toLowerCase().trim()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/\s+/g, '_');
-            
-            const nomFichier = `outilsprofs_liste_classe_${nomNettoye}_${dateFormattee}.pdf`;
-            doc.save(nomFichier);
+            if (data.section === 'body' && data.cell.raw && data.cell.raw.colSpan === 17) {
+                data.cell.styles.fillColor = [160, 160, 160];
+            }
         }
+    });
+
+    const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+    doc.save(`pointage_${nomNettoye}_${dateFormattee}.pdf`);
+}
+
+function genererPDF() {
+    if (eleves.length === 0) {
+        customConfirm("La liste est vide ! Ajoutez des élèves avant de générer le PDF.", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]);
+        return;
+    }
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF();
+    
+    const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
+    const maintenant = new Date();
+    const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
+    
+    const groupes = {}; 
+    eleves.forEach(el => { 
+        if (!groupes[el.niveau]) groupes[el.niveau] = []; 
+        groupes[el.niveau].push(el); 
+    });
+    
+    const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
+    
+    doc.setFontSize(18); 
+    doc.text(`Liste de la classe de ${nomEnseignantBrut}`, 105, 15, { align: "center" });
+    doc.setFontSize(12); 
+    doc.text(niveauxPresents.join(" / "), 105, 22, { align: "center" });
+    
+    let finalBody = []; 
+    let compteurGlobal = 1;
+    
+    niveauxPresents.forEach(niv => {
+        // Ligne de niveau : Gris foncé
+        finalBody.push([{ 
+            content: niv, 
+            colSpan: 5, 
+            styles: { fillColor: [160, 160, 160], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'left' } 
+        }]);
+        
+        groupes[niv].sort((a, b) => {
+            const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+            const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+            return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+        }).forEach((el) => {
+            const pts = el.identite.split(" ");
+            const idPDF = modeTriApp === 'nom' ? `${pts.slice(1).join(" ")} ${pts[0]}` : `${pts[0]} ${pts.slice(1).join(" ")}`;
+            finalBody.push([compteurGlobal++, idPDF, el.dateNaissance || '-', el.sexe.toUpperCase(), el.niveau]);
+        });
+    });
+    
+    doc.autoTable({ 
+        // L'en-tête est maintenant vide
+        head: [], 
+        body: finalBody, 
+        startY: 30, 
+        theme: 'grid', 
+        alternateRowStyles: { fillColor: [230, 230, 230] },
+        styles: { fontSize: 9, lineColor: [0, 0, 0] },
+        didParseCell: function (data) {
+            if (data.section === 'body' && data.cell.raw && data.cell.raw.colSpan === 5) {
+                data.cell.styles.fillColor = [160, 160, 160];
+            }
+        }
+    });
+    
+    const nomNettoye = nomEnseignantBrut.toLowerCase().trim()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, '_');
+    
+    const nomFichier = `outilsprofs_liste_classe_${nomNettoye}_${dateFormattee}.pdf`;
+    doc.save(nomFichier);
+}
+
+function genererEtiquettes() {
+    if (eleves.length === 0) {
+        customConfirm("La liste est vide ! Ajoutez des élèves avant de générer les étiquettes.", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]);
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    const margeConfig = 10;
+    const colonnes = 2;
+    const lignes = 4;
+    const largeurEtiquette = (210 - (margeConfig * 3)) / colonnes;
+    const hauteurEtiquette = (297 - (margeConfig * 5)) / lignes;
+
+    let elevesTries = [...eleves].sort((a, b) => {
+        const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+        const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+        return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
+    });
+
+    let colActuelle = 0;
+    let ligneActuelle = 0;
+
+    elevesTries.forEach((el, index) => {
+        if (index > 0 && index % 8 === 0) {
+            doc.addPage();
+            colActuelle = 0;
+            ligneActuelle = 0;
+        }
+
+        const x = margeConfig + (colActuelle * (largeurEtiquette + margeConfig));
+        const y = margeConfig + (ligneActuelle * (hauteurEtiquette + margeConfig));
+
+        // Cadre de l'étiquette
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.5);
+        doc.rect(x, y, largeurEtiquette, hauteurEtiquette);
+
+        // Niveau discret
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.setFont("helvetica", "normal");
+        doc.text(el.niveau, x + 5, y + 7);
+
+        // Séparation Prénom / Nom
+        const pts = el.identite.split(" ");
+        const prenom = pts[0];
+        const nom = pts.slice(1).join(" ");
+        
+        const centreX = x + (largeurEtiquette / 2);
+        const centreY = y + (hauteurEtiquette / 2);
+
+        // Affichage du Prénom (en haut)
+        doc.setFontSize(26);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.text(prenom, centreX, centreY - 2, { align: "center" });
+
+        // Affichage du Nom (en bas)
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "normal");
+        doc.text(nom, centreX, centreY + 8, { align: "center" });
+
+        colActuelle++;
+        if (colActuelle >= colonnes) {
+            colActuelle = 0;
+            ligneActuelle++;
+        }
+    });
+
+    const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
+    const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+    doc.save(`etiquettes_prenom_nom_${nomNettoye}.pdf`);
+}
 
         window.onload = () => { 
             const nomStocke = localStorage.getItem('nom_enseignant') || "";
