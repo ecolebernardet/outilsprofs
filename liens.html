@@ -246,12 +246,23 @@
         });
     }
 
-    function exportLinks() {
+	function exportLinks() {
         const dataStr = JSON.stringify(links);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        
+        // Préparation de la date au format aaaa-mm-jj
+        const maintenant = new Date();
+        const annee = maintenant.getFullYear();
+        const mois = String(maintenant.getMonth() + 1).padStart(2, '0');
+        const jour = String(maintenant.getDate()).padStart(2, '0');
+        const dateFormattee = `${annee}-${mois}-${jour}`;
+        
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', `liens_${new Date().toISOString().split('T')[0]}.txt`);
+        
+        // Nom du fichier mis à jour
+        linkElement.setAttribute('download', `outilsprofs_liens_${dateFormattee}.txt`);
+        
         linkElement.click();
     }
 
