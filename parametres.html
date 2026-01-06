@@ -13,11 +13,13 @@
             --text-main: #eee;
             --header-bg: #1e1e1e;
             --header-border: rgba(255, 255, 255, 0.1);
-			--border-color: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
             --card-bg: #111; 
             --card-text: #eee;
             --card-sub: #9ca3af;
             --btn-back-bg: #555555;
+            --warning-border: #ef4444;
+            --warning-text: #fca5a5;
         }
 
         .light-mode {
@@ -29,6 +31,8 @@
             --card-text: #111827;
             --card-sub: #4b5563;
             --btn-back-bg: #cccccc;
+            --warning-border: #b91c1c;
+            --warning-text: #7f1d1d;
         }
 
         body { 
@@ -69,8 +73,8 @@
         .light-mode #btn-retour { border-color: rgba(0,0,0,0.1); }
 
         .tab-btn { 
-            padding: 12px 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; 
-            letter-spacing: 1px; color: #666; border-bottom: 2px solid transparent;
+            padding: 12px 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
+            letter-spacing: 0.5px; color: #666; border-bottom: 2px solid transparent;
             transition: all 0.3s; flex: 1; text-align: center;
         }
         .tab-btn.active { color: var(--text-main); border-bottom-color: var(--text-main); }
@@ -112,8 +116,12 @@
         .handle-dot { width: 3px; height: 3px; background-color: #64748b; border-radius: 50%; }
 
         .card-warning { 
-            background: #777777; border: 2px solid #ffa2a2; border-radius: 1.2rem; 
-            padding: 15px; margin-bottom: 15px; color: #eeeeee;
+            background: var(--card-bg); 
+            border: 2px solid var(--warning-border); 
+            border-radius: 1.2rem; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            color: var(--warning-text);
         }
         
         .card-info p, .card-info li { color: var(--card-sub); }
@@ -159,8 +167,9 @@
         </div>
 
         <div class="flex border-b border-gray-800 sticky top-0 bg-[var(--bg-page)] z-40" id="tabs-nav">
-            <button class="tab-btn active" onclick="openTab(event, 'emploi')">Mode d'emploi</button>
+            <button class="tab-btn active" onclick="openTab(event, 'emploi')">Aide</button>
             <button class="tab-btn" onclick="openTab(event, 'perso')">Apparence</button>
+            <button class="tab-btn" onclick="openTab(event, 'gestion')">Données</button>
             <button class="tab-btn" onclick="openTab(event, 'propos')">À Propos</button>
         </div>
 
@@ -224,7 +233,7 @@
                     <p class="text-xs leading-relaxed">
                         • Enregistrez des notes sous forme de pense-bête avec des couleurs personnalisables.<br>
                         • Réorganiser vos notes en utilisant la poignée.<br>
-						• Cliquez sur un mémo pour le mettre à jour ou l'effacer.<br>
+                        • Cliquez sur un mémo pour le mettre à jour ou l'effacer.<br>
                     </p>
                 </div>
 
@@ -258,13 +267,6 @@
                         • Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.
                     </p>
                 </div>
-                
-                <div class="card-warning">
-                    <h3 class="font-black text-xs uppercase mb-2 text-red-300">!!! &ensp; Attention &ensp;!!!</h3>
-                    <p class="text-xs text-white leading-relaxed">
-                        Les infos enregistrées sur un appareil (PC, smartphone, tablette...) et/ou sur un navigateur (Firefox, DuckDuckGo, Chrome...) ne sont enregistrées que dans la <strong>mémoire locale</strong>.<br>Pour retrouver vos infos, <strong>exportez-les</strong> d'abord puis <strong>importez-les</strong> sur le nouvel appareil en utilisant les boutons d'exportation et d'importation.
-                    </p>
-                </div>
             </div>
 
             <div id="perso" class="tab-content">
@@ -289,6 +291,15 @@
                 
                 <div class="flex mt-6 pb-10">
                     <a href="index.html" class="btn-nav bg-green-600 text-white flex items-center justify-center no-underline shadow-lg flex-1 active:scale-95">Enregistrer et quitter</a>
+                </div>
+            </div>
+
+            <div id="gestion" class="tab-content">
+                <div class="card-warning">
+                    <h3 class="font-black text-xs uppercase mb-2" style="color: var(--warning-border)">!!! &ensp; Attention &ensp;!!!</h3>
+                    <p class="text-xs leading-relaxed">
+                        Les infos enregistrées sur un appareil (PC, smartphone, tablette...) et/ou sur un navigateur (Firefox, DuckDuckGo, Chrome...) ne sont enregistrées que dans la <strong>mémoire locale</strong>.<br>Pour retrouver vos infos, <strong>exportez-les</strong> d'abord puis <strong>importez-les</strong> sur le nouvel appareil en utilisant les boutons d'exportation et d'importation.
+                    </p>
                 </div>
             </div>
 
