@@ -54,7 +54,7 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
             width: calc(100% + 30px); margin-left: -15px;
-            height: auto;
+            height: 60px; /* Hauteur fixe pour un calcul précis du sticky */
         }
 
         #btn-retour { 
@@ -105,7 +105,6 @@
         
         .color-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        /* Effet accentué sur le point actif */
         .color-dot.active { 
             transform: scale(1.4); 
             border: 2px solid white; 
@@ -146,14 +145,20 @@
 
         #avatar-propos { width: 128px; height: auto; margin-bottom: 24px; transition: filter 0.3s ease; }
 
-        #nomEnseignant {
-            background: rgba(128, 128, 128, 0.1); color: var(--text-main); border: 1px solid var(--header-border);
-            padding: 8px 12px; border-radius: 8px; width: 100%; outline: none; font-size: 14px;
-        }
-        #nomEnseignant:focus { border-color: #22c55e; }
-
         #settingsContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; justify-items: center; }
+
+        /* ONGLETS PARFAITEMENT COLLÉS AU HEADER */
+        #tabs-nav { 
+            position: sticky; 
+            top: 60px; /* Correspond à la hauteur du header */
+            z-index: 90; 
+            background: var(--bg-page);
+            width: calc(100% + 30px); 
+            margin-left: -15px; 
+            padding: 0 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="pb-10">
@@ -166,17 +171,9 @@
         <h1 class="text-lg font-black tracking-normal uppercase flex-grow text-center mr-[40px]">infos et paramètres</h1>
     </header>
 
-    <div class="max-w-md mx-auto mt-4">
-        <div class="card-info mx-2">
-            <div class="flex items-center gap-1 mb-3">
-                <span class="text-lg">🎓</span>
-                <h3 class="font-black text-xs uppercase">Profil Enseignant</h3>
-            </div>
-            <input type="text" id="nomEnseignant" placeholder="Saisissez votre nom..." oninput="saveNom()">
-            <p class="text-[10px] mt-2 opacity-50 italic text-center">Ce nom sera utilisé pour personnaliser vos documents.</p>
-        </div>
-
-        <div class="flex border-b border-gray-800 sticky top-0 bg-[var(--bg-page)] z-40" id="tabs-nav">
+    <div class="max-w-md mx-auto">
+        
+        <div class="flex border-b border-gray-800" id="tabs-nav">
             <button class="tab-btn active" onclick="openTab(event, 'emploi')">Aide</button>
             <button class="tab-btn" onclick="openTab(event, 'perso')">Apparence</button>
             <button class="tab-btn" onclick="openTab(event, 'gestion')">Données</button>
@@ -199,8 +196,8 @@
                             <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
                             <div class="handle-dot"></div><div class="handle-dot"></div><div class="handle-dot"></div>
                         </div>
-                        <p class="text-[11px] leading-snug">
-                            Maintenez votre doigt ou votre souris appuyé sur les <strong>petites poignées</strong> situées en haut à droite de chaque tuile.
+                        <p class="text-[11px] font-bold">
+                            Maintenez les poignées situées en haut à droite pour réorganiser.
                         </p>
                     </div>
                 </div>
@@ -361,16 +358,6 @@
             memos: 'purple', obs: 'green', compt: 'blue'
         };
 
-        function saveNom() {
-            const nom = document.getElementById('nomEnseignant').value;
-            localStorage.setItem('nom_enseignant', nom);
-        }
-
-        function loadNom() {
-            const savedNom = localStorage.getItem('nom_enseignant');
-            if (savedNom) document.getElementById('nomEnseignant').value = savedNom;
-        }
-
         function selectTheme(mode) {
             document.body.classList.toggle('light-mode', mode === 'light');
             localStorage.setItem('theme_mode', mode);
@@ -384,6 +371,7 @@
             for (let l of links) l.classList.remove("active");
             document.getElementById(tabName).classList.add("active");
             evt.currentTarget.classList.add("active");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderSettings() {
@@ -464,7 +452,6 @@
 
         window.addEventListener('load', sauvegarderToutesLesAides);
         if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-        loadNom();
         renderSettings();
     </script>
 </body>
