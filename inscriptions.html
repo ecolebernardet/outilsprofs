@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Inscriptions - OutilsProfs</title>
+    <title>Ma classe - OutilsProfs</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -126,10 +126,22 @@
 
     <div id="modal-aide" onclick="fermerAide()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="aide-titre" class="text-lg font-black uppercase mb-4">💡 Inscriptions</h2>
+            <h2 id="aide-titre" class="text-lg font-black uppercase mb-4">💡 Ma classe</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
-                <strong>Enregistrement :</strong> Saisissez les infos de l'élève.<br>
-                <strong>Pastille 🟠 :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde.
+				<strong>Onglet "Enregistrement" :</strong>
+				<br>• <strong>Saisissez</strong> votre nom dans le formulaire "Nom de l'enseignant"
+                <br>• <strong>Enregistrez</strong> vos élèves en ajoutant le prénom, le nom, la date de naissance (optionnel). Choisissez le genre et le niveau, puis enregistrez.
+                <br>• <strong>Import/Export :</strong> Utilisez ces boutons pour sauvegarder votre liste sur votre appareil ou la transférer vers un autre appareil au format <em>Prénom;NOM;genre;niveau</em>.
+				<br><br><strong>La liste générée sera utilisée dans les autres rubriques de l'application.</strong></li>
+				<br>
+				<br>
+				<strong>Onglet "Édition" :</strong>
+                <br>• <strong>Générez</strong> votre liste de classe en PDF après avoir décidé de ranger les élèves par prénoms ou par noms.
+                <br>• <strong>Générez</strong> une liste de pointage avc 15 cases par élève.
+                <br>• <strong>Générez</strong> des étiquettes au nom les élèves.
+				<br>• <strong>Générez</strong> des fiches de suivi pour vos élèves.
+                <br>
+                <br><strong>Pastille 🟠 :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde.
             </div>
             <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
         </div>
@@ -139,13 +151,13 @@
         <a href="index.html" id="btn-retour" class="header-btn shadow-lg active:scale-90">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
         </a>
-        <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Inscriptions</h1>
+        <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Ma classe</h1>
         <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg active:scale-90 text-lg">💡</button>
     </header>
 
     <nav class="tab-nav">
-        <div id="tab-btn-classe" class="tab-btn active" onclick="switchTab('classe')">Enregistrement</div>
-        <div id="tab-btn-editeur" class="tab-btn" onclick="switchTab('editeur')">Éditeur de listes</div>
+        <div id="tab-btn-classe" class="tab-btn active" onclick="switchTab('classe')">Module Enregistrement</div>
+        <div id="tab-btn-editeur" class="tab-btn" onclick="switchTab('editeur')">Module Édition</div>
     </nav>
 
     <div class="max-w-4xl mx-auto p-0 mt-2">
@@ -235,6 +247,17 @@
                         <div class="text-[10px] opacity-60">8 étiquettes par page A4</div>
                     </div>
                 </button>
+				<button onclick="genererPetitesEtiquettes()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+					<div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mr-4 group-hover:bg-rose-500 group-hover:text-white transition-colors">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+						</svg>
+					</div>
+					<div class="text-left">
+						<div class="text-xs font-black uppercase">Petites Étiquettes</div>
+						<div class="text-[10px] opacity-60">27 étiquettes par page (Format 3x9)</div>
+					</div>
+				</button>
                 <button onclick="genererSuiviIndividuel()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
                     <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -579,6 +602,80 @@
                 col++; if (col === cols) { col = 0; row++; }
             });
             doc.save(`outilsprofs_etiquettes_${nomNettoye}_${dateFormattee}.pdf`);
+        }
+
+		function genererPetitesEtiquettes() {
+            if (!eleves || eleves.length === 0) { 
+                customConfirm("La liste est vide !", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]); 
+                return; 
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
+            const maintenant = new Date();
+            const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
+            
+            // Nettoyage du nom pour le fichier (pas d'espaces ni d'accents)
+            const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+            const nomFichier = `outilsprofs_petitesetiquettes_${nomNettoye}_${dateFormattee}.pdf`;
+
+            // Configuration 27 étiquettes (3 colonnes x 9 lignes)
+            const marginX = 10;
+            const marginY = 12;
+            const cols = 3;
+            const rows = 9;
+            const gap = 4;
+            const cardWidth = (210 - (2 * marginX) - ((cols - 1) * gap)) / cols;
+            const cardHeight = (297 - (2 * marginY) - ((rows - 1) * gap)) / rows;
+
+            let col = 0, row = 0;
+            const elevesTries = [...eleves].sort((a, b) => a.identite.localeCompare(b.identite));
+
+            elevesTries.forEach((el, index) => {
+                if (index > 0 && index % (cols * rows) === 0) {
+                    doc.addPage();
+                    col = 0;
+                    row = 0;
+                }
+
+                const x = marginX + (col * (cardWidth + gap));
+                const y = marginY + (row * (cardHeight + gap));
+
+                // Contour de l'étiquette (gris très léger pour la découpe)
+                doc.setDrawColor(220);
+                doc.setLineWidth(0.1);
+                doc.rect(x, y, cardWidth, cardHeight, 'S');
+
+                const parts = el.identite.split(" ");
+                const prenom = parts[0];
+                const nom = parts.slice(1).join(" ");
+
+                // Texte : Prénom
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(0);
+                doc.text(prenom, x + cardWidth / 2, y + (cardHeight / 2) - 1, { align: 'center' });
+
+                // Texte : Nom
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                doc.text(nom, x + cardWidth / 2, y + (cardHeight / 2) + 4, { align: 'center' });
+
+                // Niveau
+                doc.setFontSize(6);
+                doc.setTextColor(180);
+                doc.text(el.niveau, x + cardWidth - 2, y + cardHeight - 2, { align: 'right' });
+
+                col++;
+                if (col === cols) {
+                    col = 0;
+                    row++;
+                }
+            });
+
+            doc.save(nomFichier);
         }
 
         function genererSuiviIndividuel() {
