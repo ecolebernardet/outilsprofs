@@ -148,6 +148,24 @@
         .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
+		
+		@keyframes blink-point {
+			0% { transform: scale(0.9); opacity: 0.5; }
+			50% { transform: scale(1.2); opacity: 1; }
+			100% { transform: scale(0.9); opacity: 0.5; }
+		}
+		.mini-pastille {
+			display: inline-block;
+			width: 8px;
+			height: 8px;
+			background-color: #f97316;
+			border-radius: 50%;
+			margin-left: 4px;
+			margin-right: 2px;
+			box-shadow: 0 0 5px #f97316;
+			animation: blink-point 1.5s infinite;
+		}
+		
     </style>
 </head>
 <body>
@@ -490,7 +508,8 @@
                     <li>• <strong>Icone 🔎 :</strong> Indique qu'une note est enregistrée.</li>
                     <li>• <strong>Icone ＋ :</strong> Aucune note pour cet élève.</li>
                     <li>• <strong>Portabilité :</strong> L'export et l'import se basent sur le NOM et le PRÉNOM. Vous pouvez transférer vos notes d'un appareil à l'autre sans problème.</li>
-                </ul>`;
+					<li><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".</li>
+                 </ul>`;
             document.getElementById('modal-aide').style.display = 'flex';
         }
         function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
