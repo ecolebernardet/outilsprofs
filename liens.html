@@ -122,7 +122,10 @@
         <div class="flex gap-2">
             <label for="importFile" class="nav-btn bg-neutral-800 text-white cursor-pointer text-center flex-1">👇 importer .txt 👇</label>
             <input type="file" id="importFile" class="hidden" accept=".txt" onchange="importLinks(event)">
-            <button id="btn-export" onclick="exportLinks()" class="nav-btn bg-neutral-800 text-white flex-1">👆 exporter .txt 👆</button>
+            <button id="btn-export" onclick="exportLinks()" class="nav-btn bg-neutral-800 text-white flex-1 relative">
+                👆 exporter .txt 👆
+                <span id="badge-export" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border-2 border-white"></span>
+            </button>
         </div>
         <button onclick="resetLinks()" class="nav-btn bg-red-500 text-white shadow-md">⚠️ effacer tous les liens</button>
     </footer>
@@ -143,16 +146,39 @@
         'Autres': { text: 'text-emerald-500', border: 'border-emerald-500', emoji: '🌍' }
     };
 
-    // --- NOUVEAU : VÉRIFICATION EXPORT ---
-    function verifierDernierExport() {
-        const dernierExport = localStorage.getItem('last_export_liens');
-        const maintenant = new Date().getTime();
-        const septJours = 7 * 24 * 60 * 60 * 1000;
+    // --- GESTION DU BADGE EXPORT ---
+    function updateExportBadge(needsExport) {
+        const badge = document.getElementById('badge-export');
         const btnExport = document.getElementById('btn-export');
+        if (needsExport) {
+            badge.classList.remove('hidden');
+            localStorage.setItem('needsExport_liens', 'true');
+            if (btnExport) btnExport.style.border = '2px solid #f97316';
+        } else {
+            badge.classList.add('hidden');
+            localStorage.removeItem('needsExport_liens');
+            localStorage.setItem('last_export_liens', Date.now());
+            if (btnExport) btnExport.style.border = 'none';
+        }
+    }
 
-        if (btnExport && (!dernierExport || (maintenant - dernierExport > septJours))) {
-            btnExport.innerHTML = '👆 exporter .txt 🟠';
-            btnExport.style.border = '2px solid #f97316';
+    function checkBadgeStatus() {
+        const lastExport = localStorage.getItem('last_export_liens');
+        const needsExport = localStorage.getItem('needsExport_liens') === 'true';
+        
+        if (needsExport) {
+            updateExportBadge(true);
+            return;
+        }
+
+        if (lastExport) {
+            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+            if (Date.now() - parseInt(lastExport) > sevenDaysInMs) {
+                updateExportBadge(true);
+            }
+        } else {
+            // Premier lancement ou jamais exporté
+            localStorage.setItem('last_export_liens', Date.now());
         }
     }
 
@@ -198,6 +224,7 @@
             onEnd: () => {
                 catOrder = Array.from(document.querySelectorAll('.column')).map(el => el.getAttribute('data-cat'));
                 localStorage.setItem('eduCatOrder', JSON.stringify(catOrder));
+                updateExportBadge(true);
             }
         });
         document.querySelectorAll('.links-list').forEach(listEl => {
@@ -216,6 +243,7 @@
                     });
                     links = newLinks;
                     localStorage.setItem('eduLinksList', JSON.stringify(links));
+                    updateExportBadge(true);
                     render();
                 }
             });
@@ -238,6 +266,7 @@
             localStorage.setItem('eduLinksList', JSON.stringify(links));
             document.getElementById('linkName').value = '';
             document.getElementById('linkUrl').value = '';
+            updateExportBadge(true);
             render();
         }
     }
@@ -259,6 +288,7 @@
         afficherMessage("Suppression", "Voulez-vous supprimer ce lien ?", () => {
             links = links.filter(l => l.id !== id);
             localStorage.setItem('eduLinksList', JSON.stringify(links));
+            updateExportBadge(true);
             render();
         });
     }
@@ -279,13 +309,7 @@
         linkElement.setAttribute('download', `outilsprofs_liens_${dateFormattee}.txt`);
         linkElement.click();
 
-        // Mise à jour date export et reset pastille
-        localStorage.setItem('last_export_liens', new Date().getTime());
-        const btnExport = document.getElementById('btn-export');
-        if (btnExport) {
-            btnExport.innerHTML = '👆 exporter .txt 👆';
-            btnExport.style.border = 'none';
-        }
+        updateExportBadge(false);
     }
 
     function importLinks(event) {
@@ -296,6 +320,7 @@
             try {
                 links = JSON.parse(e.target.result);
                 localStorage.setItem('eduLinksList', JSON.stringify(links));
+                updateExportBadge(false);
                 render();
             } catch (err) {}
         };
@@ -304,7 +329,9 @@
 
     function resetLinks() {
         afficherMessage("Réinitialisation", "Effacer TOUS vos liens ?", () => {
-            links = []; localStorage.removeItem('eduLinksList'); render();
+            links = []; localStorage.removeItem('eduLinksList'); 
+            updateExportBadge(true);
+            render();
         });
     }
 
@@ -341,7 +368,7 @@
     window.onload = () => { 
         appliquerTheme(); 
         render(); 
-        verifierDernierExport(); 
+        checkBadgeStatus(); 
     };
 </script>
 </body>
