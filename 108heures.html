@@ -140,24 +140,30 @@
             border: 1px solid var(--border-color); transition: all 0.2s ease;
         }
         .toggle-list-btn { width: 100%; font-size: 9px; font-weight: 900; text-transform: uppercase; opacity: 0.4; margin-top: 8px; padding: 4px; }
-		
-		@keyframes blink-point {
-			0% { transform: scale(0.9); opacity: 0.5; }
-			50% { transform: scale(1.2); opacity: 1; }
-			100% { transform: scale(0.9); opacity: 0.5; }
-		}
-		.mini-pastille {
-			display: inline-block;
-			width: 8px;
-			height: 8px;
-			background-color: #f97316;
-			border-radius: 50%;
-			margin-left: 4px;
-			margin-right: 2px;
-			box-shadow: 0 0 5px #f97316;
-			animation: blink-point 1.5s infinite;
-		}
-		
+        
+        @keyframes blink-point {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+        .mini-pastille {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            margin-left: 4px;
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316;
+            animation: blink-point 1.5s infinite;
+        }
+
+        /* Styling range slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
+        input[type=range]::-webkit-slider-thumb { height: 18px; width: 18px; border-radius: 50%; background: var(--text-page); cursor: pointer; -webkit-appearance: none; margin-top: -7px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
     </style>
 </head>
 <body class="pb-10">
@@ -169,9 +175,9 @@
                 <p>• <b>Saisie :</b> Sélectionnez la catégorie, la date et la durée puis ajoutez un commentaire.</p>
                 <p>• <b>Visualisation :</b> Dans chaque catégorie, cliquez sur "Détails" pour visualiser toutes les réunions de la catégorie.</p>
                 <p>• <b>Modification/Suppression :</b> Cliquez sur le détail de la réunion pour la modifier ou la supprimer.</p>
-                <p>• <b>Suivi :</b> Les jauges se remplissent selon les quotas officiels.</p>
+                <p>• <b>Suivi :</b> Les jauges se remplissent selon les quotas officiels adaptés à votre quotité.</p>
                 <p>• <b>PDF :</b> Générez un bilan propre trié par rubriques.</p>
-				<br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
+                <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
             
             </div>
             <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-3 rounded-xl text-[10px] font-black uppercase">Fermer</button>
@@ -199,6 +205,15 @@
     </header>
 
     <div id="app-ui" class="max-w-md mx-auto p-2 mt-4"> 
+
+        <div class="light-card p-4 mb-4">
+            <p class="field-label">Ma quotité de travail</p>
+            <div class="flex items-center gap-4">
+                <input type="range" id="range-quotite" min="10" max="100" step="5" value="100" class="flex-grow" oninput="updateQuotite(this.value)">
+                <span id="val-quotite" class="font-black text-sm w-12 text-right">100%</span>
+            </div>
+        </div>
+
         <div id="form-container" class="light-card p-4 mb-6">
             <form id="heuresForm" class="flex flex-col gap-4">
                 <div class="grid grid-cols-4 gap-2">
@@ -237,7 +252,7 @@
 
         <div id="globalStats" class="light-card p-4 mb-5">
             <div class="flex justify-between items-end mb-1">
-                <span id="stats-title" class="text-[10px] font-black uppercase tracking-widest">Total Annuel (108h)</span>
+                <span id="stats-title" class="text-[10px] font-black uppercase tracking-widest">Total Annuel</span>
                 <span id="globalReste" class="text-[10px] font-black"></span>
             </div>
             <div class="progress-container !h-3">
@@ -283,9 +298,10 @@
     const hexaTheme = mapCouleurs[couleurH108] || '#f97316';
     const isDarkTextNeeded = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurH108);
 
-    const QUOTAS = { "APC": 36 * 60, "PEDAGO": 48 * 60, "FORM": 18 * 60, "CONSEIL": 6 * 60 };
-    const TOTAL_ANNUEL = 108 * 60;
-    const LABELS = { "APC": "APC (36h)", "PEDAGO": "Réunions (48h)", "FORM": "Formation (18h)", "CONSEIL": "Conseils (6h)" };
+    // Initialisation des quotas modifiables
+    let QUOTAS = { "APC": 36 * 60, "PEDAGO": 48 * 60, "FORM": 18 * 60, "CONSEIL": 6 * 60 };
+    let TOTAL_ANNUEL = 108 * 60;
+    const LABELS_BASE = { "APC": "APC", "PEDAGO": "Réunions", "FORM": "Formation", "CONSEIL": "Conseils" };
 
     let reunions = JSON.parse(localStorage.getItem('mesHeuresReu')) || [];
     let editId = null; 
@@ -303,6 +319,21 @@
 
         for(let i=0; i<=10; i++) sh.innerHTML += `<option value="${i}">${i} h</option>`;
         for(let i=0; i<60; i+=5) smin.innerHTML += `<option value="${i}">${i<10?'0'+i:i} min</option>`;
+    }
+
+    function updateQuotite(val) {
+        document.getElementById('val-quotite').innerText = val + "%";
+        localStorage.setItem('quotite_pro', val);
+        
+        const ratio = val / 100;
+        QUOTAS = { 
+            "APC": (36 * 60) * ratio, 
+            "PEDAGO": (48 * 60) * ratio, 
+            "FORM": (18 * 60) * ratio, 
+            "CONSEIL": (6 * 60) * ratio 
+        };
+        TOTAL_ANNUEL = (108 * 60) * ratio;
+        render();
     }
 
     function setSelectedDate(dateStr) {
@@ -347,6 +378,7 @@
         });
         document.getElementById('stats-title').style.color = hexaTheme;
         document.getElementById('aide-label').style.color = hexaTheme;
+        document.getElementById('range-quotite').style.accentColor = hexaTheme;
     }
 
     function updateExportBadge(needsExport) {
@@ -421,7 +453,7 @@
     }
 
     function formatDuree(totalMinutes) {
-        const abs = Math.abs(totalMinutes);
+        const abs = Math.abs(Math.round(totalMinutes));
         const h = Math.floor(abs / 60);
         const m = abs % 60;
         return `${totalMinutes < 0 ? "-" : ""}${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}`;
@@ -444,12 +476,12 @@
             col.innerHTML = `
                 <div class="mb-1 relative">
                     <div class="flex items-center gap-1.5 mb-1">
-                        <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS[catKey]}</h3>
+                        <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS_BASE[catKey]} (${formatDuree(QUOTAS[catKey])})</h3>
                         ${depasse ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
                     </div>
                     <div class="progress-container"><div class="progress-bar" style="width: ${Math.min((fait/QUOTAS[catKey])*100, 100)}%; background-color: ${hexaTheme}"></div></div>
                     <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])}</p>
-                    ${depasse ? `<p class="text-[7px] text-orange-500 font-bold mt-1 leading-tight uppercase">⚠️ Quota réglementaire dépassé</p>` : ''}
+                    ${depasse ? `<p class="text-[7px] text-orange-500 font-bold mt-1 leading-tight uppercase">⚠️ Quota dépassé</p>` : ''}
                 </div>
                 <button id="btn-${catKey}" onclick="toggleListe('${catKey}')" class="toggle-list-btn">Détails</button>
                 <div id="list-${catKey}" class="mt-2 space-y-1" style="display:none"></div>`;
@@ -527,6 +559,7 @@
 
     function exportPDF() {
         let profNom = localStorage.getItem('nom_enseignant') || "Enseignant";
+        let quotite = localStorage.getItem('quotite_pro') || 100;
         const dateFichier = new Date().toISOString().split('T')[0];
         const element = document.createElement('div');
         element.style.padding = "10px";
@@ -536,7 +569,7 @@
 
         let html = `<div style="text-align:center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
                 <h1 style="margin:0; text-transform:uppercase; font-size:18px;">Bilan des 108 heures</h1>
-                <h2 style="margin:5px 0; color:#444; font-size:14px;">Enseignant(e) : ${profNom}</h2>
+                <h2 style="margin:5px 0; color:#444; font-size:14px;">Enseignant(e) : ${profNom} (Quotité : ${quotite}%)</h2>
                 <p style="font-size:9px;">Document généré le ${new Date().toLocaleDateString('fr-FR')}</p>
             </div>`;
 
@@ -545,7 +578,7 @@
             const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
             html += `<div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #eee; padding: 5px; border-radius: 5px;">
                     <div style="background-color: #f3f4f6; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                        <b style="text-transform:uppercase; font-size:12px;">${LABELS[catKey]}</b>
+                        <b style="text-transform:uppercase; font-size:12px;">${LABELS_BASE[catKey]} (${formatDuree(QUOTAS[catKey])})</b>
                         <span style="font-size:10px;">Fait: <b>${formatDuree(fait)}</b></span>
                     </div>
                     <table style="width:100%; border-collapse: collapse; margin-top: 5px;">
@@ -569,7 +602,12 @@
     window.addEventListener('DOMContentLoaded', () => { 
         initSelectors();
         appliquerCouleursTheme(); 
-        render(); 
+        
+        // Charger la quotité
+        const savedQuotite = localStorage.getItem('quotite_pro') || 100;
+        document.getElementById('range-quotite').value = savedQuotite;
+        updateQuotite(savedQuotite);
+        
         initDate(); 
         if (localStorage.getItem('needsExport_108h') === 'true') {
             document.getElementById('badge-export').classList.remove('hidden');
