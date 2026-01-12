@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur d'équipes - OutilsProfs</title>
+    <title>Générateur d'équipes équilibrées - OutilsProfs</title>
     
     <script>
         (function() {
@@ -20,9 +20,8 @@
         
         :root { 
             --bg: #121212; --text: #ffffff; --card-bg: #0a0a0a; --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1); 
-            --pill-bg: #1a1a1a; --btn-num-bg: #0a0a0a; --btn-num-border: #262626; 
-            --title-gray: #888888; --theme-color: #ec4899; --theme-contrast: #ffffff;
+            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1); --pill-bg: #1a1a1a; --btn-num-bg: #0a0a0a;
+            --btn-num-border: #262626; --title-gray: #888888; 
             --student-name-boy: #bae6fd; --student-name-girl: #fbcfe8;
         }
 
@@ -34,27 +33,27 @@
 
         body { 
             font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); 
-            padding: 0 15px 20px 15px; margin: 0; transition: background 0.3s;
-            display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+            padding: 0; margin: 0; transition: background 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
 
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--header-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
             justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: 100vw; margin-bottom: 10px;
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 10px;
         }
 
-        .theme-btn-sync { 
-            background-color: var(--theme-color); color: var(--theme-contrast);
+        .header-btn { 
             display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.1s ease, opacity 0.2s;
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 1px solid var(--header-border); 
+            transition: transform 0.1s ease, background-color 0.3s ease;
         }
-
-        .header-btn { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
 
         .section-title { font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
-        #attendance-container { width: 100%; max-width: 600px; margin: 0 auto; }
+        #attendance-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 10px; }
         .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; width: 100%; }
         .level-label { text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -75,20 +74,23 @@
             text-decoration: line-through; border-color: #1a1a1a !important;
             opacity: 0.5; transform: scale(0.96);
         }
-        body.light-mode .absent { background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important; }
 
-        .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; transition: all 0.2s; }
-        .generate-btn { width: 100%; max-width: 300px; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
+        body.light-mode .absent, html.light-mode-init .absent { 
+            background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important;
+        }
+
+        .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; }
+        .generate-btn { width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
         
-        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; }
+        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; padding: 0 10px; }
         .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid var(--header-border); }
         .team-header { border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px; }
-        .team-title { font-weight: 900; font-size: 0.65rem; color: var(--theme-color); text-transform: uppercase; }
+        .team-title { font-weight: 900; font-size: 0.65rem; color: var(--text); text-transform: uppercase; }
         .team-stats { font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4; }
         
         .tag { font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; border-radius: 999px; color: #fff; min-width: 35px; text-align: center; }
         
-        .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; }
+        .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
         .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
@@ -99,19 +101,19 @@
 <body>
 
     <header>
-        <a href="index.html" id="btn-retour" class="header-btn theme-btn-sync shadow-lg">
+        <a href="index.html" id="btn-retour" class="header-btn shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
         <h1 id="mainTitle" class="font-black text-lg uppercase flex-grow text-center">Équipes</h1>
-        <button id="btn-aide" onclick="ouvrirAide()" class="header-btn theme-btn-sync shadow-lg text-lg">💡</button>
+        <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg text-lg">💡</button>
     </header>
 
     <div id="attendance-container"></div>
     <p class="section-title">Nombre d'équipes</p>
     <div class="flex gap-2 mb-4" id="selector"></div>
-    <button id="main-generate-btn" class="generate-btn theme-btn-sync" onclick="generateBalancedTeams()">Générer les équipes</button>
+    <button id="main-generate-btn" class="generate-btn" onclick="generateBalancedTeams()">Générer les équipes</button>
     <div id="results" class="grid-teams"></div>
 
     <div class="bottom-nav">
@@ -120,13 +122,13 @@
 
     <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="titre-aide" class="text-lg font-black uppercase mb-4" style="color: var(--theme-color)">💡 Équipes</h2>
+            <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Équipes</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
-                <p>• <b>Présence :</b> Cliquez sur un élève pour le marquer absent (barré).</p>
-                <p>• <b>Équilibrage :</b> L'algorithme répartit selon le sexe et les niveaux.</p>
-                <p>• <b>Nombre :</b> Sélectionnez le nombre d'équipes avant de générer.</p>
+                <p>• <b>Présence :</b> Cliquez sur un élève pour le marquer absent (barré). Il ne sera pas inclus dans les équipes.</p>
+                <p>• <b>Équilibrage :</b> L'algorithme répartit automatiquement les élèves pour que le nombre de filles, de garçons et les niveaux soient identiques dans chaque équipe.</p>
+                <p>• <b>Nombre :</b> Sélectionnez le nombre d'équipes souhaité avant de cliquer sur "Générer".</p>
             </div>
-            <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest theme-btn-sync">Fermer</button>
+            <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
         </div>
     </div>
 
@@ -136,7 +138,7 @@
             <p id="alertText" class="text-center text-sm mb-4"></p>
             <div class="flex gap-2">
                 <button onclick="closeModal()" class="modal-btn bg-gray-200 text-gray-700">Annuler</button>
-                <button id="alertConfirmBtn" class="modal-btn theme-btn-sync">Confirmer</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
     </div>
@@ -153,23 +155,47 @@
     function appliquerCouleursSexe() {
         const prefs = JSON.parse(localStorage.getItem('theme_tuiles'));
         if (prefs) {
-            if (prefs.fille && mapCouleurs[prefs.fille]) document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[prefs.fille]);
-            if (prefs.garcon && mapCouleurs[prefs.garcon]) document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[prefs.garcon]);
+            if (prefs.fille && mapCouleurs[prefs.fille]) {
+                document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[prefs.fille]);
+            }
+            if (prefs.garcon && mapCouleurs[prefs.garcon]) {
+                document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[prefs.garcon]);
+            }
         }
     }
 
     function appliquerTheme() {
         const isLight = localStorage.getItem('theme_mode') === 'light';
         document.body.classList.toggle('light-mode', isLight);
-        
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const colPref = themePrefs.equipes || 'pink';
         const cHex = mapCouleurs[colPref];
-        const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+
+        document.getElementById('mainTitle').style.color = isLight ? '#000' : '#fff';
         
-        const root = document.documentElement;
-        root.style.setProperty('--theme-color', cHex);
-        root.style.setProperty('--theme-contrast', isLightColor ? '#000000' : '#ffffff');
+        const headerBtns = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
+        headerBtns.forEach(btn => {
+            if(btn) {
+                btn.style.backgroundColor = cHex;
+                btn.style.color = isDark ? '#000' : '#fff';
+            }
+        });
+
+        const genBtn = document.getElementById('main-generate-btn');
+        if(genBtn) {
+            genBtn.style.backgroundColor = cHex;
+            genBtn.style.color = isDark ? '#000' : '#fff';
+        }
+
+        const btnFermerAide = document.getElementById('btn-fermer-aide');
+        if(btnFermerAide) {
+            btnFermerAide.style.backgroundColor = cHex;
+            btnFermerAide.style.color = isDark ? '#000' : '#fff';
+        }
+
+        const titreAide = document.getElementById('titre-aide');
+        if(titreAide) titreAide.style.color = cHex;
     }
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
@@ -184,12 +210,18 @@
 
     function getDetailedStats(team) {
         const s = { f: 0, m: 0, total: team.length, levels: {} };
-        ORDRE_SCOLAIRE.forEach(n => { s.levels[n.toLowerCase()] = { f: 0, m: 0, total: 0 }; });
+        ORDRE_SCOLAIRE.forEach(n => {
+            s.levels[n.toLowerCase()] = { f: 0, m: 0, total: 0 };
+        });
         team.forEach(e => {
             const isF = e.sexe.toLowerCase().startsWith('f');
-            const niv = e.niveau.toString().trim().toUpperCase().toLowerCase();
+            const niv = e.niveau.toString().trim().toUpperCase(); 
             if(isF) s.f++; else s.m++;
-            if(s.levels[niv]) { s.levels[niv].total++; if(isF) s.levels[niv].f++; else s.levels[niv].m++; }
+            const key = niv.toLowerCase();
+            if(s.levels[key]) {
+                s.levels[key].total++;
+                if(isF) s.levels[key].f++; else s.levels[key].m++;
+            }
         });
         return s;
     }
@@ -197,9 +229,48 @@
     function generateBalancedTeams() {
         let presents = ALL_STUDENTS.filter(s => !absents.has(String(s.id)));
         if (presents.length < selectedNumTeams) return;
+
         let teams = Array.from({ length: selectedNumTeams }, () => []);
         presents.sort(() => Math.random() - 0.5);
         presents.forEach((s, i) => teams[i % selectedNumTeams].push(s));
+
+        let improved = true;
+        let iterations = 0;
+        while(improved && iterations < 300) {
+            improved = false;
+            iterations++;
+            for(let i=0; i < teams.length; i++) {
+                for(let j=0; j < teams.length; j++) {
+                    if(i === j) continue;
+                    let sI = getDetailedStats(teams[i]), sJ = getDetailedStats(teams[j]);
+                    const getScore = (st1, st2) => {
+                        let score = Math.abs(st1.f - st2.f) * 10 + Math.abs(st1.m - st2.m) * 10;
+                        ORDRE_SCOLAIRE.forEach(n => {
+                            const niv = n.toLowerCase();
+                            score += Math.abs(st1.levels[niv].f - st2.levels[niv].f) * 20;
+                            score += Math.abs(st1.levels[niv].total - st2.levels[niv].total) * 5;
+                        });
+                        return score;
+                    };
+                    let currentScore = getScore(sI, sJ);
+                    for(let x=0; x < teams[i].length; x++) {
+                        for(let y=0; y < teams[j].length; y++) {
+                            let temp = teams[i][x];
+                            teams[i][x] = teams[j][y];
+                            teams[j][y] = temp;
+                            let nI = getDetailedStats(teams[i]), nJ = getDetailedStats(teams[j]);
+                            if(getScore(nI, nJ) < currentScore) {
+                                improved = true;
+                                currentScore = getScore(nI, nJ);
+                            } else {
+                                teams[j][y] = teams[i][x];
+                                teams[i][x] = temp;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         localStorage.setItem('savedTeams', JSON.stringify(teams));
         renderTeams(teams);
     }
@@ -211,27 +282,53 @@
         teams.forEach((t, i) => {
             const s = getDetailedStats(t);
             let statsText = `${s.f}F/${s.m}G`;
-            ORDRE_SCOLAIRE.forEach(n => { if(s.levels[n.toLowerCase()]?.total > 0) statsText += ` • ${s.levels[n.toLowerCase()].total}${n}`; });
+            
+            // Affichage des stats dans l'ordre strict
+            ORDRE_SCOLAIRE.forEach(n => { 
+                const lv = n.toLowerCase();
+                if(s.levels[lv] && s.levels[lv].total > 0) statsText += ` • ${s.levels[lv].total}${n}`; 
+            });
+
             let h = `<div class="team-card"><div class="team-header"><span class="team-title">Équipe ${i+1}</span><span class="team-stats">${statsText}</span></div>`;
-            t.sort((a, b) => ORDRE_SCOLAIRE.indexOf(a.niveau.toUpperCase()) - ORDRE_SCOLAIRE.indexOf(b.niveau.toUpperCase())).forEach(e => {
+            
+            // TRI DES ÉLÈVES DANS LA CARTE SELON L'ORDRE SCOLAIRE
+            t.sort((a, b) => {
+                const nivA = a.niveau.toString().trim().toUpperCase();
+                const nivB = b.niveau.toString().trim().toUpperCase();
+                const indexA = ORDRE_SCOLAIRE.indexOf(nivA);
+                const indexB = ORDRE_SCOLAIRE.indexOf(nivB);
+                return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+            }).forEach(e => {
                 const niv = e.niveau.toString().trim().toUpperCase();
-                const cTag = pal[niv] || couleursDecidees[niv] || '#888';
-                h += `<div class="flex items-center mb-1 text-[0.65rem] font-bold"><span class="tag" style="background-color:${cTag}">${niv}</span><span class="${e.sexe.toLowerCase().startsWith('f')?'name-f':'name-g'}">${getDisplayName(e, ALL_STUDENTS)}</span></div>`;
+                const cTag = pal[niv] || pal[niv.toLowerCase()] || couleursDecidees[niv] || '#888';
+                const genderClass = e.sexe.toLowerCase().startsWith('f') ? 'name-f' : 'name-g';
+                h += `<div class="flex items-center mb-1 text-[0.65rem] font-bold"><span class="tag" style="background-color:${cTag}">${niv}</span><span class="${genderClass}">${getDisplayName(e, ALL_STUDENTS)}</span></div>`;
             });
             res.innerHTML += h + `</div>`;
         });
     }
 
     function renderAttendance() {
-        const container = document.getElementById('attendance-container'); container.innerHTML = '';
+        const container = document.getElementById('attendance-container');
+        container.innerHTML = '';
         const pal = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
         const groups = {};
-        ALL_STUDENTS.forEach(s => { const n = s.niveau.toString().trim().toUpperCase(); if(!groups[n]) groups[n] = []; groups[n].push(s); });
+        
+        // Groupement avec nettoyage des clés
+        ALL_STUDENTS.forEach(s => { 
+            const n = s.niveau.toString().trim().toUpperCase(); 
+            if(!groups[n]) groups[n] = []; 
+            groups[n].push(s); 
+        });
+
+        // AFFICHAGE DES SECTIONS DE PRÉSENCE DANS L'ORDRE SCOLAIRE
         ORDRE_SCOLAIRE.forEach(niv => {
-            if(groups[niv]) {
+            if(groups[niv] && groups[niv].length > 0) {
                 let h = `<div class="level-label" style="color:${pal[niv]||couleursDecidees[niv]}">${niv}</div><div class="attendance-grid">`;
                 groups[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(s => {
-                    h += `<div class="student-item ${s.sexe.toLowerCase().startsWith('f')?'bg-f':'bg-m'} ${absents.has(String(s.id))?'absent':''}" onclick="toggleAbs('${s.id}')">${getDisplayName(s, ALL_STUDENTS)}</div>`;
+                    const isAbs = absents.has(String(s.id));
+                    const genderClass = s.sexe.toLowerCase().startsWith('f') ? 'bg-f' : 'bg-m';
+                    h += `<div class="student-item ${genderClass} ${isAbs?'absent':''}" onclick="toggleAbs('${s.id}')">${getDisplayName(s, ALL_STUDENTS)}</div>`;
                 });
                 container.innerHTML += h + `</div>`;
             }
@@ -239,36 +336,43 @@
     }
 
     function toggleAbs(id) {
-        if(absents.has(String(id))) absents.delete(String(id)); else absents.add(String(id));
+        const sid = String(id);
+        if(absents.has(sid)) absents.delete(sid); else absents.add(sid);
         localStorage.setItem('absents_session_equipes', JSON.stringify(Array.from(absents)));
         renderAttendance();
     }
 
     function selectNum(n) {
         selectedNumTeams = n;
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const cHex = mapCouleurs[themePrefs.equipes || 'pink'];
         document.querySelectorAll('.num-btn').forEach(b => {
-            const isSel = b.innerText == n;
-            b.style.backgroundColor = isSel ? 'var(--theme-color)' : 'var(--btn-num-bg)';
-            b.style.color = isSel ? 'var(--theme-contrast)' : 'var(--text)';
-            b.style.borderColor = isSel ? 'var(--theme-color)' : 'var(--btn-num-border)';
+            b.style.backgroundColor = b.innerText == n ? cHex : 'var(--btn-num-bg)';
+            b.style.color = b.innerText == n ? '#fff' : 'var(--text)';
+            b.style.borderColor = b.innerText == n ? cHex : 'var(--btn-num-border)';
         });
     }
 
     function resetTeams() { 
-        document.getElementById('alertText').innerText = "Effacer les équipes ?";
+        document.getElementById('alertText').innerText = "Voulez-vous effacer les équipes ?";
         document.getElementById('alertConfirmBtn').onclick = () => { localStorage.removeItem('savedTeams'); document.getElementById('results').innerHTML = ''; closeModal(); };
+        document.getElementById('alertConfirmBtn').style.backgroundColor = mapCouleurs[JSON.parse(localStorage.getItem('theme_tuiles'))?.equipes || 'pink'];
         document.getElementById('alertModal').style.display = 'flex';
     }
 
     window.onload = () => {
-        appliquerCouleursSexe(); appliquerTheme();
+        appliquerCouleursSexe();
+        appliquerTheme();
         const sel = document.getElementById('selector');
         for(let i=2; i<=8; i++) {
-            const b = document.createElement('button'); b.className = 'num-btn'; b.innerText = i; b.onclick = () => selectNum(i);
+            const b = document.createElement('button');
+            b.className = 'num-btn'; b.innerText = i; b.onclick = () => selectNum(i);
             sel.appendChild(b);
         }
-        selectNum(selectedNumTeams); renderAttendance();
-        if(localStorage.getItem('savedTeams')) renderTeams(JSON.parse(localStorage.getItem('savedTeams')));
+        selectNum(selectedNumTeams);
+        renderAttendance();
+        const s = localStorage.getItem('savedTeams');
+        if(s) renderTeams(JSON.parse(s));
     };
 </script>
 </body>

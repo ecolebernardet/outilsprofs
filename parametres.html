@@ -5,98 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Infos et paramètres - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-    
-    :root {
-        --bg-page: #121212; --text-main: #eee; --header-bg: #1e1e1e;
-        --header-border: rgba(255, 255, 255, 0.1); --card-bg: #111; 
-        --card-text: #eee; --card-sub: #9ca3af; --btn-back-bg: #555;
-        --warning-border: #ef4444; --warning-text: #fca5a5;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --bg-page: #121212;
+            --text-main: #eee;
+            --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #111; 
+            --card-text: #eee;
+            --card-sub: #9ca3af;
+            --btn-back-bg: #555555;
+            --warning-border: #ef4444;
+            --warning-text: #fca5a5;
+        }
 
-    .light-mode {
-        --bg-page: #eeeeee; --text-main: #111; --header-bg: #ffffff;
-        --header-border: #ddd; --card-bg: #ffffff; --card-text: #111827;
-        --card-sub: #4b5563; --btn-back-bg: #ccc;
-        --warning-border: #b91c1c; --warning-text: #7f1d1d;
-    }
+        .light-mode {
+            --bg-page: #eeeeee;
+            --text-main: #111;
+            --header-bg: #ffffff;
+            --header-border: #ddd;
+            --card-bg: #ffffff;
+            --card-text: #111827;
+            --card-sub: #4b5563;
+            --btn-back-bg: #cccccc;
+            --warning-border: #b91c1c;
+            --warning-text: #7f1d1d;
+        }
 
-    body { 
-        font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); 
-        margin: 0; padding: 0 15px 20px; transition: background 0.3s; overflow-x: hidden;
-    }
-    
-    header { 
-        background: var(--header-bg); border-bottom: 1px solid var(--header-border);
-        position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-        padding: calc(env(safe-area-inset-top) + 10px) 15px 10px; 
-        margin: 0 -15px; height: 60px;
-    }
+        /* --- STYLE SANS ANIMATION DE GLISSEMENT --- */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-main); 
+            padding: 0; margin: 0; 
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+            transition: background 0.3s;
+        }
+        
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100; 
+            display: flex; align-items: center; justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: calc(100% + 30px); margin-left: -15px;
+            height: 60px;
+        }
 
-    #btn-retour { 
-        background-color: var(--btn-back-bg); color: var(--text-main);
-        display: flex; align-items: center; justify-content: center;
-        width: 40px; height: 40px; border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s;
-    }
-    
-    .light-mode #btn-retour { border-color: rgba(0,0,0,0.1); }
+        #btn-retour { 
+            background-color: var(--btn-back-bg); 
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .light-mode #btn-retour { border-color: rgba(0,0,0,0.1); }
 
-    .tab-btn { 
-        padding: 12px 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
-        letter-spacing: 0.5px; color: #666; border-bottom: 2px solid transparent;
-        transition: all 0.3s; flex: 1; text-align: center; background: none;
-    }
-    .tab-btn.active { color: var(--text-main); border-bottom-color: var(--text-main); }
-    
-    .tab-content { display: none; animation: fadeIn 0.3s ease; }
-    .tab-content.active { display: block; }
+        .tab-btn { 
+            padding: 12px 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
+            letter-spacing: 0.5px; color: #666; border-bottom: 2px solid transparent;
+            transition: all 0.3s; flex: 1; text-align: center;
+            background: none; border-top: none; border-left: none; border-right: none;
+        }
+        .tab-btn.active { color: var(--text-main); border-bottom-color: var(--text-main); }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    .card-info, .tile-config, .card-warning { 
-        background: var(--card-bg); border-radius: 1.2rem; padding: 15px; 
-        margin-bottom: 15px; border: 1px solid var(--header-border);
-    }
-    
-    .tile-config { padding: 10px; margin-bottom: 8px; border-radius: 1rem; }
-    
-    .color-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s; }
-    .color-dot.active { transform: scale(1.4); border: 2px solid #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-    .light-mode .color-dot.active { border-color: #000; box-shadow: 0 0 8px rgba(0,0,0,0.2); }
+        .card-info { 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.2rem; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid var(--header-border);
+        }
+        
+        .tile-config { 
+            background: var(--card-bg); 
+            border: 1px solid var(--header-border); 
+            border-radius: 1rem; 
+            padding: 10px; 
+            margin-bottom: 8px; 
+            color: var(--card-text);
+        }
+        
+        .color-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .color-dot.active { 
+            transform: scale(1.4); 
+            border: 2px solid white; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .light-mode .color-dot.active { 
+            border-color: #000;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
 
-    .handle-preview {
-        display: inline-grid; grid-template-columns: repeat(3, 3px); gap: 2px;
-        padding: 4px; background: #cbd5e1; border-radius: 3px;
-    }
-    .handle-dot { width: 3px; height: 3px; background-color: #64748b; border-radius: 50%; }
+        .btn-nav { font-weight: 900; padding: 14px 4px; border-radius: 50px; font-size: 10px; text-align: center; text-transform: uppercase; cursor: pointer; border: none; }
+        
+        .handle-preview {
+            display: inline-grid; grid-template-columns: repeat(3, 3px); gap: 2px;
+            padding: 4px; background: #cbd5e1; border-radius: 3px; vertical-align: middle; margin: 0 4px;
+        }
+        .handle-dot { width: 3px; height: 3px; background-color: #64748b; border-radius: 50%; }
 
-    .card-warning { border: 2px solid var(--warning-border); color: var(--warning-text); }
-    .card-info p, .card-info li { color: var(--card-sub); }
+        .card-warning { 
+            background: var(--card-bg); 
+            border: 2px solid var(--warning-border); 
+            border-radius: 1.2rem; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            color: var(--warning-text);
+        }
+        
+        .card-info p, .card-info li { color: var(--card-sub); }
+        .card-info h3 { color: var(--text-main); }
 
-    .theme-choice-btn {
-        flex: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--header-border);
-        display: flex; flex-direction: column; align-items: center; gap: 8px;
-        background: var(--card-bg); color: var(--card-text);
-    }
+        .theme-choice-btn {
+            flex: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--header-border);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            transition: all 0.2s; background: var(--card-bg); color: var(--card-text);
+        }
+        .theme-choice-btn:active { transform: scale(0.95); }
 
-    #settingsContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; justify-items: center; }
+        #avatar-propos { width: 128px; height: auto; margin-bottom: 24px; transition: filter 0.3s ease; }
 
-    #tabs-nav { 
-        position: sticky; top: 60px; z-index: 90; background: var(--bg-page);
-        margin: 0 -15px; padding: 0 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    
-    .mini-pastille {
-        display: inline-block; width: 8px; height: 8px; background: #f97316;
-        border-radius: 50%; margin-left: 4px; box-shadow: 0 0 5px #f97316;
-        animation: blink 1.5s infinite;
-    }
-    @keyframes blink { 0%, 100% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
-</style>
+        #settingsContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; justify-items: center; }
 
+        #tabs-nav { 
+            position: sticky; 
+            top: 60px; 
+            z-index: 90; 
+            background: var(--bg-page);
+            width: calc(100% + 30px); 
+            margin-left: -15px; 
+            padding: 0 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes blink-point {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+        .mini-pastille {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            margin-left: 4px;
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316;
+            animation: blink-point 1.5s infinite;
+        }
+
+    </style>
 </head>
 <body class="pb-10">
     <header>
@@ -273,117 +356,143 @@
         </div>
     </div>
 
-<script>
-    // 1. Initialisation immédiate du mode
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    <script>
+        /* --- LOGIQUE SANS ANIMATION --- */
+        function goBack() {
+            window.location.href = 'index.html';
+        }
 
-    const mapCouleurs = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e'
-    };
+        const mapCouleurs = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e'
+        };
 
-    const nomsFr = {
-        'red': 'Rouge', 'orange': 'Orange', 'amber': 'Ambre', 'yellow': 'Jaune',
-        'lime': 'Citron', 'green': 'Vert', 'emerald': 'Émeraude', 'teal': 'Sarcelle',
-        'cyan': 'Cyan', 'blue': 'Bleu', 'indigo': 'Indigo',
-        'violet': 'Violet', 'purple': 'Pourpre', 'fuchsia': 'Fuchsia', 'pink': 'Rose',
-        'rose': 'Rosé'
-    };
+        const nomsFr = {
+            'red': 'Rouge', 'orange': 'Orange', 'amber': 'Ambre', 'yellow': 'Jaune',
+            'lime': 'Citron', 'green': 'Vert', 'emerald': 'Émeraude', 'teal': 'Sarcelle',
+            'cyan': 'Cyan', 'blue': 'Bleu', 'indigo': 'Indigo',
+            'violet': 'Violet', 'purple': 'Pourpre', 'fuchsia': 'Fuchsia', 'pink': 'Rose',
+            'rose': 'Rosé'
+        };
 
-    const tuiles = [
-        { id: 'fille', label: 'Filles', emoji: '👧' },
-        { id: 'garcon', label: 'Garçons', emoji: '👦' },
-        { id: 'inscr', label: 'Inscriptions', emoji: '📝' },
-        { id: 'liens', label: 'Liens', emoji: '🔗' },
-        { id: 'h108', label: '108 Heures', emoji: '⏲️' },
-        { id: 'memos', label: 'Mémos', emoji: '📒' },
-        { id: 'tirage', label: 'Tirage', emoji: '🎲' },
-        { id: 'equipes', label: 'Équipes', emoji: '👥' },
-        { id: 'obs', label: 'Observations', emoji: '✏️' },
-        { id: 'compt', label: 'Compteur', emoji: '🚥' }
-    ];
+        const tuiles = [
+            { id: 'fille', label: 'Filles', emoji: '👧' },
+            { id: 'garcon', label: 'Garçons', emoji: '👦' },
+            { id: 'inscr', label: 'Inscriptions', emoji: '📝' },
+            { id: 'liens', label: 'Liens', emoji: '🔗' },
+            { id: 'h108', label: '108 Heures', emoji: '⏲️' },
+            { id: 'memos', label: 'Mémos', emoji: '📒' },
+            { id: 'tirage', label: 'Tirage', emoji: '🎲' },
+            { id: 'equipes', label: 'Équipes', emoji: '👥' },
+            { id: 'obs', label: 'Observations', emoji: '✏️' },
+            { id: 'compt', label: 'Compteur', emoji: '🚥' }
+        ];
 
-    let prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {
-        fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
-        liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
-        memos: 'purple', obs: 'green', compt: 'blue'
-    };
+        const couleurs = Object.keys(mapCouleurs);
+        let prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {
+            fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
+            liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
+            memos: 'purple', obs: 'green', compt: 'blue'
+        };
 
-    function goBack() { window.location.href = 'index.html'; }
+        function selectTheme(mode) {
+            document.body.classList.toggle('light-mode', mode === 'light');
+            localStorage.setItem('theme_mode', mode);
+            appliquerCouleursGlobales(); 
+        }
 
-    function selectTheme(mode) {
-        document.body.classList.toggle('light-mode', mode === 'light');
-        localStorage.setItem('theme_mode', mode);
-        appliquerCouleursTitres(); 
-    }
+        function openTab(evt, tabName) {
+            const contents = document.getElementsByClassName("tab-content");
+            for (let c of contents) c.classList.remove("active");
+            const links = document.getElementsByClassName("tab-btn");
+            for (let l of links) l.classList.remove("active");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-    function openTab(evt, tabName) {
-        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-        document.querySelectorAll(".tab-btn").forEach(l => l.classList.remove("active"));
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        function renderSettings() {
+            const container = document.getElementById('settingsContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            tuiles.forEach(tuile => {
+                const configDiv = document.createElement('div');
+                const isGender = tuile.id === 'fille' || tuile.id === 'garcon';
+                
+                configDiv.className = isGender 
+                    ? 'tile-config border-2 border-dashed relative' 
+                    : 'tile-config';
+                
+                const currentColor = prefs[tuile.id] || 'blue';
+                
+                if (isGender) {
+                    configDiv.style.borderColor = mapCouleurs[currentColor];
+                }
 
-    function renderSettings() {
-        const container = document.getElementById('settingsContainer');
-        if(!container) return;
-        
-        container.innerHTML = tuiles.map(tuile => {
-            const isGender = tuile.id === 'fille' || tuile.id === 'garcon';
-            const currentColor = prefs[tuile.id] || 'blue';
-            const borderStyle = isGender ? `style="border-color: ${mapCouleurs[currentColor]}"` : '';
-            
-            return `
-                <div class="tile-config ${isGender ? 'border-2 border-dashed' : ''}" ${borderStyle}>
+                configDiv.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center gap-1.5 overflow-hidden">
                             <span class="text-xs">${tuile.emoji}</span>
                             <span class="text-[8px] font-black uppercase tracking-tight opacity-70 truncate">${tuile.label}</span>
                         </div>
-                        <span class="text-[8px] font-bold uppercase border border-gray-400/30 px-1.5 rounded" style="color: ${mapCouleurs[currentColor]}">${nomsFr[currentColor]}</span>
+                        <span class="text-[8px] font-bold uppercase border border-gray-400/30 px-1.5 rounded whitespace-nowrap" style="color: ${mapCouleurs[currentColor]}">${nomsFr[currentColor]}</span>
                     </div>
                     <div class="color-grid">
-                        ${Object.keys(mapCouleurs).map(c => `
+                        ${couleurs.map(c => `
                             <button onclick="setTileColor('${tuile.id}', '${c}')" 
                                     class="color-dot ${currentColor === c ? 'active' : ''}"
                                     style="background-color: ${mapCouleurs[c]}">
                             </button>`).join('')}
-                    </div>
-                </div>`;
-        }).join('');
-        appliquerCouleursTitres();
-    }
+                    </div>`;
+                container.appendChild(configDiv);
+            });
+            appliquerCouleursGlobales();
+        }
 
-    function setTileColor(tuileId, couleur) {
-        prefs[tuileId] = couleur;
-        localStorage.setItem('theme_tuiles', JSON.stringify(prefs));
+        function setTileColor(tuileId, couleur) {
+            prefs[tuileId] = couleur;
+            localStorage.setItem('theme_tuiles', JSON.stringify(prefs));
+            renderSettings();
+        }
+
+        function appliquerCouleursGlobales() {
+            const isLight = document.body.classList.contains('light-mode');
+            const avatar = document.getElementById('avatar-propos');
+            if (avatar) avatar.style.filter = isLight ? 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(4px 4px 8px rgba(255,255,255,0.15))';
+
+            const mapping = {
+                'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
+                'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
+                'title-observations': 'obs', 'title-compteur': 'compt'
+            };
+            for (let [elId, prefId] of Object.entries(mapping)) {
+                const el = document.getElementById(elId);
+                if (el) el.style.color = mapCouleurs[prefs[prefId] || 'blue'];
+            }
+        }
+
+        function sauvegarderToutesLesAides() {
+            const rubriques = [
+                { id: 'title-liens', key: 'aide_liens' }, { id: 'title-inscriptions', key: 'aide_inscr' },
+                { id: 'title-memos', key: 'aide_memos' }, { id: 'title-108h', key: 'aide_h108' },
+                { id: 'title-tirage', key: 'aide_tirage' }, { id: 'title-equipes', key: 'aide_equipes' },
+                { id: 'title-observations', key: 'aide_obs' }, { id: 'title-compteur', key: 'aide_compt_text' }
+            ];
+            rubriques.forEach(item => {
+                const titreEl = document.getElementById(item.id);
+                if (titreEl) {
+                    const blocAide = titreEl.closest('.card-info');
+                    if (blocAide) localStorage.setItem(item.key, blocAide.innerHTML);
+                }
+            });
+        }
+
+        window.addEventListener('load', sauvegarderToutesLesAides);
+        if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
         renderSettings();
-    }
-
-    function appliquerCouleursTitres() {
-        const isLight = document.body.classList.contains('light-mode');
-        const avatar = document.getElementById('avatar-propos');
-        if (avatar) avatar.style.filter = `drop-shadow(4px 4px 8px ${isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.15)'})`;
-
-        const mapping = {
-            'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
-            'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
-            'title-observations': 'obs', 'title-compteur': 'compt'
-        };
-        
-        Object.entries(mapping).forEach(([elId, prefId]) => {
-            const el = document.getElementById(elId);
-            if (el) el.style.color = mapCouleurs[prefs[prefId] || 'blue'];
-        });
-    }
-
-    // Lancement
-    renderSettings();
-</script>
-
+    </script>
 </body>
 </html>

@@ -6,210 +6,77 @@
     <title>Liens - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-    
-    :root {
-        --bg-page: #121212; --text-page: #ffffff; --column-bg: #1e1e1e; 
-        --column-border: rgba(255, 255, 255, 0.1); --header-bg: #1e1e1e; 
-        --card-bg: #1e1e1e; --input-bg: #2a2a2a; --input-text: #ffffff;
-        --item-bg: #2a2a2a; --item-text-url: #a1a1aa; 
-        --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --text-page: #ffffff; --column-bg: #1e1e1e; 
+            --column-border: rgba(255, 255, 255, 0.1); --header-bg: #1e1e1e; 
+            --card-bg: #1e1e1e; --input-bg: #2a2a2a; --input-text: #ffffff;
+            --item-bg: #2a2a2a; --item-text-url: #a1a1aa; 
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
 
-    body.light-mode {
-        --bg-page: #eeeeee; --text-page: #111827; --column-bg: #ffffff; 
-        --column-border: #ddd; --header-bg: #ffffff; --card-bg: #ffffff;
-        --input-bg: #f3f4f6; --input-text: #111827; --item-bg: #f3f4f6; 
-        --item-text-url: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    }
+        body.light-mode {
+            --bg-page: #eeeeee; --text-page: #111827; --column-bg: #ffffff; 
+            --column-border: #ddd; --header-bg: #ffffff; --card-bg: #ffffff;
+            --input-bg: #f3f4f6; --input-text: #111827; --item-bg: #f3f4f6; 
+            --item-text-url: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-    body { 
-        font-family: 'Inter', sans-serif; 
-        background: var(--bg-page); 
-        color: var(--text-page); 
-        margin: 0; 
-        padding: 0; 
-        transition: background 0.3s ease; 
-    }
-    
-    header { 
-        width: 100%; 
-        background: var(--header-bg); 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between; 
-        padding: calc(env(safe-area-inset-top) + 10px) 15px 10px; 
-        border-bottom: 1px solid var(--column-border); 
-        position: sticky; 
-        top: 0; 
-        z-index: 100; 
-    }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
+        header { 
+            width: 100%; background: var(--header-bg); display: flex; align-items: center; 
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            border-bottom: 1px solid var(--column-border); position: sticky; top: 0; z-index: 100; 
+        }
 
-    .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px 15px; }
+        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px 15px; }
+        .light-card, .column { background: var(--card-bg); border-radius: 1.5rem; padding: 15px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
+        .column { scroll-margin-top: 90px; }
+        .column-header { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; align-items: center; }
 
-    /* Regroupement des styles de conteneurs */
-    .light-card, .column { 
-        background: var(--card-bg); 
-        border-radius: 1.5rem; 
-        padding: 15px; 
-        border: 1px solid var(--column-border); 
-        box-shadow: var(--shadow-custom); 
-        margin-bottom: 20px; 
-    }
-    
-    .column { scroll-margin-top: 90px; }
+        .dots-handle { display: grid; grid-template-columns: repeat(3, 2.5px); grid-template-rows: repeat(3, 2.5px); gap: 2.2px; opacity: 0.3; cursor: grab; flex-shrink: 0; padding: 10px; margin: -10px; }
+        .dots-handle span { width: 2.5px; height: 2.5px; background-color: currentColor; border-radius: 50%; }
 
-    .column-header { 
-        font-size: 10px; 
-        font-weight: 900; 
-        text-transform: uppercase; 
-        margin-bottom: 12px; 
-        padding-bottom: 8px; 
-        border-bottom: 2px solid; 
-        display: flex; 
-        align-items: center; 
-    }
+        .link-item { background: var(--item-bg); border-radius: 0.75rem; padding: 8px 12px; display: flex; align-items: center; margin-bottom: 6px; border: 1px solid var(--column-border); touch-action: none; }
+        .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 10px; }
+        .link-name { font-weight: 800; font-size: 11px; text-transform: uppercase; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .link-url { font-size: 9px; color: var(--item-text-url); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .link-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        .btn-action { color: #6b7280; opacity: 0.8; cursor: pointer; padding: 4px; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
 
-    /* Optimisation des poignées (handles) */
-    .dots-handle { 
-        display: grid; 
-        grid-template-columns: repeat(3, 2.5px); 
-        grid-template-rows: repeat(3, 2.5px); 
-        gap: 2.2px; 
-        opacity: 0.3; 
-        cursor: grab; 
-        flex-shrink: 0; 
-        padding: 10px; 
-        margin: -10px; 
-    }
-    .dots-handle span { width: 2.5px; height: 2.5px; background-color: currentColor; border-radius: 50%; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.75rem; font-weight: 600; width: 100%; margin-bottom: 10px; color: var(--input-text); outline: none; }
+        .cat-btn { flex: 1; padding: 10px 4px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--input-bg); color: var(--item-text-url); border: 1px solid var(--column-border); transition: all 0.2s; }
+        .cat-btn.active { background: #4b5563 !important; color: white !important; }
+        .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
 
-    /* Style des items de liens */
-    .link-item { 
-        background: var(--item-bg); 
-        border-radius: 0.75rem; 
-        padding: 8px 12px; 
-        display: flex; 
-        align-items: center; 
-        margin-bottom: 6px; 
-        border: 1px solid var(--column-border); 
-        touch-action: none; 
-    }
-
-    .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 10px; }
-    
-    .link-name { 
-        font-weight: 800; 
-        font-size: 11px; 
-        text-transform: uppercase; 
-        display: block; 
-        line-height: 1.2; 
-    }
-
-    .link-name, .link-url { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .link-url { font-size: 9px; color: var(--item-text-url); display: block; }
-
-    .link-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-
-    .btn-action { 
-        color: #6b7280; 
-        opacity: 0.8; 
-        cursor: pointer; 
-        padding: 4px; 
-        transition: opacity 0.2s; 
-        display: flex; 
-        align-items: center; 
-        font-size: 14px; 
-    }
-
-    /* Champs de saisie et boutons de catégories */
-    .input-field { 
-        background: var(--input-bg); 
-        border: 1px solid var(--column-border); 
-        border-radius: 0.75rem; 
-        padding: 10px; 
-        font-size: 0.75rem; 
-        font-weight: 600; 
-        width: 100%; 
-        margin-bottom: 10px; 
-        color: var(--input-text); 
-        outline: none; 
-    }
-
-    .cat-btn { 
-        flex: 1; 
-        padding: 10px 4px; 
-        border-radius: 8px; 
-        font-size: 10px; 
-        font-weight: 800; 
-        text-transform: uppercase; 
-        background: var(--input-bg); 
-        color: var(--item-text-url); 
-        border: 1px solid var(--column-border); 
-        transition: all 0.2s; 
-    }
-    .cat-btn.active { background: #4b5563 !important; color: white !important; }
-
-    /* Boutons généraux */
-    .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
-    .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--column-border); }
-
-    /* Navigation basse */
-    .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
-    .nav-btn { 
-        font-weight: 900; 
-        border-radius: 50px; 
-        font-size: 9px; 
-        padding: 12px; 
-        border: none; 
-        flex: 1; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        gap: 5px; 
-        cursor: pointer; 
-    }
-    
-    /* Modales */
-    .modal-overlay { 
-        display: none; 
-        position: fixed; 
-        inset: 0; 
-        z-index: 1000; 
-        background: rgba(0,0,0,0.8); 
-        backdrop-filter: blur(5px); 
-        align-items: center; 
-        justify-content: center; 
-        padding: 20px; 
-    }
-    .modal-content { 
-        background: var(--card-bg); 
-        width: 100%; 
-        max-width: 400px; 
-        border-radius: 1.5rem; 
-        border: 1px solid var(--column-border); 
-        padding: 25px; 
-        position: relative; 
-    }
-    
-    /* Animations */
-    @keyframes blink-point {
-        0%, 100% { transform: scale(0.9); opacity: 0.5; }
-        50% { transform: scale(1.2); opacity: 1; }
-    }
-    .mini-pastille {
-        display: inline-block;
-        width: 8px; height: 8px;
-        background-color: #f97316;
-        border-radius: 50%;
-        margin-left: 4px; margin-right: 2px;
-        box-shadow: 0 0 5px #f97316;
-        animation: blink-point 1.5s infinite;
-    }
-</style>
-
+        .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--column-border); }
+        .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
+        
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+		
+		@keyframes blink-point {
+			0% { transform: scale(0.9); opacity: 0.5; }
+			50% { transform: scale(1.2); opacity: 1; }
+			100% { transform: scale(0.9); opacity: 0.5; }
+		}
+		.mini-pastille {
+			display: inline-block;
+			width: 8px;
+			height: 8px;
+			background-color: #f97316;
+			border-radius: 50%;
+			margin-left: 4px;
+			margin-right: 2px;
+			box-shadow: 0 0 5px #f97316;
+			animation: blink-point 1.5s infinite;
+		}
+		
+    </style>
 </head>
 <body class="pb-10">
 
@@ -299,11 +166,11 @@
         const badge = document.getElementById('badge-export');
         const btnExport = document.getElementById('btn-export');
         if (needsExport) {
-            badge?.classList.remove('hidden');
+            badge.classList.remove('hidden');
             localStorage.setItem('needsExport_liens', 'true');
             if (btnExport) btnExport.style.border = '2px solid #f97316';
         } else {
-            badge?.classList.add('hidden');
+            badge.classList.add('hidden');
             localStorage.removeItem('needsExport_liens');
             localStorage.setItem('last_export_liens', Date.now());
             if (btnExport) btnExport.style.border = 'none';
@@ -312,46 +179,57 @@
 
     function checkBadgeStatus() {
         const lastExport = localStorage.getItem('last_export_liens');
-        if (localStorage.getItem('needsExport_liens') === 'true') {
+        const needsExport = localStorage.getItem('needsExport_liens') === 'true';
+        
+        if (needsExport) {
             updateExportBadge(true);
-        } else if (lastExport && (Date.now() - parseInt(lastExport) > 7 * 24 * 60 * 60 * 1000)) {
-            updateExportBadge(true);
-        } else if (!lastExport) {
+            return;
+        }
+
+        if (lastExport) {
+            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+            if (Date.now() - parseInt(lastExport) > sevenDaysInMs) {
+                updateExportBadge(true);
+            }
+        } else {
+            // Premier lancement ou jamais exporté
             localStorage.setItem('last_export_liens', Date.now());
         }
     }
 
     function render() {
         const container = document.getElementById('categoriesContainer');
-        const handleHtml = `<div class="dots-handle ${'handle-placeholder'}">${'<span></span>'.repeat(9)}</div>`;
-        
-        container.innerHTML = catOrder.map(cat => {
+        container.innerHTML = '';
+        catOrder.forEach(cat => {
             const catLinks = links.filter(l => l.cat === cat);
             const conf = config[cat];
-            return `
-                <div class="column" data-cat="${cat}">
-                    <div class="column-header ${conf.text} ${conf.border}">
-                        ${handleHtml.replace('handle-placeholder', 'handle-cat mr-3')}
-                        <span class="mr-2">${conf.emoji}</span> ${cat}
-                    </div>
-                    <div class="links-list" data-cat="${cat}">
-                        ${catLinks.length === 0 ? '<p class="text-[10px] opacity-30 italic py-2 text-center">Vide</p>' : ''}
-                        ${catLinks.map(link => `
-                            <div class="link-item" data-id="${link.id}">
-                                ${handleHtml.replace('handle-placeholder', 'handle-link')}
-                                <div class="link-info" onclick="window.open('${link.url}', '_blank')">
-                                    <span class="link-name ${conf.text}">${link.name}</span>
-                                    <span class="link-url">${link.url}</span>
-                                </div>
-                                <div class="link-actions">
-                                    <div class="btn-action" onclick="editLink(${link.id})">✏️</div>
-                                    <div class="btn-action" onclick="deleteLink(${link.id})">🗑️</div>
-                                </div>
+            const col = document.createElement('div');
+            col.className = `column`;
+            col.setAttribute('data-cat', cat);
+            col.innerHTML = `
+                <div class="column-header ${conf.text} ${conf.border}">
+                    <div class="dots-handle handle-cat mr-3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                    <span class="mr-2">${conf.emoji}</span> ${cat}
+                </div>
+                <div class="links-list" data-cat="${cat}">
+                    ${catLinks.length === 0 ? '<p class="text-[10px] opacity-30 italic py-2 text-center">Vide</p>' : ''}
+                    ${catLinks.map(link => `
+                        <div class="link-item" data-id="${link.id}">
+                            <div class="dots-handle handle-link"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                            <div class="link-info" onclick="window.open('${link.url}', '_blank')">
+                                <span class="link-name ${conf.text}">${link.name}</span>
+                                <span class="link-url">${link.url}</span>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-        }).join('');
+                            <div class="link-actions">
+                                <div class="btn-action" onclick="editLink(${link.id})">✏️</div>
+                                <div class="btn-action" onclick="deleteLink(${link.id})">🗑️</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(col);
+        });
         initSortables();
     }
 
@@ -367,13 +245,14 @@
         document.querySelectorAll('.links-list').forEach(listEl => {
             new Sortable(listEl, {
                 group: 'sharedLinks', handle: '.handle-link', animation: 150,
-                delay: 200, delayOnTouchOnly: true,
+                delay: 200, delayOnTouchOnly: true, touchStartThreshold: 3,
                 onEnd: () => {
                     const newLinks = [];
                     document.querySelectorAll('.column').forEach(col => {
                         const catName = col.getAttribute('data-cat');
                         col.querySelectorAll('.link-item').forEach(item => {
-                            const link = links.find(l => l.id === parseInt(item.getAttribute('data-id')));
+                            const id = parseInt(item.getAttribute('data-id'));
+                            const link = links.find(l => l.id === id);
                             if (link) newLinks.push({ ...link, cat: catName });
                         });
                     });
@@ -389,34 +268,35 @@
     function addLink() {
         const name = document.getElementById('linkName').value.trim();
         const urlInput = document.getElementById('linkUrl').value.trim();
-        if (!name || !urlInput) return;
-
-        const url = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
-        if (editingLinkId) {
-            const index = links.findIndex(l => l.id === editingLinkId);
-            if (index !== -1) links[index] = { ...links[index], name, url, cat: currentSelectedCat };
-            editingLinkId = null;
-            document.getElementById('mainAddBtn').innerText = "Ajouter";
-        } else {
-            links.push({ id: Date.now(), name, url, cat: currentSelectedCat });
+        if (name && urlInput) {
+            const url = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
+            if (editingLinkId) {
+                const index = links.findIndex(l => l.id === editingLinkId);
+                if (index !== -1) links[index] = { ...links[index], name, url, cat: currentSelectedCat };
+                editingLinkId = null;
+                document.getElementById('mainAddBtn').innerText = "Ajouter";
+            } else {
+                links.push({ id: Date.now(), name, url, cat: currentSelectedCat });
+            }
+            localStorage.setItem('eduLinksList', JSON.stringify(links));
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkUrl').value = '';
+            updateExportBadge(true);
+            render();
         }
-        localStorage.setItem('eduLinksList', JSON.stringify(links));
-        document.getElementById('linkName').value = '';
-        document.getElementById('linkUrl').value = '';
-        updateExportBadge(true);
-        render();
     }
 
     function editLink(id) {
         const link = links.find(l => l.id === id);
-        if (!link) return;
-        document.getElementById('linkName').value = link.name;
-        document.getElementById('linkUrl').value = link.url;
-        currentSelectedCat = link.cat;
-        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat));
-        editingLinkId = id;
-        document.getElementById('mainAddBtn').innerText = "Mettre à jour";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (link) {
+            document.getElementById('linkName').value = link.name;
+            document.getElementById('linkUrl').value = link.url;
+            currentSelectedCat = link.cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat));
+            editingLinkId = id;
+            document.getElementById('mainAddBtn').innerText = "Mettre à jour";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     function deleteLink(id) {
@@ -430,12 +310,20 @@
 
     function exportLinks() {
         if (links.length === 0) return;
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(links));
-        const date = new Date().toISOString().split('T')[0];
+        const dataStr = JSON.stringify(links);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        
+        const maintenant = new Date();
+        const annee = maintenant.getFullYear();
+        const mois = String(maintenant.getMonth() + 1).padStart(2, '0');
+        const jour = String(maintenant.getDate()).padStart(2, '0');
+        const dateFormattee = `${annee}-${mois}-${jour}`;
+        
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', `outilsprofs_liens_${date}.txt`);
+        linkElement.setAttribute('download', `outilsprofs_liens_${dateFormattee}.txt`);
         linkElement.click();
+
         updateExportBadge(false);
     }
 
@@ -449,7 +337,7 @@
                 localStorage.setItem('eduLinksList', JSON.stringify(links));
                 updateExportBadge(false);
                 render();
-            } catch (err) { console.error("Erreur import"); }
+            } catch (err) {}
         };
         reader.readAsText(file);
     }
@@ -475,13 +363,10 @@
         const colPref = themePrefs.liens || 'emerald';
         const hexa = mapCouleurs[colPref];
         const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
-        
-        ['mainAddBtn', 'btn-retour', 'btn-aide', 'btn-fermer-aide'].forEach(id => {
-            const el = document.getElementById(id);
+        [document.getElementById('mainAddBtn'), document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
             if(el) { el.style.backgroundColor = hexa; el.style.color = isDark ? '#000' : '#fff'; }
         });
-        const titreAide = document.getElementById('titre-aide');
-        if(titreAide) titreAide.style.color = hexa;
+        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
     }
 
     document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -495,8 +380,11 @@
     function ouvrirAide() { appliquerTheme(); document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
     
-    window.onload = () => { appliquerTheme(); render(); checkBadgeStatus(); };
+    window.onload = () => { 
+        appliquerTheme(); 
+        render(); 
+        checkBadgeStatus(); 
+    };
 </script>
-
 </body>
 </html>

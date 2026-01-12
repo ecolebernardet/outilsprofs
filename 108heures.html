@@ -17,92 +17,153 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-    
-    :root {
-        --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e; 
-        --border-color: rgba(255, 255, 255, 0.1); --card-bg: #1e1e1e; 
-        --input-bg: #2a2a2a; --item-subtext: #a1a1aa;
-        --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; 
+            --text-page: #ffffff; 
+            --header-bg: #1e1e1e; 
+            --header-border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e; 
+            --card-text: #ffffff;
+            --input-bg: #2a2a2a; 
+            --input-border: rgba(255, 255, 255, 0.1);
+            --input-text: #ffffff;
+            --column-bg: #1e1e1e;
+            --column-text: #ffffff;
+            --item-bg: #2a2a2a; 
+            --item-text: #ffffff;
+            --item-subtext: #a1a1aa;
+            --modal-overlay: rgba(0, 0, 0, 0.85);
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
 
-    body.light-mode, html.light-mode-init body {
-        --bg-page: #eeeeee; --text-page: #111827; --header-bg: #ffffff; 
-        --border-color: #ddd; --card-bg: #ffffff; --input-bg: #f3f4f6; 
-        --item-subtext: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    }
+        body.light-mode, html.light-mode-init body {
+            --bg-page: #eeeeee; 
+            --text-page: #111827; 
+            --header-bg: #ffffff; 
+            --header-border: #ddd;
+            --border-color: #ddd;
+            --card-bg: #ffffff;
+            --card-text: #111827;
+            --input-bg: #f3f4f6; 
+            --input-border: #bbb;
+            --input-text: #111827;
+            --column-bg: #ffffff;
+            --column-text: #111827;
+            --item-bg: #f3f4f6; 
+            --item-text: #111827;
+            --item-subtext: #71717a;
+            --modal-overlay: rgba(0, 0, 0, 0.6);
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-    body { 
-        font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
-        margin: 0; padding: 0 15px 20px; transition: background 0.3s ease; 
-    }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-page); 
+            padding: 0; margin: 0; 
+            transition: background 0.3s ease;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+        }
 
-    header { 
-        background: var(--header-bg); border-bottom: 1px solid var(--border-color);
-        position: sticky; top: 0; z-index: 100; display: flex; align-items: center; 
-        justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px;
-        width: calc(100% + 30px); margin-left: -15px;
-    }
-    
-    /* Regroupement des cartes */
-    .light-card, .level-column { 
-        background: var(--card-bg); border-radius: 1.5rem; border: 1px solid var(--border-color); 
-        box-shadow: var(--shadow-custom); transition: all 0.3s; 
-    }
-    .level-column { padding: 15px; display: flex; flex-direction: column; align-self: start; }
+        header { 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            width: calc(100% + 30px); margin-left: -15px;
+        }
+        
+        .light-card { 
+            background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; 
+            border: 1px solid var(--border-color); box-shadow: var(--shadow-custom);
+            transition: all 0.3s; 
+        }
 
-    /* Formulaire & Inputs */
-    .card-input { display: none; }
-    .card-label {
-        display: flex; align-items: center; justify-content: center; text-align: center;
-        background: var(--input-bg); border: 1px solid var(--border-color); color: var(--item-subtext);
-        padding: 8px 4px; border-radius: 0.75rem; cursor: pointer; font-size: 10px; 
-        font-weight: 800; text-transform: uppercase;
-    }
-    .card-input:checked + .card-label { background: #4b5563; color: white; border-color: transparent; }
+        .card-input { display: none; }
+        .card-label {
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            background: var(--input-bg); border: 1px solid var(--border-color); color: var(--item-subtext);
+            padding: 8px 4px; border-radius: 0.75rem; cursor: pointer;
+            font-size: 10px; font-weight: 800; text-transform: uppercase; transition: all 0.2s;
+        }
+        .card-input:checked + .card-label { background: #4b5563; color: white; border-color: transparent; }
 
-    .input-field { 
-        background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-page); 
-        border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; width: 100%;
-    }
+        .level-column { 
+            background: var(--column-bg); color: var(--column-text); border-radius: 1.5rem; 
+            padding: 15px; border: 1px solid var(--border-color); box-shadow: var(--shadow-custom);
+            display: flex; flex-direction: column; justify-content: flex-start; align-self: start;
+        }
+        
+        .progress-container { width: 100%; background: var(--input-bg); height: 8px; border-radius: 10px; margin: 8px 0; overflow: hidden; border: 1px solid var(--border-color); }
+        .progress-bar { height: 100%; transition: width 0.5s ease-out; }
 
-    .field-label { font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin: 0 0 4px 4px; }
+        .reunion-item { 
+            background: var(--input-bg); padding: 8px 12px; border-radius: 0.75rem; 
+            margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; border: 1px solid var(--border-color); border-left-width: 4px;
+        }
 
-    /* Progress Bar */
-    .progress-container { width: 100%; background: var(--input-bg); height: 8px; border-radius: 10px; margin: 8px 0; overflow: hidden; border: 1px solid var(--border-color); }
-    .progress-bar { height: 100%; transition: width 0.5s ease-out; }
+        .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-group { display: flex; gap: 8px; width: 100%; }
+        .nav-btn { font-weight: 900; border-radius: 50px; font-size: 8px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
 
-    /* Items Liste */
-    .reunion-item { 
-        background: var(--input-bg); padding: 8px 12px; border-radius: 0.75rem; margin-bottom: 6px; 
-        display: flex; align-items: center; justify-content: space-between; cursor: pointer; 
-        border: 1px solid var(--border-color); border-left-width: 4px;
-    }
+        .input-field { 
+            background: var(--input-bg); border: 1px solid var(--border-color); 
+            color: var(--input-text); border-radius: 0.75rem; padding: 10px; 
+            outline: none; font-size: 0.75rem; font-weight: 600; 
+        }
 
-    /* Modales & Navigation */
-    .modal-overlay {
-        display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.8); 
-        backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;
-    }
-    .modal-content { 
-        background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; 
-        padding: 25px; border: 1px solid var(--border-color); position: relative; 
-    }
+        .field-label {
+            font-size: 10px; font-weight: 900; text-transform: uppercase;
+            opacity: 0.5; margin-bottom: 4px; margin-left: 4px; letter-spacing: 0.5px;
+        }
 
-    .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
-    .nav-btn { font-weight: 900; border-radius: 50px; font-size: 8px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: var(--modal-overlay); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content {
+            background: var(--card-bg); width: 100%; max-width: 400px; 
+            border-radius: 1.5rem; padding: 25px; border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-custom); position: relative;
+        }
 
-    .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); }
-    .toggle-list-btn { width: 100%; font-size: 9px; font-weight: 900; text-transform: uppercase; opacity: 0.4; margin-top: 8px; }
+        .header-btn { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 1px solid var(--border-color); transition: all 0.2s ease;
+        }
+        .toggle-list-btn { width: 100%; font-size: 9px; font-weight: 900; text-transform: uppercase; opacity: 0.4; margin-top: 8px; padding: 4px; }
+        
+        @keyframes blink-point {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+        .mini-pastille {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            margin-left: 4px;
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316;
+            animation: blink-point 1.5s infinite;
+        }
 
-    @keyframes blink-point { 0%, 100% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
-    .mini-pastille { display: inline-block; width: 8px; height: 8px; background-color: #f97316; border-radius: 50%; margin-left: 4px; animation: blink-point 1.5s infinite; }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; border-radius: 10px; border: 1px solid var(--border-color); }
+        input[type=range]::-webkit-slider-thumb { height: 25px; width: 25px; border-radius: 50%; background: var(--text-page); cursor: pointer; -webkit-appearance: none; margin-top: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-    input[type=range] { -webkit-appearance: none; background: transparent; }
-    input[type=range]::-webkit-slider-thumb { height: 25px; width: 25px; border-radius: 50%; background: var(--text-page); -webkit-appearance: none; margin-top: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-</style>
-
+    </style>
 </head>
 <body class="pb-10">
 
@@ -222,88 +283,171 @@
         </footer>
     </div>
 
-<script>
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+    <script>
+    const mapCouleurs = {
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+        'rose': '#f43f5e', 'gray': '#6b7280'
+    };
 
-    let QUOTAS = { "APC": 2160, "PEDAGO": 2880, "FORM": 1080, "CONSEIL": 360 };
-    let TOTAL_ANNUEL = 6480;
+    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+    const couleurH108 = themePrefs.h108 || 'orange'; 
+    const hexaTheme = mapCouleurs[couleurH108] || '#f97316';
+    const isDarkTextNeeded = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurH108);
+
+    let QUOTAS = { "APC": 36 * 60, "PEDAGO": 48 * 60, "FORM": 18 * 60, "CONSEIL": 6 * 60 };
+    let TOTAL_ANNUEL = 108 * 60;
     const LABELS_BASE = { "APC": "APC", "PEDAGO": "Réunions", "FORM": "Formation", "CONSEIL": "Conseils" };
 
     let reunions = JSON.parse(localStorage.getItem('mesHeuresReu')) || [];
-    let editId = null; let confirmAction = null;
-
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const hexaTheme = mapCouleurs[themePrefs.h108 || 'orange'] || '#f97316';
+    let editId = null; 
+    let confirmAction = null;
 
     function initSelectors() {
-        const sj = document.getElementById('sel-jour'), sm = document.getElementById('sel-mois'), sa = document.getElementById('sel-annee'), sh = document.getElementById('sel-h'), smin = document.getElementById('sel-m');
-        for(let i=1; i<=31; i++) sj.add(new Option(i, i < 10 ? '0'+i : i));
-        ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"].forEach((m, i) => sm.add(new Option(m, (i+1) < 10 ? '0'+(i+1) : (i+1))));
+        const sj = document.getElementById('sel-jour'), sm = document.getElementById('sel-mois'), sa = document.getElementById('sel-annee');
+        const sh = document.getElementById('sel-h'), smin = document.getElementById('sel-m');
+        for(let i=1; i<=31; i++) sj.innerHTML += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+        const mois = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+        mois.forEach((m, i) => sm.innerHTML += `<option value="${(i+1)<10?'0'+(i+1):(i+1)}">${m}</option>`);
         const an = new Date().getFullYear();
-        for(let i=an-1; i<=an+1; i++) sa.add(new Option(i, i));
-        for(let i=0; i<=10; i++) sh.add(new Option(i + ' h', i));
-        for(let i=0; i<60; i+=5) smin.add(new Option((i < 10 ? '0'+i : i) + ' min', i));
+        for(let i=an-1; i<=an+1; i++) sa.innerHTML += `<option value="${i}">${i}</option>`;
+        for(let i=0; i<=10; i++) sh.innerHTML += `<option value="${i}">${i} h</option>`;
+        for(let i=0; i<60; i+=5) smin.innerHTML += `<option value="${i}">${i<10?'0'+i:i} min</option>`;
     }
 
     function updateQuotite(val) {
         document.getElementById('val-quotite').innerText = val + "%";
         localStorage.setItem('quotite_pro', val);
         const ratio = val / 100;
-        QUOTAS = { "APC": 2160 * ratio, "PEDAGO": 2880 * ratio, "FORM": 1080 * ratio, "CONSEIL": 360 * ratio };
-        TOTAL_ANNUEL = 6480 * ratio;
+        QUOTAS = { 
+            "APC": (36 * 60) * ratio, 
+            "PEDAGO": (48 * 60) * ratio, 
+            "FORM": (18 * 60) * ratio, 
+            "CONSEIL": (6 * 60) * ratio 
+        };
+        TOTAL_ANNUEL = (108 * 60) * ratio;
         render();
     }
 
-    function render() {
-        const container = document.getElementById('displayContainer');
-        container.innerHTML = "";
-        let minutesGlobales = 0;
-
-        Object.keys(QUOTAS).forEach(catKey => {
-            const reuCat = reunions.filter(r => r.cat === catKey);
-            const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
-            minutesGlobales += fait;
-            const depasse = fait > QUOTAS[catKey];
-            
-            container.innerHTML += `
-                <div class="level-column">
-                    <div class="mb-1">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS_BASE[catKey]} (${formatDuree(QUOTAS[catKey])})</h3>
-                            ${depasse ? '<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>' : ''}
-                        </div>
-                        <div class="progress-container"><div class="progress-bar" style="width: ${Math.min((fait/QUOTAS[catKey])*100, 100)}%; background-color: ${hexaTheme}"></div></div>
-                        <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])}</p>
-                    </div>
-                    <button id="btn-${catKey}" onclick="toggleListe('${catKey}')" class="toggle-list-btn">Détails</button>
-                    <div id="list-${catKey}" class="mt-2 space-y-1" style="display:none">
-                        ${reuCat.sort((a,b) => new Date(b.date) - new Date(a.date)).map(r => `
-                            <div class="reunion-item" style="border-left-color: ${hexaTheme}" onclick="chargerPourEdition(${r.id})">
-                                <div class="flex-1 overflow-hidden">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-black text-[10px]" style="color: ${hexaTheme}">${new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})}</span>
-                                        <span class="font-bold text-[10px]">${formatDuree(r.minutes)}</span>
-                                    </div>
-                                    ${r.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${r.comm}</div>` : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-        });
-
-        const globalPercent = Math.min((minutesGlobales / TOTAL_ANNUEL) * 100, 100);
-        document.getElementById('stats-title').innerText = `Total Annuel (${formatDuree(TOTAL_ANNUEL)})`;
-        document.getElementById('globalFait').innerText = `Fait : ${formatDuree(minutesGlobales)}`;
-        document.getElementById('globalReste').innerText = `Reste : ${formatDuree(TOTAL_ANNUEL - minutesGlobales)}`;
-        document.getElementById('globalPercent').innerText = `${Math.round(globalPercent)}%`;
-        document.getElementById('globalBar').style.width = globalPercent + "%";
-        document.getElementById('globalBar').style.backgroundColor = hexaTheme;
+    function setSelectedDate(dateStr) {
+        const d = new Date(dateStr);
+        document.getElementById('sel-jour').value = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
+        document.getElementById('sel-mois').value = (d.getMonth() + 1) < 10 ? '0' + (d.getMonth() + 1) : (d.getMonth() + 1);
+        document.getElementById('sel-annee').value = d.getFullYear();
     }
 
-    function formatDuree(totalMinutes) {
-        const abs = Math.abs(Math.round(totalMinutes));
-        return `${totalMinutes < 0 ? "-" : ""}${Math.floor(abs / 60)}h${abs % 60 > 0 ? (abs % 60).toString().padStart(2, '0') : ''}`;
+    function getSelectedDate() {
+        return `${document.getElementById('sel-annee').value}-${document.getElementById('sel-mois').value}-${document.getElementById('sel-jour').value}`;
+    }
+
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
+    function resetHeures() {
+        customConfirm("Voulez-vous vraiment tout effacer ?", () => {
+            reunions = [];
+            saveAndRender();
+        });
+    }
+    
+    function customConfirm(msg, action) {
+        document.getElementById('confirm-msg').innerText = msg;
+        confirmAction = action;
+        document.getElementById('custom-confirm').style.display = 'flex';
+    }
+
+    function closeConfirm(confirmed) {
+        document.getElementById('custom-confirm').style.display = 'none';
+        if (confirmed && confirmAction) confirmAction();
+        confirmAction = null;
+    }
+    document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
+
+    function appliquerCouleursTheme() {
+        const textCol = isDarkTextNeeded ? '#000' : '#fff';
+        const ids = ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'btn-fermer-aide'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.backgroundColor = hexaTheme; el.style.color = textCol; }
+        });
+        document.getElementById('stats-title').style.color = hexaTheme;
+        document.getElementById('aide-label').style.color = hexaTheme;
+        document.getElementById('range-quotite').style.accentColor = hexaTheme;
+
+        // Injection du style pour la piste du slider pour la couleur dynamique
+        const styleSlider = document.createElement('style');
+        styleSlider.innerHTML = `
+            input[type=range]::-webkit-slider-runnable-track { background: ${hexaTheme}44 !important; }
+            input[type=range]::-moz-range-track { background: ${hexaTheme}44 !important; }
+        `;
+        document.head.appendChild(styleSlider);
+    }
+
+    function updateExportBadge(needsExport) {
+        const badge = document.getElementById('badge-export');
+        if (needsExport) {
+            badge.classList.remove('hidden');
+            localStorage.setItem('needsExport_108h', 'true');
+        } else {
+            badge.classList.add('hidden');
+            localStorage.removeItem('needsExport_108h');
+        }
+    }
+
+    document.getElementById('heuresForm').onsubmit = function(e) {
+        e.preventDefault();
+        const cat = document.querySelector('input[name="cat"]:checked').value;
+        const date = getSelectedDate();
+        const h = parseInt(document.getElementById('sel-h').value) || 0;
+        const m = parseInt(document.getElementById('sel-m').value) || 0;
+        const minutes = (h * 60) + m;
+        const comm = document.getElementById('comm').value;
+        if (minutes <= 0) return;
+
+        if (editId) {
+            const index = reunions.findIndex(r => r.id === editId);
+            reunions[index] = { ...reunions[index], cat, date, minutes, comm };
+            editId = null;
+            document.getElementById('submitBtn').innerText = "Enregistrer";
+            document.getElementById('edit-actions').classList.add('hidden');
+        } else {
+            reunions.push({ id: Date.now(), cat, date, minutes, comm });
+        }
+        saveAndRender();
+        this.reset();
+        initDate();
+    };
+
+    function chargerPourEdition(id) {
+        const r = reunions.find(item => item.id === id);
+        if (!r) return;
+        editId = id;
+        document.querySelector(`input[name="cat"][value="${r.cat}"]`).checked = true;
+        setSelectedDate(r.date);
+        document.getElementById('sel-h').value = Math.floor(r.minutes / 60);
+        document.getElementById('sel-m').value = (Math.round(r.minutes % 60 / 5) * 5) % 60;
+        document.getElementById('comm').value = r.comm || "";
+        document.getElementById('submitBtn').innerText = "Mettre à jour";
+        document.getElementById('edit-actions').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        editId = null;
+        document.getElementById('heuresForm').reset();
+        document.getElementById('submitBtn').innerText = "Enregistrer";
+        document.getElementById('edit-actions').classList.add('hidden');
+        initDate();
+    }
+
+    function deleteEntry() {
+        customConfirm("Supprimer cette entrée ?", () => {
+            reunions = reunions.filter(r => r.id !== editId);
+            cancelEdit();
+            saveAndRender();
+        });
     }
 
     function saveAndRender() {
@@ -312,54 +456,161 @@
         render();
     }
 
+    function formatDuree(totalMinutes) {
+        const abs = Math.abs(Math.round(totalMinutes));
+        const h = Math.floor(abs / 60);
+        const m = abs % 60;
+        return `${totalMinutes < 0 ? "-" : ""}${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}`;
+    }
+
+    function render() {
+        const container = document.getElementById('displayContainer');
+        container.innerHTML = "";
+        let minutesGlobales = 0;
+
+        document.getElementById('stats-title').innerText = `Total Annuel (${formatDuree(TOTAL_ANNUEL)})`;
+
+        Object.keys(QUOTAS).forEach(catKey => {
+            const reuCat = reunions.filter(r => r.cat === catKey);
+            const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
+            minutesGlobales += fait;
+            const depasse = fait > QUOTAS[catKey];
+            const col = document.createElement('div');
+            col.className = "level-column";
+            col.innerHTML = `
+                <div class="mb-1 relative">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS_BASE[catKey]} (${formatDuree(QUOTAS[catKey])})</h3>
+                        ${depasse ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
+                    </div>
+                    <div class="progress-container"><div class="progress-bar" style="width: ${Math.min((fait/QUOTAS[catKey])*100, 100)}%; background-color: ${hexaTheme}"></div></div>
+                    <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])}</p>
+                    ${depasse ? `<p class="text-[7px] text-orange-500 font-bold mt-1 leading-tight uppercase">⚠️ Quota dépassé</p>` : ''}
+                </div>
+                <button id="btn-${catKey}" onclick="toggleListe('${catKey}')" class="toggle-list-btn">Détails</button>
+                <div id="list-${catKey}" class="mt-2 space-y-1" style="display:none"></div>`;
+
+            const listDiv = col.querySelector(`#list-${catKey}`);
+            reuCat.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
+                const dateFmt = new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'});
+                listDiv.innerHTML += `
+                    <div class="reunion-item" style="border-left-color: ${hexaTheme}" onclick="chargerPourEdition(${r.id})">
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-[10px]" style="color: ${hexaTheme}">${dateFmt}</span>
+                                <span class="font-bold text-[10px]">${formatDuree(r.minutes)}</span>
+                            </div>
+                            ${r.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${r.comm}</div>` : ''}
+                        </div>
+                    </div>`;
+            });
+            container.appendChild(col);
+        });
+
+        const globalReste = TOTAL_ANNUEL - minutesGlobales;
+        const globalPercent = Math.min((minutesGlobales / TOTAL_ANNUEL) * 100, 100);
+        document.getElementById('globalFait').innerText = `Fait : ${formatDuree(minutesGlobales)}`;
+        document.getElementById('globalReste').innerText = `Reste : ${formatDuree(globalReste)}`;
+        document.getElementById('globalReste').style.color = hexaTheme;
+        document.getElementById('globalPercent').innerText = `${Math.round(globalPercent)}%`;
+        document.getElementById('globalBar').style.width = globalPercent + "%";
+        document.getElementById('globalBar').style.backgroundColor = hexaTheme;
+    }
+
     function toggleListe(catKey) {
-        const list = document.getElementById(`list-${catKey}`);
+        const listDiv = document.getElementById(`list-${catKey}`);
         const btn = document.getElementById(`btn-${catKey}`);
-        const isHidden = list.style.display === "none";
-        list.style.display = isHidden ? "block" : "none";
+        const isHidden = listDiv.style.display === "none";
+        listDiv.style.display = isHidden ? "block" : "none";
         btn.innerText = isHidden ? "Masquer" : "Détails";
     }
 
-    function updateExportBadge(needsExport) {
-        const badge = document.getElementById('badge-export');
-        badge.classList.toggle('hidden', !needsExport);
-        needsExport ? localStorage.setItem('needsExport_108h', 'true') : localStorage.removeItem('needsExport_108h');
+    function initDate() { 
+        setSelectedDate(new Date().toISOString().split('T')[0]);
+        document.getElementById('sel-h').value = "1";
+        document.getElementById('sel-m').value = "0";
     }
 
-    function appliquerCouleursTheme() {
-        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.h108);
-        const textCol = isDark ? '#000' : '#fff';
-        ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'btn-fermer-aide'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.style.backgroundColor = hexaTheme; el.style.color = textCol; }
+    function exportData() {
+        const date = new Date().toISOString().split('T')[0];
+        const blob = new Blob([JSON.stringify(reunions)], {type: "text/plain"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `outilsprofs_108heures_${date}.txt`;
+        a.click();
+        updateExportBadge(false);
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported)) {
+                    customConfirm("Remplacer les données actuelles ?", () => {
+                        reunions = imported; 
+                        saveAndRender();
+                        updateExportBadge(false);
+                    });
+                }
+            } catch(e) { console.error("Erreur import"); }
+        };
+        reader.readAsText(file);
+        event.target.value = "";
+    }
+
+    function exportPDF() {
+        let profNom = localStorage.getItem('nom_enseignant') || "Enseignant";
+        let quotite = localStorage.getItem('quotite_pro') || 100;
+        const dateFichier = new Date().toISOString().split('T')[0];
+        const element = document.createElement('div');
+        element.style.padding = "10px"; element.style.color = "black";
+        element.style.fontFamily = "Arial, sans-serif"; element.style.fontSize = "11px";
+
+        let html = `<div style="text-align:center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+                <h1 style="margin:0; text-transform:uppercase; font-size:18px;">Bilan des 108 heures</h1>
+                <h2 style="margin:5px 0; color:#444; font-size:14px;">Enseignant(e) : ${profNom} (Quotité : ${quotite}%)</h2>
+                <p style="font-size:9px;">Document généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+            </div>`;
+
+        Object.keys(QUOTAS).forEach(catKey => {
+            const reuCat = reunions.filter(r => r.cat === catKey);
+            const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
+            html += `<div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #eee; padding: 5px; border-radius: 5px;">
+                    <div style="background-color: #f3f4f6; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <b style="text-transform:uppercase; font-size:12px;">${LABELS_BASE[catKey]} (${formatDuree(QUOTAS[catKey])})</b>
+                        <span style="font-size:10px;">Fait: <b>${formatDuree(fait)}</b></span>
+                    </div>
+                    <table style="width:100%; border-collapse: collapse; margin-top: 5px;">
+                        <thead><tr style="border-bottom: 1px solid #000; text-align:left; font-size:9px;"><th style="padding:4px; width:20%;">Date</th><th style="padding:4px; width:15%;">Durée</th><th style="padding:4px; width:65%;">Objet</th></tr></thead>
+                        <tbody>`;
+            if (reuCat.length === 0) {
+                html += `<tr><td colspan="3" style="padding:5px; color:#999; font-style:italic; font-size:10px;">Aucune saisie.</td></tr>`;
+            } else {
+                reuCat.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
+                    html += `<tr style="border-bottom: 1px solid #f9f9f9;"><td style="padding:4px;">${new Date(r.date).toLocaleDateString('fr-FR')}</td><td style="padding:4px;">${formatDuree(r.minutes)}</td><td style="padding:4px; font-size:10px;">${r.comm || '-'}</td></tr>`;
+                });
+            }
+            html += `</tbody></table></div>`;
         });
-        document.querySelectorAll('#stats-title, #aide-label, #globalReste').forEach(el => el.style.color = hexaTheme);
-        document.getElementById('range-quotite').style.accentColor = hexaTheme;
+        element.innerHTML = html;
+        const opt = { margin: 10, filename: `108h_${profNom}_${dateFichier}.pdf`, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
     }
 
-    function initDate() {
-        const d = new Date();
-        document.getElementById('sel-jour').value = d.getDate().toString().padStart(2, '0');
-        document.getElementById('sel-mois').value = (d.getMonth() + 1).toString().padStart(2, '0');
-        document.getElementById('sel-annee').value = d.getFullYear();
-    }
-
-    // Fonctions modales et exports (Inchangées dans leur logique)
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
-    function customConfirm(msg, action) { document.getElementById('confirm-msg').innerText = msg; confirmAction = action; document.getElementById('custom-confirm').style.display = 'flex'; }
-    function closeConfirm(confirmed) { document.getElementById('custom-confirm').style.display = 'none'; if (confirmed && confirmAction) confirmAction(); }
-
-    window.onload = () => {
+    window.addEventListener('DOMContentLoaded', () => { 
         initSelectors();
-        appliquerCouleursTheme();
+        appliquerCouleursTheme(); 
         const savedQuotite = localStorage.getItem('quotite_pro') || 100;
         document.getElementById('range-quotite').value = savedQuotite;
         updateQuotite(savedQuotite);
-        initDate();
-        if (localStorage.getItem('needsExport_108h') === 'true') updateExportBadge(true);
-    };
+        initDate(); 
+        if (localStorage.getItem('needsExport_108h') === 'true') {
+            document.getElementById('badge-export').classList.remove('hidden');
+        }
+    });
 </script>
-
 </body>
 </html>

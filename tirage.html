@@ -19,111 +19,157 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: #0a0a0a; --card-text: #ffffff; --result-bg: #111111;
-            --result-border: #262626; --pill-bg: #1a1a1a;
-            --theme-color: #ec4899; --theme-contrast: #ffffff;
-            --student-name-boy: #93c5fd; --student-name-girl: #f9a8d4;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #0a0a0a;
+            --card-text: #ffffff;
+            --result-bg: #111111;
+            --result-border: #262626;
+            --pill-bg: #1a1a1a; /* Gris foncé en sombre */
+            
+            /* Couleurs par défaut (seront écrasées par le JS) */
+            --student-name-boy: #93c5fd; 
+            --student-name-girl: #f9a8d4;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee; --text-page: #000000; --header-bg: #ffffff;
-            --header-border: #dddddd; --border-color: #cccccc; --card-bg: #ffffff;
-            --card-text: #000000; --result-bg: #f5f5f5; --result-border: #dddddd;
-            --pill-bg: #ffffff;
+            --bg-page: #eeeeee;
+            --text-page: #000000;
+            --header-bg: #ffffff;
+            --header-border: #dddddd;
+            --border-color: #cccccc;
+            --card-bg: #ffffff;
+            --card-text: #000000;
+            --result-bg: #f5f5f5;
+            --result-border: #dddddd;
+            --pill-bg: #ffffff; /* Blanc en clair */
         }
 
         body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
-            padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center;
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-page); 
+            padding: 0; margin: 0; 
+            transition: background 0.3s;
+            display: flex; flex-direction: column; align-items: center;
             padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
-            transition: background 0.3s; overflow-x: hidden;
         }
 
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--header-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: 100vw; margin-bottom: 10px;
+            position: sticky; top: 0; z-index: 100; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 10px;
         }
 
-        .theme-btn-sync { 
-            background-color: var(--theme-color); color: var(--theme-contrast);
-            display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.2s, opacity 0.2s;
+        .student-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); 
+            gap: 6px; margin-bottom: 20px; width: 100%; padding: 0 10px;
         }
 
-        #btn-retour, #btn-aide { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
-
-        .student-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; width: 100%; padding: 0 10px; }
         .student-item { 
-            padding: 6px 2px; border-radius: 999px; font-size: 0.55rem; font-weight: 800; 
-            text-align: center; cursor: pointer; background-color: var(--pill-bg);
-            border: 1px solid var(--header-border); transition: all 0.2s;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            padding: 6px 2px; border-radius: 999px; font-size: 0.55rem; 
+            font-weight: 800; text-align: center; cursor: pointer; 
+            background-color: var(--pill-bg);
+            border: 1px solid var(--header-border); 
+            transition: all 0.2s; white-space: nowrap; 
+            overflow: hidden; text-overflow: ellipsis; 
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
+        /* Couleurs de texte dynamiques */
         .bg-f { color: var(--student-name-girl) !important; } 
         .bg-m { color: var(--student-name-boy) !important; } 
 
         .drawn { 
-            background-color: #0a0a0a !important; color: #444444 !important; 
-            text-decoration: line-through; border-color: #1a1a1a !important; 
-            opacity: 0.5; transform: scale(0.96); 
+            background-color: #0a0a0a !important; 
+            color: #444444 !important; 
+            text-decoration: line-through; 
+            border-color: #1a1a1a !important;
+            opacity: 0.5; transform: scale(0.96);
         }
-        body.light-mode .drawn { background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important; }
 
-        .level-title { text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; color: var(--text-page); }
+        body.light-mode .drawn, html.light-mode-init .drawn { 
+            background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important;
+        }
+
+        .level-title { 
+            text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; 
+            text-transform: uppercase; letter-spacing: 1px; color: var(--text-page);
+        }
 
         .light-card { 
             background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; 
             width: 95%; max-width: 400px; padding: 20px; text-align: center; 
             margin: 20px 0; border: 1px solid var(--border-color);
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
         }
         
         .result-box { 
             background: var(--result-bg); border: 1px solid var(--result-border); 
-            border-radius: 0.75rem; height: 60px; display: flex; align-items: center; 
-            justify-content: center; margin-bottom: 12px; font-size: 1.4rem; font-weight: 800;
-            color: var(--theme-color); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 0.75rem; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; font-size: 1.4rem; font-weight: 800;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .main-btn { width: 100%; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; border: none; cursor: pointer; }
+        .main-btn {
+            width: 100%; padding: 14px; font-size: 10px; font-weight: 900;
+            border-radius: 50px; text-transform: uppercase; border: none;
+            cursor: pointer; transition: transform 0.1s, opacity 0.2s;
+        }
         .main-btn:active { transform: scale(0.95); }
         .main-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
 
         .btn-nav { width: 100%; max-width: 400px; font-weight: 800; padding: 14px; border-radius: 50px; font-size: 10px; cursor: pointer; border: none; }
         .stats { margin-top: 8px; font-size: 0.6rem; color: #888888; text-transform: uppercase; font-weight: 800; }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: var(--card-bg); padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: var(--text-page); border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; text-align: center; }
-        .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 500; opacity: 0.8; }
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; z-index: 1000; padding: 20px; 
+        }
+        .modal-content { 
+            background: white; padding: 24px; border-radius: 24px; 
+            width: 100%; max-width: 360px; color: #111; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: #111; margin-bottom: 8px; text-align: center; }
+        .alert-text { font-size: 14px; color: #444; text-align: center; line-height: 1.5; font-weight: 500; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; transition: transform 0.2s; }
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 16px; 
+            font-weight: 900; font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: transform 0.2s;
+        }
         .btn-cancel { background: #eeeeee; color: #444; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" id="btn-retour" class="theme-btn-sync">
+        <a href="index.html" id="btn-retour" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h1 id="page-title" class="font-black text-lg tracking-normal uppercase text-center flex-grow">Tirage au sort</h1>
-        <button id="btn-aide" onclick="openHelp()" class="theme-btn-sync text-lg">💡</button>
+        <h1 id="page-title" class="font-black text-lg tracking-normal uppercase text-center flex-grow">
+            Tirage au sort
+        </h1>
+        <button id="btn-aide" onclick="openHelp()" class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 text-lg">
+            💡
+        </button>
     </header>
 
     <div class="w-full" id="listeContainer" style="max-width: 400px; margin: 0 auto;"></div>
 
     <div class="light-card mx-auto">
         <div class="result-box" id="result-display">PRÊT</div>
-        <button id="draw-btn" class="theme-btn-sync main-btn" onclick="drawName()">Tirer un prénom</button>
+        <button id="draw-btn" class="main-btn" onclick="drawName()">Tirer un prénom</button>
         <div class="stats" id="counter">--</div>
     </div>
 
@@ -139,55 +185,51 @@
             </div>
             <div class="btns">
                 <button id="btn-secondary" class="modal-btn btn-cancel" onclick="closeModal()">Annuler</button>
-                <button id="alertConfirmBtn" class="modal-btn">Confirmer</button>
+                <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
     </div>
 
     <script>
-        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#666666' };
+        const mapCouleurs = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#666666'
+        };
+
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
         const nomCouleur = themePrefs.tirage || 'pink';
         const hexaTheme = mapCouleurs[nomCouleur] || '#ec4899';
 
-        let rawData = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-        let remaining = JSON.parse(localStorage.getItem('remainingStudents')) || rawData.map(el => el.id);
-
+        // FONCTION POUR LES COULEURS DE SEXE DYNAMIQUES
         function appliquerCouleursSexe() {
-            if (themePrefs.fille && mapCouleurs[themePrefs.fille]) {
-                document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[themePrefs.fille]);
+            const prefs = JSON.parse(localStorage.getItem('theme_tuiles'));
+            if (prefs) {
+                if (prefs.fille && mapCouleurs[prefs.fille]) {
+                    document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[prefs.fille]);
+                }
+                if (prefs.garcon && mapCouleurs[prefs.garcon]) {
+                    document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[prefs.garcon]);
+                }
             }
-            if (themePrefs.garcon && mapCouleurs[themePrefs.garcon]) {
-                document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[themePrefs.garcon]);
-            }
-        }
-
-        function appliquerTheme() {
-            const isLight = localStorage.getItem('theme_mode') === 'light';
-            document.body.classList.toggle('light-mode', isLight);
-            
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
-            const contrastColor = isLightColor ? '#000000' : '#ffffff';
-            
-            const root = document.documentElement;
-            root.style.setProperty('--theme-color', hexaTheme);
-            root.style.setProperty('--theme-contrast', contrastColor);
         }
 
         function openHelp() {
             const container = document.getElementById('modal-body-content');
             container.innerHTML = `
-                <h3 class="alert-title" style="color: var(--theme-color)">💡 Tirage</h3>
-                <div class="alert-text space-y-2 mb-4">
-                    <p>• <b>Absences :</b> Cliquez sur le nom d'un élève pour le griser. Il ne sera pas tiré au sort.</p>
-                    <p>• <b>Le Tirage :</b> Cliquez sur le bouton pour désigner un élève présent.</p>
-                    <p>• <b>Suivi :</b> Les élèves déjà tirés sont barrés.</p>
-                    <p>• <b>RàZ :</b> Le bouton rouge remet tout le monde dans la liste.</p>
+                <h3 class="font-black text-xs uppercase mb-2" style="color: ${hexaTheme}">💡 Tirage</h3>
+                <div class="text-[11px] leading-relaxed space-y-2 opacity-90 mb-2" style="color: #111">
+                    <p>• <b>Absences :</b> Cliquez sur le nom d'un élève pour le griser s'il est absent. Il ne sera pas tiré au sort.</p>
+                    <p>• <b>Le Tirage :</b> Cliquez sur le bouton pour lancer l'animation et désigner un élève présent.</p>
+                    <p>• <b>Suivi :</b> Les élèves déjà tirés sont barrés. Le compteur indique la progression.</p>
+                    <p>• <b>RàZ :</b> Le bouton rouge remet tous les élèves présents dans la liste de tirage.</p>
                 </div>
             `;
             const confirmBtn = document.getElementById('alertConfirmBtn');
             confirmBtn.innerText = "Fermer";
-            confirmBtn.className = "theme-btn-sync modal-btn";
+            confirmBtn.style.backgroundColor = hexaTheme;
             confirmBtn.onclick = closeModal;
             document.getElementById('btn-secondary').style.display = 'none';
             document.getElementById('alertModal').style.display = 'flex';
@@ -198,21 +240,58 @@
             container.innerHTML = `<h3 class="alert-title">${title}</h3><p class="alert-text">${text}</p>`;
             const confirmBtn = document.getElementById('alertConfirmBtn');
             confirmBtn.innerText = "Confirmer";
-            confirmBtn.className = "theme-btn-sync modal-btn";
-            confirmBtn.onclick = () => { closeModal(); onConfirm(); };
+            confirmBtn.style.backgroundColor = hexaTheme;
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            newBtn.onclick = () => { closeModal(); onConfirm(); };
             document.getElementById('btn-secondary').style.display = 'block';
+            document.getElementById('btn-secondary').innerText = "Annuler";
             document.getElementById('alertModal').style.display = 'flex';
         }
 
         function closeModal() { document.getElementById('alertModal').style.display = 'none'; }
 
+        function appliquerTheme() {
+            const savedMode = localStorage.getItem('theme_mode');
+            const isLight = savedMode === 'light';
+            document.body.classList.toggle('light-mode', isLight);
+            
+            const title = document.getElementById('page-title');
+            const btn = document.getElementById('draw-btn');
+            const display = document.getElementById('result-display');
+            const btnRetour = document.getElementById('btn-retour');
+            const btnAide = document.getElementById('btn-aide');
+            
+            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
+            const contrastColor = isLightColor ? 'black' : 'white';
+            
+            if (title) title.style.color = isLight ? '#000000' : '#ffffff';
+            
+            [btnRetour, btnAide, btn].forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = hexaTheme;
+                    if (el === btn) el.style.color = contrastColor;
+                    const svg = el.querySelector('svg');
+                    if (svg) svg.style.color = contrastColor;
+                }
+            });
+            
+            if (display) display.style.color = hexaTheme;
+        }
+
         function formatName(fullName) {
             const parts = fullName.trim().split(" ");
             const prenom = parts[0];
             const nom = parts.slice(1).join(" ");
-            const aUnDoublon = rawData.some(s => s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase() && s.identite.trim() !== fullName.trim());
-            return aUnDoublon && nom ? `${prenom} ${nom[0]}.` : prenom;
+            const aUnDoublon = rawData.some(s => 
+                s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase() && 
+                s.identite.trim() !== fullName.trim()
+            );
+            return aUnDoublon && nom ? `${prenom} ${nom}` : prenom;
         }
+
+        let rawData = JSON.parse(localStorage.getItem('maListeEleves')) || [];
+        let remaining = JSON.parse(localStorage.getItem('remainingStudents')) || rawData.map(el => el.id);
 
         function saveState() { localStorage.setItem('remainingStudents', JSON.stringify(remaining)); }
 
@@ -230,36 +309,50 @@
                 groupes[niv].push(el);
             });
             
-            Object.keys(groupes).sort((a, b) => {
+            const niveauxTries = Object.keys(groupes).sort((a, b) => {
                 let indexA = ordreNiveaux.indexOf(a), indexB = ordreNiveaux.indexOf(b);
                 return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
-            }).forEach(niv => {
-                const section = document.createElement('div');
-                section.innerHTML = `<div class="level-title" style="color: ${paletteNiveaux[niv] || couleursFixes[niv] || '#888888'} !important;">${niv}</div>`;
+            });
+
+            niveauxTries.forEach(niv => {
+                const levelSection = document.createElement('div');
+                const couleurNiveau = paletteNiveaux[niv] || paletteNiveaux[niv.toLowerCase()] || couleursFixes[niv] || '#888888';
+                levelSection.innerHTML = `<div class="level-title" style="color: ${couleurNiveau} !important;">${niv}</div>`;
+                
                 const grid = document.createElement('div');
                 grid.className = "student-grid";
+                
                 groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
                     const isDrawn = !remaining.includes(el.id);
                     const item = document.createElement('div');
-                    item.className = `student-item ${el.sexe.toLowerCase().startsWith('f') ? 'bg-f' : 'bg-m'} ${isDrawn ? 'drawn' : ''}`;
+                    const genderClass = el.sexe.toLowerCase().startsWith('f') ? 'bg-f' : 'bg-m';
+                    item.className = `student-item ${genderClass} ${isDrawn ? 'drawn' : ''}`;
                     item.innerText = formatName(el.identite);
                     item.onclick = () => toggleStudent(el.id);
                     grid.appendChild(item);
                 });
-                section.appendChild(grid);
-                container.appendChild(section);
+                
+                levelSection.appendChild(grid);
+                container.appendChild(levelSection);
             });
             
-            const restants = remaining.length;
-            document.getElementById('counter').innerText = `${restants} restant${restants > 1 ? 's' : ''} / ${rawData.length}`;
+            const total = rawData.length, restants = remaining.length;
+            document.getElementById('counter').innerText = `${restants} restant${restants > 1 ? 's' : ''} / ${total}`;
+            
             const btn = document.getElementById('draw-btn');
-            btn.disabled = restants === 0;
-            btn.innerText = restants === 0 ? "Session terminée" : "Tirer un prénom";
+            if (restants === 0) { 
+                btn.disabled = true; 
+                btn.innerText = "Session terminée"; 
+            } else { 
+                btn.disabled = false; 
+                btn.innerText = "Tirer un prénom"; 
+            }
         }
 
         function toggleStudent(id) {
             remaining = remaining.includes(id) ? remaining.filter(item => item !== id) : [...remaining, id];
-            saveState(); renderList();
+            saveState(); 
+            renderList();
         }
 
         function drawName() {
@@ -267,34 +360,56 @@
             const display = document.getElementById('result-display'), btn = document.getElementById('draw-btn');
             btn.disabled = true; 
             display.style.color = "#666666";
+            display.style.transform = "scale(0.95)";
             
             let iterations = 0;
+            const maxIter = 15;
             const interval = setInterval(() => {
-                display.innerText = formatName(rawData.find(s => s.id === remaining[Math.floor(Math.random() * remaining.length)]).identite);
-                if (++iterations > 15) {
+                const randomIndex = Math.floor(Math.random() * remaining.length);
+                const tempStudent = rawData.find(s => s.id === remaining[randomIndex]);
+                display.innerText = formatName(tempStudent.identite);
+                
+                if (++iterations > maxIter) {
                     clearInterval(interval);
-                    const winnerId = remaining.splice(Math.floor(Math.random() * remaining.length), 1)[0];
+                    const finalIndex = Math.floor(Math.random() * remaining.length);
+                    const winnerId = remaining.splice(finalIndex, 1)[0];
                     const winner = rawData.find(s => s.id === winnerId);
+                    
                     display.innerText = formatName(winner.identite);
-                    display.style.color = "var(--theme-color)";
+                    display.style.color = hexaTheme;
                     display.style.transform = "scale(1.1)";
                     setTimeout(() => display.style.transform = "scale(1)", 200);
-                    saveState(); renderList();
+                    
+                    saveState(); 
+                    renderList();
                 }
             }, 70);
         }
 
         function resetDrawing() {
-            showAlert("Remettre à zéro ?", "Tous les élèves seront à nouveau disponibles.", () => {
+            showAlert("Remettre à zéro ?", "Tous les élèves seront à nouveau disponibles pour le tirage.", () => {
                 remaining = rawData.map(el => el.id);
                 localStorage.removeItem('remainingStudents');
                 document.getElementById('result-display').innerText = "PRÊT";
+                document.getElementById('result-display').style.color = hexaTheme;
                 renderList();
             });
         }
 
-        window.onload = () => { appliquerCouleursSexe(); appliquerTheme(); renderList(); };
-        window.onclick = e => { if (e.target.classList.contains('modal-overlay')) closeModal(); };
+        window.onload = () => { 
+            appliquerCouleursSexe(); 
+            appliquerTheme(); 
+            renderList(); 
+        };
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('alertModal');
+            if (event.target === modal) closeModal();
+        }
+
+        window.onkeydown = function(event) {
+            if (event.key === "Escape") closeModal();
+        }
     </script>
 </body>
 </html>

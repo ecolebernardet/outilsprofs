@@ -24,7 +24,6 @@
             --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
             --card-bg: #1e1e1e; --card-text: #ffffff; --input-bg: #2a2a2a;
             --input-border: rgba(255, 255, 255, 0.1); --input-text: #ffffff;
-            --theme-color: #a855f7; --theme-contrast: #ffffff;
         }
 
         body.light-mode, html.light-mode-init body {
@@ -38,28 +37,20 @@
             font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
             padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center;
             padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
-            overflow-x: hidden;
         }
 
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--header-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
             justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: 100vw; margin-bottom: 12px;
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 12px;
         }
 
         .container { width: 100%; max-width: 600px; padding: 0 4px; }
         .light-card { background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; border: 1px solid var(--border-color); }
         .input-field { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.8rem; font-weight: 600; width: 100%; }
 
-        .theme-btn-sync { 
-            background-color: var(--theme-color); 
-            color: var(--theme-contrast);
-            display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        #btn-retour, #btn-aide, #btn-search-trigger { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
+        #btn-retour, #btn-aide, #btn-search-trigger { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
         
         #searchWrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s; opacity: 0; }
         #searchWrapper.open { max-height: 100px; margin-bottom: 1.5rem; opacity: 1; }
@@ -88,23 +79,31 @@
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; }
 
+        /* Animation de la pastille */
         @keyframes pulse-orange {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
         }
         .badge-pulse { animation: pulse-orange 2s infinite; }
-        
-        @keyframes blink-point {
-            0% { transform: scale(0.9); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.5; }
-        }
-        .mini-pastille {
-            display: inline-block; width: 8px; height: 8px; background-color: #f97316;
-            border-radius: 50%; margin-left: 4px; margin-right: 2px;
-            box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
-        }
+		
+		@keyframes blink-point {
+			0% { transform: scale(0.9); opacity: 0.5; }
+			50% { transform: scale(1.2); opacity: 1; }
+			100% { transform: scale(0.9); opacity: 0.5; }
+		}
+		.mini-pastille {
+			display: inline-block;
+			width: 8px;
+			height: 8px;
+			background-color: #f97316;
+			border-radius: 50%;
+			margin-left: 4px;
+			margin-right: 2px;
+			box-shadow: 0 0 5px #f97316;
+			animation: blink-point 1.5s infinite;
+		}
+		
     </style>
 </head>
 <body>
@@ -114,13 +113,13 @@
             <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Mémos</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
                 <p class="text-xs leading-relaxed">
-                    • Enregistrez des notes sous forme de pense-bête avec des couleurs personnalisables.<br>
-                    • Réorganiser vos notes en utilisant la poignée.<br>
-                    • Cliquez sur un mémo pour le mettre à jour ou l'effacer.<br>
-                    <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
-                </p>
+                        • Enregistrez des notes sous forme de pense-bête avec des couleurs personnalisables.<br>
+                        • Réorganiser vos notes en utilisant la poignée.<br>
+                        • Cliquez sur un mémo pour le mettre à jour ou l'effacer.<br>
+						<br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
+				</p>
             </div>
-            <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="theme-btn-sync mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform">Fermer</button>
+            <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform">Fermer</button>
         </div>
     </div>
 
@@ -130,26 +129,26 @@
             <div id="alerte-texte" class="text-[11px] leading-relaxed opacity-80 mb-6 text-center"></div>
             <div class="btns">
                 <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
-                <button id="alerte-confirm" class="theme-btn-sync flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Confirmer</button>
+                <button id="alerte-confirm" class="flex-1 py-3 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Confirmer</button>
             </div>
         </div>
     </div>
 
     <header>
-        <a href="index.html" id="btn-retour" class="theme-btn-sync">
+        <a href="index.html" id="btn-retour">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
         <h1 id="pageTitle" class="font-black text-lg uppercase tracking-normal text-center flex-grow">Mémos</h1>
-        <button id="btn-aide" onclick="ouvrirAide()" class="theme-btn-sync text-lg">💡</button>
+        <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
     </header>
 
     <div class="container">
         <div class="light-card p-4 mb-4 shadow-xl">
             <div class="flex gap-2 mb-1 items-start">
                 <textarea id="noteTitle" class="input-field resize-none h-[45px]" placeholder="Titre..."></textarea>
-                <button id="btn-search-trigger" onclick="toggleSearch()" class="theme-btn-sync shadow-sm">
+                <button id="btn-search-trigger" onclick="toggleSearch()" class="shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -171,7 +170,7 @@
                 
                 <div class="flex gap-2 justify-center items-center">
                     <button id="btnDelete" onclick="deleteSelectedNote()" class="hidden px-4 py-2.5 rounded-full bg-red-500 text-white text-[10px] font-black uppercase shadow-md active:scale-90">Effacer</button>
-                    <button id="btnAction" onclick="saveNote()" class="theme-btn-sync px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
+                    <button id="btnAction" onclick="saveNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
                     <button id="btnCancelEdit" onclick="cancelEdit()" class="hidden px-5 py-2.5 rounded-full bg-neutral-500/20 text-[10px] font-black uppercase active:scale-90">Annuler</button>
                 </div>
             </div>
@@ -208,6 +207,7 @@
         let editingIndex = -1;
         let selectedColor = '#fef9c3';
 
+        // --- LOGIQUE PASTILLE EXPORT ---
         function updateExportBadge(needsExport) {
             const badge = document.getElementById('badge-export');
             const btnExport = document.getElementById('btn-export');
@@ -227,6 +227,7 @@
             const needsExport = localStorage.getItem('memos_needs_export') === 'true';
             const lastExport = localStorage.getItem('memos_last_export_date');
             const septJours = 7 * 24 * 60 * 60 * 1000;
+
             if (needsExport || !lastExport || (Date.now() - parseInt(lastExport) > septJours)) {
                 updateExportBadge(true);
             }
@@ -240,41 +241,39 @@
         function appliquerTheme() {
             const isLight = localStorage.getItem('theme_mode') === 'light';
             document.body.classList.toggle('light-mode', isLight);
-            
-            const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleurTheme) ? '#000000' : '#ffffff';
-            const root = document.documentElement;
-            root.style.setProperty('--theme-color', hexaTheme);
-            root.style.setProperty('--theme-contrast', contrast);
-
+            const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleurTheme) ? 'black' : 'white';
+            document.documentElement.style.setProperty('--theme-color', hexaTheme);
+            [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-search-trigger'), document.getElementById('btnAction'), document.getElementById('btn-fermer-aide')].forEach(el => {
+                if(el) { el.style.backgroundColor = hexaTheme; el.style.color = contrast; }
+            });
             if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexaTheme;
             renderNotes();
         }
 
         function renderNotes() {
             const grid = document.getElementById('notesGrid');
+            grid.innerHTML = '';
             const search = document.getElementById('searchInput').value.toLowerCase();
             const isDarkMode = !document.body.classList.contains('light-mode');
             
-            grid.innerHTML = notes.map((note, index) => {
-                const textToSearch = `${note.title || ''} ${note.content || ''}`.toLowerCase();
-                if (!textToSearch.includes(search)) return '';
-
-                let finalBg = note.color || '#fef9c3';
-                let textColor = (note.color === '#6b7280' || isDarkMode) ? '#ffffff' : '#121212';
-                if (isDarkMode) finalBg = shadeColor(finalBg, -0.6);
-
-                return `
-                    <div class="note-card shadow-lg ${editingIndex === index ? 'editing' : ''}" 
-                         data-index="${index}" 
-                         onclick="if(!event.target.closest('.drag-handle')) selectNote(${index})"
-                         style="background-color: ${finalBg}; color: ${textColor}">
-                        <div class="note-header">
-                            <div class="note-title">${note.title || ''}</div>
-                            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                        </div>
-                        <div class="note-card-content">${note.content}</div>
-                    </div>`;
-            }).join('');
+            notes.forEach((note, index) => {
+                if (((note.title || '') + (note.content || '')).toLowerCase().includes(search)) {
+                    const card = document.createElement('div');
+                    card.className = `note-card shadow-lg ${editingIndex === index ? 'editing' : ''}`;
+                    card.dataset.index = index;
+                    let finalColor = note.color || '#fef9c3';
+                    if (isDarkMode) {
+                        finalColor = shadeColor(finalColor, -0.6);
+                        card.style.color = 'white';
+                    } else {
+                        card.style.color = (note.color === '#6b7280' ? 'white' : '#121212');
+                    }
+                    card.style.backgroundColor = finalColor;
+                    card.onclick = (e) => { if (!e.target.closest('.drag-handle')) selectNote(index); };
+                    card.innerHTML = `<div class="note-header"><div class="note-title">${note.title || ''}</div><div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="note-card-content">${note.content}</div>`;
+                    grid.appendChild(card);
+                }
+            });
         }
 
         function selectNote(index) {
@@ -307,7 +306,7 @@
                 notes.unshift({ title, content, color: selectedColor });
             }
             cancelEdit();
-            updateExportBadge(true);
+            updateExportBadge(true); // <--- ICI
             saveAndRender();
         }
 
@@ -316,7 +315,7 @@
             afficherMessage("Supprimer ?", "Voulez-vous supprimer ce mémo ?", () => {
                 notes.splice(editingIndex, 1);
                 cancelEdit();
-                updateExportBadge(true);
+                updateExportBadge(true); // <--- ICI
                 saveAndRender();
             });
         }
@@ -363,7 +362,7 @@
                     const n=[]; 
                     document.querySelectorAll('.note-card').forEach(c=>n.push(notes[c.dataset.index])); 
                     notes=n; 
-                    updateExportBadge(true);
+                    updateExportBadge(true); // <--- ICI (changement d'ordre)
                     saveAndRender(); 
                 } 
             }); 
@@ -374,6 +373,7 @@
             document.getElementById('alerte-texte').innerText = texte;
             const modal = document.getElementById('modal-alerte');
             const confirmBtn = document.getElementById('alerte-confirm');
+            confirmBtn.style.backgroundColor = hexaTheme;
             confirmBtn.onclick = () => { fermerModal('modal-alerte'); callback(); };
             modal.style.display = 'flex'; 
         }
@@ -384,7 +384,7 @@
         function confirmResetAll() { 
             afficherMessage("Tout effacer ?", "Supprimer tous vos mémos ?", () => { 
                 notes=[]; 
-                updateExportBadge(true);
+                updateExportBadge(true); // <--- ICI
                 saveAndRender(); 
             }); 
         }
@@ -419,7 +419,8 @@
             const a = document.createElement('a');
             a.href = url; a.download = `outilsprofs_memos_${new Date().toISOString().slice(0,10)}.txt`; a.click();
             URL.revokeObjectURL(url);
-            updateExportBadge(false);
+
+            updateExportBadge(false); // <--- ICI (on cache la pastille après export réussi)
         }
 
         window.onload = () => { 
@@ -427,7 +428,7 @@
             setupColorPickers(); 
             setupSortable(); 
             setupImport(); 
-            verifierBesoinExport();
+            verifierBesoinExport(); // <--- ICI au chargement
         };
     </script>
 </body>

@@ -2,171 +2,290 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ma Classe - OutilsProfs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ma classe - OutilsProfs</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
         :root {
-            --bg-app: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --sub-text: #64748b;
-            --student-name-girl: #ec4899;
-            --student-name-boy: #3b82f6;
+            --bg-body: #121212; --text-main: #ffffff;
+            --header-bg: #1e1e1e; --header-border: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e; --input-bg: #2a2a2a;
+            --sub-text: #a1a1aa; --student-item-bg: #1e1e1e;
+            --student-name-girl: #f472b6; --student-name-boy: #60a5fa;
+            --modal-bg: rgba(0, 0, 0, 0.8); --shadow-color: rgba(0, 0, 0, 0.4);
         }
-        .dark {
-            --bg-app: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f1f5f9;
-            --sub-text: #94a3b8;
+
+        body.light-mode {
+            --bg-body: #eeeeee; --text-main: #111827;
+            --header-bg: #ffffff; --header-border: #ddd;
+            --card-bg: #ffffff; --input-bg: #f3f4f6;
+            --sub-text: #71717a; --student-item-bg: #ffffff;
+            --modal-bg: rgba(255, 255, 255, 0.8); --shadow-color: rgba(0, 0, 0, 0.1);
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-app); color: var(--text-main); transition: all 0.3s ease; margin: 0; padding-bottom: 40px; }
+
+        body { 
+            font-family: 'Inter', sans-serif; background-color: var(--bg-body); 
+            color: var(--text-main); padding: 0 15px 20px 15px; margin: 0; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        header { 
+            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            width: calc(100% + 30px); margin-left: -15px;
+        }
+
+        .tab-nav {
+            display: flex; background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            margin-left: -15px; width: calc(100% + 30px); position: sticky; top: 60px; z-index: 90;
+        }
+        .tab-btn {
+            flex: 1; padding: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase;
+            text-align: center; opacity: 0.5; border-bottom: 3px solid transparent; transition: all 0.3s;
+            cursor: pointer;
+        }
+        .tab-btn.active { opacity: 1; border-bottom-color: var(--text-main); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .tab-btn { opacity: 0.5; transition: all 0.2s; border-bottom: 2px solid transparent; }
-        .tab-btn.active { opacity: 1; border-bottom: 2px solid currentColor; }
-        .pinterest-grid { column-count: 2; column-gap: 1rem; }
-        .pinterest-item { break-inside: avoid; margin-bottom: 1rem; }
-        @media (max-width: 640px) { .pinterest-grid { column-count: 1; } }
-        .student-item { background: var(--bg-card); border-radius: 8px; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.05); }
+
+        .light-card { 
+            background: var(--card-bg); border-radius: 1.5rem; 
+            border: 1px solid var(--header-border); box-shadow: 0 10px 25px -5px var(--shadow-color);
+        }
+
+        .card-input { display: none; }
+        .card-label {
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main);
+            height: 30px; border-radius: 0.75rem; cursor: pointer;
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; transition: all 0.2s ease;
+        }
+        
+        .input-garcon:checked + .card-label { color: #fff; border-color: var(--student-name-boy); background: var(--student-name-boy); font-weight: 900; }
+        .input-fille:checked + .card-label { color: #fff; border-color: var(--student-name-girl); background: var(--student-name-girl); font-weight: 900; }
+
+        .input-cp:checked + .card-label { background: #ec4899; border-color: #ec4899; color: #fff; } 
+        .input-ce1:checked + .card-label { background: #3b82f6; border-color: #3b82f6; color: #fff; } 
+        .input-ce2:checked + .card-label { background: #eab308; border-color: #eab308; color: #000; } 
+        .input-cm1:checked + .card-label { background: #ef4444; border-color: #ef4444; color: #fff; } 
+        .input-cm2:checked + .card-label { background: #22c55e; border-color: #22c55e; color: #fff; } 
+        .input-autre:checked + .card-label { background: #8b5cf6; border-color: #8b5cf6; color: #fff; } 
+
+        .student-item { 
+            background: var(--student-item-bg); padding: 5px 12px; border-radius: 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 2px; 
+            border: 1px solid var(--header-border); box-shadow: 0 2px 5px var(--shadow-color); cursor: pointer;
+        }
+
         .text-girl-custom { color: var(--student-name-girl) !important; }
         .text-boy-custom { color: var(--student-name-boy) !important; }
-        .stat-pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
-        .notif-export { animation: pulse-orange 1.5s infinite; }
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-        .modal-content { background: var(--bg-card); width: 100%; max-width: 400px; padding: 24px; border-radius: 24px; }
-        .mini-pastille { display: inline-block; width: 8px; height: 8px; background: #f97316; border-radius: 50%; margin-left: 4px; }
+        
+        .btn-nav { font-weight: 800; padding: 12px 4px; border-radius: 50px; font-size: 8px; text-align: center; width: 100%; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main); border-radius: 0.75rem; padding: 10px; outline: none; font-size: 0.75rem; font-weight: 600; }
+        .select-date { background: var(--input-bg); border: 1px solid var(--header-border); color: var(--text-main); border-radius: 0.75rem; height: 30px; outline: none; font-size: 0.75rem; font-weight: 600; appearance: none; text-align: center; }
+        .stat-pill { padding: 1px 10px; border-radius: 99px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+        .header-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--header-border); transition: transform 0.1s ease, background-color 0.3s ease; }
+
+        /* Animation pastille clignotante */
+        @keyframes blink-border {
+            0% { border-color: #f97316; box-shadow: 0 0 2px #f97316; }
+            50% { border-color: transparent; box-shadow: 0 0 10px #f97316; }
+            100% { border-color: #f97316; box-shadow: 0 0 2px #f97316; }
+        }
+        .notif-export { border-color: #f97316 !important; animation: blink-border 1.5s infinite; }
+
+        #custom-confirm { display: none; position: fixed; inset: 0; z-index: 9999; background: var(--modal-bg); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+        .confirm-card { background: var(--card-bg); border: 1px solid var(--header-border); width: 100%; max-width: 320px; border-radius: 1.5rem; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); text-align: center; }
+        #modal-aide { display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--header-border); padding: 25px; position: relative; box-shadow: 0 10px 25px -5px var(--shadow-color); }
+
+        .pinterest-grid { column-count: 2; column-gap: 12px; width: 100%; }
+        .pinterest-item { break-inside: avoid; margin-bottom: 20px; display: inline-block; width: 100%; }
+        
+        @keyframes blink-point {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+        .mini-pastille {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            margin-left: 4px;
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316;
+            animation: blink-point 1.5s infinite;
+        }
+        
     </style>
 </head>
-<body class="p-4">
+<body class="pb-10">
+    <script>
+        if (localStorage.getItem('theme_mode') === 'light') { document.body.classList.add('light-mode'); }
+    </script>
 
-    <header class="max-w-4xl mx-auto flex justify-between items-center mb-6">
-        <button id="btn-retour" onclick="window.location.href='index.html'" class="p-3 rounded-xl shadow-lg active:scale-95 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <div class="flex gap-6">
-            <button id="tab-btn-reg" onclick="switchTab('reg')" class="tab-btn active text-[11px] font-black uppercase tracking-widest py-2">Enregistrement</button>
-            <button id="tab-btn-edit" onclick="switchTab('edit')" class="tab-btn text-[11px] font-black uppercase tracking-widest py-2">Édition PDF</button>
+    <div id="custom-confirm">
+        <div class="confirm-card">
+            <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
+            <div id="confirm-buttons" class="flex flex-col gap-2"></div>
         </div>
-        <button id="btn-aide" onclick="ouvrirAide()" class="p-3 rounded-xl shadow-lg active:scale-95 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </button>
-    </header>
+    </div>
 
-    <main class="max-w-4xl mx-auto">
-        <div id="tab-reg" class="tab-content active space-y-6">
-            <section class="bg-[var(--bg-card)] p-6 rounded-3xl shadow-sm border border-black/5">
-                <input type="text" id="nomEnseignant" oninput="sauvegarderNomEnseignant()" placeholder="Nom de l'enseignant..." class="w-full bg-transparent text-center text-lg font-black uppercase placeholder:opacity-30 outline-none mb-6">
-                
-                <form id="eleveForm" class="space-y-4">
-                    <input type="hidden" id="edit-id">
-                    <input type="text" id="nomComplet" required placeholder="Prénom NOM de l'élève..." class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none text-sm font-bold border-2 border-transparent focus:border-blue-500 transition-all">
-                    
-                    <div class="grid grid-cols-3 gap-2">
-                        <select id="birth-day" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold outline-none"></select>
-                        <select id="birth-month" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold outline-none"></select>
-                        <select id="birth-year" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold outline-none"></select>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <label class="flex-1 relative cursor-pointer group">
-                            <input type="radio" name="sexe" value="m" class="peer hidden">
-                            <div class="p-3 text-center rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase peer-checked:bg-blue-500 peer-checked:text-white transition-all">Garçon</div>
-                        </label>
-                        <label class="flex-1 relative cursor-pointer group">
-                            <input type="radio" name="sexe" value="f" checked class="peer hidden">
-                            <div class="p-3 text-center rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase peer-checked:bg-pink-500 peer-checked:text-white transition-all">Fille</div>
-                        </label>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2 justify-center py-2">
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="CP" checked class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-pink-500 peer-checked:text-white">CP</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="CE1" class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-blue-500 peer-checked:text-white">CE1</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="CE2" class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-yellow-500 peer-checked:text-white">CE2</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="CM1" class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-red-500 peer-checked:text-white">CM1</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="CM2" class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-green-500 peer-checked:text-white">CM2</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="niveau" value="AUTRE" class="peer hidden"><div class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black peer-checked:bg-purple-500 peer-checked:text-white">Autre</div></label>
-                    </div>
-
-                    <button type="submit" id="btn-submit" class="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Enregistrer</button>
-                </form>
-            </section>
-
-            <div class="flex justify-between items-center px-2">
-                <div id="stats-container" class="flex gap-2"></div>
-                <div class="flex gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl border border-black/5">
-                    <button id="sort-prenom" onclick="changerTriApp('prenom')" class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all">Prénom</button>
-                    <button id="sort-nom" onclick="changerTriApp('nom')" class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all">Nom</button>
-                </div>
-            </div>
-
-            <div id="listeContainer"></div>
-
-            <div class="grid grid-cols-2 gap-3 pt-6">
-                <button onclick="importerListe()" class="py-4 rounded-2xl bg-neutral-500 text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">📥 importer.txt</button>
-                <button id="btn-exporter-txt" onclick="exporterListe()" class="py-4 rounded-2xl bg-neutral-500 text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">👆 exporter.txt 👆</button>
-                <input type="file" id="fileInput" class="hidden" accept=".txt">
-                <button onclick="toutEffacer()" class="col-span-2 py-3 text-[10px] font-bold opacity-30 hover:opacity-100 transition-opacity uppercase tracking-widest">⚠️ Tout effacer</button>
-            </div>
-        </div>
-
-        <div id="tab-edit" class="tab-content space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="genererPDF()" class="group flex items-center p-6 bg-[var(--bg-card)] rounded-3xl shadow-sm border border-black/5 active:scale-95 transition-transform">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-                    <div class="text-left"><h4 class="text-[11px] font-black uppercase mb-1">Liste de classe</h4><p class="text-[9px] opacity-50 uppercase font-bold">PDF avec niveaux & genres</p></div>
-                </button>
-                <button onclick="genererEmargement()" class="group flex items-center p-6 bg-[var(--bg-card)] rounded-3xl shadow-sm border border-black/5 active:scale-95 transition-transform">
-                    <div class="w-12 h-12 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg></div>
-                    <div class="text-left"><h4 class="text-[11px] font-black uppercase mb-1">Pointage</h4><p class="text-[9px] opacity-50 uppercase font-bold">PDF avec 15 colonnes vides</p></div>
-                </button>
-                <button onclick="genererEtiquettes()" class="group flex items-center p-6 bg-[var(--bg-card)] rounded-3xl shadow-sm border border-black/5 active:scale-95 transition-transform">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h10a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" /></svg></div>
-                    <div class="text-left"><h4 class="text-[11px] font-black uppercase mb-1">Étiquettes</h4><p class="text-[9px] opacity-50 uppercase font-bold">8 étiquettes par page (A4)</p></div>
-                </button>
-                <button onclick="genererPetitesEtiquettes()" class="group flex items-center p-6 bg-[var(--bg-card)] rounded-3xl shadow-sm border border-black/5 active:scale-95 transition-transform">
-                    <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg></div>
-                    <div class="text-left"><h4 class="text-[11px] font-black uppercase mb-1">Mini Étiquettes</h4><p class="text-[9px] opacity-50 uppercase font-bold">27 par page (Cahiers / Casiers)</p></div>
-                </button>
-                <button onclick="genererSuiviIndividuel()" class="group flex items-center p-6 bg-[var(--bg-card)] rounded-3xl shadow-sm border border-black/5 active:scale-95 transition-transform col-span-1 md:col-span-2">
-                    <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
-                    <div class="text-left"><h4 class="text-[11px] font-black uppercase mb-1">Fiches de suivi individuel</h4><p class="text-[9px] opacity-50 uppercase font-bold">Format A5 (2 par page) - Observations</p></div>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div id="modal-aide" onclick="fermerAide()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="aide-titre" class="text-lg font-black uppercase mb-4">💡 Ma classe</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
                 <strong>Onglet "Enregistrement" :</strong>
-                <br>• <strong>Saisissez</strong> votre nom dans le formulaire "Nom de l'enseignant".
+                <br>• <strong>Saisissez</strong> votre nom dans le formulaire "Nom de l'enseignant"
                 <br>• <strong>Enregistrez</strong> vos élèves en ajoutant le prénom, le nom, la date de naissance (optionnel). Choisissez le genre et le niveau, puis enregistrez.
                 <br>• <strong>Import/Export :</strong> Utilisez ces boutons pour sauvegarder votre liste sur votre appareil ou la transférer vers un autre appareil au format <em>Prénom;NOM;genre;niveau</em>.
-                <br><br><strong>La liste générée sera utilisée dans les autres rubriques de l'application.</strong>
+                <br><br><strong>La liste générée sera utilisée dans les autres rubriques de l'application.</strong></li>
                 <br>
                 <br>
                 <strong>Onglet "Édition" :</strong>
                 <br>• <strong>Générez</strong> votre liste de classe en PDF après avoir décidé de ranger les élèves par prénoms ou par noms.
-                <br>• <strong>Générez</strong> une liste de pointage avec 15 cases par élève.
+                <br>• <strong>Générez</strong> une liste de pointage avc 15 cases par élève.
                 <br>• <strong>Générez</strong> des étiquettes au nom les élèves.
                 <br>• <strong>Générez</strong> des fiches de suivi pour vos élèves.
                 <br>
-                <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde.
+                <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
             </div>
             <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
         </div>
     </div>
 
-    <div id="custom-confirm" class="modal-overlay">
-        <div class="modal-content">
-            <p id="confirm-msg" class="text-center font-bold text-sm mb-6"></p>
-            <div id="confirm-buttons" class="flex flex-col gap-2"></div>
+    <header>
+        <a href="index.html" id="btn-retour" class="header-btn shadow-lg active:scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+        </a>
+        <h1 id="page-title" class="text-lg font-black tracking-normal uppercase flex-grow text-center">Ma classe</h1>
+        <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg active:scale-90 text-lg">💡</button>
+    </header>
+
+    <nav class="tab-nav">
+        <div id="tab-btn-classe" class="tab-btn active" onclick="switchTab('classe')">Module Enregistrement</div>
+        <div id="tab-btn-editeur" class="tab-btn" onclick="switchTab('editeur')">Module Édition</div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-0 mt-2">
+        <div id="tab-classe" class="tab-content active">
+            <div id="profil-container" class="max-w-md mx-auto light-card p-3 mb-4 border-dotted border-2" style="border-color: var(--header-border)">
+                <div class="flex flex-col gap-0">
+                    <label class="text-[9px] font-black uppercase opacity-60 ml-1">Nom de l'enseignant :</label>
+                    <input type="text" id="nomEnseignant" placeholder="ex: M. DURAND" class="input-field w-full border-none shadow-inner" style="background: rgba(0,0,0,0.05)" oninput="sauvegarderNomEnseignant()">
+                </div>
+            </div>
+
+            <div id="form-container" class="max-w-md mx-auto light-card p-3 mb-4">
+                <form id="eleveForm" class="flex flex-col gap-3">
+                    <input type="hidden" id="edit-id" value="">
+                    <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="birth-day" class="select-date"></select>
+                        <select id="birth-month" class="select-date"></select>
+                        <select id="birth-year" class="select-date"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
+                        <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
+                    </div>
+                    <div class="grid grid-cols-6 gap-1">
+                        <label><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label">CP</div></label>
+                        <label><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label">CE1</div></label>
+                        <label><input type="radio" name="niveau" value="CE2" class="card-input input-ce2" checked><div class="card-label">CE2</div></label>
+                        <label><input type="radio" name="niveau" value="CM1" class="card-input input-cm1"><div class="card-label">CM1</div></label>
+                        <label><input type="radio" name="niveau" value="CM2" class="card-input input-cm2"><div class="card-label">CM2</div></label>
+                        <label><input type="radio" name="niveau" value="AUTRE" class="card-input input-autre"><div class="card-label">Autre</div></label>
+                    </div>
+                    <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
+                </form>
+            </div>
+
+            <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
+
+            <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center p-1 rounded-xl border border-white/10" style="background: var(--card-bg);">
+                <div class="flex items-center gap-3">
+                    <span class="text-[9px] font-black uppercase opacity-60">Trier par :</span>
+                    <div class="flex gap-2">
+                        <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Prénom</button>
+                        <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Nom</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="listeContainer"></div>
+
+            <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
+                <div class="grid grid-cols-2 gap-2"> 
+                    <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
+                    <button id="btn-exporter-txt" onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
+                    <input type="file" id="fileInput" class="hidden" accept=".txt">
+                </div>
+                <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
+            </div>
+        </div>
+
+        <div id="tab-editeur" class="tab-content">
+             <div class="max-w-md mx-auto flex flex-col gap-4">
+                <button onclick="genererPDF()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mr-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.707.293V21z" /></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-black uppercase">Liste de classe</div>
+                        <div class="text-[10px] opacity-60">Format tableau classique A4</div>
+                    </div>
+                </button>
+                <button onclick="genererEmargement()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-black uppercase">Feuille de pointage</div>
+                        <div class="text-[10px] opacity-60">Grille avec 15 cases de suivi</div>
+                    </div>
+                </button>
+                <button onclick="genererEtiquettes()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mr-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01" /></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-black uppercase">Grandes Étiquettes</div>
+                        <div class="text-[10px] opacity-60">8 étiquettes par page A4</div>
+                    </div>
+                </button>
+                <button onclick="genererPetitesEtiquettes()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mr-4 group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-black uppercase">Petites Étiquettes</div>
+                        <div class="text-[10px] opacity-60">27 étiquettes par page (Format 3x9)</div>
+                    </div>
+                </button>
+                <button onclick="genererSuiviIndividuel()" class="group flex items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5 active:scale-95 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-black uppercase">Fiches de suivi</div>
+                        <div class="text-[10px] opacity-60">2 fiches A5 par page (Paysage)</div>
+                    </div>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -270,6 +389,7 @@
             return formatedPrenom + " " + nom.trim().toUpperCase(); 
         }
 
+        // LOGIQUE DE LA PASTILLE CLIGNOTANTE
         function notifierChangement() {
             localStorage.setItem('needs_export', 'true');
             const btn = document.getElementById('btn-exporter-txt');
@@ -284,6 +404,7 @@
             const needsExport = localStorage.getItem('needs_export') === 'true';
             const maintenant = new Date().getTime();
             const septJours = 7 * 24 * 60 * 60 * 1000;
+            
             if (needsExport || !dernierExport || (maintenant - dernierExport > septJours)) {
                 const btn = document.getElementById('btn-exporter-txt');
                 if (btn) {
@@ -297,12 +418,14 @@
             const statsDiv = document.getElementById('stats-container');
             if (!statsDiv) return;
             if (eleves.length === 0) { statsDiv.innerHTML = ""; return; }
+            const colorBoy = getComputedStyle(document.documentElement).getPropertyValue('--student-name-boy').trim() || '#3b82f6';
+            const colorGirl = getComputedStyle(document.documentElement).getPropertyValue('--student-name-girl').trim() || '#ec4899';
             const nbGarcons = eleves.filter(e => e.sexe === 'm').length;
             const nbFilles = eleves.filter(e => e.sexe === 'f').length;
             statsDiv.innerHTML = `
-                <div class="stat-pill border border-black/10 dark:border-white/20" style="background-color: var(--bg-card); color: var(--text-main);">Total: ${eleves.length}</div>
-                <div class="stat-pill border" style="background-color: var(--student-name-boy)15; border-color: var(--student-name-boy); color: var(--student-name-boy)">♂ ${nbGarcons}</div>
-                <div class="stat-pill border" style="background-color: var(--student-name-girl)15; border-color: var(--student-name-girl); color: var(--student-name-girl)">♀ ${nbFilles}</div>
+                <div class="stat-pill border border-black/100 dark:border-white/100" style="background-color: var(--bg-card); color: var(--text-main);">Total: ${eleves.length}</div>
+                <div class="stat-pill border" style="background-color: ${colorBoy}15; border-color: ${colorBoy}; color: ${colorBoy}">♂ ${nbGarcons}</div>
+                <div class="stat-pill border" style="background-color: ${colorGirl}15; border-color: ${colorGirl}; color: ${colorGirl}">♀ ${nbFilles}</div>
             `;
         }
 
@@ -323,7 +446,7 @@
                 const list = document.createElement('div');
                 list.className = "flex flex-col gap-0.5";
                 groupes[niv].sort((a, b) => {
-                    const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
+                    const partsA = a.identite.split(" "); const partsB = b.identite.split(" ");
                     const pA = partsA[0], nA = partsA.slice(1).join(" ");
                     const pB = partsB[0], nB = partsB.slice(1).join(" ");
                     return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
@@ -359,11 +482,13 @@
             const selectedSexe = document.querySelector('input[name="sexe"]:checked').value;
             const selectedNiveau = document.querySelector('input[name="niveau"]:checked').value;
             const data = { identite: formaterIdentite(saisie[0], saisie.slice(1).join(" ")), sexe: selectedSexe, niveau: selectedNiveau, dateNaissance: dateStockee };
+
             if (editId) { 
                 const idx = eleves.findIndex(el => String(el.id) === String(editId)); 
                 if(idx !== -1) eleves[idx] = { ...eleves[idx], ...data }; 
                 document.getElementById('edit-id').value = ""; document.getElementById('btn-submit').innerText = "Enregistrer"; 
             } else { eleves.push({ id: String(Date.now()), ...data }); }
+            
             localStorage.setItem('maListeEleves', JSON.stringify(eleves)); 
             if(year) localStorage.setItem('derniereAnneeSaisie', year);
             notifierChangement();
@@ -390,13 +515,19 @@
             const maintenant = new Date();
             const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
             const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+            const nomFichier = `outilsprofs_liste_classe_${nomNettoye}_${dateFormattee}.txt`;
             const blob = new Blob([contenu], { type: 'text/plain' }); 
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `outilsprofs_liste_classe_${nomNettoye}_${dateFormattee}.txt`; a.click(); URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = nomFichier; a.click(); URL.revokeObjectURL(url);
+            
+            // Réinitialisation de la pastille et du témoin
             localStorage.setItem('last_export_inscr', new Date().getTime());
             localStorage.setItem('needs_export', 'false');
             const btn = document.getElementById('btn-exporter-txt');
-            if (btn) { btn.classList.remove('notif-export'); btn.innerHTML = '👆 exporter.txt 👆'; }
+            if (btn) {
+                btn.classList.remove('notif-export');
+                btn.innerHTML = '👆 exporter.txt 👆';
+            }
         }
 
         function importerListe() { customConfirm("Importer une nouvelle liste ?", (val) => { if(val === 'yes') { document.getElementById('fileInput').click(); }}, [{text: 'Importer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
@@ -413,22 +544,27 @@
             reader.readAsText(fichier);
         });
 
-        // --- FONCTIONS PDF ---
+        // --- FONCTIONS PDF (Identiques à votre code) ---
         function genererEmargement() {
             if (eleves.length === 0) { customConfirm("La liste est vide !", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]); return; }
-            const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
             const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
             const maintenant = new Date();
             const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
-            const groupes = {}; eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
+            const groupes = {};
+            eleves.forEach(el => { if (!groupes[el.niveau]) groupes[el.niveau] = []; groupes[el.niveau].push(el); });
             const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            doc.setFontSize(16); doc.text(`Feuille de pointage ${niveauxPresents.join(" / ")} - ${nomEnseignantBrut}`, 105, 15, { align: "center" });
+            const texteNiveaux = niveauxPresents.join(" / ");
+            doc.setFontSize(16); doc.text(`Feuille de pointage ${texteNiveaux} - ${nomEnseignantBrut}`, 105, 15, { align: "center" });
             let finalBody = []; let compteurGlobal = 1;
+            nivevauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
             niveauxPresents.forEach(niv => {
                 finalBody.push([{ content: niv, colSpan: 17, styles: { fillColor: [160, 160, 160], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'left' } }]);
                 groupes[niv].sort((a, b) => {
-                    const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-                    return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
+                    const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+                    const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
                 }).forEach((el) => {
                     const pts = el.identite.split(" ");
                     const idAffiche = modeTriApp === 'nom' ? `${pts.slice(1).join(" ")} ${pts[0]}` : `${pts[0]} ${pts.slice(1).join(" ")}`;
@@ -453,8 +589,9 @@
             niveauxPresents.forEach(niv => {
                 finalBody.push([{ content: niv, colSpan: 5, styles: { fillColor: [160, 160, 160], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'left' } }]);
                 groupes[niv].sort((a, b) => {
-                    const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-                    return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
+                    const pA = a.identite.split(" ")[0], nA = a.identite.split(" ").slice(1).join(" ");
+                    const pB = b.identite.split(" ")[0], nB = b.identite.split(" ").slice(1).join(" ");
+                    return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
                 }).forEach((el) => {
                     const pts = el.identite.split(" ");
                     const idPDF = modeTriApp === 'nom' ? `${pts.slice(1).join(" ")} ${pts[0]}` : `${pts[0]} ${pts.slice(1).join(" ")}`;
@@ -472,16 +609,18 @@
             const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
             const maintenant = new Date(); const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
             const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
-            const margin = 10, gap = 10, cols = 2, rows = 4;
-            const cardWidth = (210 - (2 * margin) - gap) / cols, cardHeight = (297 - (2 * margin) - (3 * gap)) / rows;
+            const margin = 10; const gap = 10; const cols = 2; const rows = 4;
+            const cardWidth = (210 - (2 * margin) - gap) / cols;
+            const cardHeight = (297 - (2 * margin) - (3 * gap)) / rows;
             let col = 0, row = 0;
             const elevesTries = [...eleves].sort((a, b) => {
-                const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-                return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
+                const pA = a.identite.split(" ")[0], pB = b.identite.split(" ")[0];
+                return modeTriApp === 'nom' ? a.identite.localeCompare(b.identite) : pA.localeCompare(pB);
             });
             elevesTries.forEach((el, index) => {
                 if (index > 0 && index % (cols * rows) === 0) { doc.addPage(); col = 0; row = 0; }
-                const x = margin + (col * (cardWidth + gap)), y = margin + (row * (cardHeight + gap));
+                const x = margin + (col * (cardWidth + gap));
+                const y = margin + (row * (cardHeight + gap));
                 doc.setDrawColor(200); doc.roundedRect(x, y, cardWidth, cardHeight, 3, 3, 'S');
                 const parts = el.identite.split(" "), prenom = parts[0], nom = parts.slice(1).join(" ");
                 doc.setFontSize(24); doc.setTextColor(40); doc.text(prenom, x + cardWidth / 2, y + cardHeight / 2, { align: 'center' });
@@ -493,29 +632,77 @@
         }
 
         function genererPetitesEtiquettes() {
-            if (!eleves || eleves.length === 0) { customConfirm("La liste est vide !", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]); return; }
-            const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
+            if (!eleves || eleves.length === 0) { 
+                customConfirm("La liste est vide !", () => {}, [{text: 'D’accord', value: 'ok', type: 'primary'}]); 
+                return; 
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
             const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
-            const maintenant = new Date(); const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
+            const maintenant = new Date();
+            const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
+            
+            // Nettoyage du nom pour le fichier (pas d'espaces ni d'accents)
             const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
-            const marginX = 10, marginY = 12, cols = 3, rows = 9, gap = 4;
-            const cardWidth = (210 - (2 * marginX) - ((cols - 1) * gap)) / cols, cardHeight = (297 - (2 * marginY) - ((rows - 1) * gap)) / rows;
+            const nomFichier = `outilsprofs_petitesetiquettes_${nomNettoye}_${dateFormattee}.pdf`;
+
+            // Configuration 27 étiquettes (3 colonnes x 9 lignes)
+            const marginX = 10;
+            const marginY = 12;
+            const cols = 3;
+            const rows = 9;
+            const gap = 4;
+            const cardWidth = (210 - (2 * marginX) - ((cols - 1) * gap)) / cols;
+            const cardHeight = (297 - (2 * marginY) - ((rows - 1) * gap)) / rows;
+
             let col = 0, row = 0;
-            const elevesTries = [...eleves].sort((a, b) => {
-                const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-                return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
-            });
+            const elevesTries = [...eleves].sort((a, b) => a.identite.localeCompare(b.identite));
+
             elevesTries.forEach((el, index) => {
-                if (index > 0 && index % (cols * rows) === 0) { doc.addPage(); col = 0; row = 0; }
-                const x = marginX + (col * (cardWidth + gap)), y = marginY + (row * (cardHeight + gap));
-                doc.setDrawColor(220); doc.setLineWidth(0.1); doc.rect(x, y, cardWidth, cardHeight, 'S');
-                const parts = el.identite.split(" "), prenom = parts[0], nom = parts.slice(1).join(" ");
-                doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(0); doc.text(prenom, x + cardWidth / 2, y + (cardHeight / 2) - 1, { align: 'center' });
-                doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100); doc.text(nom, x + cardWidth / 2, y + (cardHeight / 2) + 4, { align: 'center' });
-                doc.setFontSize(6); doc.setTextColor(180); doc.text(el.niveau, x + cardWidth - 2, y + cardHeight - 2, { align: 'right' });
-                col++; if (col === cols) { col = 0; row++; }
+                if (index > 0 && index % (cols * rows) === 0) {
+                    doc.addPage();
+                    col = 0;
+                    row = 0;
+                }
+
+                const x = marginX + (col * (cardWidth + gap));
+                const y = marginY + (row * (cardHeight + gap));
+
+                // Contour de l'étiquette (gris très léger pour la découpe)
+                doc.setDrawColor(220);
+                doc.setLineWidth(0.1);
+                doc.rect(x, y, cardWidth, cardHeight, 'S');
+
+                const parts = el.identite.split(" ");
+                const prenom = parts[0];
+                const nom = parts.slice(1).join(" ");
+
+                // Texte : Prénom
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(0);
+                doc.text(prenom, x + cardWidth / 2, y + (cardHeight / 2) - 1, { align: 'center' });
+
+                // Texte : Nom
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                doc.text(nom, x + cardWidth / 2, y + (cardHeight / 2) + 4, { align: 'center' });
+
+                // Niveau
+                doc.setFontSize(6);
+                doc.setTextColor(180);
+                doc.text(el.niveau, x + cardWidth - 2, y + cardHeight - 2, { align: 'right' });
+
+                col++;
+                if (col === cols) {
+                    col = 0;
+                    row++;
+                }
             });
-            doc.save(`outilsprofs_petitesetiquettes_${nomNettoye}_${dateFormattee}.pdf`);
+
+            doc.save(nomFichier);
         }
 
         function genererSuiviIndividuel() {
@@ -524,10 +711,7 @@
             const nomEnseignantBrut = localStorage.getItem('nom_enseignant') || "enseignant";
             const maintenant = new Date(); const dateFormattee = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
             const nomNettoye = nomEnseignantBrut.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
-            const elevesTries = [...eleves].sort((a, b) => {
-                const partsA = a.identite.split(" "), partsB = b.identite.split(" ");
-                return modeTriApp === 'nom' ? partsA.slice(1).join(" ").localeCompare(partsB.slice(1).join(" ")) : partsA[0].localeCompare(partsB[0]);
-            });
+            const elevesTries = [...eleves].sort((a, b) => a.identite.localeCompare(b.identite));
             elevesTries.forEach((el, index) => {
                 if (index > 0 && index % 2 === 0) doc.addPage('l');
                 const position = index % 2, offsetX = position * 148.5;

@@ -8,89 +8,101 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap');
-    
-    :root {
-        --bg-body: #121212;
-        --card-bg: #1e1e1e;
-        --text-main: #ffffff;
-        --text-muted: #a1a1aa;
-        --border-color: rgba(255, 255, 255, 0.08);
-        --shadow-color: rgba(0, 0, 0, 0.4);
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap');
+        
+        :root {
+            /* MODE SOMBRE (Par défaut) */
+            --bg-body: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
 
-    body.light-mode {
-        --bg-body: #eeeeee;
-        --card-bg: #ffffff;
-        --text-main: #111827;
-        --text-muted: #71717a;
-        --border-color: rgba(0, 0, 0, 0.05);
-        --shadow-color: rgba(0, 0, 0, 0.1);
-    }
+        body.light-mode {
+            /* MODE CLAIR */
+            --bg-body: #eeeeee;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #71717a;
+            --border-color: rgba(0, 0, 0, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
 
-    body { 
-        font-family: 'Plus Jakarta Sans', sans-serif; 
-        background-color: var(--bg-body); 
-        color: var(--text-main);
-        transition: background 0.3s ease, color 0.3s ease;
-        padding: calc(env(safe-area-inset-top) + 20px) 20px 40px;
-    }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 40px;
+        }
 
-    .menu-card { 
-        position: relative;
-        background: var(--card-bg);
-        border-radius: 1.5rem;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 10px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
-        transition: transform 0.25s ease;
-    }
-    
-    .menu-card:active { transform: scale(0.96); }
+        /* --- TUILES STYLE "INSCRIPTIONS" 3D --- */
+        .menu-card { 
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            border: 1px solid var(--border-color);
+            
+            /* Ombre 3D */
+            box-shadow: 0 10px 25px -5px var(--shadow-color), 
+                        0 8px 10px -6px var(--shadow-color);
+            
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        
+        .menu-card:active { transform: scale(0.96); }
 
-    .icon-box {
-        width: 50px; height: 50px;
-        border-radius: 16px;
-        display: flex; align-items: center; justify-content: center;
-        margin-bottom: 8px;
-        font-size: 26px;
-        border: 1px solid var(--border-color);
-    }
+        .icon-box {
+            width: 50px; height: 50px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(128, 128, 128, 0.1);
+            margin-bottom: 8px;
+            font-size: 26px;
+            border: 1px solid var(--border-color);
+        }
 
-    .drag-handle {
-        position: absolute;
-        top: 15px; right: 15px;
-        display: grid;
-        grid-template-columns: repeat(3, 3px);
-        gap: 3px;
-        cursor: grab;
-        opacity: 0.3;
-    }
+        .tile-subtitle {
+            color: var(--text-muted);
+            margin-top: 1px;
+            text-align: center;
+        }
 
-    .drag-handle span {
-        width: 3px; height: 3px;
-        background-color: var(--text-muted);
-        border-radius: 50%;
-    }
+        .drag-handle {
+            position: absolute;
+            top: 15px; right: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 3px);
+            gap: 3px;
+            cursor: grab;
+            opacity: 0.3;
+        }
 
-    .ui-btn {
-        width: 44px; height: 44px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 12px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        box-shadow: 0 4px 6px var(--shadow-color);
-    }
+        .drag-handle span {
+            width: 3px; height: 3px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+        }
 
-    .header-avatar {
-        width: 42px; height: 42px;
-        border-radius: 12px;
-        border: 2px solid var(--card-bg);
-        box-shadow: 0 4px 10px var(--shadow-color);
-        object-fit: cover;
-    }
-</style>
+        .ui-btn {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
 
+        .header-avatar {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            border: 2px solid var(--card-bg);
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }
+    </style>
 </head>
 <body class="flex flex-col items-center">
     <script>
@@ -100,14 +112,14 @@
     </script>
     <div class="w-full max-w-[360px]">
         <header class="flex justify-between items-center mb-8 px-1">
-			<button onclick="location.href='parametres.html'" class="ui-btn active:scale-90">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-				</svg>
-			</button>
-			<h1 class="text-[15px] font-black tracking-[0.5em] uppercase opacity-90">Outils Profs</h1>
-			<img src="outilsprofs_icone.png" alt="Avatar" class="header-avatar">
-		</header>
+            <button onclick="goToSettings()" class="ui-btn active:scale-90">
+                <svg xmlns="http://www.w3.org/2000/center" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <h1 class="text-[15px] font-black tracking-[0.5em] uppercase opacity-90">Outils Profs</h1>
+            <img src="outilsprofs_icone.png" alt="Avatar" class="header-avatar">
+        </header>
 
         <nav id="grid-menu" class="grid grid-cols-2 gap-5">
             <div data-id="inscr" class="menu-card p-4">
@@ -185,66 +197,79 @@
     </div>
 
 <script>
-    const gridMenu = document.getElementById('grid-menu');
-    const isLight = document.body.classList.contains('light-mode');
+
+function goToSettings() {
+    // Redirection immédiate sans animation
+    window.location.href = 'parametres.html';
+}
+
+    // 1. GESTION DU MODE SOMBRE / CLAIR
+    if (localStorage.getItem('theme_mode') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 
     const colorMap = {
-        red: '#ef4444', orange: '#f97316', amber: '#f59e0b', yellow: '#eab308',
-        lime: '#84cc16', green: '#22c55e', emerald: '#10b981', teal: '#14b8a6',
-        cyan: '#06b6d4', sky: '#0ea5e9', blue: '#3b82f6', indigo: '#6366f1',
-        violet: '#8b5cf6', purple: '#a855f7', fuchsia: '#d946ef', pink: '#ec4899',
-        rose: '#f43f5e'
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+        'rose': '#f43f5e'
     };
 
-    // Application des couleurs et de l'ordre
-    function initGrid() {
+    // 2. APPLICATION DES COULEURS DE TUILES
+    function applyColors() {
+        const isLight = document.body.classList.contains('light-mode');
         const defaultColors = {
             inscr: 'lime', h108: 'orange', liens: 'indigo', tirage: 'yellow', 
             equipes: 'rose', memos: 'purple', obs: 'green', compt: 'sky'
         };
         const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
-        const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
 
-        // Réorganiser si un ordre existe
-        if (savedOrder) {
-            savedOrder.forEach(id => {
-                const tile = document.querySelector(`[data-id="${id}"]`);
-                if (tile) gridMenu.appendChild(tile);
-            });
-        }
-
-        // Appliquer les styles
         document.querySelectorAll('.menu-card').forEach(el => {
-            const id = el.dataset.id;
-            const hexColor = colorMap[prefs[id]] || '#3b82f6';
+            const id = el.getAttribute('data-id');
+            const colorName = prefs[id] || 'blue';
+            const hexColor = colorMap[colorName];
+            
             const iconBox = el.querySelector('.icon-box');
             const title = el.querySelector('h2');
 
             if (iconBox) {
-                iconBox.style.cssText = `
-                    background-color: ${hexColor}15;
-                    color: ${hexColor};
-                    border-color: ${hexColor}30;
-                    box-shadow: ${isLight ? 'none' : `0 0 15px ${hexColor}20`};
-                `;
+                iconBox.style.backgroundColor = `${hexColor}15`; 
+                iconBox.style.color = hexColor;
+                iconBox.style.borderColor = `${hexColor}30`;
+                if (!isLight) {
+                    iconBox.style.boxShadow = `0 0 15px ${hexColor}20`;
+                } else {
+                    iconBox.style.boxShadow = 'none';
+                }
             }
-            if (title) title.style.color = hexColor;
+            if (title) {
+                title.style.color = hexColor;
+            }
         });
     }
 
-    initGrid();
+    applyColors();
 
-    // Sortable
+    // 3. GESTION DE L'ORDRE (SORTABLE)
+    const gridMenu = document.getElementById('grid-menu');
+    const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
+    if (savedOrder) {
+        savedOrder.forEach(id => {
+            const tile = document.querySelector(`[data-id="${id}"]`);
+            if (tile) gridMenu.appendChild(tile);
+        });
+    }
+
     new Sortable(gridMenu, {
         handle: '.drag-handle',
         animation: 200,
         ghostClass: 'opacity-0',
-        onEnd: () => {
-            const order = Array.from(gridMenu.children).map(child => child.dataset.id);
+        onEnd: function() {
+            const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
             localStorage.setItem('menu_order', JSON.stringify(order));
         }
     });
 </script>
-
 </body>
 </html>
