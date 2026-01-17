@@ -43,11 +43,13 @@
         .btn-add:active { transform: scale(0.95); }
 
         .op-btn-frame { border: 2px solid var(--column-border); border-radius: 1rem; padding: 4px; transition: all 0.2s ease; background: var(--input-bg); }
-        .op-checkbox:checked + .op-btn-frame, .table-checkbox:checked + .op-btn-frame { 
+        .op-checkbox:checked + .op-btn-frame, 
+        .table-checkbox:checked + .op-btn-frame,
+        #check-all-tables:checked + .op-btn-frame { 
             border-color: var(--accent-color, #06b6d4); 
             background-color: var(--accent-color, #06b6d4);
+            color: white !important;
         }
-        .op-checkbox:checked + .op-btn-frame div, .table-checkbox:checked + .op-btn-frame { color: white !important; }
 
         .q-card { background: var(--card-bg); border-radius: 0.75rem; padding: 12px;
             border: 1px solid var(--column-border); display: flex; align-items: center;
@@ -88,8 +90,8 @@
         </div>
 
         <div>
-            <label class="block text-[10px] font-black uppercase opacity-50 mb-3 tracking-widest text-center">Tables utilisées (2 à 9)</label>
-            <div id="tables-container" class="flex flex-wrap justify-center gap-2"></div>
+            <label class="block text-[10px] font-black uppercase opacity-50 mb-3 tracking-widest text-center">Choix des tables</label>
+            <div id="tables-container" class="flex flex-col gap-2 items-center"></div>
         </div>
 
         <div class="space-y-4">
@@ -159,13 +161,20 @@
 
     function initTables() {
         const container = document.getElementById('tables-container');
-        for (let i = 2; i <= 9; i++) {
-            container.innerHTML += `
-                <label class="cursor-pointer">
-                    <input type="checkbox" class="hidden table-checkbox" value="${i}">
-                    <div class="op-btn-frame w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs">${i}</div>
-                </label>`;
+        let html = '<div class="flex gap-2 justify-center">';
+        for (let i = 2; i <= 6; i++) {
+            html += `<label class="cursor-pointer"><input type="checkbox" class="hidden table-checkbox" value="${i}"><div class="op-btn-frame w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs">${i}</div></label>`;
         }
+        html += '</div><div class="flex gap-2 justify-center">';
+        for (let i = 7; i <= 9; i++) {
+            html += `<label class="cursor-pointer"><input type="checkbox" class="hidden table-checkbox" value="${i}"><div class="op-btn-frame w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs">${i}</div></label>`;
+        }
+        html += `<label class="cursor-pointer"><input type="checkbox" id="check-all-tables" class="hidden" onchange="toggleAllTables(this)"><div class="op-btn-frame px-3 h-10 flex items-center justify-center rounded-lg font-black text-[10px] uppercase">Toutes</div></label></div>`;
+        container.innerHTML = html;
+    }
+
+    function toggleAllTables(source) {
+        document.querySelectorAll('.table-checkbox').forEach(cb => cb.checked = source.checked);
     }
 
     function validateRange() {
@@ -211,7 +220,6 @@
     function generateSeries() {
         const selectedOps = Array.from(document.querySelectorAll('.op-checkbox:checked')).map(el => el.value);
         const selectedTables = Array.from(document.querySelectorAll('.table-checkbox:checked')).map(el => parseInt(el.value));
-        
         if (selectedOps.length === 0) return alert("Sélectionnez une opération !");
         
         const mins = parseInt(document.getElementById('timer-min').value) || 0;
@@ -249,56 +257,28 @@
             let a, b, res = 0;
 
             if (op === 'x' || op === ':') {
-                // b (le diviseur ou multiplicateur) est choisi parmi les tables ou entre 1 et 10
                 b = selectedTables.length > 0 
                     ? selectedTables[Math.floor(Math.random() * selectedTables.length)]
                     : Math.floor(Math.random() * 10) + 1;
-                
-                // Le quotient ou le facteur reste entre 1 et 10
                 const factor = Math.floor(Math.random() * 10) + 1;
-
-                if (op === 'x') {
-                    a = factor;
-                    res = a * b;
-                } else {
-                    res = factor;
-                    a = res * b; // Dividende au maximum 10 * diviseur
-                }
+                if (op === 'x') { a = factor; res = a * b; }
+                else { res = factor; a = res * b; }
             } else {
                 a = Math.floor(Math.random() * (max - min + 1)) + min;
                 b = Math.floor(Math.random() * (max - min + 1)) + min;
-                if (op === '-') { 
-                    if (a < b) [a, b] = [b, a]; 
-                    res = a - b; 
-                } else {
-                    res = a + b;
-                }
+                if (op === '-') { if (a < b) [a, b] = [b, a]; res = a - b; }
+                else { res = a + b; }
             }
 
             currentCalculs.push({ q: `${a} ${op === ':' ? '÷' : op} ${b}`, r: res });
-            grid.innerHTML += `
-                <div class="q-card">
-                    <div class="flex items-center gap-2">
-                        <span class="opacity-30 text-[10px] font-bold">${i+1})&nbsp;&nbsp;</span>
-                        <span class="text-[15px] font-black">${a} ${op === ':' ? '÷' : op} ${b} =</span>
-                    </div>
-                    <span class="res-text hidden">${res}</span>
-                </div>`;
+            grid.innerHTML += `<div class="q-card"><div class="flex items-center gap-2"><span class="opacity-30 text-[10px] font-bold">${i+1})&nbsp;&nbsp;</span><span class="text-[15px] font-black">${a} ${op === ':' ? '÷' : op} ${b} =</span></div><span class="res-text hidden">${res}</span></div>`;
         }
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('game-zone').classList.remove('hidden');
     }
 
-    function showCorrection() { 
-        clearInterval(countdown); 
-        document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden')); 
-    }
-
-    function retourReglages() { 
-        clearInterval(countdown); 
-        document.getElementById('setup-zone').classList.remove('hidden'); 
-        document.getElementById('game-zone').classList.add('hidden'); 
-    }
+    function showCorrection() { clearInterval(countdown); document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden')); }
+    function retourReglages() { clearInterval(countdown); document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
 
     function exportToPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
@@ -340,10 +320,7 @@
     function ouvrirAide() { document.getElementById('helpBody').innerHTML = localStorage.getItem('aide_calcul') || "<p>Générez des fiches ou jouez avec un chronomètre.</p>"; document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    window.onload = () => {
-        appliquerTheme();
-        initTables();
-    };
+    window.onload = () => { appliquerTheme(); initTables(); };
 </script>
 </body>
 </html>
