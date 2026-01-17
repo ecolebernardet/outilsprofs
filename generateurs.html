@@ -101,6 +101,14 @@
             </div>
         </a>
 
+		<a href="motsmeles.html" class="tool-card">
+			<div class="icon-box" id="icon-mots">📝</div>
+			<div>
+				<h2 class="font-black text-[13px] uppercase tracking-wide" id="title-mots">Mots Mêlés</h2>
+				<p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Générateur de grilles personnalisées</p>
+			</div>
+		</a>
+
         <div class="tool-card opacity-40 grayscale">
             <div class="icon-box">📝</div>
             <div>
@@ -132,30 +140,36 @@
     };
 
     function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; // On utilise la couleur 'gen' définie sur l'index
-        const hexa = mapCouleurs[colPref];
-        const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
-        const contrast = isDarkText ? '#000' : '#fff';
+    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+    const colPref = themePrefs.gen || 'cyan'; 
+    const hexa = mapCouleurs[colPref];
+    const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+    const contrast = isDarkText ? '#000' : '#fff';
 
-        // Header et Modale (Même logique que liens.html)
-        [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
-            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
-        });
-        
-        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
+    [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
+        if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
+    });
+    
+    if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
 
-        // Éléments de la carte
-        const iconCalc = document.getElementById('icon-calc');
-        const titleCalc = document.getElementById('title-calc');
+    // Application du style aux icônes et titres des outils
+    const outils = [
+        { icon: 'icon-calc', title: 'title-calc' },
+        { icon: 'icon-mots', title: 'title-mots' }
+    ];
+
+    outils.forEach(outil => {
+        const iconEl = document.getElementById(outil.icon);
+        const titleEl = document.getElementById(outil.title);
         
-        if(iconCalc) {
-            iconCalc.style.color = hexa;
-            iconCalc.style.borderColor = hexa + '40';
-            iconCalc.style.backgroundColor = hexa + '15';
+        if(iconEl) {
+            iconEl.style.color = hexa;
+            iconEl.style.borderColor = hexa + '40';
+            iconEl.style.backgroundColor = hexa + '15';
         }
-        if(titleCalc) titleCalc.style.color = hexa;
-    }
+        if(titleEl) titleEl.style.color = hexa;
+    });
+}
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }

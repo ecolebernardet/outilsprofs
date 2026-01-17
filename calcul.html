@@ -42,6 +42,9 @@
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-add:active { transform: scale(0.95); }
 
+        .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
+        .btn-game-action:active { transform: scale(0.95); }
+
         .op-btn-frame { border: 2px solid var(--column-border); border-radius: 1rem; padding: 4px; transition: all 0.2s ease; background: var(--input-bg); }
         .op-checkbox:checked + .op-btn-frame, 
         .table-checkbox:checked + .op-btn-frame,
@@ -96,13 +99,13 @@
 
         <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Mini</label><input type="number" id="min-val" value="1" class="input-field" onchange="validateRange()"></div>
-                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Maxi</label><input type="number" id="max-val" value="10" class="input-field" onchange="validateRange()"></div>
+                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Mini</label><input type="number" id="min-val" value="1" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
+                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Maxi</label><input type="number" id="max-val" value="10" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2"><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Nombre de calculs</label><input type="number" id="nb-val" value="10" class="input-field"></div>
-                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Minutes</label><input type="number" id="timer-min" value="1" min="0" class="input-field"></div>
-                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Secondes</label><input type="number" id="timer-sec" value="0" min="0" max="59" class="input-field"></div>
+                <div class="col-span-2"><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Nombre de calculs</label><input type="number" id="nb-val" value="10" inputmode="numeric" class="input-field"></div>
+                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Minutes</label><input type="number" id="timer-min" value="1" min="0" inputmode="numeric" class="input-field"></div>
+                <div><label class="block text-[10px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Secondes</label><input type="number" id="timer-sec" value="0" min="0" max="59" inputmode="numeric" class="input-field"></div>
             </div>
         </div>
 
@@ -129,10 +132,10 @@
         </div>
         <div id="questions-grid" class="grid grid-cols-2 gap-2"></div>
         <div class="grid grid-cols-2 gap-4 pt-4">
-            <button onclick="retourReglages()" class="h-10 rounded-3xl text-[10px] font-black bg-gray-500 text-white">⬅️ retour</button>
-            <button onclick="generateSeries()" class="h-10 rounded-3xl text-[10px] font-black bg-amber-500 text-white">🔄 nouveau</button>
-            <button id="validate-btn" onclick="showCorrection()" class="h-10 rounded-3xl text-[10px] font-black bg-green-500 text-white">👁️ correction</button>
-            <button onclick="exportToPDF()" class="h-10 rounded-3xl text-[10px] font-black bg-blue-500 text-white">📄 édition PDF</button>
+            <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
+            <button onclick="generateSeries()" class="btn-game-action bg-amber-500">🔄 nouveau</button>
+            <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
+            <button onclick="exportToPDF()" class="btn-game-action bg-blue-500">📄 édition PDF</button>
         </div>
     </div>
 </div>
@@ -302,7 +305,6 @@
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        // Utilisation de la clé 'gen' (Générateurs) au lieu de 'calc'
         const colPref = themePrefs.gen || 'cyan'; 
         const hexa = mapCouleurs[colPref];
         const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
