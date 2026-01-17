@@ -191,12 +191,12 @@
                 </a>
             </div>
 
-            <div data-id="calc" class="menu-card p-3">
+            <div data-id="gen" class="menu-card p-3">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                <a href="calcul.html" class="flex flex-col items-center text-center">
-                    <div class="icon-box">🧮</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Calcul Mental</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">générateur</span>
+                <a href="generateurs.html" class="flex flex-col items-center text-center">
+                    <div class="icon-box">🛠️</div>
+                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Générateurs</h2>
+                    <span class="tile-subtitle text-[8px] font-semibold">outils pédagogiques</span>
                 </a>
             </div>
         </nav>
@@ -217,7 +217,7 @@
         const isLight = document.body.classList.contains('light-mode');
         const defaultColors = {
             inscr: 'lime', h108: 'orange', liens: 'indigo', tirage: 'yellow', 
-            equipes: 'rose', memos: 'purple', obs: 'green', compt: 'sky', calc: 'cyan'
+            equipes: 'rose', memos: 'purple', obs: 'green', compt: 'sky', gen: 'cyan'
         };
         const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
 

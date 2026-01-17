@@ -302,15 +302,26 @@
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.calc || 'cyan';
+        // Utilisation de la clé 'gen' (Générateurs) au lieu de 'calc'
+        const colPref = themePrefs.gen || 'cyan'; 
         const hexa = mapCouleurs[colPref];
         const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
+        
         document.documentElement.style.setProperty('--accent-color', hexa);
-        [document.getElementById('btn-retour-header'), document.getElementById('btn-aide'), document.getElementById('mainAddBtn'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-fermer-fin')].forEach(el => {
+        
+        [
+            document.getElementById('btn-retour-header'), 
+            document.getElementById('btn-aide'), 
+            document.getElementById('mainAddBtn'), 
+            document.getElementById('btn-fermer-aide'), 
+            document.getElementById('btn-fermer-fin')
+        ].forEach(el => {
             if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
         });
+        
         if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
         if(document.getElementById('titre-fin')) document.getElementById('titre-fin').style.color = hexa;
+        
         const savedSound = localStorage.getItem('calcul_sound_pref');
         if(savedSound) document.getElementById('sound-select').value = savedSound;
     }

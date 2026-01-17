@@ -301,15 +301,14 @@
                 </div>
 				
 				<div class="card-info">
-                    <h3 id="title-calcul" class="font-black text-xs uppercase mb-2">🧮 Calcul Mental</h3>
-                    <p class="text-xs leading-relaxed">
-                        Générez des exercices de calcul mental personnalisés :<br>
-                        • <strong>Paramétrage</strong> : Choisissez les opérations, les valeurs mini/maxi et le nombre de calculs.<br>
-                        • <strong>Timer</strong> : Réglez un compte à rebours en minutes et secondes. Une sonnette de vélo retentit à la fin.<br>
-                        • <strong>Entraînement</strong> : Lancez la série. La correction ne s'affiche pas automatiquement à la fin du temps pour laisser l'élève terminer.<br>
-                        • <strong>Export</strong> : Générez un PDF prêt à imprimer incluant une page d'exercices et sa page de correction.
-                    </p>
-                </div>
+					<h3 id="title-gen" class="font-black text-xs uppercase mb-2">⚙️ Générateurs</h3>
+					<p class="text-xs leading-relaxed">
+						Générez des outils et exercices personnalisés :<br>
+						• <strong>Calcul Mental</strong> : Paramétrez les opérations, les valeurs et le timer (avec sonnerie).<br>
+						• <strong>Export</strong> : Générez un PDF prêt à imprimer incluant les exercices et la correction.<br>
+						• <em>D'autres générateurs seront ajoutés prochainement pour enrichir cette section.</em>
+					</p>
+				</div>
 				
             </div>
 
@@ -400,14 +399,14 @@
             { id: 'equipes', label: 'Équipes', emoji: '👥' },
             { id: 'obs', label: 'Observations', emoji: '✏️' },
             { id: 'compt', label: 'Compteur', emoji: '🚥' },
-            { id: 'calc', label: 'Calcul', emoji: '🧮' }
+            { id: 'gen', label: 'Générateurs', emoji: '⚙️' }
         ];
 
         const couleurs = Object.keys(mapCouleurs);
         let prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {
             fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
             liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
-            memos: 'purple', obs: 'green', compt: 'blue', calc: 'cyan'
+            memos: 'purple', obs: 'green', compt: 'blue', gen: 'cyan'
         };
 
         function selectTheme(mode) {
@@ -478,7 +477,7 @@
             const mapping = {
                 'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
                 'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
-                'title-observations': 'obs', 'title-compteur': 'compt', 'title-calcul': 'calc'
+                'title-observations': 'obs', 'title-compteur': 'compt', 'title-gen': 'gen'
             };
             for (let [elId, prefId] of Object.entries(mapping)) {
                 const el = document.getElementById(elId);
@@ -492,7 +491,7 @@
                 { id: 'title-memos', key: 'aide_memos' }, { id: 'title-108h', key: 'aide_h108' },
                 { id: 'title-tirage', key: 'aide_tirage' }, { id: 'title-equipes', key: 'aide_equipes' },
                 { id: 'title-observations', key: 'aide_obs' }, { id: 'title-compteur', key: 'aide_compt_text' },
-                { id: 'title-calcul', key: 'aide_calcul' }
+                { id: 'title-calcul', key: 'aide_gen'}
             ];
             rubriques.forEach(item => {
                 const titreEl = document.getElementById(item.id);

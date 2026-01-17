@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Générateurs - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
+            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
+            --header-bg: #ffffff; --card-bg: #ffffff;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
+        header { 
+            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: 100%; margin-bottom: 20px;
+        }
+
+        #btn-retour, #btn-aide { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; 
+        }
+
+        header h1 { 
+            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
+            text-align: center; flex-grow: 1; letter-spacing: 0.1em;
+        }
+
+        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 15px 20px 15px; }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 18px;
+            border: 1px solid var(--column-border);
+            box-shadow: var(--shadow-custom);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 15px;
+        }
+
+        .tool-card:active { transform: scale(0.97); }
+
+        .icon-box {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; border: 1px solid var(--column-border);
+            background: rgba(128, 128, 128, 0.05);
+        }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        
+        .btn-modal-close {
+            width: 100%; padding: 14px; border-radius: 12px;
+            font-weight: 900; font-size: 11px; text-transform: uppercase;
+            margin-top: 20px; cursor: pointer; border: none; transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+</script>
+
+<header>
+    <a href="index.html" id="btn-retour">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+    <h1 id="pageTitle">Générateurs</h1>
+    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+</header>
+
+<div class="main-wrapper">
+    <div id="tools-list">
+        <a href="calcul.html" class="tool-card">
+            <div class="icon-box" id="icon-calc">🧮</div>
+            <div>
+                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-calc">Calcul Mental</h2>
+                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Fiches et exercices chrono</p>
+            </div>
+        </a>
+
+        <div class="tool-card opacity-40 grayscale">
+            <div class="icon-box">📝</div>
+            <div>
+                <h2 class="font-black text-[13px] uppercase tracking-wide">Mots Mêlés</h2>
+                <p class="text-[10px] font-bold">Prochainement...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide</h2>
+        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
+            <p>Cette section regroupe vos outils de création pédagogique.</p>
+            <p>Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF personnalisées ou de lancer des sessions d'entraînement en classe.</p>
+        </div>
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
+    </div>
+</div>
+
+<script>
+    const mapCouleurs = { 
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 
+        'rose': '#f43f5e' 
+    };
+
+    function appliquerTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colPref = themePrefs.gen || 'cyan'; // On utilise la couleur 'gen' définie sur l'index
+        const hexa = mapCouleurs[colPref];
+        const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+        const contrast = isDarkText ? '#000' : '#fff';
+
+        // Header et Modale (Même logique que liens.html)
+        [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
+            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
+        });
+        
+        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
+
+        // Éléments de la carte
+        const iconCalc = document.getElementById('icon-calc');
+        const titleCalc = document.getElementById('title-calc');
+        
+        if(iconCalc) {
+            iconCalc.style.color = hexa;
+            iconCalc.style.borderColor = hexa + '40';
+            iconCalc.style.backgroundColor = hexa + '15';
+        }
+        if(titleCalc) titleCalc.style.color = hexa;
+    }
+
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
+    window.onload = appliquerTheme;
+</script>
+</body>
+</html>
