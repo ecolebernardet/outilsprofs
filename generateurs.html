@@ -109,47 +109,23 @@
             </div>
         </a>
 
-		<a href="gene_trous.html" class="tool-card">
-			<div class="icon-box" id="icon-trous">🕳️</div>
-			<div>
-				<h2 class="font-black text-[13px] uppercase tracking-wide" id="title-trous">Texte à trous</h2>
-				<p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Générateur d'exercices de lecture</p>
-			</div>
-		</a>
-
-        <a href="gene_ecriture.html" class="tool-card">
-            <div class="icon-box" id="icon-ecriture">✍️</div>
+        <a href="gene_trous.html" class="tool-card">
+            <div class="icon-box" id="icon-trous">🕳️</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-ecriture">Écriture Seyes</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Modèles de calligraphie cursive</p>
+                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-trous">Texte à trous</h2>
+                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Générateur d'exercices de lecture</p>
             </div>
         </a>
 
-        <a href="gene_pixelart.html" class="tool-card">
-            <div class="icon-box" id="icon-pixel">🎨</div>
+        <a href="gene_geometrie.html" class="tool-card">
+            <div class="icon-box" id="icon-geo">📐</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-pixel">Pixel Art</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Modèles et fiches de dessin</p>
+                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-geo">Géométrie</h2>
+                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Quadrillages, symétrie et repères</p>
             </div>
         </a>
         
-		<a href="gene_grammaire.html" class="tool-card">
-			<div class="icon-box" id="icon-grammaire">🏷️</div>
-			<div>
-				<h2 class="font-black text-[13px] uppercase tracking-wide" id="title-grammaire">Grammaire</h2>
-				<p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Étiquettes Sujet / Verbe / Complément</p>
-			</div>
-		</a>
-	
-		<a href="gene_geometrie.html" class="tool-card">
-			<div class="icon-box" id="icon-geo">📐</div>
-			<div>
-				<h2 class="font-black text-[13px] uppercase tracking-wide" id="title-geo">Géométrie</h2>
-				<p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Quadrillages, symétrie et repères</p>
-			</div>
-		</a>
-		
-		<div class="tool-card opacity-40 grayscale">
+        <div class="tool-card opacity-40 grayscale">
             <div class="icon-box">⏳</div>
             <div>
                 <p class="text-[10px] font-bold">Prochainement...</p>
@@ -165,9 +141,7 @@
             <p>Cette section regroupe vos outils de création pédagogique.</p>
             <p>Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.</p>
             <p>Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.</p>
-            <p>Le <strong>Générateur d'Écriture</strong> permet de créer des fiches en cursive sur lignes Seyes avec marge.</p>
-            <p>Le <strong>Générateur de Pixel Art</strong> permet de concevoir des modèles sur grille.</p>
-			<p>Le <strong>Générateur de Grammaire</strong> crée des étiquettes colorées (Sujet, Verbe, Complément) pour la manipulation de phrases.</p>
+            <p>Le <strong>Générateur de textes à trous</strong> permet de créer des textes à trous.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -211,11 +185,8 @@
     const outils = [
         { icon: 'icon-calc', title: 'title-calc' },
         { icon: 'icon-mots', title: 'title-mots' },
-        { icon: 'icon-ecriture', title: 'title-ecriture' },
-        { icon: 'icon-pixel', title: 'title-pixel' },
-		{ icon: 'icon-grammaire', title: 'title-grammaire' },
-		{ icon: 'icon-trous', title: 'title-trous' },
-		{ icon: 'icon-geo', title: 'title-geo' },
+        { icon: 'icon-trous', title: 'title-trous' },
+        { icon: 'icon-geo', title: 'title-geo' },
     ];
 
     outils.forEach(outil => {
