@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Le Compte est Bon - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
+            --column-border: rgba(0, 0, 0, 0.1); --input-bg: #f3f4f6;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
+        header { 
+            background: var(--card-bg); border-bottom: 1px solid var(--column-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: 100%; margin-bottom: 12px;
+        }
+
+        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
+        header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
+
+        .main-wrapper { width: 100%; max-width: 380px; margin: 0 auto; padding: 10px 15px 40px; }
+        .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
+        
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border);
+            border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700;
+            width: 100%; color: var(--text-main); outline: none; text-align: center; }
+        
+        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px;
+            text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-add:active { transform: scale(0.95); }
+
+        .number-tile { 
+            background: var(--input-bg); border: 2px solid var(--column-border);
+            border-radius: 1rem; height: 60px; display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; font-weight: 900;
+        }
+
+        .target-card {
+            background: var(--accent-color, #06b6d4); color: white;
+            border-radius: 1.5rem; padding: 20px; text-align: center; margin-bottom: 20px;
+        }
+
+        .op-btn { transition: all 0.2s ease; border: 2px solid transparent; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px;
+            border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+    </style>
+</head>
+<body>
+
+<script>
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+</script>
+
+<header>
+    <a href="index.html" id="btn-retour-header" class="ui-btn-round active:scale-90">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+    <h1>Le Compte est Bon</h1>
+    <button id="btn-aide" onclick="ouvrirAide()" class="ui-btn-round active:scale-90 text-lg">💡</button>
+</header>
+
+<div class="main-wrapper">
+    <div class="mb-4">
+        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour aux générateurs
+        </a>
+    </div>
+
+    <div id="setup-zone" class="light-card space-y-4">
+        <div>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-3 tracking-widest text-center">Opérations autorisées</label>
+            <p class="text-[10px] text-center opacity-70 mb-3 italic">Sélectionnez les opérations autorisées :</p>
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="toggleOp(this)" id="btn-op-add" data-op="+" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">+</button>
+                <button onclick="toggleOp(this)" id="btn-op-sub" data-op="-" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">-</button>
+                <button onclick="toggleOp(this)" id="btn-op-mul" data-op="x" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">×</button>
+                <button onclick="toggleOp(this)" id="btn-op-div" data-op="÷" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">÷</button>
+            </div>
+        </div>
+
+<div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Petites (1-10)</label>
+                <select id="count-small" onchange="adjustPlates('small')" class="input-field">
+                    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+                    <option value="3">3</option><option value="4" selected>4</option><option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Grandes (25-100)</label>
+                <select id="count-large" onchange="adjustPlates('large')" class="input-field">
+                    <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
+                    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+        </div>
+		
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Cible Mini</label>
+                <input type="number" id="target-min" value="10" min="1" max="998" class="input-field">
+            </div>
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Cible Maxi</label>
+                <input type="number" id="target-max" value="100" min="10" max="999" class="input-field">
+            </div>
+        </div>
+
+        <button id="mainAddBtn" onclick="generateGame()" class="btn-add">Générer le défi</button>
+    </div>
+
+    <div id="game-zone" class="hidden">
+        <div class="target-card" id="target-bg">
+            <span class="text-[10px] font-black uppercase tracking-widest opacity-80">Nombre à atteindre</span>
+            <div id="target-number" class="text-5xl font-black mt-1">---</div>
+        </div>
+
+        <div class="light-card">
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-3 tracking-widest text-center">Plaques à utiliser</label>
+            <div id="plates-container" class="grid grid-cols-3 gap-3"></div>
+        </div>
+
+        <div id="solution-zone" class="hidden light-card !bg-opacity-50 border-dashed border-2 mb-4">
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Solution la plus simple</label>
+            <div id="solution-steps" class="text-center font-bold text-sm space-y-1"></div>
+        </div>
+
+        <button id="btn-solution" onclick="showSolution()" class="w-full py-3 mb-6 rounded-xl border-2 border-emerald-500 text-emerald-500 font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 bg-transparent">
+            💡 Afficher la solution
+        </button>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="retourReglages()" class="btn-add bg-gray-500 !text-white">Réglages</button>
+            <button onclick="generateGame()" class="btn-add bg-amber-500 !text-white">Nouveau</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4 text-center">💡 Comment jouer ?</h2>
+        <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Le principe</p>
+                <p>Combinez les <b>6 plaques</b> tirées au sort pour atteindre exactement le nombre cible affiché en haut de l'écran.</p>
+            </div>
+            
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Les réglages</p>
+                <ul class="list-disc pl-4 space-y-1">
+                    <li><b>Opérations :</b> Activez celles que vous souhaitez utiliser (Gris = désactivé).</li>
+                    <li><b>Plaques :</b> Choisissez la répartition entre petites (1-10) et grandes (25-100).<br>L'idéal est de choisir 4 petites plaques et 2 grandes.</li>
+                    <li><b>Cible :</b> Définissez l'intervalle de difficulté (ex: 500 à 999).</li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Les règles</p>
+                <ul class="list-disc pl-4 space-y-1">
+                    <li>Chaque plaque ne peut être utilisée <b>qu'une seule fois</b>.</li>
+                    <li>Tous les résultats intermédiaires doivent être des <b>nombres entiers positifs</b>.</li>
+                </ul>
+            </div>
+
+            <div class="p-2 bg-black/5 rounded-lg border border-black/5 italic">
+                <b>Note :</b> L'application garantit qu'une solution exacte existe toujours pour chaque tirage généré.
+            </div>
+        </div>
+        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">
+            J'ai compris
+        </button>
+    </div>
+</div>
+
+<div id="modal-erreur" class="modal-overlay" onclick="fermerModal('modal-erreur')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="text-center">
+            <div class="text-4xl mb-4">⚠️</div>
+            <h2 class="text-lg font-black uppercase mb-2">Attention</h2>
+            <p class="text-[11px] opacity-80 leading-relaxed mb-6">Vous devez sélectionner au moins une opération pour pouvoir générer un calcul.</p>
+            <button id="btn-fermer-erreur" onclick="fermerModal('modal-erreur')" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">D'accord</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-echec" class="modal-overlay" onclick="fermerModal('modal-echec')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="text-center">
+            <div class="text-4xl mb-4">🧩</div>
+            <h2 class="text-lg font-black uppercase mb-2">Impossible</h2>
+            <p class="text-[11px] opacity-80 leading-relaxed mb-6">
+                Aucun tirage n'a été trouvé avec vos réglages actuels (cible trop haute pour les opérations choisies). 
+                Réduisez la cible ou ajoutez des opérations.
+            </p>
+            <button id="btn-fermer-echec" onclick="fermerModal('modal-echec')" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">Modifier</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+
+    function toggleOp(btn) {
+        const isActive = btn.getAttribute('data-active') === 'true';
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const hexa = mapCouleurs[themePrefs.gen || 'cyan'];
+        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.gen || 'cyan') ? '#000' : '#fff';
+
+        if (isActive) {
+            btn.setAttribute('data-active', 'false');
+            btn.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+            btn.style.color = 'gray';
+        } else {
+            btn.setAttribute('data-active', 'true');
+            btn.style.backgroundColor = hexa;
+            btn.style.color = contrast;
+        }
+    }
+
+    function getSelectedOps() {
+        const ops = [];
+        if(document.getElementById('btn-op-add').getAttribute('data-active') === 'true') ops.push('+');
+        if(document.getElementById('btn-op-sub').getAttribute('data-active') === 'true') ops.push('-');
+        if(document.getElementById('btn-op-mul').getAttribute('data-active') === 'true') ops.push('x');
+        if(document.getElementById('btn-op-div').getAttribute('data-active') === 'true') ops.push('÷');
+        return ops;
+    }
+
+// Garantit que le total des plaques est toujours égal à 6
+    function adjustPlates(source) {
+        const small = document.getElementById('count-small');
+        const large = document.getElementById('count-large');
+        if (source === 'small') {
+            large.value = 6 - parseInt(small.value);
+        } else {
+            small.value = 6 - parseInt(large.value);
+        }
+    }
+	
+    function generateGame() {
+        const minCible = parseInt(document.getElementById('target-min').value) || 10;
+        const maxCible = parseInt(document.getElementById('target-max').value) || 100;
+        const nbSmall = parseInt(document.getElementById('count-small').value);
+        const nbLarge = parseInt(document.getElementById('count-large').value);
+        const allowedOps = getSelectedOps();
+        
+        if(allowedOps.length === 0) { 
+            document.getElementById('modal-erreur').style.display = 'flex';
+            return; 
+        }
+
+        let cible = 0;
+        let finalPlates = [];
+        let tentativesGénérales = 0;
+
+        while ((cible < minCible || cible > maxCible) && tentativesGénérales < 60) {
+            let petitesDispo = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
+            let grandesDispo = [25, 25, 50, 50, 75, 75, 100, 100]; // Doublé pour permettre d'en tirer 6
+            let plaques = [];
+            
+            // Tirage selon les réglages utilisateur
+            for(let i=0; i<nbSmall; i++) plaques.push(petitesDispo.splice(Math.floor(Math.random()*petitesDispo.length), 1)[0]);
+            for(let i=0; i<nbLarge; i++) plaques.push(grandesDispo.splice(Math.floor(Math.random()*grandesDispo.length), 1)[0]);
+
+            let temp = [...plaques];
+            let rounds = 2 + Math.floor(Math.random() * 3);
+            for(let i=0; i < rounds; i++) {
+                if(temp.length < 2) break;
+                let a = temp.splice(Math.floor(Math.random()*temp.length), 1)[0];
+                let b = temp.splice(Math.floor(Math.random()*temp.length), 1)[0];
+                let op = allowedOps[Math.floor(Math.random()*allowedOps.length)];
+                let res;
+                if(op=='+') res = a+b;
+                else if(op=='-') res = Math.abs(a-b);
+                else if(op=='x') res = a*b;
+                else res = (a%b==0 && b!=0) ? a/b : (b%a==0 && a!=0 ? b/a : a+b);
+                if(res > 0 && res < 1000) { temp.push(res); cible = res; }
+            }
+            if (cible >= minCible && cible <= maxCible) finalPlates = plaques;
+            tentativesGénérales++;
+        }
+
+        if (cible < minCible || cible > maxCible) {
+            document.getElementById('modal-echec').style.display = 'flex';
+            return;
+        }
+
+        document.getElementById('target-number').innerText = cible;
+        const container = document.getElementById('plates-container');
+        container.innerHTML = '';
+        finalPlates.sort((a,b) => a - b).forEach(p => {
+            container.innerHTML += `<div class="number-tile">${p}</div>`;
+        });
+
+        document.getElementById('solution-zone').classList.add('hidden');
+        document.getElementById('btn-solution').classList.remove('hidden');
+        document.getElementById('setup-zone').classList.add('hidden');
+        document.getElementById('game-zone').classList.remove('hidden');
+    }
+
+    function findShortestSolution(initialNumbers, target) {
+        const allowedOps = getSelectedOps();
+        let queue = [{ nums: initialNumbers, steps: [] }];
+        let visited = new Set();
+        visited.add(initialNumbers.sort((a,b)=>a-b).join(','));
+
+        while (queue.length > 0) {
+            let { nums, steps } = queue.shift();
+            if (steps.length >= 6) continue;
+
+            for (let i = 0; i < nums.length; i++) {
+                for (let j = 0; j < nums.length; j++) {
+                    if (i === j) continue;
+                    const a = nums[i], b = nums[j];
+                    const remaining = nums.filter((_, idx) => idx !== i && idx !== j);
+                    const ops = [
+                        {s:'+', r:a+b, sym:'+'}, {s:'-', r:a-b, sym:'-'},
+                        {s:'x', r:a*b, sym:'x'}, {s:'÷', r:a/b, sym:'÷'}
+                    ].filter(o => allowedOps.includes(o.sym));
+
+                    for (let op of ops) {
+                        if (op.s === '-' && op.r <= 0) continue;
+                        if (op.s === '÷' && (b === 0 || a % b !== 0)) continue;
+
+                        const newStep = { a, b, s: op.s, r: op.r };
+                        const allSteps = [...steps, newStep];
+                        if (op.r === target) return allSteps;
+
+                        const nextState = [...remaining, op.r].sort((x,y)=>x-y).join(',');
+                        if (!visited.has(nextState)) {
+                            visited.add(nextState);
+                            queue.push({ nums: [...remaining, op.r], steps: allSteps });
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    function showSolution() {
+        const target = parseInt(document.getElementById('target-number').innerText);
+        const plates = Array.from(document.querySelectorAll('.number-tile')).map(el => parseInt(el.innerText));
+        const steps = findShortestSolution(plates, target);
+        document.getElementById('solution-steps').innerHTML = steps ? steps.map(s => `<div>${s.a} ${s.s} ${s.b} = ${s.r}</div>`).join('') : "Aucune solution exacte trouvée.";
+        document.getElementById('solution-zone').classList.remove('hidden');
+        document.getElementById('btn-solution').classList.add('hidden');
+    }
+
+    function retourReglages() {
+        document.getElementById('setup-zone').classList.remove('hidden');
+        document.getElementById('game-zone').classList.add('hidden');
+    }
+
+    function appliquerTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colPref = themePrefs.gen || 'cyan'; 
+        const hexa = mapCouleurs[colPref];
+        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
+        document.documentElement.style.setProperty('--accent-color', hexa);
+        
+        [
+            document.getElementById('btn-retour-header'), 
+            document.getElementById('btn-retour-liste'), 
+            document.getElementById('btn-aide'), 
+            document.getElementById('mainAddBtn'), 
+            document.getElementById('btn-fermer-aide'),
+            document.getElementById('btn-fermer-erreur'),
+            document.getElementById('btn-fermer-echec'),
+            document.getElementById('target-bg')
+        ].forEach(el => {
+            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
+        });
+
+        ['btn-op-add', 'btn-op-sub', 'btn-op-mul', 'btn-op-div'].forEach(id => {
+            const btn = document.getElementById(id);
+            if(btn) {
+                if(btn.getAttribute('data-active') === 'true') {
+                    btn.style.backgroundColor = hexa;
+                    btn.style.color = contrast;
+                } else {
+                    btn.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+                    btn.style.color = 'gray';
+                }
+            }
+        });
+    }
+
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
+    window.onload = appliquerTheme;
+</script>
+</body>
+</html>

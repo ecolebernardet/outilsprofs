@@ -101,14 +101,6 @@
             </div>
         </a>
 
-        <a href="gene_motsmeles.html" class="tool-card">
-            <div class="icon-box" id="icon-mots">📝</div>
-            <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-mots">Mots Mêlés</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Grilles de mots personnalisées</p>
-            </div>
-        </a>
-
 		<a href="gene_operations.html" class="tool-card">
             <div class="icon-box" id="icon-ops">📅</div>
             <div>
@@ -117,12 +109,22 @@
             </div>
         </a>
         
-        <div class="tool-card opacity-40 grayscale">
-            <div class="icon-box">⏳</div>
+		<a href="gene_compteestbon.html" class="tool-card">
+    <div class="icon-box" id="icon-compte">🎯</div>
+    <div>
+        <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-compte">Le Compte est Bon</h2>
+        <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Générateur de défis de calcul</p>
+    </div>
+</a>
+
+        <a href="gene_motsmeles.html" class="tool-card">
+            <div class="icon-box" id="icon-mots">📝</div>
             <div>
-                <p class="text-[10px] font-bold">Prochainement...</p>
+                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-mots">Mots Mêlés</h2>
+                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Grilles de mots personnalisées</p>
             </div>
-        </div>
+        </a>
+		
     </div>
 </div>
 
@@ -131,10 +133,10 @@
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide</h2>
         <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
             <p>Cette section regroupe vos outils de création pédagogique.</p>
-            <p>Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.</p>
-            <p>Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.</p>
-            <p>Le <strong>Générateur de textes à trous</strong> permet de créer des textes à trous.</p>
-			<p>Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens (du CP au CM2) avec un contrôle précis des termes.</p>
+			<p>🧮 Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.</p>
+			<p>📅 Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens (du CP au CM2) avec un contrôle précis des termes.</p>
+            <p>🎯 Le <strong>Compte est Bon</strong> génère des tirages de nombres à atteindre avec des solutions garanties.</p>
+            <p>📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -179,6 +181,7 @@
         { icon: 'icon-ops', title: 'title-ops' },
 		{ icon: 'icon-calc', title: 'title-calc' },
         { icon: 'icon-mots', title: 'title-mots' },
+		{ icon: 'icon-compte', title: 'title-compte' },
     ];
 
     outils.forEach(outil => {

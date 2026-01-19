@@ -46,28 +46,16 @@
         .res-text { color: #10b981; font-weight: 800; }
 
         /* Styles Seyes pour le PDF */
-        .seyes-container { 
-    position: relative; 
-    height: 48mm; 
-    width: 100%; 
-    background: white; 
-    border: 1px solid #cbd5e1; 
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-        .seyes-vertical-lines {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image: linear-gradient(90deg, rgba(173, 216, 230, 1) 1px, transparent 1px);
-    background-size: 8mm 100%;
-    z-index: 1;
-}
-
+        .seyes-container { position: relative; height: 48mm; width: 100%; background: white; border: 1px solid #cbd5e1; overflow: hidden; box-sizing: border-box; }
+        .seyes-vertical-lines { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(90deg, rgba(173, 216, 230, 1) 1px, transparent 1px); background-size: 8mm 100%; z-index: 1; }
         .seyes-line { position: absolute; left: 0; right: 0; height: 1px; z-index: 2; }
         .line-principale { background: rgba(138, 43, 226, 0.4); height: 1.5px; }
         .line-interligne { background: rgba(173, 216, 230, 1); }
         .empty-frame-pdf { height: 48mm; width: 100%; background: transparent; }
+
+        /* Modale Aide */
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; color: var(--text-main); }
     </style>
 </head>
 <body>
@@ -100,25 +88,25 @@
 
         <div class="light-card space-y-5">
             <label class="block text-[10px] font-black uppercase opacity-60 mb-2 tracking-widest text-center">3. Réglages des termes</label>
-            <div id="group-settings-as" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5">
-                <span class="block text-[9px] font-black opacity-30 uppercase text-center">Additions & Soustractions</span>
+            <div id="group-settings-as" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5 text-center">
+                <span class="block text-[9px] font-black opacity-30 uppercase">Additions & Soustractions</span>
                 <div class="flex gap-3">
-                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1 ml-1">Mini</label><input type="number" id="as-min" class="input-field"></div>
-                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1 ml-1">Maxi</label><input type="number" id="as-max" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Mini</label><input type="number" id="as-min" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Maxi</label><input type="number" id="as-max" class="input-field"></div>
                 </div>
             </div>
-            <div id="group-settings-mult" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5">
-                <span class="block text-[9px] font-black opacity-30 uppercase text-center">Multiplications</span>
+            <div id="group-settings-mult" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5 text-center">
+                <span class="block text-[9px] font-black opacity-30 uppercase">Multiplications</span>
                 <div class="flex gap-3">
-                    <div class="flex-21"><label class="block text-[8px] opacity-50 mb-1 ml-1">Chiffres T1</label><input type="number" id="mult-t1" class="input-field"></div>
-                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1 ml-1">Chiffres T2</label><input type="number" id="mult-t2" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Chiffres T1</label><input type="number" id="mult-t1" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Chiffres T2</label><input type="number" id="mult-t2" class="input-field"></div>
                 </div>
             </div>
-            <div id="group-settings-div" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5">
-                <span class="block text-[9px] font-black opacity-30 uppercase text-center">Divisions</span>
+            <div id="group-settings-div" class="space-y-3 p-3 bg-white/5 rounded-2xl border border-white/5 text-center">
+                <span class="block text-[9px] font-black opacity-30 uppercase">Divisions</span>
                 <div class="flex gap-3">
-                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1 ml-1">Chiffres Dividende</label><input type="number" id="div-t1" class="input-field"></div>
-                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1 ml-1">Diviseur Max</label><input type="number" id="div-t2" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Chiffres Dividende</label><input type="number" id="div-t1" class="input-field"></div>
+                    <div class="flex-1"><label class="block text-[8px] opacity-50 mb-1">Diviseur Max</label><input type="number" id="div-t2" class="input-field"></div>
                 </div>
             </div>
         </div>
@@ -132,6 +120,33 @@
             <button onclick="exportPDF()" class="btn-add flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent-color)]/20">Exporter PDF</button>
             <button onclick="toggleCorrection()" class="col-span-2 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20 transition-all active:scale-95">Afficher la correction</button>
         </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 class="text-lg font-black uppercase mb-4 text-center">💡 Rituel opérations</h2>
+        <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Fonctionnement</p>
+                <p>Générez un programme d'entraînement pour la semaine. Vous pouvez choisir jusqu'à <b>4 opérations par jour</b>.</p>
+            </div>
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Réglages</p>
+                <ul class="list-disc pl-4 space-y-1">
+                    <li><b>Niveaux :</b> Les réglages s'adaptent automatiquement du CP au CM2.</li>
+                    <li><b>Compteurs :</b> Gérez les quantités quotidiennes avec les flèches.</li>
+                    <li><b>Paramètres :</b> Ajustez le nombre de chiffres pour chaque type d'opération.</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-black uppercase text-[9px] mb-1 opacity-50 tracking-wider">Export PDF</p>
+                <p>Le PDF génère automatiquement un <b>quadrillage Seyes complet</b> (lignes violettes et interlignes bleues) pour aider les élèves à poser les opérations.</p>
+            </div>
+        </div>
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">
+            Compris
+        </button>
     </div>
 </div>
 
@@ -209,111 +224,65 @@
     }
 
     function exportPDF() {
-    const niv = document.getElementById('niveau-select').value.toUpperCase();
-    const container = document.createElement('div');
-    
-    Object.assign(container.style, { 
-        width: "175mm", 
-        margin: "0 auto", 
-        padding: "0mm", // Pas de padding global pour maximiser l'espace
-        backgroundColor: "white",
-        display: "block",
-        boxSizing: "border-box"
-    });
+        const niv = document.getElementById('niveau-select').value.toUpperCase();
+        const container = document.createElement('div');
+        Object.assign(container.style, { width: "175mm", margin: "0 auto", padding: "0mm", backgroundColor: "white", display: "block", boxSizing: "border-box" });
 
-    let currentDay = ""; 
-    let dayCount = 0;
-
-    document.querySelectorAll('.q-card').forEach(q => {
-        const day = q.getAttribute('data-day-name');
-        
-        if(day !== currentDay) {
-            // Saut de page forcé seulement avant Jeudi
-            if(day === "Jeudi") { 
-                const pb = document.createElement('div'); 
-                pb.style.pageBreakBefore = "always"; 
-                container.appendChild(pb); 
+        let currentDay = ""; 
+        document.querySelectorAll('.q-card').forEach(q => {
+            const day = q.getAttribute('data-day-name');
+            if(day !== currentDay) {
+                if(day === "Jeudi") { 
+                    const pb = document.createElement('div'); pb.style.pageBreakBefore = "always"; container.appendChild(pb); 
+                }
+                currentDay = day;
+                const h = document.createElement('div'); h.innerHTML = `• ${day} •`;
+                Object.assign(h.style, { textAlign:"center", fontWeight:"900", padding:"4px", borderBottom:"1.5px solid black", marginBottom:"6px", marginTop: day === "Mardi" || day === "Vendredi" ? "10px" : "0px", fontSize:"14px", textTransform:"uppercase", width: "100%", color: "black" });
+                container.appendChild(h);
+                const currentGrid = document.createElement('div');
+                Object.assign(currentGrid.style, { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6mm", marginBottom:"10px", width: "100%" });
+                container.appendChild(currentGrid);
+                q.parentElement._currentGrid = currentGrid;
             }
-            
-            currentDay = day;
-            dayCount++;
 
-            // Titre du jour plus compact
-            const h = document.createElement('div'); 
-            h.innerHTML = `• ${day} •`;
-            Object.assign(h.style, { 
-                textAlign:"center", fontWeight:"900", padding:"4px", 
-                borderBottom:"1.5px solid black", marginBottom:"6px", 
-                marginTop: day === "Mardi" || day === "Vendredi" ? "10px" : "0px",
-                fontSize:"14px", textTransform:"uppercase", width: "100%", color: "black"
-            });
-            container.appendChild(h);
-
-            // Grille avec gap réduit
-            const currentGrid = document.createElement('div');
-            Object.assign(currentGrid.style, { 
-                display:"grid", gridTemplateColumns:"1fr 1fr", 
-                gap:"6mm", marginBottom:"10px", width: "100%" 
-            });
-            container.appendChild(currentGrid);
-            q.parentElement._currentGrid = currentGrid;
-        }
-
-        const card = document.createElement('div');
-        const enonce = q.querySelector('span:first-child').innerText;
-        const isDiv = enonce.includes('÷');
-        
-        Object.assign(card.style, {
-            border: isDiv ? "none" : "1px solid #e2e8f0",
-            padding: "5px", 
-            borderRadius: "6px",
-            boxSizing: "border-box"
+            const card = document.createElement('div');
+            const enonce = q.querySelector('span:first-child').innerText;
+            const isDiv = enonce.includes('÷');
+            Object.assign(card.style, { border: isDiv ? "none" : "1px solid #e2e8f0", padding: "5px", borderRadius: "6px", boxSizing: "border-box" });
+            let frameContent = isDiv ? `<div class="empty-frame-pdf"></div>` : `<div class="seyes-container"><div class="seyes-vertical-lines"></div>${Array.from({length:25}, (_,i)=>`<div class="seyes-line ${i%4===0?'line-principale':'line-interligne'}" style="top:${i*2}mm"></div>`).join('')}</div>`;
+            card.innerHTML = `<div style="font-weight:bold; font-size:13px; margin-bottom:3px; color:black;">${enonce}</div>${frameContent}`;
+            const activeGrid = Array.from(container.querySelectorAll('div[style*="display: grid"]')).pop();
+            activeGrid.appendChild(card);
         });
-        
-        let frameContent = isDiv ? 
-            `<div class="empty-frame-pdf"></div>` : 
-            `<div class="seyes-container">
-                <div class="seyes-vertical-lines"></div>
-                ${Array.from({length:25}, (_,i)=>`<div class="seyes-line ${i%4===0?'line-principale':'line-interligne'}" style="top:${i*2}mm"></div>`).join('')}
-            </div>`;
-        
-        card.innerHTML = `<div style="font-weight:bold; font-size:13px; margin-bottom:3px; color:black;">${enonce}</div>${frameContent}`;
-        
-        // On récupère la grille du jour en cours
-        const activeGrid = Array.from(container.querySelectorAll('div[style*="display: grid"]')).pop();
-        activeGrid.appendChild(card);
-    });
 
-    const opt = { 
-        margin: [8, 10], // Marges haut/bas de 8mm pour laisser respirer
-        filename: `rituel_operations_${niv}.pdf`, 
-        image: { type: 'jpeg', quality: 1 }, 
-        html2canvas: { 
-            scale: 3, 
-            useCORS: true, 
-            backgroundColor: '#ffffff',
-            scrollY: 0
-        }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-    };
-
-    html2pdf().set(opt).from(container).save();
-}
+        const opt = { margin: [8, 10], filename: `rituel_operations_${niv}.pdf`, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff', scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(container).save();
+    }
 
     function toggleCorrection() { document.querySelectorAll('.res-text').forEach(e => e.classList.toggle('hidden')); }
     
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
     function appliquerTheme() {
         const col = (JSON.parse(localStorage.getItem('theme_tuiles')) || {}).gen || 'amber';
         const map = { 'red':'#ef4444','orange':'#f97316','amber':'#f59e0b','yellow':'#eab308','lime':'#84cc16','green':'#22c55e','emerald':'#10b981','teal':'#14b8a6','cyan':'#06b6d4','sky':'#0ea5e9','blue':'#3b82f6','indigo':'#6366f1','violet':'#8b5cf6','purple':'#a855f7','fuchsia':'#d946ef','pink':'#ec4899','rose':'#f43f5e','gray':'#6b7280' };
         document.documentElement.style.setProperty('--accent-color', map[col]);
-        const hexa = map[col]; const contrast = ['yellow','lime','amber','cyan'].includes(col) ? '#000' : '#fff';
-        [document.getElementById('btn-retour-header'), document.getElementById('btn-aide'), document.querySelector('.btn-add')].forEach(el => { if(el){ el.style.backgroundColor = hexa; el.style.color = contrast; }});
+        const hexa = map[col]; 
+        const contrast = ['yellow','lime','amber','cyan'].includes(col) ? '#000' : '#fff';
+        
+        [document.getElementById('btn-retour-header'), document.getElementById('btn-aide'), document.querySelector('.btn-add'), document.getElementById('btn-fermer-aide')].forEach(el => { 
+            if(el){ el.style.backgroundColor = hexa; el.style.color = contrast; }
+        });
+
         if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
         else document.body.classList.remove('light-mode');
     }
 
-    function ouvrirAide() { alert("Générateur de rituels. Quadrillage Seyes complet (6 carreaux, lignes verticales incluses)."); }
-    window.onload = appliquerPresetsNiveau;
+    window.onload = function() {
+        appliquerPresetsNiveau();
+        appliquerTheme();
+    };
 </script>
 </body>
 </html>
