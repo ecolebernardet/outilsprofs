@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+		@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
             --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
@@ -38,19 +39,19 @@
         .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
         
         .input-field { background: var(--input-bg); border: 1px solid var(--column-border);
-			border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700;
-			width: 100%; color: var(--text-main); outline: none; text-align: center; }
+            border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700;
+            width: 100%; color: var(--text-main); outline: none; text-align: center; }
         
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px;
-			text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
+            text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-add:active { transform: scale(0.95); }
 
         .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white;
-			transition: all 0.2s ease; text-transform: uppercase; }
+            transition: all 0.2s ease; text-transform: uppercase; }
         .btn-game-action:active { transform: scale(0.95); }
 
         .op-btn-frame { border: 2px solid var(--column-border); border-radius: 1rem; padding: 2px;
-			transition: all 0.2s ease; background: var(--input-bg); }
+            transition: all 0.2s ease; background: var(--input-bg); }
         .op-checkbox:checked + .op-btn-frame, 
         .table-checkbox:checked + .op-btn-frame,
         #check-all-tables:checked + .op-btn-frame { 
@@ -66,9 +67,9 @@
         .res-text { color: #10b981; font-weight: 800; font-size: 0.85rem; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000;
-			background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px;
-			border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+            border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
     </style>
 </head>
 <body>
@@ -88,7 +89,7 @@
 </header>
 
 <div class="main-wrapper">
-	<div class="mb-4">
+    <div class="mb-4">
         <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
@@ -96,7 +97,7 @@
             Retour aux générateurs
         </a>
     </div>
-	
+    
     <div id="setup-zone" class="light-card space-y-3">
         <div>
             <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Opérations</label>
@@ -105,6 +106,16 @@
                 <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="-"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">-</div></div></label>
                 <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="x"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">x</div></div></label>
                 <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value=":"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">÷</div></div></label>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+                <label class="flex items-center justify-center gap-2 cursor-pointer opacity-80">
+                    <input type="checkbox" id="no-carry-add" class="w-3 h-3 accent-cyan-500">
+                    <span class="text-[8px] font-black uppercase tracking-tighter text-center leading-none">add. sans retenues</span>
+                </label>
+                <label class="flex items-center justify-center gap-2 cursor-pointer opacity-80">
+                    <input type="checkbox" id="no-carry-sub" class="w-3 h-3 accent-cyan-500">
+                    <span class="text-[8px] font-black uppercase tracking-tighter text-center leading-none">soustr.sans retenues</span>
+                </label>
             </div>
         </div>
 
@@ -115,10 +126,10 @@
 
         <div class="space-y-4">
             <div class="grid grid-cols-3 gap-2">
-			<div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Mini</label><input type="number" id="min-val" value="1" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
-			<div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Maxi</label><input type="number" id="max-val" value="10" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
-			<div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Calculs</label><input type="number" id="nb-val" value="10" inputmode="numeric" class="input-field"></div>
-		</div>
+            <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Mini</label><input type="number" id="min-val" value="1" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
+            <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Maxi</label><input type="number" id="max-val" value="10" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
+            <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Calculs</label><input type="number" id="nb-val" value="10" inputmode="numeric" class="input-field"></div>
+        </div>
         
             <div class="grid grid-cols-2 gap-4">
                 
@@ -165,12 +176,23 @@
         <div id="helpBody" class="text-[11px] leading-relaxed space-y-4">
             
             <div class="flex items-start gap-3">
-                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">⚙️</div>
+                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">🔢</div>
                 <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Logiciel de calcul</h3>
+                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Types de calculs</h3>
                     <p class="opacity-70 text-[10px]">
-                        Les <b>additions</b> et <b>soustractions</b> utilisent vos bornes Mini/Maxi. Pour la <b>soustraction</b>, l'outil inverse les nombres si nécessaire pour garantir un résultat positif. 
-                        Les <b>multiplications</b> et <b>divisions</b> se basent exclusivement sur les tables cochées.
+                        • <b>+ / -</b> : Basés sur vos bornes Mini/Maxi.<br>
+                        • <b>x / ÷</b> : Utilise uniquement les tables sélectionnées.<br>
+                        • <b>Inversion</b> : En soustraction, le plus grand nombre est toujours placé en premier.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">✨</div>
+                <div>
+                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Options sans retenues</h3>
+                    <p class="opacity-70 text-[10px]">
+                        Si activé, l'outil analyse chaque rang (unités, dizaines...). Pour l'<b>addition</b>, la somme de chaque colonne sera &lt; 10. Pour la <b>soustraction</b>, chaque chiffre du haut sera supérieur ou égal à celui du bas.
                     </p>
                 </div>
             </div>
@@ -178,9 +200,9 @@
             <div class="flex items-start gap-3">
                 <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">⏱️</div>
                 <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Temps & Alertes</h3>
+                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Chronomètre</h3>
                     <p class="opacity-70 text-[10px]">
-                        Réglez le minuteur sur 0 pour un mode libre. Si un temps est défini, une <b>sonnerie</b> retentit à l'échéance et la <b>correction automatique</b> s'affiche en vert pour figer les résultats.
+                        Laissez à <b>0:00</b> pour un mode libre. Sinon, une alerte sonore retentit à la fin et la correction s'affiche automatiquement pour figer les scores.
                     </p>
                 </div>
             </div>
@@ -188,20 +210,20 @@
             <div class="flex items-start gap-3">
                 <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">📄</div>
                 <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Export PDF</h3>
+                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Fiches PDF</h3>
                     <p class="opacity-70 text-[10px]">
-                        Génère un document de deux pages : la première contient les calculs (format A4), la seconde contient les <b>réponses pour l'enseignant</b>. Idéal pour les rituels de classe.
+                        L'export génère un fichier propre avec <b>les calculs sur la page 1</b> et <b>le corrigé sur la page 2</b>, prêt à être imprimé pour vos élèves.
                     </p>
                 </div>
             </div>
 
             <div class="mt-2 p-2 bg-white/5 rounded-lg border border-dashed border-white/20 text-center italic opacity-60 text-[9px]">
-                "Cochez 'Toutes' pour mélanger l'ensemble des tables de 2 à 9."
+                "Conseil : Pour un mélange total des tables, cochez simplement 'Toutes'."
             </div>
 
         </div>
 
-        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Fermer</button>
+        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">J'ai compris</button>
     </div>
 </div>
 
@@ -278,66 +300,158 @@
     }
 
     function generateSeries() {
-        const selectedOps = Array.from(document.querySelectorAll('.op-checkbox:checked')).map(el => el.value);
-        const selectedTables = Array.from(document.querySelectorAll('.table-checkbox:checked')).map(el => parseInt(el.value));
-        if (selectedOps.length === 0) return alert("Sélectionnez une opération !");
-        
-        const mins = parseInt(document.getElementById('timer-min').value) || 0;
-        const secs = parseInt(document.getElementById('timer-sec').value) || 0;
-        const timerVal = (mins * 60) + secs;
-        const timerDisplay = document.getElementById('timer-display');
-        const secondsLeftEl = document.getElementById('seconds-left');
-        
-        clearInterval(countdown);
-        secondsLeftEl.classList.remove('text-red-500');
+    const selectedOps = Array.from(document.querySelectorAll('.op-checkbox:checked')).map(el => el.value);
+    const selectedTables = Array.from(document.querySelectorAll('.table-checkbox:checked')).map(el => parseInt(el.value));
+    if (selectedOps.length === 0) return alert("Sélectionnez une opération !");
+    
+    const mins = parseInt(document.getElementById('timer-min').value) || 0;
+    const secs = parseInt(document.getElementById('timer-sec').value) || 0;
+    const timerVal = (mins * 60) + secs;
+    const timerDisplay = document.getElementById('timer-display');
+    const secondsLeftEl = document.getElementById('seconds-left');
+    
+    clearInterval(countdown);
+    secondsLeftEl.classList.remove('text-red-500');
 
-        if (timerVal > 0) {
-            timerDisplay.classList.remove('hidden');
-            let timeLeft = timerVal;
-            const updateDisplay = (t) => {
-                let m = Math.floor(t / 60); let s = t % 60;
-                secondsLeftEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            };
-            updateDisplay(timeLeft);
-            countdown = setInterval(() => {
-                timeLeft--; updateDisplay(timeLeft);
-                if (timeLeft <= 10) secondsLeftEl.classList.add('text-red-500');
-                if (timeLeft <= 0) { clearInterval(countdown); playDing(); ouvrirModalFin(); }
-            }, 1000);
-        } else { timerDisplay.classList.add('hidden'); }
+    if (timerVal > 0) {
+        timerDisplay.classList.remove('hidden');
+        let timeLeft = timerVal;
+        const updateDisplay = (t) => {
+            let m = Math.floor(t / 60); let s = t % 60;
+            secondsLeftEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        };
+        updateDisplay(timeLeft);
+        countdown = setInterval(() => {
+            timeLeft--; updateDisplay(timeLeft);
+            if (timeLeft <= 10) secondsLeftEl.classList.add('text-red-500');
+            if (timeLeft <= 0) { clearInterval(countdown); playDing(); ouvrirModalFin(); }
+        }, 1000);
+    } else { timerDisplay.classList.add('hidden'); }
 
-        const min = parseInt(document.getElementById('min-val').value) || 1;
-        const max = parseInt(document.getElementById('max-val').value) || 10;
-        const nb = parseInt(document.getElementById('nb-val').value) || 10;
-        const grid = document.getElementById('questions-grid');
-        grid.innerHTML = ''; currentCalculs = [];
+    const min = parseInt(document.getElementById('min-val').value) || 1;
+    const max = parseInt(document.getElementById('max-val').value) || 10;
+    const nb = parseInt(document.getElementById('nb-val').value) || 10;
+    
+    // --- AJOUT : RÉINITIALISATION ---
+    const grid = document.getElementById('questions-grid');
+    grid.innerHTML = ''; 
+    currentCalculs = [];
 
-        for (let i = 0; i < nb; i++) {
-            const op = selectedOps[Math.floor(Math.random() * selectedOps.length)];
-            let a, b, res = 0;
+    const btnCorr = document.getElementById('validate-btn');
+    if (btnCorr) {
+        btnCorr.innerText = "👁️ correction";
+        btnCorr.classList.remove('bg-red-500');
+        btnCorr.classList.add('bg-green-500');
+    }
+    // --------------------------------
 
-            if (op === 'x' || op === ':') {
-                b = selectedTables.length > 0 
-                    ? selectedTables[Math.floor(Math.random() * selectedTables.length)]
-                    : Math.floor(Math.random() * 10) + 1;
-                const factor = Math.floor(Math.random() * 10) + 1;
-                if (op === 'x') { a = factor; res = a * b; }
-                else { res = factor; a = res * b; }
-            } else {
+    const noCarryAdd = document.getElementById('no-carry-add').checked;
+    const noCarrySub = document.getElementById('no-carry-sub').checked;
+
+    for (let i = 0; i < nb; i++) {
+        const op = selectedOps[i % selectedOps.length];
+        let a, b, res = 0;
+
+        if (op === 'x' || op === ':') {
+            b = selectedTables.length > 0 
+                ? selectedTables[Math.floor(Math.random() * selectedTables.length)]
+                : Math.floor(Math.random() * 10) + 1;
+            const factor = Math.floor(Math.random() * 10) + 1;
+            if (op === 'x') { a = factor; res = a * b; }
+            else { res = factor; a = res * b; }
+        } else {
+            let valid = false;
+            let attempts = 0;
+            while(!valid && attempts < 100) {
                 a = Math.floor(Math.random() * (max - min + 1)) + min;
                 b = Math.floor(Math.random() * (max - min + 1)) + min;
-                if (op === '-') { if (a < b) [a, b] = [b, a]; res = a - b; }
-                else { res = a + b; }
+                
+                if (op === '+') {
+                    if (noCarryAdd) {
+                        let tempA = a, tempB = b, hasCarry = false;
+                        while (tempA > 0 || tempB > 0) {
+                            if ((tempA % 10) + (tempB % 10) >= 10) { hasCarry = true; break; }
+                            tempA = Math.floor(tempA / 10); tempB = Math.floor(tempB / 10);
+                        }
+                        if (!hasCarry) { res = a + b; valid = true; }
+                    } else { res = a + b; valid = true; }
+                } else if (op === '-') {
+                    if (a < b) [a, b] = [b, a];
+                    if (noCarrySub) {
+                        let tempA = a, tempB = b, needsBorrow = false;
+                        while (tempA > 0 || tempB > 0) {
+                            if ((tempA % 10) < (tempB % 10)) { needsBorrow = true; break; }
+                            tempA = Math.floor(tempA / 10); tempB = Math.floor(tempB / 10);
+                        }
+                        if (!needsBorrow) { res = a - b; valid = true; }
+                    } else { res = a - b; valid = true; }
+                }
+                attempts++;
             }
-
-            currentCalculs.push({ q: `${a} ${op === ':' ? '÷' : op} ${b}`, r: res });
-            grid.innerHTML += `<div class="q-card"><div class="flex items-center gap-2"><span class="opacity-30 text-[10px] font-bold">${i+1})&nbsp;&nbsp;</span><span class="text-[15px] font-black">${a} ${op === ':' ? '÷' : op} ${b} =</span></div><span class="res-text hidden">${res}</span></div>`;
+            if(!valid) { if(op==='-'){if(a<b)[a,b]=[b,a]; res=a-b;} else res=a+b; }
         }
-        document.getElementById('setup-zone').classList.add('hidden');
-        document.getElementById('game-zone').classList.remove('hidden');
+
+        currentCalculs.push({ q: `${a} ${op === ':' ? '÷' : op} ${b}`, r: res });
     }
 
-    function showCorrection() { clearInterval(countdown); document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden')); }
+    currentCalculs.sort(() => Math.random() - 0.5);
+
+    currentCalculs.forEach((calc, i) => {
+        grid.innerHTML += `<div class="q-card">
+            <div class="flex items-center gap-1">
+                <span class="opacity-30 text-[8px] font-bold">${i+1})&nbsp;&nbsp;</span>
+                <span class="text-[18px] tracking-wide" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.q} =</span>
+            </div>
+            <span class="res-text hidden text-[18px]" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.r}</span>
+        </div>`;
+    });
+
+    document.getElementById('setup-zone').classList.add('hidden');
+    document.getElementById('game-zone').classList.remove('hidden');
+}
+
+    function showCorrection() {
+        const firstRes = document.querySelector('.res-text');
+        const btn = document.getElementById('validate-btn');
+        if (!firstRes) return;
+
+        const isShowing = !firstRes.classList.contains('hidden');
+
+        if (isShowing) {
+            // --- CACHER LA CORRECTION ET RELANCER ---
+            document.querySelectorAll('.res-text').forEach(el => el.classList.add('hidden'));
+            btn.innerText = "👁️ correction";
+            btn.classList.replace('bg-red-500', 'bg-green-500');
+
+            const secondsLeftEl = document.getElementById('seconds-left');
+            const timeParts = secondsLeftEl.innerText.split(':');
+            let timeLeft = (parseInt(timeParts[0]) * 60) + parseInt(timeParts[1]);
+
+            // On relance seulement s'il reste du temps
+            if (timeLeft > 0) {
+                countdown = setInterval(() => {
+                    timeLeft--;
+                    let m = Math.floor(timeLeft / 60);
+                    let s = timeLeft % 60;
+                    secondsLeftEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                    
+                    if (timeLeft <= 10) secondsLeftEl.classList.add('text-red-500');
+                    if (timeLeft <= 0) { 
+                        clearInterval(countdown); 
+                        playDing(); 
+                        ouvrirModalFin(); 
+                    }
+                }, 1000);
+            }
+        } else {
+            // --- STOPPER ET AFFICHER LA CORRECTION ---
+            clearInterval(countdown);
+            document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden'));
+            btn.innerText = "🙈 masquer";
+            btn.classList.replace('bg-green-500', 'bg-red-500');
+        }
+    }
+	
     function retourReglages() { clearInterval(countdown); document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
 
     function exportToPDF() {
@@ -370,7 +484,7 @@
         
         [
             document.getElementById('btn-retour-header'), 
-            document.getElementById('btn-retour-liste'), // Ajouté ici
+            document.getElementById('btn-retour-liste'),
             document.getElementById('btn-aide'), 
             document.getElementById('mainAddBtn'), 
             document.getElementById('btn-fermer-aide'), 
@@ -385,12 +499,8 @@
         const savedSound = localStorage.getItem('calcul_sound_pref');
         if(savedSound) document.getElementById('sound-select').value = savedSound;
     }
-	
-
-	/* Remplacez les deux anciennes fonctions ouvrirAide par celle-ci uniquement */
-	function ouvrirAide() { 
-		document.getElementById('modal-aide').style.display = 'flex'; 
-	}
+    
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function ouvrirModalFin() { document.getElementById('modal-fin').style.display = 'flex'; }
     function fermerModalFin() { document.getElementById('modal-fin').style.display = 'none'; showCorrection(); }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
