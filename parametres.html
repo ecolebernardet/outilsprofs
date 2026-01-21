@@ -80,8 +80,9 @@
         }
         .tab-btn.active { color: var(--text-main); border-bottom-color: var(--text-main); }
         
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
-        .tab-content.active { display: block; }
+        /* CORRECTIF : Gestion stricte de l'affichage des onglets */
+        .tab-content { display: none !important; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block !important; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -160,6 +161,15 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
+        /* --- ADAPTATION PC --- */
+        @media (min-width: 768px) {
+            .max-w-md { max-width: 1000px !important; }
+            #emploi.active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            #emploi .card-info:first-child { grid-column: span 2; }
+            #settingsContainer { grid-template-columns: repeat(3, 1fr); }
+            .theme-choice-btn { max-width: 200px; }
+        }
+
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
             50% { transform: scale(1.2); opacity: 1; }
@@ -299,17 +309,17 @@
                         • Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.
                     </p>
                 </div>
-				
-				<div class="card-info">
-					<h3 id="title-gen" class="font-black text-xs uppercase mb-2">🛠️ Générateurs</h3>
-					<p class="text-xs leading-relaxed">
-						Générez des outils et exercices personnalisés :<br>
-						• <strong>Calcul Mental, mots mêlés...</strong><br>
-						• <strong>Export</strong> : Générez un PDF prêt à imprimer incluant les exercices et la correction.<br>
-						• <em>D'autres générateurs seront ajoutés prochainement pour enrichir cette section.</em>
-					</p>
-				</div>
-				
+                
+                <div class="card-info">
+                    <h3 id="title-gen" class="font-black text-xs uppercase mb-2">🛠️ Générateurs</h3>
+                    <p class="text-xs leading-relaxed">
+                        Générez des outils et exercices personnalisés :<br>
+                        • <strong>Calcul Mental, mots mêlés...</strong><br>
+                        • <strong>Export</strong> : Générez un PDF prêt à imprimer incluant les exercices et la correction.<br>
+                        • <em>D'autres générateurs seront ajoutés prochainement pour enrichir cette section.</em>
+                    </p>
+                </div>
+                
             </div>
 
             <div id="perso" class="tab-content">
@@ -400,15 +410,15 @@
             { id: 'obs', label: 'Observations', emoji: '✏️' },
             { id: 'compt', label: 'Compteur', emoji: '🚥' },
             { id: 'gen', label: 'Générateurs', emoji: '🛠️' },
-			{ id: 'outils', label: 'Outils', emoji: '🧰' }
+            { id: 'outils', label: 'Outils', emoji: '🧰' }
         ];
 
         const couleurs = Object.keys(mapCouleurs);
         let prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {
-			fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
-			liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
-			memos: 'purple', obs: 'green', compt: 'blue', gen: 'cyan', outils: 'blue'
-		};
+            fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
+            liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
+            memos: 'purple', obs: 'green', compt: 'blue', gen: 'cyan', outils: 'blue'
+        };
 
         function selectTheme(mode) {
             document.body.classList.toggle('light-mode', mode === 'light');
@@ -416,13 +426,22 @@
             appliquerCouleursGlobales(); 
         }
 
+        // CORRECTIF : Gestion propre de la navigation entre onglets
         function openTab(evt, tabName) {
-            const contents = document.getElementsByClassName("tab-content");
-            for (let c of contents) c.classList.remove("active");
-            const links = document.getElementsByClassName("tab-btn");
-            for (let l of links) l.classList.remove("active");
-            document.getElementById(tabName).classList.add("active");
+            const contents = document.querySelectorAll(".tab-content");
+            contents.forEach(c => {
+                c.classList.remove("active");
+                // On s'assure que le style inline ne force pas l'affichage
+                c.style.display = ""; 
+            });
+
+            const links = document.querySelectorAll(".tab-btn");
+            links.forEach(l => l.classList.remove("active"));
+
+            const target = document.getElementById(tabName);
+            target.classList.add("active");
             evt.currentTarget.classList.add("active");
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -476,11 +495,11 @@
             if (avatar) avatar.style.filter = isLight ? 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(4px 4px 8px rgba(255,255,255,0.15))';
 
             const mapping = {
-				'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
-				'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
-				'title-observations': 'obs', 'title-compteur': 'compt', 'title-gen': 'gen',
-				'title-outils': 'outils' // Ajout du mapping
-			};
+                'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
+                'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
+                'title-observations': 'obs', 'title-compteur': 'compt', 'title-gen': 'gen',
+                'title-outils': 'outils' 
+            };
             for (let [elId, prefId] of Object.entries(mapping)) {
                 const el = document.getElementById(elId);
                 if (el) el.style.color = mapCouleurs[prefs[prefId] || 'blue'];
@@ -493,7 +512,7 @@
                 { id: 'title-memos', key: 'aide_memos' }, { id: 'title-108h', key: 'aide_h108' },
                 { id: 'title-tirage', key: 'aide_tirage' }, { id: 'title-equipes', key: 'aide_equipes' },
                 { id: 'title-observations', key: 'aide_obs' }, { id: 'title-compteur', key: 'aide_compt_text' },
-                { id: 'title-calcul', key: 'aide_gen'}
+                { id: 'title-gen', key: 'aide_gen'}
             ];
             rubriques.forEach(item => {
                 const titreEl = document.getElementById(item.id);
