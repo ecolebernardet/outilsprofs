@@ -326,8 +326,14 @@
         }
         currentCalculs.sort(() => Math.random() - 0.5);
         currentCalculs.forEach((calc, i) => {
-            grid.innerHTML += `<div class="q-card"><div class="flex items-center gap-1"><span class="opacity-30 text-[8px] font-bold">${i+1})&nbsp;&nbsp;</span><span class="text-[18px] tracking-wide" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.q} =</span></div><span class="res-text hidden text-[18px]" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.r}</span></div>`;
-        });
+    grid.innerHTML += `<div class="q-card justify-start gap-2">
+        <div class="flex items-center">
+            <span class="opacity-30 text-[8px] font-bold min-w-[25px]">${i+1})</span>
+            <span class="text-[18px] tracking-wide" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.q} =</span>
+        </div>
+        <span class="res-text hidden text-[18px]" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.r}</span>
+    </div>`;
+});
 
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('game-zone').classList.remove('hidden');
