@@ -25,7 +25,8 @@
             margin: 0; padding: 0; 
             overflow: hidden; 
             height: 100vh; 
-            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Transition très longue pour un effet de dégradé temporel */
+            transition: background-color 2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         header { 
@@ -35,7 +36,6 @@
             position: relative; z-index: 20;
         }
 
-        /* Boutons circulaires du header */
         #btn-retour, #btn-aide { 
             width: 38px; height: 38px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
@@ -59,7 +59,7 @@
         }
 
         .controls.is-compact {
-            max-width: 180px; padding: 15px; opacity: 0.2; transform: scale(0.8);
+            max-width: 180px; padding: 15px; opacity: 0.15; transform: scale(0.8);
         }
         .controls.is-compact:hover { opacity: 1; transform: scale(1); }
         .controls.is-compact .settings-group, 
@@ -85,7 +85,7 @@
             50% { background-color: #660000; }
             100% { background-color: #ff0000; }
         }
-        .is-alerting { animation: flash-red 0.4s infinite !important; }
+        .is-alerting { animation: flash-red 1s infinite !important; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 500px; border-radius: 2rem; border: 1px solid var(--column-border); padding: 40px; }
@@ -131,11 +131,9 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-xl font-black uppercase mb-6 text-center">💡 Guide : Niveau Sonore</h2>
         <div class="text-[13px] leading-relaxed space-y-4 opacity-90 font-medium">
-            <p>L'écran réagit dynamiquement au bruit de la classe :</p>
-            <p>🟢 <strong>Silence :</strong> Fond vert.</p>
-            <p>🟡 <strong>Murmure :</strong> Jaune / Orange.</p>
-            <p>🔴 <strong>Bruit :</strong> Rouge vif.</p>
-            <p>🔥 <strong>Alerte :</strong> Clignotement si le seuil est dépassé.</p>
+            <p>Le fond réagit très doucement au bruit :</p>
+            <p>🐢 <strong>Transitions lentes :</strong> Les couleurs évoluent comme des vagues.</p>
+            <p>🔴 <strong>Mémoire du bruit :</strong> Si la classe fait du bruit, le rouge reste quelques secondes avant de redevenir vert doucement.</p>
         </div>
         <button onclick="fermerAide()" class="w-full p-4 rounded-xl font-bold uppercase mt-4 bg-white text-black">C'est clair</button>
     </div>
@@ -175,14 +173,36 @@
     let audioContext, analyser, microphone, isListening = false;
     let animationId, smoothedVolume = 0;
     let historyData = Array(50).fill(0);
-    const smoothingFactor = 0.12; 
+    
+    // Paramètres pour le dégradé lent
+    const smoothingFactor = 0.02; // Très lent pour l'effet "vague"
+    let targetVolume = 0;
+    let holdTimer = 0;
 
     function setPageColor(vol) {
-        smoothedVolume += (vol - smoothedVolume) * smoothingFactor;
+        // Si le nouveau volume est plus haut, on monte la cible
+        if (vol > targetVolume) {
+            targetVolume = vol;
+            holdTimer = 180; // Garde le niveau haut pendant environ 3 secondes (60fps * 3)
+        } else {
+            // Sinon, on attend que le timer expire avant de baisser la cible
+            if (holdTimer > 0) {
+                holdTimer--;
+            } else {
+                targetVolume += (vol - targetVolume) * 0.01; // Redescente encore plus lente
+            }
+        }
+
+        // Application du lissage sur le volume final
+        smoothedVolume += (targetVolume - smoothedVolume) * smoothingFactor;
+        
         const hue = Math.max(0, 120 - (smoothedVolume * 1.5)); 
-        const sat = 50 + (smoothedVolume * 0.4);
-        const light = Math.max(25, 40 - (smoothedVolume * 0.15));
-        if (isListening) document.body.style.backgroundColor = `hsl(${hue}, ${sat}%, ${light}%)`;
+        const sat = 40 + (smoothedVolume * 0.5);
+        const light = Math.max(20, 35 - (smoothedVolume * 0.1));
+
+        if (isListening) {
+            document.body.style.backgroundColor = `hsl(${hue}, ${sat}%, ${light}%)`;
+        }
     }
 
     slider.oninput = () => { document.getElementById('threshold-value').textContent = slider.value + '%'; };
@@ -216,6 +236,7 @@
         document.body.style.backgroundColor = "";
         document.body.classList.remove('is-alerting');
         smoothedVolume = 0;
+        targetVolume = 0;
     }
 
     function loop() {
@@ -225,13 +246,19 @@
         let sum = 0;
         for (let i = 0; i < array.length; i++) sum += array[i];
         let average = sum / array.length;
-        let volume = Math.min(100, Math.round(average * 2.5)); 
+        
+        // Volume amplifié pour plus de réactivité dans le rouge
+        let volume = Math.min(100, Math.round(average * 2.8)); 
+        
         setPageColor(volume);
-        if (volume > parseInt(slider.value)) {
+        
+        const threshold = parseInt(slider.value);
+        if (smoothedVolume > threshold) {
             document.body.classList.add('is-alerting');
         } else {
             document.body.classList.remove('is-alerting');
         }
+        
         updateHistory(volume);
         animationId = requestAnimationFrame(loop);
     }
