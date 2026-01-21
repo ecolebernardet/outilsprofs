@@ -62,6 +62,16 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Adaptation des icônes sur PC */
+        @media (min-width: 768px) {
+            .icon-box {
+                width: 64px; height: 64px;
+                font-size: 32px;
+                border-radius: 16px;
+                margin-bottom: 12px;
+            }
+        }
+
         .tile-subtitle {
             color: var(--text-muted);
             margin-top: 1px;
@@ -107,105 +117,105 @@
         }
     </script>
 
-    <div class="w-full max-w-[360px]">
+    <div class="w-full max-w-[360px] md:max-w-6xl md:px-6">
         <header class="flex justify-between items-center mb-6 px-1">
             <button onclick="goToSettings()" class="ui-btn active:scale-90">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
-            <h1 class="text-[13px] font-black tracking-[0.4em] uppercase opacity-90">Outils Profs</h1>
+            <h1 class="text-[13px] md:text-[18px] font-black tracking-[0.4em] uppercase opacity-90">Outils Profs</h1>
             <img src="outilsprofs_icone.png" alt="Avatar" class="header-avatar">
         </header>
 
-        <nav id="grid-menu" class="grid grid-cols-2 gap-3">
-            <div data-id="inscr" class="menu-card p-3">
+        <nav id="grid-menu" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+            <div data-id="inscr" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="maclasse.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📝</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Ma classe</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">enregistrement & édition</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Ma classe</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">enregistrement & édition</span>
                 </a>
             </div>
 
-            <div data-id="liens" class="menu-card p-3">
+            <div data-id="liens" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="liens.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🔗</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Liens</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">bibliothèque de favoris</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Liens</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">bibliothèque de favoris</span>
                 </a>
             </div>
 
-            <div data-id="h108" class="menu-card p-3">
+            <div data-id="h108" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="108heures.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">⏱️</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">108 heures</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">suivi des réunions</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">108 heures</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">suivi des réunions</span>
                 </a>
             </div>
 
-            <div data-id="memos" class="menu-card p-3">
+            <div data-id="memos" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="memos.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📒</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Mémos</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">pense-bêtes</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Mémos</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">pense-bêtes</span>
                 </a>
             </div>
 
-            <div data-id="tirage" class="menu-card p-3">
+            <div data-id="tirage" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="tirage.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🎲</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Tirage</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">nom au hasard</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Tirage</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">nom au hasard</span>
                 </a>
             </div>
 
-            <div data-id="equipes" class="menu-card p-3">
+            <div data-id="equipes" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="equipes.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">👥</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Équipes</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">groupes équilibrés</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Équipes</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">groupes équilibrés</span>
                 </a>
             </div>
 
-            <div data-id="obs" class="menu-card p-3">
+            <div data-id="obs" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="observations.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">✏️</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Observations</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">suivi des élèves</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Observations</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">suivi des élèves</span>
                 </a>
             </div>
 
-            <div data-id="compt" class="menu-card p-3">
+            <div data-id="compt" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="compteur.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🚥</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Compteur</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">comportement</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Compteur</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">comportement</span>
                 </a>
             </div>
 
-            <div data-id="gen" class="menu-card p-3">
+            <div data-id="gen" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="generateurs.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🛠️</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Générateurs</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">outils pédagogiques</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Générateurs</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">outils pédagogiques</span>
                 </a>
             </div>
 
-            <div data-id="outils" class="menu-card p-3">
+            <div data-id="outils" class="menu-card p-3 md:p-6">
                 <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                 <a href="outils.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🧰</div>
-                    <h2 class="font-bold text-[11px] uppercase tracking-wider">Outils</h2>
-                    <span class="tile-subtitle text-[8px] font-semibold">gestion de la classe</span>
+                    <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Outils</h2>
+                    <span class="tile-subtitle text-[8px] md:text-[11px] font-semibold">gestion de la classe</span>
                 </a>
             </div>
         </nav>
