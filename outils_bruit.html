@@ -25,8 +25,7 @@
             margin: 0; padding: 0; 
             overflow: hidden; 
             height: 100vh; 
-            /* Transition très longue pour un effet de dégradé temporel */
-            transition: background-color 2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background-color 1.5s ease; /* Transition douce pour la couleur */
         }
         
         header { 
@@ -39,7 +38,6 @@
         #btn-retour, #btn-aide { 
             width: 38px; height: 38px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.1s;
         }
 
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
@@ -71,7 +69,6 @@
         .btn-start {
             width: 100%; padding: 20px; border-radius: 20px; font-weight: 900; 
             text-transform: uppercase; font-size: 14px; cursor: pointer; border: none;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
         }
 
         .history-container {
@@ -104,7 +101,7 @@
 </header>
 
 <div class="max-w-[1200px] mx-auto w-full px-5 mt-6 flex justify-start">
-    <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase transition-transform active:scale-95 shadow-md">
+    <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase shadow-md transition-transform active:scale-95">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
         Retour aux outils
     </a>
@@ -114,7 +111,7 @@
     <div class="controls">
         <div class="settings-group">
             <div class="mb-6 text-center">
-                <p class="text-[13px] font-black uppercase opacity-40 tracking-widest">Réglages de la classe</p>
+                <p class="text-[13px] font-black uppercase opacity-40 tracking-widest">Moyenne intelligente</p>
             </div>
             <div class="flex justify-between mb-3">
                 <span class="text-[11px] font-black uppercase opacity-70">Tolérance au bruit</span>
@@ -131,11 +128,12 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-xl font-black uppercase mb-6 text-center">💡 Guide : Niveau Sonore</h2>
         <div class="text-[13px] leading-relaxed space-y-4 opacity-90 font-medium">
-            <p>Le fond réagit très doucement au bruit :</p>
-            <p>🐢 <strong>Transitions lentes :</strong> Les couleurs évoluent comme des vagues.</p>
-            <p>🔴 <strong>Mémoire du bruit :</strong> Si la classe fait du bruit, le rouge reste quelques secondes avant de redevenir vert doucement.</p>
+            <p>Cet outil ignore les bruits courts et accidentels.</p>
+            <p>📊 <strong>Moyenne sur 3s :</strong> La couleur change seulement si le bruit persiste.</p>
+            <p>🟢 <strong>Calme :</strong> Vert.</p>
+            <p>🔴 <strong>Bruit continu :</strong> Le rouge s'installe progressivement.</p>
         </div>
-        <button onclick="fermerAide()" class="w-full p-4 rounded-xl font-bold uppercase mt-4 bg-white text-black">C'est clair</button>
+        <button onclick="fermerAide()" class="w-full p-4 rounded-xl font-bold uppercase mt-4 bg-white text-black">C'est parti</button>
     </div>
 </div>
 
@@ -171,34 +169,19 @@
     });
 
     let audioContext, analyser, microphone, isListening = false;
-    let animationId, smoothedVolume = 0;
+    let animationId;
     let historyData = Array(50).fill(0);
     
-    // Paramètres pour le dégradé lent
-    const smoothingFactor = 0.02; // Très lent pour l'effet "vague"
-    let targetVolume = 0;
-    let holdTimer = 0;
+    // --- LOGIQUE MOYENNE GLISSANTE ---
+    // On stocke les 120 dernières mesures (environ 2 secondes à 60fps)
+    let bufferVolume = [];
+    const bufferSize = 120; 
 
-    function setPageColor(vol) {
-        // Si le nouveau volume est plus haut, on monte la cible
-        if (vol > targetVolume) {
-            targetVolume = vol;
-            holdTimer = 180; // Garde le niveau haut pendant environ 3 secondes (60fps * 3)
-        } else {
-            // Sinon, on attend que le timer expire avant de baisser la cible
-            if (holdTimer > 0) {
-                holdTimer--;
-            } else {
-                targetVolume += (vol - targetVolume) * 0.01; // Redescente encore plus lente
-            }
-        }
-
-        // Application du lissage sur le volume final
-        smoothedVolume += (targetVolume - smoothedVolume) * smoothingFactor;
-        
-        const hue = Math.max(0, 120 - (smoothedVolume * 1.5)); 
-        const sat = 40 + (smoothedVolume * 0.5);
-        const light = Math.max(20, 35 - (smoothedVolume * 0.1));
+    function setPageColor(avgVol) {
+        // La couleur se base sur la MOYENNE du buffer
+        const hue = Math.max(0, 120 - (avgVol * 1.5)); 
+        const sat = 40 + (avgVol * 0.4);
+        const light = Math.max(20, 35 - (avgVol * 0.1));
 
         if (isListening) {
             document.body.style.backgroundColor = `hsl(${hue}, ${sat}%, ${light}%)`;
@@ -221,6 +204,7 @@
             btnAction.textContent = "Arrêter";
             btnAction.style.backgroundColor = "#444";
             btnAction.style.color = "#fff";
+            bufferVolume = []; // Reset du buffer
             loop();
         } catch (err) { alert("Micro non accessible."); }
     }
@@ -235,36 +219,40 @@
         btnAction.style.color = contrast;
         document.body.style.backgroundColor = "";
         document.body.classList.remove('is-alerting');
-        smoothedVolume = 0;
-        targetVolume = 0;
     }
 
     function loop() {
         if (!isListening) return;
         const array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
-        let sum = 0;
-        for (let i = 0; i < array.length; i++) sum += array[i];
-        let average = sum / array.length;
         
-        // Volume amplifié pour plus de réactivité dans le rouge
-        let volume = Math.min(100, Math.round(average * 2.8)); 
+        let sumMeasure = 0;
+        for (let i = 0; i < array.length; i++) sumMeasure += array[i];
+        let instantVol = Math.min(100, Math.round((sumMeasure / array.length) * 2.8)); 
         
-        setPageColor(volume);
+        // Ajouter au buffer et limiter sa taille
+        bufferVolume.push(instantVol);
+        if (bufferVolume.length > bufferSize) bufferVolume.shift();
+
+        // Calculer la moyenne glissante
+        let sumBuffer = bufferVolume.reduce((a, b) => a + b, 0);
+        let averageVol = sumBuffer / bufferVolume.length;
+
+        setPageColor(averageVol);
         
         const threshold = parseInt(slider.value);
-        if (smoothedVolume > threshold) {
+        if (averageVol > threshold) {
             document.body.classList.add('is-alerting');
         } else {
             document.body.classList.remove('is-alerting');
         }
         
-        updateHistory(volume);
+        updateHistory(instantVol, averageVol);
         animationId = requestAnimationFrame(loop);
     }
 
-    function updateHistory(vol) {
-        historyData.push(vol);
+    function updateHistory(instant, average) {
+        historyData.push(instant);
         historyData.shift();
         const historyContainer = document.getElementById('history');
         historyContainer.innerHTML = '';
@@ -272,7 +260,9 @@
             const bar = document.createElement('div');
             bar.className = 'history-bar';
             bar.style.height = `${v}%`;
+            // Barre rouge si l'instant dépasse, mais fond de la barre plus sombre
             bar.style.backgroundColor = v > parseInt(slider.value) ? '#ff4444' : 'var(--theme-color)';
+            bar.style.opacity = "0.5";
             historyContainer.appendChild(bar);
         });
     }
