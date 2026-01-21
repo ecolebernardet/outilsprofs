@@ -36,90 +36,80 @@
             align-items: center; 
             justify-content: center; 
             padding: 20px;
-            gap: 40px;
+            gap: 30px;
         }
 
         @media (min-width: 768px) {
             .main-content {
                 flex-direction: row;
                 justify-content: center;
-                gap: 120px;
-                max-width: 1200px;
+                gap: 80px;
+                max-width: 1000px;
                 margin: 0 auto;
             }
         }
 
-        /* Jauge XL pour Tableau de Classe */
-        .visualizer-container { 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            flex-shrink: 0;
-        }
-
-        .gauge-track {
-            width: 120px; /* Jauge plus large */
-            height: 450px; /* Plus haute */
-            background: rgba(255, 255, 255, 0.05);
-            border: 8px solid var(--column-border); /* Bordure plus épaisse */
-            border-radius: 60px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.2);
-        }
-
-        #gauge-fill {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 0%;
-            background: #22c55e;
-            transition: height 0.1s ease-out, background-color 0.2s;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-        }
-
-        #emoji-status { 
-            font-size: 150px; /* Emoji géant */
-            margin-left: 60px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        @media (max-width: 768px) {
-            .visualizer-container { flex-direction: column; gap: 30px; }
-            #emoji-status { margin-left: 0; font-size: 100px; }
-            .gauge-track { height: 300px; width: 80px; }
-        }
-
-        .controls { width: 100%; max-width: 350px; background: var(--card-bg); padding: 30px; border-radius: 32px; border: 1px solid var(--column-border); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .visualizer-container { position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        input[type=range] { width: 100%; accent-color: var(--theme-color); cursor: pointer; height: 10px; border-radius: 5px; }
+        @media (min-width: 768px) {
+            .visualizer-container { width: 350px; height: 350px; }
+            svg.progress-ring { width: 350px; height: 350px; }
+            svg.progress-ring circle { r: 155; cx: 175; cy: 175; stroke-width: 15; }
+            #progress-bar { stroke-dasharray: 973.89; stroke-dashoffset: 973.89; }
+            #emoji-status { font-size: 110px; }
+        }
+
+        svg.progress-ring { transform: rotate(-90deg); filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.1s, stroke 0.3s;
+            stroke-linecap: round;
+        }
+
+        #emoji-status { font-size: 80px; position: absolute; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .controls { width: 100%; max-width: 320px; background: var(--card-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--column-border); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        
+        input[type=range] { width: 100%; accent-color: var(--theme-color); cursor: pointer; }
 
         .btn-start {
-            width: 100%; padding: 20px; border-radius: 20px; font-weight: 900; 
-            text-transform: uppercase; font-size: 14px; cursor: pointer; border: none;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            width: 100%; padding: 16px; border-radius: 16px; font-weight: 900; 
+            text-transform: uppercase; font-size: 13px; cursor: pointer; border: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
             transition: transform 0.1s, background-color 0.2s;
         }
-        .btn-start:active { transform: translateY(3px); }
+        .btn-start:hover { transform: translateY(-2px); }
+        .btn-start:active { transform: translateY(2px); }
 
+        /* Historique (Graphique) */
         .history-container {
-            width: 100%; height: 50px; display: flex; align-items: flex-end; gap: 3px;
-            margin-top: 25px; overflow: hidden; border-radius: 8px; background: rgba(0,0,0,0.08);
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.05);
         }
-        .history-bar { flex: 1; background: var(--theme-color); opacity: 0.7; min-width: 4px; border-radius: 3px 3px 0 0; }
+        .history-bar {
+            flex: 1;
+            background: var(--theme-color);
+            opacity: 0.6;
+            min-width: 3px;
+            border-radius: 2px 2px 0 0;
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 500px; border-radius: 2rem; border: 1px solid var(--column-border); padding: 40px; position: relative; }
-        .btn-modal-close { width: 100%; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 30px; position: relative; }
+        .btn-modal-close { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
 
         @keyframes flash-red {
             0% { background-color: var(--bg-page); }
-            50% { background-color: rgba(239, 68, 68, 0.4); }
+            50% { background-color: rgba(239, 68, 68, 0.3); }
             100% { background-color: var(--bg-page); }
         }
-        .is-alerting { animation: flash-red 0.3s infinite; }
+        .is-alerting { animation: flash-red 0.4s infinite; }
     </style>
 </head>
 <body class="flex flex-col">
@@ -130,51 +120,54 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
         </svg>
     </a>
-    <h1 id="pageTitle">Moniteur de Bruit Scolaire</h1>
+    <h1 id="pageTitle">Moniteur de Bruit</h1>
     <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
 </header>
 
-<div class="max-w-[1200px] mx-auto w-full px-5 mt-6">
-    <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase transition-transform active:scale-95 shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+<div class="max-w-[1000px] mx-auto w-full px-5 mt-4">
+    <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
         Retour aux outils
     </a>
 </div>
 
 <div class="main-content">
     <div class="visualizer-container">
-        <div class="gauge-track">
-            <div id="gauge-fill"></div>
-        </div>
+        <svg id="svg-ring" class="progress-ring" width="280" height="280">
+            <circle id="bg-circle" class="opacity-10" stroke="currentColor" stroke-width="12" fill="transparent" r="120" cx="140" cy="140"/>
+            <circle id="progress-bar" class="progress-ring__circle" stroke="var(--theme-color)" stroke-width="12" stroke-dasharray="753.98" stroke-dashoffset="753.98" fill="transparent" r="120" cx="140" cy="140"/>
+        </svg>
         <div id="emoji-status">🤫</div>
     </div>
 
     <div class="controls">
-        <div class="mb-6 text-center">
-            <p class="text-[13px] font-black uppercase opacity-40 tracking-widest">Réglages de la classe</p>
+        <div class="mb-6 text-center hidden md:block">
+            <p class="text-[12px] font-bold uppercase opacity-40 tracking-widest">Réglages</p>
         </div>
-        <div class="flex justify-between mb-3">
-            <span class="text-[11px] font-black uppercase opacity-70">Tolérance au bruit</span>
-            <span id="threshold-value" class="text-[12px] font-black">70%</span>
+        <div class="flex justify-between mb-2">
+            <span class="text-[10px] font-black uppercase opacity-60">Sensibilité du seuil</span>
+            <span id="threshold-value" class="text-[10px] font-black">70%</span>
         </div>
-        <input type="range" id="threshold-slider" min="5" max="100" value="70">
+        <input type="range" id="threshold-slider" min="10" max="100" value="70">
         
-        <div id="history" class="history-container"></div>
+        <div id="history" class="history-container">
+            </div>
 
-        <button id="btn-action" class="btn-start mt-8" onclick="toggleMic()">Démarrer l'écoute</button>
+        <button id="btn-action" class="btn-start mt-6" onclick="toggleMic()">Démarrer l'écoute</button>
     </div>
 </div>
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-xl font-black uppercase mb-6 text-center">💡 Guide : Niveau Sonore</h2>
-        <div class="text-[13px] leading-relaxed space-y-4 opacity-90 font-medium">
-            <p>Cet outil est conçu pour aider les élèves à réguler leur volume sonore de manière autonome.</p>
-            <p>1️⃣ Cliquez sur <strong>"Démarrer l'écoute"</strong>.</p>
-            <p>2️⃣ Réglez la <strong>tolérance</strong> selon l'activité (travail de groupe ou calme absolu).</p>
-            <p>3️⃣ Observez la jauge : elle devient <strong>rouge</strong> et l'emoji se fâche si le bruit est trop fort.</p>
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Niveau Sonore</h2>
+        <div class="text-[11px] md:text-[12px] leading-relaxed space-y-3 opacity-80 font-semibold">
+            <p>Cet outil permet de visualiser le volume sonore de la classe en temps réel.</p>
+            <p>🎤 Cliquez sur <strong>"Démarrer l'écoute"</strong> pour autoriser l'accès au micro.</p>
+            <p>⚙️ Utilisez le <strong>curseur de sensibilité</strong> pour définir la limite de bruit autorisée.</p>
+            <p>📊 Le petit graphique montre l'historique récent du bruit.</p>
+            <p>🚨 Si le volume dépasse le seuil, l'écran flashe pour alerter visuellement les élèves.</p>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Compris !</button>
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
 </div>
 
@@ -199,9 +192,6 @@
     const btnAide = document.getElementById('btn-aide');
     const btnFermerAide = document.getElementById('btn-fermer-aide');
     const historyContainer = document.getElementById('history');
-    const gaugeFill = document.getElementById('gauge-fill');
-    const emoji = document.getElementById('emoji-status');
-    const slider = document.getElementById('threshold-slider');
     
     const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
     const contrast = isDarkText ? '#000' : '#fff';
@@ -215,14 +205,19 @@
     
     if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = themeColor;
 
+    const circle = document.getElementById('progress-bar');
+    let radius = circle.r.baseVal.value;
+    let circumference = radius * 2 * Math.PI;
+    const emoji = document.getElementById('emoji-status');
+    const slider = document.getElementById('threshold-slider');
+
     let audioContext, analyser, microphone, isListening = false;
     let animationId;
-    let historyData = Array(50).fill(0);
+    let historyData = Array(40).fill(0); // Stockage des 40 dernières mesures
 
     function setProgress(percent) {
-        gaugeFill.style.height = percent + '%';
-        const hue = Math.max(0, 120 - (percent * 1.2)); 
-        gaugeFill.style.backgroundColor = `hsl(${hue}, 85%, 45%)`;
+        const offset = circumference - (percent / 100 * circumference);
+        circle.style.strokeDashoffset = offset;
     }
 
     slider.oninput = () => {
@@ -240,12 +235,12 @@
             microphone.connect(analyser);
 
             isListening = true;
-            btnAction.textContent = "Arrêter l'analyse";
-            btnAction.style.backgroundColor = "#444";
+            btnAction.textContent = "Arrêter";
+            btnAction.style.backgroundColor = "#555";
             btnAction.style.color = "#fff";
             
             loop();
-        } catch (err) { alert("Micro non accessible. Vérifiez les autorisations de votre navigateur."); }
+        } catch (err) { alert("Micro non accessible."); }
     }
 
     function stopMic() {
@@ -267,7 +262,7 @@
         let sum = 0;
         for (let i = 0; i < array.length; i++) sum += array[i];
         let average = sum / array.length;
-        let volume = Math.min(100, Math.round(average * 1.8)); // Sensibilité accrue pour TNI
+        let volume = Math.min(100, Math.round(average * 1.5)); // Boost pour la réactivité
         
         updateUI(volume);
         updateHistory(volume);
@@ -284,6 +279,7 @@
             const bar = document.createElement('div');
             bar.className = 'history-bar';
             bar.style.height = `${v}%`;
+            // Coloration de l'historique si dépassement
             if (v > parseInt(slider.value)) bar.style.background = '#ef4444';
             historyContainer.appendChild(bar);
         });
@@ -293,26 +289,36 @@
         setProgress(vol);
         const threshold = parseInt(slider.value);
         
-        if (vol <= 3) {
+        if (vol <= 2) {
             emoji.textContent = "🤫";
-            emoji.style.transform = "scale(1)";
+            circle.style.stroke = "var(--theme-color)";
         } else if (vol > threshold) {
             emoji.textContent = "😡";
-            emoji.style.transform = "scale(1.2)";
+            emoji.style.transform = "scale(1.3)";
+            circle.style.stroke = "#ef4444";
             document.body.classList.add('is-alerting');
-        } else if (vol > threshold * 0.75) {
+        } else if (vol > threshold * 0.7) {
             emoji.textContent = "😟";
             emoji.style.transform = "scale(1.1)";
+            circle.style.stroke = "#f97316";
             document.body.classList.remove('is-alerting');
         } else {
             emoji.textContent = "😊";
             emoji.style.transform = "scale(1)";
+            circle.style.stroke = "#22c55e";
             document.body.classList.remove('is-alerting');
         }
     }
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
+    window.addEventListener('resize', () => {
+        radius = circle.r.baseVal.value;
+        circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = circumference;
+        setProgress(0);
+    });
 </script>
 </body>
 </html>

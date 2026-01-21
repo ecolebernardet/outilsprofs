@@ -36,64 +36,30 @@
             align-items: center; 
             justify-content: center; 
             padding: 20px;
-            gap: 40px;
+            height: calc(100vh - 80px);
         }
 
-        @media (min-width: 768px) {
-            .main-content {
-                flex-direction: row;
-                justify-content: center;
-                gap: 120px;
-                max-width: 1200px;
-                margin: 0 auto;
-            }
+        .controls { 
+            width: 100%; max-width: 350px; background: var(--card-bg); padding: 30px; 
+            border-radius: 32px; border: 1px solid var(--column-border); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+            z-index: 10;
         }
 
-        /* Jauge XL pour Tableau de Classe */
-        .visualizer-container { 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            flex-shrink: 0;
+        /* État réduit quand le micro est actif */
+        .controls.is-compact {
+            max-width: 180px;
+            padding: 15px;
+            opacity: 0.3;
+            transform: scale(0.8);
         }
+        .controls.is-compact:hover { opacity: 1; transform: scale(1); }
+        .controls.is-compact .settings-group, 
+        .controls.is-compact .history-container { display: none; }
+        .controls.is-compact .btn-start { margin-top: 0; padding: 12px; font-size: 11px; }
 
-        .gauge-track {
-            width: 120px; /* Jauge plus large */
-            height: 450px; /* Plus haute */
-            background: rgba(255, 255, 255, 0.05);
-            border: 8px solid var(--column-border); /* Bordure plus épaisse */
-            border-radius: 60px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.2);
-        }
-
-        #gauge-fill {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 0%;
-            background: #22c55e;
-            transition: height 0.1s ease-out, background-color 0.2s;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-        }
-
-        #emoji-status { 
-            font-size: 150px; /* Emoji géant */
-            margin-left: 60px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        @media (max-width: 768px) {
-            .visualizer-container { flex-direction: column; gap: 30px; }
-            #emoji-status { margin-left: 0; font-size: 100px; }
-            .gauge-track { height: 300px; width: 80px; }
-        }
-
-        .controls { width: 100%; max-width: 350px; background: var(--card-bg); padding: 30px; border-radius: 32px; border: 1px solid var(--column-border); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
-        
         input[type=range] { width: 100%; accent-color: var(--theme-color); cursor: pointer; height: 10px; border-radius: 5px; }
 
         .btn-start {
@@ -115,11 +81,11 @@
         .btn-modal-close { width: 100%; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
 
         @keyframes flash-red {
-            0% { background-color: var(--bg-page); }
-            50% { background-color: rgba(239, 68, 68, 0.4); }
-            100% { background-color: var(--bg-page); }
+            0% { background-color: #ef4444; }
+            50% { background-color: #7f1d1d; }
+            100% { background-color: #ef4444; }
         }
-        .is-alerting { animation: flash-red 0.3s infinite; }
+        .is-alerting { animation: flash-red 0.5s infinite !important; }
     </style>
 </head>
 <body class="flex flex-col">
@@ -134,30 +100,18 @@
     <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
 </header>
 
-<div class="max-w-[1200px] mx-auto w-full px-5 mt-6">
-    <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase transition-transform active:scale-95 shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-        Retour aux outils
-    </a>
-</div>
-
 <div class="main-content">
-    <div class="visualizer-container">
-        <div class="gauge-track">
-            <div id="gauge-fill"></div>
-        </div>
-        <div id="emoji-status">🤫</div>
-    </div>
-
     <div class="controls">
-        <div class="mb-6 text-center">
-            <p class="text-[13px] font-black uppercase opacity-40 tracking-widest">Réglages de la classe</p>
+        <div class="settings-group">
+            <div class="mb-6 text-center">
+                <p class="text-[13px] font-black uppercase opacity-40 tracking-widest">Réglages de la classe</p>
+            </div>
+            <div class="flex justify-between mb-3">
+                <span class="text-[11px] font-black uppercase opacity-70">Tolérance au bruit</span>
+                <span id="threshold-value" class="text-[12px] font-black">70%</span>
+            </div>
+            <input type="range" id="threshold-slider" min="5" max="100" value="70">
         </div>
-        <div class="flex justify-between mb-3">
-            <span class="text-[11px] font-black uppercase opacity-70">Tolérance au bruit</span>
-            <span id="threshold-value" class="text-[12px] font-black">70%</span>
-        </div>
-        <input type="range" id="threshold-slider" min="5" max="100" value="70">
         
         <div id="history" class="history-container"></div>
 
@@ -169,10 +123,11 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-xl font-black uppercase mb-6 text-center">💡 Guide : Niveau Sonore</h2>
         <div class="text-[13px] leading-relaxed space-y-4 opacity-90 font-medium">
-            <p>Cet outil est conçu pour aider les élèves à réguler leur volume sonore de manière autonome.</p>
-            <p>1️⃣ Cliquez sur <strong>"Démarrer l'écoute"</strong>.</p>
-            <p>2️⃣ Réglez la <strong>tolérance</strong> selon l'activité (travail de groupe ou calme absolu).</p>
-            <p>3️⃣ Observez la jauge : elle devient <strong>rouge</strong> et l'emoji se fâche si le bruit est trop fort.</p>
+            <p>Cet outil transforme l'écran en indicateur de bruit géant.</p>
+            <p>1️⃣ Cliquez sur <strong>"Démarrer"</strong>. Le formulaire se réduira pour laisser place à la couleur.</p>
+            <p>2️⃣ Réglez la <strong>tolérance</strong> selon le calme souhaité.</p>
+            <p>3️⃣ Le fond passe du <strong>vert au rouge</strong>. S'il clignote, le seuil est dépassé !</p>
+            <p>4️⃣ Survolez le bouton <strong>"Arrêter"</strong> pour faire réapparaître les réglages.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Compris !</button>
     </div>
@@ -195,18 +150,16 @@
 
     const btnAction = document.getElementById('btn-action');
     const btnRetour = document.getElementById('btn-retour');
-    const btnRetourListe = document.getElementById('btn-retour-liste');
     const btnAide = document.getElementById('btn-aide');
     const btnFermerAide = document.getElementById('btn-fermer-aide');
     const historyContainer = document.getElementById('history');
-    const gaugeFill = document.getElementById('gauge-fill');
-    const emoji = document.getElementById('emoji-status');
     const slider = document.getElementById('threshold-slider');
+    const controls = document.querySelector('.controls');
     
     const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
     const contrast = isDarkText ? '#000' : '#fff';
 
-    [btnAction, btnRetour, btnRetourListe, btnAide, btnFermerAide].forEach(btn => {
+    [btnAction, btnRetour, btnAide, btnFermerAide].forEach(btn => {
         if(btn) {
             btn.style.backgroundColor = themeColor;
             btn.style.color = contrast;
@@ -219,10 +172,10 @@
     let animationId;
     let historyData = Array(50).fill(0);
 
-    function setProgress(percent) {
-        gaugeFill.style.height = percent + '%';
+    function setPageColor(percent) {
+        // Dégradé de 120 (vert) à 0 (rouge)
         const hue = Math.max(0, 120 - (percent * 1.2)); 
-        gaugeFill.style.backgroundColor = `hsl(${hue}, 85%, 45%)`;
+        document.body.style.backgroundColor = `hsl(${hue}, 70%, 40%)`;
     }
 
     slider.oninput = () => {
@@ -240,22 +193,25 @@
             microphone.connect(analyser);
 
             isListening = true;
-            btnAction.textContent = "Arrêter l'analyse";
+            controls.classList.add('is-compact');
+            btnAction.textContent = "Arrêter";
             btnAction.style.backgroundColor = "#444";
             btnAction.style.color = "#fff";
             
             loop();
-        } catch (err) { alert("Micro non accessible. Vérifiez les autorisations de votre navigateur."); }
+        } catch (err) { alert("Micro non accessible."); }
     }
 
     function stopMic() {
         isListening = false;
         cancelAnimationFrame(animationId);
         if (audioContext) audioContext.close();
+        
+        controls.classList.remove('is-compact');
         btnAction.textContent = "Démarrer l'écoute";
         btnAction.style.backgroundColor = themeColor;
         btnAction.style.color = contrast;
-        updateUI(0);
+        document.body.style.backgroundColor = "";
         document.body.classList.remove('is-alerting');
     }
 
@@ -267,7 +223,7 @@
         let sum = 0;
         for (let i = 0; i < array.length; i++) sum += array[i];
         let average = sum / array.length;
-        let volume = Math.min(100, Math.round(average * 1.8)); // Sensibilité accrue pour TNI
+        let volume = Math.min(100, Math.round(average * 1.8)); 
         
         updateUI(volume);
         updateHistory(volume);
@@ -278,7 +234,6 @@
     function updateHistory(vol) {
         historyData.push(vol);
         historyData.shift();
-        
         historyContainer.innerHTML = '';
         historyData.forEach(v => {
             const bar = document.createElement('div');
@@ -290,23 +245,11 @@
     }
 
     function updateUI(vol) {
-        setProgress(vol);
+        setPageColor(vol);
         const threshold = parseInt(slider.value);
-        
-        if (vol <= 3) {
-            emoji.textContent = "🤫";
-            emoji.style.transform = "scale(1)";
-        } else if (vol > threshold) {
-            emoji.textContent = "😡";
-            emoji.style.transform = "scale(1.2)";
+        if (vol > threshold) {
             document.body.classList.add('is-alerting');
-        } else if (vol > threshold * 0.75) {
-            emoji.textContent = "😟";
-            emoji.style.transform = "scale(1.1)";
-            document.body.classList.remove('is-alerting');
         } else {
-            emoji.textContent = "😊";
-            emoji.style.transform = "scale(1)";
             document.body.classList.remove('is-alerting');
         }
     }
