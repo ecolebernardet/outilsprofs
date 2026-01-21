@@ -39,21 +39,34 @@
             text-align: center; flex-grow: 1; letter-spacing: 0.1em;
         }
 
-        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 15px 20px 15px; }
+        /* Adaptation de la largeur pour PC */
+        .main-wrapper { 
+            width: 100%; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 0 15px 40px 15px; 
+            transition: max-width 0.4s ease;
+        }
+
+        /* Système de grille adaptative */
+        #tools-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
 
         .tool-card {
             background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 18px;
+            padding: 20px;
             border: 1px solid var(--column-border);
             box-shadow: var(--shadow-custom);
             display: flex;
             align-items: center;
             gap: 16px;
-            transition: transform 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
-            margin-bottom: 15px;
         }
 
         .tool-card:active { transform: scale(0.97); }
@@ -63,10 +76,28 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 26px; border: 1px solid var(--column-border);
             background: rgba(128, 128, 128, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        /* Styles Spécifiques PC */
+        @media (min-width: 768px) {
+            .main-wrapper { max-width: 900px; }
+            #tools-list { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .tool-card:hover { 
+                transform: translateY(-4px); 
+                border-color: currentColor; 
+                background: rgba(128, 128, 128, 0.03);
+            }
+            .tool-card:hover .icon-box { transform: rotate(-5deg) scale(1.1); }
+        }
+
+        @media (min-width: 1200px) {
+            .main-wrapper { max-width: 1100px; }
+            #tools-list { grid-template-columns: repeat(3, 1fr); }
         }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 30px; position: relative; }
         
         .btn-modal-close {
             width: 100%; padding: 14px; border-radius: 12px;
@@ -96,7 +127,7 @@
         <a href="outils_timer.html" class="tool-card">
             <div class="icon-box" id="icon-timer">⏱️</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-timer">Minuteur & Chrono</h2>
+                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-timer">Minuteur & Chrono</h2>
                 <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Gérer le temps des activités</p>
             </div>
         </a>
@@ -104,7 +135,7 @@
         <a href="outils_bruit.html" class="tool-card">
             <div class="icon-box" id="icon-bruit">🔈</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-bruit">Niveau sonore</h2>
+                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-bruit">Niveau sonore</h2>
                 <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Visualiser le bruit en classe</p>
             </div>
         </a>
@@ -112,7 +143,7 @@
         <a href="outils_ambiances.html" class="tool-card">
             <div class="icon-box" id="icon-musique">🎵</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-musique">Ambiances Zen</h2>
+                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-musique">Ambiances Zen</h2>
                 <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Musiques de fond pour le travail</p>
             </div>
         </a>
@@ -120,7 +151,7 @@
         <a href="outils_feux.html" class="tool-card">
             <div class="icon-box" id="icon-feux">🚦</div>
             <div>
-                <h2 class="font-black text-[13px] uppercase tracking-wide" id="title-feux">Feux de classe</h2>
+                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-feux">Feux de classe</h2>
                 <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Indiquer le mode de travail actuel</p>
             </div>
         </a>
@@ -131,12 +162,12 @@
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide Outils</h2>
-        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
+        <div class="text-[11px] md:text-[12px] leading-relaxed space-y-3 opacity-80 font-semibold">
             <p>Cette section regroupe des utilitaires pour faciliter la gestion quotidienne de votre classe.</p>
             <p>⏱️ Le <strong>Minuteur</strong> vous aide à rythmer les séances et les transitions.</p>
-            <p>🔈 Le <strong>Niveau Sonore</strong> (si disponible sur votre navigateur) permet de réguler le volume sonore durant les ateliers.</p>
+            <p>🔈 Le <strong>Niveau Sonore</strong> permet de réguler le volume sonore durant les ateliers.</p>
             <p>🎵 Les <strong>Ambiances Zen</strong> proposent des sons relaxants pour favoriser la concentration.</p>
-            <p>🚦 Les <strong>Feux de classe</strong> servent de repère visuel pour indiquer si les élèves peuvent parler ou se déplacer.</p>
+            <p>🚦 Les <strong>Feux de classe</strong> servent de repère visuel pour indiquer le mode de travail.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -153,12 +184,11 @@
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.outils || 'blue'; // Utilise la couleur de la tuile "outils"
+        const colPref = themePrefs.outils || 'blue'; 
         const hexa = mapCouleurs[colPref];
         const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
         const contrast = isDarkText ? '#000' : '#fff';
 
-        // 1. Boutons du header et de la modal
         const boutonsSoles = [
             document.getElementById('btn-retour'), 
             document.getElementById('btn-aide'), 
@@ -172,11 +202,9 @@
             }
         });
         
-        // 2. Titre de l'aide
         const titreAide = document.getElementById('titre-aide');
         if(titreAide) titreAide.style.color = hexa;
 
-        // 3. Liste des tuiles
         const elementsOutils = [
             { icon: 'icon-timer', title: 'title-timer' },
             { icon: 'icon-bruit', title: 'title-bruit' },
