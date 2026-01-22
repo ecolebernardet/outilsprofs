@@ -18,7 +18,7 @@
             --header-bg: #ffffff; --card-bg: #ffffff;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
         
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--column-border);
@@ -30,48 +30,74 @@
         #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
-        .main-wrapper { 
-            width: 100%; 
-            max-width: 1200px; /* Augmenté de 500px à 1200px pour le PC */
-            margin: 0 auto; 
-            padding: 20px 15px; 
-        }
+        .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
-        /* Jauge de bruit */
         .gauge-container {
             background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 40px 30px; /* Augmenté légèrement pour l'équilibre visuel */
+            padding: 40px 30px;
             border: 1px solid var(--column-border);
             text-align: center;
-            width: 100%; /* S'assure de prendre toute la largeur du wrapper */
         }
 
-        .progress-bg {
-            width: 100%;
-            height: 80px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 4px solid var(--bg-page);
-            position: relative;
+        /* Jauge Verticale + Graduations */
+        .gauge-flex-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
             margin: 20px 0;
         }
 
+        .graduations {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 400px;
+            padding: 5px 0;
+            font-size: 10px;
+            font-weight: 900;
+            opacity: 0.5;
+            text-align: right;
+        }
+
+        .graduation-line { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+        .line-tick { width: 10px; height: 2px; background: currentColor; }
+
+        .progress-bg {
+            width: 80px;
+            height: 400px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 40px;
+            overflow: hidden;
+            border: 4px solid var(--bg-page);
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+        }
+
         #progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
-            transition: width 0.1s ease-out;
-            border-radius: 0 15px 15px 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(0deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
+            transition: height 0.1s ease-out;
+            border-radius: 40px 40px 0 0;
         }
 
         .status-text { font-weight: 900; text-transform: uppercase; font-size: 1.5rem; margin-top: 10px; }
 
         #btn-start {
-            width: 100%; padding: 16px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none;
-            transition: transform 0.2s;
+            width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
+            text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto; display: block;
+        }
+
+        input[type=range] { width: 100%; accent-color: var(--theme-color); }
+
+        /* Historique */
+        .history-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--column-border);
         }
 
         /* Modale */
@@ -83,7 +109,7 @@
 <body>
 
 <header>
-    <a href="outils.html" id="btn-retour">
+    <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
         </svg>
@@ -93,17 +119,46 @@
 </header>
 
 <div class="main-wrapper">
+    <div class="mb-4">
+        <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux outils
+        </a>
+    </div>
+
     <div class="gauge-container">
-        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest">Volume Ambiant</p>
+        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest">Capteur Microphone</p>
         
-        <div class="progress-bg">
-            <div id="progress-bar"></div>
+        <div class="gauge-flex-wrapper">
+            <div class="graduations">
+                <div class="graduation-line"><span>MAX</span><div class="line-tick"></div></div>
+                <div class="graduation-line"><span>80</span><div class="line-tick"></div></div>
+                <div class="graduation-line"><span>60</span><div class="line-tick"></div></div>
+                <div class="graduation-line"><span>40</span><div class="line-tick"></div></div>
+                <div class="graduation-line"><span>20</span><div class="line-tick"></div></div>
+                <div class="graduation-line"><span>0</span><div class="line-tick"></div></div>
+            </div>
+            <div class="progress-bg">
+                <div id="progress-bar"></div>
+            </div>
         </div>
 
         <div id="status-label" class="status-text" style="color: #22c55e;">SILENCE</div>
-        <p id="db-display" class="text-[12px] font-bold opacity-40 mt-2">Prêt à mesurer</p>
+        
+        <div class="max-w-xs mx-auto mt-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
+                <span id="sens-value" class="text-[10px] font-black">x2.0</span>
+            </div>
+            <input type="range" id="sens-slider" min="0.5" max="5" step="0.1" value="2" oninput="updateSens(this.value)">
+        </div>
 
-        <button id="btn-start" onclick="toggleMic()">Démarrer le micro</button>
+        <button id="btn-start" onclick="toggleMic()">Démarrer la mesure</button>
+
+        <div class="history-container">
+            <p class="text-[10px] font-black opacity-50 uppercase tracking-widest mb-4">Historique (5 min)</p>
+            <canvas id="noise-chart" height="100" style="width: 100%; height: 100px;"></canvas>
+        </div>
     </div>
 </div>
 
@@ -111,10 +166,9 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Sonomètre</h2>
         <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
-            <p>Cet outil permet de visualiser le niveau sonore de la classe en temps réel.</p>
-            <p>🎤 Cliquez sur <strong>Démarrer</strong> et autorisez l'accès au micro.</p>
-            <p>🟢 <strong>Vert :</strong> Calme parfait.<br>🟡 <strong>Jaune :</strong> Chuchotements / Travail.<br>🔴 <strong>Rouge :</strong> Trop de bruit !</p>
-            <p>⚠️ Les valeurs sont indicatives et dépendent de la sensibilité de votre micro.</p>
+            <p>Visualisez le niveau sonore et son évolution historique.</p>
+            <p>🎚️ <strong>Sensibilité :</strong> Augmentez si le micro est loin, baissez si le micro est très sensible.</p>
+            <p>📈 <strong>Graphique :</strong> Suit l'évolution du bruit sur les 5 dernières minutes.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -136,91 +190,91 @@
     const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
     const contrast = isDarkText ? '#000' : '#fff';
 
-    // Application du thème
-    const elementsTheme = [
-        document.getElementById('btn-retour'), 
-        document.getElementById('btn-aide'), 
-        document.getElementById('btn-fermer-aide'),
-        document.getElementById('btn-start')
+    const boutonsTheme = [
+        document.getElementById('btn-retour'), document.getElementById('btn-aide'), 
+        document.getElementById('btn-fermer-aide'), document.getElementById('btn-start'),
+        document.getElementById('btn-retour-liste')
     ];
-    elementsTheme.forEach(el => { if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; } });
+    boutonsTheme.forEach(btn => { if(btn) { btn.style.backgroundColor = themeColor; btn.style.color = contrast; } });
+    document.documentElement.style.setProperty('--theme-color', themeColor);
     if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = themeColor;
 
-    // Logique Sonomètre
-    let audioContext;
-    let analyser;
-    let microphone;
-    let javascriptNode;
-    let isListening = false;
+    // Logique Audio & Historique
+    let audioContext, analyser, microphone, javascriptNode, isListening = false;
+    let sensitivity = 2;
+    let history = [];
+    const maxHistory = 150;
+    const canvas = document.getElementById('noise-chart');
+    const ctx = canvas.getContext('2d');
+
+    function updateSens(val) {
+        sensitivity = parseFloat(val);
+        document.getElementById('sens-value').textContent = 'x' + sensitivity.toFixed(1);
+    }
 
     function toggleMic() {
         if (!isListening) {
             startMic();
             document.getElementById('btn-start').textContent = "Arrêter la mesure";
-            document.getElementById('btn-start').style.opacity = "0.7";
         } else {
             stopMic();
             document.getElementById('btn-start').textContent = "Démarrer le micro";
-            document.getElementById('btn-start').style.opacity = "1";
         }
         isListening = !isListening;
     }
 
     function startMic() {
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then(function(stream) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             microphone = audioContext.createMediaStreamSource(stream);
             javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-            analyser.smoothingTimeConstant = 0.8;
             analyser.fftSize = 1024;
-
             microphone.connect(analyser);
             analyser.connect(javascriptNode);
             javascriptNode.connect(audioContext.destination);
 
-            javascriptNode.onaudioprocess = function() {
+            javascriptNode.onaudioprocess = () => {
                 let array = new Uint8Array(analyser.frequencyBinCount);
                 analyser.getByteFrequencyData(array);
-                let values = 0;
-                for (let i = 0; i < array.length; i++) { values += array[i]; }
-                let average = values / array.length;
+                let average = array.reduce((a, b) => a + b) / array.length;
                 updateGauge(Math.round(average));
             };
-        })
-        .catch(function(err) {
-            alert("Erreur d'accès au micro : " + err);
         });
     }
 
-    function stopMic() {
-        if (audioContext) audioContext.close();
-        updateGauge(0);
-        document.getElementById('db-display').textContent = "Mesure arrêtée";
-    }
+    function stopMic() { if (audioContext) audioContext.close(); updateGauge(0); }
 
     function updateGauge(val) {
-        // Normalisation (le volume moyen tourne souvent entre 0 et 100)
-        let percentage = Math.min(val * 1.5, 100); 
-        const bar = document.getElementById('progress-bar');
+        let percentage = Math.min(val * sensitivity, 100); 
+        document.getElementById('progress-bar').style.height = percentage + "%";
+        
         const label = document.getElementById('status-label');
-        const dbText = document.getElementById('db-display');
+        if (percentage < 25) { label.textContent = "SILENCE"; label.style.color = "#22c55e"; }
+        else if (percentage < 65) { label.textContent = "BRUIT ACCEPTABLE"; label.style.color = "#eab308"; }
+        else { label.textContent = "TROP DE BRUIT !"; label.style.color = "#ef4444"; }
 
-        bar.style.width = percentage + "%";
-        dbText.textContent = "Intensité : " + val;
-
-        if (percentage < 30) {
-            label.textContent = "SILENCE";
-            label.style.color = "#22c55e";
-        } else if (percentage < 70) {
-            label.textContent = "MURMURES";
-            label.style.color = "#eab308";
-        } else {
-            label.textContent = "TROP DE BRUIT";
-            label.style.color = "#ef4444";
+        // Enregistrement historique toutes les secondes
+        if (isListening && Date.now() % 1000 < 100) { 
+            history.push(percentage);
+            if (history.length > maxHistory) history.shift();
+            drawHistory();
         }
+    }
+
+    function drawHistory() {
+        canvas.width = canvas.clientWidth;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const step = canvas.width / maxHistory;
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = themeColor;
+        history.forEach((point, i) => {
+            const x = i * step;
+            const y = canvas.height - (point / 100 * canvas.height);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
     }
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
