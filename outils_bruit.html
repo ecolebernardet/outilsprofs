@@ -27,58 +27,66 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #btn-retour { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
         .gauge-container {
-            background: var(--card-bg);
-            border-radius: 1.5rem;
-            padding: 40px 30px;
-            border: 1px solid var(--column-border);
-            text-align: center;
+            background: var(--card-bg); border-radius: 1.5rem; padding: 40px 30px; border: 1px solid var(--column-border); text-align: center;
         }
 
-        /* Jauge Horizontale */
+        /* ZONE UTILE SYNCHRONISÉE PAR LE PADDING */
         .progress-bg {
-            width: 100%;
+            display: grid;
+            grid-template-columns: 100%;
             height: 80px;
             background: rgba(0,0,0,0.1);
             border-radius: 40px;
-            overflow: hidden;
             border: 4px solid var(--bg-page);
             position: relative;
+            overflow: visible;
+            /* Padding identique pour la barre et le curseur */
+            padding: 0 40px; 
             margin-bottom: 10px;
         }
 
         #progress-bar {
+            grid-area: 1/1;
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
+            border-radius: 4px; /* Plus carré pour s'aligner sur le trait */
             transition: width 0.1s ease-out;
-            border-radius: 0 40px 40px 0;
+            z-index: 1;
         }
 
-        /* Graduations Horizontales */
+        #cursor-rail {
+            grid-area: 1/1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #threshold-marker {
+            position: absolute;
+            top: -12px;
+            bottom: -12px;
+            width: 8px; /* Plus épais comme demandé */
+            background: var(--text-page);
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            transform: translateX(-180%);
+            transition: left 0.1s ease-out;
+            z-index: 50;
+        }
+
         .graduations-h {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            font-size: 10px;
-            font-weight: 900;
-            opacity: 0.5;
-            margin-bottom: 30px;
+            display: flex; justify-content: space-between; padding: 0 40px; /* Aligné sur le padding de la jauge */
+            font-size: 10px; font-weight: 900; opacity: 0.5; margin-bottom: 30px;
         }
-
-        .grad-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .tick-v { width: 2px; height: 8px; background: currentColor; }
 
         #btn-start {
             width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
@@ -86,181 +94,138 @@
         }
 
         input[type=range] { width: 100%; accent-color: var(--theme-color); }
-
-        .history-container {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--column-border);
-        }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
-        .btn-modal-close { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
     </style>
 </head>
 <body>
 
 <header>
     <a href="index.html" id="btn-retour">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
     </a>
     <h1 id="pageTitle">Niveau Sonore</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+    <div style="width:38px"></div>
 </header>
 
 <div class="main-wrapper">
-    <div class="mb-4">
-        <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-            Retour aux outils
-        </a>
-    </div>
-
     <div class="gauge-container">
-        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest mb-6">Capteur Microphone</p>
+        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest mb-6">Mesure Microphone</p>
         
         <div class="progress-bg">
             <div id="progress-bar"></div>
+            <div id="cursor-rail">
+                <div id="threshold-marker"></div>
+            </div>
         </div>
 
         <div class="graduations-h">
-            <div class="grad-item"><div class="tick-v"></div><span>0</span></div>
-            <div class="grad-item"><div class="tick-v"></div><span>20</span></div>
-            <div class="grad-item"><div class="tick-v"></div><span>40</span></div>
-            <div class="grad-item"><div class="tick-v"></div><span>60</span></div>
-            <div class="grad-item"><div class="tick-v"></div><span>80</span></div>
-            <div class="grad-item"><div class="tick-v"></div><span>MAX</span></div>
+            <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>MAX</span>
         </div>
 
-        <div class="max-w-xs mx-auto mt-6">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
-                <span id="sens-value" class="text-[10px] font-black">x2.0</span>
+        <div class="max-w-xs mx-auto mt-6 space-y-6">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
+                    <span id="sens-value" class="text-[10px] font-black">x2.0</span>
+                </div>
+                <input type="range" id="sens-slider" min="0.5" max="5" step="0.1" value="2" oninput="updateSens(this.value)">
             </div>
-            <input type="range" id="sens-slider" min="0.5" max="5" step="0.1" value="2" oninput="updateSens(this.value)">
+
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-black uppercase opacity-60">Seuil d'alerte</span>
+                    <span id="seuil-value" class="text-[10px] font-black">80%</span>
+                </div>
+                <input type="range" id="seuil-slider" min="0" max="100" step="1" value="80" oninput="updateSeuil(this.value)">
+            </div>
         </div>
 
         <button id="btn-start" onclick="toggleMic()">Démarrer la mesure</button>
 
-        <div class="history-container">
-            <p class="text-[10px] font-black opacity-50 uppercase tracking-widest mb-4">Historique (5 min)</p>
-            <canvas id="noise-chart" height="100" style="width: 100%; height: 100px;"></canvas>
+        <div class="flex justify-center items-center gap-4 mt-8 py-2 bg-black/5 dark:bg-white/5 rounded-xl">
+            <span class="text-[10px] font-black uppercase opacity-60">Dépassements :</span>
+            <span id="compteur-alertes" class="text-xl font-black text-red-500">0</span>
+            <button onclick="resetCompteur()" class="text-[9px] opacity-40 uppercase font-bold underline ml-2">Reset</button>
         </div>
-    </div>
-</div>
-
-<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Sonomètre</h2>
-        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
-            <p>Visualisez le niveau sonore en temps réel.</p>
-            <p>🎚️ <strong>Sensibilité :</strong> Réglez selon la distance de votre micro.</p>
-            <p>📈 <strong>Graphique :</strong> Affiche l'évolution du bruit sur les 5 dernières minutes.</p>
-        </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
 </div>
 
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-
-    const mapCouleurs = { 
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 
-        'rose': '#f43f5e' 
-    };
-
+    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
     const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
     const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
-    const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
-    const contrast = isDarkText ? '#000' : '#fff';
-
-    const boutonsTheme = [
-        document.getElementById('btn-retour'), document.getElementById('btn-aide'), 
-        document.getElementById('btn-fermer-aide'), document.getElementById('btn-start'),
-        document.getElementById('btn-retour-liste')
-    ];
-    boutonsTheme.forEach(btn => { if(btn) { btn.style.backgroundColor = themeColor; btn.style.color = contrast; } });
+    const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
+    
+    document.getElementById('btn-start').style.backgroundColor = themeColor;
+    document.getElementById('btn-start').style.color = contrast;
+    document.getElementById('btn-retour').style.backgroundColor = themeColor;
+    document.getElementById('btn-retour').style.color = contrast;
     document.documentElement.style.setProperty('--theme-color', themeColor);
 
     let audioContext, analyser, microphone, javascriptNode, isListening = false;
-    let sensitivity = 2;
-    let history = [];
-    const maxHistory = 150;
-    const canvas = document.getElementById('noise-chart');
-    const ctx = canvas.getContext('2d');
+    let sensitivity = 2, seuilAlerte = 80, countAlertes = 0, peutCompter = true;
 
     function updateSens(val) {
         sensitivity = parseFloat(val);
         document.getElementById('sens-value').textContent = 'x' + sensitivity.toFixed(1);
     }
 
+    function updateSeuil(val) {
+        seuilAlerte = parseInt(val);
+        document.getElementById('seuil-value').textContent = seuilAlerte + "%";
+        document.getElementById('threshold-marker').style.left = seuilAlerte + "%";
+    }
+
     function toggleMic() {
         if (!isListening) {
-            startMic();
-            document.getElementById('btn-start').textContent = "Arrêter la mesure";
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                audioContext = new AudioContext();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+                javascriptNode.onaudioprocess = () => {
+                    let array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    let average = array.reduce((a, b) => a + b) / array.length;
+                    updateGauge(Math.round(average));
+                };
+            });
+            document.getElementById('btn-start').textContent = "Arrêter";
         } else {
-            stopMic();
-            document.getElementById('btn-start').textContent = "Démarrer le micro";
+            if (audioContext) audioContext.close();
+            updateGauge(0);
+            document.getElementById('btn-start').textContent = "Démarrer la mesure";
         }
         isListening = !isListening;
     }
 
-    function startMic() {
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(stream);
-            javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-            analyser.fftSize = 1024;
-            microphone.connect(analyser);
-            analyser.connect(javascriptNode);
-            javascriptNode.connect(audioContext.destination);
-
-            javascriptNode.onaudioprocess = () => {
-                let array = new Uint8Array(analyser.frequencyBinCount);
-                analyser.getByteFrequencyData(array);
-                let average = array.reduce((a, b) => a + b) / array.length;
-                updateGauge(Math.round(average));
-            };
-        });
-    }
-
-    function stopMic() { if (audioContext) audioContext.close(); updateGauge(0); }
-
     function updateGauge(val) {
         let percentage = Math.min(val * sensitivity, 100); 
-        document.getElementById('progress-bar').style.width = percentage + "%";
+        const bar = document.getElementById('progress-bar');
+        bar.style.width = percentage + "%";
 
-        if (isListening && Date.now() % 1000 < 100) { 
-            history.push(percentage);
-            if (history.length > maxHistory) history.shift();
-            drawHistory();
+        if (percentage >= seuilAlerte) {
+            bar.classList.add('is-alerting');
+            if (peutCompter) {
+                countAlertes++;
+                document.getElementById('compteur-alertes').textContent = countAlertes;
+                peutCompter = false;
+            }
+        } else {
+            bar.classList.remove('is-alerting');
+            peutCompter = true;
         }
     }
 
-    function drawHistory() {
-        canvas.width = canvas.clientWidth;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const step = canvas.width / maxHistory;
-        ctx.beginPath();
-        ctx.lineWidth = 3;
-        ctx.lineJoin = "round";
-        ctx.strokeStyle = themeColor;
-        history.forEach((point, i) => {
-            const x = i * step;
-            const y = canvas.height - (point / 100 * canvas.height);
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
+    function resetCompteur() {
+        countAlertes = 0;
+        document.getElementById('compteur-alertes').textContent = "0";
     }
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+    updateSeuil(80);
 </script>
 </body>
 </html>
