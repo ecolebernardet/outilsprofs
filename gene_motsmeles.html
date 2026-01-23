@@ -454,9 +454,12 @@
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        
         const rawTitle = document.getElementById('grid-title').value || "Mots Mêlés";
         const mots = document.getElementById('word-list').value.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0).sort((a,b)=>a.localeCompare(b,'fr'));
-        const cellSize = 8, startX = (210 - (gridSize * cellSize)) / 2, startY = 40;
+        const cellSize = 8;
+        const startX = (210 - (gridSize * cellSize)) / 2;
+        const startY = 40;
 
         const dessinerListeMots = (yDepart) => {
             doc.setTextColor(0).setFont("helvetica", "bold").setFontSize(12).text("Mots à trouver :", startX, yDepart + 15);
@@ -467,27 +470,42 @@
             });
         };
 
+        // --- PAGE 1 : LA GRILLE VIERGE ---
         doc.setFont("helvetica", "bold").setFontSize(18).text(rawTitle, 105, 20, { align: "center" });
         finalGrid.forEach((row, r) => row.forEach((obj, c) => {
             const x = startX + (c * cellSize), y = startY + (r * cellSize);
             doc.setDrawColor(180).setLineWidth(0.1).rect(x, y, cellSize, cellSize);
-            doc.setTextColor(0).setFontSize(11).text(obj.char, x + 4, y + 5.5, { align: "center" });
+            doc.setTextColor(0).setFontSize(11).text(obj.char, x + (cellSize / 2), y + (cellSize / 2) + 1.5, { align: "center" });
         }));
         dessinerListeMots(startY + (gridSize * cellSize));
 
+        // --- PAGE 2 : LA CORRECTION ---
         doc.addPage().setFont("helvetica", "bold").setFontSize(18).text(rawTitle + " (CORRECTION)", 105, 20, { align: "center" });
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        doc.setDrawColor(mapCouleurs[themePrefs.gen || 'cyan']).setLineWidth(cellSize - 3).setLineCap(1);
-        window.placedWords.forEach(w => {
-            doc.setGState(new doc.GState({ opacity: 0.35 }));
-            doc.line(startX + (w.c1 * cellSize) + cellSize/2, startY + (w.r1 * cellSize) + cellSize/2, startX + (w.c2 * cellSize) + cellSize/2, startY + (w.r2 * cellSize) + cellSize/2);
+        
+        // 1. DESSINER LES SURLIGNAGES (GRIS UNIQUE)
+        // On utilise un gris moyen avec une opacité légère pour l'effet feutre
+        doc.setGState(new doc.GState({ opacity: 0.3 }));
+        doc.setDrawColor(150, 150, 150); // Gris neutre
+        doc.setLineCap("round");
+        doc.setLineWidth(cellSize - 4); // Surlignage fin
+
+        window.placedWords.forEach((w) => {
+            const x1 = startX + (w.c1 * cellSize) + (cellSize / 2);
+            const y1 = startY + (w.r1 * cellSize) + (cellSize / 2);
+            const x2 = startX + (w.c2 * cellSize) + (cellSize / 2);
+            const y2 = startY + (w.r2 * cellSize) + (cellSize / 2);
+            doc.line(x1, y1, x2, y2);
         });
+
+        // 2. REDESSINER LES LETTRES ET LA GRILLE
+        doc.setGState(new doc.GState({ opacity: 1 })); 
         finalGrid.forEach((row, r) => row.forEach((obj, c) => {
             const x = startX + (c * cellSize), y = startY + (r * cellSize);
-            doc.setGState(new doc.GState({ opacity: 1 }));
-            doc.setDrawColor(220).rect(x, y, cellSize, cellSize);
-            doc.setTextColor(0).text(obj.char, x + 4, y + 5.5, { align: "center" });
+            doc.setDrawColor(200).setLineWidth(0.1).rect(x, y, cellSize, cellSize);
+            doc.setTextColor(0).setFont("helvetica", "bold").setFontSize(11);
+            doc.text(obj.char, x + (cellSize / 2), y + (cellSize / 2) + 1.5, { align: "center" });
         }));
+
         dessinerListeMots(startY + (gridSize * cellSize));
         doc.save(`outilsprofs_mots_meles_${cleanStringForFilename(rawTitle)}.pdf`);
     }
