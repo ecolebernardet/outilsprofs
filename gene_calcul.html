@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
             --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
@@ -31,275 +30,169 @@
             width: 100%; margin-bottom: 12px;
         }
 
-        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
-
+        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease; cursor: pointer; border: none; }
         header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
 
-        .main-wrapper { width: 100%; max-width: 380px; margin: 0 auto; padding: 10px 15px 40px; transition: all 0.3s ease; }
+        .main-wrapper { width: 100%; max-width: 380px; margin: 0 auto; padding: 10px 15px 40px; }
         .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
         
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border);
-            border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700;
-            width: 100%; color: var(--text-main); outline: none; text-align: center; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; text-align: center; }
         
-        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px;
-            text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-add:active { transform: scale(0.95); }
 
-        .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white;
-            transition: all 0.2s ease; text-transform: uppercase; }
+        .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; padding: 0 15px; }
         .btn-game-action:active { transform: scale(0.95); }
 
-        .op-btn-frame { border: 2px solid var(--column-border); border-radius: 1rem; padding: 2px;
-            transition: all 0.2s ease; background: var(--input-bg); }
-        .op-checkbox:checked + .op-btn-frame, 
-        .table-checkbox:checked + .op-btn-frame,
-        #check-all-tables:checked + .op-btn-frame { 
-            border-color: var(--accent-color, #06b6d4); 
-            background-color: var(--accent-color, #06b6d4);
-            color: white !important;
+        .op-btn-frame { border: 2px solid var(--column-border); border-radius: 1rem; padding: 2px; transition: all 0.2s ease; background: var(--input-bg); }
+        .op-checkbox:checked + .op-btn-frame, .table-checkbox:checked + .op-btn-frame, .mode-radio:checked + .op-btn-frame, #check-all-tables:checked + .op-btn-frame { 
+            border-color: var(--accent-color, #06b6d4); background-color: var(--accent-color, #06b6d4); color: white !important;
         }
 
-        .q-card { background: var(--card-bg); border-radius: 0.75rem; padding: 12px;
+        /* --- GRILLE ET CARTES --- */
+        #questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+        .q-card { 
+            background: var(--card-bg); border-radius: 0.75rem; padding: 6px 8px;
             border: 1px solid var(--column-border); display: flex; align-items: center;
-            justify-content: space-between; min-height: 50px;}
+            justify-content: space-between; min-height: 50px; gap: 2px;
+        }
             
-        .res-text { color: #10b981; font-weight: 800; font-size: 0.85rem; }
+        .answer-input {
+            background: var(--input-bg); border: 1px solid var(--column-border);
+            border-radius: 0.4rem; width: 42px; height: 28px; text-align: center;
+            font-weight: 800; font-size: 0.75rem; color: var(--text-main); outline: none; flex-shrink: 0;
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px;
-            border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        .res-text { color: #10b981; font-weight: 800; }
+        .solo-text { font-size: 12px !important; white-space: nowrap; letter-spacing: -0.04em; }
+        .solo-res { font-size: 11px !important; margin-left: 3px; flex-shrink: 0; }
 
-        /* --- ADAPTATION PC --- */
+        /* --- MODE VPI --- */
+        .vpi-card { padding: 15px !important; }
+        .vpi-text { font-size: 1.9rem !important; white-space: nowrap; letter-spacing: -0.02em; }
+
+        /* --- MODALE AIDE --- */
+        .help-section { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--column-border); }
+        .help-title { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .help-text { font-size: 11px; line-height: 1.5; opacity: 0.9; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; }
+
         @media (min-width: 768px) {
             .main-wrapper { max-width: 950px; }
-            #setup-zone:not(.hidden) { 
-                display: grid; 
-                grid-template-columns: 1fr 1fr; 
-                gap: 25px; 
-                align-items: start; 
-            }
-            #mainAddBtn { grid-column: span 2; margin-top: 10px; }
+            #setup-zone:not(.hidden) { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-items: start; }
+            #mainAddBtn { grid-column: span 2; }
             #questions-grid { grid-template-columns: repeat(3, 1fr); gap: 15px; }
-            .q-card span.text-[18px] { font-size: 1.4rem; }
-            .res-text { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
 
-<script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-</script>
+<script>if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');</script>
 
 <header>
-    <a href="index.html" id="btn-retour-header" class="ui-btn-round active:scale-90">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-        </svg>
-    </a>
+    <a href="index.html" class="ui-btn-round active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg></a>
     <h1>Calcul Mental</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="ui-btn-round active:scale-90 text-lg">💡</button>
+    <button onclick="ouvrirAide()" class="ui-btn-round active:scale-90 text-lg">💡</button>
 </header>
 
 <div class="main-wrapper">
-    <div class="mb-4">
-        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
-            </svg>
-            Retour aux générateurs
-        </a>
-    </div>
-    
-    <div id="setup-zone" class="light-card space-y-3">
+    <div id="setup-zone" class="light-card space-y-4">
         <div class="space-y-4">
             <div>
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Opérations</label>
                 <div class="grid grid-cols-4 gap-2">
-                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="+" checked><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">+</div></div></label>
-                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="-"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">-</div></div></label>
-                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="x"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">x</div></div></label>
-                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value=":"><div class="op-btn-frame"><div class="h-12 flex items-center justify-center rounded-lg font-black text-lg">÷</div></div></label>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <label class="flex items-center justify-center gap-2 cursor-pointer opacity-80">
-                        <input type="checkbox" id="no-carry-add" class="w-3 h-3 accent-cyan-500">
-                        <span class="text-[8px] font-black uppercase tracking-tighter text-center leading-none">add. sans retenues</span>
-                    </label>
-                    <label class="flex items-center justify-center gap-2 cursor-pointer opacity-80">
-                        <input type="checkbox" id="no-carry-sub" class="w-3 h-3 accent-cyan-500">
-                        <span class="text-[8px] font-black uppercase tracking-tighter text-center leading-none">soustr.sans retenues</span>
-                    </label>
+                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="+" checked><div class="op-btn-frame h-12 flex items-center justify-center rounded-lg font-black text-lg">+</div></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="-"><div class="op-btn-frame h-12 flex items-center justify-center rounded-lg font-black text-lg">-</div></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value="x"><div class="op-btn-frame h-12 flex items-center justify-center rounded-lg font-black text-lg">x</div></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="hidden op-checkbox" value=":"><div class="op-btn-frame h-12 flex items-center justify-center rounded-lg font-black text-lg">÷</div></label>
                 </div>
             </div>
-
             <div>
-                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Choix des tables</label>
-                <div id="tables-container" class="flex flex-col gap-2 items-center"></div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Tables</label>
+                <div id="tables-container" class="space-y-2"></div>
             </div>
         </div>
 
         <div class="space-y-4">
             <div class="grid grid-cols-3 gap-2">
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Mini</label><input type="number" id="min-val" value="1" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Maxi</label><input type="number" id="max-val" value="10" inputmode="numeric" class="input-field" onchange="validateRange()"></div>
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Calculs</label><input type="number" id="nb-val" value="10" inputmode="numeric" class="input-field"></div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Minutes</label><input type="number" id="timer-min" value="1" min="0" inputmode="numeric" class="input-field"></div>
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Secondes</label><input type="number" id="timer-sec" value="0" min="0" max="59" inputmode="numeric" class="input-field"></div>
+                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Min</label><input type="number" id="min-val" value="1" class="input-field"></div>
+                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Max</label><input type="number" id="max-val" value="10" class="input-field"></div>
+                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Nb</label><input type="number" id="nb-val" value="12" class="input-field"></div>
             </div>
 
             <div>
-                <label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Sonnerie de fin</label>
-                <div class="flex gap-2">
-                    <select id="sound-select" class="input-field flex-1" onchange="saveSoundPref()">
-                        <option value="retro">👾 Rétro Game</option>
-                        <option value="zen">🔔 Zen Bowl</option>
-                        <option value="digital">⌚ Réveil Digital</option>
-                        <option value="none">🔇 Muet</option>
-                    </select>
-                    <button onclick="playDing()" class="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center active:scale-90 transition-transform">🔊</button>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Mode de jeu</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="cursor-pointer"><input type="radio" name="game-mode" value="solo" class="hidden mode-radio" checked><div class="op-btn-frame h-12 flex flex-col items-center justify-center rounded-lg"><span class="text-xs font-black">SOLO</span><span class="text-[8px] opacity-60">Individuel</span></div></label>
+                    <label class="cursor-pointer"><input type="radio" name="game-mode" value="vpi" class="hidden mode-radio"><div class="op-btn-frame h-12 flex flex-col items-center justify-center rounded-lg"><span class="text-xs font-black">VPI</span><span class="text-[8px] opacity-60">Projection</span></div></label>
                 </div>
             </div>
+            
+            <button id="mainAddBtn" onclick="generateSeries()" class="btn-add">Démarrer</button>
         </div>
-
-        <button id="mainAddBtn" onclick="generateSeries()" class="btn-add">Générer les calculs</button>
     </div>
 
-    <div id="game-zone" class="hidden space-y-6">
-        <div id="timer-display" class="hidden text-center p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <span class="text-[10px] font-black uppercase opacity-50 tracking-widest">Temps restant</span>
-            <div id="seconds-left" class="text-2xl font-black text-amber-500">0:00</div>
-        </div>
-        <div id="questions-grid" class="grid grid-cols-2 gap-2"></div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-            <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
-            <button onclick="generateSeries()" class="btn-game-action bg-amber-500">🔄 nouveau</button>
-            <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
-            <button onclick="exportToPDF()" class="btn-game-action bg-blue-500">📄 édition PDF</button>
+    <div id="game-zone" class="hidden space-y-4">
+        <div id="questions-grid"></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 pt-4">
+            <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ Retour</button>
+            <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ Correction</button>
+            <button onclick="generateSeries()" class="btn-game-action bg-amber-500">🔄 Nouveau</button>
+            <button onclick="exportToPDF()" class="btn-game-action bg-blue-500">📄 PDF</button>
         </div>
     </div>
 </div>
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Générateur de calculs</h2>
-        <div id="helpBody" class="text-[11px] leading-relaxed space-y-4">
-            <div class="flex items-start gap-3">
-                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">🔢</div>
-                <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Types de calculs</h3>
-                    <p class="opacity-70 text-[10px]">
-                        • <b>+ / -</b> : Basés sur vos bornes Mini/Maxi.<br>
-                        • <b>x / ÷</b> : Utilise uniquement les tables sélectionnées.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3">
-                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">✨</div>
-                <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Options sans retenues</h3>
-                    <p class="opacity-70 text-[10px]">
-                        Si activé, l'outil analyse chaque rang (unités, dizaines...). Pour l'<b>addition</b>, la somme de chaque colonne sera &lt; 10. Pour la <b>soustraction</b>, chaque chiffre du haut sera supérieur ou égal à celui du bas.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3">
-                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">⏱️</div>
-                <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Chronomètre</h3>
-                    <p class="opacity-70 text-[10px]">
-                        Laissez à <b>0:00</b> pour un mode libre. Sinon, une alerte sonore retentit à la fin et la correction s'affiche automatiquement.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3">
-                <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 text-xs">📄</div>
-                <div>
-                    <h3 class="font-black uppercase tracking-wider mb-0.5" style="color: var(--accent-color)">Fiches PDF</h3>
-                    <p class="opacity-70 text-[10px]">
-                        L'export génère un fichier propre avec <b>les calculs sur la page 1</b> et <b>le corrigé sur la page 2</b>.
-                    </p>
-                </div>
-            </div>
+        <h2 class="text-xl font-black uppercase mb-6 flex items-center gap-2">💡 Mode d'emploi</h2>
+        <div class="help-section">
+            <h3 class="help-title">👤 Mode Solo (Élève)</h3>
+            <p class="help-text">Calculs sur <strong>2 colonnes</strong> avec saisie. Clique sur <strong>Correction</strong> pour voir ton score.</p>
         </div>
-        <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">J'ai compris</button>
-    </div>
-</div>
-
-<div id="modal-fin" class="modal-overlay">
-    <div class="modal-content text-center">
-        <div class="text-6xl mb-4">🔔</div>
-        <h2 id="titre-fin" class="text-2xl font-black uppercase mb-2">Temps écoulé !</h2>
-        <button id="btn-fermer-fin" onclick="fermerModalFin()" class="btn-add">Voir les résultats</button>
+        <div class="help-section">
+            <h3 class="help-title">📺 Mode VPI (Classe)</h3>
+            <p class="help-text">Affichage <strong>géant</strong> pour la projection collective. Idéal pour l'ardoise.</p>
+        </div>
+        <div class="help-section border-none">
+            <h3 class="help-title">📄 Export PDF</h3>
+            <p class="help-text">Génère un fichier <strong>Recto-Verso</strong> (Exercices au recto, Correction au verso).</p>
+        </div>
+        <button onclick="fermerModal('modal-aide')" class="w-full mt-4 btn-add">C'est compris !</button>
     </div>
 </div>
 
 <script>
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     let currentCalculs = [];
-    let countdown;
 
     function initTables() {
         const container = document.getElementById('tables-container');
         let html = '<div class="flex gap-2 justify-center">';
         for (let i = 2; i <= 6; i++) { html += `<label class="cursor-pointer"><input type="checkbox" class="hidden table-checkbox" value="${i}"><div class="op-btn-frame w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs">${i}</div></label>`; }
-        html += '</div><div class="flex gap-2 justify-center">';
+        html += '</div><div class="flex gap-2 justify-center mt-2">';
         for (let i = 7; i <= 9; i++) { html += `<label class="cursor-pointer"><input type="checkbox" class="hidden table-checkbox" value="${i}"><div class="op-btn-frame w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs">${i}</div></label>`; }
         html += `<label class="cursor-pointer"><input type="checkbox" id="check-all-tables" class="hidden" onchange="toggleAllTables(this)"><div class="op-btn-frame px-3 h-10 flex items-center justify-center rounded-lg font-black text-[10px] uppercase">Toutes</div></label></div>`;
         container.innerHTML = html;
     }
 
     function toggleAllTables(source) { document.querySelectorAll('.table-checkbox').forEach(cb => cb.checked = source.checked); }
-    function validateRange() { const min = document.getElementById('min-val'); const max = document.getElementById('max-val'); if (parseInt(min.value) >= parseInt(max.value)) max.value = parseInt(min.value) + 1; }
-    function saveSoundPref() { localStorage.setItem('calcul_sound_pref', document.getElementById('sound-select').value); }
-
-    function playDing() {
-        const soundType = document.getElementById('sound-select').value; if (soundType === 'none') return;
-        const context = new (window.AudioContext || window.webkitAudioContext)();
-        if (soundType === 'retro') { [440, 330, 220].forEach((freq, i) => { const osc = context.createOscillator(); const gain = context.createGain(); osc.frequency.setValueAtTime(freq, context.currentTime + (i * 0.15)); gain.gain.setValueAtTime(0.2, context.currentTime + (i * 0.15)); gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + (i * 0.15) + 0.3); osc.connect(gain); gain.connect(context.destination); osc.start(context.currentTime + (i * 0.15)); osc.stop(context.currentTime + (i * 0.15) + 0.3); }); }
-        else if (soundType === 'zen') { const osc = context.createOscillator(); const gain = context.createGain(); osc.type = "sine"; osc.frequency.setValueAtTime(880, context.currentTime); gain.gain.setValueAtTime(0.5, context.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 1.5); osc.connect(gain); gain.connect(context.destination); osc.start(); osc.stop(context.currentTime + 1.5); }
-        else if (soundType === 'digital') { [0, 0.2, 0.4].forEach(delay => { const osc = context.createOscillator(); const gain = context.createGain(); osc.type = "square"; osc.frequency.setValueAtTime(1000, context.currentTime + delay); gain.gain.setValueAtTime(0.1, context.currentTime + delay); gain.gain.setValueAtTime(0, context.currentTime + delay + 0.1); osc.connect(gain); gain.connect(context.destination); osc.start(context.currentTime + delay); osc.stop(context.currentTime + delay + 0.1); }); }
-    }
 
     function generateSeries() {
         const selectedOps = Array.from(document.querySelectorAll('.op-checkbox:checked')).map(el => el.value);
         const selectedTables = Array.from(document.querySelectorAll('.table-checkbox:checked')).map(el => parseInt(el.value));
+        const mode = document.querySelector('input[name="game-mode"]:checked').value;
         if (selectedOps.length === 0) return alert("Sélectionnez une opération !");
         
-        const mins = parseInt(document.getElementById('timer-min').value) || 0;
-        const secs = parseInt(document.getElementById('timer-sec').value) || 0;
-        const timerVal = (mins * 60) + secs;
-        const timerDisplay = document.getElementById('timer-display');
-        const secondsLeftEl = document.getElementById('seconds-left');
-        
-        clearInterval(countdown);
-        secondsLeftEl.classList.remove('text-red-500');
-
-        if (timerVal > 0) {
-            timerDisplay.classList.remove('hidden');
-            let timeLeft = timerVal;
-            const updateDisplay = (t) => { let m = Math.floor(t / 60); let s = t % 60; secondsLeftEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`; };
-            updateDisplay(timeLeft);
-            countdown = setInterval(() => { timeLeft--; updateDisplay(timeLeft); if (timeLeft <= 10) secondsLeftEl.classList.add('text-red-500'); if (timeLeft <= 0) { clearInterval(countdown); playDing(); ouvrirModalFin(); } }, 1000);
-        } else { timerDisplay.classList.add('hidden'); }
-
         const min = parseInt(document.getElementById('min-val').value) || 1;
         const max = parseInt(document.getElementById('max-val').value) || 10;
-        const nb = parseInt(document.getElementById('nb-val').value) || 10;
-        
+        const nb = parseInt(document.getElementById('nb-val').value) || 12;
         const grid = document.getElementById('questions-grid');
         grid.innerHTML = ''; currentCalculs = [];
-
-        const btnCorr = document.getElementById('validate-btn');
-        if (btnCorr) { btnCorr.innerText = "👁️ correction"; btnCorr.classList.remove('bg-red-500'); btnCorr.classList.add('bg-green-500'); }
-
-        const noCarryAdd = document.getElementById('no-carry-add').checked;
-        const noCarrySub = document.getElementById('no-carry-sub').checked;
+        const scoreDiv = document.getElementById('score-display'); if (scoreDiv) scoreDiv.remove();
 
         for (let i = 0; i < nb; i++) {
             const op = selectedOps[i % selectedOps.length];
@@ -309,79 +202,109 @@
                 const factor = Math.floor(Math.random() * 10) + 1;
                 if (op === 'x') { a = factor; res = a * b; } else { res = factor; a = res * b; }
             } else {
-                let valid = false; let attempts = 0;
-                while(!valid && attempts < 100) {
-                    a = Math.floor(Math.random() * (max - min + 1)) + min; b = Math.floor(Math.random() * (max - min + 1)) + min;
-                    if (op === '+') {
-                        if (noCarryAdd) { let tempA = a, tempB = b, hasCarry = false; while (tempA > 0 || tempB > 0) { if ((tempA % 10) + (tempB % 10) >= 10) { hasCarry = true; break; } tempA = Math.floor(tempA / 10); tempB = Math.floor(tempB / 10); } if (!hasCarry) { res = a + b; valid = true; } } else { res = a + b; valid = true; }
-                    } else if (op === '-') {
-                        if (a < b) [a, b] = [b, a];
-                        if (noCarrySub) { let tempA = a, tempB = b, needsBorrow = false; while (tempA > 0 || tempB > 0) { if ((tempA % 10) < (tempB % 10)) { needsBorrow = true; break; } tempA = Math.floor(tempA / 10); tempB = Math.floor(tempB / 10); } if (!needsBorrow) { res = a - b; valid = true; } } else { res = a - b; valid = true; }
-                    }
-                    attempts++;
-                }
-                if(!valid) { if(op==='-'){if(a<b)[a,b]=[b,a]; res=a-b;} else res=a+b; }
+                a = Math.floor(Math.random() * (max - min + 1)) + min;
+                b = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (op === '+') res = a + b; else { if (a < b) [a, b] = [b, a]; res = a - b; }
             }
             currentCalculs.push({ q: `${a} ${op === ':' ? '÷' : op} ${b}`, r: res });
         }
-        currentCalculs.sort(() => Math.random() - 0.5);
+
         currentCalculs.forEach((calc, i) => {
-    grid.innerHTML += `<div class="q-card justify-start gap-1">
-        <div class="flex items-center">
-            <span class="opacity-30 text-[8px] font-bold min-w-[22px] text-left">${i+1})</span>
-            <span class="text-[18px] tracking-wide" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.q} =</span>
-        </div>
-        <span class="res-text hidden text-[18px]" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${calc.r}</span>
-    </div>`;
-});
+            let cardClass = mode === 'vpi' ? 'vpi-card' : '';
+            let textClass = mode === 'vpi' ? 'vpi-text' : 'solo-text';
+            const num = mode === 'vpi' ? `<span class="opacity-30 text-[12px] font-bold min-w-[25px] text-left shrink-0">${i+1})</span>` : '';
+            let contentRight = '';
+
+            if (mode === 'solo') {
+                contentRight = `<div class="flex items-center shrink-0 ml-auto"><input type="text" inputmode="decimal" class="answer-input" placeholder="?"><span class="res-text hidden solo-res font-bold">${calc.r}</span></div>`;
+            } else {
+                contentRight = `<span class="res-text hidden ${textClass} ml-auto shrink-0" style="color:var(--accent-color); font-weight: 900;">${calc.r}</span>`;
+            }
+            grid.innerHTML += `<div class="q-card ${cardClass}"><div class="flex items-center overflow-hidden flex-1">${num}<span class="${textClass} font-bold">${calc.q} =</span></div>${contentRight}</div>`;
+        });
 
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('game-zone').classList.remove('hidden');
     }
 
     function showCorrection() {
-        const firstRes = document.querySelector('.res-text'); const btn = document.getElementById('validate-btn'); if (!firstRes) return;
+        const inputs = document.querySelectorAll('.answer-input');
+        const firstRes = document.querySelector('.res-text');
+        const btn = document.getElementById('validate-btn');
+        const mode = document.querySelector('input[name="game-mode"]:checked').value;
+        if (!firstRes) return;
         const isShowing = !firstRes.classList.contains('hidden');
+
         if (isShowing) {
-            document.querySelectorAll('.res-text').forEach(el => el.classList.add('hidden')); btn.innerText = "👁️ correction"; btn.classList.replace('bg-red-500', 'bg-green-500');
-            const secondsLeftEl = document.getElementById('seconds-left'); const timeParts = secondsLeftEl.innerText.split(':'); let timeLeft = (parseInt(timeParts[0]) * 60) + parseInt(timeParts[1]);
-            if (timeLeft > 0) { countdown = setInterval(() => { timeLeft--; let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; secondsLeftEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`; if (timeLeft <= 10) secondsLeftEl.classList.add('text-red-500'); if (timeLeft <= 0) { clearInterval(countdown); playDing(); ouvrirModalFin(); } }, 1000); }
-        } else { clearInterval(countdown); document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden')); btn.innerText = "🙈 masquer"; btn.classList.replace('bg-green-500', 'bg-red-500'); }
+            const scoreDiv = document.getElementById('score-display'); if (scoreDiv) scoreDiv.remove();
+            document.querySelectorAll('.res-text').forEach(el => el.classList.add('hidden'));
+            inputs.forEach(input => { input.style.borderColor = 'var(--column-border)'; input.style.backgroundColor = 'var(--input-bg)'; });
+            btn.innerText = "👁️ Correction";
+        } else {
+            document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden'));
+            if (mode === 'solo') {
+                let score = 0;
+                inputs.forEach((input, i) => {
+                    const userAns = input.value.trim().replace(',', '.');
+                    if (userAns !== "" && parseFloat(userAns) === currentCalculs[i].r) {
+                        score++; input.style.borderColor = "#10b981"; input.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+                    } else if (userAns !== "") {
+                        input.style.borderColor = "#ef4444"; input.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+                    }
+                });
+                const scoreHtml = `<div id="score-display" class="w-full text-center p-4 mb-4 rounded-2xl border-2 border-dashed border-[var(--accent-color)]"><span class="text-3xl font-black" style="color:var(--accent-color)">Score : ${score} / ${currentCalculs.length}</span></div>`;
+                document.getElementById('questions-grid').insertAdjacentHTML('beforebegin', scoreHtml);
+            }
+            btn.innerText = "🙈 Masquer";
+        }
     }
-    
-    function retourReglages() { clearInterval(countdown); document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
 
     function exportToPDF() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const drawPage = (title, showRes) => {
-            doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.text(title, 105, 20, { align: "center" }); doc.setFontSize(10); if(!showRes) doc.text("Nom : ____________________  Date : ________", 20, 30);
-            let yStart = 45, y = yStart, x = 20;
-            currentCalculs.forEach((calc, index) => {
-                if (y > 280) { doc.addPage(); y = 20; } doc.setFont("helvetica", "normal"); doc.setTextColor(0,0,0);
-                const textBase = `${index + 1})  ${calc.q} = `; doc.text(textBase, x, y); const offset = doc.getTextWidth(textBase);
-                if(showRes) { doc.setFont("helvetica", "bold"); doc.setTextColor(150,0,100); doc.text(`${calc.r}`, x + offset, y); } else { doc.text("........", x + offset, y); }
-                y += 11; if ((index + 1) === Math.ceil(currentCalculs.length / 2)) { x = 115; y = yStart; }
-            });
-        };
-        drawPage("Fiche de Calcul Mental", false); doc.addPage(); drawPage("Correction", true);
-        doc.save(`outilsprofs_calcul_mental_${new Date().toISOString().split('T')[0]}.pdf`);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const maintenant = new Date();
+        const dateFmt = `${maintenant.getFullYear()}${String(maintenant.getMonth() + 1).padStart(2, '0')}${String(maintenant.getDate()).padStart(2, '0')}`;
+        
+        // PAGE 1 : RECTO
+        doc.setFont("helvetica", "bold"); doc.setFontSize(18);
+        doc.text("Calcul Mental - Exercices", 105, 20, { align: "center" });
+        doc.setFontSize(12); doc.setFont("helvetica", "normal");
+        let yS = 40, x1 = 20, x2 = 110, cY = yS;
+        const half = Math.ceil(currentCalculs.length / 2);
+        currentCalculs.forEach((c, i) => {
+            let x = (i < half) ? x1 : x2;
+            let y = (i < half) ? cY : yS + ((i - half) * 12);
+            doc.text(`${i + 1})  ${c.q} = .......`, x, y);
+            if (i < half) cY += 12;
+        });
+
+        // PAGE 2 : VERSO
+        doc.addPage();
+        doc.setFont("helvetica", "bold"); doc.setFontSize(18);
+        doc.text("Correction", 105, 20, { align: "center" });
+        doc.setFontSize(12); doc.setFont("helvetica", "normal");
+        cY = yS;
+        currentCalculs.forEach((c, i) => {
+            let x = (i < half) ? x1 : x2;
+            let y = (i < half) ? cY : yS + ((i - half) * 12);
+            doc.text(`${i + 1})  ${c.q} = `, x, y);
+            doc.setFont("helvetica", "bold");
+            doc.text(`${c.r}`, x + doc.getTextWidth(`${i + 1})  ${c.q} = `), y);
+            doc.setFont("helvetica", "normal");
+            if (i < half) cY += 12;
+        });
+        doc.save(`outilsprofs_calcul_mental_${dateFmt}.pdf`);
     }
 
+    function retourReglages() { document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; const hexa = mapCouleurs[colPref];
-        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
+        const hexa = mapCouleurs[themePrefs.gen || 'cyan'];
         document.documentElement.style.setProperty('--accent-color', hexa);
-        [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('btn-aide'), document.getElementById('mainAddBtn'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-fermer-fin')].forEach(el => { if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; } });
-        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
-        if(document.getElementById('titre-fin')) document.getElementById('titre-fin').style.color = hexa;
-        const savedSound = localStorage.getItem('calcul_sound_pref'); if(savedSound) document.getElementById('sound-select').value = savedSound;
+        document.querySelectorAll('.btn-add, .ui-btn-round').forEach(el => { el.style.backgroundColor = hexa; el.style.color = '#fff'; });
     }
-    
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function ouvrirModalFin() { document.getElementById('modal-fin').style.display = 'flex'; }
-    function fermerModalFin() { document.getElementById('modal-fin').style.display = 'none'; showCorrection(); }
-    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onload = () => { appliquerTheme(); initTables(); };
 </script>
 </body>
