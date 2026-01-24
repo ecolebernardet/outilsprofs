@@ -42,24 +42,27 @@
         .ambient-card {
             background: var(--card-bg); border-radius: 1.5rem; padding: 15px; border: 1px solid var(--column-border);
             display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
-            animation: slideIn 0.3s ease-out;
+            position: relative; overflow: hidden; animation: slideIn 0.3s ease-out;
         }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Barre de progression */
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.2); display: none; }
+        .progress-bar { height: 100%; width: 0%; background: var(--theme-color); transition: width 0.3s linear; }
+
         .play-btn {
-            width: 45px; height: 45px; border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
             background: var(--theme-color); color: white; border: none; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 10;
         }
 
-        .stop-indicator {
-            display: none; background: #ff4444; color: white; padding: 12px; border-radius: 1rem;
-            margin-bottom: 20px; text-align: center; font-weight: 900; font-size: 11px;
-            text-transform: uppercase; cursor: pointer;
-        }
+        .play-btn:active { transform: scale(0.9); }
+        .play-btn.is-playing { background: #ff4444 !important; color: white !important; border-radius: 50%; }
 
-        input { width: 100%; border: 1px solid var(--column-border); background: rgba(0,0,0,0.05); color: inherit; border-radius: 12px; outline: none; transition: border-color 0.2s; }
+        input { width: 100%; border: 1px solid var(--column-border); background: rgba(0,0,0,0.05); color: inherit; border-radius: 12px; outline: none; }
         body.light-mode input { background: #fff; }
 
         .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
@@ -90,20 +93,18 @@
     <div class="bg-[var(--card-bg)] p-5 rounded-[1.5rem] border border-[var(--column-border)] mb-6">
         <h2 id="form-legend" class="text-[10px] font-black uppercase opacity-60 mb-3">Ajouter un nouveau son</h2>
         <div class="flex flex-col gap-3">
-            <input type="text" id="media-title" placeholder="Nom de la musique (ex: Lofi Zen...)" class="p-3 text-[12px] border-2 focus:border-[var(--theme-color)]">
+            <input type="text" id="media-title" placeholder="Nom de la musique..." class="p-3 text-[12px] border-2 focus:border-[var(--theme-color)]">
             <input type="text" id="media-url" placeholder="Lien YouTube ou Spotify..." class="p-3 text-[12px] border-2 focus:border-[var(--theme-color)]">
             
             <div class="flex flex-col gap-2">
                 <button onclick="ajouterAmbiance()" id="btn-ajouter-action" class="w-full p-3 rounded-xl font-black uppercase text-[11px] transition-transform active:scale-95">Créer le bouton</button>
                 <div id="edit-buttons" class="hidden flex gap-2">
-                    <button onclick="supprimerViaForm()" class="flex-1 p-3 rounded-xl font-black uppercase text-[11px] bg-red-500 text-white shadow-lg">Supprimer</button>
+                    <button onclick="supprimerViaForm()" class="flex-1 p-3 rounded-xl font-black uppercase text-[11px] bg-red-500 text-white">Supprimer</button>
                     <button onclick="annulerModification()" class="flex-1 p-3 rounded-xl font-black uppercase text-[11px] bg-neutral-500 text-white">Annuler</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="stop-music" class="stop-indicator" onclick="couperSon()">⏹️ Arrêter l'ambiance sonore</div>
 
     <div id="ambiances-list"></div>
 
@@ -125,9 +126,9 @@
 <div id="modal-aide" onclick="fermerAideParOverlay(event)" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
     <div class="bg-[var(--card-bg)] w-full max-w-md rounded-[2rem] border border-[var(--column-border)] p-6 text-center" onclick="event.stopPropagation()">
         <div class="text-4xl mb-4">💡</div>
-        <h3 class="text-lg font-black uppercase mb-4">Aide & Astuces</h3>
-        <p class="text-sm opacity-80 mb-4 text-left">• <strong>Modifier :</strong> Cliquez sur le titre d'une ambiance pour la modifier ou la supprimer via le formulaire en haut.</p>
-        <p class="text-sm opacity-80 mb-6 text-left">• <strong>Sauvegarde :</strong> Pensez à exporter votre liste régulièrement pour ne pas la perdre.</p>
+        <h3 class="text-lg font-black uppercase mb-4">Aide</h3>
+        <p class="text-sm opacity-80 mb-4 text-left">• <strong>Modifier :</strong> Cliquez sur le titre d'une ambiance.</p>
+        <p class="text-sm opacity-80 mb-6 text-left">• <strong>Lecture :</strong> Le bouton change de forme et de couleur. Une barre de progression apparaît en bas de l'étiquette.</p>
         <button onclick="fermerAide()" id="btn-compris" class="w-full p-4 rounded-xl font-black uppercase text-[12px]">J'ai compris</button>
     </div>
 </div>
@@ -143,8 +144,10 @@
     </div>
 </div>
 
-<div id="player-zone" class="hidden"><div id="player-container"></div></div>
+<div id="yt-player" class="hidden"></div>
+<div id="player-container" class="hidden"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
 
@@ -159,40 +162,82 @@
     });
 
     let mesAmbiances = JSON.parse(localStorage.getItem('ambiances_zen')) || [];
-    let editModeUrl = null; 
+    let ytPlayer = null;
+    let progressInterval = null;
+    let editModeUrl = null;
     const listContainer = document.getElementById('ambiances-list');
 
-    window.onload = () => {
-        renderList();
-        checkBadgeStatus();
-    };
+    function onYouTubeIframeAPIReady() {}
+
+    window.onload = () => { renderList(); checkBadgeStatus(); };
 
     function renderList() {
         listContainer.innerHTML = "";
-        mesAmbiances.forEach(data => creerCarte(data));
+        mesAmbiances.forEach((data, index) => creerCarte(data, index));
     }
 
-    // --- LOGIQUE MODALES ---
-    function showAlert(title, text, onConfirm, showCancel = true) {
-        document.getElementById('alertTitle').innerText = title;
-        document.getElementById('alertText').innerText = text;
-        const confirmBtn = document.getElementById('alertConfirmBtn');
-        const cancelBtn = document.getElementById('alertCancelBtn');
-        confirmBtn.style.backgroundColor = themeColor;
-        confirmBtn.style.color = contrast;
-        cancelBtn.style.display = showCancel ? 'block' : 'none';
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
-        document.getElementById('alertModal').style.display = 'flex';
+    // --- LECTEUR ---
+    function toggleLecteur(url, btn, cardId) {
+        const isPlaying = btn.classList.contains('is-playing');
+        const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>';
+        const stopIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>';
+
+        // Reset global
+        clearInterval(progressInterval);
+        document.querySelectorAll('.progress-container').forEach(c => c.style.display = 'none');
+        document.querySelectorAll('.progress-bar').forEach(b => b.style.width = '0%');
+        document.querySelectorAll('.play-btn').forEach(b => {
+            b.classList.remove('is-playing');
+            b.style.backgroundColor = themeColor;
+            b.innerHTML = playIcon;
+        });
+
+        if (!isPlaying) {
+            btn.classList.add('is-playing');
+            btn.innerHTML = stopIcon;
+            
+            const card = document.getElementById(cardId);
+            const container = card.querySelector('.progress-container');
+            const bar = card.querySelector('.progress-bar');
+            container.style.display = 'block';
+
+            if (url.includes('youtube.com') || url.includes('youtube.be')) {
+                // Utilisation de l'API YouTube pour le curseur réel
+                const videoId = url.split('embed/')[1]?.split('?')[0];
+                if (ytPlayer) ytPlayer.destroy();
+                
+                ytPlayer = new YT.Player('yt-player', {
+                    height: '0', width: '0', videoId: videoId,
+                    playerVars: { 'autoplay': 1, 'controls': 0 },
+                    events: {
+                        onReady: (e) => {
+                            e.target.playVideo();
+                            progressInterval = setInterval(() => {
+                                let p = (e.target.getCurrentTime() / e.target.getDuration()) * 100;
+                                bar.style.width = p + '%';
+                            }, 1000);
+                        },
+                        onStateChange: (e) => {
+                            if (e.data === YT.PlayerState.ENDED) toggleLecteur(url, btn, cardId);
+                        }
+                    }
+                });
+            } else {
+                // Simulation pour Spotify
+                document.getElementById('player-container').innerHTML = `<iframe src="${url}" width="100%" height="200" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+                let mockP = 0;
+                progressInterval = setInterval(() => {
+                    mockP += 0.2;
+                    bar.style.width = (mockP % 100) + '%';
+                }, 1000);
+            }
+        } else {
+            if (ytPlayer) ytPlayer.stopVideo();
+            document.getElementById('player-container').innerHTML = "";
+        }
     }
 
-    function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
-    function ouvrirAide() { document.getElementById('modal-aide').classList.remove('hidden'); document.getElementById('modal-aide').classList.add('active'); }
-    function fermerAide() { document.getElementById('modal-aide').classList.add('hidden'); document.getElementById('modal-aide').classList.remove('active'); }
-    function fermerAideParOverlay(e) { if (e.target.id === 'modal-aide') fermerAide(); }
-
-    // --- LOGIQUE EDITION ---
+    // --- FORMULAIRE & EDITION ---
     function remplirFormulaire(titre, url) {
         editModeUrl = url;
         document.getElementById('media-title').value = titre;
@@ -201,13 +246,6 @@
         document.getElementById('btn-ajouter-action').innerText = "Mettre à jour";
         document.getElementById('edit-buttons').classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Petit effet de focus visuel
-        const inputs = [document.getElementById('media-title'), document.getElementById('media-url')];
-        inputs.forEach(input => {
-            input.style.borderColor = themeColor;
-            setTimeout(() => { input.style.borderColor = ''; }, 1000);
-        });
     }
 
     function annulerModification() {
@@ -219,36 +257,21 @@
         document.getElementById('edit-buttons').classList.add('hidden');
     }
 
-    function supprimerViaForm() {
-        if (!editModeUrl) return;
-        showAlert("Supprimer ?", "Voulez-vous retirer ce son de la liste ?", () => {
-            mesAmbiances = mesAmbiances.filter(a => a.embedUrl !== editModeUrl);
-            localStorage.setItem('ambiances_zen', JSON.stringify(mesAmbiances));
-            renderList();
-            annulerModification();
-            updateExportBadge(true);
-        });
-    }
-
-    // --- ACTIONS CORE ---
     function ajouterAmbiance() {
         const url = document.getElementById('media-url').value.trim();
         const customTitle = document.getElementById('media-title').value.trim();
         if (!url || !customTitle) return;
 
-        // Si modification, on retire l'ancien pour le remplacer
-        if (editModeUrl) {
-            mesAmbiances = mesAmbiances.filter(a => a.embedUrl !== editModeUrl);
-        }
+        if (editModeUrl) mesAmbiances = mesAmbiances.filter(a => a.embedUrl !== editModeUrl);
 
         let data = { title: customTitle, thumb: "", embedUrl: "", type: "" };
         if (url.includes('youtube') || url.includes('youtu.be')) {
             let videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop().split('?')[0];
             data.thumb = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-            data.embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            data.embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
             data.type = "YouTube";
         } else if (url.includes('spotify')) {
-            data.embedUrl = url.includes('embed') ? url : url.replace("https://open.spotify.com/", "https://open.spotify.com/embed/");
+            data.embedUrl = url.includes('embed') ? url : url.replace("open.spotify.com", "open.spotify.com/embed");
             data.thumb = "https://cdn-icons-png.flaticon.com/512/174/174872.png";
             data.type = "Spotify";
         }
@@ -262,10 +285,11 @@
         }
     }
 
-    function creerCarte(data) {
+    function creerCarte(data, index) {
+        const cardId = `card-${index}`;
         const card = document.createElement('div');
+        card.id = cardId;
         card.className = 'ambient-card cursor-pointer active:scale-[0.98] transition-transform';
-        // Sécurisation de la chaîne de titre pour le onclick
         const escapedTitle = data.title.replace(/'/g, "\\'");
         card.innerHTML = `
             <div class="flex items-center gap-4 overflow-hidden flex-1" onclick="remplirFormulaire('${escapedTitle}', '${data.embedUrl}')">
@@ -275,34 +299,40 @@
                     <p class="text-[9px] font-bold opacity-50 uppercase">${data.type}</p>
                 </div>
             </div>
-            <button class="play-btn" onclick="chargerLecteur('${data.embedUrl}', this)" style="background:${themeColor}; color:${contrast}">▶️</button>
+            <button class="play-btn" onclick="toggleLecteur('${data.embedUrl}', this, '${cardId}')" style="background:${themeColor}; color:${contrast}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="progress-container"><div class="progress-bar"></div></div>
         `;
         listContainer.appendChild(card);
     }
 
-    function chargerLecteur(url, btn) {
-        document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶️');
-        btn.textContent = '🔊';
-        document.getElementById('stop-music').style.display = 'block';
-        document.getElementById('player-container').innerHTML = `<iframe src="${url}" width="100%" height="200" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+    // --- SYSTEME MODALES ---
+    function showAlert(title, text, onConfirm, showCancel = true) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertText').innerText = text;
+        const confirmBtn = document.getElementById('alertConfirmBtn');
+        const cancelBtn = document.getElementById('alertCancelBtn');
+        confirmBtn.style.backgroundColor = themeColor;
+        confirmBtn.style.color = contrast;
+        cancelBtn.style.display = showCancel ? 'block' : 'none';
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+        document.getElementById('alertModal').style.display = 'flex';
     }
-
-    function couperSon() {
-        document.getElementById('player-container').innerHTML = "";
-        document.getElementById('stop-music').style.display = 'none';
-        document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶️');
-    }
+    function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
+    function ouvrirAide() { document.getElementById('modal-aide').classList.add('active'); }
+    function fermerAide() { document.getElementById('modal-aide').classList.remove('active'); }
+    function fermerAideParOverlay(e) { if (e.target.id === 'modal-aide') fermerAide(); }
 
     function toutEffacer() {
-        showAlert("Tout effacer ?", "Supprimer définitivement tous vos sons ?", () => {
-            mesAmbiances = [];
-            localStorage.setItem('ambiances_zen', JSON.stringify(mesAmbiances));
-            renderList();
-            updateExportBadge(true);
+        showAlert("Tout effacer ?", "Voulez-vous vider toute votre liste ?", () => {
+            mesAmbiances = []; localStorage.setItem('ambiances_zen', JSON.stringify(mesAmbiances));
+            renderList(); updateExportBadge(true);
         });
     }
 
-    // --- GESTION EXPORT / IMPORT ---
     function updateExportBadge(needsExport) {
         const badge = document.getElementById('badge-export');
         if (needsExport) { badge.classList.remove('hidden'); localStorage.setItem('needsExport_ambiances', 'true'); }
@@ -313,42 +343,11 @@
     function exportToFile() {
         if (mesAmbiances.length === 0) return;
         let contenu = mesAmbiances.map(a => `${a.title};${a.embedUrl};${a.thumb};${a.type}`).join("\n");
-        const nomFichier = `outilsprofs_ambiances_${new Date().toISOString().split('T')[0]}.txt`;
-        if (window.Android && typeof window.Android.exportTxt === "function") {
-            window.Android.exportTxt(contenu, nomFichier);
-        } else {
-            const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = nomFichier; a.click();
-            URL.revokeObjectURL(url);
-        }
+        const blob = new Blob([contenu], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = `ambiances_zen_${new Date().toISOString().split('T')[0]}.txt`; a.click();
         updateExportBadge(false);
     }
-
-    document.getElementById('importFile').addEventListener('change', function(e) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const lignes = event.target.result.split(/\r?\n/);
-                const nouvelles = [];
-                lignes.forEach(l => {
-                    const p = l.split(";");
-                    if (p.length === 4) nouvelles.push({ title: p[0], embedUrl: p[1], thumb: p[2], type: p[3] });
-                });
-                if (nouvelles.length > 0) {
-                    showAlert("Importer ?", `Ajouter les ${nouvelles.length} sons détectés ?`, () => {
-                        mesAmbiances = [...nouvelles, ...mesAmbiances];
-                        localStorage.setItem('ambiances_zen', JSON.stringify(mesAmbiances));
-                        renderList();
-                        updateExportBadge(false);
-                    });
-                }
-            } catch (err) { showAlert("Erreur", "Fichier invalide.", null, false); }
-        };
-        if(e.target.files[0]) reader.readAsText(e.target.files[0]);
-        this.value = "";
-    });
 </script>
 </body>
 </html>
