@@ -27,7 +27,7 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        #btn-retour { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2; }
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
@@ -45,13 +45,14 @@
         }
 
         .is-alerting-container { 
-            background-color: rgba(239, 68, 68, 0.2) !important; 
+            background-color: rgba(239, 68, 68, 0.75) !important; 
             border-color: #ef4444 !important; 
         }
 
         .radar-box {
             position: relative;
-            width: 400px; height: 400px;
+            width: 85vw; height: 85vw;
+            max-width: 400px; max-height: 400px;
             margin: 20px auto 10px auto;
             display: flex; align-items: center; justify-content: center;
             overflow: visible;
@@ -62,17 +63,36 @@
             opacity: 0.1; width: 100%; height: 100%;
         }
 
+		.ticks {
+			display: flex;
+			justify-content: space-between;
+			padding: 0 4px;
+			margin-top: 4px;
+		}
+		tick {
+			width: 1px;
+			height: 5px;
+			background: var(--text-page);
+			opacity: 0.2;
+		}
+		.tick-label {
+			font-size: 8px;
+			font-weight: 700;
+			opacity: 0.4;
+			margin-top: 2px;
+		}
+
         #threshold-circle {
             position: absolute; border-radius: 50%; border: 3px dashed var(--text-page);
-            opacity: 0.3; width: 400px; height: 400px; z-index: 5;
+            opacity: 0.3; width: 100%; height: 100%; z-index: 5;
             transition: transform 0.2s ease-out; pointer-events: none;
         }
 
         #noise-blob {
-            width: 400px; height: 400px; background: var(--theme-color);
+            width: 100%; height: 100%; background: var(--theme-color);
             border-radius: 50%; transition: transform 0.1s ease-out, background-color 0.4s ease;
             box-shadow: 0 0 40px var(--theme-color); z-index: 10;
-            transform: scale(0); /* Correction : Caché au départ */
+            transform: scale(0);
         }
 
         #btn-start {
@@ -80,17 +100,34 @@
             text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto; display: block;
         }
         
-        input[type=range] { width: 100%; accent-color: var(--theme-color); }
+        input[type=range] { width: 100%; accent-color: var(--theme-color); height: 12px; cursor: pointer; }
+
+        /* Styles Modale */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
+            align-items: center; justify-content: center; padding: 20px; 
+        }
+        .modal-content { 
+            background: var(--card-bg); width: 100%; max-width: 450px;
+            border-radius: 1.5rem; border: 1px solid var(--column-border); 
+            padding: 30px; position: relative; color: var(--text-page);
+        }
+
+        @media (max-width: 640px) {
+            input[type=range] { height: 24px; }
+            .text-[10px] { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <a href="index.html" id="btn-retour">
+    <a href="index.html" id="btn-retour" class="ui-btn-round">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
     </a>
-    <h1 id="pageTitle">Radar de Bruit XXL</h1>
-    <div style="width:38px"></div>
+    <h1 id="pageTitle">Radar de Bruit</h1>
+    <button id="btn-aide" onclick="ouvrirAide()" class="ui-btn-round text-lg">💡</button>
 </header>
 
 <div class="main-wrapper">
@@ -111,17 +148,27 @@
             <div id="noise-blob"></div>
         </div>
 
-        <div class="max-w-xs mx-auto space-y-6">
-            <div class="flex gap-4">
-                <div class="flex-1 text-left">
-                    <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
-                    <input type="range" id="sens-slider" min="0.5" max="10" step="0.5" value="3" oninput="updateSens(this.value)">
-                </div>
-                <div class="flex-1 text-left">
-                    <span class="text-[10px] font-black uppercase opacity-60">Seuil</span>
-                    <input type="range" id="seuil-slider" min="10" max="100" step="5" value="75" oninput="updateSeuil(this.value)">
-                </div>
-            </div>
+        <div class="max-w-xs mx-auto mt-6">
+            <div class="flex flex-col sm:flex-row gap-6 sm:gap-4">
+    <div class="flex-1 text-left">
+        <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
+        <input type="range" id="sens-slider" min="0.1" max="5" step="0.1" value="1.5" oninput="updateSens(this.value)">
+        <div class="ticks">
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Min</span></div>
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Normal</span></div>
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Max</span></div>
+        </div>
+    </div>
+    <div class="flex-1 text-left">
+        <span class="text-[10px] font-black uppercase opacity-60">Seuil d'alerte</span>
+        <input type="range" id="seuil-slider" min="10" max="100" step="5" value="75" oninput="updateSeuil(this.value)">
+        <div class="ticks">
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">10%</span></div>
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">50%</span></div>
+            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">100%</span></div>
+        </div>
+    </div>
+</div>
         </div>
 
         <button id="btn-start" onclick="toggleMic()">Lancer l'analyse</button>
@@ -138,6 +185,19 @@
     </div>
 </div>
 
+<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4" style="color: var(--theme-color)">💡 Manuel du Radar</h2>
+        <div class="text-[12px] leading-relaxed space-y-4 opacity-90">
+            <p>• <b>Lancement :</b> Cliquez sur "Lancer l'analyse" pour activer le micro.</p>
+            <p>• <b>La Bulle :</b> La sphère centrale grossit avec le bruit. Si elle dépasse le <b>cercle en pointillés</b>, une alerte est comptabilisée.</p>
+            <p>• <b>Sensibilité :</b> Ajustez ce curseur selon l'acoustique de votre pièce. Si la bulle bouge trop dans le silence, baissez la sensibilité.</p>
+            <p>• <b>Délai :</b> Un intervalle de 1.5 seconde est appliqué après chaque alerte pour éviter les comptages multiples sur un seul bruit.</p>
+        </div>
+        <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-8 w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-white shadow-lg">J'ai compris</button>
+    </div>
+</div>
+
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
@@ -145,16 +205,14 @@
     const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
     const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
     
-    document.getElementById('btn-start').style.backgroundColor = themeColor;
-    document.getElementById('btn-start').style.color = contrast;
-    document.getElementById('btn-retour').style.backgroundColor = themeColor;
-    document.getElementById('btn-retour').style.color = contrast;
-    const btnListe = document.getElementById('btn-retour-liste');
-    if(btnListe) { btnListe.style.backgroundColor = themeColor; btnListe.style.color = contrast; }
+    [document.getElementById('btn-start'), document.getElementById('btn-retour'), document.getElementById('btn-retour-liste'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
+        if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
+    });
     document.documentElement.style.setProperty('--theme-color', themeColor);
 
     let audioContext, analyser, javascriptNode, isListening = false;
-    let sensitivity = 3, seuilAlerte = 75, countAlertes = 0, peutCompter = true;
+    let sensitivity = 1.5, seuilAlerte = 75, countAlertes = 0, peutCompter = true;
+    let smoothedLevel = 0; 
     let isMuted = false, canPlaySound = true;
 
     function toggleSoundMode() {
@@ -180,6 +238,7 @@
         gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioContext.destination);
         osc.start(); osc.stop(audioContext.currentTime + 0.3);
+        if ("vibrate" in navigator) navigator.vibrate(200);
         setTimeout(() => { canPlaySound = true; }, 1500);
     }
 
@@ -200,7 +259,7 @@
                     let average = array.reduce((a, b) => a + b) / array.length;
                     renderRadar(average);
                 };
-            });
+            }).catch(err => alert("L'accès au micro est nécessaire."));
             document.getElementById('btn-start').textContent = "Arrêter";
         } else {
             if (audioContext) audioContext.close();
@@ -211,12 +270,14 @@
     }
 
     function renderRadar(val) {
-        let level = Math.min(val * sensitivity, 100);
+        let targetLevel = Math.min(val * sensitivity, 100);
+        smoothedLevel += (targetLevel - smoothedLevel) * 0.15;
+        
         const blob = document.getElementById('noise-blob');
         const container = document.querySelector('.gauge-container');
-        blob.style.transform = `scale(${level / 100})`;
+        blob.style.transform = `scale(${smoothedLevel / 100})`;
         
-        if (level > seuilAlerte) {
+        if (smoothedLevel > seuilAlerte) {
             blob.style.backgroundColor = "#ef4444";
             container.style.transition = "background-color 0.2s ease, border-color 0.2s ease";
             container.classList.add('is-alerting-container');
@@ -228,7 +289,7 @@
                 peutCompter = false;
             }
         } else {
-            peutCompter = true;
+            if (smoothedLevel < seuilAlerte - 5) peutCompter = true;
             blob.style.backgroundColor = "var(--theme-color)";
             container.style.transition = "background-color 5s ease, border-color 5s ease";
             container.classList.remove('is-alerting-container');
@@ -239,6 +300,9 @@
         countAlertes = 0;
         document.getElementById('compteur-alertes').textContent = "0";
     }
+
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
 
     updateSeuil(75);
 </script>

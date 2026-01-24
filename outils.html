@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Outils de classe - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
@@ -39,7 +40,6 @@
             text-align: center; flex-grow: 1; letter-spacing: 0.1em;
         }
 
-        /* Adaptation de la largeur pour PC */
         .main-wrapper { 
             width: 100%; 
             max-width: 500px; 
@@ -48,22 +48,22 @@
             transition: max-width 0.4s ease;
         }
 
-        /* Système de grille adaptative */
         #tools-list {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         .tool-card {
+            position: relative;
             background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 20px;
+            padding: 20px 12px;
             border: 1px solid var(--column-border);
             box-shadow: var(--shadow-custom);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
@@ -72,17 +72,35 @@
         .tool-card:active { transform: scale(0.97); }
 
         .icon-box {
-            width: 52px; height: 52px; border-radius: 14px;
+            width: 44px; height: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px; border: 1px solid var(--column-border);
+            font-size: 22px; border: 1px solid var(--column-border);
             background: rgba(128, 128, 128, 0.05);
             transition: transform 0.3s ease;
+            flex-shrink: 0;
         }
 
-        /* Styles Spécifiques PC */
+        .drag-handle {
+            position: absolute;
+            top: 10px; right: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 2px);
+            gap: 2px;
+            cursor: grab;
+            opacity: 0.2;
+        }
+
+        .drag-handle span {
+            width: 2px; height: 2px;
+            background-color: var(--text-page);
+            border-radius: 50%;
+        }
+
         @media (min-width: 768px) {
             .main-wrapper { max-width: 900px; }
             #tools-list { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .tool-card { padding: 20px; gap: 16px; }
+            .icon-box { width: 52px; height: 52px; font-size: 26px; }
             .tool-card:hover { 
                 transform: translateY(-4px); 
                 border-color: currentColor; 
@@ -124,38 +142,41 @@
 
 <div class="main-wrapper">
     <div id="tools-list">
-        <a href="outils_timer.html" class="tool-card">
+        <a href="outils_timer.html" class="tool-card" data-id="timer">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="icon-box" id="icon-timer">⏱️</div>
             <div>
-                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-timer">Minuteur & Chrono</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Gérer le temps des activités</p>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-timer">Minuteur & Chrono</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Gérer le temps des activités</p>
             </div>
         </a>
 
-        <a href="outils_bruit.html" class="tool-card">
+        <a href="outils_bruit.html" class="tool-card" data-id="bruit">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="icon-box" id="icon-bruit">🔈</div>
             <div>
-                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-bruit">Niveau sonore</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Visualiser le bruit en classe</p>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-bruit">Radar de bruit</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Visualiser le bruit en classe</p>
             </div>
         </a>
         
-        <a href="outils_ambiances.html" class="tool-card">
+        <a href="outils_ambiances.html" class="tool-card" data-id="musique">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="icon-box" id="icon-musique">🎵</div>
             <div>
-                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-musique">Ambiances Zen</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Musiques de fond pour le travail</p>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-musique">Ambiances Zen</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Musiques de fond de travail</p>
             </div>
         </a>
 
-        <a href="outils_feux.html" class="tool-card">
+        <a href="outils_feux.html" class="tool-card" data-id="feux">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="icon-box" id="icon-feux">🚦</div>
             <div>
-                <h2 class="font-black text-[13px] md:text-[14px] uppercase tracking-wide" id="title-feux">Feux de classe</h2>
-                <p class="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Indiquer le mode de travail actuel</p>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-feux">Feux de classe</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Indiquer le mode de travail</p>
             </div>
         </a>
-
     </div>
 </div>
 
@@ -227,10 +248,35 @@
         });
     }
 
+    function initSortable() {
+        const toolsList = document.getElementById('tools-list');
+        const savedOrder = JSON.parse(localStorage.getItem('outils_order'));
+        
+        if (savedOrder) {
+            savedOrder.forEach(id => {
+                const tile = document.querySelector(`[data-id="${id}"]`);
+                if (tile) toolsList.appendChild(tile);
+            });
+        }
+
+        new Sortable(toolsList, {
+            handle: '.drag-handle',
+            animation: 250,
+            ghostClass: 'opacity-0',
+            onEnd: function() {
+                const order = Array.from(toolsList.children).map(child => child.getAttribute('data-id'));
+                localStorage.setItem('outils_order', JSON.stringify(order));
+            }
+        });
+    }
+
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
-    window.onload = appliquerTheme;
+    window.onload = () => {
+        appliquerTheme();
+        initSortable();
+    };
 </script>
 </body>
 </html>
