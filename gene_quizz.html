@@ -94,25 +94,47 @@
     <div id="setup-zone" class="light-card space-y-4">
         <div class="space-y-4">
             <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Titre du Quizz</label>
+                <input type="text" id="quiz-title" class="input-field mb-2" placeholder="Ex: Histoire - Les Rois de France">
+
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Questions / Réponses</label>
                 <textarea id="quiz-data" class="input-field h-48 text-left font-normal" placeholder="Question 1 ; Réponse 1&#10;Question 2 ; Réponse 2"></textarea>
                 
-                <div class="flex flex-wrap gap-4 items-center mt-2">
-                    <button onclick="addExample()" class="text-[9px] font-bold uppercase text-cyan-500">+ Exemple</button>
-                    <button onclick="clearAll()" class="text-[9px] font-bold uppercase text-red-500">🗑️ Tout effacer</button>
-                    <label class="cursor-pointer text-[9px] font-bold uppercase text-emerald-500 flex items-center gap-1">
-                        📥 Importer .txt
-                        <input type="file" id="import-txt" class="hidden" accept=".txt" onchange="importFromTXT(this)">
-                    </label>
-                </div>
+                <div class="flex flex-row items-center justify-between gap-2 mt-4">
+					<div class="flex gap-2">
+						<button onclick="addExample()" class="px-2 py-1.5 rounded-lg border border-cyan-500/30 text-[8px] font-bold uppercase text-cyan-500 hover:bg-cyan-500/10 transition-colors">Exemple</button>
+						<button onclick="clearAll()" class="px-2 py-1.5 rounded-lg border border-red-500/30 text-[8px] font-bold uppercase text-red-500 hover:bg-red-500/10 transition-colors">Vider</button>
+					</div>
+    
+					<label id="label-import" class="cursor-pointer px-4 py-2 rounded-full bg-emerald-500 text-white text-[9px] font-black uppercase flex items-center gap-2 shadow-md active:scale-95 transition-transform whitespace-nowrap">
+						📥 Importer .txt
+						<input type="file" id="import-txt" class="hidden" accept=".txt" onchange="importFromTXT(this)">
+					</label>
+				</div>
             </div>
         </div>
 
         <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Minutes</label><input type="number" id="timer-min" value="0" min="0" class="input-field"></div>
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Secondes</label><input type="number" id="timer-sec" value="30" min="0" max="59" class="input-field"></div>
-            </div>
+    <div class="flex items-end gap-3">
+    <div class="pb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[var(--accent-color)] opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-3 flex-grow">
+        <div>
+            <label class="block text-[8px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Minutes</label>
+            <input type="number" id="timer-min" value="0" min="0" class="input-field text-center">
+        </div>
+        <div>
+            <label class="block text-[8px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Secondes</label>
+            <input type="number" id="timer-sec" value="30" min="0" max="59" class="input-field text-center">
+        </div>
+    </div>
+</div>
+    
+    </div>
 
             <div>
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Sonnerie de fin</label>
@@ -156,10 +178,10 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide Quizz</h2>
         <div class="text-[11px] leading-relaxed space-y-4">
-            <p>1. <b>Saisie :</b> Saisissez une question par ligne au format <br><code class="bg-black/20 p-1 rounded">Question ; Réponse</code></p>
+            <p>1. <b>Saisie :</b> Saisissez un titre puis une question par ligne au format <br><code class="bg-black/20 p-1 rounded">Question ; Réponse</code></p>
             <p>2. <b>Import :</b> Vous pouvez importer un fichier texte (.txt) déjà préparé.</p>
-            <p>3. <b>Chrono :</b> Réglez le temps. Si à 0:00, le mode est libre.</p>
-            <p>4. <b>Export :</b> Générez une fiche PDF (propre pour impression) ou un fichier TXT (pour sauvegarde).</p>
+            <p>3. <b>Chrono :</b> Paramétrez le temps. Si vous réglez à 0:00, le temps est illimité.</p>
+            <p>4. <b>Export :</b> Générez une fiche PDF ou un fichier TXT nommé selon votre titre et la date.</p>
         </div>
         <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">J'ai compris</button>
     </div>
@@ -187,58 +209,100 @@
     </div>
 </div>
 
+<div id="modal-effacer" class="modal-overlay" onclick="fermerModal('modal-effacer')">
+    <div class="modal-content text-center" onclick="event.stopPropagation()">
+        <div class="text-4xl mb-4">🗑️</div>
+        <h2 id="titre-effacer" class="text-lg font-black uppercase mb-2">Tout effacer ?</h2>
+        <p class="text-[11px] opacity-80 leading-relaxed mb-6">Cette action supprimera le titre et toutes les questions.</p>
+        <div class="flex gap-3">
+            <button onclick="fermerModal('modal-effacer')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gray-500 text-white">Annuler</button>
+            <button onclick="confirmerEffacement()" id="btn-confirmer-effacer" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">Effacer</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     let currentQuestions = [];
     let countdown;
 
     function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; 
-        const hexa = mapCouleurs[colPref];
-        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
-        
-        document.documentElement.style.setProperty('--accent-color', hexa);
-        
-        const btns = [
-            document.getElementById('btn-retour-header'), 
-            document.getElementById('btn-retour-liste'), 
-            document.getElementById('btn-aide'), 
-            document.getElementById('mainAddBtn'), 
-            document.getElementById('btn-fermer-aide'), 
-            document.getElementById('btn-fermer-fin'),
-            document.getElementById('btn-test-son'),
-            document.getElementById('btn-fermer-erreur')
-        ];
-        
-        btns.forEach(b => { if(b) { b.style.backgroundColor = hexa; b.style.color = contrast; } });
-        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
-        if(document.getElementById('titre-erreur')) document.getElementById('titre-erreur').style.color = hexa;
-    }
+    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+    const colPref = themePrefs.gen || 'cyan'; 
+    const hexa = mapCouleurs[colPref];
+    const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
+    
+    document.documentElement.style.setProperty('--accent-color', hexa);
+    
+    const btns = [
+        document.getElementById('btn-retour-header'), 
+        document.getElementById('btn-retour-liste'), 
+        document.getElementById('btn-aide'), 
+        document.getElementById('mainAddBtn'), 
+        document.getElementById('btn-fermer-aide'), 
+        document.getElementById('btn-fermer-fin'),
+        document.getElementById('btn-test-son'),
+        document.getElementById('btn-fermer-erreur'),
+        document.getElementById('btn-confirmer-effacer'),
+        document.getElementById('label-import') // Le bouton import prend maintenant la couleur du thème
+    ];
+    
+    btns.forEach(b => { if(b) { b.style.backgroundColor = hexa; b.style.color = contrast; } });
+    
+    // ... reste de la fonction (couleurs des titres)
+    ['titre-aide', 'titre-erreur', 'titre-effacer'].forEach(id => {
+        if(document.getElementById(id)) document.getElementById(id).style.color = hexa;
+    });
+}
 
     function addExample() {
+        document.getElementById('quiz-title').value = "Culture Générale";
         document.getElementById('quiz-data').value = "Capitale du Japon ? ; Tokyo\nQuel est le plus grand océan ? ; Pacifique\nCombien font 9 x 8 ? ; 72\nQui a peint la Joconde ? ; Léonard de Vinci";
     }
 
-    function clearAll() {
-        if(confirm("Effacer tout le contenu ?")) document.getElementById('quiz-data').value = "";
+    function clearAll() { document.getElementById('modal-effacer').style.display = 'flex'; }
+    function confirmerEffacement() {
+        document.getElementById('quiz-title').value = "";
+        document.getElementById('quiz-data').value = "";
+        fermerModal('modal-effacer');
+    }
+
+    function getFormattedDate() {
+        const d = new Date();
+        return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getFileName(ext) {
+        const rawTitle = document.getElementById('quiz-title').value.trim() || "quizz";
+        const cleanTitle = rawTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        return `outilsprofs_${cleanTitle}_${getFormattedDate()}.${ext}`;
     }
 
     function importFromTXT(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const lines = e.target.result.split('\n').filter(line => line.includes(';'));
-            if (lines.length > 0) {
-                document.getElementById('quiz-data').value = lines.map(l => l.trim()).join('\n');
-            } else {
-                document.getElementById('modal-erreur').style.display = 'flex';
-            }
-        };
-        reader.readAsText(file);
-        input.value = '';
-    }
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        
+        // 1. Chercher et extraire le titre si la ligne commence par "TITRE :"
+        const titleLine = lines.find(l => l.toUpperCase().startsWith('TITRE :'));
+        if (titleLine) {
+            const extractedTitle = titleLine.split(':')[1].trim();
+            document.getElementById('quiz-title').value = extractedTitle;
+        }
+
+        // 2. Extraire les questions (lignes contenant un point-virgule)
+        const data = lines.filter(l => l.includes(';'));
+        if (data.length > 0) {
+            document.getElementById('quiz-data').value = data.map(l => l.trim()).join('\n');
+        } else {
+            document.getElementById('modal-erreur').style.display = 'flex';
+        }
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
 
     function playDing() {
         const soundType = document.getElementById('sound-select').value;
@@ -248,10 +312,8 @@
         const createTone = (freq, vol, decay) => {
             const osc = context.createOscillator();
             const gain = context.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now);
-            gain.gain.setValueAtTime(vol, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(vol, now); gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
             osc.connect(gain); gain.connect(context.destination);
             osc.start(); osc.stop(now + decay);
         };
@@ -260,20 +322,12 @@
 
     function generateQuiz() {
         const text = document.getElementById('quiz-data').value.trim();
-        if (!text || !text.includes(';')) { 
-            document.getElementById('modal-erreur').style.display = 'flex';
-            return; 
-        }
+        if (!text || !text.includes(';')) { document.getElementById('modal-erreur').style.display = 'flex'; return; }
         const lines = text.split('\n');
         currentQuestions = lines.map(line => {
             const parts = line.split(';');
             return { q: parts[0]?.trim(), r: parts[1]?.trim() || "???" };
-        }).filter(item => item.q && item.q.length > 0);
-
-        if (currentQuestions.length === 0) {
-            document.getElementById('modal-erreur').style.display = 'flex';
-            return;
-        }
+        }).filter(item => item.q);
 
         if (document.getElementById('shuffle-order').checked) currentQuestions.sort(() => Math.random() - 0.5);
         startTimer();
@@ -298,30 +352,42 @@
             if (timeLeft <= 0) { clearInterval(countdown); playDing(); document.getElementById('modal-fin').style.display = 'flex'; }
             timeLeft--;
         };
-        updateDisplay();
-        countdown = setInterval(updateDisplay, 1000);
+        updateDisplay(); countdown = setInterval(updateDisplay, 1000);
     }
 
     function renderQuestions() {
-        const grid = document.getElementById('questions-grid');
-        grid.innerHTML = '';
-        currentQuestions.forEach((item, i) => {
-            grid.innerHTML += `
-                <div class="q-card">
-                    <div class="flex items-start gap-2">
-                        <span class="opacity-30 text-[10px] font-black mt-1">${i+1}.</span>
-                        <span class="text-sm font-bold leading-tight">${item.q}</span>
-                    </div>
-                    <div class="res-text hidden">
-                        <span class="text-[9px] uppercase opacity-40 block mb-1">Réponse</span>
-                        ${item.r}
-                    </div>
-                </div>`;
-        });
-        const btn = document.getElementById('validate-btn');
-        btn.innerText = "👁️ correction";
-        btn.classList.replace('bg-red-500', 'bg-green-500');
+    const grid = document.getElementById('questions-grid');
+    const title = document.getElementById('quiz-title').value.trim();
+    
+    // On vide la grille et on ajoute le titre s'il existe
+    grid.innerHTML = '';
+    
+    if (title) {
+        grid.innerHTML = `
+            <div class="col-span-full mb-4 text-center">
+                <h2 class="text-xl font-black uppercase tracking-tight text-[var(--accent-color)]">${title}</h2>
+                <div class="h-1 w-20 bg-[var(--accent-color)] mx-auto mt-2 rounded-full opacity-50"></div>
+            </div>
+        `;
     }
+
+    currentQuestions.forEach((item, i) => {
+        grid.innerHTML += `
+            <div class="q-card">
+                <div class="flex items-start gap-2">
+                    <span class="opacity-30 text-[10px] font-black mt-1">${i+1}.</span>
+                    <span class="text-sm font-bold leading-tight">${item.q}</span>
+                </div>
+                <div class="res-text hidden">
+                    ${item.r}
+                </div>
+            </div>`;
+    });
+    
+    const btn = document.getElementById('validate-btn');
+    btn.innerText = "👁️ correction"; 
+    btn.classList.replace('bg-red-500', 'bg-green-500');
+}
 
     function showCorrection() {
         const res = document.querySelectorAll('.res-text');
@@ -331,32 +397,31 @@
         if (isHidden) {
             clearInterval(countdown);
             res.forEach(el => el.classList.remove('hidden'));
-            btn.innerText = "🙈 masquer";
-            btn.classList.replace('bg-green-500', 'bg-red-500');
+            btn.innerText = "🙈 masquer"; btn.classList.replace('bg-green-500', 'bg-red-500');
         } else {
             res.forEach(el => el.classList.add('hidden'));
-            btn.innerText = "👁️ correction";
-            btn.classList.replace('bg-red-500', 'bg-green-500');
+            btn.innerText = "👁️ correction"; btn.classList.replace('bg-red-500', 'bg-green-500');
         }
     }
 
     function exportToTXT() {
         if (currentQuestions.length === 0) return;
-        const content = currentQuestions.map(item => `${item.q} ; ${item.r}`).join('\n');
+        const title = document.getElementById('quiz-title').value.trim() || "Quizz sans titre";
+        const content = `TITRE : ${title}\nDATE : ${getFormattedDate()}\n\n` + currentQuestions.map(item => `${item.q} ; ${item.r}`).join('\n');
         const blob = new Blob([content], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `quizz_export.txt`; link.click();
+        link.download = getFileName('txt'); link.click();
     }
 
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const draw = (title, showRes) => {
+        const mainTitle = document.getElementById('quiz-title').value.trim() || "Quizz";
+        const draw = (subTitle, showRes) => {
             doc.setFont("helvetica", "bold"); doc.setFontSize(18);
-            doc.text(title, 105, 20, {align:'center'});
-            doc.setFontSize(10);
-            let y = 40;
+            doc.text(`${mainTitle} - ${subTitle}`, 105, 20, {align:'center'});
+            doc.setFontSize(10); let y = 40;
             currentQuestions.forEach((item, i) => {
                 if (y > 270) { doc.addPage(); y = 20; }
                 doc.setFont("helvetica", "bold"); doc.text(`${i+1}. ${item.q}`, 20, y); y += 7;
@@ -368,8 +433,8 @@
                 }
             });
         };
-        draw("Quizz - Fiche Elève", false); doc.addPage(); draw("Quizz - Corrigé", true);
-        doc.save("quizz_outilsprofs.pdf");
+        draw("Fiche Elève", false); doc.addPage(); draw("Corrigé", true);
+        doc.save(getFileName('pdf'));
     }
 
     function retourReglages() { 
