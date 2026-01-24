@@ -10,12 +10,12 @@
         
         :root {
             --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --header-bg: #1e1e1e; --card-bg: #1e1e1e; --input-bg: rgba(255,255,255,0.05);
         }
 
         body.light-mode {
             --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
-            --header-bg: #ffffff; --card-bg: #ffffff;
+            --header-bg: #ffffff; --card-bg: #ffffff; --input-bg: rgba(0,0,0,0.05);
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
@@ -27,51 +27,57 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2; }
+        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
-        #container-retour-liste { margin-bottom: 1rem; text-align: left; }
-        #btn-retour-liste {
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
-            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
-            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-
         .gauge-container {
-            background: var(--card-bg); border-radius: 1.5rem; padding: 10px 30px 40px 30px; border: 1px solid var(--column-border); text-align: center;
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 10px 30px 40px 30px;
+            border: 1px solid var(--column-border);
+            text-align: center;
         }
 
-        /* Reveal Box Format Paysage et Grand écran */
         .reveal-box {
             position: relative;
-            width: 90vw; 
+            width: 100%; 
             aspect-ratio: 16 / 9;
             max-width: 900px; 
-            margin: 20px auto 10px auto;
+            margin: 10px auto;
             background: #000;
-            border-radius: 1.5rem;
+            border-radius: 1rem;
             overflow: hidden;
             display: flex; align-items: center; justify-content: center;
             border: 2px solid var(--column-border);
         }
+        
+        #hidden-image { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease; }
+        #pixel-grid { position: absolute; inset: 0; display: grid; pointer-events: none; z-index: 5; }
+        .pixel-block { background-color: var(--bg-page); transition: opacity 0.2s ease; }
 
-        #hidden-image {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            filter: blur(30px) brightness(0.4);
-            transition: filter 0.3s linear;
-        }
-
-        #btn-start {
+        #btn-start, #btn-reset {
             width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto; display: block;
+            text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto;
         }
 
-        .mic-monitor-bg { width: 100px; height: 6px; background: rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden; margin: 5px auto; }
+        .mic-monitor-bg { 
+            width: 250px; height: 15px; background: var(--input-bg); 
+            border-radius: 7px; overflow: hidden; margin: 5px auto; position: relative; 
+        }
         #mic-bar { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; }
 
+        .mode-selector { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; gap: 4px; }
+        .mode-option {
+            flex: 1; padding: 8px; border-radius: 8px; font-size: 10px; font-weight: 800; 
+            text-transform: uppercase; cursor: pointer; transition: 0.2s; opacity: 0.6;
+        }
+        .mode-option.active { background: var(--theme-color); color: #fff; opacity: 1; }
+
+        .time-box { background: var(--input-bg); border: 1px solid var(--column-border); }
+
+        /* Modal Styles */
         .modal-overlay { 
             display: none; position: fixed; inset: 0; z-index: 1000;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
@@ -83,9 +89,7 @@
             padding: 30px; position: relative; color: var(--text-page);
         }
 
-        @media (max-width: 640px) {
-            .gauge-container { padding: 20px 20px 40px 20px; }
-        }
+        @media (max-width: 640px) { .gauge-container { padding: 20px 20px 40px 20px; } }
     </style>
 </head>
 <body>
@@ -99,24 +103,16 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste">
-        <a href="outils.html" id="btn-retour-liste">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-            Retour aux outils
-        </a>
-    </div>
-
     <div class="gauge-container">
-        <div class="mt-2">
-            <span class="text-[9px] font-black uppercase opacity-40">Niveau Micro</span>
-            <div class="mic-monitor-bg">
-                <div id="mic-bar"></div>
-            </div>
+        <div class="mic-monitor-bg relative flex items-center justify-center mt-2">
+            <div id="mic-bar" class="absolute left-0 top-0 h-full"></div>
+            <span class="relative z-10 text-[8px] font-black uppercase opacity-60">Niveau Micro</span>
         </div>
 
         <div class="reveal-box">
             <img id="hidden-image" src="https://picsum.photos/900/500?nature,animals" alt="Surprise">
-            <div id="msg-start" class="absolute inset-0 flex items-center justify-center text-center p-6 text-sm font-bold opacity-30">
+            <div id="pixel-grid"></div>
+            <div id="msg-start" class="absolute inset-0 z-10 flex items-center justify-center text-center p-6 text-sm font-bold opacity-30">
                 Restez silencieux pour<br>révéler l'image...
             </div>
         </div>
@@ -131,20 +127,47 @@
             </div>
         </div>
 
-        <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
-        <button id="btn-reset" onclick="nouveauDefi()" class="hidden w-full max-w-400px padding-16 border-radius-12 font-weight-900 text-transform-uppercase cursor-pointer border-none margin-20-auto display-block" style="width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto;">Nouveau défi</button>
+        <div class="flex justify-center min-h-[80px]">
+            <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
+            <button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
+        </div>
 
-        <div class="flex flex-col gap-4 mt-8 py-4 bg-black/5 dark:bg-white/5 rounded-xl">
-            <div class="flex justify-center items-center gap-4">
-                <span class="text-[10px] font-black uppercase opacity-60">Durée (sec) :</span>
-                <input type="number" id="duree-defi" value="10" min="1" max="1000" class="bg-transparent font-bold text-xs outline-none border-b border-current w-12 text-center">
-            </div>
+        <div class="flex flex-col gap-6 mt-8 py-8 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
             <div class="px-8">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] font-black uppercase opacity-60">Sensibilité du micro</span>
-                    <span id="sensibilite-val" class="text-[10px] font-bold">50</span>
+                <span class="text-[10px] font-black uppercase tracking-widest opacity-40 block mb-3">Mode d'apparition</span>
+                <div class="mode-selector">
+                    <div id="mode-pixels" onclick="setMode('pixels')" class="mode-option active">Pixels</div>
+                    <div id="mode-flou" onclick="setMode('flou')" class="mode-option">Flou</div>
                 </div>
-                <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-1.5 bg-black/20 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
+            </div>
+
+            <div class="flex flex-col items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Durée du défi</span>
+                <div class="flex items-center justify-center p-3 px-6 rounded-2xl time-box min-w-[180px]">
+                    <div class="flex flex-col items-center w-12">
+                        <button onclick="adjustTime('min', 1)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▲</button>
+                        <span id="min-defi-display" class="text-2xl font-black w-full text-center leading-none block">0</span>
+                        <input type="hidden" id="min-defi" value="0">
+                        <button onclick="adjustTime('min', -1)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▼</button>
+                    </div>
+                    <div class="flex items-center justify-center w-6">
+                        <span class="text-2xl font-black opacity-20" style="margin-top: -4px;">:</span>
+                    </div>
+                    <div class="flex flex-col items-center w-12">
+                        <button onclick="adjustTime('sec', 5)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▲</button>
+                        <span id="sec-defi-display" class="text-2xl font-black w-full text-center leading-none block">15</span>
+                        <input type="hidden" id="sec-defi" value="15">
+                        <button onclick="adjustTime('sec', -5)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▼</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Sensibilité micro</span>
+                    <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">50</span>
+                </div>
+                <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-1.5 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
             </div>
         </div>
     </div>
@@ -154,10 +177,10 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 class="text-lg font-black uppercase mb-4" style="color: var(--theme-color)">💡 Le Défi Calme</h2>
         <div class="text-[12px] leading-relaxed space-y-4 opacity-90">
-            <p>• <b>Objectif :</b> L'image devient de plus en plus nette si le silence est respecté.</p>
-            <p>• <b>Progression :</b> Plus il y a de calme, plus l'image se révèle.</p>
-            <p>• <b>Sanction :</b> Si le bruit dépasse la limite, l'image redevient floue.</p>
-            <p>• <b>Succès :</b> Atteignez 100% pour voir l'image parfaitement !</p>
+            <p>• <b>Objectif :</b> L'image se révèle si le silence est respecté.</p>
+            <p>• <b>Modes :</b> <b>Pixels</b> (révélation par blocs) ou <b>Flou</b> (netteté progressive).</p>
+            <p>• <b>Durée :</b> En mode Pixels, plus le temps est long, plus les carrés sont petits.</p>
+            <p>• <b>Bruit :</b> Si le niveau sonore est trop haut, l'image se cache à nouveau.</p>
         </div>
         <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-8 w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-white shadow-lg">J'ai compris</button>
     </div>
@@ -165,124 +188,131 @@
 
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
     const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
     const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
     const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
     
-    document.querySelectorAll('#btn-start, #btn-retour, #btn-retour-liste, #btn-aide, #btn-fermer-aide').forEach(el => {
+    document.documentElement.style.setProperty('--theme-color', themeColor);
+    document.querySelectorAll('#btn-start, #btn-reset, #btn-retour, #btn-aide, #btn-fermer-aide').forEach(el => {
         if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
     });
-    document.documentElement.style.setProperty('--theme-color', themeColor);
 
-    let audioContext, analyser, javascriptNode, stream, isPlaying = false, progress = 0;
+    let audioContext, analyser, javascriptNode, stream, isPlaying = false, progress = 0, lastTime = 0, currentMode = 'pixels';
+    const gridContainer = document.getElementById('pixel-grid');
+    const imageEl = document.getElementById('hidden-image');
+    let pixelsOrder = [];
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('mode-pixels').classList.toggle('active', mode === 'pixels');
+        document.getElementById('mode-flou').classList.toggle('active', mode === 'flou');
+        if (mode === 'flou') {
+            gridContainer.innerHTML = '';
+        } else {
+            generateGrid();
+        }
+        updateUI();
+    }
+
+    function adjustTime(type, delta) {
+        const input = document.getElementById(`${type}-defi`);
+        const display = document.getElementById(`${type}-defi-display`);
+        let val = parseInt(input.value) + delta;
+        if (val < 0) val = 0; if (val > 59) val = 59;
+        input.value = val;
+        display.textContent = val;
+        if (currentMode === 'pixels') generateGrid();
+    }
+
+    function getDureeTotaleSeconds() {
+        return (parseInt(document.getElementById('min-defi').value) * 60) + parseInt(document.getElementById('sec-defi').value) || 1;
+    }
+
+    function generateGrid() {
+        if (currentMode !== 'pixels') return;
+        const totalSeconds = getDureeTotaleSeconds();
+        const density = Math.max(4, Math.round(3 + (totalSeconds * 0.4))); 
+        const rows = Math.min(density, 40); const cols = Math.round(rows * (16/9));
+        gridContainer.innerHTML = '';
+        gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        const temp = [];
+        for (let i = 0; i < rows * cols; i++) {
+            const p = document.createElement('div'); p.className = 'pixel-block';
+            gridContainer.appendChild(p); temp.push(p);
+        }
+        pixelsOrder = temp.sort(() => Math.random() - 0.5);
+        updateUI();
+    }
 
     async function toggleDefi() {
         if (!isPlaying) {
-            const success = await startMic();
-            if (success) {
-                isPlaying = true;
+            try {
+                if (!stream) {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioContext = new AudioContext();
+                    analyser = audioContext.createAnalyser();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+                    source.connect(analyser); analyser.connect(javascriptNode); javascriptNode.connect(audioContext.destination);
+                    javascriptNode.onaudioprocess = () => {
+                        const now = performance.now(); const delta = (now - lastTime) / 1000; lastTime = now;
+                        let array = new Uint8Array(analyser.frequencyBinCount);
+                        analyser.getByteFrequencyData(array);
+                        let volume = array.reduce((a, b) => a + b) / array.length;
+                        document.getElementById('mic-bar').style.width = `${Math.min(volume * 3, 100)}%`;
+                        if (isPlaying) updateGame(volume, delta);
+                    };
+                }
+                isPlaying = true; lastTime = performance.now();
                 document.getElementById('btn-start').textContent = "Pause";
                 document.getElementById('msg-start').style.display = 'none';
-            }
+            } catch (err) { alert("Micro non détecté"); }
         } else {
-            stopMic();
             isPlaying = false;
             document.getElementById('btn-start').textContent = "Reprendre";
-            document.getElementById('status-text').textContent = "En pause";
         }
     }
 
-    async function startMic() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioContext.state === 'suspended') await audioContext.resume();
-            analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaStreamSource(stream);
-            javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-            source.connect(analyser); analyser.connect(javascriptNode); javascriptNode.connect(audioContext.destination);
-            javascriptNode.onaudioprocess = () => {
-                let array = new Uint8Array(analyser.frequencyBinCount);
-                analyser.getByteFrequencyData(array);
-                let volume = array.reduce((a, b) => a + b) / array.length;
-                document.getElementById('mic-bar').style.width = `${Math.min(volume * 3, 100)}%`;
-                updateGame(volume);
-            };
-            return true;
-        } catch (err) { return false; }
-    }
-
-    function stopMic() {
-        if (javascriptNode) javascriptNode.disconnect();
-        if (stream) stream.getTracks().forEach(t => t.stop());
-    }
-
-    function updateGame(volume) {
-        // On convertit la sensibilité (1-100) en seuil de volume (plus c'est sensible, plus le seuil est bas)
-        // Un volume capté est souvent entre 0 et 50. Ici on mappe 100 de sensibilité à un seuil très bas (5).
-        const sensibilite = parseInt(document.getElementById('sensibilite-slider').value);
-        const threshold = 60 - (sensibilite * 0.55); 
-        
-        const dureeSaisie = parseInt(document.getElementById('duree-defi').value) || 10;
-        const img = document.getElementById('hidden-image'), fill = document.getElementById('progress-fill'), status = document.getElementById('status-text');
-        
-        const increment = 100 / (dureeSaisie * 60);
-
+    function updateGame(volume, deltaTime) {
+        const threshold = 60 - (parseInt(document.getElementById('sensibilite-slider').value) * 0.55);
+        const speed = 100 / getDureeTotaleSeconds(); 
         if (volume < threshold) {
-            if (progress < 100) progress += increment; 
-            status.textContent = "Chut... ça s'éclaircit !";
-            status.style.color = "inherit";
+            if (progress < 100) progress += (speed * deltaTime);
+            document.getElementById('status-text').textContent = "Chut... ça apparait !";
         } else {
-            if (progress > 0) progress -= (increment * 4); // Sanction légèrement augmentée pour le challenge
-            status.textContent = "Trop de bruit !";
-            status.style.color = "#ef4444";
+            if (progress > 0) progress -= (speed * deltaTime * 2);
+            document.getElementById('status-text').textContent = "Trop de bruit !";
         }
-
-        const blurValue = 30 - (progress * 0.3);
-        const brightnessValue = 0.4 + (progress * 0.006);
-        img.style.filter = `blur(${Math.max(0, blurValue)}px) brightness(${brightnessValue})`;
-        
-        fill.style.width = `${progress}%`;
-        document.getElementById('percent-text').textContent = `${Math.floor(progress)}%`;
-        
+        progress = Math.max(0, Math.min(100, progress));
+        updateUI();
         if (progress >= 100) {
-            status.textContent = "Bravo !"; 
-            img.style.filter = "blur(0px) brightness(1)";
-            stopMic(); 
-            isPlaying = false;
+            document.getElementById('status-text').textContent = "Bravo !"; isPlaying = false;
             document.getElementById('btn-start').style.display = 'none';
-            const btnReset = document.getElementById('btn-reset');
-            btnReset.classList.remove('hidden');
-            btnReset.style.backgroundColor = themeColor;
-            btnReset.style.color = contrast;
+            document.getElementById('btn-reset').style.display = 'block';
+            if (javascriptNode) javascriptNode.disconnect();
         }
     }
 
-	function nouveauDefi() {
-        progress = 0;
-        isPlaying = false;
-        
-        // Réinitialisation de l'affichage
-        const img = document.getElementById('hidden-image');
-        img.style.filter = "blur(30px) brightness(0.4)";
-        // On ajoute un paramètre aléatoire à l'URL pour forcer le chargement d'une nouvelle image
-        img.src = `https://picsum.photos/900/500?nature,animals&sig=${Math.random()}`;
-        
-        document.getElementById('progress-fill').style.width = "0%";
-        document.getElementById('percent-text').textContent = "0%";
-        document.getElementById('status-text').textContent = "Prêt ?";
-        document.getElementById('status-text').style.color = "inherit";
-        
-        // Gestion des boutons
-        document.getElementById('btn-start').style.display = 'block';
-        document.getElementById('btn-start').textContent = "Démarrer le défi";
-        document.getElementById('btn-reset').classList.add('hidden');
-        document.getElementById('msg-start').style.display = 'flex';
+    function updateUI() {
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('percent-text').textContent = `${Math.floor(progress)}%`;
+        if (currentMode === 'pixels') {
+            imageEl.style.filter = 'none';
+            const revealCount = Math.floor((progress / 100) * pixelsOrder.length);
+            pixelsOrder.forEach((p, i) => p.style.opacity = i < revealCount ? "0" : "1");
+        } else {
+            const blurVal = 40 - (progress * 0.4);
+            imageEl.style.filter = `blur(${blurVal}px)`;
+        }
     }
-	
+
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    generateGrid();
 </script>
 </body>
 </html>
