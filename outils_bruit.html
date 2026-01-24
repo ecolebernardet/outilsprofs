@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sonomètre - OutilsProfs</title>
+    <title>Radar de Bruit XXL - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
@@ -32,76 +32,54 @@
 
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
+        #container-retour-liste { margin-bottom: 1rem; text-align: left; }
+        #btn-retour-liste {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
+            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
+            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
         .gauge-container {
-            background: var(--card-bg); border-radius: 1.5rem; padding: 40px 30px; border: 1px solid var(--column-border); text-align: center;
+            background: var(--card-bg); border-radius: 1.5rem; padding: 10px 30px 40px 30px; border: 1px solid var(--column-border); text-align: center;
+            transition: background-color 5s ease, border-color 5s ease;
         }
 
-        /* ZONE UTILE SYNCHRONISÉE PAR LE PADDING */
-        .progress-bg {
-            display: grid;
-            grid-template-columns: 100%;
-            height: 80px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 40px;
-            border: 4px solid var(--bg-page);
+        .is-alerting-container { 
+            background-color: rgba(239, 68, 68, 0.2) !important; 
+            border-color: #ef4444 !important; 
+        }
+
+        .radar-box {
             position: relative;
+            width: 400px; height: 400px;
+            margin: 20px auto 10px auto;
+            display: flex; align-items: center; justify-content: center;
             overflow: visible;
-            /* Padding identique pour la barre et le curseur */
-            padding: 0 40px; 
-            margin-bottom: 10px;
         }
 
-        #progress-bar {
-            grid-area: 1/1;
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
-            border-radius: 4px; /* Plus carré pour s'aligner sur le trait */
-            transition: width 0.1s ease-out;
-            z-index: 1;
+        .radar-circle {
+            position: absolute; border-radius: 50%; border: 5px solid var(--theme-color);
+            opacity: 0.1; width: 100%; height: 100%;
         }
 
-        #cursor-rail {
-            grid-area: 1/1;
-            width: 100%;
-            height: 100%;
-            position: relative;
-            pointer-events: none;
-            z-index: 2;
+        #threshold-circle {
+            position: absolute; border-radius: 50%; border: 3px dashed var(--text-page);
+            opacity: 0.3; width: 400px; height: 400px; z-index: 5;
+            transition: transform 0.2s ease-out; pointer-events: none;
         }
 
-        #threshold-marker {
-            position: absolute;
-            top: -12px;
-            bottom: -12px;
-            width: 8px; /* Plus épais comme demandé */
-            background: var(--text-page);
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.6);
-            transform: translateX(-180%);
-            transition: left 0.1s ease-out;
-            z-index: 50;
-        }
-
-        .graduations-h {
-            display: flex; justify-content: space-between; padding: 0 40px; /* Aligné sur le padding de la jauge */
-            font-size: 10px; font-weight: 900; opacity: 0.5; margin-bottom: 30px;
+        #noise-blob {
+            width: 400px; height: 400px; background: var(--theme-color);
+            border-radius: 50%; transition: transform 0.1s ease-out, background-color 0.4s ease;
+            box-shadow: 0 0 40px var(--theme-color); z-index: 10;
+            transform: scale(0); /* Correction : Caché au départ */
         }
 
         #btn-start {
             width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
             text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto; display: block;
         }
-		
-		#container-retour-liste { margin-bottom: 1rem; text-align: left; }
-        #btn-retour-liste {
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
-            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
-            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-		
-        #btn-retour-liste:active { transform: scale(0.95); }
-
+        
         input[type=range] { width: 100%; accent-color: var(--theme-color); }
     </style>
 </head>
@@ -111,57 +89,51 @@
     <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
     </a>
-    <h1 id="pageTitle">Niveau Sonore</h1>
+    <h1 id="pageTitle">Radar de Bruit XXL</h1>
     <div style="width:38px"></div>
 </header>
 
 <div class="main-wrapper">
-	<div class="main-wrapper">
     <div id="container-retour-liste">
         <a href="outils.html" id="btn-retour-liste">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
             Retour aux outils
         </a>
     </div>
+
     <div class="gauge-container">
-    <div class="gauge-container">
-        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest mb-6">Mesure Microphone</p>
-        
-        <div class="progress-bg">
-            <div id="progress-bar"></div>
-            <div id="cursor-rail">
-                <div id="threshold-marker"></div>
-            </div>
+        <div class="radar-box">
+            <div class="radar-circle" style="transform: scale(0.25)"></div>
+            <div class="radar-circle" style="transform: scale(0.50)"></div>
+            <div class="radar-circle" style="transform: scale(0.75)"></div>
+            <div class="radar-circle" style="transform: scale(1)"></div>
+            <div id="threshold-circle"></div>
+            <div id="noise-blob"></div>
         </div>
 
-        <div class="graduations-h">
-            <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>MAX</span>
-        </div>
-
-        <div class="max-w-xs mx-auto mt-6 space-y-6">
-            <div>
-                <div class="flex justify-between items-center mb-2">
+        <div class="max-w-xs mx-auto space-y-6">
+            <div class="flex gap-4">
+                <div class="flex-1 text-left">
                     <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
-                    <span id="sens-value" class="text-[10px] font-black">x2.0</span>
+                    <input type="range" id="sens-slider" min="0.5" max="10" step="0.5" value="3" oninput="updateSens(this.value)">
                 </div>
-                <input type="range" id="sens-slider" min="0.5" max="5" step="0.1" value="2" oninput="updateSens(this.value)">
-            </div>
-
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black uppercase opacity-60">Seuil d'alerte</span>
-                    <span id="seuil-value" class="text-[10px] font-black">80%</span>
+                <div class="flex-1 text-left">
+                    <span class="text-[10px] font-black uppercase opacity-60">Seuil</span>
+                    <input type="range" id="seuil-slider" min="10" max="100" step="5" value="75" oninput="updateSeuil(this.value)">
                 </div>
-                <input type="range" id="seuil-slider" min="0" max="100" step="1" value="80" oninput="updateSeuil(this.value)">
             </div>
         </div>
 
-        <button id="btn-start" onclick="toggleMic()">Démarrer la mesure</button>
+        <button id="btn-start" onclick="toggleMic()">Lancer l'analyse</button>
 
         <div class="flex justify-center items-center gap-4 mt-8 py-2 bg-black/5 dark:bg-white/5 rounded-xl">
-            <span class="text-[10px] font-black uppercase opacity-60">Dépassements :</span>
+            <span class="text-[10px] font-black uppercase opacity-60">Alertes :</span>
             <span id="compteur-alertes" class="text-xl font-black text-red-500">0</span>
-            <button onclick="resetCompteur()" class="text-[9px] opacity-40 uppercase font-bold underline ml-2">Reset</button>
+            <button id="toggle-sound" onclick="toggleSoundMode()" class="p-2 opacity-60 hover:opacity-100 transition-opacity">
+                <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+            </button>
+            <button onclick="resetCompteur()" class="text-[9px] opacity-40 uppercase font-bold underline">Reset</button>
         </div>
     </div>
 </div>
@@ -177,71 +149,89 @@
     document.getElementById('btn-start').style.color = contrast;
     document.getElementById('btn-retour').style.backgroundColor = themeColor;
     document.getElementById('btn-retour').style.color = contrast;
-    
-    // Application du thème au nouveau bouton de retour liste
     const btnListe = document.getElementById('btn-retour-liste');
-    if(btnListe) {
-        btnListe.style.backgroundColor = themeColor;
-        btnListe.style.color = contrast;
-    }
-
+    if(btnListe) { btnListe.style.backgroundColor = themeColor; btnListe.style.color = contrast; }
     document.documentElement.style.setProperty('--theme-color', themeColor);
 
-    let audioContext, analyser, microphone, javascriptNode, isListening = false;
-    let sensitivity = 2, seuilAlerte = 80, countAlertes = 0, peutCompter = true;
+    let audioContext, analyser, javascriptNode, isListening = false;
+    let sensitivity = 3, seuilAlerte = 75, countAlertes = 0, peutCompter = true;
+    let isMuted = false, canPlaySound = true;
 
-    function updateSens(val) {
-        sensitivity = parseFloat(val);
-        document.getElementById('sens-value').textContent = 'x' + sensitivity.toFixed(1);
+    function toggleSoundMode() {
+        isMuted = !isMuted;
+        document.getElementById('icon-sound-on').classList.toggle('hidden', isMuted);
+        document.getElementById('icon-sound-off').classList.toggle('hidden', !isMuted);
     }
+
+    function updateSens(val) { sensitivity = parseFloat(val); }
 
     function updateSeuil(val) {
         seuilAlerte = parseInt(val);
-        document.getElementById('seuil-value').textContent = seuilAlerte + "%";
-        document.getElementById('threshold-marker').style.left = seuilAlerte + "%";
+        document.getElementById('threshold-circle').style.transform = `scale(${seuilAlerte / 100})`;
+    }
+
+    function playAlertSound() {
+        if (isMuted || !canPlaySound || !audioContext) return;
+        canPlaySound = false;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.frequency.setValueAtTime(440, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        osc.connect(gain); gain.connect(audioContext.destination);
+        osc.start(); osc.stop(audioContext.currentTime + 0.3);
+        setTimeout(() => { canPlaySound = true; }, 1500);
     }
 
     function toggleMic() {
         if (!isListening) {
             navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                audioContext = new AudioContext();
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
-                microphone = audioContext.createMediaStreamSource(stream);
+                analyser.fftSize = 256;
+                const source = audioContext.createMediaStreamSource(stream);
                 javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-                microphone.connect(analyser);
+                source.connect(analyser);
                 analyser.connect(javascriptNode);
                 javascriptNode.connect(audioContext.destination);
                 javascriptNode.onaudioprocess = () => {
                     let array = new Uint8Array(analyser.frequencyBinCount);
                     analyser.getByteFrequencyData(array);
                     let average = array.reduce((a, b) => a + b) / array.length;
-                    updateGauge(Math.round(average));
+                    renderRadar(average);
                 };
             });
             document.getElementById('btn-start').textContent = "Arrêter";
         } else {
             if (audioContext) audioContext.close();
-            updateGauge(0);
-            document.getElementById('btn-start').textContent = "Démarrer la mesure";
+            renderRadar(0);
+            document.getElementById('btn-start').textContent = "Lancer l'analyse";
         }
         isListening = !isListening;
     }
 
-    function updateGauge(val) {
-        let percentage = Math.min(val * sensitivity, 100); 
-        const bar = document.getElementById('progress-bar');
-        bar.style.width = percentage + "%";
-
-        if (percentage >= seuilAlerte) {
-            bar.classList.add('is-alerting');
+    function renderRadar(val) {
+        let level = Math.min(val * sensitivity, 100);
+        const blob = document.getElementById('noise-blob');
+        const container = document.querySelector('.gauge-container');
+        blob.style.transform = `scale(${level / 100})`;
+        
+        if (level > seuilAlerte) {
+            blob.style.backgroundColor = "#ef4444";
+            container.style.transition = "background-color 0.2s ease, border-color 0.2s ease";
+            container.classList.add('is-alerting-container');
+            
             if (peutCompter) {
                 countAlertes++;
                 document.getElementById('compteur-alertes').textContent = countAlertes;
+                playAlertSound();
                 peutCompter = false;
             }
         } else {
-            bar.classList.remove('is-alerting');
             peutCompter = true;
+            blob.style.backgroundColor = "var(--theme-color)";
+            container.style.transition = "background-color 5s ease, border-color 5s ease";
+            container.classList.remove('is-alerting-container');
         }
     }
 
@@ -250,7 +240,7 @@
         document.getElementById('compteur-alertes').textContent = "0";
     }
 
-    updateSeuil(80);
+    updateSeuil(75);
 </script>
 </body>
 </html>
