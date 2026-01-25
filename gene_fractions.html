@@ -181,7 +181,7 @@
     function addExample() {
         document.getElementById('quiz-title').value = "Révisions : les fractions";
         const exemples = [];
-        for(let i = 1; i <= 10; i++) {
+        for(let i = 1; i <= 5; i++) {
             exemples.push(`${i}/${i+1} ; ${i % 2 === 0 ? 'disque' : 'bande'}`);
         }
         document.getElementById('quiz-data').value = exemples.join('\n');
@@ -294,23 +294,38 @@
     }
 
     function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const titre = document.getElementById('quiz-title').value || "Fractions";
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-        doc.setFontSize(18); doc.text(titre, 105, 20, { align: "center" });
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Génération de la date au format AAAA-MM-JJ
+    const maintenant = new Date();
+    const yyyy = maintenant.getFullYear();
+    const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+    const dd = String(maintenant.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    
+    const titre = document.getElementById('quiz-title').value || "Fractions";
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    
+    // Nouveau format de nom de fichier
+    const nomFichier = `outilsprofs_fractions_${dateStr}.pdf`;
+
+    const drawQuestions = (isCorrection) => {
+        doc.setFontSize(18);
+        doc.text(titre + (isCorrection ? " - Correction" : ""), 105, 20, { align: "center" });
         let x = 20, y = 45;
 
         currentQuestions.forEach((q, i) => {
             if (y > 250) { doc.addPage(); y = 30; }
             const [n, d] = q.frac.split('/');
-            doc.setFontSize(14); doc.text(n, x + 25, y - 8, { align: "center" });
+            doc.setFontSize(14);
+            doc.text(n, x + 25, y - 8, { align: "center" });
             doc.line(x + 21, y - 6.5, x + 29, y - 6.5);
             doc.text(d, x + 25, y - 2, { align: "center" });
             
             if (q.type === 'disque') {
                 const cx = x + 25, cy = y + 20, r = 18;
-                if (currentMode === 'prof') {
+                if (isCorrection || currentMode === 'prof') {
                     doc.setFillColor(accent);
                     for (let j = 0; j < q.num; j++) {
                         for (let a = (j * 360 / q.den - 90); a < ((j + 1) * 360 / q.den - 90); a += 2) {
@@ -326,14 +341,28 @@
                 }
             } else {
                 const bx = x, by = y + 10, w = 50, h = 15, step = w / q.den;
-                if (currentMode === 'prof') { doc.setFillColor(accent); doc.rect(bx, by, step * q.num, h, 'F'); }
+                if (isCorrection || currentMode === 'prof') { 
+                    doc.setFillColor(accent); 
+                    doc.rect(bx, by, step * q.num, h, 'F'); 
+                }
                 doc.rect(bx, by, w, h, 'S');
                 for (let j = 0; j <= q.den; j++) doc.line(bx + j * step, by, bx + j * step, by + h);
             }
             x += 65; if (x > 160) { x = 20; y += 70; }
         });
-        doc.save(titre.replace(/\s+/g, '_') + ".pdf");
+    };
+
+    drawQuestions(false);
+    doc.addPage();
+    drawQuestions(true);
+
+    if (window.Android && window.Android.savePdfFromBase64) {
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+        window.Android.savePdfFromBase64(pdfBase64, nomFichier);
+    } else {
+        doc.save(nomFichier);
     }
+}
 
     function retourReglages() { 
         clearInterval(countdown);

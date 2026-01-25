@@ -317,6 +317,15 @@
     async function exportPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        
+        // --- GESTION DE LA DATE ET DU NOM ---
+        const maintenant = new Date();
+        const yyyy = maintenant.getFullYear();
+        const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+        const dd = String(maintenant.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const nomFichier = `outilsprofs_pixelart_${dateStr}.pdf`;
+
         const size = parseInt(document.getElementById('grid-size').value);
         const pixels = document.querySelectorAll('.pixel');
         const cellSize = 100 / size;
@@ -342,7 +351,14 @@
                 doc.rect(startX + j * cellSize, 175 + i * cellSize, cellSize, cellSize, 'D');
             }
         }
-        doc.save("pixelart-fiche.pdf");
+
+        // --- COMPATIBILITÉ ANDROID / NAVIGATEUR ---
+        if (window.Android && window.Android.savePdfFromBase64) {
+            const pdfBase64 = doc.output('datauristring').split(',')[1];
+            window.Android.savePdfFromBase64(pdfBase64, nomFichier);
+        } else {
+            doc.save(nomFichier);
+        }
     }
 
     function appliquerTheme() {

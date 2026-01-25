@@ -163,12 +163,30 @@
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="text-lg font-black uppercase mb-4 text-center" id="titre-aide">💡 Rituel opérations</h2>
+        <h2 class="text-lg font-black uppercase mb-4 text-center" id="titre-aide">💡 Guide du Rituel</h2>
+        
         <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
-            <p>Générez un programme hebdomadaire avec <b>4 opérations par jour</b>.</p>
-            <p>L'export PDF génère un <b>quadrillage Seyes complet</b>.</p>
+            <div>
+                <p class="font-bold uppercase text-[9px] mb-1 text-[var(--accent-color)]">1. Configuration</p>
+                <p>Choisissez le <b>niveau scolaire</b> pour appliquer les préréglages (difficulté des nombres). Ajustez ensuite le nombre de calculs par jour via les compteurs (max 4 par jour).</p>
+            </div>
+
+            <div>
+                <p class="font-bold uppercase text-[9px] mb-1 text-[var(--accent-color)]">2. Réglages Avancés</p>
+                <p>Définissez le nombre de chiffres pour chaque terme. Pour les plus petits, cochez <b>"Sans retenues"</b> pour simplifier les opérations.</p>
+            </div>
+
+            <div>
+                <p class="font-bold uppercase text-[9px] mb-1 text-[var(--accent-color)]">3. Génération & PDF</p>
+                <p>Une fois la semaine générée, vous pouvez vérifier les résultats avec <b>"Afficher la correction"</b>. L'export PDF créera automatiquement deux pages : les exercices sur <b>Seyes</b> et la correction.</p>
+            </div>
+
+            <div class="bg-black/5 p-2 rounded-lg border border-white/5 italic">
+                Note : Par défaut, le système génère 4 calculs par jour, soit 16 calculs sur la semaine.
+            </div>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Compris</button>
+
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">J'ai compris</button>
     </div>
 </div>
 
@@ -269,35 +287,90 @@
     }
 
     function exportPDF() {
-        const niv = document.getElementById('niveau-select').value.toUpperCase();
-        const container = document.createElement('div');
-        Object.assign(container.style, { width: "175mm", margin: "0 auto", padding: "0mm", backgroundColor: "white", display: "block", boxSizing: "border-box" });
+    const niv = document.getElementById('niveau-select').value.toUpperCase();
+    
+    const maintenant = new Date();
+    const yyyy = maintenant.getFullYear();
+    const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+    const dd = String(maintenant.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    const nomFichier = `outilsprofs_rituel_operations_${dateStr}.pdf`;
+
+    const container = document.createElement('div');
+    Object.assign(container.style, { 
+        width: "175mm", margin: "0 auto", padding: "0mm", backgroundColor: "white", 
+        display: "block", boxSizing: "border-box", position: "relative", top: "0"
+    });
+
+    const generateContent = (isCorrection) => {
+        const titlePage = document.createElement('div');
+        titlePage.innerHTML = isCorrection ? "--- CORRECTION ---" : "";
+        Object.assign(titlePage.style, { textAlign: "center", fontWeight: "bold", marginBottom: "10px", fontSize: "16px", paddingTop: isCorrection ? "10px" : "0" });
+        if (isCorrection) container.appendChild(titlePage);
+
         let currentDay = ""; 
         document.querySelectorAll('.q-card').forEach(q => {
             const day = q.getAttribute('data-day-name');
             if(day !== currentDay) {
-                if(day === "Jeudi") { 
-                    const pb = document.createElement('div'); pb.style.pageBreakBefore = "always"; container.appendChild(pb); 
-                }
                 currentDay = day;
-                const h = document.createElement('div'); h.innerHTML = `• ${day} •`;
-                Object.assign(h.style, { textAlign:"center", fontWeight:"900", padding:"4px", borderBottom:"1.5px solid black", marginBottom:"6px", marginTop: "10px", fontSize:"14px", textTransform:"uppercase", width: "100%", color: "black" });
+                const h = document.createElement('div'); 
+                h.innerHTML = `• ${day} ${isCorrection ? '(Correction)' : ''} •`;
+                Object.assign(h.style, { 
+                    textAlign:"center", fontWeight:"900", padding:"4px", borderBottom:"1.5px solid black", 
+                    marginBottom:"6px", marginTop: "10px", fontSize:"14px", textTransform:"uppercase", width: "100%", color: "black" 
+                });
                 container.appendChild(h);
+                
                 const currentGrid = document.createElement('div');
                 Object.assign(currentGrid.style, { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6mm", marginBottom:"10px", width: "100%" });
                 container.appendChild(currentGrid);
             }
+
             const card = document.createElement('div');
             const enonce = q.querySelector('span:first-child').innerText;
+            // CORRECTION ICI : Utilisation de la classe .res-text présente dans votre script
+            const reponse = q.querySelector('.res-text') ? q.querySelector('.res-text').innerText : "";
             const isDiv = enonce.includes('÷');
-            Object.assign(card.style, { border: isDiv ? "none" : "1px solid #e2e8f0", padding: "5px", borderRadius: "6px" });
-            let frameContent = isDiv ? `<div style="height:48mm"></div>` : `<div class="seyes-container"><div class="seyes-vertical-lines"></div>${Array.from({length:25}, (_,i)=>`<div class="seyes-line ${i%4===0?'line-principale':'line-interligne'}" style="top:${i*2}mm"></div>`).join('')}</div>`;
-            card.innerHTML = `<div style="font-weight:bold; font-size:13px; margin-bottom:3px; color:black;">${enonce}</div>${frameContent}`;
+
+            Object.assign(card.style, { border: "1px solid #e2e8f0", padding: "5px", borderRadius: "6px" });
+            
+            if (isCorrection) {
+                card.innerHTML = `<div style="font-weight:bold; font-size:13px; color:black;">${enonce}</div>
+                                  <div style="color:red; font-size:14px; margin-top:5px; font-weight:bold;">${reponse}</div>`;
+            } else {
+                let frameContent = isDiv ? `<div style="height:48mm"></div>` : `<div class="seyes-container"><div class="seyes-vertical-lines"></div>${Array.from({length:25}, (_,i)=>`<div class="seyes-line ${i%4===0?'line-principale':'line-interligne'}" style="top:${i*2}mm"></div>`).join('')}</div>`;
+                card.innerHTML = `<div style="font-weight:bold; font-size:13px; margin-bottom:3px; color:black;">${enonce}</div>${frameContent}`;
+            }
+
             const activeGrids = container.querySelectorAll('div[style*="display: grid"]');
             activeGrids[activeGrids.length-1].appendChild(card);
         });
-        html2pdf().set({ margin: [8, 10], filename: `rituel_${niv}.pdf`, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(container).save();
+    };
+
+    generateContent(false);
+
+    const pageBreak = document.createElement('div');
+    pageBreak.style.pageBreakBefore = "always";
+    container.appendChild(pageBreak);
+
+    generateContent(true);
+
+    const worker = html2pdf().set({ 
+        margin: [10, 10, 10, 10], 
+        filename: nomFichier, 
+        html2canvas: { scale: 2, scrollY: 0, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+    }).from(container);
+
+    if (window.Android && window.Android.savePdfFromBase64) {
+        worker.outputPdf('datauristring').then(function(pdfBase64) {
+            const base64String = pdfBase64.split(',')[1];
+            window.Android.savePdfFromBase64(base64String, nomFichier);
+        });
+    } else {
+        worker.save();
     }
+}
 
     function toggleCorrection() { document.querySelectorAll('.res-text').forEach(e => e.classList.toggle('hidden')); }
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }

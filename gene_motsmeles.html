@@ -48,22 +48,37 @@
             border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-add:active { transform: scale(0.95); }
 
-        .grid-container { 
-            position: relative; 
-            margin: 10px auto; 
-            width: fit-content; 
-            max-width: 100%; /* Empêche la grille de sortir de l'écran */
-            overflow-x: auto; /* Ajoute un scroll interne si vraiment trop grand sur petit PC */
-            border-radius: 8px; 
-        }
+        .grid-container {
+    position: relative;
+    display: flex;         /* Active Flexbox */
+    justify-content: center; /* Centre horizontalement */
+    align-items: center;     /* Centre verticalement */
+    margin: 20px auto;
+    width: 100%;
+    min-height: 300px;     /* Ajustez selon vos besoins */
+    overflow: hidden;      /* Évite les débordements sur petit écran */
+}
 		
-        #word-grid { display: grid; gap: 2px; background: var(--column-border); border: 2px solid var(--column-border); position: relative; z-index: 2; }
+        #word-grid {
+    display: grid;
+    gap: 2px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
         .grid-cell { width: 100%; height: 100%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; position: relative; z-index: 3; cursor: pointer; user-select: none; transition: background 0.2s; }
         .grid-cell.selected { color: white; border-radius: 4px; }
 
         .word-found { text-decoration: line-through; opacity: 0.3; transition: all 0.3s ease; color: gray !important; }
 
-        #correction-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
+        #correction-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centre parfaitement par rapport au milieu du parent */
+    z-index: 5;
+    pointer-events: none;
+}
 
         .bottom-nav { width: 100%; max-width: 600px; margin: 20px auto 0; display: flex; flex-direction: column; gap: 8px; }
         .nav-group { display: flex; gap: 8px; width: 100%; }
@@ -455,7 +470,16 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
+        // --- GESTION DE LA DATE ET DU NOM DE FICHIER ---
+        const maintenant = new Date();
+        const yyyy = maintenant.getFullYear();
+        const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+        const dd = String(maintenant.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
         const rawTitle = document.getElementById('grid-title').value || "Mots Mêlés";
+        const nomFichier = `outilsprofs_motsmeles_${cleanStringForFilename(rawTitle)}_${dateStr}.pdf`;
+        
         const mots = document.getElementById('word-list').value.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0).sort((a,b)=>a.localeCompare(b,'fr'));
         const cellSize = 8;
         const startX = (210 - (gridSize * cellSize)) / 2;
@@ -482,12 +506,10 @@
         // --- PAGE 2 : LA CORRECTION ---
         doc.addPage().setFont("helvetica", "bold").setFontSize(18).text(rawTitle + " (CORRECTION)", 105, 20, { align: "center" });
         
-        // 1. DESSINER LES SURLIGNAGES (GRIS UNIQUE)
-        // On utilise un gris moyen avec une opacité légère pour l'effet feutre
         doc.setGState(new doc.GState({ opacity: 0.3 }));
-        doc.setDrawColor(150, 150, 150); // Gris neutre
+        doc.setDrawColor(150, 150, 150); 
         doc.setLineCap("round");
-        doc.setLineWidth(cellSize - 4); // Surlignage fin
+        doc.setLineWidth(cellSize - 4); 
 
         window.placedWords.forEach((w) => {
             const x1 = startX + (w.c1 * cellSize) + (cellSize / 2);
@@ -497,7 +519,6 @@
             doc.line(x1, y1, x2, y2);
         });
 
-        // 2. REDESSINER LES LETTRES ET LA GRILLE
         doc.setGState(new doc.GState({ opacity: 1 })); 
         finalGrid.forEach((row, r) => row.forEach((obj, c) => {
             const x = startX + (c * cellSize), y = startY + (r * cellSize);
@@ -507,16 +528,51 @@
         }));
 
         dessinerListeMots(startY + (gridSize * cellSize));
-        doc.save(`outilsprofs_mots_meles_${cleanStringForFilename(rawTitle)}.pdf`);
+
+        // --- GESTION COMPATIBILITÉ ANDROID / NAVIGATEUR ---
+        if (window.Android && window.Android.savePdfFromBase64) {
+            const pdfBase64 = doc.output('datauristring').split(',')[1];
+            window.Android.savePdfFromBase64(pdfBase64, nomFichier);
+        } else {
+            doc.save(nomFichier);
+        }
     }
 
     function exportToTXT() {
-        const rawTitle = document.getElementById('grid-title').value || "grille";
-        const data = { title: rawTitle, words: document.getElementById('word-list').value, size: gridSize, diff: document.getElementById('difficulty').value };
-        const blob = new Blob([JSON.stringify(data)], { type: 'text/plain' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `outilsprofs_mots_meles_${cleanStringForFilename(rawTitle)}.txt`; a.click();
+    const maintenant = new Date();
+    const yyyy = maintenant.getFullYear();
+    const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+    const dd = String(maintenant.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+
+    const rawTitle = document.getElementById('grid-title').value || "grille";
+    const nomFichier = `outilsprofs_motsmeles_${cleanStringForFilename(rawTitle)}_${dateStr}.txt`;
+    
+    const data = { 
+        title: rawTitle, 
+        words: document.getElementById('word-list').value, 
+        size: gridSize, 
+        diff: document.getElementById('difficulty').value 
+    };
+    
+    const jsonString = JSON.stringify(data);
+
+    // GESTION ANDROID
+    if (window.Android && window.Android.savePdfFromBase64) {
+        // On convertit la chaîne JSON en Base64 via btoa (compatible UTF-8 avec unescape)
+        const base64String = btoa(unescape(encodeURIComponent(jsonString)));
+        // On réutilise la même fonction Android (elle accepte n'importe quel Base64 avec le bon nom de fichier)
+        window.Android.savePdfFromBase64(base64String, nomFichier);
+    } else {
+        // GESTION NAVIGATEUR CLASSIQUE
+        const blob = new Blob([jsonString], { type: 'text/plain' });
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob);
+        a.download = nomFichier; 
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
+}
 
     function importData(event) {
         const reader = new FileReader();

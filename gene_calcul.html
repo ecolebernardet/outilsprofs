@@ -59,6 +59,8 @@
         .vpi-text { font-size: 1.2rem !important; white-space: nowrap; font-weight: 900; letter-spacing: -0.02em; }
         .vpi-res { font-size: 1.15rem !important; }
 
+		#container-retour-liste { text-align: left; display: flex; justify-content: flex-start; }
+		
         @media (min-width: 768px) {
             .main-wrapper { max-width: 950px; }
             #setup-zone:not(.hidden) { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
@@ -74,6 +76,8 @@
 </head>
 <body>
 
+<audio id="audio-finish" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
 <header>
     <div class="flex items-center gap-2">
         <a href="index.html" class="ui-btn-round active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg></a>
@@ -83,7 +87,7 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste" class="mb-4 text-center">
+    <div id="container-retour-liste" class="mb-4">
         <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
             Retour aux générateurs
@@ -122,7 +126,10 @@
             <div class="grid grid-cols-3 gap-2">
                 <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Min</label><input type="number" id="min-val" value="1" class="input-field"></div>
                 <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Max</label><input type="number" id="max-val" value="50" class="input-field"></div>
-                <div><label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Nb</label><input type="number" id="nb-val" value="10" class="input-field"></div>
+                <div>
+					<label class="block text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest text-center">Nb (max 50)</label>
+					<input type="number" id="nb-val" value="10" min="1" max="50" class="input-field">
+				</div>
             </div>
             <div>
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Mode de jeu</label>
@@ -131,7 +138,7 @@
                     <label class="cursor-pointer"><input type="radio" name="game-mode" value="vpi" class="hidden mode-radio"><div class="op-btn-frame h-12 flex flex-col items-center justify-center rounded-lg"><span class="text-xs font-black">VPI</span><span class="text-[8px] opacity-60">Projection</span></div></label>
                 </div>
             </div>
-            <button onclick="generateSeries()" id="mainAddBtn" class="btn-add">Démarrer</button>
+            <button onclick="prechargerSon(); generateSeries();" id="mainAddBtn" class="btn-add">Démarrer</button>
         </div>
     </div>
 
@@ -150,17 +157,49 @@
 </div>
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="text-xl font-black uppercase mb-4">💡 Mode d'emploi</h2>
-        <div class="text-sm space-y-3 opacity-90 mb-6 text-left">
-            <p><strong>1. Configuration :</strong> Sélectionnez vos opérations. Pour la multiplication et la division, choisissez les tables spécifiques ou cliquez sur "Toutes".</p>
-            <p><strong>2. Nombres :</strong> Définissez les valeurs Min et Max des nombres générés ainsi que la quantité totale de calculs (jusqu'à 50).</p>
-            <p><strong>3. Modes de jeu :</strong> 
-                <br>• <b style="color:var(--accent-color)">SOLO :</b> Entraînement avec saisie au clavier et calcul automatique du score final.
-                <br>• <b style="color:var(--accent-color)">VPI :</b> Affichage géant sans zone de saisie, idéal pour une correction collective projetée au tableau.</p>
-            <p><strong>4. Correction :</strong> L'œil permet d'afficher les résultats. Si vous avez mis un chrono, la correction s'active d'elle-même à la fin du temps.</p>
+    <div class="modal-content !max-w-[320px] !p-5" onclick="event.stopPropagation()">
+        <h2 class="text-sm font-black uppercase mb-3 flex items-center gap-2 tracking-tight">
+            <span class="text-base">💡</span> Guide d'utilisation
+        </h2>
+        
+        <div class="text-[11px] leading-relaxed space-y-3 opacity-90 mb-5 overflow-y-auto max-h-[50vh] pr-1 text-left">
+            <section>
+                <h3 class="font-black text-[var(--accent-color)] uppercase text-[9px] mb-0.5 tracking-wider">1. Configuration</h3>
+                <p>Sélectionnez vos opérations. Pour <b>x</b> et <b>÷</b>, choisissez des tables ou <b>"Toutes"</b>. Les champs <b>Min/Max</b> règlent l'amplitude des nombres.</p>
+            </section>
+
+            <section>
+                <h3 class="font-black text-[var(--accent-color)] uppercase text-[9px] mb-0.5 tracking-wider">2. Modes de jeu</h3>
+                <ul class="space-y-1">
+                    <li>• <b>SOLO :</b> Entraînement individuel avec saisie clavier et calcul automatique du score.</li>
+                    <li>• <b>VPI :</b> Affichage agrandi pour projection collective (sans zone de saisie).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3 class="font-black text-[var(--accent-color)] uppercase text-[9px] mb-0.5 tracking-wider">3. Chronomètre</h3>
+                <p>Réglez les min/sec. À 0:00, un signal retentit et une fenêtre propose d'afficher la correction. Réglez le chrono <b>0:00</b> pour le désactiver.</p>
+            </section>
+
+            <section>
+                <h3 class="font-black text-[var(--accent-color)] uppercase text-[9px] mb-0.5 tracking-wider">4. Correction & Export</h3>
+                <ul class="space-y-1">
+                    <li>• <b>Correction :</b> Affiche les résultats. En solo, les erreurs apparaissent en rouge.</li>
+                    <!-- <li>• <b>PDF :</b> (Mode VPI uniquement) Génère une fiche sur 2 colonnes avec sa correction.</li> -->
+                </ul>
+            </section>
         </div>
-        <button onclick="fermerModal('modal-aide')" class="w-full btn-add">J'ai compris</button>
+        
+        <button onclick="fermerModal('modal-aide')" class="w-full !py-3 !text-[10px] btn-add shadow-md">J'ai compris</button>
+    </div>
+</div>
+
+<div id="modal-fin" class="modal-overlay">
+    <div class="modal-content text-center">
+        <div class="text-5xl mb-4">⏰</div>
+        <h2 class="text-xl font-black uppercase mb-2">Temps écoulé !</h2>
+        <p class="text-sm opacity-90 mb-6">Le chrono est terminé. Prêt à voir les résultats ?</p>
+        <button onclick="validerFinChrono()" class="w-full btn-add">Afficher la correction</button>
     </div>
 </div>
 
@@ -191,20 +230,59 @@
 
     function toggleAllTables(source) { document.querySelectorAll('.table-checkbox').forEach(cb => cb.checked = source.checked); }
 
+	function prechargerSon() {
+        const audio = document.getElementById('audio-finish');
+        if (audio) {
+            // Joue un court instant puis reset pour débloquer l'audio sur Android/APK
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(e => console.log("Audio prêt pour la fin"));
+        }
+    }
+
+    function jouerBip() {
+        const audio = document.getElementById('audio-finish');
+        if (audio) {
+            audio.currentTime = 0;
+            audio.volume = 1.0;
+            audio.play().catch(e => console.error("Erreur lecture son:", e));
+        }
+    }
+
     function startTimer() {
         clearInterval(countdown);
         const mins = parseInt(document.getElementById('timer-min').value) || 0;
         const secs = parseInt(document.getElementById('timer-sec').value) || 0;
         let timeLeft = (mins * 60) + secs;
-        if (timeLeft <= 0) { document.getElementById('timer-display').classList.add('hidden'); return; }
+        
+        if (timeLeft <= 0) { 
+            document.getElementById('timer-display').classList.add('hidden'); 
+            return; 
+        }
+        
         document.getElementById('timer-display').classList.remove('hidden');
+        
         const updateDisplay = () => {
-            let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+            let m = Math.floor(timeLeft / 60); 
+            let s = timeLeft % 60;
             document.getElementById('seconds-left').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if (timeLeft <= 0) { clearInterval(countdown); showCorrection(); }
+            
+            // Dans la fonction updateDisplay() à l'intérieur de startTimer :
+    if (timeLeft <= 0) { 
+        clearInterval(countdown); 
+        jouerBip(); // Déclenchement du son de cloche
+        document.getElementById('modal-fin').style.display = 'flex';
+    }
             timeLeft--;
         };
-        updateDisplay(); countdown = setInterval(updateDisplay, 1000);
+        updateDisplay(); 
+        countdown = setInterval(updateDisplay, 1000);
+    }
+	
+	function validerFinChrono() {
+        fermerModal('modal-fin');
+        showCorrection();
     }
 
     function generateSeries() {
@@ -213,7 +291,17 @@
         const mode = document.querySelector('input[name="game-mode"]:checked').value;
         const min = parseInt(document.getElementById('min-val').value) || 1;
         const max = parseInt(document.getElementById('max-val').value) || 5000;
-        const nb = Math.min(Math.max(parseInt(document.getElementById('nb-val').value) || 10, 1), 50);
+        
+        // Récupération et bridage strict à 50
+        let nbInput = document.getElementById('nb-val');
+        let nb = parseInt(nbInput.value) || 10;
+        if (nb > 50) {
+            nb = 50;
+            nbInput.value = 50; // On corrige visuellement le champ
+        } else if (nb < 1) {
+            nb = 1;
+            nbInput.value = 1;
+        }
 
         currentCalculs = [];
         let attempts = 0;
@@ -248,7 +336,16 @@
                 btn.style.backgroundColor = '#22c55e';
             }
             if (btn.innerText.includes('Nouveau')) btn.style.backgroundColor = '#f59e0b';
-            if (btn.innerText.includes('PDF')) btn.style.backgroundColor = '#3b82f6';
+            
+            // Masquer le bouton PDF en mode solo, l'afficher sinon
+            if (btn.innerText.includes('PDF')) {
+                btn.style.backgroundColor = '#3b82f6';
+                if (mode === 'solo') {
+                    btn.classList.add('hidden');
+                } else {
+                    btn.classList.remove('hidden');
+                }
+            }
         });
 
         currentCalculs.forEach((calc, i) => {
@@ -278,16 +375,27 @@
 
     function showCorrection() {
         const inputs = document.querySelectorAll('.answer-input');
-        const firstRes = document.querySelector('.res-text');
         const btn = document.getElementById('validate-btn');
-        if (!firstRes) return;
-        const isShowing = !firstRes.classList.contains('hidden');
+        const scoreDiv = document.getElementById('score-display');
+        
+        // On détermine si on est en train d'afficher ou de masquer
+        // On considère qu'on "masque" si le score est déjà visible
+        const isShowing = scoreDiv !== null || (inputs.length === 0 && !document.querySelector('.res-text').classList.contains('hidden'));
 
         if (isShowing) {
-            const scoreDiv = document.getElementById('score-display'); if (scoreDiv) scoreDiv.remove();
+            // LOGIQUE DE MASQUAGE
+            if (scoreDiv) scoreDiv.remove();
+            
             document.querySelectorAll('.res-text').forEach(el => el.classList.add('hidden'));
+            
+            inputs.forEach(input => {
+                input.style.borderColor = ""; 
+                input.style.backgroundColor = "";
+            });
+
             btn.innerText = "👁️ Correction";
         } else {
+            // LOGIQUE D'AFFICHAGE
             clearInterval(countdown);
             let score = 0;
             
@@ -301,20 +409,18 @@
                         input.style.borderColor = "#10b981"; 
                         input.style.backgroundColor = "rgba(16, 185, 129, 0.1)"; 
                         score++;
-                        // Si c'est juste, on laisse la correction masquée
-                        resElement.classList.add('hidden');
+                        resElement.classList.add('hidden'); // On laisse caché si c'est juste
                     } else {
                         input.style.borderColor = "#ef4444"; 
                         input.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
-                        // Si c'est faux ou vide, on affiche la correction
-                        resElement.classList.remove('hidden');
+                        resElement.classList.remove('hidden'); // On montre la réponse si c'est faux/vide
                     }
                 });
                 
                 const scoreHtml = `<div id="score-display" class="w-full text-center p-4 mb-4 rounded-2xl border-2 border-dashed border-[var(--accent-color)]"><span class="text-3xl font-black" style="color:var(--accent-color)">Score : ${score} / ${currentCalculs.length}</span></div>`;
                 document.getElementById('questions-grid').insertAdjacentHTML('beforebegin', scoreHtml);
             } else {
-                // Mode VPI (pas d'inputs), on affiche tout
+                // Mode VPI
                 document.querySelectorAll('.res-text').forEach(el => el.classList.remove('hidden'));
             }
             
@@ -323,12 +429,69 @@
     }
 
     function exportToPDF() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text("Calcul Mental", 105, 20, { align: "center" });
-        currentCalculs.forEach((c, i) => doc.text(`${i+1}) ${c.q} = .......`, 20, 40 + (i*10)));
-        doc.addPage(); doc.text("Correction", 105, 20, { align: "center" });
-        currentCalculs.forEach((c, i) => doc.text(`${i+1}) ${c.q} = ${c.r}`, 20, 40 + (i*10)));
-        doc.save(`calculs.pdf`);
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF();
+        
+        // Génération de la date au format aaaammjj
+        const maintenant = new Date();
+        const yyyy = maintenant.getFullYear();
+        const mm = String(maintenant.getMonth() + 1).padStart(2, '0');
+        const dd = String(maintenant.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}${mm}${dd}`;
+        const nomFichier = `outilsprofs_calcul_mental_${dateStr}.pdf`;
+
+        const drawCalculs = (isCorrection) => {
+            const titre = isCorrection ? "Correction - Calcul Mental" : "Calcul Mental";
+            doc.setFont(undefined, 'bold');
+            doc.text(titre, 105, 20, { align: "center" });
+            doc.setFont(undefined, 'normal');
+
+            const col1X = 20;
+            const col2X = 110;
+            let yStart = 40;
+            const yStep = 10;
+            const maxPerCol = 25; // Jusqu'à 50 calculs par page sur 2 colonnes
+
+            currentCalculs.forEach((c, i) => {
+                const isCol2 = i >= maxPerCol;
+                const x = isCol2 ? col2X : col1X;
+                const y = yStart + ((i % maxPerCol) * yStep);
+                
+                const texte = isCorrection 
+                    ? `${i + 1}) ${c.q} = ${c.r}`
+                    : `${i + 1}) ${c.q} = .......`;
+                
+                doc.text(texte, x, y);
+            });
+        };
+
+        // Page 1 : Exercices
+        drawCalculs(false);
+        
+        // Page 2 : Correction
+        doc.addPage();
+        drawCalculs(true);
+
+        // Gestion spécifique pour la compatibilité APK / Mobile
+        if (window.Android && window.Android.savePdfFromBase64) {
+            // Extraction des données en Base64 (sans le préfixe data:application/pdf;base64,)
+            const base64String = doc.output('datauristring').split(',')[1];
+            window.Android.savePdfFromBase64(base64String, nomFichier);
+        } else if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomFichier;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        } else {
+            doc.save(nomFichier);
+        }
     }
 
     function retourReglages() { clearInterval(countdown); document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('container-retour-liste').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
