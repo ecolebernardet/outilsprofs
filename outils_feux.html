@@ -81,6 +81,14 @@
             text-align: center;
         }
 
+		#container-retour-liste { width: 100%; max-width: 500px; margin: 0 auto 1.5rem auto; text-align: left; }
+        #btn-retour-liste {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
+            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
+            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        #btn-retour-liste:active { transform: scale(0.95); }
+		
         /* Modale */
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
@@ -90,7 +98,7 @@
 <body>
 
 <header>
-    <a href="outils.html" id="btn-retour">
+    <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
         </svg>
@@ -99,7 +107,14 @@
     <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
 </header>
 
-<div class="main-content">
+<div class="main-content" style="justify-content: flex-start; padding-top: 20px;">
+    <div id="container-retour-liste">
+        <a href="outils.html" id="btn-retour-liste">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux outils
+        </a>
+    </div>
+	
     <div id="status-text" class="status-label">Prêt ?</div>
     
     <div class="traffic-light">
@@ -150,7 +165,8 @@
     const uiElements = [
         document.getElementById('btn-retour'),
         document.getElementById('btn-aide'),
-        document.getElementById('btn-fermer-aide')
+        document.getElementById('btn-fermer-aide'),
+		document.getElementById('btn-retour-liste')
     ];
     uiElements.forEach(el => {
         if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }

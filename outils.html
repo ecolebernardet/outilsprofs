@@ -168,6 +168,16 @@
                 <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Et l'image apparaît...</p>
             </div>
         </a>
+		
+		<a href="outils_feux.html" class="tool-card" data-id="feux">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="icon-box" id="icon-feux">🚦</div>
+            <div>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-feux">Feux tricolores</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Mode de travail</p>
+            </div>
+        </a>
+		
     </div>
 </div>
 
@@ -179,7 +189,7 @@
             <p>⏱️ Le <strong>Minuteur</strong> vous aide à rythmer les séances et les transitions.</p>
             <p>🔈 Le <strong>Niveau Sonore</strong> permet de réguler le volume sonore durant les ateliers.</p>
             <p>🤫 Le <strong>Défi calme</strong>: quand le calme en classe permet de faire apparaître une photo.</p>
-
+            <p>🚦 Les <strong>feux tricolores</strong>: cliquez sur un feu pour changer le mode de travail.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -221,6 +231,7 @@
             { icon: 'icon-timer', title: 'title-timer' },
             { icon: 'icon-bruit', title: 'title-bruit' },
             { icon: 'icon-calme', title: 'title-deficalme' },
+            { icon: 'icon-feux', title: 'title-feux' },
         ];
 
         elementsOutils.forEach(item => {
