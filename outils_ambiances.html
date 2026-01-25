@@ -47,7 +47,8 @@
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .play-btn-container { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 75px; }
+        .play-btn-container { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 95px; }
+        .controls-group { display: flex; gap: 6px; align-items: center; }
         .time-display { font-size: 9px; font-weight: 800; font-family: monospace; opacity: 0.6; white-space: nowrap; }
 
         .progress-container { 
@@ -65,6 +66,15 @@
         }
 
         .play-btn.is-playing { background: #ff4444 !important; border-radius: 50%; }
+        
+        .pause-btn {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--column-border);
+            color: var(--text-page); cursor: pointer; transition: all 0.2s;
+        }
+        body.light-mode .pause-btn { background: rgba(0, 0, 0, 0.05); }
+        .is-playing + .pause-btn { display: flex; }
 
         input { width: 100%; border: 1px solid var(--column-border); background: rgba(0,0,0,0.05); color: inherit; border-radius: 12px; outline: none; }
         body.light-mode input { background: #fff; }
@@ -178,9 +188,14 @@
                 </div>
                 <div class="play-btn-container">
                     <span class="time-display" id="time-${cardId}">00:00 / 00:00</span>
-                    <button class="play-btn" onclick="toggleLecteur('${data.embedUrl}', this, '${cardId}')" style="background:${themeColor}; color:${contrast}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </button>
+                    <div class="controls-group">
+                        <button class="play-btn" onclick="toggleLecteur('${data.embedUrl}', this, '${cardId}')" style="background:${themeColor}; color:${contrast}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </button>
+                        <button class="pause-btn" onclick="pauseLecteur(event)" title="Pause">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 9v6m4-6v6" /></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="progress-container" onclick="seekAudio(event, this)"><div class="progress-bar"></div></div>
             `;
@@ -188,16 +203,32 @@
         });
     }
 
+    function pauseLecteur(event) {
+        event.stopPropagation();
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                ytPlayer.pauseVideo();
+                event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>';
+            } else {
+                ytPlayer.playVideo();
+                event.currentTarget.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 9v6m4-6v6" /></svg>';
+            }
+        }
+    }
+
     function toggleLecteur(url, btn, cardId) {
         const isPlaying = btn.classList.contains('is-playing');
         const timeDisplay = document.getElementById(`time-${cardId}`);
         const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
         const stopIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 10h6v4H9z" /></svg>';
+        const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 9v6m4-6v6" /></svg>';
 
         clearInterval(progressInterval);
         document.querySelectorAll('.progress-container').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.time-display').forEach(t => t.innerText = '00:00 / 00:00');
         document.querySelectorAll('.play-btn').forEach(b => { b.classList.remove('is-playing'); b.style.backgroundColor = themeColor; b.innerHTML = playIcon; });
+        document.querySelectorAll('.pause-btn').forEach(pb => pb.innerHTML = pauseIcon);
 
         if (!isPlaying) {
             btn.classList.add('is-playing'); btn.innerHTML = stopIcon;
@@ -215,10 +246,12 @@
                             e.target.playVideo();
                             const total = formatTime(e.target.getDuration());
                             progressInterval = setInterval(() => {
-                                const cur = e.target.getCurrentTime();
-                                const dur = e.target.getDuration();
-                                bar.style.width = (cur / dur * 100) + '%';
-                                timeDisplay.innerText = `${formatTime(cur)} / ${total}`;
+                                if(e.target.getPlayerState() === YT.PlayerState.PLAYING) {
+                                    const cur = e.target.getCurrentTime();
+                                    const dur = e.target.getDuration();
+                                    bar.style.width = (cur / dur * 100) + '%';
+                                    timeDisplay.innerText = `${formatTime(cur)} / ${total}`;
+                                }
                             }, 1000);
                         },
                         onStateChange: (e) => { if (e.data === YT.PlayerState.ENDED) toggleLecteur(url, btn, cardId); }
@@ -295,6 +328,18 @@
         let txt = mesAmbiances.map(a => `${a.title};${a.embedUrl};${a.thumb};${a.type}`).join("\n");
         const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'})); a.download = 'ambiances.txt'; a.click();
     }
+    
+    function supprimerViaForm() {
+        if (editModeUrl) {
+            showAlert("Supprimer ?", "Supprimer cet élément ?", () => {
+                mesAmbiances = mesAmbiances.filter(a => a.embedUrl !== editModeUrl);
+                localStorage.setItem('ambiances_zen', JSON.stringify(mesAmbiances));
+                renderList();
+                annulerModification();
+            });
+        }
+    }
+
     window.onYouTubeIframeAPIReady = () => {};
     window.onload = () => { renderList(); if (localStorage.getItem('needsExport_ambiances')) document.getElementById('badge-export').classList.remove('hidden'); };
 </script>
