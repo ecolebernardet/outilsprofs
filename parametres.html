@@ -231,6 +231,24 @@
                     </div>
                 </div>
 
+				<div class="card-info border-2 border-blue-500/30">
+    <div class="flex items-center gap-2 mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 21h6l-.75-4M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <h3 class="font-black text-xs uppercase">Usage sur PC et VPI</h3>
+    </div>
+    <p class="text-xs leading-relaxed mb-3">
+        OutilsProfs est parfaitement adapté pour une utilisation sur <strong>ordinateur</strong> ou une projection sur <strong>VPI/TBI</strong> en classe.
+    </p>
+    <div class="flex items-center gap-2 bg-black/50 p-2.5 rounded-lg border border-white/10 shadow-inner">
+        <code id="app-url" class="text-[10px] text-blue-100 font-bold truncate flex-1 tracking-wide">https://ecolebernardet.github.io/outilsprofs/</code>
+        <button onclick="copyUrl(this)" class="bg-blue-600 text-white text-[9px] font-black px-3 py-1.5 rounded-md uppercase active:scale-90 transition-all">
+            Copier
+        </button>
+    </div>
+</div>
+
                 <div class="card-info">
                     <h3 id="title-inscriptions" class="font-black text-xs uppercase mb-2">📌 Ma classe</h3>
                     <ul class="text-xs space-y-2 leading-relaxed">
@@ -313,8 +331,8 @@
                 <div class="card-info">
                     <h3 id="title-gen" class="font-black text-xs uppercase mb-2">🛠️ Générateurs</h3>
                     <p class="text-xs leading-relaxed">
-                        Générez des acitivités et des exercices personnalisés : <strong>calcul mental, rituel opérations, mots mêlés, le compte est bon, pixel art...</strong><br><br>
-						• <strong>Configuration</strong> : Paramétrez chaque rituel en fonction du niveau de la classe ou selon vos propres critères.<br>
+                        Générez des acitivités et des exercices personnalisés : <strong>calcul mental, rituel opérations, fractions, compte est bon, mots mêlés, pixel art, quizz...</strong><br><br>
+						• <strong>Configuration</strong> : Paramétrez chaque activité en fonction du niveau de la classe ou selon vos propres critères.<br>
                         • <strong>Export</strong> : Générez un PDF prêt à imprimer incluant les exercices et la correction.<br>
                     </p>
                 </div>
@@ -323,9 +341,8 @@
                     <h3 id="title-outils" class="font-black text-xs uppercase mb-2">🧰 Outils</h3>
                     <p class="text-xs leading-relaxed">
                         Optimisez l'organisation de vos séances avec des outils interactifs conçus pour le quotidien des professeurs : 
-						<strong>chronométrage, gestion du bruit, ambiances sonores et signalétique visuelle.</strong><br><br>
-        				• <strong>Autonomie</strong> : Utilisez les feux de classe et le minuteur pour aider les élèves à se repérer dans le temps et les consignes.<br>
-						• <strong>Climat scolaire</strong> : Régulez le volume de la classe avec le capteur sonore et créez une atmosphère propice à la concentration avec les sons d'ambiance.<br><br>
+						<strong>chronomètre, timer, gestion du bruit...</strong><br><br>
+						D'autres outils seront à venir...<br><br>
                     </p>
                 </div>
 				
@@ -380,7 +397,7 @@
                     <img src="outilsprofs_icone.png" id="avatar-propos" alt="Avatar">
                     <p class="text-sm font-bold">Application conçue par Nicolas BERNARDET<br>avec la grande aide de Gemini<br>pour la programmation.</p>
                     <div class="h-[1px] bg-gray-700 w-full my-6"></div>
-                    <p class="text-[15px] font-black text-gray-500 ">OutilsProfs version 3.0</p>
+                    <p class="text-[15px] font-black text-gray-500 ">OutilsProfs version 6.0</p>
                 </div>
             </div>
         </div>
@@ -531,6 +548,23 @@
                 }
             });
         }
+
+			function copyUrl(btn) {
+    const url = "https://ecolebernardet.github.io/outilsprofs/";
+    navigator.clipboard.writeText(url).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = "Copié !";
+        btn.style.backgroundColor = "#16a34a"; // Vert (green-600)
+        
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.backgroundColor = ""; // Retour au bleu original
+        }, 2000);
+    }).catch(err => {
+        console.error('Erreur :', err);
+    });
+
+}
 
         window.addEventListener('load', sauvegarderToutesLesAides);
         if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
