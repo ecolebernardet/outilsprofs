@@ -184,10 +184,11 @@
             </div>
         </div>
 
-        <div class="flex justify-center min-h-[60px] mt-4">
-            <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
-            <button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
-        </div>
+        <div class="flex justify-center items-center gap-4 min-h-[60px] mt-4">
+			<button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
+			<button id="btn-stop" onclick="stopDefi()" style="display: none; width: 100%; max-width: 200px; padding: 16px; border-radius: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin: 10px 0;">Stop</button>
+			<button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
+		</div>
 
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-2 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
             <div class="flex items-center gap-4">
@@ -314,6 +315,21 @@
         updateUI();
     }
 
+    function stopDefi() {
+        isPlaying = false;
+        progress = 0;
+        updateUI();
+        document.getElementById('btn-start').textContent = "Démarrer le défi";
+        document.getElementById('btn-start').style.display = "block";
+        document.getElementById('btn-stop').style.display = "none";
+        document.getElementById('msg-start').style.display = 'flex';
+        // Réinitialisation des barres de micro
+        const barPC = document.getElementById('mic-bar');
+        const barMob = document.getElementById('mic-bar-mobile');
+        if(barPC) barPC.style.height = "0%";
+        if(barMob) barMob.style.width = "0%";
+    }
+
     async function toggleDefi() {
         if (!isPlaying) {
             try {
@@ -325,6 +341,7 @@
                     javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
                     source.connect(analyser); analyser.connect(javascriptNode); javascriptNode.connect(audioContext.destination);
                     javascriptNode.onaudioprocess = () => {
+                        if (!isPlaying) return;
                         const now = performance.now(); const delta = (now - lastTime) / 1000; lastTime = now;
                         let array = new Uint8Array(analyser.frequencyBinCount);
                         analyser.getByteFrequencyData(array);
@@ -336,11 +353,14 @@
                         if(barPC) barPC.style.height = level;
                         if(barMob) barMob.style.width = level;
 
-                        if (isPlaying) updateGame(volume, delta);
+                        updateGame(volume, delta);
                     };
                 }
                 isPlaying = true; lastTime = performance.now();
                 document.getElementById('btn-start').textContent = "Pause";
+                document.getElementById('btn-stop').style.display = "block";
+                document.getElementById('btn-stop').style.backgroundColor = themeColor; // Applique la couleur de thème
+                document.getElementById('btn-stop').style.color = contrast;
                 document.getElementById('msg-start').style.display = 'none';
             } catch (err) { alert("Micro non détecté"); }
         } else {
@@ -360,11 +380,12 @@
         progress = Math.max(0, Math.min(100, progress));
         updateUI();
         if (progress >= 100) {
-            isPlaying = false;
-            document.getElementById('btn-start').style.display = 'none';
-            document.getElementById('btn-reset').style.display = 'block';
-            if (javascriptNode) javascriptNode.disconnect();
-        }
+			isPlaying = false;
+			document.getElementById('btn-start').style.display = 'none';
+			document.getElementById('btn-stop').style.display = 'none'; // Masquer le bouton stop
+			document.getElementById('btn-reset').style.display = 'block';
+			if (javascriptNode) javascriptNode.disconnect();
+		}
     }
 
     function updateUI() {
