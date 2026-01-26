@@ -35,22 +35,43 @@
         .gauge-container {
             background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 10px 30px 40px 30px;
+            padding: 30px;
             border: 1px solid var(--column-border);
             text-align: center;
         }
 
+        @media (min-width: 1024px) {
+            .defi-layout-container {
+                display: grid;
+                grid-template-columns: 80px 1fr 80px;
+                align-items: center;
+                gap: 30px;
+            }
+            .side-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+            .v-gauge-bg {
+                width: 20px !important;
+                height: 350px !important;
+                background: var(--input-bg);
+                border-radius: 10px;
+                overflow: hidden;
+                position: relative;
+                display: flex;
+                flex-direction: column-reverse;
+            }
+            .v-label {
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+                transform: rotate(180deg);
+                margin-bottom: 10px;
+            }
+            #mic-bar, #prog-bar-v { width: 100% !important; background: var(--theme-color); transition: height 0.1s; }
+        }
+
         .reveal-box {
-            position: relative;
-            width: 100%; 
-            aspect-ratio: 16 / 9;
-            max-width: 900px; 
-            margin: 10px auto;
-            background: #000;
-            border-radius: 1rem;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid var(--column-border);
+            position: relative; width: 100%; aspect-ratio: 16 / 9;
+            max-width: 850px; margin: 0 auto; background: #000;
+            border-radius: 1rem; overflow: hidden; display: flex; 
+            align-items: center; justify-content: center; border: 2px solid var(--column-border);
         }
         
         #hidden-image { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease, transform 0.3s ease; }
@@ -59,14 +80,14 @@
 
         #btn-start, #btn-reset {
             width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto;
+            text-transform: uppercase; cursor: pointer; border: none; margin: 10px auto;
         }
 
-        .mic-monitor-bg { 
-            width: 250px; height: 15px; background: var(--input-bg); 
-            border-radius: 7px; overflow: hidden; margin: 5px auto; position: relative; 
+        .mic-monitor-bg-mob { 
+            width: 250px; height: 12px; background: var(--input-bg); 
+            border-radius: 10px; overflow: hidden; margin: 5px auto; position: relative; 
         }
-        #mic-bar { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; }
+        #mic-bar-mobile { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; }
 
         .mode-selector { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; gap: 4px; }
         .mode-option {
@@ -75,7 +96,13 @@
         }
         .mode-option.active { background: var(--theme-color); color: #fff; opacity: 1; }
 
-        .time-box { background: var(--input-bg); border: 1px solid var(--column-border); }
+        /* Style Compact pour la Durée */
+        .time-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--input-bg); padding: 5px 15px; border-radius: 50px;
+            border: 1px solid var(--column-border);
+        }
+        .time-btn { width: 28px; height: 28px; border-radius: 50%; font-weight: 900; background: var(--theme-color); display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
         .modal-overlay { 
             display: none; position: fixed; inset: 0; z-index: 1000;
@@ -87,8 +114,6 @@
             border-radius: 1.5rem; border: 1px solid var(--column-border); 
             padding: 30px; position: relative; color: var(--text-page);
         }
-
-        @media (max-width: 640px) { .gauge-container { padding: 20px 20px 40px 20px; } }
     </style>
 </head>
 <body>
@@ -102,92 +127,89 @@
 </header>
 
 <div class="main-wrapper">
-	<div id="container-retour-liste" class="mb-4 text-left">
-		<a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform shadow-sm">
-			<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-			Retour aux outils
-		</a>
-	</div>
+    <div id="container-retour-liste" class="mb-4 text-left">
+        <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux outils
+        </a>
+    </div>
+
     <div class="gauge-container">
-        <div class="mic-monitor-bg relative flex items-center justify-center mt-2">
-            <div id="mic-bar" class="absolute left-0 top-0 h-full"></div>
-            <span class="relative z-10 text-[8px] font-black uppercase opacity-60">Niveau Micro</span>
-        </div>
+        <div class="defi-layout-container">
+            <div class="side-panel hidden lg:flex">
+                <div class="v-gauge-bg">
+                    <div id="mic-bar" style="height: 0%"></div>
+                    <span class="v-label absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase opacity-60 pointer-events-none">Niveau Micro</span>
+                </div>
+            </div>
 
-        <div class="reveal-box">
-            <img id="hidden-image" src="https://picsum.photos/900/500?nature,animals" alt="Surprise">
-            <div id="pixel-grid"></div>
-            <div id="msg-start" class="absolute inset-0 z-10 flex items-center justify-center text-center p-6 text-sm font-bold opacity-30">
-                Restez silencieux pour<br>révéler l'image...
+            <div>
+                <div class="mic-monitor-bg-mob relative flex lg:hidden items-center justify-center mb-4">
+                    <div id="mic-bar-mobile"></div>
+                    <span class="relative z-10 text-[8px] font-black uppercase opacity-60">Niveau Micro</span>
+                </div>
+
+                <div class="reveal-box">
+                    <img id="hidden-image" src="https://picsum.photos/900/500?nature,animals" alt="Surprise">
+                    <div id="pixel-grid"></div>
+                    <div id="msg-start" class="absolute inset-0 z-10 flex items-center justify-center text-center p-6 text-sm font-bold opacity-30">
+                        Restez silencieux pour<br>révéler l'image...
+                    </div>
+                </div>
+
+                <div class="max-w-md mx-auto mt-4 px-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Seuil de tolérance</span>
+                        <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">50</span>
+                    </div>
+                    <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-1.5 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
+                </div>
+
+                <div class="max-w-md mx-auto mt-4 flex lg:hidden items-center gap-3 px-4">
+                    <span id="percent-text-mobile" class="text-xl font-black min-w-[50px]">0%</span>
+                    <div class="flex-grow bg-black/10 dark:bg-white/5 h-3 rounded-full overflow-hidden">
+                        <div id="progress-fill" class="h-full transition-all duration-300" style="width: 0%; background-color: var(--theme-color);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel hidden lg:flex">
+                <div class="flex flex-col items-center gap-2">
+                    <span id="percent-text" class="text-2xl lg:text-3xl font-black">0%</span>
+                    <div class="v-gauge-bg">
+                        <div id="prog-bar-v" style="height: 0%"></div>
+                        <span class="v-label absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase opacity-60 pointer-events-none">Progression</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="max-w-xs mx-auto mt-2">
-            <div class="flex justify-between items-end mb-2">
-                <span id="status-text" class="text-[10px] font-black uppercase opacity-60">En attente...</span>
-                <span id="percent-text" class="text-xl font-black">0%</span>
-            </div>
-            <div class="w-full bg-black/10 dark:bg-white/5 h-4 rounded-full overflow-hidden">
-                <div id="progress-fill" class="h-full transition-all duration-300" style="width: 0%; background-color: var(--theme-color);"></div>
-            </div>
-        </div>
-
-        <div class="flex justify-center min-h-[80px]">
+        <div class="flex justify-center min-h-[60px] mt-4">
             <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
             <button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
         </div>
 
-        <div class="flex flex-col gap-3 mt-0 py-2 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
-            <div class="px-8">
-                <span class="text-[10px] font-black uppercase tracking-widest opacity-40 block mb-3">Mode d'apparition</span>
-                <div class="mode-selector">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-2 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
+            <div class="flex items-center gap-4">
+                <span class="text-[10px] font-black uppercase opacity-40">Mode</span>
+                <div class="mode-selector min-w-[200px]">
                     <div id="mode-pixels" onclick="setMode('pixels')" class="mode-option active">Pixels</div>
                     <div id="mode-flou" onclick="setMode('flou')" class="mode-option">Flou</div>
                     <div id="mode-zoom" onclick="setMode('zoom')" class="mode-option">Zoom</div>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center gap-3">
-                <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Durée du défi</span>
-                <div class="flex items-center justify-center p-3 px-3 rounded-2xl time-box min-w-[180px]">
-                    <div class="flex flex-col items-center w-12">
-                        <button onclick="adjustTime('min', 1)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▲</button>
-                        <span id="min-defi-display" class="text-2xl font-black w-full text-center leading-none block">0</span>
-                        <input type="hidden" id="min-defi" value="0">
-                        <button onclick="adjustTime('min', -1)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▼</button>
-                    </div>
-                    <div class="flex items-center justify-center w-6">
-                        <span class="text-2xl font-black opacity-20" style="margin-top: -4px;">:</span>
-                    </div>
-                    <div class="flex flex-col items-center w-12">
-                        <button onclick="adjustTime('sec', 5)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▲</button>
-                        <span id="sec-defi-display" class="text-2xl font-black w-full text-center leading-none block">15</span>
-                        <input type="hidden" id="sec-defi" value="15">
-                        <button onclick="adjustTime('sec', -5)" class="text-[var(--theme-color)] font-black h-8 w-full flex items-center justify-center">▼</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-8">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Sensibilité micro</span>
-                    <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">50</span>
-                </div>
-                <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-1.5 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
-            </div>
+            <div class="flex items-center gap-4">
+				<span class="text-[10px] font-black uppercase opacity-40">Durée</span>
+				<div class="time-pill">
+					<button id="btn-time-minus" class="time-btn" style="user-select: none;">-</button>
+				<span class="text-lg font-black min-w-[50px]"><span id="min-defi-display">1</span>:<span id="sec-defi-display">00</span></span>
+					<button id="btn-time-plus" class="time-btn" style="user-select: none;">+</button>
+					<input type="hidden" id="min-defi" value="1">
+					<input type="hidden" id="sec-defi" value="00">
+				</div>
+			</div>
         </div>
-    </div>
-</div>
-
-<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="text-lg font-black uppercase mb-4" style="color: var(--theme-color)">💡 Le Défi Calme</h2>
-        <div class="text-[12px] leading-relaxed space-y-4 opacity-90">
-            <p>• <b>Objectif :</b> L'image se révèle si le silence est respecté.</p>
-            <p>• <b>Modes :</b> <b>Pixels</b> (carrés), <b>Flou</b> (netteté) ou <b>Zoom</b> (reculement).</p>
-            <p>• <b>Sanction :</b> Si le niveau sonore dépasse le seuil, l'image se cache à nouveau.</p>
-        </div>
-        <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-8 w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-white shadow-lg">J'ai compris</button>
     </div>
 </div>
 
@@ -200,9 +222,9 @@
     const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
     
     document.documentElement.style.setProperty('--theme-color', themeColor);
-    document.querySelectorAll('#btn-start, #btn-reset, #btn-retour, #btn-retour-liste, #btn-aide, #btn-fermer-aide').forEach(el => {
-		if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
-	});
+    document.querySelectorAll('#btn-start, #btn-reset, #btn-retour, #btn-retour-liste, #btn-aide, .time-btn').forEach(el => {
+        if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
+    });
 
     let audioContext, analyser, javascriptNode, stream, isPlaying = false, progress = 0, lastTime = 0, currentMode = 'pixels';
     const gridContainer = document.getElementById('pixel-grid');
@@ -213,22 +235,63 @@
         currentMode = mode;
         document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
         document.getElementById(`mode-${mode}`).classList.add('active');
-        
         if (mode === 'pixels') generateGrid();
         else gridContainer.innerHTML = '';
-        
         updateUI();
     }
 
-    function adjustTime(type, delta) {
-        const input = document.getElementById(`${type}-defi`);
-        const display = document.getElementById(`${type}-defi-display`);
-        let val = parseInt(input.value) + delta;
-        if (val < 0) val = 0; if (val > 59) val = 59;
-        input.value = val;
-        display.textContent = val;
-        if (currentMode === 'pixels') generateGrid();
-    }
+    let timeInterval;
+	let timeDelay;
+
+	function adjustTime(delta) {
+		const minInput = document.getElementById('min-defi');
+		const secInput = document.getElementById('sec-defi');
+    
+		let totalSeconds = (parseInt(minInput.value) * 60) + parseInt(secInput.value);
+		totalSeconds += (delta * 15); // Ingrément de 15 secondes
+		
+		if (totalSeconds < 15) totalSeconds = 5;
+		if (totalSeconds > 3600) totalSeconds = 3600;
+	
+		const newMin = Math.floor(totalSeconds / 60);
+		const newSec = totalSeconds % 60;
+	
+		minInput.value = newMin;
+		secInput.value = newSec;
+		document.getElementById('min-defi-display').textContent = newMin;
+		document.getElementById('sec-defi-display').textContent = newSec.toString().padStart(2, '0');
+		
+		if (currentMode === 'pixels') generateGrid();
+	}
+
+	function startTime(delta) {
+		adjustTime(delta); // Premier ajustement immédiat
+		timeDelay = setTimeout(() => {
+			timeInterval = setInterval(() => adjustTime(delta), 100);
+		}, 400); // Délai avant le défilement rapide
+	}
+
+	function stopTime() {
+		clearTimeout(timeDelay);
+		clearInterval(timeInterval);
+	}
+
+	// Événements pour le bouton Moins
+	const btnMinus = document.getElementById('btn-time-minus');
+	btnMinus.addEventListener('mousedown', () => startTime(-1));
+	btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(-1); });
+	
+	// Événements pour le bouton Plus
+	const btnPlus = document.getElementById('btn-time-plus');
+	btnPlus.addEventListener('mousedown', () => startTime(1));
+	btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(1); });
+	
+	// Arrêt global
+	[window, btnMinus, btnPlus].forEach(el => {
+		el.addEventListener('mouseup', stopTime);
+		el.addEventListener('mouseleave', stopTime);
+		el.addEventListener('touchend', stopTime);
+	});	
 
     function getDureeTotaleSeconds() {
         return (parseInt(document.getElementById('min-defi').value) * 60) + parseInt(document.getElementById('sec-defi').value) || 1;
@@ -256,7 +319,7 @@
             try {
                 if (!stream) {
                     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    audioContext = new AudioContext();
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     analyser = audioContext.createAnalyser();
                     const source = audioContext.createMediaStreamSource(stream);
                     javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
@@ -266,7 +329,13 @@
                         let array = new Uint8Array(analyser.frequencyBinCount);
                         analyser.getByteFrequencyData(array);
                         let volume = array.reduce((a, b) => a + b) / array.length;
-                        document.getElementById('mic-bar').style.width = `${Math.min(volume * 3, 100)}%`;
+                        
+                        const level = Math.min(volume * 3, 100) + '%';
+                        const barPC = document.getElementById('mic-bar');
+                        const barMob = document.getElementById('mic-bar-mobile');
+                        if(barPC) barPC.style.height = level;
+                        if(barMob) barMob.style.width = level;
+
                         if (isPlaying) updateGame(volume, delta);
                     };
                 }
@@ -285,15 +354,13 @@
         const speed = 100 / getDureeTotaleSeconds(); 
         if (volume < threshold) {
             if (progress < 100) progress += (speed * deltaTime);
-            document.getElementById('status-text').textContent = "Chut... ça s'éclaircit !";
         } else {
             if (progress > 0) progress -= (speed * deltaTime * 2);
-            document.getElementById('status-text').textContent = "Trop de bruit !";
         }
         progress = Math.max(0, Math.min(100, progress));
         updateUI();
         if (progress >= 100) {
-            document.getElementById('status-text').textContent = "Bravo !"; isPlaying = false;
+            isPlaying = false;
             document.getElementById('btn-start').style.display = 'none';
             document.getElementById('btn-reset').style.display = 'block';
             if (javascriptNode) javascriptNode.disconnect();
@@ -301,10 +368,18 @@
     }
 
     function updateUI() {
-        document.getElementById('progress-fill').style.width = `${progress}%`;
-        document.getElementById('percent-text').textContent = `${Math.floor(progress)}%`;
+        const pStr = `${Math.floor(progress)}%`;
+        const percentPC = document.getElementById('percent-text');
+        const percentMob = document.getElementById('percent-text-mobile');
+        if(percentPC) percentPC.textContent = pStr;
+        if(percentMob) percentMob.textContent = pStr;
         
-        // Reset des effets
+        const progV = document.getElementById('prog-bar-v');
+        if(progV) progV.style.height = pStr;
+        
+        const progH = document.getElementById('progress-fill');
+        if(progH) progH.style.width = pStr;
+
         imageEl.style.filter = 'none';
         imageEl.style.transform = 'scale(1)';
 
@@ -315,9 +390,8 @@
             const blurVal = 40 - (progress * 0.4);
             imageEl.style.filter = `blur(${blurVal}px)`;
         } else if (currentMode === 'zoom') {
-            // Commence à 3x (zoomé) et finit à 1x (normal)
             const zoomVal = 10 - (progress * 0.09);
-            const blurVal = 0 - (progress * 0.1); // Léger flou initial aussi pour le zoom
+            const blurVal = 5 - (progress * 0.05);
             imageEl.style.transform = `scale(${zoomVal})`;
             imageEl.style.filter = `blur(${Math.max(0, blurVal)}px)`;
         }
