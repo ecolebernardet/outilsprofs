@@ -33,44 +33,28 @@
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
         .gauge-container {
-            background: var(--card-bg);
-            border-radius: 1.5rem;
-            padding: 30px;
-            border: 1px solid var(--column-border);
-            text-align: center;
+            background: var(--card-bg); border-radius: 1.5rem; padding: 30px;
+            border: 1px solid var(--column-border); text-align: center;
         }
 
         @media (min-width: 1024px) {
-            .defi-layout-container {
-                display: grid;
-                grid-template-columns: 80px 1fr 80px;
-                align-items: center;
-                gap: 30px;
-            }
+            .defi-layout-container { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 30px; }
             .side-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
             .v-gauge-bg {
-                width: 20px !important;
-                height: 350px !important;
-                background: var(--input-bg);
-                border-radius: 10px;
-                overflow: hidden;
-                position: relative;
-                display: flex;
-                flex-direction: column-reverse;
+                width: 20px !important; height: 350px !important; background: var(--input-bg);
+                border-radius: 10px; overflow: hidden; position: relative; display: flex; flex-direction: column-reverse;
             }
             .v-label {
-                writing-mode: vertical-rl;
-                text-orientation: mixed;
-                transform: rotate(180deg);
-                margin-bottom: 10px;
+                writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+                position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+                z-index: 10; font-size: 8px; font-weight: 900; text-transform: uppercase; opacity: 0.6; pointer-events: none;
             }
-            #mic-bar, #prog-bar-v { width: 100% !important; background: var(--theme-color); transition: height 0.1s; }
+            #mic-bar, #prog-bar-v { width: 100% !important; background: var(--theme-color); transition: height 0.1s; position: relative; z-index: 1; }
         }
 
         .reveal-box {
-            position: relative; width: 100%; aspect-ratio: 16 / 9;
-            max-width: 850px; margin: 0 auto; background: #000;
-            border-radius: 1rem; overflow: hidden; display: flex; 
+            position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 850px; margin: 0 auto; 
+            background: #000; border-radius: 1rem; overflow: hidden; display: flex; 
             align-items: center; justify-content: center; border: 2px solid var(--column-border);
         }
         
@@ -79,31 +63,52 @@
         .pixel-block { background-color: var(--bg-page); transition: opacity 0.2s ease; }
 
         #btn-start, #btn-reset {
-            width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; border: none; margin: 10px auto;
+            width: 100%; max-width: 400px; padding: 10px; border-radius: 12px; font-weight: 900; 
+            text-transform: uppercase; cursor: pointer; border: none; margin: 5px auto;
         }
 
+        /* Jauge Mobile Corrigée */
         .mic-monitor-bg-mob { 
-            width: 250px; height: 12px; background: var(--input-bg); 
+            width: 250px; height: 16px; background: var(--input-bg); 
             border-radius: 10px; overflow: hidden; margin: 5px auto; position: relative; 
         }
-        #mic-bar-mobile { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; }
+        #mic-bar-mobile { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; position: absolute; left: 0; top: 0; z-index: 1; }
+        .label-mob { 
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; 
+            z-index: 10; font-size: 7px; font-weight: 900; text-transform: uppercase; opacity: 0.6; pointer-events: none; 
+        }Seuil de tolérance
 
         .mode-selector { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; gap: 4px; }
         .mode-option {
-            flex: 1; padding: 8px; border-radius: 8px; font-size: 10px; font-weight: 800; 
-            text-transform: uppercase; cursor: pointer; transition: 0.2s; opacity: 0.6;
-        }
-        .mode-option.active { background: var(--theme-color); color: #fff; opacity: 1; }
+			flex: 1; 
+			padding: 8px; 
+			border-radius: 8px; 
+			font-size: 10px; 
+			font-weight: 800; 
+			text-transform: uppercase; 
+			cursor: pointer; 
+			transition: 0.2s; 
+			opacity: 0.6;
+			/* Ajout de la bordure pour les modes non choisis */
+			border: 1px solid var(--column-border);
+			text-align: center;
+		}
 
-        /* Style Compact pour la Durée */
+		.mode-option.active { 
+			background: var(--theme-color); 
+			color: #fff; 
+			opacity: 1; 
+			/* La bordure prend la couleur du thème pour l'élément actif */
+			border-color: var(--theme-color);
+		}
+
         .time-pill {
             display: flex; align-items: center; gap: 10px;
-            background: var(--input-bg); padding: 5px 15px; border-radius: 50px;
-            border: 1px solid var(--column-border);
+            background: var(--input-bg); padding: 5px 15px; border-radius: 50px; border: 1px solid var(--column-border);
         }
         .time-btn { width: 28px; height: 28px; border-radius: 50%; font-weight: 900; background: var(--theme-color); display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
+        /* Modale */
         .modal-overlay { 
             display: none; position: fixed; inset: 0; z-index: 1000;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
@@ -139,14 +144,14 @@
             <div class="side-panel hidden lg:flex">
                 <div class="v-gauge-bg">
                     <div id="mic-bar" style="height: 0%"></div>
-                    <span class="v-label absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase opacity-60 pointer-events-none">Niveau Micro</span>
+                    <span class="v-label">Niveau Micro</span>
                 </div>
             </div>
 
             <div>
-                <div class="mic-monitor-bg-mob relative flex lg:hidden items-center justify-center mb-4">
+                <div class="mic-monitor-bg-mob lg:hidden mb-4">
                     <div id="mic-bar-mobile"></div>
-                    <span class="relative z-10 text-[8px] font-black uppercase opacity-60">Niveau Micro</span>
+                    <span class="label-mob">Niveau Micro</span>
                 </div>
 
                 <div class="reveal-box">
@@ -157,18 +162,18 @@
                     </div>
                 </div>
 
-                <div class="max-w-md mx-auto mt-4 px-4">
+                <div class="max-w-md mx-auto mt-2 px-4">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Seuil de tolérance</span>
-                        <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">50</span>
+                        <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">75</span>
                     </div>
-                    <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-1.5 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
+                    <input type="range" id="sensibilite-slider" min="1" max="100" value="75" class="w-full h-2 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
                 </div>
 
-                <div class="max-w-md mx-auto mt-4 flex lg:hidden items-center gap-3 px-4">
+                <div class="max-w-md mx-auto mt-2 flex lg:hidden items-center gap-3 px-4">
                     <span id="percent-text-mobile" class="text-xl font-black min-w-[50px]">0%</span>
-                    <div class="flex-grow bg-black/10 dark:bg-white/5 h-3 rounded-full overflow-hidden">
-                        <div id="progress-fill" class="h-full transition-all duration-300" style="width: 0%; background-color: var(--theme-color);"></div>
+                    <div class="flex-grow bg-black/10 dark:bg-white/5 h-3 rounded-full overflow-hidden relative">
+                        <div id="progress-fill" class="h-full absolute left-0 top-0 transition-all duration-300" style="width: 0%; background-color: var(--theme-color);"></div>
                     </div>
                 </div>
             </div>
@@ -178,39 +183,51 @@
                     <span id="percent-text" class="text-2xl lg:text-3xl font-black">0%</span>
                     <div class="v-gauge-bg">
                         <div id="prog-bar-v" style="height: 0%"></div>
-                        <span class="v-label absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase opacity-60 pointer-events-none">Progression</span>
+                        <span class="v-label">Progression</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="flex justify-center items-center gap-4 min-h-[60px] mt-4">
-			<button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
-			<button id="btn-stop" onclick="stopDefi()" style="display: none; width: 100%; max-width: 200px; padding: 16px; border-radius: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin: 10px 0;">Stop</button>
-			<button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
-		</div>
+            <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
+            <button id="btn-stop" onclick="stopDefi()" style="display: none; width: 100%; max-width: 200px; padding: 16px; border-radius: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin: 10px 0;">Stop</button>
+            <button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
+        </div>
 
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-2 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
             <div class="flex items-center gap-4">
-                <span class="text-[10px] font-black uppercase opacity-40">Mode</span>
-                <div class="mode-selector min-w-[200px]">
-                    <div id="mode-pixels" onclick="setMode('pixels')" class="mode-option active">Pixels</div>
-                    <div id="mode-flou" onclick="setMode('flou')" class="mode-option">Flou</div>
-                    <div id="mode-zoom" onclick="setMode('zoom')" class="mode-option">Zoom</div>
-                </div>
-            </div>
+    <span class="text-[10px] font-black uppercase opacity-40">Mode</span>
+    <div class="mode-selector flex flex-row items-center min-w-[240px] gap-1">
+        <div id="mode-pixels" onclick="setMode('pixels')" class="mode-option active">Pixels</div>
+        <div id="mode-flou" onclick="setMode('flou')" class="mode-option">Flou</div>
+        <div id="mode-zoom" onclick="setMode('zoom')" class="mode-option">Zoom</div>
+    </div>
+</div>
 
             <div class="flex items-center gap-4">
-				<span class="text-[10px] font-black uppercase opacity-40">Durée</span>
-				<div class="time-pill">
-					<button id="btn-time-minus" class="time-btn" style="user-select: none;">-</button>
-				<span class="text-lg font-black min-w-[50px]"><span id="min-defi-display">1</span>:<span id="sec-defi-display">00</span></span>
-					<button id="btn-time-plus" class="time-btn" style="user-select: none;">+</button>
-					<input type="hidden" id="min-defi" value="1">
-					<input type="hidden" id="sec-defi" value="00">
-				</div>
-			</div>
+                <span class="text-[10px] font-black uppercase opacity-40">Durée</span>
+                <div class="time-pill">
+                    <button id="btn-time-minus" class="time-btn" style="user-select: none;">-</button>
+                    <span class="text-lg font-black min-w-[50px]"><span id="min-defi-display">1</span>:<span id="sec-defi-display">00</span></span>
+                    <button id="btn-time-plus" class="time-btn" style="user-select: none;">+</button>
+                    <input type="hidden" id="min-defi" value="1">
+                    <input type="hidden" id="sec-defi" value="00">
+                </div>
+            </div>
         </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 class="text-xl font-black uppercase mb-4">Le défi calme</h2>
+        <div class="space-y-4 text-sm opacity-80 leading-relaxed">
+            <p>1. <strong>Le but :</strong> Réveler l'image cachée en restant le plus silencieux possible.</p>
+            <p>2. <strong>Le son :</strong> Si le niveau sonore dépasse le seuil, la progression recule deux fois plus vite !</p>
+            <p>3. <strong>Réglages :</strong> Ajustez la <strong>sensibilité</strong> selon le bruit ambiant et choisissez le <strong>mode de révélation</strong> (Pixels, Flou ou Zoom).</p>
+        </div>
+        <button onclick="fermerModal('modal-aide')" class="w-full mt-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest" style="background: var(--theme-color); color: #fff;">Compris !</button>
     </div>
 </div>
 
@@ -241,62 +258,41 @@
         updateUI();
     }
 
-    let timeInterval;
-	let timeDelay;
-
-	function adjustTime(delta) {
-		const minInput = document.getElementById('min-defi');
-		const secInput = document.getElementById('sec-defi');
-    
-		let totalSeconds = (parseInt(minInput.value) * 60) + parseInt(secInput.value);
-		totalSeconds += (delta * 15); // Ingrément de 15 secondes
-		
-		if (totalSeconds < 15) totalSeconds = 5;
-		if (totalSeconds > 3600) totalSeconds = 3600;
-	
-		const newMin = Math.floor(totalSeconds / 60);
-		const newSec = totalSeconds % 60;
-	
-		minInput.value = newMin;
-		secInput.value = newSec;
-		document.getElementById('min-defi-display').textContent = newMin;
-		document.getElementById('sec-defi-display').textContent = newSec.toString().padStart(2, '0');
-		
-		if (currentMode === 'pixels') generateGrid();
-	}
-
-	function startTime(delta) {
-		adjustTime(delta); // Premier ajustement immédiat
-		timeDelay = setTimeout(() => {
-			timeInterval = setInterval(() => adjustTime(delta), 100);
-		}, 400); // Délai avant le défilement rapide
-	}
-
-	function stopTime() {
-		clearTimeout(timeDelay);
-		clearInterval(timeInterval);
-	}
-
-	// Événements pour le bouton Moins
-	const btnMinus = document.getElementById('btn-time-minus');
-	btnMinus.addEventListener('mousedown', () => startTime(-1));
-	btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(-1); });
-	
-	// Événements pour le bouton Plus
-	const btnPlus = document.getElementById('btn-time-plus');
-	btnPlus.addEventListener('mousedown', () => startTime(1));
-	btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(1); });
-	
-	// Arrêt global
-	[window, btnMinus, btnPlus].forEach(el => {
-		el.addEventListener('mouseup', stopTime);
-		el.addEventListener('mouseleave', stopTime);
-		el.addEventListener('touchend', stopTime);
-	});	
-
-    function getDureeTotaleSeconds() {
-        return (parseInt(document.getElementById('min-defi').value) * 60) + parseInt(document.getElementById('sec-defi').value) || 1;
+    let timeInterval, timeDelay;
+    function adjustTime(delta) {
+        const minInput = document.getElementById('min-defi');
+        const secInput = document.getElementById('sec-defi');
+        let totalSeconds = (parseInt(minInput.value) * 60) + parseInt(secInput.value);
+        totalSeconds += (delta * 15);
+        if (totalSeconds < 15) totalSeconds = 5;
+        if (totalSeconds > 3600) totalSeconds = 3600;
+        const newMin = Math.floor(totalSeconds / 60);
+        const newSec = totalSeconds % 60;
+        minInput.value = newMin; secInput.value = newSec;
+        document.getElementById('min-defi-display').textContent = newMin;
+        document.getElementById('sec-defi-display').textContent = newSec.toString().padStart(2, '0');
+        if (currentMode === 'pixels') generateGrid();
     }
+
+    function startTime(delta) {
+        adjustTime(delta);
+        timeDelay = setTimeout(() => { timeInterval = setInterval(() => adjustTime(delta), 100); }, 400);
+    }
+    function stopTime() { clearTimeout(timeDelay); clearInterval(timeInterval); }
+
+    const btnMinus = document.getElementById('btn-time-minus');
+    btnMinus.addEventListener('mousedown', () => startTime(-1));
+    btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(-1); });
+    const btnPlus = document.getElementById('btn-time-plus');
+    btnPlus.addEventListener('mousedown', () => startTime(1));
+    btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(1); });
+    [window, btnMinus, btnPlus].forEach(el => {
+        el.addEventListener('mouseup', stopTime);
+        el.addEventListener('mouseleave', stopTime);
+        el.addEventListener('touchend', stopTime);
+    });    
+
+    function getDureeTotaleSeconds() { return (parseInt(document.getElementById('min-defi').value) * 60) + parseInt(document.getElementById('sec-defi').value) || 1; }
 
     function generateGrid() {
         if (currentMode !== 'pixels') return;
@@ -316,14 +312,11 @@
     }
 
     function stopDefi() {
-        isPlaying = false;
-        progress = 0;
-        updateUI();
+        isPlaying = false; progress = 0; updateUI();
         document.getElementById('btn-start').textContent = "Démarrer le défi";
         document.getElementById('btn-start').style.display = "block";
         document.getElementById('btn-stop').style.display = "none";
         document.getElementById('msg-start').style.display = 'flex';
-        // Réinitialisation des barres de micro
         const barPC = document.getElementById('mic-bar');
         const barMob = document.getElementById('mic-bar-mobile');
         if(barPC) barPC.style.height = "0%";
@@ -346,20 +339,18 @@
                         let array = new Uint8Array(analyser.frequencyBinCount);
                         analyser.getByteFrequencyData(array);
                         let volume = array.reduce((a, b) => a + b) / array.length;
-                        
                         const level = Math.min(volume * 3, 100) + '%';
                         const barPC = document.getElementById('mic-bar');
                         const barMob = document.getElementById('mic-bar-mobile');
                         if(barPC) barPC.style.height = level;
                         if(barMob) barMob.style.width = level;
-
                         updateGame(volume, delta);
                     };
                 }
                 isPlaying = true; lastTime = performance.now();
                 document.getElementById('btn-start').textContent = "Pause";
                 document.getElementById('btn-stop').style.display = "block";
-                document.getElementById('btn-stop').style.backgroundColor = themeColor; // Applique la couleur de thème
+                document.getElementById('btn-stop').style.backgroundColor = themeColor;
                 document.getElementById('btn-stop').style.color = contrast;
                 document.getElementById('msg-start').style.display = 'none';
             } catch (err) { alert("Micro non détecté"); }
@@ -372,20 +363,17 @@
     function updateGame(volume, deltaTime) {
         const threshold = 60 - (parseInt(document.getElementById('sensibilite-slider').value) * 0.55);
         const speed = 100 / getDureeTotaleSeconds(); 
-        if (volume < threshold) {
-            if (progress < 100) progress += (speed * deltaTime);
-        } else {
-            if (progress > 0) progress -= (speed * deltaTime * 2);
-        }
+        if (volume < threshold) { if (progress < 100) progress += (speed * deltaTime); }
+        else { if (progress > 0) progress -= (speed * deltaTime * 2); }
         progress = Math.max(0, Math.min(100, progress));
         updateUI();
         if (progress >= 100) {
-			isPlaying = false;
-			document.getElementById('btn-start').style.display = 'none';
-			document.getElementById('btn-stop').style.display = 'none'; // Masquer le bouton stop
-			document.getElementById('btn-reset').style.display = 'block';
-			if (javascriptNode) javascriptNode.disconnect();
-		}
+            isPlaying = false;
+            document.getElementById('btn-start').style.display = 'none';
+            document.getElementById('btn-stop').style.display = 'none';
+            document.getElementById('btn-reset').style.display = 'block';
+            if (javascriptNode) javascriptNode.disconnect();
+        }
     }
 
     function updateUI() {
@@ -394,16 +382,12 @@
         const percentMob = document.getElementById('percent-text-mobile');
         if(percentPC) percentPC.textContent = pStr;
         if(percentMob) percentMob.textContent = pStr;
-        
         const progV = document.getElementById('prog-bar-v');
         if(progV) progV.style.height = pStr;
-        
         const progH = document.getElementById('progress-fill');
         if(progH) progH.style.width = pStr;
 
-        imageEl.style.filter = 'none';
-        imageEl.style.transform = 'scale(1)';
-
+        imageEl.style.filter = 'none'; imageEl.style.transform = 'scale(1)';
         if (currentMode === 'pixels') {
             const revealCount = Math.floor((progress / 100) * pixelsOrder.length);
             pixelsOrder.forEach((p, i) => p.style.opacity = i < revealCount ? "0" : "1");
@@ -420,7 +404,6 @@
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-
     generateGrid();
 </script>
 </body>
