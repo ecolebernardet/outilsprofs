@@ -27,20 +27,20 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2; }
+        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
         .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
 
-        #container-retour-liste { margin-bottom: 1rem; text-align: left; }
         #btn-retour-liste {
             display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
             border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
             transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
         }
 
         .gauge-container {
-            background: var(--card-bg); border-radius: 1.5rem; padding: 10px 30px 40px 30px; border: 1px solid var(--column-border); text-align: center;
+            background: var(--card-bg); border-radius: 1.5rem; padding: 30px; border: 1px solid var(--column-border); text-align: center;
             transition: background-color 5s ease, border-color 5s ease;
         }
 
@@ -50,70 +50,69 @@
         }
 
         .radar-box {
-            position: relative;
-            width: 85vw; height: 85vw;
-            max-width: 400px; max-height: 400px;
-            margin: 20px auto 10px auto;
-            display: flex; align-items: center; justify-content: center;
-            overflow: visible;
+            position: relative; width: 80vw; height: 80vw;
+            max-width: 380px; max-height: 380px;
+            margin: 0 auto; display: flex; align-items: center; justify-content: center;
         }
 
         .radar-circle {
             position: absolute; border-radius: 50%; border: 5px solid var(--theme-color);
-            opacity: 0.1; width: 100%; height: 100%;
-            top: 0; left: 0;
+            opacity: 0.1; width: 100%; height: 100%; top: 0; left: 0;
         }
-
-		.ticks {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px; /* Aligné avec le décalage naturel des curseurs */
-            margin-top: -5px;
-        }
-
-        .tick {
-            width: 2px;
-            height: 6px;
-            background: var(--text-page);
-            opacity: 0.3;
-            margin-bottom: 4px;
-        }
-		
-		.tick-label {
-			font-size: 8px;
-			font-weight: 700;
-			opacity: 0.4;
-			margin-top: 2px;
-		}
 
         #threshold-circle {
             position: absolute; border-radius: 50%; border: 3px dashed var(--text-page);
             opacity: 0.3; width: 100%; height: 100%; z-index: 5;
-            top: 0; left: 0;
-            transition: transform 0.2s ease-out; pointer-events: none;
+            top: 0; left: 0; transition: transform 0.2s ease-out; pointer-events: none;
         }
 
         #noise-blob {
             width: 100%; height: 100%; background: var(--theme-color);
             border-radius: 50%; transition: transform 0.1s ease-out, background-color 0.4s ease;
-            box-shadow: 0 0 40px var(--theme-color); z-index: 10;
-            transform: scale(0);
+            box-shadow: 0 0 40px var(--theme-color); z-index: 10; transform: scale(0);
         }
 
         #btn-start {
-            width: 100%; max-width: 400px; padding: 16px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; border: none; margin: 20px auto; display: block;
-        }
-        
-        input[type=range] { 
-            width: 100%; 
-            accent-color: var(--theme-color); 
-            height: 32px; /* Zone de contact élargie */
-            cursor: pointer; 
-            margin: 5px 0;
+            position: absolute; inset: 0; margin: auto; z-index: 50;
+            width: 110px; height: 110px; border-radius: 50%;
+            font-size: 11px; font-weight: 900; line-height: 1.2;
+            text-transform: uppercase; cursor: pointer; border: none;
+            transition: all 0.4s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        /* Styles Modale */
+        #btn-start.is-listening { opacity: 0.15; transform: scale(0.9); }
+        #btn-start.is-listening:hover { opacity: 0.6; }
+
+        /* JAUGE VERTICALE PC */
+        .range-v-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        
+        @media (min-width: 1024px) {
+            .vertical-range {
+                appearance: none; -webkit-appearance: none;
+                width: 220px !important; height: 8px !important;
+                transform: rotate(-90deg); transform-origin: center;
+                margin: 110px 0 !important; background: rgba(128,128,128,0.2);
+                border-radius: 10px; cursor: pointer;
+            }
+            .range-v-wrapper { width: 80px; height: 350px; justify-content: center; }
+        }
+
+        @media (max-width: 1023px) {
+            .vertical-range { width: 100%; accent-color: var(--theme-color); height: 32px; margin: 10px 0; }
+            .ticks { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; margin-top: -5px; }
+            .tick { width: 2px; height: 6px; background: var(--text-page); opacity: 0.3; }
+            .tick-label { font-size: 8px; font-weight: 700; opacity: 0.4; }
+        }
+
+        /* BLOC ALERTE AFFINÉ */
+        .alert-mini-card {
+            background: rgba(0,0,0,0.05); border-radius: 1rem;
+            padding: 1.25rem; width: 100%; max-width: 180px;
+            border: 1px solid var(--column-border);
+            margin: 0 auto;
+        }
+        body.light-mode .alert-mini-card { background: rgba(255,255,255,0.5); }
+
         .modal-overlay { 
             display: none; position: fixed; inset: 0; z-index: 1000;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
@@ -121,16 +120,8 @@
         }
         .modal-content { 
             background: var(--card-bg); width: 100%; max-width: 450px;
-            border-radius: 1.5rem; border: 1px solid var(--column-border); 
-            padding: 30px; position: relative; color: var(--text-page);
+            border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 30px;
         }
-
-        @media (max-width: 640px) {
-            .gauge-container { padding: 20px 20px 40px 20px; }
-            .text-[10px] { font-size: 12px; } /* Plus lisible */
-            .tick-label { font-size: 10px; }
-        }
-		
     </style>
 </head>
 <body>
@@ -144,56 +135,58 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste">
-        <a href="outils.html" id="btn-retour-liste">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-            Retour aux outils
-        </a>
-    </div>
+    <a href="outils.html" id="btn-retour-liste">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+        Retour aux outils
+    </a>
 
     <div class="gauge-container">
-        <div class="radar-box">
-            <div class="radar-circle" style="transform: scale(0.25)"></div>
-            <div class="radar-circle" style="transform: scale(0.50)"></div>
-            <div class="radar-circle" style="transform: scale(0.75)"></div>
-            <div class="radar-circle" style="transform: scale(1)"></div>
-            <div id="threshold-circle"></div>
-            <div id="noise-blob"></div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 items-center">
+            
+            <div class="order-2 lg:order-1 flex flex-col lg:flex-row justify-center items-center gap-4 lg:gap-12">
+                <div class="range-v-wrapper">
+                    <span class="text-[10px] font-black uppercase opacity-60 lg:mb-2 whitespace-nowrap">Sensibilité</span>
+                    <input type="range" id="sens-slider" class="vertical-range" min="0.1" max="5" step="0.1" value="1.5" oninput="updateSens(this.value)">
+                    <div class="ticks lg:hidden">
+                        <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Min</span></div>
+                        <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Max</span></div>
+                    </div>
+                </div>
+                <div class="range-v-wrapper">
+                    <span class="text-[10px] font-black uppercase opacity-60 lg:mb-2 whitespace-nowrap">Seuil</span>
+                    <input type="range" id="seuil-slider" class="vertical-range" min="10" max="100" step="5" value="75" oninput="updateSeuil(this.value)">
+                    <div class="ticks lg:hidden">
+                        <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">10%</span></div>
+                        <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">100%</span></div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="max-w-xs mx-auto mt-6">
-            <div class="flex flex-col sm:flex-row gap-6 sm:gap-4">
-    <div class="flex-1 text-left">
-        <span class="text-[10px] font-black uppercase opacity-60">Sensibilité</span>
-        <input type="range" id="sens-slider" min="0.1" max="5" step="0.1" value="1.5" oninput="updateSens(this.value)">
-        <div class="ticks">
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Min</span></div>
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Normal</span></div>
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">Max</span></div>
-        </div>
-    </div>
-    <div class="flex-1 text-left">
-        <span class="text-[10px] font-black uppercase opacity-60">Seuil d'alerte</span>
-        <input type="range" id="seuil-slider" min="10" max="100" step="5" value="75" oninput="updateSeuil(this.value)">
-        <div class="ticks">
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">10%</span></div>
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">50%</span></div>
-            <div class="flex flex-col items-center"><div class="tick"></div><span class="tick-label">100%</span></div>
-        </div>
-    </div>
-</div>
-        </div>
+            <div class="order-1 lg:order-2">
+                <div class="radar-box">
+                    <div class="radar-circle" style="transform: scale(0.25)"></div>
+                    <div class="radar-circle" style="transform: scale(0.50)"></div>
+                    <div class="radar-circle" style="transform: scale(0.75)"></div>
+                    <div class="radar-circle" style="transform: scale(1)"></div>
+                    <div id="threshold-circle"></div>
+                    <div id="noise-blob"></div>
+                    <button id="btn-start" onclick="toggleMic()"><span id="btn-text">Lancer<br>l'analyse</span></button>
+                </div>
+            </div>
 
-        <button id="btn-start" onclick="toggleMic()">Lancer l'analyse</button>
-
-        <div class="flex justify-center items-center gap-4 mt-8 py-2 bg-black/5 dark:bg-white/5 rounded-xl">
-            <span class="text-[10px] font-black uppercase opacity-60">Alertes :</span>
-            <span id="compteur-alertes" class="text-xl font-black text-red-500">0</span>
-            <button id="toggle-sound" onclick="toggleSoundMode()" class="p-2 opacity-60 hover:opacity-100 transition-opacity">
-                <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
-            </button>
-            <button onclick="resetCompteur()" class="text-[9px] opacity-40 uppercase font-bold underline">Reset</button>
+            <div class="order-3 lg:order-3">
+                <div class="alert-mini-card flex flex-col items-center justify-center">
+                    <span class="text-[9px] font-black uppercase opacity-50 mb-1">Alertes</span>
+                    <span id="compteur-alertes" class="text-5xl font-black text-red-500 mb-4 leading-none">0</span>
+                    <div class="flex items-center gap-4">
+                        <button id="toggle-sound" onclick="toggleSoundMode()" class="opacity-60 hover:opacity-100 transition-opacity">
+                            <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                            <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+                        </button>
+                        <button onclick="resetCompteur()" class="text-[9px] opacity-40 uppercase font-bold underline">Reset</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -201,13 +194,12 @@
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4" style="color: var(--theme-color)">💡 Manuel du Radar</h2>
-        <div class="text-[12px] leading-relaxed space-y-4 opacity-90">
-            <p>• <b>Lancement :</b> Cliquez sur "Lancer l'analyse" pour activer le micro.</p>
-            <p>• <b>La Bulle :</b> La sphère centrale grossit avec le bruit. Si elle dépasse le <b>cercle en pointillés</b>, une alerte est comptabilisée.</p>
-            <p>• <b>Sensibilité :</b> Ajustez ce curseur selon l'acoustique de votre pièce. Si la bulle bouge trop dans le silence, baissez la sensibilité.</p>
-            <p>• <b>Délai :</b> Un intervalle de 1.5 seconde est appliqué après chaque alerte pour éviter les comptages multiples sur un seul bruit.</p>
+        <div class="text-[12px] leading-relaxed space-y-4 opacity-90 text-left">
+            <p>• <b>Lancement :</b> Cliquez au centre du radar pour activer le micro.</p>
+            <p>• <b>La Bulle :</b> Elle grossit avec le bruit. Dépassez le cercle en pointillés pour déclencher une alerte.</p>
+            <p>• <b>Réglages :</b> Sensibilité (amplitude du mouvement) et Seuil (limite autorisée).</p>
         </div>
-        <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-8 w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-white shadow-lg">J'ai compris</button>
+        <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-8 w-full py-4 rounded-xl text-[11px] font-black uppercase text-white shadow-lg">Compris</button>
     </div>
 </div>
 
@@ -225,8 +217,7 @@
 
     let audioContext, analyser, javascriptNode, isListening = false;
     let sensitivity = 1.5, seuilAlerte = 75, countAlertes = 0, peutCompter = true;
-    let smoothedLevel = 0; 
-    let isMuted = false, canPlaySound = true;
+    let smoothedLevel = 0, isMuted = false, canPlaySound = true;
 
     function toggleSoundMode() {
         isMuted = !isMuted;
@@ -235,88 +226,111 @@
     }
 
     function updateSens(val) { sensitivity = parseFloat(val); }
-
     function updateSeuil(val) {
         seuilAlerte = parseInt(val);
         document.getElementById('threshold-circle').style.transform = `scale(${seuilAlerte / 100})`;
     }
 
+    // FONCTION SONORE RENFORCÉE
     function playAlertSound() {
         if (isMuted || !canPlaySound || !audioContext) return;
         canPlaySound = false;
+
+        // Force la réactivation du contexte si le navigateur l'a mis en veille
+        if (audioContext.state === 'suspended') audioContext.resume();
+
         const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.frequency.setValueAtTime(440, audioContext.currentTime);
-        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        osc.connect(gain); gain.connect(audioContext.destination);
-        osc.start(); osc.stop(audioContext.currentTime + 0.3);
+        const gainNode = audioContext.createGain();
+
+        osc.type = 'sine'; 
+        osc.frequency.setValueAtTime(880, audioContext.currentTime); // Note A5 (plus percutante)
+
+        // Volume monté à 0.9 (90%)
+        gainNode.gain.setValueAtTime(0.9, audioContext.currentTime); 
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioContext.destination); // CONNEXION AUX HP
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.4);
+
         if ("vibrate" in navigator) navigator.vibrate(200);
         setTimeout(() => { canPlaySound = true; }, 1500);
     }
 
     function toggleMic() {
+        const btn = document.getElementById('btn-start');
+        const btnText = document.getElementById('btn-text');
+
         if (!isListening) {
             navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Initialisation au clic
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                audioContext.resume();
+
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 256;
                 const source = audioContext.createMediaStreamSource(stream);
+                
+                // ScriptProcessor pour l'analyse visuelle
                 javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
                 source.connect(analyser);
                 analyser.connect(javascriptNode);
                 javascriptNode.connect(audioContext.destination);
+
                 javascriptNode.onaudioprocess = () => {
                     let array = new Uint8Array(analyser.frequencyBinCount);
                     analyser.getByteFrequencyData(array);
                     let average = array.reduce((a, b) => a + b) / array.length;
                     renderRadar(average);
                 };
-            }).catch(err => alert("L'accès au micro est nécessaire."));
-            document.getElementById('btn-start').textContent = "Arrêter";
+
+                btn.classList.add('is-listening');
+                btnText.innerHTML = "Arrêter";
+                isListening = true;
+                
+                // Petit bip de confirmation au lancement
+                playAlertSound(); 
+                
+            }).catch(err => alert("Erreur micro : " + err));
         } else {
-            if (audioContext) audioContext.close();
+            if (javascriptNode) javascriptNode.onaudioprocess = null;
             renderRadar(0);
-            document.getElementById('btn-start').textContent = "Lancer l'analyse";
+            btn.classList.remove('is-listening');
+            btnText.innerHTML = "Lancer<br>l'analyse";
+            isListening = false;
         }
-        isListening = !isListening;
     }
 
     function renderRadar(val) {
         let targetLevel = Math.min(val * sensitivity, 100);
         smoothedLevel += (targetLevel - smoothedLevel) * 0.15;
-        
         const blob = document.getElementById('noise-blob');
         const container = document.querySelector('.gauge-container');
         blob.style.transform = `scale(${smoothedLevel / 100})`;
         
         if (smoothedLevel > seuilAlerte) {
             blob.style.backgroundColor = "#ef4444";
-            container.style.transition = "background-color 0.2s ease, border-color 0.2s ease";
             container.classList.add('is-alerting-container');
-            
             if (peutCompter) {
                 countAlertes++;
                 document.getElementById('compteur-alertes').textContent = countAlertes;
-                playAlertSound();
+                playAlertSound(); // DÉCLENCHE LE SON
                 peutCompter = false;
             }
         } else {
             if (smoothedLevel < seuilAlerte - 5) peutCompter = true;
             blob.style.backgroundColor = "var(--theme-color)";
-            container.style.transition = "background-color 5s ease, border-color 5s ease";
             container.classList.remove('is-alerting-container');
         }
     }
 
-    function resetCompteur() {
-        countAlertes = 0;
-        document.getElementById('compteur-alertes').textContent = "0";
-    }
-
+    function resetCompteur() { countAlertes = 0; document.getElementById('compteur-alertes').textContent = "0"; }
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-
     updateSeuil(75);
 </script>
 </body>
