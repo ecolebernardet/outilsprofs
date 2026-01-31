@@ -12,11 +12,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
+            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.2); 
             --header-bg: #1e1e1e; --card-bg: #1e1e1e;
         }
         body.light-mode { 
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
+            --bg-page: #eeeeee; --text-page: #111827; --column-border: #999; 
             --header-bg: #ffffff; --card-bg: #ffffff;
         }
 
@@ -49,13 +49,13 @@
             background: var(--bg-page);
             overflow: hidden;
             padding: 10px;
-            padding-bottom: 90px; /* Espace pour la toolbar */
+            padding-bottom: 90px;
         }
 
         svg {
-            height: 100%; /* Se cale sur la hauteur de l'écran */
+            height: 100%;
             width: auto;
-            aspect-ratio: 1500 / 1800; /* Garde le ratio de la classe */
+            aspect-ratio: 1500 / 1800;
             max-width: 100%;
             background-image: radial-gradient(rgba(128,128,128,0.2) 1.5px, transparent 1.5px);
             background-size: 40px 40px;
@@ -68,7 +68,7 @@
 
         .desk-group { cursor: grab; user-select: none; }
         .desk-rect { stroke: rgba(0,0,0,0.3); stroke-width: 2; rx: 5; }
-        .desk-label { fill: white; font-size: 20px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; text-transform: uppercase; }
+        .desk-label { fill: black; font-size: 30px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; text-transform: uppercase; }
         .chair-rect { fill: #2e7d32; rx: 2; }
 
         .toolbar {
@@ -170,8 +170,8 @@
     let studentData = JSON.parse(localStorage.getItem('plan_vector_v1')) || [];
     let historyStack = [], redoStack = [];
     
-    // Dimensions ajustées pour garder de l'espace dans le plan 1500x1800
-    const SVG_NS = "http://www.w3.org/2000/svg", DESK_W = 140, DESK_H = 90;
+    // Vos dimensions souhaitées
+    const SVG_NS = "http://www.w3.org/2000/svg", DESK_W = 200, DESK_H = 120;
     const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
     const couleurDefautBureau = '#5d4037';
 
@@ -184,27 +184,27 @@
     function undo() { if (historyStack.length > 0) { redoStack.push(JSON.stringify(studentData)); studentData = JSON.parse(historyStack.pop()); sync(); } }
     function redo() { if (redoStack.length > 0) { historyStack.push(JSON.stringify(studentData)); studentData = JSON.parse(redoStack.pop()); sync(); } }
     function sync() { localStorage.setItem('plan_vector_v1', JSON.stringify(studentData)); drawPlan(); updateButtons(); }
+    
     function updateButtons() { 
         document.getElementById('btn-undo').disabled = historyStack.length === 0; 
         document.getElementById('btn-redo').disabled = redoStack.length === 0; 
     }
 
     function drawPlan() {
-    const layer = document.getElementById('main-layer');
-    layer.innerHTML = '';
+        const layer = document.getElementById('main-layer');
+        layer.innerHTML = '';
 
-    // AJOUT DES MURS : Un rectangle qui fait tout le tour du canvas
-    const walls = document.createElementNS(SVG_NS, "rect");
-    walls.setAttribute("x", 0);
-    walls.setAttribute("y", 0);
-    walls.setAttribute("width", 1500);
-    walls.setAttribute("height", 1800);
-    walls.setAttribute("fill", "none");
-    walls.setAttribute("stroke", "var(--column-border)"); // Couleur des murs selon le mode
-    walls.setAttribute("stroke-width", "10"); // Épaisseur des murs
-    layer.appendChild(walls);
+        // MURS (Placés en premier pour être en dessous des tables)
+        const walls = document.createElementNS(SVG_NS, "rect");
+        walls.setAttribute("x", 5); walls.setAttribute("y", 5);
+        walls.setAttribute("width", 1490); walls.setAttribute("height", 1790);
+        walls.setAttribute("fill", "none");
+        walls.setAttribute("stroke", "var(--column-border)");
+        walls.setAttribute("stroke-width", "10");
+        walls.style.pointerEvents = "none"; // Ne bloque pas le clic sur les tables
+        layer.appendChild(walls);
 
-    studentData.forEach((student, index) => {
+        studentData.forEach((student, index) => {
             const g = document.createElementNS(SVG_NS, "g");
             g.setAttribute("class", "desk-group");
             g.setAttribute("id", `desk-${index}`);
@@ -274,7 +274,7 @@
             const prenom = el.identite.split(' ')[0];
             const existant = studentData.find(s => s.name === prenom);
             if (existant) return { ...existant, niveau: el.niveau };
-            return { name: prenom, niveau: el.niveau, x: 200 + ((i % 6) * 220), y: 150 + (Math.floor(i / 6) * 180), r: 0 };
+            return { name: prenom, niveau: el.niveau, x: 220 + ((i % 5) * 260), y: 200 + (Math.floor(i / 5) * 240), r: 0 };
         });
         sync();
     }
@@ -284,67 +284,38 @@
     function toutEffacer() { pushHistory(); studentData = []; sync(); fermerConfirm(); }
 
     function exportPDF() {
-    const svg = document.getElementById('plan-svg');
-    const { jsPDF } = window.jspdf;
-    const svgClone = svg.cloneNode(true);
+        const svg = document.getElementById('plan-svg');
+        const { jsPDF } = window.jspdf;
+        const svgClone = svg.cloneNode(true);
+        svgClone.style.backgroundColor = "white";
+        svgClone.style.backgroundImage = "none";
 
-    // Préparation du clone pour un rendu propre sur PDF (fond blanc)
-    svgClone.style.backgroundColor = "white";
-    svgClone.style.backgroundImage = "none";
+        const walls = svgClone.querySelector('#main-layer rect:first-child');
+        if (walls && !walls.classList.contains('desk-rect')) {
+            walls.setAttribute("stroke", "#333333");
+            walls.setAttribute("fill", "white");
+        }
 
-    // Gestion des murs (le premier rect du calque main-layer)
-    const walls = svgClone.querySelector('#main-layer rect:first-child');
-    if (walls && !walls.classList.contains('desk-rect')) {
-        walls.setAttribute("stroke", "#333333"); // Mur sombre pour le PDF
-        walls.setAttribute("fill", "white");
-    }
-
-    // Style des bureaux : fond blanc, bordure de la couleur du niveau
-    svgClone.querySelectorAll('.desk-rect').forEach(rect => {
-        const col = rect.getAttribute('data-color') || "black";
-        rect.style.fill = "white"; 
-        rect.style.stroke = col; 
-        rect.style.strokeWidth = "3px";
-    });
-
-    // Style du texte : noir pour la lisibilité
-    svgClone.querySelectorAll('.desk-label').forEach(text => { 
-        text.style.fill = "black"; 
-    });
-
-    // Style des chaises : gris léger
-    svgClone.querySelectorAll('.chair-rect').forEach(chair => { 
-        chair.style.fill = "#eeeeee"; 
-        chair.style.stroke = "#999999"; 
-    });
-
-    const svgData = new XMLSerializer().serializeToString(svgClone);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-
-    // Dimensions du canvas (ratio 1500x1800)
-    canvas.width = 1500; 
-    canvas.height = 1800;
-
-    img.onload = function() {
-        ctx.fillStyle = "white"; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height); 
-        ctx.drawImage(img, 0, 0);
-
-        const pdf = new jsPDF({ 
-            orientation: 'portrait', 
-            unit: 'pt', 
-            format: [1500, 1800] 
+        svgClone.querySelectorAll('.desk-rect').forEach(rect => {
+            const col = rect.getAttribute('data-color') || "black";
+            rect.style.fill = "white"; rect.style.stroke = col; rect.style.strokeWidth = "3px";
         });
-
-        pdf.addImage(canvas.toDataURL("image/jpeg", 1.0), 'JPEG', 0, 0, 1500, 1800);
-        pdf.save("plan_classe.pdf");
-    };
-
-    // Encodage moderne pour éviter les problèmes d'accents
-    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
-}
+        svgClone.querySelectorAll('.desk-label').forEach(text => { text.style.fill = "black"; });
+        svgClone.querySelectorAll('.chair-rect').forEach(chair => { chair.style.fill = "#eeeeee"; chair.style.stroke = "#999999"; });
+        
+        const svgData = new XMLSerializer().serializeToString(svgClone);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        canvas.width = 1500; canvas.height = 1800;
+        img.onload = function() {
+            ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0);
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: [1500, 1800] });
+            pdf.addImage(canvas.toDataURL("image/jpeg", 1.0), 'JPEG', 0, 0, 1500, 1800);
+            pdf.save("plan_classe.pdf");
+        };
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+    }
 
     document.getElementById('btn-shuffle').onclick = function() {
         pushHistory();
