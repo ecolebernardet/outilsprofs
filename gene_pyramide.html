@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Générateur de Pyramides - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
+            --accent-color: #06b6d4; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
+            --column-border: rgba(0, 0, 0, 0.1); --input-bg: #f3f4f6;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
+        header { 
+            background: var(--card-bg); border-bottom: 1px solid var(--column-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: 100%; margin-bottom: 12px;
+        }
+
+        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
+        header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
+
+        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 10px 15px 40px; }
+        .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
+        
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
+        
+        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-add:active { transform: scale(0.95); }
+
+        .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .q-card { background: var(--card-bg); border-radius: 0.75rem; padding: 15px; border: 1px solid var(--column-border); display: flex; flex-direction: column; align-items: center; }
+        
+        .pyramid-container { display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; width: 100%; margin-top: 10px; }
+        .pyramid-row { display: flex; justify-content: center; gap: 4px; }
+        .brick { 
+            width: 45px; height: 30px; border: 2px solid var(--column-border); 
+            border-radius: 6px; display: flex; align-items: center; justify-content: center; 
+            font-size: 10px; font-weight: 900; transition: all 0.2s;
+            background: transparent; color: inherit;
+        }
+        .brick.filled { border-color: var(--accent-color); color: var(--accent-color); }
+        .brick.empty { background: rgba(0,0,0,0.05); border-style: dashed; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+
+        @media (min-width: 768px) {
+            .main-wrapper { max-width: 950px; }
+            #questions-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+</script>
+
+<header>
+    <a href="index.html" id="btn-retour-header" class="ui-btn-round active:scale-90">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+    </a>
+    <h1>Pyramides des nombres</h1>
+    <button id="btn-aide" onclick="document.getElementById('modal-aide').style.display='flex'" class="ui-btn-round active:scale-90 text-lg">💡</button>
+</header>
+
+<div class="main-wrapper">
+    <div id="container-retour-liste" class="mb-4 text-left">
+        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux générateurs
+        </a>
+    </div>
+
+    <div id="setup-zone" class="light-card space-y-4">
+        <div>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Titre de la fiche</label>
+            <input type="text" id="quiz-title" class="input-field mb-4" placeholder="Ex: Calcul mental : Pyramides">
+            
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Nombres de la base (un par brique)</label>
+            <textarea id="quiz-data" class="input-field h-40 font-normal" placeholder="2 5 3&#10;10 20 30 40"></textarea>
+            
+            <div class="flex justify-between mt-2 gap-2">
+                <button onclick="addExample()" class="flex-1 px-3 py-1.5 rounded-lg border border-cyan-500/30 text-[8px] font-bold uppercase text-cyan-500 hover:bg-cyan-500/10 transition-colors">Exemple</button>
+                <button onclick="generateRandomData()" class="flex-1 px-3 py-1.5 rounded-lg border border-orange-500/30 text-[8px] font-bold uppercase text-orange-500 hover:bg-orange-500/10 transition-colors">Aléatoire (x4)</button>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 text-center">Opération</label>
+            <div class="grid grid-cols-2 gap-1 bg-black/10 p-1 rounded-xl">
+                <button onclick="setOp('+')" id="op-add" class="p-2 text-[9px] font-bold transition-all">Addition</button>
+                <button onclick="setOp('*')" id="op-mult" class="p-2 text-[9px] font-bold transition-all">Mult.</button>
+            </div>
+        </div>
+        <button id="mainAddBtn" onclick="generateQuiz()" class="btn-add">Générer les Pyramides</button>
+    </div>
+
+    <div id="game-zone" class="hidden space-y-6">
+        <div id="questions-grid" class="grid grid-cols-1 gap-4"></div>
+        <div class="flex flex-wrap justify-center gap-3 pt-4">
+            <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
+            <button id="btn-reponses" onclick="ouvrirModaleReponses()" class="btn-game-action bg-orange-500">🔓 réponses</button>
+            <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
+            <button onclick="exportToPDF()" class="btn-game-action bg-blue-500">📄 PDF</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 class="text-lg font-black uppercase mb-4 text-center">💡 Comment jouer ?</h2>
+        <div class="text-[11px] leading-relaxed space-y-4 text-center">
+            <p>Chaque brique est le résultat de l'opération des deux briques juste au-dessous.</p>
+            
+            <div class="flex flex-col items-center gap-1 py-4 bg-black/5 rounded-2xl">
+                <div class="w-10 h-7 border-2 border-cyan-500 rounded flex items-center justify-center font-black text-cyan-800 bg-cyan-500/10">5</div>
+                <div class="flex gap-1">
+                    <div class="w-10 h-7 border-2 border-cyan-400 rounded flex items-center justify-center font-bold">2</div>
+                    <div class="w-10 h-7 border-2 border-cyan-400 rounded flex items-center justify-center font-bold">3</div>
+                </div>
+                <div class="text-[9px] mt-2 font-bold opacity-50 uppercase tracking-widest">Exemple : 2 + 3 = 5</div>
+            </div>
+            <p>Remplis toutes les cases vides pour terminer la pyramide !</p>
+        </div>
+        <button onclick="document.getElementById('modal-aide').style.display='none'" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-cyan-500 text-white btn-accent-dynamic">J'ai compris</button>
+    </div>
+</div>
+
+<div id="modal-success" class="modal-overlay">
+    <div class="modal-content text-center">
+        <div class="text-5xl mb-4">🎉</div>
+        <h2 class="text-2xl font-black uppercase mb-2">Bravo !</h2>
+        <p class="text-sm opacity-70 mb-6">Tout est juste !</p>
+        <button onclick="document.getElementById('modal-success').style.display='none'" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-green-500 text-white">Super</button>
+    </div>
+</div>
+
+<div id="modal-confirm-reponses" class="modal-overlay">
+    <div class="modal-content text-center">
+        <div class="text-5xl mb-4">🔓</div>
+        <h2 class="text-xl font-black uppercase mb-2">Afficher les réponses ?</h2>
+        <p class="text-sm opacity-70 mb-6">Toutes les solutions seront dévoilées à l'écran.</p>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('modal-confirm-reponses').style.display='none'" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gray-500 text-white">Annuler</button>
+            <button onclick="validerVoirReponses()" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-orange-500 text-white">Dévoiler</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+    let currentQuestions = [], currentOp = '+';
+
+    function appliquerTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colPref = themePrefs.gen || 'cyan'; 
+        const hexa = mapCouleurs[colPref];
+        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
+        document.documentElement.style.setProperty('--accent-color', hexa);
+        const btns = [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('btn-aide'), document.getElementById('mainAddBtn'), document.querySelector('.btn-accent-dynamic')];
+        btns.forEach(b => { if(b) { b.style.backgroundColor = hexa; b.style.color = contrast; } });
+        setOp(currentOp);
+    }
+
+    function setOp(op) {
+        currentOp = op;
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        const bA = document.getElementById('op-add'), bM = document.getElementById('op-mult');
+        [bA, bM].forEach(b => b.style.cssText = "background-color: transparent !important; color: inherit; border-radius: 9999px;");
+        const active = (op === '+') ? bA : bM;
+        const isLight = ['yellow', 'lime', 'amber', 'cyan'].some(c => accent.toLowerCase().includes(c));
+        active.style.cssText = `background-color: ${accent} !important; color: ${isLight ? '#000' : '#fff'} !important; border-radius: 9999px;`;
+    }
+
+    function addExample() {
+        document.getElementById('quiz-title').value = "Calcul Mental : Pyramides";
+        document.getElementById('quiz-data').value = "5 8 3\n12 7 9 15\n4 2 6 1";
+    }
+
+    function generateRandomData() {
+        let lines = [];
+        for(let i=0; i<4; i++) {
+            let size = Math.random() > 0.5 ? 3 : 4;
+            let line = [];
+            for(let j=0; j<size; j++) line.push(Math.floor(Math.random() * 15) + 1);
+            lines.push(line.join(' '));
+        }
+        document.getElementById('quiz-data').value = lines.join('\n');
+    }
+
+    function calculatePyramid(base) {
+        let pyramid = [base];
+        while (pyramid[pyramid.length - 1].length > 1) {
+            let nextRow = [], lastRow = pyramid[pyramid.length - 1];
+            for (let i = 0; i < lastRow.length - 1; i++) {
+                let res = (currentOp === '+') ? (lastRow[i] + lastRow[i+1]) : (lastRow[i] * lastRow[i+1]);
+                nextRow.push(Math.round(res * 100) / 100);
+            }
+            pyramid.push(nextRow);
+        }
+        return pyramid;
+    }
+
+    function renderPyramidHTML(pyramid) {
+        let html = '<div class="pyramid-container">';
+        pyramid.forEach((row, rowIndex) => {
+            html += '<div class="pyramid-row">';
+            row.forEach(val => {
+                if (rowIndex === 0) {
+                    html += `<div class="brick filled">${val}</div>`;
+                } else {
+                    html += `<input type="number" step="any" class="brick empty text-center user-input outline-none" onfocus="this.style.borderColor=''" data-answer="${val}" placeholder="?">`;
+                }
+            });
+            html += '</div>';
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function ouvrirModaleReponses() {
+        document.getElementById('modal-confirm-reponses').style.display = 'flex';
+    }
+
+    function validerVoirReponses() {
+        document.querySelectorAll('.user-input').forEach(input => {
+            input.value = input.dataset.answer;
+            input.style.setProperty('color', 'var(--accent-color)', 'important');
+            input.style.setProperty('border-color', 'var(--accent-color)', 'important');
+            input.readOnly = true;
+        });
+        document.getElementById('modal-confirm-reponses').style.display = 'none';
+    }
+
+    function generateQuiz() {
+        const text = document.getElementById('quiz-data').value.trim();
+        if (!text) return;
+        currentQuestions = text.split('\n').filter(l => l.trim() !== '').map(line => calculatePyramid(line.trim().split(/\s+/).map(Number)));
+        const grid = document.getElementById('questions-grid');
+        grid.innerHTML = '';
+        currentQuestions.forEach((pyr, i) => {
+            grid.innerHTML += `<div class="q-card">
+                <div class="text-[9px] font-black uppercase opacity-40 mb-2">Pyramide n°${i+1}</div>
+                ${renderPyramidHTML(pyr)}
+            </div>`;
+        });
+        document.getElementById('setup-zone').classList.add('hidden');
+        document.getElementById('container-retour-liste').classList.add('hidden');
+        document.getElementById('game-zone').classList.remove('hidden');
+    }
+
+    function showCorrection() {
+        let hasErrors = false;
+        document.querySelectorAll('.user-input').forEach(input => {
+            const userVal = parseFloat(input.value);
+            const correctVal = parseFloat(input.dataset.answer);
+            if (!isNaN(userVal) && Math.abs(userVal - correctVal) < 0.01) {
+                input.style.setProperty('color', '#22c55e', 'important'); 
+                input.style.setProperty('border-color', '#22c55e', 'important');
+            } else {
+                input.style.setProperty('color', '#ef4444', 'important');
+                input.style.setProperty('border-color', '#ef4444', 'important');
+                hasErrors = true;
+            }
+        });
+        if (!hasErrors) document.getElementById('modal-success').style.display = 'flex';
+    }
+
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        const titre = document.getElementById('quiz-title').value || "Pyramides des nombres";
+
+        const drawContent = (isCorrection) => {
+            doc.setFontSize(18);
+            doc.setTextColor(0,0,0);
+            doc.text(titre + (isCorrection ? " (Correction)" : ""), 105, 20, { align: "center" });
+            
+            if (!isCorrection) {
+                doc.setFontSize(10);
+                doc.text("Prénom / Nom : ________________________", 20, 30);
+            }
+            
+            let x = 20, y = 45;
+            currentQuestions.forEach((pyr) => {
+                const bW = 18, bH = 10, bL = pyr[0].length;
+                if (y + (bL * bH) > 270) { doc.addPage(); y = 30; }
+
+                pyr.forEach((row, rIdx) => {
+                    const rY = y + ((bL - 1 - rIdx) * bH);
+                    const rO = (rIdx * bW) / 2;
+                    row.forEach((val, cIdx) => {
+                        const bX = x + rO + (cIdx * bW);
+                        doc.setDrawColor(180);
+                        doc.rect(bX, rY, bW, bH);
+                        if (rIdx === 0 || isCorrection) {
+                            doc.setFontSize(8);
+                            doc.setTextColor(rIdx === 0 ? 0 : accent);
+                            doc.text(String(val), bX + (bW/2), rY + (bH/2) + 1, { align: "center" });
+                        }
+                    });
+                });
+                y += (bL * bH) + 15;
+            });
+        };
+
+        drawContent(false);
+        doc.addPage();
+        drawContent(true);
+        doc.save(`pyramides.pdf`);
+    }
+
+    function retourReglages() { 
+        document.getElementById('game-zone').classList.add('hidden');
+        document.getElementById('setup-zone').classList.remove('hidden');
+        document.getElementById('container-retour-liste').classList.remove('hidden');
+    }
+
+    window.onload = appliquerTheme;
+</script>
+</body>
+</html>
