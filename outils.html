@@ -178,9 +178,19 @@
             </div>
         </a>
 		
+		<a href="outils_plan.html" class="tool-card" data-id="plan">
+			<div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+			<div class="icon-box" id="icon-plan">🪑</div>
+			<div>
+				<h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-plan">Plan de classe</h2>
+				<p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Placer les élèves en un clic</p>
+			</div>
+		</a>
+
     </div>
 </div>
 
+		
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide Outils</h2>
@@ -230,8 +240,9 @@
         const elementsOutils = [
             { icon: 'icon-timer', title: 'title-timer' },
             { icon: 'icon-bruit', title: 'title-bruit' },
-            { icon: 'icon-calme', title: 'title-deficalme' },
+            { icon: 'icon-deficalme', title: 'title-deficalme' },
             { icon: 'icon-feux', title: 'title-feux' },
+			{ icon: 'icon-plan', title: 'title-plan' },
         ];
 
         elementsOutils.forEach(item => {

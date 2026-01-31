@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Plan de classe Pro - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
+            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
+            --header-bg: #ffffff; --card-bg: #ffffff;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; overflow: hidden; }
+        
+        header { 
+            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100;
+        }
+
+        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+        #btn-retour:active, #btn-aide:active { transform: scale(0.9); }
+
+        .classroom-area {
+            position: relative;
+            width: 100vw;
+            height: calc(100vh - 150px);
+            background-image: radial-gradient(var(--column-border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .desk {
+            position: absolute;
+            width: 100px;
+            height: 70px;
+            background: #5d4037;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+        }
+
+        .desk::before {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            width: 40px;
+            height: 8px;
+            background: #2e7d32;
+            border-radius: 2px;
+        }
+
+        .desk.is-dragging { opacity: 0.8; cursor: grabbing; z-index: 1000; transition: none; }
+
+        .toolbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--header-bg);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--column-border);
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+
+        .btn-tool { padding: 10px 15px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; transition: all 0.2s; }
+        .btn-tool:active { transform: scale(0.95); }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="outils.html" id="btn-retour">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+    </a>
+    <h1 class="font-black uppercase tracking-widest text-sm">Plan de Classe Pro</h1>
+    <button id="btn-aide" onclick="ouvrirAide()">💡</button>
+</header>
+
+<div class="classroom-area" id="canvas"></div>
+
+<div class="toolbar">
+    <button class="btn-tool" id="btn-mode" onclick="toggleLock()" style="background: rgba(128,128,128,0.2);">🔓 Édition</button>
+    <button class="btn-tool" id="btn-shuffle" onclick="shuffleNames()" style="background: var(--theme-color); color: var(--contrast-color);">🔀 Mélanger</button>
+    <button class="btn-tool bg-white/10" onclick="ouvrirConfig()">👥 Liste</button>
+    <button class="btn-tool bg-white/10" onclick="exporterPlan()" title="Télécharger le plan">💾</button>
+    <button class="btn-tool bg-white/10" onclick="importerPlan()" title="Charger un plan">📂</button>
+</div>
+
+<div id="modal-config" class="modal-overlay">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 class="font-black uppercase mb-2">Liste des élèves</h2>
+        <p class="text-[9px] opacity-50 mb-4 uppercase font-bold text-center">Un nom par ligne</p>
+        <textarea id="liste-input" class="w-full h-48 bg-black/20 border border-[var(--column-border)] p-4 rounded-xl text-white outline-none font-bold" placeholder="Nom 1&#10;Nom 2..."></textarea>
+        <div class="flex gap-2 mt-4">
+            <button onclick="fermerConfig()" class="flex-1 py-4 rounded-xl font-black uppercase text-[10px] bg-white/5">Fermer</button>
+            <button onclick="saveAndReload()" class="flex-[2] py-4 rounded-xl font-black uppercase text-[10px]" style="background: var(--theme-color); color: var(--contrast-color);">Appliquer</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 class="text-lg font-black uppercase mb-4">💡 Aide</h2>
+        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
+            <p><strong>Mode Édition :</strong> Déplacez librement les bureaux sur le plan.</p>
+            <p><strong>Pivoter :</strong> Faites un <strong>double-clic</strong> (ou double-tap) sur un bureau pour le tourner de 45°.</p>
+            <p><strong>Mélanger :</strong> Verrouillez le plan (🔓 devient 🔒) pour ne mélanger que les noms sans bouger les meubles.</p>
+        </div>
+        <button onclick="fermerAide()" class="w-full py-4 mt-6 rounded-xl font-black uppercase text-[10px]" style="background: var(--theme-color); color: var(--contrast-color);">Compris</button>
+    </div>
+</div>
+
+<script>
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    
+    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+    const mapCouleurs = { red:'#ef4444', orange:'#f97316', amber:'#f59e0b', yellow:'#eab308', lime:'#84cc16', green:'#22c55e', emerald:'#10b981', teal:'#14b8a6', cyan:'#06b6d4', sky:'#0ea5e9', blue:'#3b82f6', indigo:'#6366f1', violet:'#8b5cf6', purple:'#a855f7', fuchsia:'#d946ef', pink:'#ec4899', rose:'#f43f5e' };
+    const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
+    const contrast = ['yellow','amber','cyan','lime'].includes(themePrefs.outils) ? '#000' : '#fff';
+    document.documentElement.style.setProperty('--theme-color', themeColor);
+    document.documentElement.style.setProperty('--contrast-color', contrast);
+    document.getElementById('btn-retour').style.backgroundColor = themeColor;
+    document.getElementById('btn-retour').style.color = contrast;
+
+    let isLocked = false;
+    let studentData = JSON.parse(localStorage.getItem('plan_gynzy_v3')) || [];
+
+    function initClassroom() {
+        const canvas = document.getElementById('canvas');
+        canvas.innerHTML = '';
+        studentData.forEach((student, index) => {
+            const el = document.createElement('div');
+            el.className = 'desk';
+            el.textContent = student.name;
+            const x = student.x || 50, y = student.y || 50, r = student.r || 0;
+            el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg)`;
+            el.setAttribute('data-x', x); el.setAttribute('data-y', y); el.setAttribute('data-r', r);
+            
+            el.addEventListener('dblclick', function() {
+                if(isLocked) return;
+                let curR = (parseInt(this.dataset.r) + 45) % 360;
+                this.dataset.r = curR;
+                this.style.transform = `translate(${this.dataset.x}px, ${this.dataset.y}px) rotate(${curR}deg)`;
+                savePositions();
+            });
+            canvas.appendChild(el);
+        });
+        setupDrag();
+    }
+
+    function setupDrag() {
+        interact('.desk').draggable({
+            inertia: true,
+            listeners: {
+                move(event) {
+                    if(isLocked) return;
+                    let { x, y, r } = event.target.dataset;
+                    x = (parseFloat(x) || 0) + event.dx;
+                    y = (parseFloat(y) || 0) + event.dy;
+                    event.target.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg)`;
+                    Object.assign(event.target.dataset, { x, y });
+                },
+                end: savePositions
+            }
+        });
+    }
+
+    function savePositions() {
+        const desks = document.querySelectorAll('.desk');
+        studentData = Array.from(desks).map(d => ({
+            name: d.textContent,
+            x: parseFloat(d.dataset.x),
+            y: parseFloat(d.dataset.y),
+            r: parseInt(d.dataset.r) || 0
+        }));
+        localStorage.setItem('plan_gynzy_v3', JSON.stringify(studentData));
+    }
+
+    function toggleLock() {
+        isLocked = !isLocked;
+        const btn = document.getElementById('btn-mode');
+        btn.textContent = isLocked ? '🔒 Verrouillé' : '🔓 Édition';
+        btn.style.background = isLocked ? themeColor : 'rgba(128,128,128,0.2)';
+        btn.style.color = isLocked ? contrast : 'white';
+    }
+
+    function shuffleNames() {
+        const desks = document.querySelectorAll('.desk');
+        let names = Array.from(desks).map(d => d.textContent);
+        for (let i = names.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [names[i], names[j]] = [names[j], names[i]];
+        }
+        desks.forEach((d, i) => {
+            d.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            d.textContent = names[i];
+            setTimeout(() => d.style.transition = '', 500);
+        });
+        savePositions();
+    }
+
+    function ouvrirConfig() { document.getElementById('modal-config').style.display = 'flex'; document.getElementById('liste-input').value = studentData.map(s => s.name).join('\n'); }
+    function fermerConfig() { document.getElementById('modal-config').style.display = 'none'; }
+    function saveAndReload() {
+        const input = document.getElementById('liste-input').value;
+        const names = input.split('\n').map(n => n.trim()).filter(n => n !== "");
+        
+        if (names.length === 0) {
+            alert("Veuillez entrer au moins un prénom.");
+            return;
+        }
+
+        // On reconstruit le tableau des élèves
+        // On essaie de garder les positions (x, y, r) des bureaux existants
+        // Si c'est un nouvel élève, on le place au centre par défaut
+        studentData = names.map((name, i) => {
+            const existing = studentData[i] || {};
+            return {
+                name: name,
+                x: existing.x !== undefined ? existing.x : 100,
+                y: existing.y !== undefined ? existing.y : 100 + (i * 10),
+                r: existing.r !== undefined ? existing.r : 0
+            };
+        });
+        
+        // Sauvegarde immédiate et rechargement complet de la grille
+        localStorage.setItem('plan_gynzy_v3', JSON.stringify(studentData));
+        fermerConfig();
+        initClassroom(); // Relance la création des éléments HTML
+    }
+
+// Sauvegarde le plan complet (positions + noms) dans un fichier .json
+    function exporterPlan() {
+        const dataStr = JSON.stringify(studentData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'mon_plan_de_classe.json';
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    }
+
+    // Charge un fichier de plan sauvegardé
+    function importerPlan() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.readAsText(file,'UTF-8');
+            reader.onload = readerEvent => {
+                try {
+                    const content = JSON.parse(readerEvent.target.result);
+                    studentData = content;
+                    localStorage.setItem('plan_gynzy_v3', JSON.stringify(studentData));
+                    initClassroom();
+                } catch (err) {
+                    alert("Erreur : le fichier n'est pas un plan valide.");
+                }
+            }
+        }
+        input.click();
+    }
+	
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
+    initClassroom();
+</script>
+</body>
+</html>
