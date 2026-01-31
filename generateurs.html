@@ -196,6 +196,15 @@
         </div>
     </a>
     
+	<a href="gene_sudokus.html" class="tool-card" data-id="sudoku">
+        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="icon-box" id="icon-sudoku">🔢</div>
+        <div>
+            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-sudoku">Sudokus</h2>
+            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">grilles de logique et variantes</p>
+        </div>
+    </a>
+	
     <a href="gene_motsmeles.html" class="tool-card" data-id="mots">
         <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <div class="icon-box" id="icon-mots">📝</div>
@@ -236,6 +245,7 @@
             <p>🔺 Le <strong>Générateur de Pyramides</strong> crée des défis de calcul basés sur la somme ou le produit de briques adjacentes.</p>
             <p>➗ Le <strong>Générateur de Fractions</strong> crée des exercices de lecture, d'écriture et de comparaison de fractions.</p>
             <p>🀄 Le <strong>Générateur de Dominos</strong> crée des chaînes de calculs ou de révisions thématiques avec sens de lecture.</p>
+			<p>🔢 Le <strong>Générateur de Sudokus</strong> crée des grilles de logique de différents niveaux avec leurs corrections.</p>
             <p>📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.</p>
             <p>🎨 Le <strong>Générateur de Pixel Art</strong> permet de transformer des images en grilles à colorier.</p>
             <p>❓ Le <strong>Générateur de Quizz</strong> permet de créer des séries de questions/réponses avec minuteur et export PDF/TXT.</p>
@@ -285,7 +295,8 @@
             { icon: 'icon-quizz', title: 'title-quizz' },
             { icon: 'icon-fractions', title: 'title-fractions' },
 			{ icon: 'icon-pyramide', title: 'title-pyramide' },
-			{ icon: 'icon-dominos', title: 'title-dominos' }
+			{ icon: 'icon-dominos', title: 'title-dominos' },
+			{ icon: 'icon-sudoku', title: 'title-sudoku' }
         ];
 
         outils.forEach(outil => {
