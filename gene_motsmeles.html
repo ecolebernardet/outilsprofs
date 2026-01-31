@@ -356,28 +356,34 @@
         const gridEl = document.getElementById('word-grid');
         const canvas = document.getElementById('correction-canvas');
         
-        // 1. On affiche d'abord la zone pour que le navigateur puisse calculer les dimensions réelles
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('game-zone').classList.remove('hidden');
 
         const isDesktop = window.innerWidth > 768;
-        
-        // 2. Maintenant on calcule la largeur disponible réelle
-        const containerWidth = document.querySelector('.main-wrapper').offsetWidth - 30;
-        const maxCellSize = Math.floor(containerWidth / gridSize);
-        
-        // On limite la taille sur PC pour ne pas avoir des carreaux géants
-        const cellSize = isDesktop ? Math.min(42, maxCellSize) : maxCellSize;
-        const fontSize = Math.max(10, cellSize * 0.55);
         const gap = 2;
         
+        // On récupère la largeur disponible réelle du parent
+        const containerWidth = document.querySelector('.main-wrapper').clientWidth - 40;
+        
+        // Calcul précis : (Largeur totale - espaces entre cellules) / nombre de cellules
+        const maxCellSize = Math.floor((containerWidth - (gridSize - 1) * gap) / gridSize);
+        
+        // On limite la taille sur PC, mais sur mobile on utilise le maximum possible
+        const cellSize = isDesktop ? Math.min(42, maxCellSize) : maxCellSize;
+        const fontSize = Math.max(10, cellSize * 0.55);
+        
         gridEl.style.gridTemplateColumns = `repeat(${gridSize}, ${cellSize}px)`;
+        gridEl.style.gap = `${gap}px`; // On s'assure que le gap est bien appliqué
+        
         gridEl.innerHTML = finalGrid.flat().map(obj => 
             `<div class="grid-cell" onclick="toggleCell(this)" data-sol="${obj.isSolution}" style="font-size: ${fontSize}px; width:${cellSize}px; height:${cellSize}px;">${obj.char}</div>`
         ).join('');
         
+        // Calcul du total pour le canvas de correction
         const totalSize = (gridSize * cellSize) + ((gridSize - 1) * gap);
-        canvas.width = totalSize; canvas.height = totalSize;
+        canvas.width = totalSize; 
+        canvas.height = totalSize;
+        
         document.getElementById('display-title').innerText = title;
 
         const sortedWords = words.sort((a, b) => a.localeCompare(b, 'fr'));
