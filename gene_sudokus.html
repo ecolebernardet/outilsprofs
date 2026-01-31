@@ -116,13 +116,25 @@
             <input type="text" id="quiz-title" class="input-field mb-4" placeholder="Ex: Défi Sudoku">
             
             <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Taille de la grille</label>
-            <div class="grid grid-cols-2 gap-1 bg-black/10 p-1 rounded-xl mb-4">
+            <div class="grid grid-cols-3 gap-1 bg-black/10 p-1 rounded-xl mb-4">
+                <button onclick="setGridSize(4)" id="size-4" class="p-2 text-[9px] font-bold transition-all">4 x 4</button>
                 <button onclick="setGridSize(6)" id="size-6" class="p-2 text-[9px] font-bold transition-all">6 x 6</button>
                 <button onclick="setGridSize(9)" id="size-9" class="p-2 text-[9px] font-bold transition-all">9 x 9</button>
             </div>
 
-            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Nombre de cases vides</label>
-            <input type="range" id="difficulty" min="15" max="55" value="35" class="w-full accent-cyan-500">
+            <div class="flex justify-between items-center mb-2">
+                <label class="block text-[9px] font-black uppercase opacity-50 tracking-widest">Nombre de cases vides</label>
+                <span id="holes-count" class="bg-[var(--accent-color)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
+            </div>
+            <div class="px-2">
+                <input type="range" id="difficulty" min="15" max="55" value="35" class="w-full accent-cyan-500 cursor-pointer" oninput="updateHolesDisplay()">
+                <div class="flex justify-between w-full px-1 mt-1 text-[8px] font-black uppercase opacity-40 tracking-tighter">
+                    <span>Facile</span>
+                    <span>Moyen</span>
+                    <span>Difficile</span>
+                    <span>Expert</span>
+                </div>
+            </div>
         </div>
 
         <button id="mainAddBtn" onclick="generateSudokus()" class="btn-add">Générer les grilles</button>
@@ -149,9 +161,45 @@
     </div>
 </div>
 
+<div id="modal-aide" class="modal-overlay" onclick="if(event.target == this) this.style.display='none'">
+    <div class="modal-content">
+        <h2 class="text-xl font-black uppercase mb-4 flex items-center gap-2">
+            <span>💡</span> Aide
+        </h2>
+        <div class="space-y-4 text-sm opacity-90 leading-relaxed">
+            <p>1. <b>Choisissez</b> la taille de grille (4x4, 6x6 ou 9x9).</p>
+            <p>2. <b>Réglez</b> le curseur pour définir le nombre de cases vides.</p>
+            <p>3. <b>Générez</b> les grilles et complétez-les à l'écran ou en <b>PDF</b>.</p>
+        </div>
+        <button onclick="document.getElementById('modal-aide').style.display='none'" class="w-full mt-6 py-3 rounded-xl bg-[var(--accent-color)] text-white font-bold uppercase tracking-wide">Fermer</button>
+    </div>
+</div>
+
+<div id="modal-bravo" class="modal-overlay" onclick="if(event.target == this) this.style.display='none'">
+    <div class="modal-content text-center">
+        <div class="text-5xl mb-4">🏆</div>
+        <h2 class="text-2xl font-black uppercase mb-2">Félicitations !</h2>
+        <p class="opacity-75 mb-6 font-medium">Vous avez résolu les grilles avec succès.</p>
+        <button onclick="document.getElementById('modal-bravo').style.display='none'" class="w-full py-3 rounded-xl bg-green-500 text-white font-bold uppercase tracking-wide">Merci !</button>
+    </div>
+</div>
+
 <script>
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     let currentGrids = [], currentSize = 9;
+
+    function updateHolesDisplay() {
+        const s = currentSize;
+        const diffInput = document.getElementById('difficulty');
+        if(!diffInput) return;
+        const difficultyPercent = parseInt(diffInput.value);
+        let holes = Math.floor((difficultyPercent / 100) * (s * s));
+        const maxHoles = Math.floor((s * s) * 0.75);
+        if (holes > maxHoles) holes = maxHoles;
+        if (s === 4 && holes > 11) holes = 11;
+        const countSpan = document.getElementById('holes-count');
+        if(countSpan) countSpan.textContent = `${holes} cases`;
+    }
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
@@ -159,23 +207,27 @@
         const hexa = mapCouleurs[colPref];
         const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
         document.documentElement.style.setProperty('--accent-color', hexa);
-        const btns = [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('mainAddBtn')];
+        const rangeInput = document.getElementById('difficulty');
+        if(rangeInput) rangeInput.style.accentColor = hexa;
+        const btns = [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('mainAddBtn'), document.getElementById('btn-aide')];
         btns.forEach(b => { if(b) { b.style.backgroundColor = hexa; b.style.color = contrast; } });
-        setGridSize(9);
+        setGridSize(currentSize);
     }
 
     function setGridSize(s) {
         currentSize = s;
-        const b6 = document.getElementById('size-6'), b9 = document.getElementById('size-9');
+        const b4 = document.getElementById('size-4'), b6 = document.getElementById('size-6'), b9 = document.getElementById('size-9');
         const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-        [b6, b9].forEach(b => b.style.cssText = "background-color: transparent !important; color: inherit; border-radius: 9999px;");
-        const active = (s === 6) ? b6 : b9;
-        active.style.cssText = `background-color: ${accent} !important; color: white !important; border-radius: 9999px;`;
+        [b4, b6, b9].forEach(b => { if(b) b.style.cssText = "background-color: transparent !important; color: inherit; border-radius: 9999px;"; });
+        const active = document.getElementById(`size-${s}`);
+        if(active) active.style.cssText = `background-color: ${accent} !important; color: white !important; border-radius: 9999px;`;
+        updateHolesDisplay();
     }
 
     function generateSudokuData() {
         const s = currentSize;
-        const bW = 3, bH = (s === 6) ? 2 : 3;
+        const bW = (s === 6 || s === 9) ? 3 : 2;
+        const bH = (s === 4 || s === 6) ? 2 : 3;
         let grid = Array.from({length: s}, () => Array(s).fill(0));
 
         const isValid = (g, r, c, v) => {
@@ -199,8 +251,12 @@
 
         solve(grid);
         let puzzle = grid.map(row => [...row]);
-        let holes = parseInt(document.getElementById('difficulty').value);
-        if(s === 6) holes = Math.floor(holes * 0.5);
+        const difficultyPercent = parseInt(document.getElementById('difficulty').value);
+        let holes = Math.floor((difficultyPercent / 100) * (s * s));
+        const maxHoles = Math.floor((s * s) * 0.75);
+        if (holes > maxHoles) holes = maxHoles;
+        if (s === 4 && holes > 11) holes = 11;
+        
         while(holes > 0) {
             let r = Math.floor(Math.random()*s), c = Math.floor(Math.random()*s);
             if(puzzle[r][c] !== 0) { puzzle[r][c] = 0; holes--; }
@@ -240,18 +296,20 @@
     }
 
     function showCorrection() {
+        let hasError = false, isComplete = true;
         document.querySelectorAll('.user-input').forEach(input => {
-            const userVal = input.value.trim();
-            const correctVal = String(input.dataset.ans);
-            if (userVal === correctVal) input.style.setProperty('color', '#22c55e', 'important');
-            else if (userVal !== "") input.style.setProperty('color', '#ef4444', 'important');
+            const userVal = input.value.trim(), correctVal = String(input.dataset.ans);
+            if (userVal === "") { isComplete = false; input.style.setProperty('color', '#000000', 'important'); }
+            else if (userVal === correctVal) { input.style.setProperty('color', '#22c55e', 'important'); }
+            else { input.style.setProperty('color', '#ef4444', 'important'); hasError = true; }
         });
+        if (isComplete && !hasError) document.getElementById('modal-bravo').style.display = 'flex';
     }
 
     function validerVoirReponses() {
         document.querySelectorAll('.user-input').forEach(input => {
             input.value = input.dataset.ans;
-            input.style.setProperty('color', '#000000', 'important');
+            input.style.setProperty('color', '#994231', 'important');
             input.readOnly = true;
         });
         document.getElementById('modal-confirm-reponses').style.display = 'none';
@@ -262,44 +320,58 @@
         const doc = new jsPDF();
         const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
         const filename = `outilsprofs_sudoku_${currentSize}x${currentSize}_${date}.pdf`;
-
         const draw = (data, startX, startY, isCorr) => {
-            const size = 70, cellSize = size / data.size;
-            doc.setDrawColor(180);
-            data.puzzle.forEach((row, r) => row.forEach((val, c) => {
-                const x = startX + c*cellSize, y = startY + r*cellSize;
-                doc.rect(x, y, cellSize, cellSize);
-                let v = val !== 0 ? val : (isCorr ? data.solution[r][c] : "");
-                if(v) {
-                    doc.setFontSize(14);
-                    doc.setTextColor(val === 0 && isCorr ? 220 : 0, 0, 0);
-                    doc.text(String(v), x + cellSize/2, y + cellSize/2 + 2, {align:"center"});
-                }
-            }));
-            doc.setDrawColor(0); doc.setLineWidth(0.8);
-            for(let i=0; i<=data.size; i++) {
-                if(i % data.bW === 0) doc.line(startX + i*cellSize, startY, startX + i*cellSize, startY + size);
-                if(i % data.bH === 0) doc.line(startX, startY + i*cellSize, startX + size, startY + i*cellSize);
-            }
-        };
-
-        const title = document.getElementById('quiz-title').value || "Sudoku";
-        doc.text(title, 105, 15, {align:"center"});
-        draw(currentGrids[0], 20, 30, false); draw(currentGrids[1], 115, 30, false);
-        doc.addPage();
-        doc.text(title + " (Correction)", 105, 15, {align:"center"});
-        draw(currentGrids[0], 20, 30, true); draw(currentGrids[1], 115, 30, true);
-
-        // Méthode compatible Android
-        const blob = doc.output('blob');
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+		const size = 70, cellSize = size / data.size;
+		const fontSize = data.size === 4 ? 24 : (data.size === 6 ? 18 : 14);
+    
+		data.puzzle.forEach((row, r) => row.forEach((val, c) => {
+			const x = startX + c * cellSize, y = startY + r * cellSize;
+        
+			// 1. GESTION DU FOND GRIS FONCÉ POUR LES RÉPONSES
+			if (val === 0 && isCorr) {
+				doc.setFillColor(60, 60, 60); // Gris foncé
+				doc.rect(x, y, cellSize, cellSize, 'F'); 
+			}
+	
+			// 2. BORDURE DE LA CELLULE
+			doc.setDrawColor(180);
+			doc.setLineWidth(0.1);
+			doc.rect(x, y, cellSize, cellSize, 'D');
+	
+			// 3. AFFICHAGE DU TEXTE
+			let v = val !== 0 ? val : (isCorr ? data.solution[r][c] : "");
+			if (v) {
+				doc.setFontSize(fontSize);
+				
+				// Si c'est une réponse (fond gris), on écrit en BLANC (255)
+				// Sinon (énoncé), on écrit en NOIR (0)
+				if (val === 0 && isCorr) {
+					doc.setTextColor(255, 255, 255); 
+				} else {
+					doc.setTextColor(0, 0, 0);
+				}
+				
+				doc.text(String(v), x + cellSize / 2, y + cellSize / 2 + (fontSize / 7), { align: "center" });
+				}
+			}));
+	
+			// 4. TRACÉ DES LIGNES ÉPAISSES (BLOCS)
+			doc.setDrawColor(0); 
+			doc.setLineWidth(0.8);
+			for (let i = 0; i <= data.size; i++) {
+				if (i % data.bW === 0) doc.line(startX + i * cellSize, startY, startX + i * cellSize, startY + size);
+				if (i % data.bH === 0) doc.line(startX, startY + i * cellSize, startX + size, startY + i * cellSize);
+			}
+		};
+				const title = document.getElementById('quiz-title').value || "Sudoku";
+				doc.setFont("helvetica", "bold"); doc.setFontSize(18);
+				doc.text(title, 105, 15, {align:"center"});
+				draw(currentGrids[0], 20, 30, false); draw(currentGrids[1], 115, 30, false);
+				doc.addPage();
+				doc.text(title + " (Correction)", 105, 15, {align:"center"});
+				draw(currentGrids[0], 20, 30, true); draw(currentGrids[1], 115, 30, true);
+				doc.save(filename);
+			}
 
     function retourReglages() { 
         document.getElementById('game-zone').classList.add('hidden');
