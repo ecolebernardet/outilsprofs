@@ -288,6 +288,12 @@
         const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
         const titre = document.getElementById('quiz-title').value || "Pyramides des nombres";
 
+        const maintenant = new Date();
+        const dateStr = maintenant.getFullYear() + 
+                        String(maintenant.getMonth() + 1).padStart(2, '0') + 
+                        String(maintenant.getDate()).padStart(2, '0');
+        const filename = `outilsprofs_pyramides_${dateStr}.pdf`;
+
         const drawContent = (isCorrection) => {
             doc.setFontSize(18);
             doc.setTextColor(0,0,0);
@@ -324,7 +330,21 @@
         drawContent(false);
         doc.addPage();
         drawContent(true);
-        doc.save(`pyramides.pdf`);
+
+        // Méthode optimisée pour Android (Blob + lien invisible)
+        const blob = doc.output('blob');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Nettoyage
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
     }
 
     function retourReglages() { 
