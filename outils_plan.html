@@ -55,7 +55,7 @@
         svg {
             height: 100%;
             width: auto;
-            aspect-ratio: 1500 / 1800;
+            aspect-ratio: 1800 / 1800;
             max-width: 100%;
             background-image: radial-gradient(rgba(128,128,128,0.2) 1.5px, transparent 1.5px);
             background-size: 40px 40px;
@@ -120,7 +120,7 @@
     </div>
 
     <div id="canvas-container">
-        <svg id="plan-svg" onclick="deselectAll(event)" viewBox="0 0 1500 1800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <svg id="plan-svg" onclick="deselectAll(event)" viewBox="0 0 1800 1800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
             <g id="main-layer"></g>
         </svg>
     </div>
@@ -266,13 +266,41 @@
 
         const walls = document.createElementNS(SVG_NS, "rect");
         walls.setAttribute("x", 5); walls.setAttribute("y", 5);
-        walls.setAttribute("width", 1490); walls.setAttribute("height", 1790);
+        walls.setAttribute("width", 1790); walls.setAttribute("height", 1790);
         walls.setAttribute("fill", "none");
         walls.setAttribute("stroke", "var(--column-border)");
         walls.setAttribute("stroke-width", "10");
         walls.style.pointerEvents = "none";
         layer.appendChild(walls);
 
+		// --- AJOUT DU TABLEAU ---
+        const boardW = 900; // 50% de 1800px
+        const boardH = 40;  // Épaisseur du tableau
+        const board = document.createElementNS(SVG_NS, "rect");
+        board.setAttribute("x", (1800 - boardW) / 2); // Centrage horizontal
+        board.setAttribute("y", 10); // Plaqué contre le mur du haut
+        board.setAttribute("width", boardW);
+        board.setAttribute("height", boardH);
+        board.setAttribute("rx", "5"); // Coins légèrement arrondis
+        // Style : On utilise une couleur grise ou le thème
+        board.setAttribute("fill", "#4b5563"); 
+        board.setAttribute("stroke", "var(--column-border)");
+        board.setAttribute("stroke-width", "2");
+        layer.appendChild(board);
+
+        // Texte "TABLEAU" (optionnel)
+        const boardText = document.createElementNS(SVG_NS, "text");
+        boardText.setAttribute("x", 900);
+        boardText.setAttribute("y", 35);
+        boardText.setAttribute("text-anchor", "middle");
+        boardText.setAttribute("fill", "white");
+        boardText.style.fontSize = "20px";
+        boardText.style.fontWeight = "900";
+        boardText.style.pointerEvents = "none";
+        boardText.textContent = "TABLEAU";
+        layer.appendChild(boardText);
+        // --- FIN AJOUT TABLEAU ---
+		
         studentData.forEach((student, index) => {
             const g = document.createElementNS(SVG_NS, "g");
             g.setAttribute("class", "desk-group" + (selectedIndex === index ? " selected" : ""));
@@ -445,7 +473,7 @@ function getExportFileName(extension) {
         const ctx = canvas.getContext("2d");
         const img = new Image();
         
-        canvas.width = 1500; 
+        canvas.width = 1800; 
         canvas.height = 1800;
         
         img.onload = function() {
@@ -457,7 +485,7 @@ function getExportFileName(extension) {
                 const pdf = new jsPDF({ 
                     orientation: 'portrait', 
                     unit: 'pt', 
-                    format: [1500, 1800] 
+                    format: [1800, 1800] 
                 });
                 
                 pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), 'JPEG', 0, 0, 1500, 1800);
