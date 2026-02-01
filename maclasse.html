@@ -316,8 +316,10 @@
         function sauvegarderNomEnseignant() {
             const nom = document.getElementById('nomEnseignant').value;
             localStorage.setItem('nom_enseignant', nom);
+            // On relance l'application des couleurs pour vérifier si on colore ou si on nettoie
+            appliquerCouleursTheme();
         }
-
+		
         function appliquerCouleursSexe() {
             const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
             const couleurFille = prefs.fille && mapCouleurs[prefs.fille] ? mapCouleurs[prefs.fille] : '#f472b6';
@@ -349,7 +351,25 @@
             const btnSubmit = document.getElementById('btn-submit');
             if (btnSubmit) { btnSubmit.style.backgroundColor = hexaTheme; btnSubmit.style.color = textClr; }
             
-            // Ajout du bouton OK (btn-save-nom) dans la liste ci-dessous
+            // Gestion du champ Nom de l'enseignant
+            const inputEnseignant = document.getElementById('nomEnseignant');
+            if (inputEnseignant) {
+                // La bordure est TOUJOURS de la couleur dynamique
+                inputEnseignant.style.borderColor = hexaTheme;
+                inputEnseignant.style.borderWidth = "1px";
+                inputEnseignant.style.borderStyle = "solid";
+
+                if (inputEnseignant.value.trim() !== "") {
+                    // Si rempli : fond coloré
+                    inputEnseignant.style.backgroundColor = hexaTheme;
+                    inputEnseignant.style.color = textClr;
+                } else {
+                    // Si vide : fond transparent (ou léger selon ton CSS)
+                    inputEnseignant.style.backgroundColor = "transparent";
+                    inputEnseignant.style.color = "inherit";
+                }
+            }
+            
             const headerBtns = [
                 document.getElementById('btn-retour'), 
                 document.getElementById('btn-aide'),
