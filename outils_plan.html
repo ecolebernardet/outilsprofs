@@ -98,9 +98,7 @@
         .btn-modal-action { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
     </style>
 </head>
-<body>
-
-<header>
+<body class="dark-mode"> <header>
     <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
@@ -123,6 +121,12 @@
             <g id="main-layer"></g>
         </svg>
     </div>
+</div>
+
+<div id="zoom-controls" class="fixed bottom-[145px] right-6 flex flex-col gap-2 z-[250]">
+    <button onclick="changeZoom(0.2)" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-xl font-bold flex items-center justify-center">＋</button>
+    <button onclick="resetZoom()" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-[10px] font-black flex items-center justify-center">1:1</button>
+    <button onclick="changeZoom(-0.2)" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-xl font-bold flex items-center justify-center">－</button>
 </div>
 
 <div id="add-menu" class="hidden fixed bottom-[95px] left-1/2 -translate-x-1/2 bg-[var(--header-bg)] border border-[var(--column-border)] p-4 rounded-3xl shadow-2xl flex gap-4 z-[300]">
@@ -177,6 +181,7 @@
         <h2 class="font-black uppercase mb-4 flex items-center gap-2">💡 Mode d'emploi</h2>
         <div class="text-[11px] opacity-90 leading-relaxed max-h-[60vh] overflow-y-auto">
             <p><strong>Rotation :</strong> Double-cliquez sur un élément pour pivoter de 45°.</p>
+            <p><strong>Zoom :</strong> Utilisez les boutons + et - ou 1:1. En zoom, déplacez le plan au doigt.</p>
             <p><strong>Tableau :</strong> Vous pouvez désormais placer et déplacer le tableau librement.</p>
         </div>
         <button onclick="fermerModale('modal-aide')" class="mt-6 btn-modal-action">J'ai compris</button>
@@ -213,13 +218,17 @@
     let studentData = JSON.parse(localStorage.getItem('plan_vector_v1')) || [];
     let historyStack = [], redoStack = [];
     let selectedIndex = null;
+
+    let currentScale = 1;
+    let translateX = 0;
+    let translateY = 0;
     
     const SVG_NS = "http://www.w3.org/2000/svg";
     const DESK_W = 180, DESK_H = 100;
     const PROF_W = 360, PROF_H = 180;
     const MEUBLE_W = 320, MEUBLE_H = 80;
     const DOOR_W = 200, DOOR_H = 40;
-    const BOARD_W = 900, BOARD_H = 40; // Dimensions du tableau mobile
+    const BOARD_W = 900, BOARD_H = 40;
 
     const couleurParNiveau = { 
         'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 
@@ -238,6 +247,31 @@
     }
     function toggleAddMenu() { document.getElementById('add-menu').classList.toggle('hidden'); }
 
+    function changeZoom(delta) {
+        const newScale = Math.min(Math.max(currentScale + delta, 1), 4);
+        if (newScale !== currentScale) {
+            currentScale = newScale;
+            if (currentScale > 1 && !isLocked) toggleLock();
+            if (currentScale === 1) { translateX = 0; translateY = 0; }
+            applyTransform();
+        }
+    }
+
+    function resetZoom() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        if (isLocked) toggleLock();
+        applyTransform();
+    }
+
+    function applyTransform() {
+        const layer = document.getElementById('main-layer');
+        layer.style.transition = "transform 0.1s ease-out";
+        layer.style.transformOrigin = "center";
+        layer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+    }
+
     function ajouterMeuble(type) {
         pushHistory();
         let item = { x: 900, y: 900, r: 0 };
@@ -254,7 +288,6 @@
         const layer = document.getElementById('main-layer');
         layer.innerHTML = '';
 
-        // Murs extérieurs
         const walls = document.createElementNS(SVG_NS, "rect");
         walls.setAttribute("x", 5); walls.setAttribute("y", 5);
         walls.setAttribute("width", 1790); walls.setAttribute("height", 1790);
@@ -271,16 +304,15 @@
             g.setAttribute("transform", `translate(${x},${y}) rotate(${r})`);
             g.setAttribute("data-x", x); g.setAttribute("data-y", y); g.setAttribute("data-r", r);
             
-            let currentW = DESK_W, currentH = DESK_H, hasChair = true, isSpecial = false;
+            let currentW = DESK_W, currentH = DESK_H, hasChair = true;
 
             if (student.niveau === 'PROF') { currentW = PROF_W; currentH = PROF_H; }
             else if (student.niveau === 'MEUBLE') { currentW = MEUBLE_W; currentH = MEUBLE_H; hasChair = false; }
-            else if (student.niveau === 'PORTE') { currentW = DOOR_W; currentH = DOOR_H; hasChair = false; isSpecial = true; }
-            else if (student.niveau === 'TABLEAU') { currentW = BOARD_W; currentH = BOARD_H; hasChair = false; isSpecial = true; }
+            else if (student.niveau === 'PORTE') { currentW = DOOR_W; currentH = DOOR_H; hasChair = false; }
+            else if (student.niveau === 'TABLEAU') { currentW = BOARD_W; currentH = BOARD_H; hasChair = false; }
 
             const color = couleurParNiveau[student.niveau] || couleurDefautBureau;
 
-            // Rectangle principal
             const rect = document.createElementNS(SVG_NS, "rect");
             rect.setAttribute("class", "desk-rect");
             rect.setAttribute("x", -currentW/2); rect.setAttribute("y", -currentH/2);
@@ -288,7 +320,6 @@
             rect.style.fill = color;
             g.appendChild(rect);
 
-            // Chaise
             if (hasChair) {
                 const chair = document.createElementNS(SVG_NS, "rect");
                 chair.setAttribute("class", "chair-rect");
@@ -297,7 +328,6 @@
                 g.appendChild(chair);
             }
 
-            // Label
             if (student.name) {
                 const text = document.createElementNS(SVG_NS, "text");
                 text.setAttribute("class", "desk-label");
@@ -312,6 +342,7 @@
             layer.appendChild(g);
         });
         setupInteract();
+        applyTransform();
     }
 
     function deselectAllManual() { document.querySelectorAll('.desk-group').forEach(el => el.classList.remove('selected')); selectedIndex = null; updateButtons(); }
@@ -335,10 +366,23 @@
                     target.setAttribute('data-x', x); target.setAttribute('data-y', y);
                 },
                 end(event) {
+                    if(isLocked) return;
                     const idx = event.target.id.split('-')[1];
                     studentData[idx].x = parseFloat(event.target.getAttribute('data-x'));
                     studentData[idx].y = parseFloat(event.target.getAttribute('data-y'));
                     localStorage.setItem('plan_vector_v1', JSON.stringify(studentData));
+                }
+            }
+        });
+
+        interact('#plan-svg').draggable({
+            listeners: {
+                move(event) {
+                    if (currentScale > 1) {
+                        translateX += event.dx;
+                        translateY += event.dy;
+                        applyTransform();
+                    }
                 }
             }
         });
@@ -353,17 +397,13 @@
     function toutEffacer() { pushHistory(); studentData = []; selectedIndex = null; sync(); fermerModale('modal-confirm'); }
     function toggleLock() { isLocked = !isLocked; document.getElementById('btn-mode').textContent = isLocked ? '🔒' : '🔓'; document.getElementById('btn-mode').style.background = isLocked ? 'var(--theme-color)' : 'rgba(128,128,128,0.1)'; document.getElementById('btn-mode').style.color = isLocked ? 'var(--contrast-color)' : 'inherit'; }
 
-    // Export / Import (inchangés mais inclus)
     function getExportFileName(ext) {
         const nomProf = (localStorage.getItem('nom_enseignant') || 'prof').toLowerCase().replace(/\s+/g, '_');
-        
         const d = new Date();
-        const dateStr = d.getFullYear() + 
-                        String(d.getMonth() + 1).padStart(2, '0') + 
-                        String(d.getDate()).padStart(2, '0');
-
+        const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
         return `outilsprofs_plan_classe_${nomProf}_${dateStr}.${ext}`;
     }
+    
     function exportPDF() { /* Logique jsPDF existante */ }
     function exporterPlan() { const blob = new Blob([JSON.stringify(studentData)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = getExportFileName('json'); a.click(); }
     function importerPlan() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = e => { const reader = new FileReader(); reader.onload = ev => { studentData = JSON.parse(ev.target.result); sync(); }; reader.readAsText(e.target.files[0]); }; inp.click(); }
