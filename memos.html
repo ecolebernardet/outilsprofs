@@ -73,10 +73,14 @@
         .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 1.5rem; width: 100%; max-width: 400px; border: 1px solid var(--border-color); position: relative; }
         .btns { display: flex; gap: 10px; margin-top: 20px; }
         
+        #modal-form { z-index: 1000; }
+        #modal-alerte { z-index: 1100; }
+        #modal-aide { z-index: 1200; }
+
         #form-title { color: var(--theme-color); }
 
         @keyframes pulse-orange {
@@ -96,25 +100,22 @@
             border-radius: 50%; margin-left: 4px; margin-right: 2px;
             box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
         }
-        
-        .reminder-indicator { font-size: 10px; margin-right: 5px; opacity: 0.8; }
-        
     </style>
 </head>
 <body>
 
     <button id="btnAddMemo" onclick="ouvrirFormulaire()" 
-        class="fixed bottom-20 right-20 w-20 h-20 rounded-full z-50 flex items-center justify-center text-4xl transition-all duration-200 active:scale-90 hover:scale-110" 
+        class="fixed bottom-10 right-10 w-16 h-16 rounded-full z-50 flex items-center justify-center text-2xl transition-all duration-200 active:scale-90 hover:scale-110" 
         style="background-color: var(--theme-color); color: white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);">
     ＋
-	</button>
+    </button>
 
     <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Mémos</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
                 <p class="text-xs leading-relaxed">
-                        • Enregistrez des notes avec couleurs et rappels 🔔.<br>
+                        • Enregistrez des notes avec différentes couleurs.<br>
                         • Réorganisez vos notes avec la poignée.<br>
                         • Cliquez sur un mémo pour modifier ou supprimer.<br>
                         <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Indique que vos données locales doivent être exportées pour sauvegarde.
@@ -138,15 +139,9 @@
     <div id="modal-form" class="modal-overlay" onclick="cancelEdit()">
         <div class="modal-content !max-w-[500px]" onclick="event.stopPropagation()">
             <h2 id="form-title" class="text-lg font-black uppercase mb-4 text-center">Nouveau Mémo</h2>
-            
             <textarea id="noteTitle" class="input-field resize-none h-[45px] mb-2" placeholder="Titre..."></textarea>
             <textarea id="noteInput" class="input-field mb-3 min-h-[100px] resize-none" placeholder="Saisir une note..." oninput="autoExpand(this)"></textarea>
             
-            <div class="mb-4 px-1">
-                <label class="block text-[9px] font-black uppercase mb-1 opacity-50 tracking-tighter">🔔 Rappel (optionnel)</label>
-                <input type="datetime-local" id="noteReminder" class="input-field py-2 text-[10px]">
-            </div>
-
             <div class="flex flex-col gap-4">
                 <div class="flex flex-wrap gap-2 justify-center" id="colorPicker">
                     <div class="color-dot active" style="background-color: #fef9c3;" data-color="#fef9c3"></div>
@@ -215,35 +210,10 @@
         let notes = JSON.parse(localStorage.getItem('myKeepNotes')) || [];
         let editingIndex = -1;
         let selectedColor = '#fef9c3';
-        let activeTimers = {};
-
-        function scheduleNotification(note, index) {
-            if (!note.reminder) return;
-            const targetTime = new Date(note.reminder).getTime();
-            const now = Date.now();
-            const delay = targetTime - now;
-            if (delay <= 0) return;
-
-            if (window.Android && typeof window.Android.setReminder === "function") {
-                window.Android.setReminder(targetTime, note.title || "Mémos", note.content, index);
-            } 
-
-            if (activeTimers[index]) clearTimeout(activeTimers[index]);
-            activeTimers[index] = setTimeout(() => {
-                if (Notification.permission === "granted") {
-                    new Notification("🔔 " + (note.title || "Mémos"), { body: note.content });
-                } else {
-                    alert("🔔 RAPPEL : " + (note.title || "") + "\n" + note.content);
-                }
-            }, delay);
-        }
 
         function deleteSelectedNote() {
             if(editingIndex === -1) return;
             afficherMessage("Supprimer ?", "Voulez-vous supprimer ce mémo ?", () => {
-                if (window.Android && typeof window.Android.cancelReminder === "function") {
-                    window.Android.cancelReminder(editingIndex);
-                }
                 notes.splice(editingIndex, 1);
                 cancelEdit();
                 updateExportBadge(true);
@@ -269,8 +239,7 @@
         function verifierBesoinExport() {
             const needsExport = localStorage.getItem('memos_needs_export') === 'true';
             const lastExport = localStorage.getItem('memos_last_export_date');
-            const septJours = 7 * 24 * 60 * 60 * 1000;
-            if (needsExport || !lastExport || (Date.now() - parseInt(lastExport) > septJours)) {
+            if (needsExport || !lastExport || (Date.now() - parseInt(lastExport) > 604800000)) {
                 updateExportBadge(true);
             }
         }
@@ -288,7 +257,6 @@
             [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-search-trigger'), document.getElementById('btnAction'), document.getElementById('btn-fermer-aide'), document.getElementById('btnAddMemo')].forEach(el => {
                 if(el) { el.style.backgroundColor = hexaTheme; el.style.color = contrast; }
             });
-            if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexaTheme;
             renderNotes();
         }
 
@@ -322,11 +290,9 @@
                     card.style.backgroundColor = finalColor;
                     card.onclick = (e) => { if (!e.target.closest('.drag-handle')) selectNote(index); };
                     
-                    const reminderIcon = note.reminder ? '<span class="reminder-indicator">🔔</span>' : '';
-                    
                     card.innerHTML = `
                         <div class="note-header">
-                            <div class="note-title">${reminderIcon}${note.title || ''}</div>
+                            <div class="note-title">${note.title || ''}</div>
                             <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                         </div>
                         <div class="note-card-content">${note.content}</div>`;
@@ -341,7 +307,6 @@
             document.getElementById('form-title').innerText = "Modifier le mémo";
             document.getElementById('noteTitle').value = note.title || '';
             document.getElementById('noteInput').value = note.content;
-            document.getElementById('noteReminder').value = note.reminder || '';
             selectedColor = note.color;
             
             document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
@@ -357,10 +322,9 @@
         function saveNote() {
             const title = document.getElementById('noteTitle').value.trim();
             const content = document.getElementById('noteInput').value.trim();
-            const reminder = document.getElementById('noteReminder').value;
             if(!content) return;
 
-            const noteObj = { title, content, color: selectedColor, reminder };
+            const noteObj = { title, content, color: selectedColor };
 
             if(editingIndex > -1) {
                 notes[editingIndex] = noteObj;
@@ -368,7 +332,6 @@
                 notes.unshift(noteObj);
             }
             
-            notes.forEach((n, i) => scheduleNotification(n, i));
             cancelEdit();
             updateExportBadge(true);
             saveAndRender();
@@ -378,7 +341,6 @@
             editingIndex = -1;
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteInput').value = '';
-            document.getElementById('noteReminder').value = '';
             document.getElementById('noteInput').style.height = '60px';
             document.getElementById('modal-form').style.display = 'none';
             renderNotes();
@@ -409,15 +371,11 @@
 
         function setupSortable() { 
             new Sortable(document.getElementById('notesGrid'), { 
-                handle: '.drag-handle', 
-                animation: 150, 
+                handle: '.drag-handle', animation: 150, 
                 onEnd: function(){ 
                     const n=[]; 
                     document.querySelectorAll('.note-card').forEach(c=>n.push(notes[c.dataset.index])); 
-                    notes=n; 
-                    updateExportBadge(true);
-                    notes.forEach((n, i) => scheduleNotification(n, i));
-                    saveAndRender(); 
+                    notes=n; updateExportBadge(true); saveAndRender(); 
                 } 
             }); 
         }
@@ -437,11 +395,7 @@
         
         function confirmResetAll() { 
             afficherMessage("Tout effacer ?", "Supprimer tous vos mémos ?", () => { 
-                notes=[]; 
-                Object.values(activeTimers).forEach(clearTimeout);
-                activeTimers = {};
-                updateExportBadge(true);
-                saveAndRender(); 
+                notes=[]; updateExportBadge(true); saveAndRender(); 
             }); 
         }
 
@@ -455,10 +409,7 @@
                     try {
                         const imported = JSON.parse(e.target.result);
                         if (Array.isArray(imported)) {
-                            const existingKeys = new Set(notes.map(n => (n.title || '') + '|' + n.content));
-                            const toAdd = imported.filter(n => !existingKeys.has((n.title || '') + '|' + n.content));
-                            notes = [...toAdd, ...notes];
-                            notes.forEach((n, i) => scheduleNotification(n, i));
+                            notes = [...imported, ...notes];
                             saveAndRender();
                         }
                     } catch(err) {}
@@ -485,16 +436,7 @@
         }
 
         window.onload = () => { 
-            appliquerTheme(); 
-            setupColorPickers(); 
-            setupSortable(); 
-            setupImport(); 
-            verifierBesoinExport();
-            
-            if ("Notification" in window && Notification.permission !== "granted") {
-                Notification.requestPermission();
-            }
-            notes.forEach((note, i) => scheduleNotification(note, i));
+            appliquerTheme(); setupColorPickers(); setupSortable(); setupImport(); verifierBesoinExport();
         };
     </script>
 </body>
