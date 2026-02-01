@@ -33,7 +33,12 @@
 
         .main-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
-        #container-retour-liste { width: 100%; max-width: 2000px; padding: 15px 20px 0 20px; text-align: left; z-index: 50; pointer-events: none; position: absolute; }
+        #container-retour-liste {
+            position: relative; /* Change de absolute à relative */
+            width: 100%;
+            pointer-events: auto;
+            display: block;
+        }
         #btn-retour-liste {
             pointer-events: auto;
             display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
@@ -42,13 +47,13 @@
         }
 
         #canvas-container {
-            flex: 0 1 auto; /* Prend seulement la place nécessaire */
+            flex: 1; /* Prend l'espace restant sans déborder */
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             background: var(--bg-page);
             overflow: hidden;
-            padding: 10px 10px 0 10px; /* Pas de padding en bas */
+            padding: 0 10px;
         }
 
         svg {
@@ -72,29 +77,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 12px;
-            padding: 10px 0;
-            z-index: 250;
-            /* Pas de position fixed ici pour qu'il suive le flux sous le canvas */
+            gap: 15px;
+            padding: 15px 0;
+            margin-bottom: calc(env(safe-area-inset-bottom) + 70px); /* Laisse la place pour la toolbar */
         }
 
         .toolbar {
             position: fixed; 
-            bottom: 0; /* On colle au bas de l'écran */
+            bottom: 0;
             left: 50%; 
             transform: translateX(-50%);
             background: var(--header-bg); 
-            width: 100%; /* Prend toute la largeur sur mobile pour plus de stabilité */
-            max-width: 700px; 
-            /* On ajoute le padding de sécurité système + un petit espace */
-            padding: 10px 10px calc(env(safe-area-inset-bottom) + 20px) 10px;
-            border-radius: 24px 24px 0 0; /* Arrondi seulement en haut */
-            border: 1px solid rgba(128,128,128,0.3);
+            width: 100%;
+            max-width: 600px; 
+            padding: 10px 10px calc(env(safe-area-inset-bottom) + 10px) 10px;
+            border-radius: 20px 20px 0 0;
+            border-top: 1px solid rgba(128,128,128,0.3);
             display: flex; 
             justify-content: space-around; 
-            gap: 4px; 
-            z-index: 300;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            z-index: 500; /* Toujours au-dessus de tout */
         }
 
         .btn-tool { flex: 1; height: 42px; border-radius: 12px; font-size: 18px; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); transition: all 0.2s; border: none; color: inherit; }
@@ -122,7 +123,7 @@
 </header>
 
 <div class="main-content">
-    <div id="container-retour-liste">
+    <div id="container-retour-liste" class="relative p-4 z-50">
         <a href="outils.html" id="btn-retour-liste">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
             Retour aux outils
