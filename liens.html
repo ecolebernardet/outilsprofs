@@ -15,6 +15,7 @@
             --card-bg: #1e1e1e; --input-bg: #2a2a2a; --input-text: #ffffff;
             --item-bg: #2a2a2a; --item-text-url: #a1a1aa; 
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --modal-overlay: rgba(0, 0, 0, 0.85);
         }
 
         body.light-mode {
@@ -22,6 +23,7 @@
             --column-border: #ddd; --header-bg: #ffffff; --card-bg: #ffffff;
             --input-bg: #f3f4f6; --input-text: #111827; --item-bg: #f3f4f6; 
             --item-text-url: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --modal-overlay: rgba(0, 0, 0, 0.6);
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
@@ -60,15 +62,28 @@
 
         .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.75rem; font-weight: 600; width: 100%; margin-bottom: 10px; color: var(--input-text); outline: none; }
         .cat-btn { flex: 1; padding: 10px 4px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--input-bg); color: var(--item-text-url); border: 1px solid var(--column-border); transition: all 0.2s; }
-        .cat-btn.active { background: #4b5563 !important; color: white !important; }
+        .cat-btn.active { background: #4b5563 !important; color: white !important; border-color: transparent !important; }
         .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
         
         .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        /* MODALES ET FORMULAIRE */
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: var(--modal-overlay); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; box-shadow: var(--shadow-custom); }
         
+        #form-container-modal { z-index: 900; }
+        #modal-aide, #modal-alerte { z-index: 1100; }
+
+        .fab-add {
+            position: fixed; bottom: 40px; right: 30px;
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 800; border: none; cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+        }
+        .fab-add:active { transform: scale(0.9); }
+
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
             50% { transform: scale(1.2); opacity: 1; }
@@ -87,18 +102,50 @@
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
 </script>
 
+<div id="form-container-modal" class="modal-overlay" onclick="fermerFormulaire()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="form-title" class="text-sm font-black uppercase mb-4 opacity-50">Nouveau Lien</h2>
+        <input type="text" id="linkName" class="input-field" placeholder="Nom du lien..." autocomplete="off">
+        <input type="text" id="linkUrl" class="input-field" placeholder="URL (ex: google.fr)" autocomplete="off">
+        <div class="flex gap-2 mb-6">
+            <button class="cat-btn active" data-value="École">École</button>
+            <button class="cat-btn" data-value="Institutionnel">Inst.</button>
+            <button class="cat-btn" data-value="Ressources">Ress.</button>
+            <button class="cat-btn" data-value="Autres">Autres</button>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="fermerFormulaire()" class="flex-1 py-3 rounded-xl bg-neutral-500/10 text-[10px] font-black uppercase">Annuler</button>
+            <button id="mainAddBtn" onclick="addLink()" class="flex-[2] btn-add transition-transform">Ajouter</button>
+        </div>
+    </div>
+</div>
+
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Liens</h2>
-        <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
-            <p>Accès rapide à vos sites favoris rangés par rubriques.<br>
-                        • Cliquez sur la poignée pour réorganiser les liens et les catégories.<br>
-                        • Cliquez sur le crayon pour modifier un lien.<br>
-                        • Cliquez sur la poubelle pour supprimer un lien.
-            <br><br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde.
-            </p>
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Mes Liens</h2>
+        
+        <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
+            <div>
+                <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Organisation</p>
+                <ul class="space-y-1">
+                    <li>• <b>Ajouter :</b> Utilisez le bouton <span class="font-bold">+</span> en bas à droite.</li>
+                    <li>• <b>Trier :</b> Maintenez les <span class="opacity-50 text-xs">⠿</span> pour déplacer un lien ou une catégorie.</li>
+                    <li>• <b>Actions :</b> Cliquez sur ✏️ pour modifier ou 🗑️ pour supprimer.</li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Sauvegarde</p>
+                <p>Vos liens sont stockés sur cet appareil. Pensez à <b>Exporter</b> régulièrement votre liste pour ne pas la perdre en cas de changement de navigateur.</p>
+            </div>
+
+            <div class="bg-neutral-500/5 p-3 rounded-lg border border-neutral-500/10">
+                <p><strong>Alerte <span class="mini-pastille"></span> :</strong></p>
+                <p class="mt-1">Si cette pastille clignote sur l'export, vos dernières modifications n'ont pas encore été sauvegardées dans un fichier .txt.</p>
+            </div>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform">Fermer</button>
+
+        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
     </div>
 </div>
 
@@ -124,18 +171,6 @@
 </header>
 
 <div class="main-wrapper">
-    <div class="light-card">
-        <input type="text" id="linkName" class="input-field" placeholder="Nom du lien..." autocomplete="off">
-        <input type="text" id="linkUrl" class="input-field" placeholder="URL (ex: google.fr)" autocomplete="off">
-        <div class="flex gap-2 mb-4">
-            <button class="cat-btn active" data-value="École">École</button>
-            <button class="cat-btn" data-value="Institutionnel">Institutionnel</button>
-            <button class="cat-btn" data-value="Ressources">Ressources</button>
-            <button class="cat-btn" data-value="Autres">Autres</button>
-        </div>
-        <button id="mainAddBtn" onclick="addLink()" class="btn-add transition-transform">Ajouter</button>
-    </div>
-
     <div id="categoriesContainer"></div>
 
     <footer class="bottom-nav">
@@ -150,6 +185,12 @@
         <button onclick="resetLinks()" class="nav-btn bg-red-500 text-white shadow-lg">⚠️ effacer tous les liens</button>
     </footer>
 </div>
+
+<button id="fab-plus" onclick="ouvrirFormulaire()" class="fab-add">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+    </svg>
+</button>
 
 <script>
     let catOrder = JSON.parse(localStorage.getItem('eduCatOrder')) || ["École", "Institutionnel", "Ressources", "Autres"];
@@ -217,8 +258,8 @@
                                 <span class="link-url">${link.url}</span>
                             </div>
                             <div class="link-actions">
-                                <div class="btn-action" onclick="editLink(${link.id})">✏️</div>
-                                <div class="btn-action" onclick="deleteLink(${link.id})">🗑️</div>
+                                <div class="btn-action" onclick="event.stopPropagation(); editLink(${link.id})">✏️</div>
+                                <div class="btn-action" onclick="event.stopPropagation(); deleteLink(${link.id})">🗑️</div>
                             </div>
                         </div>
                     `).join('')}
@@ -261,6 +302,21 @@
         });
     }
 
+    function ouvrirFormulaire() {
+        document.getElementById('form-container-modal').style.display = 'flex';
+        document.getElementById('form-title').innerText = editingLinkId ? "Modifier le lien" : "Nouveau Lien";
+    }
+
+    function fermerFormulaire() {
+        document.getElementById('form-container-modal').style.display = 'none';
+        if (editingLinkId) {
+            editingLinkId = null;
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('mainAddBtn').innerText = "Ajouter";
+        }
+    }
+
     function addLink() {
         const name = document.getElementById('linkName').value.trim();
         const urlInput = document.getElementById('linkUrl').value.trim();
@@ -278,6 +334,7 @@
             document.getElementById('linkName').value = '';
             document.getElementById('linkUrl').value = '';
             updateExportBadge(true);
+            fermerFormulaire();
             render();
         }
     }
@@ -291,7 +348,7 @@
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat));
             editingLinkId = id;
             document.getElementById('mainAddBtn').innerText = "Mettre à jour";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            ouvrirFormulaire();
         }
     }
 
@@ -365,7 +422,7 @@
         const hexa = mapCouleurs[colPref];
         const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
         const contrast = isDark ? '#000' : '#fff';
-        [document.getElementById('mainAddBtn'), document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => {
+        [document.getElementById('mainAddBtn'), document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('fab-plus')].forEach(el => {
             if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
         });
         if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
