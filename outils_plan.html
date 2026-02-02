@@ -47,14 +47,14 @@
         }
 
         #canvas-container {
-            flex: 1; /* Prend l'espace restant sans déborder */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg-page);
-            overflow: hidden;
-            padding: 0 10px;
-        }
+			flex: 1;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: var(--bg-page);
+			overflow: hidden;
+			padding: 0; /* Suppression du padding pour maximiser l'espace */
+		}
 
         svg {
             height: 100%;
@@ -74,35 +74,47 @@
 
         /* Nouveaux styles pour les contrôles de zoom sous le plan */
         #zoom-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 0;
-            margin-bottom: calc(env(safe-area-inset-bottom) + 70px); /* Laisse la place pour la toolbar */
-        }
+			display: flex;
+			flex-direction: column; /* Boutons l'un au-dessus de l'autre pour plus de discrétion */
+			gap: 10px;
+			padding: 0;
+			position: absolute;
+			right: 20px;
+			bottom: calc(env(safe-area-inset-bottom) + 100px); /* Juste au-dessus de la toolbar */
+			z-index: 50;
+			margin-bottom: 0;
+		}
 
         .toolbar {
-            position: fixed; 
-            bottom: 0;
-            left: 50%; 
-            transform: translateX(-50%);
-            background: var(--header-bg); 
-            width: 100%;
-            max-width: 600px; 
-            padding: 10px 10px calc(env(safe-area-inset-bottom) + 10px) 10px;
-            border-radius: 20px 20px 0 0;
-            border-top: 1px solid rgba(128,128,128,0.3);
-            display: flex; 
-            justify-content: space-around; 
-            z-index: 500; /* Toujours au-dessus de tout */
-        }
+			position: fixed; 
+			bottom: 0;
+			left: 50%; 
+			transform: translateX(-50%);
+			background: var(--header-bg); 
+			width: 100%;
+			max-width: 600px; 
+			/* Augmentation du padding pour décoller de la zone de navigation Android */
+			padding: 12px 10px calc(env(safe-area-inset-bottom) + 15px) 10px;
+			border-radius: 20px 20px 0 0;
+			border-top: 1px solid rgba(128,128,128,0.3);
+			display: flex; 
+			justify-content: space-around; 
+			z-index: 9999; /* Priorité maximale pour passer au-dessus du reste */
+			pointer-events: auto; /* Force la réactivité aux clics */
+			touch-action: manipulation; /* Supprime le délai de clic sur mobile */
+		}
 
         .btn-tool { flex: 1; height: 42px; border-radius: 12px; font-size: 18px; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); transition: all 0.2s; border: none; color: inherit; }
         .btn-tool:disabled { opacity: 0.15; pointer-events: none; }
         
-        #add-menu { transition: all 0.2s ease-out; }
-        #add-menu.hidden { display: none; opacity: 0; transform: translate(-50%, 20px); }
+        #add-menu { 
+			transition: all 0.2s ease-out; 
+			z-index: 9998; 
+		}
+		#add-menu.hidden { 
+			display: none !important; /* Force la disparition totale pour libérer l'espace tactile */
+			pointer-events: none; 
+		}
         #add-menu button:active { transform: scale(0.9); }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
@@ -138,7 +150,7 @@
 
     <div id="zoom-controls">
         <button onclick="changeZoom(-0.2)" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-xl font-bold flex items-center justify-center">－</button>
-        <button onclick="resetZoom()" class="px-6 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-[10px] font-black flex items-center justify-center uppercase">Reset 1:1</button>
+        <button onclick="resetZoom()" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-[12px] font-black flex items-center justify-center">1:1</button>
         <button onclick="changeZoom(0.2)" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-xl font-bold flex items-center justify-center">＋</button>
     </div>
 </div>
@@ -425,16 +437,20 @@
 
         // Déplacement panoramique (accelerated)
         interact('#plan-svg').draggable({
-            listeners: {
-                move(event) {
-                    if (currentScale > 1) {
-                        translateX += event.dx * SPEED_MULTIPLIER;
-                        translateY += event.dy * SPEED_MULTIPLIER;
-                        applyTransform();
-                    }
-                }
+    listeners: {
+        move(event) {
+            if (currentScale > 1) {
+                // Empêche le défilement de la page pendant qu'on bouge le plan
+                event.preventDefault(); 
+                translateX += event.dx * SPEED_MULTIPLIER;
+                translateY += event.dy * SPEED_MULTIPLIER;
+                applyTransform();
             }
-        });
+        }
+    },
+    // Empêche l'interaction de capturer les clics hors de la zone du plan
+    allowFrom: '#plan-svg' 
+});
     }
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
@@ -446,17 +462,144 @@
     function toutEffacer() { pushHistory(); studentData = []; selectedIndex = null; sync(); fermerModale('modal-confirm'); }
     function toggleLock() { isLocked = !isLocked; document.getElementById('btn-mode').textContent = isLocked ? '🔒' : '🔓'; document.getElementById('btn-mode').style.background = isLocked ? 'var(--theme-color)' : 'rgba(128,128,128,0.1)'; document.getElementById('btn-mode').style.color = isLocked ? 'var(--contrast-color)' : 'inherit'; }
 
+    /* --- REMPLACEZ TOUTE LA FIN DE VOTRE SCRIPT (à partir de exporterPlan) PAR CECI --- */
+
     function getExportFileName(ext) {
         const nomProf = (localStorage.getItem('nom_enseignant') || 'prof').toLowerCase().replace(/\s+/g, '_');
         const d = new Date();
         const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
         return `outilsprofs_plan_classe_${nomProf}_${dateStr}.${ext}`;
     }
-    
-    function exportPDF() { /* Logique jsPDF */ }
-    function exporterPlan() { const blob = new Blob([JSON.stringify(studentData)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = getExportFileName('json'); a.click(); }
-    function importerPlan() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = e => { const reader = new FileReader(); reader.onload = ev => { studentData = JSON.parse(ev.target.result); sync(); }; reader.readAsText(e.target.files[0]); }; inp.click(); }
-    function genererTablesDepuisClasse() { const list = JSON.parse(localStorage.getItem('maListeEleves') || "[]"); if(list.length) { pushHistory(); studentData = list.map((el, i) => ({ name: el.identite.split(' ')[0], niveau: el.niveau, x: 220 + ((i % 5) * 260), y: 200 + (Math.floor(i / 5) * 240), r: 0 })); sync(); } }
+
+    function exporterPlan() {
+        const fileName = getExportFileName('json');
+        const content = JSON.stringify(studentData);
+
+        if (window.Android && window.Android.savePdfFromBase64) {
+            // Encodage Base64 sécurisé pour Android
+            const base64Content = btoa(unescape(encodeURIComponent(content)));
+            window.Android.savePdfFromBase64(base64Content, fileName);
+        } else {
+            // Mode navigateur classique
+            const blob = new Blob([content], {type: "application/json"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+        }
+    }
+
+    async function exportPDF() {
+    try {
+        const fileName = getExportFileName('pdf');
+        if (!window.jspdf || !window.jspdf.jsPDF) return;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("PLAN DE CLASSE", 105, 15, { align: 'center' });
+
+        const svgElement = document.getElementById('plan-svg');
+        const svgClone = svgElement.cloneNode(true);
+        
+        // --- ADAPTATION DYNAMIQUE DE LA TAILLE DU TEXTE ---
+        const groups = svgClone.querySelectorAll('.desk-group');
+        groups.forEach((group) => {
+            const label = group.querySelector('.desk-label');
+            const rect = group.querySelector('.desk-rect');
+            
+            if (label && rect) {
+                const rectWidth = parseFloat(rect.getAttribute('width'));
+                const studentName = label.textContent || "";
+                
+                // 1. Calcul de la taille de police
+                let fontSize = Math.min(30, rectWidth / (studentName.length * 0.65));
+                if (fontSize < 16) fontSize = 16;
+
+                // 2. FORCER LE CENTRAGE ABSOLU
+                // text-anchor: middle -> centre horizontalement le texte sur son point X
+                // dominant-baseline: central -> centre verticalement le texte sur son point Y
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('dominant-baseline', 'central');
+                
+                // On s'assure que x et y sont bien à 0 (centre du groupe translate)
+                label.setAttribute('x', '0');
+                label.setAttribute('y', '0');
+
+                label.setAttribute('style', `font-size: ${fontSize}px; font-weight: bold; font-family: Arial, sans-serif;`);
+            }
+        });
+
+        const svgData = new XMLSerializer().serializeToString(svgClone);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        canvas.width = 1800;
+        canvas.height = 1800;
+
+        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = function() {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            doc.addImage(imgData, 'JPEG', 10, 25, 190, 190);
+            
+            if (window.Android && window.Android.savePdfFromBase64) {
+                const base64String = doc.output('datauristring').split(',')[1];
+                window.Android.savePdfFromBase64(base64String, fileName);
+            } else {
+                doc.save(fileName);
+            }
+            URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+
+    } catch (error) {
+        alert("Erreur PDF : " + error.message);
+    }
+}
+
+    function importerPlan() { 
+        const inp = document.createElement('input'); 
+        inp.type = 'file'; 
+        inp.accept = '.json'; 
+        inp.onchange = e => { 
+            const reader = new FileReader(); 
+            reader.onload = ev => { 
+                try {
+                    studentData = JSON.parse(ev.target.result); 
+                    sync(); 
+                } catch(err) {
+                    alert("Erreur lors de la lecture du fichier.");
+                }
+            }; 
+            reader.readAsText(e.target.files[0]); 
+        }; 
+        inp.click(); 
+    }
+
+    function genererTablesDepuisClasse() { 
+        const list = JSON.parse(localStorage.getItem('maListeEleves') || "[]"); 
+        if(list.length) { 
+            pushHistory(); 
+            studentData = list.map((el, i) => ({ 
+                name: el.identite.split(' ')[0], 
+                niveau: el.niveau, 
+                x: 220 + ((i % 5) * 260), 
+                y: 200 + (Math.floor(i / 5) * 240), 
+                r: 0 
+            })); 
+            sync(); 
+        } 
+    }
 
     appliquerCouleursDynamiques();
     drawPlan();
