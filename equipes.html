@@ -53,7 +53,44 @@
         }
 
         .section-title { font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
-        #attendance-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 10px; }
+        #attendance-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px; }
+		/* --- MODIFICATIONS POUR ÉCRANS LARGES (PC) --- */
+		@media (min-width: 768px) {
+			/* Élargir les conteneurs */
+			#attendance-container, .grid-teams { 
+				max-width: 95% !important; 
+			}
+
+			/* Grille de présence : 8 colonnes et prénoms plus gros */
+			.attendance-grid { 
+				grid-template-columns: repeat(10, 1fr) !important; 
+				gap: 10px !important;
+			}
+			.student-item {
+				font-size: 0.9rem !important; /* Prénoms beaucoup plus grands */
+				padding: 12px 5px !important;
+			}
+
+			/* Équipes : 4 colonnes sur PC */
+			.grid-teams { 
+				grid-template-columns: repeat(4, 1fr) !important; 
+			}
+
+			/* Prénoms à l'intérieur des cartes d'équipes */
+			.team-card .flex.items-center {
+				font-size: 0.95rem !important; /* Taille augmentée */
+				margin-bottom: 8px !important;
+			}
+    
+			.tag {
+				font-size: 0.65rem !important;
+				padding: 4px 10px !important;
+			}
+    
+			.team-title {
+				font-size: 0.85rem !important;
+			}
+		}
         .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; width: 100%; }
         .level-label { text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -82,7 +119,13 @@
         .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; }
         .generate-btn { width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
         
-        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; margin: 0 auto; padding: 0 10px; }
+        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px; }
+		@media (min-width: 1024px) {
+			.grid-teams { 
+				grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur grands écrans */
+			}
+		}
+
         .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid var(--header-border); }
         .team-header { border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px; }
         .team-title { font-weight: 900; font-size: 0.65rem; color: var(--text); text-transform: uppercase; }
