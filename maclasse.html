@@ -194,21 +194,21 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="aide-titre" class="text-lg font-black uppercase mb-4">💡 Ma classe</h2>
             <div class="text-[11px] leading-relaxed space-y-2 opacity-80">
-                <strong>Onglet "Enregistrement" :</strong>
-                <br>• <strong>Saisissez</strong> votre nom dans le formulaire "Nom de l'enseignant"
-                <br>• <strong>Enregistrez</strong> vos élèves en ajoutant le prénom, le nom, la date de naissance (optionnel). Choisissez le genre et le niveau, puis enregistrez.
-                <br>• <strong>Import/Export :</strong> Utilisez ces boutons pour sauvegarder votre liste sur votre appareil ou la transférer vers un autre appareil au format <em>Prénom;NOM;genre;niveau</em>.
-                <br><br><strong>La liste générée sera utilisée dans les autres rubriques de l'application.</strong></li>
-                <br>
-                <br>
-                <strong>Onglet "Édition" :</strong>
-                <br>• <strong>Générez</strong> votre liste de classe en PDF après avoir décidé de ranger les élèves par prénoms ou par noms.
-                <br>• <strong>Générez</strong> une liste de pointage avc 15 cases par élève.
-                <br>• <strong>Générez</strong> des étiquettes au nom les élèves.
-                <br>• <strong>Générez</strong> des fiches de suivi pour vos élèves.
-                <br>
-                <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".
-            </div>
+    <strong>Onglet "Enregistrement" :</strong>
+    <br>• <strong>Nom de l'enseignant :</strong> Saisissez votre nom et validez avec "OK" pour personnaliser vos documents.
+    <br>• <strong>Ajouter un élève :</strong> Cliquez sur le bouton <span class="font-bold text-orange-500">+</span> en bas à droite pour ouvrir le formulaire.
+	<br>• <strong>Saisie :</strong> Renseignez l'identité, le genre et le niveau de l'élève, puis enregistrez. La date de naissance est optionnelle.
+	<br>• <strong>Modifier un élève :</strong> Cliquez sur le nom de l'élève pour ouvrir le formulaire et modifier les informations le concernant.
+    <br>• <strong>Import/Export :</strong> Sauvegardez votre liste sur votre appareil ou transférez-la au format <em>.txt</em> (Prénom;NOM;genre;niveau).
+    <br><br><strong>La liste générée sera utilisée dans toutes les autres rubriques de l'application.</strong>
+    <br>
+    <br>
+    <strong>Onglet "Édition" :</strong>
+    <br>• <strong>Générez</strong> vos listes (PDF ou pointage), vos étiquettes ou vos fiches de suivi individuel en un clic.
+    <br>• <strong>Tri :</strong> Pensez à choisir le tri (par Nom ou Prénom) dans l'onglet Enregistrement avant de générer vos documents.
+    <br>
+    <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton d'exportation, vos données locales ont été modifiées depuis votre dernier export. Cliquez sur "👆 exporter.txt 👆" pour sécuriser votre liste.
+</div>
             <button id="btn-fermer-aide" onclick="fermerAide()" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Fermer</button>
         </div>
     </div>
@@ -229,164 +229,159 @@
 
 
 <div class="max-w-4xl mx-auto p-0 mt-2">
-        <div id="tab-classe" class="tab-content active">
-            <div id="profil-container" class="max-w-md mx-auto light-card p-3 mb-4 border-dotted border-2" style="border-color: var(--header-border)">
-                <div class="flex flex-col gap-0">
-                    <label class="text-[9px] font-black uppercase opacity-60 ml-1">Nom de l'enseignant :</label>
-                    <div class="flex gap-2 items-center">
-                        <input type="text" id="nomEnseignant" placeholder="ex: M. PROF" class="input-field flex-grow border-none shadow-inner" style="background: rgba(0,0,0,0.05)">
-                        <button id="btn-save-nom" onclick="sauvegarderNomEnseignant()" class="h-[30px] px-3 rounded-lg text-[10px] font-black uppercase transition-transform active:scale-90">OK</button>
-                    </div>
-                </div>
-            </div>
-		
-            
-               
-                <button id="fab-plus" class="fab-add" onclick="ouvrirFormulaire()">+</button>
-
-<div id="modal-form" onclick="fermerFormulaire(event)">
-    
-    <div class="modal-content-form" onclick="event.stopPropagation()">
+    <div id="tab-classe" class="tab-content active">
         
-        <div class="flex justify-between items-center mb-6">
-            <h2 id="form-title" class="text-sm font-black uppercase tracking-widest" style="color:var(--text-main)">Élève</h2>
-            <button onclick="document.getElementById('modal-form').style.display='none'" class="text-3xl" style="color:var(--sub-text)">&times;</button>
+        <div id="profil-container" class="max-w-md mx-auto light-card p-3 mb-4 border-dotted border-2" style="border-color: var(--header-border)">
+            <div class="flex flex-col gap-0">
+                <label class="text-[9px] font-black uppercase opacity-60 ml-1">Nom de l'enseignant :</label>
+                <div class="flex gap-2 items-center">
+                    <input type="text" id="nomEnseignant" placeholder="ex: M. PROF" class="input-field flex-grow border-none shadow-inner" style="background: rgba(0,0,0,0.05)">
+                    <button id="btn-save-nom" onclick="sauvegarderNomEnseignant()" class="h-[30px] px-3 rounded-lg text-[10px] font-black uppercase transition-transform active:scale-90">OK</button>
+                </div>
+            </div>
         </div>
-
-        <form id="eleveForm" class="space-y-4">
-    <input type="hidden" id="edit-id">
     
-    <div class="flex flex-col gap-1">
-        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Identité de l'élève :</label>
-        <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field" required>
-    </div>
+		<button id="fab-plus" onclick="ouvrirFormulaire()" 
+			class="fixed bottom-10 right-10 w-16 h-16 rounded-full z-50 flex items-center justify-center transition-all duration-200 active:scale-90 hover:scale-110 shadow-2xl border-none cursor-pointer" 
+			style="background-color: var(--theme-color); color: white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);">
+    
+			<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+			</svg>
+		</button>
 
-    <div class="flex flex-col gap-1">
-        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Date de naissance (optionnel) :</label>
-        <div class="grid grid-cols-3 gap-2">
-            <select id="birth-day" class="select-date"></select>
-            <select id="birth-month" class="select-date"></select>
-            <select id="birth-year" class="select-date"></select>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1">
-            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Genre :</label>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <input type="radio" name="sexe" value="G" id="sexeG" class="card-input input-garcon" checked>
-                    <label for="sexeG" class="card-label">Garçon</label>
+        <div id="modal-form" onclick="fermerFormulaire(event)">
+            <div class="modal-content-form" onclick="event.stopPropagation()">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="form-title" class="text-sm font-black uppercase tracking-widest" style="color:var(--text-main)">Élève</h2>
+                    <button onclick="document.getElementById('modal-form').style.display='none'" class="text-3xl" style="color:var(--sub-text)">&times;</button>
                 </div>
-                <div>
-                    <input type="radio" name="sexe" value="F" id="sexeF" class="card-input input-fille">
-                    <label for="sexeF" class="card-label">Fille</label>
-                </div>
-            </div>
-        </div>
-        <div class="flex flex-col gap-1">
-            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Niveau :</label>
-            <div class="relative">
-                <select id="niveauSelect" class="input-field w-full appearance-none pr-8">
-                    <option value="CP">CP</option>
-                    <option value="CE1">CE1</option>
-                    <option value="CE2">CE2</option>
-                    <option value="CM1">CM1</option>
-                    <option value="CM2">CM2</option>
-                    <option value="AUTRE">AUTRE</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none opacity-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <button type="submit" id="btn-submit" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-2">Enregistrer</button>
-</form>
-        
-    </div>
-</div>
-            </div>
-
-            <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
-
-            <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center p-1 rounded-xl border border-white/10" style="background: var(--card-bg);">
-                <div class="flex items-center gap-3">
-                    <span class="text-[9px] font-black uppercase opacity-60">Trier par :</span>
-                    <div class="flex gap-2">
-                        <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Prénom</button>
-                        <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Nom</button>
+                <form id="eleveForm" class="space-y-4">
+                    <input type="hidden" id="edit-id">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Identité de l'élève :</label>
+                        <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field" required>
                     </div>
-                </div>
-            </div>
-
-            <div id="listeContainer"></div>
-
-            <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
-                <div class="grid grid-cols-2 gap-2"> 
-                    <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
-                    <button id="btn-exporter-txt" onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
-                    <input type="file" id="fileInput" class="hidden" accept=".txt">
-                </div>
-                <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Date de naissance (optionnel) :</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <select id="birth-day" class="select-date"></select>
+                            <select id="birth-month" class="select-date"></select>
+                            <select id="birth-year" class="select-date"></select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Genre :</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <input type="radio" name="sexe" value="G" id="sexeG" class="card-input input-garcon" checked>
+                                    <label for="sexeG" class="card-label">Garçon</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="sexe" value="F" id="sexeF" class="card-input input-fille">
+                                    <label for="sexeF" class="card-label">Fille</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Niveau :</label>
+                            <div class="relative">
+                                <select id="niveauSelect" class="input-field w-full appearance-none pr-8">
+                                    <option value="CP">CP</option>
+                                    <option value="CE1">CE1</option>
+                                    <option value="CE2">CE2</option>
+                                    <option value="CM1">CM1</option>
+                                    <option value="CM2">CM2</option>
+                                    <option value="AUTRE">AUTRE</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none opacity-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-submit" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-2">Enregistrer</button>
+                </form>
             </div>
         </div>
 
-        <div id="tab-editeur" class="tab-content">
-            <div class="max-w-md mx-auto flex flex-col gap-4">
-                <button onclick="genererPDF()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
-                    <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mr-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.707.293V21z" /></svg>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs font-black uppercase" style="color: var(--text-main);">Liste de classe</div>
-                        <div class="text-[10px] opacity-60" style="color: var(--text-main);">Format tableau classique A4</div>
-                    </div>
-                </button>
+        <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
 
-                <button onclick="genererEmargement()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs font-black uppercase" style="color: var(--text-main);">Feuille de pointage</div>
-                        <div class="text-[10px] opacity-60" style="color: var(--text-main);">Grille avec 15 cases de suivi</div>
-                    </div>
-                </button>
-
-                <button onclick="genererEtiquettes()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
-                    <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mr-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01" /></svg>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs font-black uppercase" style="color: var(--text-main);">Grandes Étiquettes</div>
-                        <div class="text-[10px] opacity-60" style="color: var(--text-main);">8 étiquettes par page A4</div>
-                    </div>
-                </button>
-
-                <button onclick="genererPetitesEtiquettes()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
-                    <div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mr-4 group-hover:bg-rose-500 group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs font-black uppercase" style="color: var(--text-main);">Petites Étiquettes</div>
-                        <div class="text-[10px] opacity-60" style="color: var(--text-main);">27 étiquettes par page (Format 3x9)</div>
-                    </div>
-                </button>
-
-                <button onclick="genererSuiviIndividuel()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
-                    <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs font-black uppercase" style="color: var(--text-main);">Fiches de suivi</div>
-                        <div class="text-[10px] opacity-60" style="color: var(--text-main);">2 fiches A5 par page (Paysage)</div>
-                    </div>
-                </button>
+        <div id="sort-controls" class="max-w-md mx-auto mb-5 flex justify-center items-center p-1 rounded-xl border border-white/10" style="background: var(--card-bg);">
+            <div class="flex items-center gap-3">
+                <span class="text-[9px] font-black uppercase opacity-60">Trier par :</span>
+                <div class="flex gap-2">
+                    <button onclick="changerTriApp('prenom')" id="sort-prenom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Prénom</button>
+                    <button onclick="changerTriApp('nom')" id="sort-nom" class="text-[9px] font-black uppercase px-3 py-0.5 rounded-lg border border-white/10">Nom</button>
+                </div>
             </div>
         </div>
-    </div>
+
+        <div id="listeContainer"></div>
+
+        <div class="max-w-md mx-auto flex flex-col gap-3 mt-6 mb-10">
+            <div class="grid grid-cols-2 gap-2"> 
+                <button onclick="importerListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👇 importer .txt 👇</button>
+                <button id="btn-exporter-txt" onclick="exporterListe()" class="btn-nav bg-neutral-800 text-white shadow-md">👆 exporter.txt 👆</button>
+                <input type="file" id="fileInput" class="hidden" accept=".txt">
+            </div>
+            <button onclick="toutEffacer()" class="btn-nav bg-red-500 text-red-100 shadow-md">⚠️ effacer la liste</button>
+        </div>
+    </div> <div id="tab-editeur" class="tab-content">
+        <div class="max-w-md mx-auto flex flex-col gap-4 mt-4">
+            <button onclick="genererPDF()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
+                <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mr-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.707.293V21z" /></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-xs font-black uppercase" style="color: var(--text-main);">Liste de classe</div>
+                    <div class="text-[10px] opacity-60" style="color: var(--text-main);">Format tableau classique A4</div>
+                </div>
+            </button>
+
+            <button onclick="genererEmargement()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-xs font-black uppercase" style="color: var(--text-main);">Feuille de pointage</div>
+                    <div class="text-[10px] opacity-60" style="color: var(--text-main);">Grille avec 15 cases de suivi</div>
+                </div>
+            </button>
+
+            <button onclick="genererEtiquettes()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
+                <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mr-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01" /></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-xs font-black uppercase" style="color: var(--text-main);">Grandes Étiquettes</div>
+                    <div class="text-[10px] opacity-60" style="color: var(--text-main);">8 étiquettes par page A4</div>
+                </div>
+            </button>
+
+            <button onclick="genererPetitesEtiquettes()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
+                <div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mr-4 group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-xs font-black uppercase" style="color: var(--text-main);">Petites Étiquettes</div>
+                    <div class="text-[10px] opacity-60" style="color: var(--text-main);">27 étiquettes par page (Format 3x9)</div>
+                </div>
+            </button>
+
+            <button onclick="genererSuiviIndividuel()" class="group flex items-center p-4 rounded-2xl shadow-sm border active:scale-95 transition-all" style="background: var(--card-bg); border-color: var(--header-border);">
+                <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 mr-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-xs font-black uppercase" style="color: var(--text-main);">Fiches de suivi</div>
+                    <div class="text-[10px] opacity-60" style="color: var(--text-main);">2 fiches A5 par page (Paysage)</div>
+                </div>
+            </button>
+        </div>
+    </div> </div>
 
     <script>
         const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
@@ -399,12 +394,21 @@
         let modeTriApp = localStorage.getItem('tri_eleves_app') || 'prenom';
         let eleves = JSON.parse(localStorage.getItem('maListeEleves')) || [];
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.getElementById('tab-btn-' + tab).classList.add('active');
-        }
+        function switchTab(tabId) {
+			// Masquer tous les contenus
+			document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+			document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+			// Afficher l'onglet sélectionné
+			document.getElementById('tab-' + tabId).classList.add('active');
+			document.getElementById('tab-btn-' + tabId).classList.add('active');
+
+			// Cacher ou afficher le bouton flottant selon l'onglet
+			const fab = document.getElementById('fab-plus');
+			if (fab) {
+				fab.style.display = (tabId === 'classe') ? 'flex' : 'none';
+			}
+		}
 
         function sauvegarderNomEnseignant() {
             const nom = document.getElementById('nomEnseignant').value;
