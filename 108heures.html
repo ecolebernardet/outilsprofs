@@ -201,15 +201,30 @@
 
     <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="aide-label" class="text-lg font-black uppercase mb-4">💡️ 108 heures</h2>
-            <div class="text-[11px] leading-relaxed space-y-2 opacity-80 mb-6">
-                <p>• <b>Réglez</b> votre quotité de travail.</p>
-                <p>• <b>Saisie :</b> Cliquez sur le bouton <b>+</b> en bas à droite.</p>
-                <p>• <b>Modification :</b> Cliquez sur une réunion dans les détails pour l'éditer.</p>
-                <p>• <b>Export :</b> Sauvegardez régulièrement vos données en .txt.</p>
-                <br><strong>Pastille <span class="mini-pastille"></span> :</strong> Indique que vos données ne sont pas synchronisées avec votre dernier export.
+            <h2 id="aide-label" class="text-lg font-black uppercase mb-4">💡 Gestion des 108h</h2>
+            
+            <div class="text-[11px] leading-relaxed space-y-4 opacity-90 mb-6">
+                <div>
+                    <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Saisie des heures</p>
+                    <ul class="space-y-1">
+                        <li>• <b>Ajouter :</b> Cliquez sur le bouton <span class="font-bold">+</span> pour enregistrer une séance.</li>
+                        <li>• <b>Types :</b> Ventilez vos heures entre l'APC, les réunions, la formation et les conseils.</li>
+                        <li>• <b>Modification :</b> Cliquez sur une réunion dans les détails pour l'éditer ou la supprimer.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Suivi & Compteurs</p>
+                    <p>Le tableau de bord calcule automatiquement votre <b>solde restant</b> en fonction de votre quotité. Les barres de progression indiquent votre avancement annuel.</p>
+                </div>
+
+                <div class="bg-neutral-500/5 p-3 rounded-lg border border-neutral-500/10">
+                    <p><strong>Alerte <span class="mini-pastille"></span> :</strong></p>
+                    <p class="mt-1">Cette pastille indique que vos saisies actuelles ne sont pas encore sécurisées dans un fichier d'export .txt.</p>
+                </div>
             </div>
-            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-3 rounded-xl text-[10px] font-black uppercase">Fermer</button>
+
+            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
         </div>
     </div>
 
@@ -272,7 +287,7 @@
         <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg text-lg">💡</button>
     </header>
 
-    <div id="app-ui" class="max-w-md mx-auto p-2 mt-4"> 
+    <div id="app-ui" class="max-w-md lg:max-w-6xl mx-auto p-2 mt-4">
 
         <div class="light-card p-4 mb-4">
             <p class="field-label">Ma quotité de travail</p>
@@ -296,7 +311,7 @@
             </div>
         </div>
 
-        <div id="displayContainer" class="grid grid-cols-2 gap-3 items-start"></div>
+        <div id="displayContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-3 items-start"></div>
 
         <footer class="bottom-nav">
             <div class="nav-group">
@@ -317,10 +332,10 @@
     </div>
 
     <button id="fab-plus" onclick="openForm()" class="fab-add">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-    </svg>
-</button>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+        </svg>
+    </button>
 
     <script>
     const mapCouleurs = {
