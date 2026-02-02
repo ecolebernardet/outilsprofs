@@ -81,6 +81,22 @@
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
+        @media (min-width: 768px) {
+            .student-grid {
+                /* On ne force plus 5 colonnes, mais on remplit tout l'espace */
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            .student-item {
+                font-size: 0.9rem;
+                padding: 12px 10px;
+            }
+            /* On élargit aussi la carte de tirage pour l'équilibre visuel */
+            .light-card {
+                max-width: 600px;
+            }
+        }
+
         /* Couleurs de texte dynamiques */
         .bg-f { color: var(--student-name-girl) !important; } 
         .bg-m { color: var(--student-name-boy) !important; } 
@@ -165,7 +181,7 @@
         </button>
     </header>
 
-    <div class="w-full" id="listeContainer" style="max-width: 400px; margin: 0 auto;"></div>
+    <div class="w-full" id="listeContainer" style="max-width: 95%; margin: 0 auto;"></div>
 
     <div class="light-card mx-auto">
         <div class="result-box" id="result-display">PRÊT</div>
