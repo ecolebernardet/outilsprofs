@@ -128,6 +128,53 @@
             animation: blink-point 1.5s infinite;
         }
         
+		/* Bouton flottant + */
+.fab-add {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 100;
+    cursor: pointer;
+    border: none;
+}
+
+/* Modal pour le formulaire */
+#modal-form {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-form {
+    background: var(--card-bg); /* Correction ici */
+    width: 90%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--header-border); /* Pour bien voir les bords */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+#niveauSelect option {
+    background: var(--card-bg);
+    color: var(--text-main);
+}
+
     </style>
 </head>
 <body class="pb-10">
@@ -178,6 +225,8 @@
         <div id="tab-btn-editeur" class="tab-btn" onclick="switchTab('editeur')">Module Édition</div>
     </nav>
 
+
+
 <div class="max-w-4xl mx-auto p-0 mt-2">
         <div id="tab-classe" class="tab-content active">
             <div id="profil-container" class="max-w-md mx-auto light-card p-3 mb-4 border-dotted border-2" style="border-color: var(--header-border)">
@@ -189,31 +238,74 @@
                     </div>
                 </div>
             </div>
+		
+            
+               
+                <button id="fab-plus" class="fab-add" onclick="ouvrirFormulaire()">+</button>
 
-            <div id="form-container" class="max-w-md mx-auto light-card p-3 mb-4">
-                <label class="text-[9px] font-black uppercase opacity-60 ml-1 mb-1 block">Élèves :</label>
-                <form id="eleveForm" class="flex flex-col gap-3">
-                    <input type="hidden" id="edit-id" value="">
-                    <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field w-full" required autocomplete="off">
-                    <div class="grid grid-cols-3 gap-2">
-                        <select id="birth-day" class="select-date"></select>
-                        <select id="birth-month" class="select-date"></select>
-                        <select id="birth-year" class="select-date"></select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label><input type="radio" name="sexe" value="f" class="card-input input-fille"><div class="card-label">Fille</div></label>
-                        <label><input type="radio" name="sexe" value="m" class="card-input input-garcon" checked><div class="card-label">Garçon</div></label>
-                    </div>
-                    <div class="grid grid-cols-6 gap-1">
-                        <label><input type="radio" name="niveau" value="CP" class="card-input input-cp"><div class="card-label">CP</div></label>
-                        <label><input type="radio" name="niveau" value="CE1" class="card-input input-ce1"><div class="card-label">CE1</div></label>
-                        <label><input type="radio" name="niveau" value="CE2" class="card-input input-ce2" checked><div class="card-label">CE2</div></label>
-                        <label><input type="radio" name="niveau" value="CM1" class="card-input input-cm1"><div class="card-label">CM1</div></label>
-                        <label><input type="radio" name="niveau" value="CM2" class="card-input input-cm2"><div class="card-label">CM2</div></label>
-                        <label><input type="radio" name="niveau" value="AUTRE" class="card-input input-autre"><div class="card-label">Autre</div></label>
-                    </div>
-                    <button type="submit" id="btn-submit" class="font-black py-2.5 rounded-full uppercase text-xs active:scale-95 transition-transform mt-1">Enregistrer</button>
-                </form>
+<div id="modal-form" onclick="fermerFormulaire(event)">
+    
+    <div class="modal-content-form" onclick="event.stopPropagation()">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 id="form-title" class="text-sm font-black uppercase tracking-widest" style="color:var(--text-main)">Élève</h2>
+            <button onclick="document.getElementById('modal-form').style.display='none'" class="text-3xl" style="color:var(--sub-text)">&times;</button>
+        </div>
+
+        <form id="eleveForm" class="space-y-4">
+    <input type="hidden" id="edit-id">
+    
+    <div class="flex flex-col gap-1">
+        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Identité de l'élève :</label>
+        <input type="text" id="nomComplet" placeholder="Prénom NOM" class="input-field" required>
+    </div>
+
+    <div class="flex flex-col gap-1">
+        <label class="text-[9px] font-black uppercase opacity-60 ml-1">Date de naissance (optionnel) :</label>
+        <div class="grid grid-cols-3 gap-2">
+            <select id="birth-day" class="select-date"></select>
+            <select id="birth-month" class="select-date"></select>
+            <select id="birth-year" class="select-date"></select>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Genre :</label>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <input type="radio" name="sexe" value="G" id="sexeG" class="card-input input-garcon" checked>
+                    <label for="sexeG" class="card-label">Garçon</label>
+                </div>
+                <div>
+                    <input type="radio" name="sexe" value="F" id="sexeF" class="card-input input-fille">
+                    <label for="sexeF" class="card-label">Fille</label>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] font-black uppercase opacity-60 ml-1">Niveau :</label>
+            <div class="relative">
+                <select id="niveauSelect" class="input-field w-full appearance-none pr-8">
+                    <option value="CP">CP</option>
+                    <option value="CE1">CE1</option>
+                    <option value="CE2">CE2</option>
+                    <option value="CM1">CM1</option>
+                    <option value="CM2">CM2</option>
+                    <option value="AUTRE">AUTRE</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none opacity-50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" id="btn-submit" class="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-2">Enregistrer</button>
+</form>
+        
+    </div>
+</div>
             </div>
 
             <div id="stats-container" class="max-w-md mx-auto mb-4 flex flex-wrap justify-center gap-2"></div>
@@ -344,6 +436,20 @@
         function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
         function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
+		function ouvrirFormulaire() {
+    const form = document.getElementById('eleveForm');
+    form.reset(); // Vide les champs
+    document.getElementById('edit-id').value = ""; // Très important pour ne pas écraser un élève
+    document.getElementById('btn-submit').innerText = "Enregistrer";
+    document.getElementById('form-title').innerText = "Nouvel Élève";
+    initDateSelectors(); // Remet les dates à zéro
+    document.getElementById('modal-form').style.display = 'flex';
+}
+
+function fermerFormulaire(e) {
+    if(e.target.id === 'modal-form') e.target.style.display = 'none';
+}
+
         function appliquerCouleursTheme() {
             const isDarkTxt = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurInscr);
             const textClr = isDarkTxt ? '#000' : '#fff';
@@ -384,6 +490,10 @@
             const btnFermerAide = document.getElementById('btn-fermer-aide');
             if(btnFermerAide) { btnFermerAide.style.backgroundColor = hexaTheme; btnFermerAide.style.color = textClr; }
             
+			// À ajouter à la fin de la fonction appliquerCouleursTheme
+const fab = document.getElementById('fab-plus');
+if(fab) { fab.style.backgroundColor = hexaTheme; fab.style.color = textClr; }
+
             majBoutonsTri();
         }
 
@@ -457,12 +567,13 @@
             if (eleves.length === 0) { statsDiv.innerHTML = ""; return; }
             const colorBoy = getComputedStyle(document.documentElement).getPropertyValue('--student-name-boy').trim() || '#3b82f6';
             const colorGirl = getComputedStyle(document.documentElement).getPropertyValue('--student-name-girl').trim() || '#ec4899';
-            const nbGarcons = eleves.filter(e => e.sexe === 'm').length;
-            const nbFilles = eleves.filter(e => e.sexe === 'f').length;
+            const nbGarcons = eleves.filter(e => { const s = e.sexe.toUpperCase(); return s === 'M' || s === 'G'; }).length;
+            const nbFilles = eleves.filter(e => e.sexe === 'F').length;
             statsDiv.innerHTML = `
-                <div class="stat-pill border border-black/100 dark:border-white/100" style="background-color: var(--bg-card); color: var(--text-main);">Total: ${eleves.length}</div>
-                <div class="stat-pill border" style="background-color: ${colorBoy}15; border-color: ${colorBoy}; color: ${colorBoy}">♂ ${nbGarcons}</div>
-                <div class="stat-pill border" style="background-color: ${colorGirl}15; border-color: ${colorGirl}; color: ${colorGirl}">♀ ${nbFilles}</div>
+                <div class="stat-pill border border-black/100 dark:border-white/100" style="background-color: var(--bg-card); color: var(--text-main);">Nombre d'élèves : ${eleves.length}</div>
+                <div class="stat-pill border" style="background-color: ${colorGirl}15; border-color: ${colorGirl}; color: ${colorGirl}">♀ ${nbFilles} filles</div>
+                <div class="stat-pill border" style="background-color: ${colorBoy}15; border-color: ${colorBoy}; color: ${colorBoy}">♂ ${nbGarcons} garçons</div>
+
             `;
         }
 
@@ -489,7 +600,7 @@
                     return modeTriApp === 'nom' ? nA.localeCompare(nB) : pA.localeCompare(pB);
                 }).forEach(el => {
                     const item = document.createElement('div');
-                    const genderClass = el.sexe === 'f' ? 'text-girl-custom' : 'text-boy-custom';
+                    const genderClass = el.sexe.toUpperCase() === 'F' ? 'text-girl-custom' : 'text-boy-custom';
                     item.className = `student-item ${genderClass}`;
                     const parts = el.identite.split(" ");
                     const identiteAffiche = modeTriApp === 'nom' ? `${parts.slice(1).join(" ")} ${parts[0]}` : `${parts[0]} ${parts.slice(1).join(" ")}`;
@@ -509,38 +620,91 @@
         }
 
         document.getElementById('eleveForm').onsubmit = (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('edit-id').value;
-            const saisie = document.getElementById('nomComplet').value.trim().split(" ");
-            const day = document.getElementById('birth-day').value;
-            const month = document.getElementById('birth-month').value;
-            const year = document.getElementById('birth-year').value;
-            let dateStockee = (day && month && year) ? `${day}-${month}-${year}` : "";
-            const selectedSexe = document.querySelector('input[name="sexe"]:checked').value;
-            const selectedNiveau = document.querySelector('input[name="niveau"]:checked').value;
-            const data = { identite: formaterIdentite(saisie[0], saisie.slice(1).join(" ")), sexe: selectedSexe, niveau: selectedNiveau, dateNaissance: dateStockee };
+    e.preventDefault();
+    const editId = document.getElementById('edit-id').value;
+    const saisie = document.getElementById('nomComplet').value.trim().split(" ");
+    
+    // Dates
+    const day = document.getElementById('birth-day').value;
+    const month = document.getElementById('birth-month').value;
+    const year = document.getElementById('birth-year').value;
+    let dateStockee = (day && month && year) ? `${day}-${month}-${year}` : "";
+    
+    // Genre (Radio)
+    const selectedSexe = document.querySelector('input[name="sexe"]:checked').value;
+    
+    // NIVEAU (C'est ici que ça bloquait : on récupère la valeur du SELECT)
+    const selectedNiveau = document.getElementById('niveauSelect').value;
 
-            if (editId) { 
-                const idx = eleves.findIndex(el => String(el.id) === String(editId)); 
-                if(idx !== -1) eleves[idx] = { ...eleves[idx], ...data }; 
-                document.getElementById('edit-id').value = ""; document.getElementById('btn-submit').innerText = "Enregistrer"; 
-            } else { eleves.push({ id: String(Date.now()), ...data }); }
-            
-            localStorage.setItem('maListeEleves', JSON.stringify(eleves)); 
-            if(year) localStorage.setItem('derniereAnneeSaisie', year);
-            notifierChangement();
-            render(); 
-            document.getElementById('nomComplet').value = "";
-            initDateSelectors();
-        };
+    const data = { 
+        identite: formaterIdentite(saisie[0], saisie.slice(1).join(" ")), 
+        sexe: selectedSexe, 
+        niveau: selectedNiveau, 
+        dateNaissance: dateStockee 
+    };
+
+    if (editId) { 
+        const idx = eleves.findIndex(el => String(el.id) === String(editId)); 
+        if(idx !== -1) eleves[idx] = { ...eleves[idx], ...data }; 
+        document.getElementById('edit-id').value = ""; 
+        document.getElementById('btn-submit').innerText = "Enregistrer"; 
+    } else { 
+        eleves.push({ id: String(Date.now()), ...data }); 
+    }
+    
+    localStorage.setItem('maListeEleves', JSON.stringify(eleves)); 
+    if(year) localStorage.setItem('derniereAnneeSaisie', year);
+    
+    notifierChangement();
+    render(); 
+    
+    // Reset et Fermeture
+    e.target.reset(); // Vide tout le formulaire d'un coup
+    initDateSelectors();
+    document.getElementById('modal-form').style.display = 'none';
+};
 
         function preparerModification(id) {
-            const el = eleves.find(e => String(e.id) === String(id)); if (!el) return;
-            document.getElementById('edit-id').value = el.id; document.getElementById('nomComplet').value = el.identite; 
-            if (el.dateNaissance) { const parts = el.dateNaissance.split('-'); document.getElementById('birth-day').value = parts[0]; document.getElementById('birth-month').value = parts[1]; document.getElementById('birth-year').value = parts[2]; }
-            document.querySelector(`input[name="sexe"][value="${el.sexe}"]`).checked = true; document.querySelector(`input[name="niveau"][value="${el.niveau}"]`).checked = true;
-            document.getElementById('btn-submit').innerText = "Mettre à jour"; window.scrollTo({ top: 0, behavior: "smooth" });
-        }
+    const el = eleves.find(e => String(e.id) === String(id));
+    if (!el) return;
+
+    // 1. Remplir l'ID caché pour savoir qu'on modifie et non qu'on crée
+    document.getElementById('edit-id').value = el.id;
+    
+    // 2. Remplir le nom
+    document.getElementById('nomComplet').value = el.identite;
+    
+    // 3. Cocher le bon sexe
+    if (el.sexe === 'G' || el.sexe === 'M') {
+        document.getElementById('sexeG').checked = true;
+    } else {
+        document.getElementById('sexeF').checked = true;
+    }
+
+    // 4. Sélectionner le niveau dans le menu déroulant
+    const niveauSelect = document.getElementById('niveauSelect');
+    if (niveauSelect) niveauSelect.value = el.niveau;
+
+    // 5. Gérer la date de naissance si elle existe
+    if (el.dateNaissance && el.dateNaissance.includes("-")) {
+        const d = el.dateNaissance.split("-");
+        document.getElementById('birth-day').value = d[0];
+        document.getElementById('birth-month').value = d[1];
+        document.getElementById('birth-year').value = d[2];
+    } else {
+        // Reset des dates si aucune date n'est enregistrée
+        document.getElementById('birth-day').value = "";
+        document.getElementById('birth-month').value = "";
+        document.getElementById('birth-year').value = "";
+    }
+
+    // 6. Changer l'apparence du bouton et du titre
+    document.getElementById('btn-submit').innerText = "Mettre à jour";
+    document.getElementById('form-title').innerText = "Modifier l'élève";
+    
+    // 7. OUVRIR LA MODALE
+    document.getElementById('modal-form').style.display = 'flex';
+}
 
         function supprimer(id) { customConfirm("Supprimer cet élève ?", (val) => { if(val === 'yes') { eleves = eleves.filter(e => String(e.id) !== String(id)); localStorage.setItem('maListeEleves', JSON.stringify(eleves)); notifierChangement(); render(); }}, [{text: 'Supprimer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
         function toutEffacer() { customConfirm("⚠️ Supprimer toute la liste ?", (val) => { if(val === 'yes') { eleves = []; localStorage.setItem('maListeEleves', JSON.stringify(eleves)); notifierChangement(); render(); }}, [{text: 'Tout effacer', value: 'yes', type: 'primary'}, {text: 'Annuler', value: 'no'}]); }
