@@ -45,9 +45,40 @@
             text-align: center; flex-grow: 1; 
         }
 
-        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 10px 15px 20px 15px; }
+        .main-wrapper { 
+			width: 100%; 
+			max-width: 100%;
+			margin: 0 auto; 
+			padding: 10px 15px 20px 15px; 
+		}
+
+		#categoriesContainer {
+			display: grid;
+			grid-template-columns: 1fr; /* Par défaut une seule colonne (mobile) */
+			gap: 15px;
+			width: 100%;
+		}
+
+		/* Version PC : 2 colonnes sur tablettes, 4 colonnes sur PC */
+		@media (min-width: 1024px) {
+			#categoriesContainer {
+				grid-template-columns: repeat(4, 1fr); /* 4 colonnes égales */
+			}
+			.main-wrapper {
+				padding: 20px 40px; /* Plus de marge sur les côtés sur PC */
+			}
+		}
+
+		@media (min-width: 1024px) {
+			#categoriesContainer {
+				grid-template-columns: repeat(4, 1fr);
+			}
+			.main-wrapper {
+				max-width: 95%; /* Prend presque toute la largeur sur très grand écran */
+			}
+		}
         .light-card, .column { background: var(--card-bg); border-radius: 1.5rem; padding: 15px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
-        .column { scroll-margin-top: 90px; }
+        .column { min-width: 0; scroll-margin-top: 90px; height: fit-content; }
         .column-header { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; align-items: center; }
 
         .dots-handle { display: grid; grid-template-columns: repeat(3, 2.5px); grid-template-rows: repeat(3, 2.5px); gap: 2.2px; opacity: 0.3; cursor: grab; flex-shrink: 0; padding: 10px; margin: -10px; }
@@ -65,7 +96,7 @@
         .cat-btn.active { background: #4b5563 !important; color: white !important; border-color: transparent !important; }
         .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
         
-        .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
+        .bottom-nav { width: 100%; max-width: 600px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
         .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
         
         /* MODALES ET FORMULAIRE */
@@ -81,8 +112,10 @@
             display: flex; align-items: center; justify-content: center;
             z-index: 800; border: none; cursor: pointer; transition: all 0.2s ease;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+			z-index: 500;
         }
-        .fab-add:active { transform: scale(0.9); }
+        .fab-add:hover { transform: scale(1.1); } /* Effet de survol identique aux mémos */
+		.fab-add:active { transform: scale(0.9); }
 
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
@@ -302,10 +335,17 @@
         });
     }
 
-    function ouvrirFormulaire() {
-        document.getElementById('form-container-modal').style.display = 'flex';
-        document.getElementById('form-title').innerText = editingLinkId ? "Modifier le lien" : "Nouveau Lien";
-    }
+    /* --- Uniquement la partie modifier dans ouvrirFormulaire et les boutons de catégorie --- */
+
+function ouvrirFormulaire() {
+    document.getElementById('form-container-modal').style.display = 'flex';
+    document.getElementById('form-title').innerText = editingLinkId ? "Modifier le lien" : "Nouveau Lien";
+    
+    // S'assurer que le bouton visuel correspond à currentSelectedCat
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-value') === currentSelectedCat);
+    });
+}
 
     function fermerFormulaire() {
         document.getElementById('form-container-modal').style.display = 'none';
@@ -317,27 +357,32 @@
         }
     }
 
-    function addLink() {
-        const name = document.getElementById('linkName').value.trim();
-        const urlInput = document.getElementById('linkUrl').value.trim();
-        if (name && urlInput) {
-            const url = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
-            if (editingLinkId) {
-                const index = links.findIndex(l => l.id === editingLinkId);
-                if (index !== -1) links[index] = { ...links[index], name, url, cat: currentSelectedCat };
-                editingLinkId = null;
-                document.getElementById('mainAddBtn').innerText = "Ajouter";
-            } else {
-                links.push({ id: Date.now(), name, url, cat: currentSelectedCat });
-            }
-            localStorage.setItem('eduLinksList', JSON.stringify(links));
-            document.getElementById('linkName').value = '';
-            document.getElementById('linkUrl').value = '';
-            updateExportBadge(true);
-            fermerFormulaire();
-            render();
+    /* --- Uniquement la logique de traitement d'URL dans addLink --- */
+
+function addLink() {
+    const name = document.getElementById('linkName').value.trim();
+    let urlInput = document.getElementById('linkUrl').value.trim().replace(/\s/g, ''); // Supprime les espaces
+    
+    if (name && urlInput) {
+        // Ajoute https:// seulement s'il n'y a pas déjà de protocole
+        const url = /^(http|https):\/\//i.test(urlInput) ? urlInput : 'https://' + urlInput;
+        
+        if (editingLinkId) {
+            const index = links.findIndex(l => l.id === editingLinkId);
+            if (index !== -1) links[index] = { ...links[index], name, url, cat: currentSelectedCat };
+            editingLinkId = null;
+            document.getElementById('mainAddBtn').innerText = "Ajouter";
+        } else {
+            links.push({ id: Date.now(), name, url, cat: currentSelectedCat });
         }
+        localStorage.setItem('eduLinksList', JSON.stringify(links));
+        document.getElementById('linkName').value = '';
+        document.getElementById('linkUrl').value = '';
+        updateExportBadge(true);
+        fermerFormulaire();
+        render();
     }
+}
 
     function editLink(id) {
         const link = links.find(l => l.id === id);
