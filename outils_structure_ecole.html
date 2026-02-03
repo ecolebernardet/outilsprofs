@@ -11,6 +11,9 @@
         :root {
             --bg-page: #f4f7f9; --text-page: #1a1a1a; --card-bg: #ffffff;
             --border-color: #e2e8f0; --header-bg: #ffffff;
+            /* Couleurs niveaux maclasse.html */
+            --color-cp: #ec4899; --color-ce1: #3b82f6; --color-ce2: #eab308;
+            --color-cm1: #ef4444; --color-cm2: #22c55e; --color-autre: #8b5cf6;
         }
 
         body.dark-mode {
@@ -39,19 +42,41 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
         }
 
-        h3 { font-weight: 800; text-transform: uppercase; font-size: 0.75rem; color: #888; margin-bottom: 15px; letter-spacing: 1px; }
+        h3 { 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            color: var(--theme-color); 
+            margin-bottom: 20px; 
+            letter-spacing: 1px; 
+            text-align: center;
+            padding-bottom: 15px;                         /* Espace entre texte et ligne */
+            padding-bottom: 15px;width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            display: table;                              /* Technique pour centrer un bloc de largeur auto */
+        }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .section { border: 1px solid var(--border-color); padding: 20px; border-radius: 18px; margin-bottom: 20px; background: rgba(0,0,0,0.01); }
 
-        label { display: block; font-weight: 700; font-size: 0.65rem; margin-bottom: 6px; text-transform: uppercase; }
-        input[type="number"] { 
-            width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--border-color); 
-            background: var(--bg-page); color: var(--text-page); font-weight: 600;
+        label { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: -10px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
+		label2 { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: 5px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
+
+		/* Classes de couleurs pour les labels */
+		.label-cp { color: var(--color-cp); }
+		.label-ce1 { color: var(--color-ce1); }
+		.label-ce2 { color: #926b00; }
+		.label-cm1 { color: var(--color-cm1); }
+		.label-cm2 { color: var(--color-cm2); }
+		
+		input[type="number"] { 
+            margin-top: 0; width: 100%; padding: 2px; border-radius: 20px; border: 1px solid var(--border-color); 
+            background: var(--bg-page); color: var(--text-page); font-weight: 600; text-align: center;
         }
 
         .main-btn { 
-            padding: 16px; border-radius: 50px; cursor: pointer; font-size: 0.7rem; 
+            padding: 12px; border-radius: 50px; cursor: pointer; font-size: 0.7rem; 
             font-weight: 900; text-transform: uppercase; width: 100%; border: none;
             transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -62,7 +87,19 @@
             padding: 25px; margin-top: 30px; border-radius: 24px; animation: fadeIn 0.5s ease-out;
         }
 
-        .classe-item { background: var(--bg-page); padding: 15px; border-radius: 16px; border: 1px solid var(--border-color); }
+        .classe-item { background: var(--bg-page); padding: 15px; border-radius: 20px; border: 1px solid var(--border-color); }
+        
+        /* Badges de niveaux */
+        .badge-niv {
+            display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; 
+            border-radius: 6px; font-weight: 800; font-size: 0.75rem; margin-right: 4px; margin-bottom: 4px;
+        }
+		.badge-cp { background: color-mix(in srgb, var(--color-cp), transparent 80%); color: var(--color-cp); }
+        .badge-ce1 { background: color-mix(in srgb, var(--color-ce1), transparent 80%); color: var(--color-ce1); }
+        .badge-ce2 { background: color-mix(in srgb, var(--color-ce2), transparent 80%); color: #926b00; } /* Texte un peu plus sombre pour le jaune */
+        .badge-cm1 { background: color-mix(in srgb, var(--color-cm1), transparent 80%); color: var(--color-cm1); }
+        .badge-cm2 { background: color-mix(in srgb, var(--color-cm2), transparent 80%); color: var(--color-cm2); }
+
         .error { color: #ef4444; background: #fee2e2; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 700; font-size: 0.8rem; text-align: center; display: none; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -70,7 +107,6 @@
         .check-group { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 700; }
         input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--theme-color); }
 
-        /* Modale */
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--border-color); padding: 25px; position: relative; }
     </style>
@@ -100,34 +136,50 @@
             <div class="section">
                 <h3>Effectifs par niveau</h3>
                 <div class="grid">
-                    <div><label>CP</label><input type="number" id="cp" value="28"></div>
-                    <div><label>CE1</label><input type="number" id="ce1" value="31"></div>
-                    <div><label>CE2</label><input type="number" id="ce2" value="36"></div>
-                    <div><label>CM1</label><input type="number" id="cm1" value="41"></div>
-                    <div><label>CM2</label><input type="number" id="cm2" value="29"></div>
-                    <div><label>Nb Classes</label><input type="number" id="nbC" value="7"></div>
-                </div>
+					<div><label class="label-cp">CP</label><input type="number" id="cp" value="28"></div>
+					<div><label class="label-ce1">CE1</label><input type="number" id="ce1" value="31"></div>
+					<div><label class="label-ce2">CE2</label><input type="number" id="ce2" value="36"></div>
+					<div><label class="label-cm1">CM1</label><input type="number" id="cm1" value="41"></div>
+					<div><label class="label-cm2">CM2</label><input type="number" id="cm2" value="29"></div>
+					<div><label>Nb Classes</label><input type="number" id="nbC" value="7"></div>
+				</div>
             </div>
 
             <div class="section">
-                <h3>Contraintes de calcul</h3>
-                <div class="grid">
-                    <div><label>Niveaux max / cl.</label><input type="number" id="maxNiv" value="2" min="1"></div>
-                    <div><label>Écart niveau max</label><input type="number" id="gapNiv" value="1" min="1"></div>
-                    <div class="check-group" style="padding-top: 25px;">
-                        <input type="checkbox" id="limit24"> 
-                        <label style="margin:0">Limiter CP/CE1 à 24</label>
-                    </div>
-                </div>
-                
-                <label style="margin-top:15px">Éviter ces mélanges :</label>
-                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
-                    <span class="check-group"><input type="checkbox" class="avoid" value="1-2"> CP/CE1</span>
-                    <span class="check-group"><input type="checkbox" class="avoid" value="2-3"> CE1/CE2</span>
-                    <span class="check-group"><input type="checkbox" class="avoid" value="3-4"> CE2/CM1</span>
-                    <span class="check-group"><input type="checkbox" class="avoid" value="4-5"> CM1/CM2</span>
-                </div>
-            </div>
+    <h3>Contraintes de calcul</h3>
+    <div class="grid">
+        <div>
+            <label2>Nombre de niveaux<br>max par classe</label2>
+            <input type="number" id="maxNiv" value="2" min="1">
+        </div>
+        <div>
+            <label2>Écart max entre 2 niveaux<br>dans une classe</label2>
+            <input type="number" id="gapNiv" value="1" min="1">
+        </div>
+        <div>
+            <label2>Écart effectif max<br>entre deux classes</label2>
+            <input type="number" id="gapEffectif" value="4" min="1" max="10">
+        </div>
+        
+        <div class="check-group" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px;">
+    <input type="checkbox" id="limit24" style="cursor: pointer; margin: 0; width: 16px; height: 16px; vertical-align: middle;"> 
+    <label style="margin: 0; display: inline-flex; align-items: center; text-align: left; font-size: 0.65rem; line-height: 1; cursor: pointer;">
+        Limiter les classes CP et CE1 à 24 élèves max
+    </label>
+</div>
+    </div>
+    
+    <label style="margin-top:15px; text-align: left;">Éviter ces mélanges :</label>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+        <span class="check-group"><input type="checkbox" class="avoid" value="1-2"> CP/CE1</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="2-3"> CE1/CE2</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="3-4"> CE2/CM1</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="4-5"> CM1/CM2</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="1-3"> CP/CE2</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="2-4"> CE1/CM1</span>
+        <span class="check-group"><input type="checkbox" class="avoid" value="3-5"> CE2/CM2</span>
+    </div>
+</div>
 
             <button type="button" class="main-btn" id="btn-calculer" onclick="calculer()">Générer les propositions</button>
         </form>
@@ -139,17 +191,33 @@
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Structure</h2>
-        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
-            <p>Cet outil teste des milliers de combinaisons pour trouver des répartitions équilibrées.</p>
-            <p>🔴 <strong>Important :</strong> L'algorithme impose un minimum de 6 élèves d'un même niveau dans une classe double pour assurer la viabilité pédagogique.</p>
-            <p>L'écart total entre la classe la plus chargée et la moins chargée n'excède jamais 4 élèves.</p>
+        <div class="text-[11px] leading-relaxed space-y-4 opacity-90 font-semibold">
+            <p>Cet outil teste des milliers de combinaisons pour générer des répartitions équilibrées selon vos besoins.</p>
+            
+            <ul style="list-style: none; padding: 0; margin: 0; space-y-3;">
+                <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                    <span style="color: var(--theme-color);">•</span>
+                    <span><strong>Pédagogie :</strong> L'algorithme impose <strong>6 élèves minimum</strong> par niveau dans les classes doubles pour assurer une dynamique de groupe.</span>
+                </li>
+                <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                    <span style="color: var(--theme-color);">•</span>
+                    <span><strong>Équilibre :</strong> L'écart d'effectif total entre la classe la plus chargée et la moins chargée respecte la valeur fixée dans vos réglages.</span>
+                </li>
+                <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                    <span style="color: var(--theme-color);">•</span>
+                    <span><strong>Contraintes :</strong> Si aucune solution n'est trouvée, essayez d'augmenter "l'écart effectif max" ou de décocher certaines cases "Éviter".</span>
+                </li>
+            </ul>
+
+            <p style="font-style: italic; font-size: 10px; border-top: 1px solid var(--border-color); pt-3;">
+                Astuce : Les propositions sont classées par ordre croissant de niveaux.
+            </p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none;">Fermer</button>
     </div>
 </div>
 
 <script>
-    // THEME & COULEURS
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
     const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
@@ -168,7 +236,6 @@
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
-    // LOGIQUE DE CALCUL (CONSERVÉE)
     function calculer() {
         const errorBox = document.getElementById('errorBox');
         const resDiv = document.getElementById('resultats');
@@ -186,7 +253,8 @@
             nbClasses: parseInt(document.getElementById('nbC').value),
             maxNiv: parseInt(document.getElementById('maxNiv').value),
             gapNiv: parseInt(document.getElementById('gapNiv').value),
-            limit24: document.getElementById('limit24').checked,
+			gapEffectif: parseInt(document.getElementById('gapEffectif').value), // Nouvelle ligne
+			limit24: document.getElementById('limit24').checked,
             avoid: Array.from(document.querySelectorAll('.avoid:checked')).map(c => c.value)
         };
 
@@ -263,7 +331,7 @@
         }
 
         const effectifs = classes.map(c => c.total);
-        if (Math.max(...effectifs) - Math.min(...effectifs) > 4) return null;
+        if (Math.max(...effectifs) - Math.min(...effectifs) > data.gapEffectif) return null;
         for (let cl of classes) {
             if (cl.niveaux.size > 1 && cl.eleves.some(e => e.count < 6)) return null;
             if (data.limit24 && (cl.niveaux.has(1) || cl.niveaux.has(2)) && cl.total > 24) return null;
@@ -278,9 +346,22 @@
         classes.sort((a, b) => Math.min(...a.niveaux) - Math.min(...b.niveaux));
 
         let html = `<div class="proposition"><h2 style="font-weight:900; font-size:0.8rem; text-transform:uppercase; color:var(--theme-color); margin-bottom:20px;">Proposition n°${num}</h2><div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">`;
+        
         classes.forEach((c, index) => {
-            let details = c.eleves.map(e => `<span style="font-weight:800;">${e.count}</span> ${e.nom}`).join(' + ');
-            html += `<div class="classe-item"><div style="font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; margin-bottom: 8px;">Classe ${index + 1}</div><div style="font-size: 0.9rem; margin-bottom: 10px;">${details}</div><div style="font-size: 0.65rem; font-weight: 700; background: var(--theme-color); color: var(--contrast-color); display: inline-block; padding: 2px 8px; border-radius: 5px;">${c.total} élèves</div></div>`;
+            // Extraction des noms de niveaux pour le titre (ex: CP/CE1)
+            const nomsNiveaux = c.eleves.map(e => e.nom).join('/');
+            
+            let detailsHtml = c.eleves.map(e => {
+                let colorClass = `badge-${e.nom.toLowerCase()}`;
+                return `<span class="badge-niv ${colorClass}">${e.count} ${e.nom}</span>`;
+            }).join('');
+
+            html += `
+                <div class="classe-item">
+                    <div style="font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; margin-bottom: 8px;">Classe ${index + 1} : <span style="font-size: 0.8rem; color: #000;">${nomsNiveaux}</div>
+                    <div style="margin-bottom: 10px; display: flex; flex-wrap: wrap;">${detailsHtml}</div>
+                    <div style="font-size: 0.65rem; font-weight: 700; background: var(--theme-color); color: var(--contrast-color); display: inline-block; padding: 2px 8px; border-radius: 5px;">Total : ${c.total}</div>
+                </div>`;
         });
         html += `</div></div>`;
         resDiv.innerHTML += html;
