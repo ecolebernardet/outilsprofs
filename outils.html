@@ -196,6 +196,15 @@
             </div>
         </a>
 		
+		<a href="outils_edition.html" class="tool-card" data-id="edition">
+            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="icon-box" id="icon-edition">📄</div>
+            <div>
+                <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-edition">Module Édition</h2>
+                <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">Listes, étiquettes et suivis</p>
+            </div>
+        </a>
+		
     </div>
 </div>
 
@@ -211,6 +220,7 @@
             <p>🚦 Les <strong>feux tricolores</strong>: cliquez sur un feu pour changer le mode de travail.</p>
 			<p>🪑 Le <strong>plan</strong> permet de générer le plan de votre classe.</p>
 			<p>🏫 La <strong>Structure École</strong> permet de simuler et d'équilibrer la répartition des élèves par classe.</p>
+			<p>📄 Le <strong>Module Édition</strong> permet de générer vos listes de classe, étiquettes et fiches de suivi en PDF.</p>
         </div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Fermer</button>
     </div>
@@ -255,6 +265,7 @@
             { icon: 'icon-feux', title: 'title-feux' },
 			{ icon: 'icon-plan', title: 'title-plan' },
 			{ icon: 'icon-structure', title: 'title-structure' },
+			{ icon: 'icon-edition', title: 'title-edition' },
         ];
 
         elementsOutils.forEach(item => {
