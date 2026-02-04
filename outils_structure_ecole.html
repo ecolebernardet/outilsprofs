@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Structure École - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
@@ -38,8 +40,8 @@
         .main-content { padding: 20px; max-width: 1000px; margin: auto; }
 
         .container-box { 
-            background: var(--card-bg); padding: 30px; border-radius: 24px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
+            background: var(--card-bg); padding: 10px; border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
         }
 
         h3 { 
@@ -61,27 +63,13 @@
         .section { border: 1px solid var(--border-color); padding: 20px; border-radius: 18px; margin-bottom: 20px; background: rgba(0,0,0,0.01); }
 
 		/* Grille des effectifs : 3 colonnes */
-.grid-effectifs { 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 12px; 
-    margin-bottom: 20px; 
-}
+		.grid-effectifs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
 
 /* Grille des contraintes : 2 colonnes */
-.grid-contraintes { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; 
-    margin-bottom: 20px; 
-}
+		.grid-contraintes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
 
 /* Grille des classes dans les résultats : 2 colonnes */
-.grid-resultats { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; 
-}
+		.grid-resultats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
 		
         label { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: -10px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
 		label2 { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: 5px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
@@ -107,7 +95,7 @@
 
         .proposition { 
             background: var(--card-bg); border: 2px solid var(--theme-color); 
-            padding: 25px; margin-top: 30px; border-radius: 24px; animation: fadeIn 0.5s ease-out;
+            padding: 15px; margin-top: 30px; border-radius: 24px; animation: fadeIn 0.5s ease-out;
         }
 
         .classe-item { background: var(--bg-page); padding: 15px; border-radius: 20px; border: 1px solid var(--border-color); }
@@ -126,6 +114,14 @@
         .error { color: #ef4444; background: #fee2e2; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 700; font-size: 0.8rem; text-align: center; display: none; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+		@media print {
+			header, #container-retour-liste, #monForm, #btn-aide, .main-btn { display: none !important; }
+			body { background: white !important; color: black !important; }
+			.main-content { padding: 0; margin: 0; width: 100%; }
+			.proposition { border: 2px solid #000 !important; page-break-inside: avoid; margin-bottom: 20px; }
+			.container-box { box-shadow: none !important; border: none !important; }
+		}
 
         .check-group { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 700; }
         input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--theme-color); }
@@ -193,8 +189,8 @@
                     </label>
                 </div>
 
-                <label style="margin-bottom: 10px; display: block; text-align: left; font-size: 0.65rem;">Éviter ces mélanges :</label>
-                <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                <label style="margin-bottom: 0px; display: block; text-align: left; font-size: 0.65rem;">Éviter ces mélanges :</label>
+                <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
                     <span class="check-group"><input type="checkbox" class="avoid" value="1-2"> CP/CE1</span>
                     <span class="check-group"><input type="checkbox" class="avoid" value="2-3"> CE1/CE2</span>
                     <span class="check-group"><input type="checkbox" class="avoid" value="3-4"> CE2/CM1</span>
@@ -203,7 +199,12 @@
                     <span class="check-group"><input type="checkbox" class="avoid" value="2-4"> CE1/CM1</span>
                     <span class="check-group"><input type="checkbox" class="avoid" value="3-5"> CE2/CM2</span>
                 </div>
-            </div> <button type="button" class="main-btn" id="btn-calculer" onclick="calculer()">Générer les propositions</button>
+            </div>
+			<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 15px;">
+				<button type="button" class="main-btn" id="btn-calculer" onclick="calculer()" style="grid-column: span 2;">Générer les propositions</button>
+				<button type="button" class="main-btn" id="btn-pdf" onclick="exporterPDF()" style="background: #22c55e; color: white;">💾 Enregistrer PDF</button>
+				<button type="button" class="main-btn" id="btn-effacer" onclick="effacerResultats()" style="background: #ef4444; color: white;">Effacer</button>
+			</div>
         </form>
 
 
@@ -240,6 +241,27 @@
     </div>
 </div>
 
+<div id="modal-alerte" class="modal-overlay" onclick="fermerModale('modal-alerte')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+        <h2 id="titre-alerte" class="text-lg font-black uppercase mb-4" style="color: var(--theme-color);">Action requise</h2>
+        <p class="text-[11px] font-semibold opacity-90 mb-6">Générez d'abord des propositions avant d'effectuer cette action.</p>
+        <button onclick="fermerModale('modal-alerte')" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; background: var(--theme-color); color: var(--contrast-color);">D'accord</button>
+    </div>
+</div>
+
+<div id="modal-confirm" class="modal-overlay" onclick="fermerModale('modal-confirm')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🗑️</div>
+        <h2 class="text-lg font-black uppercase mb-4" style="color: #ef4444;">Tout effacer ?</h2>
+        <p class="text-[11px] font-semibold opacity-90 mb-6">Êtes-vous sûr de vouloir supprimer les propositions actuelles ?</p>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="fermerModale('modal-confirm')" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-page);">Annuler</button>
+            <button onclick="confirmerEffacer()" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; border: none; background: #ef4444; color: white;">Effacer</button>
+        </div>
+    </div>
+</div>
+
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
@@ -251,7 +273,7 @@
     document.documentElement.style.setProperty('--theme-color', themeColor);
     document.documentElement.style.setProperty('--contrast-color', contrast);
 
-    const uiElements = [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-retour-liste'), document.getElementById('btn-calculer')];
+    const uiElements = [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-retour-liste'), document.getElementById('btn-calculer'), document.getElementById('btn-effacer')];
     uiElements.forEach(el => { if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; } });
     document.getElementById('pageTitle').style.color = themeColor;
     document.getElementById('titre-aide').style.color = themeColor;
@@ -363,10 +385,18 @@
     }
 
     function afficher(classes, num) {
-        const resDiv = document.getElementById('resultats');
-        const ordreNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
-        classes.forEach(c => c.eleves.sort((a, b) => ordreNiveaux[a.nom] - ordreNiveaux[b.nom]));
-        classes.sort((a, b) => Math.min(...a.niveaux) - Math.min(...b.niveaux));
+    const resDiv = document.getElementById('resultats');
+    const ordreNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+    
+    // 1. Trier les élèves à l'intérieur de chaque classe
+    classes.forEach(c => c.eleves.sort((a, b) => ordreNiveaux[a.nom] - ordreNiveaux[b.nom]));
+
+    // 2. Trier les classes entre elles (Logique : Simple < Double < Simple suivant)
+    classes.sort((a, b) => {
+        const valA = a.niveaux.size > 1 ? Math.min(...a.niveaux) + 0.5 : Math.min(...a.niveaux);
+        const valB = b.niveaux.size > 1 ? Math.min(...b.niveaux) + 0.5 : Math.min(...b.niveaux);
+        return valA - valB;
+    });
 
         let html = `<div class="proposition"><h2 style="font-weight:900; font-size:0.8rem; text-transform:uppercase; color:var(--theme-color); margin-bottom:20px;">Proposition n°${num}</h2><div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">`;
         
@@ -389,6 +419,124 @@
         html += `</div></div>`;
         resDiv.innerHTML += html;
     }
+	
+	function ouvrirModale(id) { document.getElementById(id).style.display = 'flex'; }
+	function fermerModale(id) { document.getElementById(id).style.display = 'none'; }
+	
+	function effacerResultats() {
+    const res = document.getElementById('resultats');
+    // On n'ouvre la modale que s'il y a quelque chose à effacer
+    if (res.innerHTML.trim() !== "") {
+        ouvrirModale('modal-confirm');
+    }
+}
+
+function confirmerEffacer() {
+    document.getElementById('resultats').innerHTML = "";
+    document.getElementById('errorBox').style.display = "none";
+    fermerModale('modal-confirm');
+}
+
+async function exporterPDF() {
+    const { jsPDF } = window.jspdf;
+    const resDiv = document.getElementById('resultats');
+    const propositions = resDiv.querySelectorAll('.proposition');
+
+    if (propositions.length === 0) {
+        ouvrirModale('modal-alerte');
+        return;
+    }
+
+    // Initialisation du document (Ligne qui manquait)
+    const doc = new jsPDF('l', 'mm', 'a4'); 
+
+    const d = new Date();
+    const dateStr = d.getFullYear() + 
+                    String(d.getMonth() + 1).padStart(2, '0') + 
+                    String(d.getDate()).padStart(2, '0');
+    const fileName = `outilsprofs_structure_ecole_${dateStr}.pdf`;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("COMPARAISON DES STRUCTURES", 148, 12, { align: "center" });
+
+    const tableBody = [];
+    const mapping = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+
+    const rowsCount = Math.max(...Array.from(propositions).map(p => p.querySelectorAll('.classe-item').length));
+
+    for (let i = 0; i < rowsCount; i++) {
+        let row = [];
+        propositions.forEach(prop => {
+            const classesDocs = Array.from(prop.querySelectorAll('.classe-item')).sort((a, b) => {
+                const elA = a.querySelector('div span');
+                const elB = b.querySelector('div span');
+                const txtA = elA ? elA.innerText.split('/') : [];
+                const txtB = elB ? elB.innerText.split('/') : [];
+                const nivA = txtA.map(n => mapping[n.trim()] || 9);
+                const nivB = txtB.map(n => mapping[n.trim()] || 9);
+                
+                const valA = nivA.length > 1 ? Math.min(...nivA) + 0.5 : Math.min(...nivA);
+                const valB = nivB.length > 1 ? Math.min(...nivB) + 0.5 : Math.min(...nivB);
+                return valA - valB;
+            });
+
+            const cl = classesDocs[i];
+            if (cl) {
+                const labelClasse = `CLASSE ${i + 1}`;
+                const niveaux = cl.querySelector('div span').innerText;
+                const effectifs = Array.from(cl.querySelectorAll('.badge-niv'))
+                                       .map(b => b.innerText).join(' / ');
+                const total = cl.querySelector('div[style*="background"]').innerText;
+
+                row.push({
+                    content: `${labelClasse} : ${niveaux}\n${effectifs}\n${total}`,
+                    styles: { fontStyle: 'normal' }
+                });
+            } else {
+                row.push("");
+            }
+        });
+        tableBody.push(row);
+    }
+
+    doc.autoTable({
+        startY: 18,
+        head: [['PROPOSITION 1', 'PROPOSITION 2', 'PROPOSITION 3']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: themeColor, halign: 'center', fontStyle: 'bold', fontSize: 9 },
+        styles: { 
+            fontSize: 7.5, 
+            cellPadding: 1, 
+            halign: 'center', 
+            valign: 'middle', 
+            minCellHeight: 20 
+        },
+        columnStyles: { 0: { cellWidth: 92 }, 1: { cellWidth: 92 }, 2: { cellWidth: 92 } },
+        didDrawCell: function(data) {
+            if (data.section === 'body' && data.cell.text && data.cell.text.length > 0) {
+                const textLines = data.cell.text;
+                const x = data.cell.x + data.cell.width / 2;
+                let y = data.cell.y + 5;
+                
+                doc.setFillColor(255, 255, 255);
+                doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+
+                doc.setFont("helvetica", "bold");
+                doc.text(textLines[0] || "", x, y, { align: "center" });
+                
+                doc.setFont("helvetica", "normal");
+                if(textLines[1]) doc.text(textLines[1], x, y + 6, { align: "center" });
+                if(textLines[2]) doc.text(textLines[2], x, y + 11, { align: "center" });
+            }
+        },
+        margin: { top: 15, bottom: 10 }
+    });
+
+    doc.save(fileName);
+}
+	
 </script>
 </body>
 </html>
