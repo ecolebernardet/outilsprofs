@@ -32,6 +32,9 @@
             background: var(--header-bg); border-bottom: 1px solid var(--border-color);
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
             display: flex; align-items: center; justify-content: space-between; width: 100%;
+			position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
@@ -285,7 +288,6 @@
 
     const uiElements = [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-retour-liste'), document.getElementById('btn-calculer'), document.getElementById('btn-effacer')];
     uiElements.forEach(el => { if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; } });
-    document.getElementById('pageTitle').style.color = themeColor;
     document.getElementById('titre-aide').style.color = themeColor;
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
