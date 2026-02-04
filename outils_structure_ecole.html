@@ -452,115 +452,135 @@ function confirmerEffacer() {
 }
 
 async function exporterPDF() {
-    const { jsPDF } = window.jspdf;
-    const resDiv = document.getElementById('resultats');
-    const propositions = resDiv.querySelectorAll('.proposition');
+    try {
+        const { jsPDF } = window.jspdf;
+        const resDiv = document.getElementById('resultats');
+        const propositions = resDiv.querySelectorAll('.proposition');
 
-    if (propositions.length === 0) {
-        ouvrirModale('modal-alerte');
-        return;
-    }
+        if (propositions.length === 0) {
+            ouvrirModale('modal-alerte');
+            return;
+        }
 
-    // Initialisation du document (Ligne qui manquait)
-    const doc = new jsPDF('l', 'mm', 'a4'); 
-
-    const d = new Date();
-    const dateStr = d.getFullYear() + 
-                    String(d.getMonth() + 1).padStart(2, '0') + 
-                    String(d.getDate()).padStart(2, '0');
-    const fileName = `outilsprofs_structure_ecole_${dateStr}.pdf`;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("COMPARAISON DES STRUCTURES", 148, 12, { align: "center" });
-
-    const tableBody = [];
-    const mapping = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
-
-    const rowsCount = Math.max(...Array.from(propositions).map(p => p.querySelectorAll('.classe-item').length));
-
-    for (let i = 0; i < rowsCount; i++) {
-        let row = [];
-        propositions.forEach(prop => {
-            const classesDocs = Array.from(prop.querySelectorAll('.classe-item')).sort((a, b) => {
-                const elA = a.querySelector('div span');
-                const elB = b.querySelector('div span');
-                const txtA = elA ? elA.innerText.split('/') : [];
-                const txtB = elB ? elB.innerText.split('/') : [];
-                const nivA = txtA.map(n => mapping[n.trim()] || 9);
-                const nivB = txtB.map(n => mapping[n.trim()] || 9);
-                
-                const valA = nivA.length > 1 ? Math.min(...nivA) + 0.5 : Math.min(...nivA);
-                const valB = nivB.length > 1 ? Math.min(...nivB) + 0.5 : Math.min(...nivB);
-                return valA - valB;
-            });
-
-            const cl = classesDocs[i];
-            if (cl) {
-                const labelClasse = `CLASSE ${i + 1}`;
-                const niveaux = cl.querySelector('div span').innerText;
-                const effectifs = Array.from(cl.querySelectorAll('.badge-niv'))
-                                       .map(b => b.innerText).join(' / ');
-                const total = cl.querySelector('div[style*="background"]').innerText;
-
-                row.push({
-                    content: `${labelClasse} : ${niveaux}\n${effectifs}\n${total}`,
-                    styles: { fontStyle: 'normal' }
-                });
-            } else {
-                row.push("");
-            }
+        // Changement : On passe en portrait ('p') pour une meilleure compatibilité mobile
+        // ou on s'assure que l'initialisation est robuste
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+            putOnlyUsedFonts: true
         });
-        tableBody.push(row);
+
+        const d = new Date();
+        const dateStr = d.getFullYear() + 
+                        String(d.getMonth() + 1).padStart(2, '0') + 
+                        String(d.getDate()).padStart(2, '0');
+        const fileName = `outilsprofs_structure_ecole_${dateStr}.pdf`;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("COMPARAISON DES STRUCTURES", 148, 12, { align: "center" });
+
+        const tableBody = [];
+        const mapping = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+
+        // Correction de la logique de récupération des données pour éviter les erreurs de sélection
+        const propsArray = Array.from(propositions);
+        const rowsCount = Math.max(...propsArray.map(p => p.querySelectorAll('.classe-item').length));
+
+        for (let i = 0; i < rowsCount; i++) {
+            let row = [];
+            propsArray.forEach(prop => {
+                const classesDocs = Array.from(prop.querySelectorAll('.classe-item'));
+                const cl = classesDocs[i];
+                if (cl) {
+                    const labelClasse = `CLASSE ${i + 1}`;
+                    const niveauxElement = cl.querySelector('div span');
+                    const niveaux = niveauxElement ? niveauxElement.innerText : "";
+                    const effectifs = Array.from(cl.querySelectorAll('.badge-niv'))
+                                           .map(b => b.innerText).join(' / ');
+                    const totalDiv = cl.querySelector('div[style*="background"]');
+                    const total = totalDiv ? totalDiv.innerText : "";
+
+                    row.push({
+						label: labelClasse,
+						niv: niveaux,
+						eff: effectifs,
+						tot: total
+					});
+				} else {
+					row.push("");
+				}
+            });
+            tableBody.push(row);
+        }
+
+        // Génération du tableau
+        doc.autoTable({
+    startY: 18,
+    head: [['PROPOSITION 1', 'PROPOSITION 2', 'PROPOSITION 3']],
+    body: tableBody,
+    theme: 'grid',
+	headStyles: { fillColor: false, textColor: [0, 0, 0], halign: 'center' },
+    styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle', minCellHeight: 22 },
+    didDrawCell: function(data) {
+        if (data.section === 'body' && data.cell.raw && typeof data.cell.raw === 'object') {
+            const { label, niv, eff, tot } = data.cell.raw;
+            const x = data.cell.x + data.cell.width / 2;
+            let y = data.cell.y + 6;
+
+            // 1. Dessiner le fond blanc pour effacer le texte par défaut
+            doc.setFillColor(255, 255, 255);
+            doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+            
+            doc.setTextColor(0, 0, 0);
+			
+
+            // 2. Classe et Niveaux en GRAS
+            doc.setFont("helvetica", "bold");
+			doc.setFontSize(9);        // On augmente la taille (de 8 à 9) pour l'impact visuel
+			doc.setLineWidth(0.2);      // Contour plus épais
+			doc.setDrawColor(0, 0, 0);  // Contour noir
+
+			// 'fillAndStroke' remplit la lettre ET dessine le contour, ce qui l'épaissit
+			doc.text(`${label} : ${niv}`, x, y, { 
+				align: "center", 
+				renderingMode: 'fillAndStroke' 
+			});
+
+            // 3. Effectifs et Total en NORMAL
+			doc.setFontSize(8);         // On repasse à 8 pour les détails
+			doc.setLineWidth(0); // Réinitialise l'épaisseur pour ne pas impacter le reste
+            doc.setFont("helvetica", "normal");
+            doc.text(eff, x, y + 6, { align: "center" });
+            doc.text(tot, x, y + 11, { align: "center" });
+        }
     }
+});
 
-    doc.autoTable({
-        startY: 18,
-        head: [['PROPOSITION 1', 'PROPOSITION 2', 'PROPOSITION 3']],
-        body: tableBody,
-        theme: 'grid',
-        headStyles: { 
-            fillColor: false, // Rend le fond transparent
-            textColor: [0, 0, 0], // Force le texte en noir (optionnel)
-            halign: 'center', 
-            fontStyle: 'bold', 
-            fontSize: 10 
-        },
-        styles: { 
-		    fontSize: 8, 
-            cellPadding: 1, 
-            halign: 'center', 
-            valign: 'middle', 
-            minCellHeight: 20 
-        },
-        columnStyles: { 0: { cellWidth: 92 }, 1: { cellWidth: 92 }, 2: { cellWidth: 92 } },
-        didDrawCell: function(data) {
-            if (data.section === 'body' && data.cell.text && data.cell.text.length > 0) {
-                const textLines = data.cell.text;
-                const x = data.cell.x + data.cell.width / 2;
-                let y = data.cell.y + 5;
-                
-                doc.setFillColor(255, 255, 255);
-                doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+        // CRUCIAL POUR ANDROID : Utiliser output('bloburl') puis ouvrir ou save direct
+        // Certains navigateurs mobiles bloquent doc.save() direct
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+        if (window.Android && window.Android.savePdfFromBase64) {
+            window.Android.savePdfFromBase64(pdfBase64, fileName);
+        } else {
+            // Repli pour le navigateur classique
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+        }
 
-				doc.setTextColor(0, 0, 0); // Force le texte en noir (R, G, B)
-                doc.setDrawColor(0, 0, 0);  // Force le contour en noir
-				
-                doc.setFont("helvetica", "bold");
-				doc.setLineWidth(0.1);
-				doc.text(textLines[0] || "", x, y, { align: "center", renderingMode: 'fillThenStroke' });
-                
-                doc.setFont("helvetica", "normal");
-                if(textLines[1]) doc.text(textLines[1], x, y + 6, { align: "center" });
-                if(textLines[2]) doc.text(textLines[2], x, y + 11, { align: "center" });
-            }
-        },
-        margin: { top: 15, bottom: 10 }
-    });
-
-    doc.save(fileName);
+    } catch (error) {
+        console.error("Erreur PDF:", error);
+        alert("L'exportation a échoué. Essayez de faire une capture d'écran ou d'utiliser un navigateur comme Chrome.");
+    }
 }
-	
+
+
 </script>
 </body>
 </html>
