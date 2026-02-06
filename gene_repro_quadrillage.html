@@ -16,50 +16,43 @@
         header { background: var(--header-bg); border-bottom: 1px solid var(--column-border); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; width: 100%; margin-bottom: 20px; }
         #btn-retour-header, #btn-aide { display: flex !important; align-items: center; justify-content: center; width: 38px !important; height: 38px !important; border-radius: 50% !important; flex-shrink: 0; cursor: pointer !important; }
         
-        .main-wrapper { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 15px 20px 15px; }
+        .main-wrapper { width: 100%; max-width: 1100px; margin: 0 auto; padding: 10px 15px 40px; }
         .controls { background: var(--card-bg); padding: 20px; border-radius: 1.5rem; border: 1px solid var(--column-border); margin-bottom: 20px; }
         
-        #preview-container { background: white; padding: 15px; border-radius: 1.5rem; display: flex; justify-content: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); width: 100%; }
+        #preview-container { background: white; padding: 15px; border-radius: 1.5rem; display: flex; gap: 20px; justify-content: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); width: 100%; }
         
-        #svg-model { background: white; cursor: crosshair; touch-action: none; display: block; width: 100%; max-width: 400px; height: auto; }
-		#draw-actions { flex-wrap: wrap; justify-content: center; }
+		svg { background: white; cursor: crosshair; touch-action: none; display: block; width: 100%; max-width: 450px; height: auto; }
+		
+		/* Ne cible que les grilles de dessin, pas les icônes */
+#svg-model, #svg-eleve { 
+    background: white; 
+    cursor: crosshair; /* La croix seulement ici */
+    touch-action: none; 
+    display: block; 
+    width: 100%; 
+    max-width: 450px; 
+    height: auto; 
+}
+/* Empêche les icônes de navigation d'hériter du fond blanc des grilles */
+#btn-retour-header svg, #btn-retour-liste svg {
+    background: transparent !important;
+}
+/* Pour les boutons de navigation et leurs icônes */
+#btn-retour-header, #btn-retour-liste, #btn-retour-header svg, #btn-retour-liste svg {
+    cursor: pointer !important;
+}
+	#btn-retour-liste { display: inline-flex; align-items: center; gap: 8px; }
+        #draw-actions { flex-wrap: wrap; justify-content: center; }
         .grid-line { stroke: #e5e7eb; stroke-width: 1; }
         .grid-main { stroke: #9ca3af; stroke-width: 2; }
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
         .btn-modal-close { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
         
-		/* Optimisation Mobile */
-@media (max-width: 640px) {
-    #preview-container {
-        padding: 10px; /* Réduction drastique du padding blanc */
-    }
-    
-    .main-wrapper {
-        padding: 0 8px 20px 8px; /* Moins de marge sur les bords de l'écran */
-    }
-
-    #draw-actions button {
-        width: 38px;  /* Boutons plus petits */
-        height: 38px;
-        font-size: 1.1rem;
-        border-radius: 10px;
-    }
-
-    #btn-gomme {
-        padding: 0 10px;
-        height: 38px;
-    }
-
-    #gomme-status {
-        font-size: 8px; /* Texte plus petit dans le bouton gomme */
-    }
-    
-    #draw-actions {
-        gap: 6px; /* Espace réduit entre les boutons */
-        flex-wrap: wrap; /* Passage à la ligne si nécessaire */
-    }
-}
+        @media (max-width: 768px) {
+            #preview-container { flex-direction: column; align-items: center; }
+            #preview-container > div { width: 100%; }
+        }
 
         @media print { .no-print { display: none !important; } body { background: white; } #preview-container { box-shadow: none; padding: 0; } }
     </style>
@@ -69,19 +62,26 @@
 <script>if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');</script>
 
 <header>
-    <a href="index.html" id="btn-retour-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7" /></svg>
+    <a href="index.html" id="btn-retour-header" style="display: flex; align-items: center; justify-content: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="background: transparent !important; width: 20px !important; height: 20px !important;"><path d="M15 19l-7-7 7-7" /></svg>
     </a>
     <h1 style="margin: 0; font-size: 1.125rem; font-weight: 900; text-transform: uppercase; flex-grow: 1; text-align: center;">Reproduction sur quadrillage</h1>
     <button id="btn-aide" onclick="ouvrirAide()">💡</button>
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste" class="mb-6 text-left no-print">
-        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width:12px; height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+    <div id="container-retour-liste" class="mb-4 text-left no-print">
+        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:12px; height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             Retour aux générateurs
         </a>
+    </div>
+
+    <div class="no-print flex justify-center mb-8">
+        <div class="inline-flex bg-white/5 p-1 rounded-2xl border border-white/10 shadow-inner">
+            <button onclick="switchAppMode('prof')" id="btn-mode-prof" class="px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all">👨‍🏫 Mode Professeur</button>
+            <button onclick="switchAppMode('eleve')" id="btn-mode-eleve" class="px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all">🎓 Mode Élève</button>
+        </div>
     </div>
 
     <div class="controls no-print flex items-center gap-3 py-2 px-4 w-fit mx-auto rounded-full border border-white/10 shadow-sm mb-6">
@@ -91,333 +91,447 @@
     </div>
 
     <div id="preview-container">
-        <div class="flex flex-col items-center">
+        <div class="flex flex-col items-center flex-1">
             <span id="label-modele" class="text-black text-[10px] font-bold uppercase mb-2">Modèle</span>
             <svg id="svg-model"></svg>
-            <div id="draw-actions" class="flex items-center gap-2 mt-4 no-print">
-                <button id="btn-tool-line" onclick="setTool('line')" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Outil Ligne">📏</button>
-                <button id="btn-tool-circle" onclick="setTool('circle')" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Outil Cercle">⭕</button>
-                
-                <div class="w-px h-8 bg-gray-400/20 mx-1"></div>
-                
-                <button id="btn-undo" onclick="undoLastAction()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Annuler">↩</button>
-                <button id="btn-redo" onclick="redoLastAction()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Refaire">↪</button>
-                
-                <button id="btn-gomme" onclick="toggleGomme()" class="h-12 px-4 flex items-center justify-center rounded-xl text-[10px] font-black uppercase transition-colors active:scale-95 shadow-sm" title="Gomme">
-                    <span id="gomme-status">🧽 Gomme OFF</span>
-                </button>
+        </div>
 
-                <button id="btn-vider" onclick="viderGrille()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Vider tout">🗑️</button>
-            </div>
+        <div id="container-eleve" class="hidden flex-col items-center flex-1">
+            <span class="text-black text-[10px] font-bold uppercase mb-2">Ta reproduction</span>
+            <svg id="svg-eleve"></svg>
+            <button id="btn-verifier" onclick="verifierReproduction()" class="mt-4 px-6 py-2 rounded-xl text-white font-black text-[10px] uppercase shadow-md active:scale-95 bg-green-500">✅ Vérifier</button>
         </div>
     </div>
 
-    <div class="mt-8 no-print">
-        <button onclick="exportToPDF()" id="btn-export-pdf" class="w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest transition active:scale-95 shadow-lg">📄 Générer le PDF (Modèle + Vide)</button>
+    <div id="draw-actions" class="flex items-center gap-2 mt-8 no-print justify-center">
+        <button id="btn-tool-line" onclick="setTool('line')" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Outil Ligne">📏</button>
+        <button id="btn-tool-circle" onclick="setTool('circle')" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Outil Cercle">⭕</button>
+        <button id="btn-tool-fill" onclick="setTool('fill')" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Remplir une zone">🎨</button>
+        
+        <div class="w-px h-8 bg-gray-400/20 mx-1"></div>
+        
+        <button id="btn-undo" onclick="undoLastAction()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Annuler">↩</button>
+        <button id="btn-redo" onclick="redoLastAction()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Refaire">↪</button>
+        
+        <button id="btn-gomme" onclick="toggleGomme()" class="h-12 px-4 flex items-center justify-center rounded-xl text-[10px] font-black uppercase transition-colors active:scale-95 shadow-sm" title="Gomme">
+            <span id="gomme-status">🧽 Gomme OFF</span>
+        </button>
+
+        <button id="btn-vider" onclick="viderGrille()" class="w-12 h-12 flex items-center justify-center rounded-xl text-lg transition-colors active:scale-95 shadow-sm" title="Vider tout">🗑️</button>
+    </div>
+
+    <div id="admin-actions" class="controls no-print p-4 rounded-3xl border border-white/10 mt-6 mb-6 bg-black/5 flex flex-wrap gap-3 justify-center">
+        <button onclick="exporterFichier()" id="btn-export-file" class="px-4 py-2 rounded-xl font-black text-[10px] uppercase transition active:scale-95 shadow-sm">
+            💾 Sauvegarder dans un fichier
+        </button>
+        <label for="import-file" id="label-import" class="px-4 py-2 rounded-xl font-black text-[10px] uppercase transition active:scale-95 shadow-sm cursor-pointer text-center">
+            📂 Charger un fichier
+        </label>
+        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importerFichier(event)">
+        <button onclick="exportToPDF()" id="btn-export-pdf" class="px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition active:scale-95 shadow-lg">📄 Générer le PDF</button>
     </div>
 </div>
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="text-lg font-black uppercase mb-4" style="color: var(--text-page)">💡 Comment ça marche ?</h2>
-        <div class="text-[11px] space-y-4 opacity-80 font-semibold leading-relaxed">
-            <p>1. <span class="text-blue-500">Outils :</span> Choisissez entre la ligne 📏 ou le cercle ⭕.</p>
-            <p>2. <span class="text-blue-500">Tracer :</span> Cliquez sur un premier point (départ/centre), puis sur un second pour finaliser la forme.</p>
-            <p>3. <span class="text-red-500">Gomme :</span> Activez la gomme et cliquez sur une forme pour l'effacer.</p>
-            <p>4. <span class="text-green-500">Export :</span> Le PDF crée 3 exercices avec modèle et grille vide.</p>
+        <h2 class="text-xl font-black uppercase mb-4 flex items-center gap-2" style="color: var(--text-page)">
+            💡 Guide d'utilisation
+        </h2>
+        
+        <div class="text-[12px] space-y-5 font-medium leading-relaxed" style="color: var(--text-page)">
+            
+            <div>
+                <p class="text-orange-500 uppercase font-black text-[10px] tracking-widest mb-1">1. Configuration</p>
+                <p class="opacity-80">Réglez le <b>nombre de carreaux</b> (de 5 à 15). Notez que changer la taille effacera le dessin en cours.</p>
+            </div>
+
+            <div>
+                <p class="text-blue-500 uppercase font-black text-[10px] tracking-widest mb-1">2. Outils de dessin</p>
+                <ul class="space-y-2 opacity-80">
+                    <li><b>📏 Ligne :</b> Cliquez sur un point d'intersection, déplacez la souris, puis cliquez à nouveau pour fixer la ligne.</li>
+                    <li><b>⭕ Cercle :</b> Cliquez sur le centre, écartez pour définir le rayon, puis validez avec un second clic.</li>
+                    <li><b>🎨 Remplissage :</b> Cliquez sur chaque sommet de votre forme. Pour terminer, <b>cliquez sur le tout premier point</b> posé pour fermer la zone.</li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="text-emerald-500 uppercase font-black text-[10px] tracking-widest mb-1">3. Mode Élève & Vérification</p>
+                <p class="opacity-80">Passez en <b>Mode Élève</b> pour masquer les outils d'édition. L'élève reproduit le modèle à droite, puis clique sur <b>✅ Vérifier</b> pour valider sa précision.</p>
+            </div>
+
+            <div>
+                <p class="text-purple-500 uppercase font-black text-[10px] tracking-widest mb-1">4. Sauvegarde & PDF</p>
+                <p class="opacity-80">Utilisez <b>Sauvegarder</b> pour conserver votre modèle sur l'ordinateur. Le bouton <b>PDF</b> génère une fiche prête à imprimer avec le modèle et la grille vide.</p>
+            </div>
+
         </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close">C'est compris !</button>
+
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close" style="background-color: var(--accent-color); color: white;">
+            J'ai compris, c'est parti !
+        </button>
     </div>
 </div>
 
 <div id="modal-confirm" class="modal-overlay" onclick="fermerConfirm()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 class="text-lg font-black uppercase mb-4 text-red-500">🗑️ Tout effacer ?</h2>
-        <p class="text-[11px] leading-relaxed opacity-80 font-semibold mb-6">Supprimer tous les tracés du modèle ?</p>
         <div class="flex gap-3">
-            <button onclick="fermerConfirm()" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-gray-500/20 active:scale-95">Annuler</button>
-            <button id="btn-valider-vider" onclick="validerVider()" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase text-white bg-red-500 active:scale-95">Confirmer</button>
+            <button onclick="fermerConfirm()" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase bg-gray-500/20">Annuler</button>
+            <button id="btn-valider-vider" onclick="validerVider()" class="flex-1 py-3 rounded-xl font-black text-[10px] uppercase text-white bg-red-500">Confirmer</button>
         </div>
     </div>
 </div>
 
 <script>
     const svgModel = document.getElementById('svg-model');
+    const svgEleve = document.getElementById('svg-eleve');
+    let activeSVG = svgModel; 
+    let appMode = 'prof';
     let lastPoint = null;
-    let undoStack = []; 
-    let redoStack = [];
-    let ghostLine, ghostCircle, hoverDot, anchorDot;
+    let undoStacks = { model: [], eleve: [] }; 
+    let redoStacks = { model: [], eleve: [] };
     let isGommeActive = false;
     let currentTool = 'line'; 
+    let fillPoints = [];
     const INTERNAL_SIZE = 600;
+    let helpLayers = { model: {}, eleve: {} };
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+    function switchAppMode(mode) {
+        appMode = mode;
+        const containerEleve = document.getElementById('container-eleve');
+        const adminActions = document.getElementById('admin-actions');
+        if (mode === 'eleve') {
+            containerEleve.classList.remove('hidden');
+            adminActions.classList.add('hidden');
+            activeSVG = svgEleve;
+            svgModel.style.opacity = "0.6";
+            svgModel.style.pointerEvents = "none";
+        } else {
+            containerEleve.classList.add('hidden');
+            adminActions.classList.remove('hidden');
+            activeSVG = svgModel;
+            svgModel.style.opacity = "1";
+            svgModel.style.pointerEvents = "all";
+        }
+        setTool(currentTool);
+        appliquerTheme();
+    }
+
+    function verifierReproduction() {
+    const getSignature = (svg) => Array.from(svg.querySelectorAll('.line-group'))
+        .map(g => g.innerHTML)
+        .sort()
+        .join('|');
+
+    const estCorrect = getSignature(svgModel) === getSignature(svgEleve);
+    afficherMessage(estCorrect);
+}
+
+	function afficherMessage(succes) {
+    // Supprime l'ancienne modale si elle existe encore
+    const existing = document.getElementById('modal-resultat');
+    if (existing) existing.remove();
+
+    const config = succes ? 
+        { emoji: "✨", titre: "Parfait !", texte: "Ta reproduction est identique au modèle. Beau travail !", color: "#10b981" } : 
+        { emoji: "❌", titre: "Pas tout à fait...", texte: "Il y a quelques petites différences. Regarde bien le modèle et réessaie !", color: "#ef4444" };
+
+    const modalHTML = `
+        <div id="modal-resultat" class="modal-overlay" style="display: flex; opacity: 0; transition: opacity 0.3s ease;">
+            <div class="modal-content" style="text-align: center; transform: scale(0.8); transition: transform 0.3s ease;">
+                <div style="font-size: 50px; margin-bottom: 10px;">${config.emoji}</div>
+                <h2 class="text-xl font-black uppercase mb-2" style="color: ${config.color}">${config.titre}</h2>
+                <p class="text-sm opacity-80 mb-6 font-medium">${config.texte}</p>
+                <button onclick="fermerResultat()" class="btn-modal-close" style="background-color: ${config.color}; color: white; margin-top: 0;">
+                    Continuer
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Petit délai pour l'animation d'entrée
+    setTimeout(() => {
+        const m = document.getElementById('modal-resultat');
+        m.style.opacity = "1";
+        m.querySelector('.modal-content').style.transform = "scale(1)";
+    }, 10);
+}
+
+function fermerResultat() {
+    const m = document.getElementById('modal-resultat');
+    if (m) {
+        m.style.opacity = "0";
+        m.querySelector('.modal-content').style.transform = "scale(0.8)";
+        setTimeout(() => m.remove(), 300);
+    }
+}
 
     function setTool(tool) {
-        currentTool = tool;
-        isGommeActive = false;
-        const status = document.getElementById('gomme-status');
-        status.innerText = "🧽 Gomme OFF";
-        svgModel.style.cursor = "crosshair";
-        if (hoverDot) hoverDot.setAttribute("visibility", "visible");
+        currentTool = tool; isGommeActive = false; fillPoints = [];
+        document.getElementById('gomme-status').innerText = "🧽 Gomme OFF";
+        activeSVG.style.cursor = "crosshair";
+        resetAideVisuelle(); appliquerTheme();
+    }
+
+    function resetAideVisuelle() {
+        [svgModel, svgEleve].forEach(svg => {
+            const layer = helpLayers[svg.id === 'svg-model' ? 'model' : 'eleve'];
+            if(layer.anchorDot) layer.anchorDot.setAttribute("visibility", "hidden");
+            if(layer.ghostLine) layer.ghostLine.setAttribute("visibility", "hidden");
+            if(layer.ghostCircle) layer.ghostCircle.setAttribute("visibility", "hidden");
+            if(layer.ghostPath) layer.ghostPath.setAttribute("visibility", "hidden");
+        });
         lastPoint = null;
-        anchorDot.setAttribute("visibility", "hidden");
-        ghostLine.setAttribute("visibility", "hidden");
-        ghostCircle.setAttribute("visibility", "hidden");
-        appliquerTheme();
     }
 
     function initGrids() {
         const size = parseInt(document.getElementById('gridSize').value) || 10;
         const cell = INTERNAL_SIZE / size;
-        svgModel.dataset.computedCell = cell;
-        
-        lastPoint = null; undoStack = []; redoStack = [];
-        svgModel.innerHTML = '';
-        svgModel.setAttribute('viewBox', `0 0 ${INTERNAL_SIZE} ${INTERNAL_SIZE}`);
-
-        let lines = '';
-        for (let i = 0; i <= size; i++) {
-            const pos = i * cell;
-            const color = (i === 0 || i === size) ? 'grid-main' : 'grid-line';
-            lines += `<line x1="0" y1="${pos}" x2="${INTERNAL_SIZE}" y2="${pos}" class="${color}" />`;
-            lines += `<line x1="${pos}" y1="0" x2="${pos}" y2="${INTERNAL_SIZE}" class="${color}" />`;
-        }
-        svgModel.insertAdjacentHTML('beforeend', lines);
-
-        const helpGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        helpGroup.id = "help-layer";
-        
-        ghostLine = createSVGElement("line", { "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" });
-        ghostCircle = createSVGElement("circle", { "fill": "none", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" });
-        hoverDot = createSVGElement("circle", { "r": "6", "fill": "rgba(0,0,0,0.2)" });
-        anchorDot = createSVGElement("circle", { "r": "6", "fill": "black", "visibility": "hidden" });
-
-        helpGroup.appendChild(ghostLine);
-        helpGroup.appendChild(ghostCircle);
-        helpGroup.appendChild(hoverDot);
-        helpGroup.appendChild(anchorDot);
-        svgModel.appendChild(helpGroup);
+        [svgModel, svgEleve].forEach(svg => {
+            svg.dataset.computedCell = cell; svg.innerHTML = '';
+            svg.setAttribute('viewBox', `0 0 ${INTERNAL_SIZE} ${INTERNAL_SIZE}`);
+            let lines = '';
+            for (let i = 0; i <= size; i++) {
+                const pos = i * cell; const color = (i === 0 || i === size) ? 'grid-main' : 'grid-line';
+                lines += `<line x1="0" y1="${pos}" x2="${INTERNAL_SIZE}" y2="${pos}" class="${color}" />`;
+                lines += `<line x1="${pos}" y1="0" x2="${pos}" y2="${INTERNAL_SIZE}" class="${color}" />`;
+            }
+            svg.insertAdjacentHTML('afterbegin', lines);
+            const helpGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const key = svg.id === 'svg-model' ? 'model' : 'eleve';
+            helpLayers[key] = {
+                ghostLine: createSVGElement("line", { "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+                ghostCircle: createSVGElement("circle", { "fill": "none", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+                ghostPath: createSVGElement("path", { "fill": "rgba(0,0,0,0.1)", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+                hoverDot: createSVGElement("circle", { "r": "6", "fill": "rgba(0,0,0,0.2)" }),
+                anchorDot: createSVGElement("circle", { "r": "6", "fill": "black", "visibility": "hidden" })
+            };
+            Object.values(helpLayers[key]).forEach(el => helpGroup.appendChild(el));
+            svg.appendChild(helpGroup);
+        });
+        undoStacks = { model: [], eleve: [] }; redoStacks = { model: [], eleve: [] };
     }
 
     function createSVGElement(tag, attrs) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-        for (let k in attrs) el.setAttribute(k, attrs[k]);
-        return el;
+        for (let k in attrs) el.setAttribute(k, attrs[k]); return el;
     }
 
-    function getCoords(e) {
-        const cell = parseFloat(svgModel.dataset.computedCell);
-        const rect = svgModel.getBoundingClientRect();
-        const xInternal = ((e.clientX - rect.left) / rect.width) * INTERNAL_SIZE;
-        const yInternal = ((e.clientY - rect.top) / rect.height) * INTERNAL_SIZE;
-        return {
-            x: Math.round(xInternal / cell) * cell,
-            y: Math.round(yInternal / cell) * cell
-        };
+    function getCoords(e, svg) {
+        const cell = parseFloat(svg.dataset.computedCell);
+        const rect = svg.getBoundingClientRect();
+        return { x: Math.round((((e.clientX - rect.left) / rect.width) * INTERNAL_SIZE) / cell) * cell, 
+                 y: Math.round((((e.clientY - rect.top) / rect.height) * INTERNAL_SIZE) / cell) * cell };
     }
 
-    svgModel.addEventListener('pointerdown', (e) => {
+    function handlePointerDown(e, svg) {
+        if (svg !== activeSVG) return;
+        const key = svg.id === 'svg-model' ? 'model' : 'eleve';
+        const layer = helpLayers[key];
         if (isGommeActive) {
             if (e.target.classList.contains('eraser-zone')) {
-                const group = e.target.parentNode;
-                undoStack.push({ type: 'erase', element: group });
-                svgModel.removeChild(group);
-                redoStack = [];
+                const g = e.target.parentNode; undoStacks[key].push({ type: 'erase', element: g });
+                svg.removeChild(g); redoStacks[key] = []; autoSauvegarde();
             }
             return;
         }
-
-        const c = getCoords(e);
+        const c = getCoords(e, svg);
+        if (currentTool === 'fill') {
+            if (fillPoints.length > 0 && c.x === fillPoints[0].x && c.y === fillPoints[0].y) {
+                if (fillPoints.length >= 3) {
+                    const d = fillPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+                    const group = createSVGElement("g", { "class": "line-group" });
+                    group.appendChild(createSVGElement("path", { "d": d, "fill": "transparent", "class": "eraser-zone" }));
+                    group.appendChild(createSVGElement("path", { "d": d, "fill": "rgba(0,0,0,0.2)", "stroke": "black", "stroke-width": "2" }));
+                    svg.insertBefore(group, svg.querySelector('[id^="help-layer"]'));
+                    undoStacks[key].push({ type: 'draw', element: group });
+                    fillPoints = []; layer.ghostPath.setAttribute("visibility", "hidden");
+                    layer.anchorDot.setAttribute("visibility", "hidden"); autoSauvegarde();
+                }
+            } else {
+                fillPoints.push(c); layer.anchorDot.setAttribute("cx", c.x); layer.anchorDot.setAttribute("cy", c.y);
+                layer.anchorDot.setAttribute("visibility", "visible");
+            }
+            return;
+        }
         if (!lastPoint) {
-            lastPoint = c;
-            anchorDot.setAttribute("cx", c.x); anchorDot.setAttribute("cy", c.y);
-            anchorDot.setAttribute("visibility", "visible");
+            lastPoint = c; layer.anchorDot.setAttribute("cx", c.x); layer.anchorDot.setAttribute("cy", c.y);
+            layer.anchorDot.setAttribute("visibility", "visible");
         } else {
-            if (lastPoint.x === c.x && lastPoint.y === c.y) return;
-            
             const group = createSVGElement("g", { "class": "line-group" });
-            let visualElement, hitZone;
-
             if (currentTool === 'line') {
-                hitZone = createSVGElement("line", { "x1": lastPoint.x, "y1": lastPoint.y, "x2": c.x, "y2": c.y, "stroke": "transparent", "stroke-width": "30", "class": "eraser-zone" });
-                visualElement = createSVGElement("line", { "x1": lastPoint.x, "y1": lastPoint.y, "x2": c.x, "y2": c.y, "stroke": "black", "stroke-width": "4", "stroke-linecap": "round" });
-            } else {
-                const radius = Math.sqrt(Math.pow(c.x - lastPoint.x, 2) + Math.pow(c.y - lastPoint.y, 2));
-                hitZone = createSVGElement("circle", { "cx": lastPoint.x, "cy": lastPoint.y, "r": radius, "stroke": "transparent", "stroke-width": "20", "fill": "none", "class": "eraser-zone" });
-                visualElement = createSVGElement("circle", { "cx": lastPoint.x, "cy": lastPoint.y, "r": radius, "stroke": "black", "stroke-width": "4", "fill": "none" });
+                group.appendChild(createSVGElement("line", { "x1": lastPoint.x, "y1": lastPoint.y, "x2": c.x, "y2": c.y, "stroke": "transparent", "stroke-width": "30", "class": "eraser-zone" }));
+                group.appendChild(createSVGElement("line", { "x1": lastPoint.x, "y1": lastPoint.y, "x2": c.x, "y2": c.y, "stroke": "black", "stroke-width": "4", "stroke-linecap": "round" }));
+            } else if (currentTool === 'circle') {
+                const r = Math.sqrt(Math.pow(c.x - lastPoint.x, 2) + Math.pow(c.y - lastPoint.y, 2));
+                group.appendChild(createSVGElement("circle", { "cx": lastPoint.x, "cy": lastPoint.y, "r": r, "stroke": "transparent", "stroke-width": "20", "fill": "none", "class": "eraser-zone" }));
+                group.appendChild(createSVGElement("circle", { "cx": lastPoint.x, "cy": lastPoint.y, "r": r, "stroke": "black", "stroke-width": "4", "fill": "none" }));
             }
-
-            hitZone.style.pointerEvents = "stroke";
-            visualElement.style.pointerEvents = "none";
-            group.appendChild(hitZone);
-            group.appendChild(visualElement);
-            svgModel.insertBefore(group, document.getElementById('help-layer'));
-            
-            undoStack.push({ type: 'draw', element: group });
-            lastPoint = null;
-            anchorDot.setAttribute("visibility", "hidden");
-            ghostLine.setAttribute("visibility", "hidden");
-            ghostCircle.setAttribute("visibility", "hidden");
-            redoStack = [];
+            svg.insertBefore(group, svg.querySelector('[id^="help-layer"]'));
+            undoStacks[key].push({ type: 'draw', element: group });
+            lastPoint = null; layer.anchorDot.setAttribute("visibility", "hidden");
+            layer.ghostLine.setAttribute("visibility", "hidden"); layer.ghostCircle.setAttribute("visibility", "hidden");
+            autoSauvegarde();
         }
-    });
+    }
 
-    svgModel.addEventListener('pointermove', (e) => {
-        if (isGommeActive) return;
-        const c = getCoords(e);
-        if (hoverDot) { 
-            hoverDot.setAttribute("cx", c.x); hoverDot.setAttribute("cy", c.y);
-            hoverDot.setAttribute("visibility", "visible");
-        }
-        if (lastPoint) {
+    function handlePointerMove(e, svg) {
+        if (svg !== activeSVG || isGommeActive) return;
+        const key = svg.id === 'svg-model' ? 'model' : 'eleve';
+        const layer = helpLayers[key]; const c = getCoords(e, svg);
+        layer.hoverDot.setAttribute("cx", c.x); layer.hoverDot.setAttribute("cy", c.y);
+        if (currentTool === 'fill' && fillPoints.length > 0) {
+            layer.ghostPath.setAttribute("d", fillPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ` L ${c.x} ${c.y} Z`);
+            layer.ghostPath.setAttribute("visibility", "visible");
+        } else if (lastPoint) {
             if (currentTool === 'line') {
-                ghostLine.setAttribute("x1", lastPoint.x); ghostLine.setAttribute("y1", lastPoint.y);
-                ghostLine.setAttribute("x2", c.x); ghostLine.setAttribute("y2", c.y);
-                ghostLine.setAttribute("visibility", "visible");
-                ghostCircle.setAttribute("visibility", "hidden");
-            } else {
-                const radius = Math.sqrt(Math.pow(c.x - lastPoint.x, 2) + Math.pow(c.y - lastPoint.y, 2));
-                ghostCircle.setAttribute("cx", lastPoint.x); ghostCircle.setAttribute("cy", lastPoint.y);
-                ghostCircle.setAttribute("r", radius);
-                ghostCircle.setAttribute("visibility", "visible");
-                ghostLine.setAttribute("visibility", "hidden");
+                layer.ghostLine.setAttribute("x1", lastPoint.x); layer.ghostLine.setAttribute("y1", lastPoint.y);
+                layer.ghostLine.setAttribute("x2", c.x); layer.ghostLine.setAttribute("y2", c.y);
+                layer.ghostLine.setAttribute("visibility", "visible");
+            } else if (currentTool === 'circle') {
+                const r = Math.sqrt(Math.pow(c.x - lastPoint.x, 2) + Math.pow(c.y - lastPoint.y, 2));
+                layer.ghostCircle.setAttribute("cx", lastPoint.x); layer.ghostCircle.setAttribute("cy", lastPoint.y);
+                layer.ghostCircle.setAttribute("r", r); layer.ghostCircle.setAttribute("visibility", "visible");
             }
         }
-    });
+    }
 
     function toggleGomme() {
-        isGommeActive = !isGommeActive;
-        const status = document.getElementById('gomme-status');
-        if (isGommeActive) {
-            status.innerText = "🧽 Gomme ON";
-            svgModel.style.cursor = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size:24px'><text y='24' x='0'>🧽</text></svg>") 12 12, pointer`;
-            if (hoverDot) hoverDot.setAttribute("visibility", "hidden");
-        } else {
-            status.innerText = "🧽 Gomme OFF";
-            svgModel.style.cursor = "crosshair";
-            if (hoverDot) hoverDot.setAttribute("visibility", "visible");
-        }
-        lastPoint = null;
-        anchorDot.setAttribute("visibility", "hidden");
-        ghostLine.setAttribute("visibility", "hidden");
-        ghostCircle.setAttribute("visibility", "hidden");
-        appliquerTheme();
+        isGommeActive = !isGommeActive; resetAideVisuelle();
+        document.getElementById('gomme-status').innerText = isGommeActive ? "🧽 Gomme ON" : "🧽 Gomme OFF";
+        activeSVG.style.cursor = isGommeActive ? "pointer" : "crosshair"; appliquerTheme();
     }
 
     function undoLastAction() {
-        if (undoStack.length === 0) return;
-        const action = undoStack.pop();
-        redoStack.push(action);
-        if (action.type === 'draw') svgModel.removeChild(action.element);
-        else svgModel.insertBefore(action.element, document.getElementById('help-layer'));
+        const k = activeSVG.id === 'svg-model' ? 'model' : 'eleve';
+        if (undoStacks[k].length === 0) return;
+        const a = undoStacks[k].pop(); redoStacks[k].push(a);
+        if (a.type === 'draw') activeSVG.removeChild(a.element);
+        else activeSVG.insertBefore(a.element, activeSVG.querySelector('[id^="help-layer"]'));
+        autoSauvegarde();
     }
 
     function redoLastAction() {
-        if (redoStack.length === 0) return;
-        const action = redoStack.pop();
-        undoStack.push(action);
-        if (action.type === 'draw') svgModel.insertBefore(action.element, document.getElementById('help-layer'));
-        else svgModel.removeChild(action.element);
+        const k = activeSVG.id === 'svg-model' ? 'model' : 'eleve';
+        if (redoStacks[k].length === 0) return;
+        const a = redoStacks[k].pop(); undoStacks[k].push(a);
+        if (a.type === 'draw') activeSVG.insertBefore(a.element, activeSVG.querySelector('[id^="help-layer"]'));
+        else activeSVG.removeChild(a.element);
+        autoSauvegarde();
     }
 
     function viderGrille() { document.getElementById('modal-confirm').style.display = 'flex'; }
     function fermerConfirm() { document.getElementById('modal-confirm').style.display = 'none'; }
     function validerVider() {
-        svgModel.querySelectorAll('.line-group').forEach(l => svgModel.removeChild(l));
-        lastPoint = null; undoStack = []; redoStack = [];
-        anchorDot.setAttribute("visibility", "hidden");
-        ghostLine.setAttribute("visibility", "hidden");
-        ghostCircle.setAttribute("visibility", "hidden");
-        fermerConfirm();
+        activeSVG.querySelectorAll('.line-group').forEach(l => activeSVG.removeChild(l));
+        const k = activeSVG.id === 'svg-model' ? 'model' : 'eleve';
+        undoStacks[k] = []; redoStacks[k] = []; lastPoint = null; fillPoints = [];
+        resetAideVisuelle(); fermerConfirm(); autoSauvegarde();
     }
 
-    async function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const modelWrapper = document.querySelector('#preview-container > div');
-        const titleLabel = document.getElementById('label-modele');
+    function exporterFichier() {
+        const data = { gridSize: document.getElementById('gridSize').value, shapes: Array.from(svgModel.querySelectorAll('.line-group')).map(g => g.outerHTML) };
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+        a.download = `modele_repro.json`; a.click();
+    }
+
+    function importerFichier(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader(); reader.onload = (e) => {
+            const data = JSON.parse(e.target.result); document.getElementById('gridSize').value = data.gridSize; initGrids();
+            data.shapes.forEach(html => { svgModel.insertAdjacentHTML('beforeend', html); svgModel.insertBefore(svgModel.lastChild, svgModel.querySelector('[id^="help-layer"]')); });
+        }; reader.readAsText(file);
+    }
+
+    async function exportToPDF() { 
+    const { jsPDF } = window.jspdf; 
+    const modelWrapper = document.querySelector('#preview-container > div'); 
+    const titleLabel = document.getElementById('label-modele'); 
+    
+    // Récupération des aides visuelles pour les masquer
+    const key = (activeSVG === svgModel) ? 'model' : 'eleve';
+    const layer = helpLayers[key];
+
+    const maintenant = new Date(); 
+    const dateStr = maintenant.getFullYear() + 
+        String(maintenant.getMonth() + 1).padStart(2, '0') + 
+        String(maintenant.getDate()).padStart(2, '0'); 
+    const nomFichier = `outilsprofs_repro_quadrillage_${dateStr}.pdf`; 
+
+    // Masquage des éléments d'interface et aides
+    if (layer && layer.hoverDot) layer.hoverDot.setAttribute("visibility", "hidden"); 
+    if (layer && layer.anchorDot) layer.anchorDot.setAttribute("visibility", "hidden"); 
+    document.getElementById('draw-actions').style.display = 'none'; 
+
+    try { 
+        // 1. Capture du modèle dessiné
+        const canvasModel = await html2canvas(modelWrapper, { scale: 2, backgroundColor: "#ffffff" }); 
         
-        const maintenant = new Date();
-        const dateStr = maintenant.getFullYear() + String(maintenant.getMonth() + 1).padStart(2, '0') + String(maintenant.getDate()).padStart(2, '0');
-        const nomFichier = `outilsprofs_repro_quadrillage_${dateStr}.pdf`;
+        // 2. Masquage du dessin pour capturer la grille vide
+        const lines = svgModel.querySelectorAll('.line-group'); 
+        lines.forEach(l => l.style.display = 'none'); 
+        titleLabel.style.visibility = 'hidden'; 
+        
+        const canvasEmpty = await html2canvas(modelWrapper, { scale: 2, backgroundColor: "#ffffff" }); 
 
-        if (hoverDot) hoverDot.setAttribute("visibility", "hidden");
-        if (anchorDot) anchorDot.setAttribute("visibility", "hidden");
-        document.getElementById('draw-actions').style.display = 'none';
+        // 3. Restauration de l'affichage
+        lines.forEach(l => l.style.display = 'block'); 
+        titleLabel.style.visibility = 'visible'; 
+        document.getElementById('draw-actions').style.display = 'flex'; 
+        if (layer && layer.hoverDot && !isGommeActive) layer.hoverDot.setAttribute("visibility", "visible"); 
 
-        try {
-            const canvasModel = await html2canvas(modelWrapper, { scale: 2, backgroundColor: "#ffffff" });
-            const lines = svgModel.querySelectorAll('.line-group');
-            lines.forEach(l => l.style.display = 'none');
-            titleLabel.style.visibility = 'hidden';
-            const canvasEmpty = await html2canvas(modelWrapper, { scale: 2, backgroundColor: "#ffffff" });
+        // 4. Génération du PDF (3 blocs de reproduction par page)
+        const pdf = new jsPDF('p', 'mm', 'a4'); 
+        const imgW = 75, gap = 15; 
+        const imgH = (canvasModel.height * imgW) / canvasModel.width; 
+        const marginX = (pdf.internal.pageSize.getWidth() - ((imgW * 2) + gap)) / 2; 
 
-            lines.forEach(l => l.style.display = 'block');
-            titleLabel.style.visibility = 'visible';
-            document.getElementById('draw-actions').style.display = 'flex';
-            if (hoverDot && !isGommeActive) hoverDot.setAttribute("visibility", "visible");
+        const dataModel = canvasModel.toDataURL('image/png'); 
+        const dataEmpty = canvasEmpty.toDataURL('image/png'); 
 
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgW = 75, gap = 15;
-            const imgH = (canvasModel.height * imgW) / canvasModel.width;
-            const marginX = (pdf.internal.pageSize.getWidth() - ((imgW * 2) + gap)) / 2;
+        // Placement des 3 exercices sur la page
+        [15, 110, 205].forEach(y => { 
+            pdf.addImage(dataModel, 'PNG', marginX, y, imgW, imgH); 
+            pdf.addImage(dataEmpty, 'PNG', marginX + imgW + gap, y, imgW, imgH); 
+        }); 
+        
+        pdf.save(nomFichier); 
+    } catch (error) { 
+        console.error(error);
+        alert("Erreur lors de la génération."); 
+    } 
+}
 
-            const dataModel = canvasModel.toDataURL('image/png');
-            const dataEmpty = canvasEmpty.toDataURL('image/png');
-
-            [15, 110, 205].forEach(y => {
-                pdf.addImage(dataModel, 'PNG', marginX, y, imgW, imgH);
-                pdf.addImage(dataEmpty, 'PNG', marginX + imgW + gap, y, imgW, imgH);
-            });
-            pdf.save(nomFichier);
-        } catch (error) { alert("Erreur lors de la génération."); }
+    function autoSauvegarde() {
+        const s = Array.from(svgModel.querySelectorAll('.line-group')).map(g => g.outerHTML);
+        localStorage.setItem('repro_autosave', JSON.stringify({ gridSize: document.getElementById('gridSize').value, shapes: s }));
     }
 
     function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; 
-        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
-        
-        const hexa = mapCouleurs[colPref] || '#06b6d4';
-        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
-        
-        const gridInput = document.getElementById('gridSize');
-        if (gridInput) {
-            gridInput.style.color = document.body.classList.contains('light-mode') ? '#000' : '#fff';
-            gridInput.style.borderBottomColor = hexa;
-        }
-
-        const hexToRgba = (hex, opacity) => {
-            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        };
-
-        const editionButtons = ['btn-tool-line', 'btn-tool-circle', 'btn-undo', 'btn-redo', 'btn-gomme', 'btn-vider'];
-        editionButtons.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                const isActive = (id === 'btn-tool-line' && currentTool === 'line' && !isGommeActive) ||
-                                 (id === 'btn-tool-circle' && currentTool === 'circle' && !isGommeActive) ||
-                                 (id === 'btn-gomme' && isGommeActive);
-                if (isActive) {
-                    el.style.backgroundColor = (id === 'btn-gomme') ? "#ef4444" : hexa;
-                    el.style.color = "#fff";
-                } else {
-                    el.style.backgroundColor = hexToRgba(hexa, 0.15);
-                    el.style.color = hexa;
-                }
-            }
-        });
-
-        ['btn-export-pdf', 'btn-retour-header', 'btn-aide', 'btn-retour-liste', 'btn-valider-vider', 'btn-fermer-aide'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
-        });
+        const theme = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const hexa = { 'red': '#ef4444', 'orange': '#f97316', 'emerald': '#10b981', 'cyan': '#06b6d4', 'blue': '#3b82f6', 'violet': '#8b5cf6', 'pink': '#ec4899' }[theme.gen || 'cyan'] || '#06b6d4';
+        const style = (id, active) => { const el = document.getElementById(id); if (el) { el.style.backgroundColor = active ? hexa : 'rgba(128,128,128,0.1)'; el.style.color = active ? '#fff' : hexa; } };
+        style('btn-mode-prof', appMode === 'prof'); style('btn-mode-eleve', appMode === 'eleve');
+        style('btn-tool-line', currentTool === 'line' && !isGommeActive); style('btn-tool-circle', currentTool === 'circle' && !isGommeActive);
+        style('btn-tool-fill', currentTool === 'fill' && !isGommeActive); style('btn-gomme', isGommeActive);
+        ['btn-export-pdf', 'btn-retour-header', 'btn-aide', 'btn-retour-liste', 'btn-export-file', 'label-import', 'btn-valider-vider'].forEach(id => { const el = document.getElementById(id); if (el) { el.style.backgroundColor = hexa; el.style.color = '#fff'; } });
     }
 
-    document.getElementById('gridSize').onchange = initGrids;
-    window.onload = () => { initGrids(); appliquerTheme(); };
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+
+    window.onload = () => {
+        initGrids(); switchAppMode('prof');
+        const saved = localStorage.getItem('repro_autosave');
+        if (saved) {
+            const data = JSON.parse(saved); document.getElementById('gridSize').value = data.gridSize; initGrids();
+            data.shapes.forEach(html => { svgModel.insertAdjacentHTML('beforeend', html); svgModel.insertBefore(svgModel.lastChild, svgModel.querySelector('[id^="help-layer"]')); });
+        }
+        [svgModel, svgEleve].forEach(svg => { svg.addEventListener('pointerdown', (e) => handlePointerDown(e, svg)); svg.addEventListener('pointermove', (e) => handlePointerMove(e, svg)); });
+        document.getElementById('gridSize').onchange = initGrids;
+    };
 </script>
 </body>
 </html>
