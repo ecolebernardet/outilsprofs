@@ -317,11 +317,20 @@ function fermerResultat() {
 }
 
     function setTool(tool) {
-        currentTool = tool; isGommeActive = false; fillPoints = [];
-        document.getElementById('gomme-status').innerText = "🧽 Gomme OFF";
-        activeSVG.style.cursor = "crosshair";
-        resetAideVisuelle(); appliquerTheme();
-    }
+    currentTool = tool; 
+    isGommeActive = false; 
+    fillPoints = [];
+    
+    // On retire explicitement la classe du curseur éponge
+    [svgModel, svgEleve].forEach(svg => {
+        svg.classList.remove('cursor-gomme');
+    });
+
+    document.getElementById('gomme-status').innerText = "🧽 Gomme OFF";
+    activeSVG.style.cursor = "crosshair";
+    resetAideVisuelle(); 
+    appliquerTheme();
+}
 
     function resetAideVisuelle() {
         [svgModel, svgEleve].forEach(svg => {
@@ -335,32 +344,38 @@ function fermerResultat() {
     }
 
     function initGrids() {
-        const size = parseInt(document.getElementById('gridSize').value) || 10;
-        const cell = INTERNAL_SIZE / size;
-        [svgModel, svgEleve].forEach(svg => {
-            svg.dataset.computedCell = cell; svg.innerHTML = '';
-            svg.setAttribute('viewBox', `0 0 ${INTERNAL_SIZE} ${INTERNAL_SIZE}`);
-            let lines = '';
-            for (let i = 0; i <= size; i++) {
-                const pos = i * cell; const color = (i === 0 || i === size) ? 'grid-main' : 'grid-line';
-                lines += `<line x1="0" y1="${pos}" x2="${INTERNAL_SIZE}" y2="${pos}" class="${color}" />`;
-                lines += `<line x1="${pos}" y1="0" x2="${pos}" y2="${INTERNAL_SIZE}" class="${color}" />`;
-            }
-            svg.insertAdjacentHTML('afterbegin', lines);
-            const helpGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const key = svg.id === 'svg-model' ? 'model' : 'eleve';
-            helpLayers[key] = {
-                ghostLine: createSVGElement("line", { "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
-                ghostCircle: createSVGElement("circle", { "fill": "none", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
-                ghostPath: createSVGElement("path", { "fill": "rgba(0,0,0,0.1)", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
-                hoverDot: createSVGElement("circle", { "r": "6", "fill": "rgba(0,0,0,0.2)" }),
-                anchorDot: createSVGElement("circle", { "r": "6", "fill": "black", "visibility": "hidden" })
-            };
-            Object.values(helpLayers[key]).forEach(el => helpGroup.appendChild(el));
-            svg.appendChild(helpGroup);
-        });
-        undoStacks = { model: [], eleve: [] }; redoStacks = { model: [], eleve: [] };
-    }
+    const size = parseInt(document.getElementById('gridSize').value) || 10;
+    const cell = INTERNAL_SIZE / size;
+    [svgModel, svgEleve].forEach(svg => {
+        svg.dataset.computedCell = cell; svg.innerHTML = '';
+        svg.setAttribute('viewBox', `0 0 ${INTERNAL_SIZE} ${INTERNAL_SIZE}`);
+        let lines = '';
+        for (let i = 0; i <= size; i++) {
+            const pos = i * cell; const color = (i === 0 || i === size) ? 'grid-main' : 'grid-line';
+            lines += `<line x1="0" y1="${pos}" x2="${INTERNAL_SIZE}" y2="${pos}" class="${color}" />`;
+            lines += `<line x1="${pos}" y1="0" x2="${pos}" y2="${INTERNAL_SIZE}" class="${color}" />`;
+        }
+        svg.insertAdjacentHTML('afterbegin', lines);
+        
+        const helpGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const key = svg.id === 'svg-model' ? 'model' : 'eleve';
+        
+        // --- LA LIGNE À AJOUTER EST ICI ---
+        helpGroup.id = "help-layer-" + key; 
+        // ----------------------------------
+
+        helpLayers[key] = {
+            ghostLine: createSVGElement("line", { "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+            ghostCircle: createSVGElement("circle", { "fill": "none", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+            ghostPath: createSVGElement("path", { "fill": "rgba(0,0,0,0.1)", "stroke": "rgba(0,0,0,0.3)", "stroke-width": "2", "stroke-dasharray": "4", "visibility": "hidden" }),
+            hoverDot: createSVGElement("circle", { "r": "6", "fill": "rgba(0,0,0,0.2)" }),
+            anchorDot: createSVGElement("circle", { "r": "6", "fill": "black", "visibility": "hidden" })
+        };
+        Object.values(helpLayers[key]).forEach(el => helpGroup.appendChild(el));
+        svg.appendChild(helpGroup);
+    });
+    undoStacks = { model: [], eleve: [] }; redoStacks = { model: [], eleve: [] };
+}
 
     function createSVGElement(tag, attrs) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -619,7 +634,6 @@ function fermerResultat() {
                 el.style.transform = "scale(1.15)";
                 el.style.boxShadow = `0 0 15px ${hexa}`;
             } else {
-                // Inactif : TOTALEMENT TRANSPARENT avec bordure fine
                 el.style.backgroundColor = "transparent";
                 el.style.border = `1px solid ${isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)'}`;
                 el.style.color = isLight ? "#000" : "#fff";
@@ -630,10 +644,15 @@ function fermerResultat() {
         } 
     };
 
+    // Outils de dessin
     styleTool('btn-tool-line', currentTool === 'line' && !isGommeActive); 
     styleTool('btn-tool-circle', currentTool === 'circle' && !isGommeActive);
     styleTool('btn-tool-fill', currentTool === 'fill' && !isGommeActive); 
     styleTool('btn-gomme', isGommeActive);
+
+    // Modes Professeur / Élève
+    styleTool('btn-mode-prof', appMode === 'prof');
+    styleTool('btn-mode-eleve', appMode === 'eleve');
 
     // Boutons de contrôle (neutres)
     ['btn-undo', 'btn-redo', 'btn-vider'].forEach(id => {
@@ -648,7 +667,11 @@ function fermerResultat() {
     // Boutons d'interface (Header, Retour, etc.)
     ['btn-export-pdf', 'btn-retour-header', 'btn-aide', 'btn-retour-liste', 'btn-export-file', 'label-import'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) { el.style.backgroundColor = hexa; el.style.color = '#fff'; el.style.border = "none"; }
+        if (el) { 
+            el.style.backgroundColor = hexa; 
+            el.style.color = '#fff'; 
+            el.style.border = "none"; 
+        }
     });
 }
 
