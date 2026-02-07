@@ -6,23 +6,31 @@
     <title>Générateurs - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
             --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --header-bg: #1e1e1e; --card-bg: #1e1e1e; --input-bg: #2a2a2a;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         body.light-mode {
             --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
-            --header-bg: #ffffff; --card-bg: #ffffff;
+            --header-bg: #ffffff; --card-bg: #ffffff; --input-bg: #f3f4f6;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
-        
+        /* Base Styles */
+        body { 
+            font-family: 'Inter', sans-serif; background: var(--bg-page); 
+            color: var(--text-page); margin: 0; padding: 0; 
+            transition: background 0.3s ease;
+        }
+
+        /* Header */
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--column-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
@@ -32,7 +40,8 @@
 
         #btn-retour, #btn-aide { 
             display: flex; align-items: center; justify-content: center; 
-            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; 
+            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+            transition: all 0.3s ease; border: none; cursor: pointer;
         }
 
         header h1 { 
@@ -40,20 +49,180 @@
             text-align: center; flex-grow: 1; letter-spacing: 0.1em;
         }
 
+        /* Main Container */
         .main-wrapper { 
-            width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            padding: 0 15px 40px 15px; 
-            transition: max-width 0.4s ease;
+            width: 100%; max-width: 500px; margin: 0 auto; 
+            padding: 0 15px 40px 15px; transition: max-width 0.4s ease;
         }
 
-        #tools-list {
+        @media (min-width: 768px) {
+            .main-wrapper { max-width: 900px; }
+        }
+
+        @media (min-width: 1200px) {
+            .main-wrapper { max-width: 1100px; }
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border-radius: 12px;
+            border: 1px solid var(--column-border);
+            background: var(--input-bg);
+            color: var(--text-page);
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            border-color: currentColor;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            display: none;
+            padding: 4px;
+            color: var(--text-page);
+        }
+
+        .search-clear:hover { opacity: 0.8; }
+        .search-clear.visible { display: block; }
+
+        /* Categories Container */
+        #categoriesContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Category Section */
+        .category-section {
+            animation: fadeIn 0.3s ease-out;
+            position: relative;
+            border-radius: 1.2rem;
+            padding: 16px;
+            background: rgba(128, 128, 128, 0.02);
+            border: 1px solid var(--column-border);
+            transition: all 0.3s ease;
+        }
+
+        .category-section:hover {
+            background: rgba(128, 128, 128, 0.04);
+        }
+
+        .category-section.sortable-ghost {
+            opacity: 0.5;
+            background: rgba(128, 128, 128, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--column-border);
+            position: relative;
+        }
+
+        .category-drag-handle {
+            display: grid;
+            grid-template-columns: repeat(3, 2px);
+            gap: 2px;
+            cursor: grab;
+            opacity: 0.2;
+            transition: opacity 0.3s;
+            padding: 4px 8px;
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+
+        .category-drag-handle:hover {
+            opacity: 0.6;
+        }
+
+        .category-drag-handle:active {
+            cursor: grabbing;
+            opacity: 1;
+        }
+
+        .category-drag-handle span {
+            width: 2px;
+            height: 2px;
+            background-color: var(--text-page);
+            border-radius: 50%;
+        }
+
+        .category-icon { 
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .category-title { 
+            font-size: 0.875rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            flex-grow: 1;
+        }
+
+        .category-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.2);
+            color: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* Tools Grid */
+        .tools-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
 
+        @media (min-width: 768px) {
+            .tools-grid { gap: 20px; }
+        }
+
+        @media (min-width: 1200px) {
+            .tools-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Tool Card */
         .tool-card {
             position: relative;
             background: var(--card-bg);
@@ -67,10 +236,33 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
+            cursor: pointer;
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        .tool-card:focus {
+            outline-color: currentColor;
+        }
+
+        @media (min-width: 768px) {
+            .tool-card { 
+                padding: 20px; 
+                gap: 16px;
+            }
+            .tool-card:hover { 
+                transform: translateY(-4px); 
+                border-color: currentColor; 
+                background: rgba(128, 128, 128, 0.03);
+            }
+            .tool-card:hover .icon-box { 
+                transform: rotate(-5deg) scale(1.1); 
+            }
         }
 
         .tool-card:active { transform: scale(0.97); }
 
+        /* Icon Box */
         .icon-box {
             width: 44px; height: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -80,15 +272,29 @@
             flex-shrink: 0;
         }
 
+        @media (min-width: 768px) {
+            .icon-box { 
+                width: 52px; 
+                height: 52px; 
+                font-size: 26px;
+            }
+        }
+
+        /* Drag Handle */
         .drag-handle {
             position: absolute;
-            top: 10px; right: 10px;
+            top: 10px; 
+            right: 10px;
             display: grid;
             grid-template-columns: repeat(3, 2px);
             gap: 2px;
             cursor: grab;
             opacity: 0.2;
+            transition: opacity 0.3s;
+            padding: 4px;
         }
+
+        .drag-handle:active { cursor: grabbing; }
 
         .drag-handle span {
             width: 2px; height: 2px;
@@ -96,32 +302,86 @@
             border-radius: 50%;
         }
 
+        .tool-card:hover .drag-handle { opacity: 0.5; }
+
+        /* Tool Info */
+        .tool-info h2 { 
+            font-size: 0.75rem;
+            line-height: 1.2;
+            margin: 0;
+        }
+
         @media (min-width: 768px) {
-            .main-wrapper { max-width: 900px; }
-            #tools-list { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-            .tool-card { padding: 20px; gap: 16px; }
-            .icon-box { width: 52px; height: 52px; font-size: 26px; }
-            .tool-card:hover { 
-                transform: translateY(-4px); 
-                border-color: currentColor; 
-                background: rgba(128, 128, 128, 0.03);
-            }
-            .tool-card:hover .icon-box { transform: rotate(-5deg) scale(1.1); }
+            .tool-info h2 { font-size: 0.875rem; }
         }
 
-        @media (min-width: 1200px) {
-            .main-wrapper { max-width: 1100px; }
-            #tools-list { grid-template-columns: repeat(3, 1fr); }
+        .tool-info p { 
+            font-size: 0.5625rem;
+            opacity: 0.5;
+            margin: 4px 0 0 0;
         }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 30px; position: relative; }
-        
+        @media (min-width: 768px) {
+            .tool-info p { font-size: 0.625rem; }
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+            font-size: 0.875rem;
+        }
+
+        .no-results-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        /* Modals */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; z-index: 1000; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
+            align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content { 
+            background: var(--card-bg); width: 100%; max-width: 450px; 
+            border-radius: 1.5rem; border: 1px solid var(--column-border); 
+            padding: 30px; position: relative;
+        }
+
+        .modal-title { 
+            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
+            margin-bottom: 1rem; margin-top: 0;
+        }
+
+        .modal-text { 
+            font-size: 0.6875rem;
+            line-height: 1.5;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .modal-text { font-size: 0.75rem; }
+        }
+
+        .modal-text p { margin-bottom: 0.75rem; margin-top: 0; }
+
         .btn-modal-close {
             width: 100%; padding: 14px; border-radius: 12px;
             font-weight: 900; font-size: 11px; text-transform: uppercase;
-            margin-top: 20px; cursor: pointer; border: none; transition: transform 0.2s;
+            margin-top: 20px; cursor: pointer; border: none; 
+            transition: transform 0.2s; color: white;
         }
+
+        .btn-modal-close:active { transform: scale(0.95); }
+        .btn-modal-close:focus { outline: 2px solid currentColor; outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -130,229 +390,475 @@
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
 </script>
 
+<!-- ====================== HEADER ====================== -->
 <header>
-    <a href="index.html" id="btn-retour">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <a href="index.html" id="btn-retour" aria-label="Retourner à l'accueil">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
         </svg>
     </a>
     <h1 id="pageTitle">Générateurs</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg" aria-label="Ouvrir l'aide">💡</button>
 </header>
 
+<!-- ====================== MAIN CONTENT ====================== -->
 <div class="main-wrapper">
-    <div id="tools-list">
-    <a href="gene_calcul.html" class="tool-card" data-id="calc">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-calc">🧮</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-calc">Calcul Mental</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">fiches et exercices chrono</p>
-        </div>
-    </a>
+    <!-- Search Bar -->
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Rechercher un outil..." 
+            aria-label="Rechercher parmi les outils"
+            autocomplete="off"
+        >
+        <button class="search-clear" id="clearSearch" aria-label="Effacer la recherche">✕</button>
+    </div>
 
-    <a href="gene_operations.html" class="tool-card" data-id="ops">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-ops">📅</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-ops">Rituel Opérations</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">planificateur hebdomadaire</p>
-        </div>
-    </a>
-    
-    <a href="gene_compteestbon.html" class="tool-card" data-id="compte">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-compte">🎯</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-compte">Le Compte est Bon</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">générateur de défis de calcul</p>
-        </div>
-    </a>
+    <!-- Tools by Category -->
+    <div id="categoriesContainer"></div>
 
-	<a href="gene_pyramide.html" class="tool-card" data-id="pyramide">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-pyramide">🔺</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-pyramide">Pyramides</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">calculs additifs et multiplicatifs</p>
-        </div>
-    </a>
-	
-	<a href="gene_domino.html" class="tool-card" data-id="dominos">
-		<div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-		<div class="icon-box" id="icon-dominos">🀄</div>
-		<div>
-			<h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-dominos">Dominos</h2>
-			<p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">calculs ou thèmes</p>
-		</div>
-	</a>
-
-    <a href="gene_fractions.html" class="tool-card" data-id="fractions">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-fractions">➗</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-fractions">Fractions</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">représentations et calculs</p>
-        </div>
-    </a>
-    
-	<a href="gene_repro_quadrillage.html" class="tool-card" data-id="repro">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-repro">📐</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-repro">Reproduction</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">reproduction dans un quadrillage</p>
-        </div>
-    </a>
-	
-	<a href="gene_sudokus.html" class="tool-card" data-id="sudoku">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-sudoku">🔢</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-sudoku">Sudokus</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">grilles de logique et variantes</p>
-        </div>
-    </a>
-	
-    <a href="gene_motsmeles.html" class="tool-card" data-id="mots">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-mots">📝</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-mots">Mots Mêlés</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">grilles de mots personnalisées</p>
-        </div>
-    </a>
-    
-    <a href="gene_pixelart.html" class="tool-card" data-id="pixel">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-pixel">🎨</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-pixel">Pixel Art</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">créateur de modèles et grilles</p>
-        </div>
-    </a>
-
-    <a href="gene_quizz.html" class="tool-card" data-id="quizz">
-        <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="icon-box" id="icon-quizz">❓</div>
-        <div>
-            <h2 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-quizz">Quizz</h2>
-            <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">questions-réponses</p>
-        </div>
-    </a>
-</div>
+    <!-- No Results -->
+    <div id="noResults" class="no-results" style="display: none;">
+        <div class="no-results-icon">🔍</div>
+        <p>Aucun outil ne correspond à votre recherche</p>
+    </div>
 </div>
 
-<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+<!-- ====================== HELP MODAL ====================== -->
+<div id="modal-aide" class="modal-overlay" onclick="fermerAide()" role="dialog" aria-modal="true">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide</h2>
-        <div class="text-[11px] md:text-[12px] leading-relaxed space-y-3 opacity-80 font-semibold">
-            <p>Cette section regroupe vos outils de création pédagogique.</p>
-            <p>🧮 Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.</p>
-            <p>📅 Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens.</p>
-            <p>🎯 Le <strong>Compte est Bon</strong> génère des tirages de nombres à atteindre avec des solutions garanties.</p>
-            <p>🔺 Le <strong>Générateur de Pyramides</strong> crée des défis de calcul basés sur la somme ou le produit de briques adjacentes.</p>
-            <p>➗ Le <strong>Générateur de Fractions</strong> crée des exercices de lecture, d'écriture et de comparaison de fractions.</p>
-			<p>📐 Le <strong>Générateur de Reproduction</strong> permet de créer des grilles de reproduction de figures géométriques.</p>
-            <p>🀄 Le <strong>Générateur de Dominos</strong> crée des chaînes de calculs ou de révisions thématiques avec sens de lecture.</p>
-			<p>🔢 Le <strong>Générateur de Sudokus</strong> crée des grilles de logique de différents niveaux avec leurs corrections.</p>
-            <p>📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.</p>
-            <p>🎨 Le <strong>Générateur de Pixel Art</strong> permet de transformer des images en grilles à colorier.</p>
-            <p>❓ Le <strong>Générateur de Quizz</strong> permet de créer des séries de questions/réponses avec minuteur et export PDF/TXT.</p>
-        </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close active:scale-95">Compris</button>
+        <h2 id="titre-aide" class="modal-title">💡 Aide</h2>
+        <div id="aide-content" class="modal-text space-y-3"></div>
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close">Compris</button>
     </div>
 </div>
 
 <script>
-    const mapCouleurs = { 
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 
-        'rose': '#f43f5e' 
+    // ====================== CONFIGURATION & CONSTANTS ====================== 
+    const COLOR_MAP = {
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+        'rose': '#f43f5e'
     };
 
-    function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; 
-        const hexa = mapCouleurs[colPref];
-        const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
-        const contrast = isDarkText ? '#000' : '#fff';
+    const STORAGE_KEYS = {
+        theme: 'theme_tuiles',
+        themeMode: 'theme_mode',
+        toolOrder: 'gen_order',
+        categoryOrder: 'gen_category_order'
+    };
 
-        const boutonsSoles = [
-            document.getElementById('btn-retour'), 
-            document.getElementById('btn-aide'), 
+    const CATEGORIES = {
+        calcul: {
+            icon: '🧮',
+            name: 'Calcul',
+            color: '#3b82f6'
+        },
+        logique: {
+            icon: '🧩',
+            name: 'Logique & Réflexion',
+            color: '#8b5cf6'
+        },
+        langage: {
+            icon: '📝',
+            name: 'Langage & Vocabulaire',
+            color: '#ec4899'
+        },
+        geometrie: {
+            icon: '📐',
+            name: 'Géométrie & Spatial',
+            color: '#f59e0b'
+        }
+    };
+
+    const TOOLS = [
+        {
+            id: 'calc',
+            href: 'gene_calcul.html',
+            icon: '🧮',
+            title: 'Calcul Mental',
+            description: 'fiches et exercices chrono',
+            category: 'calcul'
+        },
+        {
+            id: 'ops',
+            href: 'gene_operations.html',
+            icon: '📅',
+            title: 'Rituel Opérations',
+            description: 'planificateur hebdomadaire',
+            category: 'calcul'
+        },
+        {
+            id: 'compte',
+            href: 'gene_compteestbon.html',
+            icon: '🎯',
+            title: 'Le Compte est Bon',
+            description: 'générateur de défis de calcul',
+            category: 'calcul'
+        },
+        {
+            id: 'pyramide',
+            href: 'gene_pyramide.html',
+            icon: '🔺',
+            title: 'Pyramides',
+            description: 'calculs additifs et multiplicatifs',
+            category: 'calcul'
+        },
+        {
+            id: 'fractions',
+            href: 'gene_fractions.html',
+            icon: '➗',
+            title: 'Fractions',
+            description: 'représentations et calculs',
+            category: 'calcul'
+        },
+        {
+            id: 'sudoku',
+            href: 'gene_sudokus.html',
+            icon: '🔢',
+            title: 'Sudokus',
+            description: 'grilles de logique et variantes',
+            category: 'logique'
+        },
+        {
+            id: 'dominos',
+            href: 'gene_domino.html',
+            icon: '🀄',
+            title: 'Dominos',
+            description: 'calculs ou thèmes',
+            category: 'logique'
+        },
+        {
+            id: 'mots',
+            href: 'gene_motsmeles.html',
+            icon: '📝',
+            title: 'Mots Mêlés',
+            description: 'grilles de mots personnalisées',
+            category: 'langage'
+        },
+        {
+            id: 'quizz',
+            href: 'gene_quizz.html',
+            icon: '❓',
+            title: 'Quizz',
+            description: 'questions-réponses',
+            category: 'langage'
+        },
+        {
+            id: 'repro',
+            href: 'gene_repro_quadrillage.html',
+            icon: '📐',
+            title: 'Reproduction',
+            description: 'reproduction dans un quadrillage',
+            category: 'geometrie'
+        },
+        {
+            id: 'pixel',
+            href: 'gene_pixelart.html',
+            icon: '🎨',
+            title: 'Pixel Art',
+            description: 'créateur de modèles et grilles',
+            category: 'geometrie'
+        }
+    ];
+
+    const HELP_CONTENT = [
+        'Cette section regroupe vos outils de création pédagogique.',
+        '🧮 Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.',
+        '📅 Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens.',
+        '🎯 Le <strong>Compte est Bon</strong> génère des tirages de nombres à atteindre avec des solutions garanties.',
+        '🔺 Le <strong>Générateur de Pyramides</strong> crée des défis de calcul basés sur la somme ou le produit de briques adjacentes.',
+        '➗ Le <strong>Générateur de Fractions</strong> crée des exercices de lecture, d\'écriture et de comparaison de fractions.',
+        '📐 Le <strong>Générateur de Reproduction</strong> permet de créer des grilles de reproduction de figures géométriques.',
+        '🀄 Le <strong>Générateur de Dominos</strong> crée des chaînes de calculs ou de révisions thématiques avec sens de lecture.',
+        '🔢 Le <strong>Générateur de Sudokus</strong> crée des grilles de logique de différents niveaux avec leurs corrections.',
+        '📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.',
+        '🎨 Le <strong>Générateur de Pixel Art</strong> permet de transformer des images en grilles à colorier.',
+        '❓ Le <strong>Générateur de Quizz</strong> permet de créer des séries de questions/réponses avec minuteur et export PDF/TXT.'
+    ];
+
+    // ====================== UTILITY FUNCTIONS ====================== 
+    function isDarkText(colorName) {
+        return ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
+    }
+
+    function normalizeSearchText(text) {
+        return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function toolMatchesSearch(tool, searchTerm) {
+        const normalized = normalizeSearchText(searchTerm);
+        return normalizeSearchText(tool.title).includes(normalized) ||
+               normalizeSearchText(tool.description).includes(normalized) ||
+               normalizeSearchText(tool.category).includes(normalized);
+    }
+
+    function getOrderedCategories() {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.categoryOrder));
+        if (saved) return saved;
+        return Object.keys(CATEGORIES);
+    }
+
+    // ====================== RENDER TOOLS ====================== 
+    function renderTools(searchTerm = '') {
+        const container = document.getElementById('categoriesContainer');
+        const noResults = document.getElementById('noResults');
+        container.innerHTML = '';
+        
+        let totalVisibleTools = 0;
+
+        // Group tools by category
+        const toolsByCategory = {};
+        Object.keys(CATEGORIES).forEach(catKey => {
+            toolsByCategory[catKey] = [];
+        });
+
+        TOOLS.forEach(tool => {
+            if (!searchTerm || toolMatchesSearch(tool, searchTerm)) {
+                toolsByCategory[tool.category].push(tool);
+                totalVisibleTools++;
+            }
+        });
+
+        // Get ordered categories
+        const orderedCategories = getOrderedCategories();
+
+        // Render each category with tools
+        orderedCategories.forEach(catKey => {
+            if (!CATEGORIES[catKey]) return;
+            
+            const catData = CATEGORIES[catKey];
+            const tools = toolsByCategory[catKey];
+            if (tools.length === 0) return; // Skip empty categories
+
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            section.setAttribute('data-category', catKey);
+
+            // Category header with drag handle
+            const header = document.createElement('div');
+            header.className = 'category-header';
+            header.style.borderBottomColor = catData.color + '40';
+            header.innerHTML = `
+                <div class="category-drag-handle" title="Maintenez pour réorganiser les catégories">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="category-icon">${catData.icon}</span>
+                <h2 class="category-title" style="color: ${catData.color};">${catData.name}</h2>
+                <span class="category-badge" style="background-color: ${catData.color}20; color: ${catData.color};">${tools.length}</span>
+            `;
+            section.appendChild(header);
+
+            // Tools grid
+            const grid = document.createElement('div');
+            grid.className = 'tools-grid';
+
+            tools.forEach(tool => {
+                const card = document.createElement('a');
+                card.href = tool.href;
+                card.className = 'tool-card';
+                card.setAttribute('data-id', tool.id);
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('role', 'link');
+                card.setAttribute('aria-label', `${tool.title} - ${tool.description}`);
+
+                // Handle Enter/Space keyboard navigation
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        card.click();
+                    }
+                });
+
+                card.innerHTML = `
+                    <div class="drag-handle" aria-hidden="true">
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
+                    <div class="tool-info">
+                        <h3 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
+                            ${tool.title}
+                        </h3>
+                        <p class="text-[9px] md:text-[10px] font-bold opacity-50 tracking-tighter">
+                            ${tool.description}
+                        </p>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
+
+        // Show/hide no results message
+        noResults.style.display = totalVisibleTools === 0 ? 'block' : 'none';
+    }
+
+    // ====================== SEARCH FUNCTIONALITY ====================== 
+    function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value;
+            clearBtn.classList.toggle('visible', searchTerm.length > 0);
+            renderTools(searchTerm);
+            applyTheme(); // Reapply theme to new elements
+            setupCategoryDragDrop(); // Reinitialize drag & drop
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchInput.focus();
+            clearBtn.classList.remove('visible');
+            renderTools();
+            applyTheme();
+            setupCategoryDragDrop();
+        });
+
+        // Clear on Escape
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchInput.blur();
+                clearBtn.classList.remove('visible');
+                renderTools();
+                applyTheme();
+                setupCategoryDragDrop();
+            }
+        });
+    }
+
+    // ====================== CATEGORY DRAG & DROP (avec Sortable) ====================== 
+    function setupCategoryDragDrop() {
+        const container = document.getElementById('categoriesContainer');
+        
+        // Détruire l'instance précédente si elle existe
+        if (container._sortableInstance) {
+            container._sortableInstance.destroy();
+        }
+
+        // Créer une nouvelle instance Sortable
+        container._sortableInstance = new Sortable(container, {
+            animation: 250,
+            ghostClass: 'sortable-ghost',
+            handle: '.category-drag-handle',
+            filter: '.tool-card',
+            preventOnFilter: false,
+            onEnd: function(evt) {
+                saveCategoryOrder();
+            }
+        });
+    }
+
+    function saveCategoryOrder() {
+        const container = document.getElementById('categoriesContainer');
+        const order = Array.from(container.querySelectorAll('.category-section'))
+            .map(section => section.getAttribute('data-category'));
+        localStorage.setItem(STORAGE_KEYS.categoryOrder, JSON.stringify(order));
+    }
+
+    // ====================== THEME APPLICATION ====================== 
+    function applyTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+        const colorPref = themePrefs.gen || 'cyan';
+        const colorHex = COLOR_MAP[colorPref];
+        const textColor = isDarkText(colorPref) ? '#000' : '#fff';
+
+        // Apply theme to buttons
+        const buttons = [
+            document.getElementById('btn-retour'),
+            document.getElementById('btn-aide'),
             document.getElementById('btn-fermer-aide')
         ];
 
-        boutonsSoles.forEach(el => {
-            if(el) { 
-                el.style.backgroundColor = hexa; 
-                el.style.color = contrast; 
+        buttons.forEach(el => {
+            if (el) {
+                el.style.backgroundColor = colorHex;
+                el.style.color = textColor;
             }
         });
-        
-        const titreAide = document.getElementById('titre-aide');
-        if(titreAide) titreAide.style.color = hexa;
 
-        const outils = [
-            { icon: 'icon-ops', title: 'title-ops' },
-            { icon: 'icon-calc', title: 'title-calc' },
-            { icon: 'icon-mots', title: 'title-mots' },
-            { icon: 'icon-compte', title: 'title-compte' },
-            { icon: 'icon-pixel', title: 'title-pixel' },
-            { icon: 'icon-quizz', title: 'title-quizz' },
-            { icon: 'icon-fractions', title: 'title-fractions' },
-			{ icon: 'icon-pyramide', title: 'title-pyramide' },
-			{ icon: 'icon-dominos', title: 'title-dominos' },
-			{ icon: 'icon-sudoku', title: 'title-sudoku' },
-			{ icon: 'icon-repro', title: 'title-repro' }
-        ];
+        // Apply theme to help title
+        const helpTitle = document.getElementById('titre-aide');
+        if (helpTitle) helpTitle.style.color = colorHex;
 
-        outils.forEach(outil => {
-            const iconEl = document.getElementById(outil.icon);
-            const titleEl = document.getElementById(outil.title);
-            
-            if(iconEl) {
-                iconEl.style.color = hexa;
-                iconEl.style.borderColor = hexa + '40';
-                iconEl.style.backgroundColor = hexa + '15';
+        // Apply theme to tool cards
+        TOOLS.forEach(tool => {
+            const icon = document.getElementById(`icon-${tool.id}`);
+            const title = document.getElementById(`title-${tool.id}`);
+
+            if (icon) {
+                icon.style.color = colorHex;
+                icon.style.borderColor = colorHex + '40';
+                icon.style.backgroundColor = colorHex + '15';
             }
-            if(titleEl) {
-                titleEl.style.color = hexa;
+
+            if (title) {
+                title.style.color = colorHex;
             }
         });
-    }
 
-    function initSortable() {
-        const toolsList = document.getElementById('tools-list');
-        const savedOrderGen = JSON.parse(localStorage.getItem('gen_order'));
-        
-        if (savedOrderGen) {
-            savedOrderGen.forEach(id => {
-                const tile = document.querySelector(`[data-id="${id}"]`);
-                if (tile) toolsList.appendChild(tile);
-            });
+        // Apply theme to close button
+        const closeBtn = document.getElementById('btn-fermer-aide');
+        if (closeBtn) {
+            closeBtn.style.backgroundColor = colorHex;
+            closeBtn.style.color = textColor;
         }
+    }
 
-        new Sortable(toolsList, {
-            handle: '.drag-handle',
-            animation: 250,
-            ghostClass: 'opacity-0',
-            onEnd: function() {
-                const order = Array.from(toolsList.children).map(child => child.getAttribute('data-id'));
-                localStorage.setItem('gen_order', JSON.stringify(order));
+    // ====================== MODAL MANAGEMENT ====================== 
+    function ouvrirAide() {
+        const content = document.getElementById('aide-content');
+        content.innerHTML = HELP_CONTENT.map(text => `<p>${text}</p>`).join('');
+        document.getElementById('modal-aide').classList.add('active');
+    }
+
+    function fermerAide() {
+        document.getElementById('modal-aide').classList.remove('active');
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            fermerAide();
+        }
+    });
+
+    // ====================== KEYBOARD SHORTCUTS ====================== 
+    function setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // ? to open help
+            if ((e.key === '?' || e.key === 'h') && e.target === document.body) {
+                e.preventDefault();
+                ouvrirAide();
+            }
+
+            // / to focus search
+            if (e.key === '/' && e.target === document.body) {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
             }
         });
     }
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
-
+    // ====================== INITIALIZATION ====================== 
     window.onload = () => {
-        appliquerTheme();
-        initSortable();
+        renderTools();
+        applyTheme();
+        setupSearch();
+        setupKeyboardShortcuts();
+        setupCategoryDragDrop();
     };
 </script>
 </body>
