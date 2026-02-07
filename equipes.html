@@ -15,22 +15,25 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
             --bg: #121212; --text: #ffffff; --card-bg: #0a0a0a; --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1); --pill-bg: #1a1a1a; --btn-num-bg: #0a0a0a;
-            --btn-num-border: #262626; --title-gray: #888888; 
-            --student-name-boy: #bae6fd; --student-name-girl: #fbcfe8;
+            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
+            --pill-bg: #1a1a1a; --btn-num-bg: #0a0a0a; --btn-num-border: #262626;
+            --title-gray: #888888; --student-name-boy: #bae6fd; --student-name-girl: #fbcfe8;
         }
 
         body.light-mode, html.light-mode-init body {
             --bg: #eeeeee; --text: #000000; --card-bg: #ffffff; --header-bg: #ffffff;
             --header-border: #dddddd; --pill-bg: #ffffff; --btn-num-bg: #ffffff;
-            --btn-num-border: #cccccc; --title-gray: #666666; 
+            --btn-num-border: #cccccc; --title-gray: #666666;
         }
 
+        /* Base Styles */
         body { 
             font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); 
             padding: 0; margin: 0; transition: background 0.3s;
@@ -38,6 +41,7 @@
             padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
         }
 
+        /* Header */
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--header-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
@@ -52,87 +56,35 @@
             transition: transform 0.1s ease, background-color 0.3s ease;
         }
 
-        .section-title { font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase; }
+        /* Titles */
+        .section-title { 
+            font-size: 10px; color: var(--title-gray); margin: 15px 0 5px 0; 
+            font-weight: 900; letter-spacing: 1px; text-align: center; text-transform: uppercase;
+        }
+
+        .level-label { 
+            text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Containers */
         #attendance-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px; }
 
-		/* --- MODIFICATIONS POUR ÉCRANS LARGES (PC) --- */
-		@media (min-width: 768px) {
-			/* Élargir les conteneurs */
-			#attendance-container, .grid-teams { 
-				max-width: 95% !important; 
-			}
+        /* Attendance Grid */
+        .attendance-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; 
+            margin-bottom: 20px; width: 100%;
+        }
 
-			/* Grille de présence : 10 colonnes et prénoms plus gros */
-			.attendance-grid { 
-				grid-template-columns: repeat(10, 1fr) !important; 
-				gap: 7px !important;
-			}
-			.student-item {
-				font-size: 0.7rem !important; /* Prénoms beaucoup plus grands */
-				padding: 10px 2px !important;
-			}
+        @media (min-width: 768px) {
+            .attendance-grid { grid-template-columns: repeat(10, 1fr); gap: 7px; }
+        }
 
-			/* Équipes : 4 colonnes sur PC */
-			.grid-teams { 
-				grid-template-columns: repeat(4, 1fr) !important; 
-			}
+        @media (min-width: 1024px) {
+            .attendance-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; }
+        }
 
-			/* Prénoms à l'intérieur des cartes d'équipes */
-			.team-card .flex.items-center {
-				font-size: 0.95rem !important; /* Taille augmentée */
-				margin-bottom: 8px !important;
-			}
-    
-			.tag {
-				font-size: 0.65rem !important;
-				padding: 4px 10px !important;
-			}
-    
-			.team-title {
-				font-size: 0.85rem !important;
-			}
-		}
-		
-@media (min-width: 1024px) {
-			/* Élargir les conteneurs */
-			#attendance-container, .grid-teams { 
-				max-width: 95% !important; 
-			}
-
-			/* Grille de présence : 10 colonnes et prénoms plus gros */
-			.attendance-grid { 
-				grid-template-columns: repeat(10, 1fr) !important; 
-				gap: 10px !important;
-			}
-			.student-item {
-				font-size: 0.9rem !important; /* Prénoms beaucoup plus grands */
-				padding: 10px 2px !important;
-			}
-
-			/* Équipes : 4 colonnes sur PC */
-			.grid-teams { 
-				grid-template-columns: repeat(4, 1fr) !important; 
-			}
-
-			/* Prénoms à l'intérieur des cartes d'équipes */
-			.team-card .flex.items-center {
-				font-size: 0.95rem !important; /* Taille augmentée */
-				margin-bottom: 8px !important;
-			}
-    
-			.tag {
-				font-size: 0.65rem !important;
-				padding: 4px 10px !important;
-			}
-    
-			.team-title {
-				font-size: 0.85rem !important;
-			}
-		}
-			
-        .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; width: 100%; }
-        .level-label { text-align: center; font-size: 10px; font-weight: 900; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
-
+        /* Student Items */
         .student-item { 
             padding: 6px 2px; border-radius: 999px; font-size: 0.6rem; font-weight: 800; 
             text-align: center; cursor: pointer; background-color: var(--pill-bg);
@@ -140,48 +92,126 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none;
         }
 
-        .bg-f { color: var(--student-name-girl) !important; } 
-        .bg-m { color: var(--student-name-boy) !important; } 
-        .name-f { color: var(--student-name-girl); } 
-        .name-g { color: var(--student-name-boy); }
+        @media (min-width: 768px) {
+            .student-item { font-size: 0.7rem; padding: 10px 2px; }
+        }
 
-        .absent { 
+        @media (min-width: 1024px) {
+            .student-item { font-size: 0.9rem; padding: 10px 2px; }
+        }
+
+        .student-item.bg-f { color: var(--student-name-girl) !important; }
+        .student-item.bg-m { color: var(--student-name-boy) !important; }
+
+        .student-item.absent { 
             background-color: #0a0a0a !important; color: #444444 !important; 
             text-decoration: line-through; border-color: #1a1a1a !important;
             opacity: 0.5; transform: scale(0.96);
         }
 
-        body.light-mode .absent, html.light-mode-init .absent { 
+        body.light-mode .student-item.absent, html.light-mode-init .student-item.absent { 
             background: #e0e0e0 !important; color: #aaaaaa !important; border-color: #cccccc !important;
         }
 
-        .num-btn { background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer; }
-        .generate-btn { width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; border: none; cursor: pointer; }
-        
-        .grid-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px; }
-		@media (min-width: 1024px) {
-			.grid-teams { 
-				grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur grands écrans */
-			}
-		}
+        /* Buttons */
+        .num-btn { 
+            background: var(--btn-num-bg); color: var(--text); border: 1px solid var(--btn-num-border); 
+            width: 34px; height: 34px; border-radius: 50%; font-weight: 800; cursor: pointer;
+            transition: all 0.2s;
+        }
 
-        .team-card { border-radius: 1.2rem; padding: 10px; background: var(--card-bg); border: 1px solid var(--header-border); }
-        .team-header { border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px; }
-        .team-title { font-weight: 900; font-size: 0.65rem; color: var(--text); text-transform: uppercase; }
-        .team-stats { font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4; }
-        
-        .tag { font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; border-radius: 999px; color: #fff; min-width: 35px; text-align: center; }
-        
-        .bottom-nav { width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px; }
-        .btn-nav { font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; text-align: center; cursor: pointer; width: 100%; border: none; }
-        
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: var(--card-bg); padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; color: var(--text); border: 1px solid var(--header-border); }
-        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; }
+        .generate-btn { 
+            width: 100%; max-width: 300px; color: white; padding: 14px; font-size: 10px; 
+            font-weight: 900; border-radius: 50px; text-transform: uppercase; margin: 20px 0; 
+            border: none; cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-nav { 
+            font-weight: 800; padding: 12px; border-radius: 50px; font-size: 10px; 
+            text-align: center; cursor: pointer; width: 100%; border: none;
+        }
+
+        /* Teams Grid */
+        .grid-teams { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+            width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px;
+        }
+
+        @media (min-width: 1024px) {
+            .grid-teams { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* Team Cards */
+        .team-card { 
+            border-radius: 1.2rem; padding: 10px; background: var(--card-bg); 
+            border: 1px solid var(--header-border);
+        }
+
+        .team-header { 
+            border-bottom: 1px solid var(--header-border); margin-bottom: 8px; padding-bottom: 4px;
+        }
+
+        .team-title { 
+            font-weight: 900; font-size: 0.65rem; color: var(--text); 
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) {
+            .team-title { font-size: 0.85rem; }
+        }
+
+        .team-stats { 
+            font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4;
+        }
+
+        .team-member { 
+            display: flex; align-items: center; margin-bottom: 1px; font-size: 0.65rem; font-weight: bold;
+        }
+
+        @media (min-width: 768px) {
+            .team-member { font-size: 0.95rem; margin-bottom: 8px; }
+        }
+
+        .tag { 
+            font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; 
+            border-radius: 999px; color: #fff; min-width: 35px; text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .tag { font-size: 0.65rem; padding: 4px 10px; }
+        }
+
+        .name-f { color: var(--student-name-girl); }
+        .name-g { color: var(--student-name-boy); }
+
+        /* Navigation */
+        .bottom-nav { 
+            width: 100%; max-width: 400px; margin: 20px 0 40px 0; padding: 0 10px;
+        }
+
+        /* Modals */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(4px); align-items: center; justify-content: center; 
+            z-index: 1000; padding: 20px;
+        }
+
+        .modal-content { 
+            background: var(--card-bg); padding: 24px; border-radius: 24px; 
+            width: 100%; max-width: 360px; color: var(--text); 
+            border: 1px solid var(--header-border);
+        }
+
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 16px; 
+            font-weight: 900; font-size: 11px; text-transform: uppercase; 
+            cursor: pointer; transition: all 0.2s;
+        }
     </style>
 </head>
 <body>
 
+    <!-- ====================== HEADER ====================== -->
     <header>
         <a href="index.html" id="btn-retour" class="header-btn shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -192,16 +222,25 @@
         <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg text-lg">💡</button>
     </header>
 
+    <!-- ====================== ATTENDANCE SECTION ====================== -->
     <div id="attendance-container"></div>
+
+    <!-- ====================== TEAM COUNT SELECTOR ====================== -->
     <p class="section-title">Nombre d'équipes</p>
     <div class="flex gap-2 mb-4" id="selector"></div>
+
+    <!-- ====================== GENERATE BUTTON ====================== -->
     <button id="main-generate-btn" class="generate-btn" onclick="generateBalancedTeams()">Générer les équipes</button>
+
+    <!-- ====================== TEAMS RESULTS ====================== -->
     <div id="results" class="grid-teams"></div>
 
+    <!-- ====================== BOTTOM NAVIGATION ====================== -->
     <div class="bottom-nav">
         <button onclick="resetTeams()" class="btn-nav bg-red-500 text-white shadow-lg">⚠️ effacer les équipes</button>
     </div>
 
+    <!-- ====================== HELP MODAL ====================== -->
     <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Équipes</h2>
@@ -214,248 +253,368 @@
         </div>
     </div>
 
+    <!-- ====================== ALERT MODAL ====================== -->
     <div id="alertModal" class="modal-overlay" onclick="fermerModal('alertModal')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 id="alertTitle" class="font-black uppercase text-center mb-2">Confirmation</h3>
             <p id="alertText" class="text-center text-sm mb-4"></p>
             <div class="flex gap-2">
-                <button onclick="closeModal()" class="modal-btn bg-gray-200 text-gray-700">Annuler</button>
+                <button onclick="fermerModal('alertModal')" class="modal-btn bg-gray-200 text-gray-700">Annuler</button>
                 <button id="alertConfirmBtn" class="modal-btn text-white">Confirmer</button>
             </div>
         </div>
     </div>
 
-<script>
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#666666' };
-    const couleursDecidees = { "CP": "#ec4899", "CE1": "#3b82f6", "CE2": "#eab308", "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7" };
-    const ORDRE_SCOLAIRE = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
+    <script>
+        // ====================== CONFIGURATION & CONSTANTS ====================== 
+        const COLOR_MAP = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#666666'
+        };
 
-    let selectedNumTeams = 4;
-    let ALL_STUDENTS = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-    let absents = new Set(JSON.parse(localStorage.getItem('absents_session_equipes')) || []);
+        const LEVEL_COLORS = {
+            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
+            'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#a855f7'
+        };
 
-    function appliquerCouleursSexe() {
-        const prefs = JSON.parse(localStorage.getItem('theme_tuiles'));
-        if (prefs) {
-            if (prefs.fille && mapCouleurs[prefs.fille]) {
-                document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[prefs.fille]);
-            }
-            if (prefs.garcon && mapCouleurs[prefs.garcon]) {
-                document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[prefs.garcon]);
-            }
-        }
-    }
+        const LEVEL_ORDER = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
 
-    function appliquerTheme() {
-        const isLight = localStorage.getItem('theme_mode') === 'light';
-        document.body.classList.toggle('light-mode', isLight);
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.equipes || 'pink';
-        const cHex = mapCouleurs[colPref];
-        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
+        const STORAGE_KEYS = {
+            students: 'maListeEleves',
+            absents: 'absents_session_equipes',
+            savedTeams: 'savedTeams',
+            theme: 'theme_tuiles',
+            themeMode: 'theme_mode',
+            levelPalette: 'palette_niveaux'
+        };
 
-        document.getElementById('mainTitle').style.color = isLight ? '#000' : '#fff';
-        
-        const headerBtns = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
-        headerBtns.forEach(btn => {
-            if(btn) {
-                btn.style.backgroundColor = cHex;
-                btn.style.color = isDark ? '#000' : '#fff';
-            }
-        });
+        const TEAM_RANGE = { min: 2, max: 8 };
+        const ALGORITHM_ITERATIONS = 300;
 
-        const genBtn = document.getElementById('main-generate-btn');
-        if(genBtn) {
-            genBtn.style.backgroundColor = cHex;
-            genBtn.style.color = isDark ? '#000' : '#fff';
-        }
+        let selectedNumTeams = 4;
+        let allStudents = JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || [];
+        let absentSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.absents)) || []);
 
-        const btnFermerAide = document.getElementById('btn-fermer-aide');
-        if(btnFermerAide) {
-            btnFermerAide.style.backgroundColor = cHex;
-            btnFermerAide.style.color = isDark ? '#000' : '#fff';
+        // ====================== UTILITY FUNCTIONS ====================== 
+        function getDisplayName(student, allStudentsArray) {
+            const firstName = student.identite.trim().split(" ")[0];
+            const hasDuplicate = allStudentsArray.some(s =>
+                s.id !== student.id &&
+                s.identite.trim().split(" ")[0].toLowerCase() === firstName.toLowerCase()
+            );
+            return hasDuplicate && student.identite.split(" ")[1]
+                ? `${firstName} ${student.identite.split(" ")[1].charAt(0)}.`
+                : firstName;
         }
 
-        const titreAide = document.getElementById('titre-aide');
-        if(titreAide) titreAide.style.color = cHex;
-    }
+        function getNormalizedLevel(student) {
+            return student.niveau.toString().trim().toUpperCase();
+        }
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-    function closeModal() { document.getElementById('alertModal').style.display = 'none'; }
+        function getGenderClass(student) {
+            return student.sexe.toLowerCase().startsWith('f') ? 'bg-f' : 'bg-m';
+        }
 
-    function getDisplayName(eleve, all) {
-        const prenom = eleve.identite.trim().split(" ")[0];
-        const aUnDoublon = all.some(s => s.id !== eleve.id && s.identite.trim().split(" ")[0].toLowerCase() === prenom.toLowerCase());
-        return aUnDoublon && eleve.identite.split(" ")[1] ? `${prenom} ${eleve.identite.split(" ")[1].charAt(0)}.` : prenom;
-    }
+        function getGenderNameClass(student) {
+            return student.sexe.toLowerCase().startsWith('f') ? 'name-f' : 'name-g';
+        }
 
-    function getDetailedStats(team) {
-        const s = { f: 0, m: 0, total: team.length, levels: {} };
-        ORDRE_SCOLAIRE.forEach(n => {
-            s.levels[n.toLowerCase()] = { f: 0, m: 0, total: 0 };
-        });
-        team.forEach(e => {
-            const isF = e.sexe.toLowerCase().startsWith('f');
-            const niv = e.niveau.toString().trim().toUpperCase(); 
-            if(isF) s.f++; else s.m++;
-            const key = niv.toLowerCase();
-            if(s.levels[key]) {
-                s.levels[key].total++;
-                if(isF) s.levels[key].f++; else s.levels[key].m++;
+        // ====================== TEAM STATISTICS ====================== 
+        function getTeamStats(team) {
+            const stats = { f: 0, m: 0, total: team.length, levels: {} };
+            
+            LEVEL_ORDER.forEach(level => {
+                stats.levels[level.toLowerCase()] = { f: 0, m: 0, total: 0 };
+            });
+
+            team.forEach(student => {
+                const isFemale = student.sexe.toLowerCase().startsWith('f');
+                const level = getNormalizedLevel(student);
+
+                if (isFemale) stats.f++;
+                else stats.m++;
+
+                const levelKey = level.toLowerCase();
+                if (stats.levels[levelKey]) {
+                    stats.levels[levelKey].total++;
+                    if (isFemale) stats.levels[levelKey].f++;
+                    else stats.levels[levelKey].m++;
+                }
+            });
+
+            return stats;
+        }
+
+        function calculateScore(stats1, stats2) {
+            let score = 0;
+            score += Math.abs(stats1.f - stats2.f) * 10;
+            score += Math.abs(stats1.m - stats2.m) * 10;
+
+            LEVEL_ORDER.forEach(level => {
+                const levelKey = level.toLowerCase();
+                score += Math.abs(stats1.levels[levelKey].f - stats2.levels[levelKey].f) * 20;
+                score += Math.abs(stats1.levels[levelKey].total - stats2.levels[levelKey].total) * 5;
+            });
+
+            return score;
+        }
+
+        // ====================== COLOR & THEME APPLICATION ====================== 
+        function applySexColors() {
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme));
+            if (prefs) {
+                if (prefs.fille && COLOR_MAP[prefs.fille]) {
+                    document.documentElement.style.setProperty('--student-name-girl', COLOR_MAP[prefs.fille]);
+                }
+                if (prefs.garcon && COLOR_MAP[prefs.garcon]) {
+                    document.documentElement.style.setProperty('--student-name-boy', COLOR_MAP[prefs.garcon]);
+                }
             }
-        });
-        return s;
-    }
+        }
 
-    function generateBalancedTeams() {
-        let presents = ALL_STUDENTS.filter(s => !absents.has(String(s.id)));
-        if (presents.length < selectedNumTeams) return;
+        function applyTheme() {
+            const isLight = localStorage.getItem(STORAGE_KEYS.themeMode) === 'light';
+            document.body.classList.toggle('light-mode', isLight);
 
-        let teams = Array.from({ length: selectedNumTeams }, () => []);
-        presents.sort(() => Math.random() - 0.5);
-        presents.forEach((s, i) => teams[i % selectedNumTeams].push(s));
+            const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorPref = themePrefs.equipes || 'pink';
+            const colorHex = COLOR_MAP[colorPref];
+            const needsDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorPref);
+            const textColor = needsDarkText ? '#000' : '#fff';
 
-        let improved = true;
-        let iterations = 0;
-        while(improved && iterations < 300) {
-            improved = false;
-            iterations++;
-            for(let i=0; i < teams.length; i++) {
-                for(let j=0; j < teams.length; j++) {
-                    if(i === j) continue;
-                    let sI = getDetailedStats(teams[i]), sJ = getDetailedStats(teams[j]);
-                    const getScore = (st1, st2) => {
-                        let score = Math.abs(st1.f - st2.f) * 10 + Math.abs(st1.m - st2.m) * 10;
-                        ORDRE_SCOLAIRE.forEach(n => {
-                            const niv = n.toLowerCase();
-                            score += Math.abs(st1.levels[niv].f - st2.levels[niv].f) * 20;
-                            score += Math.abs(st1.levels[niv].total - st2.levels[niv].total) * 5;
+            document.getElementById('mainTitle').style.color = isLight ? '#000' : '#fff';
+
+            const headerButtons = [document.getElementById('btn-retour'), document.getElementById('btn-aide')];
+            headerButtons.forEach(btn => {
+                if (btn) {
+                    btn.style.backgroundColor = colorHex;
+                    btn.style.color = textColor;
+                }
+            });
+
+            const genBtn = document.getElementById('main-generate-btn');
+            if (genBtn) {
+                genBtn.style.backgroundColor = colorHex;
+                genBtn.style.color = textColor;
+            }
+
+            const closeBtn = document.getElementById('btn-fermer-aide');
+            if (closeBtn) {
+                closeBtn.style.backgroundColor = colorHex;
+                closeBtn.style.color = textColor;
+            }
+
+            const helpTitle = document.getElementById('titre-aide');
+            if (helpTitle) helpTitle.style.color = colorHex;
+        }
+
+        // ====================== MODAL MANAGEMENT ====================== 
+        function ouvrirAide() {
+            document.getElementById('modal-aide').style.display = 'flex';
+        }
+
+        function fermerModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // ====================== ATTENDANCE RENDERING ====================== 
+        function renderAttendance() {
+            const container = document.getElementById('attendance-container');
+            container.innerHTML = '';
+
+            const customPalette = JSON.parse(localStorage.getItem(STORAGE_KEYS.levelPalette)) || {};
+            const groups = {};
+
+            // Group students by level
+            allStudents.forEach(student => {
+                const level = getNormalizedLevel(student);
+                if (!groups[level]) groups[level] = [];
+                groups[level].push(student);
+            });
+
+            // Render each level in order
+            LEVEL_ORDER.forEach(level => {
+                if (groups[level] && groups[level].length > 0) {
+                    const levelColor = customPalette[level] || customPalette[level.toLowerCase()] || LEVEL_COLORS[level];
+                    let html = `<div class="level-label" style="color:${levelColor}">${level}</div><div class="attendance-grid">`;
+
+                    groups[level]
+                        .sort((a, b) => a.identite.localeCompare(b.identite))
+                        .forEach(student => {
+                            const isAbsent = absentSet.has(String(student.id));
+                            const genderClass = getGenderClass(student);
+                            const absentClass = isAbsent ? 'absent' : '';
+                            html += `<div class="student-item ${genderClass} ${absentClass}" onclick="toggleAbsent('${student.id}')">${getDisplayName(student, allStudents)}</div>`;
                         });
-                        return score;
-                    };
-                    let currentScore = getScore(sI, sJ);
-                    for(let x=0; x < teams[i].length; x++) {
-                        for(let y=0; y < teams[j].length; y++) {
-                            let temp = teams[i][x];
-                            teams[i][x] = teams[j][y];
-                            teams[j][y] = temp;
-                            let nI = getDetailedStats(teams[i]), nJ = getDetailedStats(teams[j]);
-                            if(getScore(nI, nJ) < currentScore) {
-                                improved = true;
-                                currentScore = getScore(nI, nJ);
-                            } else {
-                                teams[j][y] = teams[i][x];
-                                teams[i][x] = temp;
+
+                    container.innerHTML += html + `</div>`;
+                }
+            });
+        }
+
+        function toggleAbsent(studentId) {
+            const id = String(studentId);
+            if (absentSet.has(id)) {
+                absentSet.delete(id);
+            } else {
+                absentSet.add(id);
+            }
+            localStorage.setItem(STORAGE_KEYS.absents, JSON.stringify(Array.from(absentSet)));
+            renderAttendance();
+        }
+
+        // ====================== TEAM COUNT SELECTION ====================== 
+        function selectTeamCount(count) {
+            selectedNumTeams = count;
+            const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[themePrefs.equipes || 'pink'];
+
+            document.querySelectorAll('.num-btn').forEach(btn => {
+                const isSelected = parseInt(btn.innerText) === count;
+                btn.style.backgroundColor = isSelected ? colorHex : 'var(--btn-num-bg)';
+                btn.style.color = isSelected ? '#fff' : 'var(--text)';
+                btn.style.borderColor = isSelected ? colorHex : 'var(--btn-num-border)';
+            });
+        }
+
+        // ====================== TEAM GENERATION ALGORITHM ====================== 
+        function generateBalancedTeams() {
+            const presentStudents = allStudents.filter(s => !absentSet.has(String(s.id)));
+
+            if (presentStudents.length < selectedNumTeams) return;
+
+            // Initialize teams
+            let teams = Array.from({ length: selectedNumTeams }, () => []);
+            let shuffled = [...presentStudents].sort(() => Math.random() - 0.5);
+            shuffled.forEach((student, idx) => teams[idx % selectedNumTeams].push(student));
+
+            // Optimization algorithm
+            let improved = true;
+            let iterations = 0;
+
+            while (improved && iterations < ALGORITHM_ITERATIONS) {
+                improved = false;
+                iterations++;
+
+                for (let i = 0; i < teams.length; i++) {
+                    for (let j = 0; j < teams.length; j++) {
+                        if (i === j) continue;
+
+                        const statsI = getTeamStats(teams[i]);
+                        const statsJ = getTeamStats(teams[j]);
+                        const currentScore = calculateScore(statsI, statsJ);
+
+                        for (let x = 0; x < teams[i].length; x++) {
+                            for (let y = 0; y < teams[j].length; y++) {
+                                // Swap
+                                const temp = teams[i][x];
+                                teams[i][x] = teams[j][y];
+                                teams[j][y] = temp;
+
+                                const newStatsI = getTeamStats(teams[i]);
+                                const newStatsJ = getTeamStats(teams[j]);
+                                const newScore = calculateScore(newStatsI, newStatsJ);
+
+                                if (newScore < currentScore) {
+                                    improved = true;
+                                } else {
+                                    // Revert swap
+                                    teams[j][y] = teams[i][x];
+                                    teams[i][x] = temp;
+                                }
                             }
                         }
                     }
                 }
             }
+
+            localStorage.setItem(STORAGE_KEYS.savedTeams, JSON.stringify(teams));
+            renderTeams(teams);
         }
-        localStorage.setItem('savedTeams', JSON.stringify(teams));
-        renderTeams(teams);
-    }
 
-    function renderTeams(teams) {
-        const res = document.getElementById('results');
-        const pal = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
-        res.innerHTML = '';
-        teams.forEach((t, i) => {
-            const s = getDetailedStats(t);
-            let statsText = `${s.f}F/${s.m}G`;
-            
-            // Affichage des stats dans l'ordre strict
-            ORDRE_SCOLAIRE.forEach(n => { 
-                const lv = n.toLowerCase();
-                if(s.levels[lv] && s.levels[lv].total > 0) statsText += ` • ${s.levels[lv].total}${n}`; 
-            });
+        // ====================== TEAM RENDERING ====================== 
+        function renderTeams(teams) {
+            const resultsContainer = document.getElementById('results');
+            const customPalette = JSON.parse(localStorage.getItem(STORAGE_KEYS.levelPalette)) || {};
 
-            let h = `<div class="team-card"><div class="team-header"><span class="team-title">Équipe ${i+1}</span><span class="team-stats">${statsText}</span></div>`;
-            
-            // TRI DES ÉLÈVES DANS LA CARTE SELON L'ORDRE SCOLAIRE
-            t.sort((a, b) => {
-                const nivA = a.niveau.toString().trim().toUpperCase();
-                const nivB = b.niveau.toString().trim().toUpperCase();
-                const indexA = ORDRE_SCOLAIRE.indexOf(nivA);
-                const indexB = ORDRE_SCOLAIRE.indexOf(nivB);
-                return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
-            }).forEach(e => {
-                const niv = e.niveau.toString().trim().toUpperCase();
-                const cTag = pal[niv] || pal[niv.toLowerCase()] || couleursDecidees[niv] || '#888';
-                const genderClass = e.sexe.toLowerCase().startsWith('f') ? 'name-f' : 'name-g';
-                h += `<div class="flex items-center mb-1 text-[0.65rem] font-bold"><span class="tag" style="background-color:${cTag}">${niv}</span><span class="${genderClass}">${getDisplayName(e, ALL_STUDENTS)}</span></div>`;
-            });
-            res.innerHTML += h + `</div>`;
-        });
-    }
+            resultsContainer.innerHTML = '';
 
-    function renderAttendance() {
-        const container = document.getElementById('attendance-container');
-        container.innerHTML = '';
-        const pal = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
-        const groups = {};
-        
-        // Groupement avec nettoyage des clés
-        ALL_STUDENTS.forEach(s => { 
-            const n = s.niveau.toString().trim().toUpperCase(); 
-            if(!groups[n]) groups[n] = []; 
-            groups[n].push(s); 
-        });
+            teams.forEach((team, teamIdx) => {
+                const stats = getTeamStats(team);
+                let statsText = `${stats.f}F/${stats.m}G`;
 
-        // AFFICHAGE DES SECTIONS DE PRÉSENCE DANS L'ORDRE SCOLAIRE
-        ORDRE_SCOLAIRE.forEach(niv => {
-            if(groups[niv] && groups[niv].length > 0) {
-                let h = `<div class="level-label" style="color:${pal[niv]||couleursDecidees[niv]}">${niv}</div><div class="attendance-grid">`;
-                groups[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(s => {
-                    const isAbs = absents.has(String(s.id));
-                    const genderClass = s.sexe.toLowerCase().startsWith('f') ? 'bg-f' : 'bg-m';
-                    h += `<div class="student-item ${genderClass} ${isAbs?'absent':''}" onclick="toggleAbs('${s.id}')">${getDisplayName(s, ALL_STUDENTS)}</div>`;
+                // Add level stats
+                LEVEL_ORDER.forEach(level => {
+                    const levelKey = level.toLowerCase();
+                    if (stats.levels[levelKey] && stats.levels[levelKey].total > 0) {
+                        statsText += ` • ${stats.levels[levelKey].total}${level}`;
+                    }
                 });
-                container.innerHTML += h + `</div>`;
-            }
-        });
-    }
 
-    function toggleAbs(id) {
-        const sid = String(id);
-        if(absents.has(sid)) absents.delete(sid); else absents.add(sid);
-        localStorage.setItem('absents_session_equipes', JSON.stringify(Array.from(absents)));
-        renderAttendance();
-    }
+                let html = `<div class="team-card"><div class="team-header"><span class="team-title">Équipe ${teamIdx + 1}</span><span class="team-stats">${statsText}</span></div>`;
 
-    function selectNum(n) {
-        selectedNumTeams = n;
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const cHex = mapCouleurs[themePrefs.equipes || 'pink'];
-        document.querySelectorAll('.num-btn').forEach(b => {
-            b.style.backgroundColor = b.innerText == n ? cHex : 'var(--btn-num-bg)';
-            b.style.color = b.innerText == n ? '#fff' : 'var(--text)';
-            b.style.borderColor = b.innerText == n ? cHex : 'var(--btn-num-border)';
-        });
-    }
+                // Sort team by level order
+                team.sort((a, b) => {
+                    const levelA = getNormalizedLevel(a);
+                    const levelB = getNormalizedLevel(b);
+                    const indexA = LEVEL_ORDER.indexOf(levelA);
+                    const indexB = LEVEL_ORDER.indexOf(levelB);
+                    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+                });
 
-    function resetTeams() { 
-        document.getElementById('alertText').innerText = "Voulez-vous effacer les équipes ?";
-        document.getElementById('alertConfirmBtn').onclick = () => { localStorage.removeItem('savedTeams'); document.getElementById('results').innerHTML = ''; closeModal(); };
-        document.getElementById('alertConfirmBtn').style.backgroundColor = mapCouleurs[JSON.parse(localStorage.getItem('theme_tuiles'))?.equipes || 'pink'];
-        document.getElementById('alertModal').style.display = 'flex';
-    }
+                // Add team members
+                team.forEach(student => {
+                    const level = getNormalizedLevel(student);
+                    const tagColor = customPalette[level] || customPalette[level.toLowerCase()] || LEVEL_COLORS[level] || '#888';
+                    const genderClass = getGenderNameClass(student);
+                    html += `<div class="team-member"><span class="tag" style="background-color:${tagColor}">${level}</span><span class="${genderClass}">${getDisplayName(student, allStudents)}</span></div>`;
+                });
 
-    window.onload = () => {
-        appliquerCouleursSexe();
-        appliquerTheme();
-        const sel = document.getElementById('selector');
-        for(let i=2; i<=8; i++) {
-            const b = document.createElement('button');
-            b.className = 'num-btn'; b.innerText = i; b.onclick = () => selectNum(i);
-            sel.appendChild(b);
+                resultsContainer.innerHTML += html + `</div>`;
+            });
         }
-        selectNum(selectedNumTeams);
-        renderAttendance();
-        const s = localStorage.getItem('savedTeams');
-        if(s) renderTeams(JSON.parse(s));
-    };
-</script>
+
+        // ====================== RESET FUNCTION ====================== 
+        function resetTeams() {
+            document.getElementById('alertText').innerText = "Voulez-vous effacer les équipes ?";
+            const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[themePrefs.equipes || 'pink'];
+            document.getElementById('alertConfirmBtn').style.backgroundColor = colorHex;
+            document.getElementById('alertConfirmBtn').onclick = () => {
+                localStorage.removeItem(STORAGE_KEYS.savedTeams);
+                document.getElementById('results').innerHTML = '';
+                fermerModal('alertModal');
+            };
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        // ====================== INITIALIZATION ====================== 
+        window.onload = () => {
+            applySexColors();
+            applyTheme();
+
+            // Create team count selector buttons
+            const selectorContainer = document.getElementById('selector');
+            for (let i = TEAM_RANGE.min; i <= TEAM_RANGE.max; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'num-btn';
+                btn.innerText = i;
+                btn.onclick = () => selectTeamCount(i);
+                selectorContainer.appendChild(btn);
+            }
+
+            selectTeamCount(selectedNumTeams);
+            renderAttendance();
+
+            // Load saved teams if they exist
+            const savedTeams = localStorage.getItem(STORAGE_KEYS.savedTeams);
+            if (savedTeams) {
+                renderTeams(JSON.parse(savedTeams));
+            }
+        };
+    </script>
 </body>
 </html>

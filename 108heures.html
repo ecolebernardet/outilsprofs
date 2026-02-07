@@ -64,141 +64,301 @@
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
             color: var(--text-page); 
-            padding: 0; margin: 0; 
+            padding: 0; 
+            margin: 0; 
             transition: background 0.3s ease;
-            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+            padding-left: 15px; 
+            padding-right: 15px; 
+            padding-bottom: 20px;
         }
 
         header { 
             background: var(--header-bg); 
             border-bottom: 1px solid var(--header-border);
-            position: sticky; top: 0; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
-            width: calc(100% + 30px); margin-left: -15px;
+            width: calc(100% + 30px); 
+            margin-left: -15px;
         }
         
+        /* Card Components */
         .light-card { 
-            background: var(--card-bg); color: var(--card-text); border-radius: 1.5rem; 
-            border: 1px solid var(--border-color); box-shadow: var(--shadow-custom);
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-custom);
             transition: all 0.3s; 
         }
 
-        .card-input { display: none; }
-        .card-label {
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            background: var(--input-bg); border: 1px solid var(--border-color); color: var(--item-subtext);
-            padding: 8px 4px; border-radius: 0.75rem; cursor: pointer;
-            font-size: 10px; font-weight: 800; text-transform: uppercase; transition: all 0.2s;
-        }
-        .card-input:checked + .card-label { background: #4b5563; color: white; border-color: transparent; }
-
         .level-column { 
-            background: var(--column-bg); color: var(--column-text); border-radius: 1.5rem; 
-            padding: 15px; border: 1px solid var(--border-color); box-shadow: var(--shadow-custom);
-            display: flex; flex-direction: column; justify-content: flex-start; align-self: start;
-        }
-        
-        .progress-container { width: 100%; background: var(--input-bg); height: 8px; border-radius: 10px; margin: 8px 0; overflow: hidden; border: 1px solid var(--border-color); }
-        .progress-bar { height: 100%; transition: width 0.5s ease-out; }
-
-        .reunion-item { 
-            background: var(--input-bg); padding: 8px 12px; border-radius: 0.75rem; 
-            margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; border: 1px solid var(--border-color); border-left-width: 4px;
+            background: var(--column-bg); 
+            color: var(--column-text); 
+            border-radius: 1.5rem; 
+            padding: 15px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-custom);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-self: start;
         }
 
-        .bottom-nav { width: 100%; max-width: 500px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
-        .nav-group { display: flex; gap: 8px; width: 100%; }
-        .nav-btn { font-weight: 900; border-radius: 50px; font-size: 8px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
-
+        /* Form Inputs */
         .input-field { 
-            background: var(--input-bg); border: 1px solid var(--border-color); 
-            color: var(--input-text); border-radius: 0.75rem; padding: 10px; 
-            outline: none; font-size: 0.75rem; font-weight: 600; 
+            background: var(--input-bg); 
+            border: 1px solid var(--input-border); 
+            color: var(--input-text); 
+            border-radius: 0.75rem; 
+            padding: 10px; 
+            outline: none; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
         }
 
         .field-label {
-            font-size: 10px; font-weight: 900; text-transform: uppercase;
-            opacity: 0.5; margin-bottom: 4px; margin-left: 4px; letter-spacing: 0.5px;
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            opacity: 0.5; 
+            margin-bottom: 4px; 
+            margin-left: 4px; 
+            letter-spacing: 0.5px;
         }
 
-        /* MODALES ET Z-INDEX */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; 
-            background: var(--modal-overlay); backdrop-filter: blur(5px);
-            align-items: center; justify-content: center; padding: 20px;
-        }
+        /* Radio Card Selection */
+        .card-input { display: none; }
         
-        /* Ordre : Formulaire (900) < Aide/Confirm (950) */
+        .card-label {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center;
+            background: var(--input-bg); 
+            border: 1px solid var(--border-color); 
+            color: var(--item-subtext);
+            padding: 8px 4px; 
+            border-radius: 0.75rem; 
+            cursor: pointer;
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            transition: all 0.2s;
+        }
+
+        .card-input:checked + .card-label { 
+            background: #4b5563; 
+            color: white; 
+            border-color: transparent; 
+        }
+
+        /* Progress */
+        .progress-container { 
+            width: 100%; 
+            background: var(--input-bg); 
+            height: 8px; 
+            border-radius: 10px; 
+            margin: 8px 0; 
+            overflow: hidden; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .progress-bar { 
+            height: 100%; 
+            transition: width 0.5s ease-out; 
+        }
+
+        /* Reunion Item */
+        .reunion-item { 
+            background: var(--input-bg); 
+            padding: 8px 12px; 
+            border-radius: 0.75rem; 
+            margin-bottom: 6px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            cursor: pointer; 
+            border: 1px solid var(--border-color); 
+            border-left-width: 4px;
+        }
+
+        /* Header Buttons */
+        .header-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            border: 1px solid var(--border-color); 
+            transition: all 0.2s ease;
+        }
+
+        /* FAB Button */
+        .fab-add {
+            position: fixed;
+            bottom: 60px;
+            right: 30px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 900;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+        }
+
+        .fab-add:active {
+            transform: scale(0.9);
+        }
+
+        @media (hover: hover) {
+            .fab-add:hover {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Navigation */
+        .bottom-nav { 
+            width: 100%; 
+            max-width: 500px; 
+            margin: 20px auto 0; 
+            padding-bottom: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+        }
+
+        .nav-group { 
+            display: flex; 
+            gap: 8px; 
+            width: 100%; 
+        }
+
+        .nav-btn { 
+            font-weight: 900; 
+            border-radius: 50px; 
+            font-size: 8px; 
+            padding: 12px; 
+            border: none; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px; 
+            cursor: pointer; 
+            background: #2a2a2a;
+            color: white;
+        }
+
+        /* Toggle List */
+        .toggle-list-btn { 
+            width: 100%; 
+            font-size: 9px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            opacity: 0.4; 
+            margin-top: 8px; 
+            padding: 4px;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: var(--modal-overlay); 
+            backdrop-filter: blur(5px);
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+        }
+
         #form-container { z-index: 900; }
         #modal-aide, #custom-confirm { z-index: 950; }
 
         .modal-content {
-            background: var(--card-bg); width: 100%; max-width: 400px; 
-            border-radius: 1.5rem; padding: 25px; border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-custom); position: relative;
+            background: var(--card-bg); 
+            width: 100%; 
+            max-width: 400px; 
+            border-radius: 1.5rem; 
+            padding: 25px; 
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-custom); 
+            position: relative;
         }
 
-        .header-btn { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 40px; height: 40px; border-radius: 50%; 
-            border: 1px solid var(--border-color); transition: all 0.2s ease;
-        }
-
-        /* BOUTON FLOTTANT */
-        .fab-add {
-    position: fixed;
-    bottom: 40px;
-    right: 30px;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 900;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    /* Ombre exacte de la page memos */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
-}
-
-.fab-add:active {
-    transform: scale(0.9);
-}
-
-/* Optionnel : effet de survol pour PC */
-@media (hover: hover) {
-    .fab-add:hover {
-        transform: scale(1.1);
-    }
-}
-
-        .toggle-list-btn { width: 100%; font-size: 9px; font-weight: 900; text-transform: uppercase; opacity: 0.4; margin-top: 8px; padding: 4px; }
-        
+        /* Animation */
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
             50% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(0.9); opacity: 0.5; }
         }
+
         .mini-pastille {
-            display: inline-block; width: 8px; height: 8px;
-            background-color: #f97316; border-radius: 50%;
-            margin-left: 4px; margin-right: 2px;
-            box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
+            display: inline-block; 
+            width: 8px; 
+            height: 8px;
+            background-color: #f97316; 
+            border-radius: 50%;
+            margin-left: 4px; 
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316; 
+            animation: blink-point 1.5s infinite;
         }
 
-        input[type=range] { -webkit-appearance: none; background: transparent; }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; border-radius: 10px; border: 1px solid var(--border-color); }
-        input[type=range]::-webkit-slider-thumb { height: 25px; width: 25px; border-radius: 50%; background: var(--text-page); cursor: pointer; -webkit-appearance: none; margin-top: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        /* Range Input */
+        input[type=range] { 
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
 
+        input[type=range]:focus { 
+            outline: none; 
+        }
+
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; 
+            height: 6px; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            border: 1px solid var(--border-color); 
+        }
+
+        input[type=range]::-webkit-slider-thumb { 
+            height: 25px; 
+            width: 25px; 
+            border-radius: 50%; 
+            background: var(--text-page); 
+            cursor: pointer; 
+            -webkit-appearance: none; 
+            margin-top: -10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+        }
+
+        input[type=range]::-moz-range-track {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            height: 6px;
+        }
     </style>
 </head>
 <body class="pb-10">
 
+    <!-- Help Modal -->
     <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="aide-label" class="text-lg font-black uppercase mb-4">💡 Gestion des 108h</h2>
@@ -228,6 +388,7 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
     <div id="custom-confirm" class="modal-overlay" onclick="closeConfirm(false)">
         <div class="modal-content text-center" onclick="event.stopPropagation()">
             <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
@@ -238,10 +399,12 @@
         </div>
     </div>
 
+    <!-- Form Modal -->
     <div id="form-container" class="modal-overlay" onclick="closeForm()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="form-title" class="text-sm font-black uppercase mb-4 opacity-50">Nouvelle Saisie</h2>
             <form id="heuresForm" class="flex flex-col gap-4">
+                <!-- Category Selection -->
                 <div class="grid grid-cols-4 gap-2">
                     <label><input type="radio" name="cat" value="APC" class="card-input" checked><div class="card-label">APC</div></label>
                     <label><input type="radio" name="cat" value="PEDAGO" class="card-input"><div class="card-label">Réunions</div></label>
@@ -249,6 +412,7 @@
                     <label><input type="radio" name="cat" value="CONSEIL" class="card-input"><div class="card-label">Conseil</div></label>
                 </div>
 
+                <!-- Date Selection -->
                 <div>
                     <p class="field-label">Date</p>
                     <div class="grid grid-cols-3 gap-2">
@@ -258,6 +422,7 @@
                     </div>
                 </div>
 
+                <!-- Duration Selection -->
                 <div>
                     <p class="field-label">Durée</p>
                     <div class="grid grid-cols-2 gap-2">
@@ -266,17 +431,22 @@
                     </div>
                 </div>
 
+                <!-- Comment -->
                 <input type="text" id="comm" placeholder="Commentaire..." class="input-field" autocomplete="off">
                 
+                <!-- Edit Actions (hidden by default) -->
                 <div id="edit-actions" class="hidden flex gap-2">
                     <button type="button" onclick="cancelEdit()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-neutral-500/20">Annuler</button>
                     <button type="button" onclick="deleteEntry()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-red-600 text-white">Supprimer</button>
                 </div>
+
+                <!-- Submit -->
                 <button type="submit" id="submitBtn" class="font-black py-3 rounded-full uppercase text-[10px] active:scale-95 transition-transform text-white">Enregistrer</button>
             </form>
         </div>
     </div>
 
+    <!-- Header -->
     <header>
         <a href="index.html" id="btn-retour" class="header-btn shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -287,8 +457,10 @@
         <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg text-lg">💡</button>
     </header>
 
+    <!-- Main Content -->
     <div id="app-ui" class="max-w-md lg:max-w-6xl mx-auto p-2 mt-4">
 
+        <!-- Quotité Card -->
         <div class="light-card p-4 mb-4">
             <p class="field-label">Ma quotité de travail</p>
             <div class="flex items-center gap-4">
@@ -297,6 +469,7 @@
             </div>
         </div>
 
+        <!-- Global Stats Card -->
         <div id="globalStats" class="light-card p-4 mb-5">
             <div class="flex justify-between items-end mb-1">
                 <span id="stats-title" class="text-[10px] font-black uppercase tracking-widest">Total Annuel</span>
@@ -311,19 +484,21 @@
             </div>
         </div>
 
+        <!-- Categories Grid -->
         <div id="displayContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-3 items-start"></div>
 
+        <!-- Footer Navigation -->
         <footer class="bottom-nav">
             <div class="nav-group">
-                <label class="nav-btn bg-neutral-800 text-white cursor-pointer text-center flex-1">
+                <label class="nav-btn cursor-pointer text-center flex-1">
                     👇 importer .txt 👇
                     <input type="file" id="importFile" class="hidden" accept=".txt" onchange="importData(event)">
                 </label>
-                <button onclick="exportData()" class="nav-btn bg-neutral-800 text-white flex-1 relative">
+                <button onclick="exportData()" class="nav-btn flex-1 relative">
                     👆 exporter .txt 👆
                     <span id="badge-export" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border-2 border-white"></span>
                 </button>
-                <button onclick="exportPDF()" class="nav-btn bg-neutral-800 text-white flex-1">📄 PDF</button>
+                <button onclick="exportPDF()" class="nav-btn flex-1">📄 PDF</button>
             </div>
             <button onclick="resetHeures()" class="nav-btn bg-red-500 text-white shadow-md active:scale-95">
                 ⚠️ effacer les données
@@ -331,6 +506,7 @@
         </footer>
     </div>
 
+    <!-- FAB Button -->
     <button id="fab-plus" onclick="openForm()" class="fab-add">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
@@ -338,349 +514,571 @@
     </button>
 
     <script>
-    const mapCouleurs = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e', 'gray': '#6b7280'
-    };
+        // ============================================================================
+        // CONFIGURATION & STATE
+        // ============================================================================
 
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const couleurH108 = themePrefs.h108 || 'orange'; 
-    const hexaTheme = mapCouleurs[couleurH108] || '#f97316';
-    const isDarkTextNeeded = ['yellow', 'lime', 'amber', 'cyan'].includes(couleurH108);
-
-    let QUOTAS = { "APC": 36 * 60, "PEDAGO": 48 * 60, "FORM": 18 * 60, "CONSEIL": 6 * 60 };
-    let TOTAL_ANNUEL = 108 * 60;
-    const LABELS_BASE = { "APC": "APC", "PEDAGO": "Réunions", "FORM": "Formation", "CONSEIL": "Conseils" };
-
-    let reunions = JSON.parse(localStorage.getItem('mesHeuresReu')) || [];
-    let editId = null; 
-    let confirmAction = null;
-
-    function initSelectors() {
-        const sj = document.getElementById('sel-jour'), sm = document.getElementById('sel-mois'), sa = document.getElementById('sel-annee');
-        const sh = document.getElementById('sel-h'), smin = document.getElementById('sel-m');
-        sj.innerHTML = ""; sm.innerHTML = ""; sa.innerHTML = ""; sh.innerHTML = ""; smin.innerHTML = "";
-        for(let i=1; i<=31; i++) sj.innerHTML += `<option value="${i<10?'0'+i:i}">${i}</option>`;
-        const mois = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-        mois.forEach((m, i) => sm.innerHTML += `<option value="${(i+1)<10?'0'+(i+1):(i+1)}">${m}</option>`);
-        const an = new Date().getFullYear();
-        for(let i=an-1; i<=an+1; i++) sa.innerHTML += `<option value="${i}">${i}</option>`;
-        for(let i=0; i<=10; i++) sh.innerHTML += `<option value="${i}">${i} h</option>`;
-        for(let i=0; i<60; i+=5) smin.innerHTML += `<option value="${i}">${i<10?'0'+i:i} min</option>`;
-    }
-
-    function openForm() {
-        const form = document.getElementById('form-container');
-        form.style.display = 'flex';
-        document.getElementById('form-title').innerText = editId ? "Modifier la saisie" : "Nouvelle Saisie";
-    }
-
-    function closeForm() {
-        if (editId) cancelEdit();
-        document.getElementById('form-container').style.display = 'none';
-    }
-
-    function updateQuotite(val) {
-        document.getElementById('val-quotite').innerText = val + "%";
-        localStorage.setItem('quotite_pro', val);
-        const ratio = val / 100;
-        QUOTAS = { 
-            "APC": (36 * 60) * ratio, 
-            "PEDAGO": (48 * 60) * ratio, 
-            "FORM": (18 * 60) * ratio, 
-            "CONSEIL": (6 * 60) * ratio 
+        const COLOR_MAPPING = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#6b7280'
         };
-        TOTAL_ANNUEL = (108 * 60) * ratio;
-        render();
-    }
 
-    function setSelectedDate(dateStr) {
-        const d = new Date(dateStr);
-        document.getElementById('sel-jour').value = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
-        document.getElementById('sel-mois').value = (d.getMonth() + 1) < 10 ? '0' + (d.getMonth() + 1) : (d.getMonth() + 1);
-        document.getElementById('sel-annee').value = d.getFullYear();
-    }
+        const CATEGORY_LABELS = {
+            "APC": "APC",
+            "PEDAGO": "Réunions",
+            "FORM": "Formation",
+            "CONSEIL": "Conseils"
+        };
 
-    function getSelectedDate() {
-        return `${document.getElementById('sel-annee').value}-${document.getElementById('sel-mois').value}-${document.getElementById('sel-jour').value}`;
-    }
+        const MONTHS_FR = [
+            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+        ];
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+        const DEFAULT_QUOTAS_BASE = {
+            "APC": 36 * 60,
+            "PEDAGO": 48 * 60,
+            "FORM": 18 * 60,
+            "CONSEIL": 6 * 60
+        };
 
-    function resetHeures() {
-        customConfirm("Voulez-vous vraiment tout effacer ?", () => {
-            reunions = [];
-            saveAndRender();
+        const ELEMENT_IDS = {
+            buttons: ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'btn-fermer-aide', 'fab-plus'],
+            selectors: ['sel-jour', 'sel-mois', 'sel-annee', 'sel-h', 'sel-m']
+        };
+
+        // Theme colors
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const THEME_COLOR = themePrefs.h108 || 'orange';
+        const THEME_HEX = COLOR_MAPPING[THEME_COLOR] || '#f97316';
+        const NEEDS_DARK_TEXT = ['yellow', 'lime', 'amber', 'cyan'].includes(THEME_COLOR);
+        const THEME_TEXT_COLOR = NEEDS_DARK_TEXT ? '#000' : '#fff';
+
+        // State
+        let QUOTAS = { ...DEFAULT_QUOTAS_BASE };
+        let TOTAL_ANNUEL = 108 * 60;
+        let reunions = JSON.parse(localStorage.getItem('mesHeuresReu')) || [];
+        let editId = null;
+        let confirmAction = null;
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSelectors();
+            applyThemeColors();
+            const savedQuotite = localStorage.getItem('quotite_pro') || 100;
+            document.getElementById('range-quotite').value = savedQuotite;
+            updateQuotite(savedQuotite);
+            initDate();
+            if (localStorage.getItem('needsExport_108h') === 'true') {
+                document.getElementById('badge-export').classList.remove('hidden');
+            }
         });
-    }
-    
-    function customConfirm(msg, action) {
-        document.getElementById('confirm-msg').innerText = msg;
-        confirmAction = action;
-        document.getElementById('custom-confirm').style.display = 'flex';
-    }
 
-    function closeConfirm(confirmed) {
-        document.getElementById('custom-confirm').style.display = 'none';
-        if (confirmed && confirmAction) confirmAction();
-        confirmAction = null;
-    }
-    document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
+        // ============================================================================
+        // SELECTOR INITIALIZATION
+        // ============================================================================
 
-    function appliquerCouleursTheme() {
-        const textCol = isDarkTextNeeded ? '#000' : '#fff';
-        const ids = ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'btn-fermer-aide', 'fab-plus'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.style.backgroundColor = hexaTheme; el.style.color = textCol; }
-        });
-        document.getElementById('stats-title').style.color = hexaTheme;
-        document.getElementById('aide-label').style.color = hexaTheme;
-        document.getElementById('range-quotite').style.accentColor = hexaTheme;
+        function initSelectors() {
+            const daySelect = document.getElementById('sel-jour');
+            const monthSelect = document.getElementById('sel-mois');
+            const yearSelect = document.getElementById('sel-annee');
+            const hoursSelect = document.getElementById('sel-h');
+            const minutesSelect = document.getElementById('sel-m');
 
-        const styleSlider = document.createElement('style');
-        styleSlider.innerHTML = `
-            input[type=range]::-webkit-slider-runnable-track { background: ${hexaTheme}44 !important; }
-            input[type=range]::-moz-range-track { background: ${hexaTheme}44 !important; }
-        `;
-        document.head.appendChild(styleSlider);
-    }
+            daySelect.innerHTML = "";
+            monthSelect.innerHTML = "";
+            yearSelect.innerHTML = "";
+            hoursSelect.innerHTML = "";
+            minutesSelect.innerHTML = "";
 
-    function updateExportBadge(needsExport) {
-        const badge = document.getElementById('badge-export');
-        if (needsExport) {
-            badge.classList.remove('hidden');
-            localStorage.setItem('needsExport_108h', 'true');
-        } else {
-            badge.classList.add('hidden');
-            localStorage.removeItem('needsExport_108h');
-        }
-    }
+            // Days
+            for (let i = 1; i <= 31; i++) {
+                const dayValue = i < 10 ? '0' + i : i;
+                daySelect.innerHTML += `<option value="${dayValue}">${i}</option>`;
+            }
 
-    document.getElementById('heuresForm').onsubmit = function(e) {
-        e.preventDefault();
-        const cat = document.querySelector('input[name="cat"]:checked').value;
-        const date = getSelectedDate();
-        const h = parseInt(document.getElementById('sel-h').value) || 0;
-        const m = parseInt(document.getElementById('sel-m').value) || 0;
-        const minutes = (h * 60) + m;
-        const comm = document.getElementById('comm').value;
-        if (minutes <= 0) return;
-
-        if (editId) {
-            const index = reunions.findIndex(r => r.id === editId);
-            reunions[index] = { ...reunions[index], cat, date, minutes, comm };
-            editId = null;
-            document.getElementById('submitBtn').innerText = "Enregistrer";
-            document.getElementById('edit-actions').classList.add('hidden');
-        } else {
-            reunions.push({ id: Date.now(), cat, date, minutes, comm });
-        }
-        saveAndRender();
-        this.reset();
-        initDate();
-        document.getElementById('form-container').style.display = 'none';
-    };
-
-    function chargerPourEdition(id) {
-        const r = reunions.find(item => item.id === id);
-        if (!r) return;
-        editId = id;
-        document.querySelector(`input[name="cat"][value="${r.cat}"]`).checked = true;
-        setSelectedDate(r.date);
-        document.getElementById('sel-h').value = Math.floor(r.minutes / 60);
-        document.getElementById('sel-m').value = (Math.round(r.minutes % 60 / 5) * 5) % 60;
-        document.getElementById('comm').value = r.comm || "";
-        document.getElementById('submitBtn').innerText = "Mettre à jour";
-        document.getElementById('edit-actions').classList.remove('hidden');
-        openForm();
-    }
-
-    function cancelEdit() {
-        editId = null;
-        document.getElementById('heuresForm').reset();
-        document.getElementById('submitBtn').innerText = "Enregistrer";
-        document.getElementById('edit-actions').classList.add('hidden');
-        initDate();
-    }
-
-    function deleteEntry() {
-        customConfirm("Supprimer cette entrée ?", () => {
-            reunions = reunions.filter(r => r.id !== editId);
-            cancelEdit();
-            saveAndRender();
-            document.getElementById('form-container').style.display = 'none';
-        });
-    }
-
-    function saveAndRender() {
-        localStorage.setItem('mesHeuresReu', JSON.stringify(reunions));
-        updateExportBadge(true);
-        render();
-    }
-
-    function formatDuree(totalMinutes) {
-        const abs = Math.abs(Math.round(totalMinutes));
-        const h = Math.floor(abs / 60);
-        const m = abs % 60;
-        return `${totalMinutes < 0 ? "-" : ""}${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}`;
-    }
-
-    function render() {
-        const container = document.getElementById('displayContainer');
-        container.innerHTML = "";
-        let minutesGlobales = 0;
-
-        document.getElementById('stats-title').innerText = `Total Annuel (${formatDuree(TOTAL_ANNUEL)})`;
-
-        Object.keys(QUOTAS).forEach(catKey => {
-            const reuCat = reunions.filter(r => r.cat === catKey);
-            const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
-            minutesGlobales += fait;
-            const depasse = fait > QUOTAS[catKey];
-            const col = document.createElement('div');
-            col.className = "level-column";
-            col.innerHTML = `
-                <div class="mb-1 relative">
-                    <div class="flex items-center gap-1.5 mb-1">
-                        <h3 class="text-[9px] font-black uppercase opacity-60">${LABELS_BASE[catKey]}</h3>
-                        ${depasse ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
-                    </div>
-                    <div class="progress-container"><div class="progress-bar" style="width: ${Math.min((fait/QUOTAS[catKey])*100, 100)}%; background-color: ${hexaTheme}"></div></div>
-                    <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])}</p>
-                </div>
-                <button id="btn-${catKey}" onclick="toggleListe('${catKey}')" class="toggle-list-btn">Détails</button>
-                <div id="list-${catKey}" class="mt-2 space-y-1" style="display:none"></div>`;
-
-            const listDiv = col.querySelector(`#list-${catKey}`);
-            reuCat.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
-                const dateFmt = new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'});
-                listDiv.innerHTML += `
-                    <div class="reunion-item" style="border-left-color: ${hexaTheme}" onclick="chargerPourEdition(${r.id})">
-                        <div class="flex-1 overflow-hidden">
-                            <div class="flex items-center gap-2">
-                                <span class="font-black text-[10px]" style="color: ${hexaTheme}">${dateFmt}</span>
-                                <span class="font-bold text-[10px]">${formatDuree(r.minutes)}</span>
-                            </div>
-                            ${r.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${r.comm}</div>` : ''}
-                        </div>
-                    </div>`;
+            // Months
+            MONTHS_FR.forEach((month, index) => {
+                const monthValue = (index + 1) < 10 ? '0' + (index + 1) : (index + 1);
+                monthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
             });
-            container.appendChild(col);
-        });
 
-        const globalReste = TOTAL_ANNUEL - minutesGlobales;
-        const globalPercent = Math.min((minutesGlobales / TOTAL_ANNUEL) * 100, 100);
-        document.getElementById('globalFait').innerText = `Fait : ${formatDuree(minutesGlobales)}`;
-        document.getElementById('globalReste').innerText = `Reste : ${formatDuree(globalReste)}`;
-        document.getElementById('globalReste').style.color = hexaTheme;
-        document.getElementById('globalPercent').innerText = `${Math.round(globalPercent)}%`;
-        document.getElementById('globalBar').style.width = globalPercent + "%";
-        document.getElementById('globalBar').style.backgroundColor = hexaTheme;
-    }
+            // Years
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear - 1; i <= currentYear + 1; i++) {
+                yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
+            }
 
-    function toggleListe(catKey) {
-        const listDiv = document.getElementById(`list-${catKey}`);
-        const btn = document.getElementById(`btn-${catKey}`);
-        const isHidden = listDiv.style.display === "none";
-        listDiv.style.display = isHidden ? "block" : "none";
-        btn.innerText = isHidden ? "Masquer" : "Détails";
-    }
+            // Hours
+            for (let i = 0; i <= 10; i++) {
+                hoursSelect.innerHTML += `<option value="${i}">${i} h</option>`;
+            }
 
-    function initDate() { 
-        setSelectedDate(new Date().toISOString().split('T')[0]);
-        document.getElementById('sel-h').value = "1";
-        document.getElementById('sel-m').value = "0";
-    }
-
-    function exportData() {
-        if (reunions.length === 0) { alert("Aucune donnée."); return; }
-        const date = new Date().toISOString().split('T')[0];
-        const fileName = `outilsprofs_108heures_${date}.txt`;
-        const content = JSON.stringify(reunions);
-        if (window.Android && window.Android.exportTxt) {
-            window.Android.exportTxt(content, fileName);
-            updateExportBadge(false);
-        } else {
-            const blob = new Blob([content], {type: "text/plain;charset=utf-8"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url; a.download = fileName;
-            document.body.appendChild(a); a.click();
-            setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); updateExportBadge(false); }, 100);
+            // Minutes
+            for (let i = 0; i < 60; i += 5) {
+                const minuteValue = i < 10 ? '0' + i : i;
+                minutesSelect.innerHTML += `<option value="${i}">${minuteValue} min</option>`;
+            }
         }
-    }
 
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                if (Array.isArray(imported)) {
-                    customConfirm("Remplacer les données ?", () => {
-                        reunions = imported; saveAndRender(); updateExportBadge(false);
-                    });
+        // ============================================================================
+        // THEME APPLICATION
+        // ============================================================================
+
+        function applyThemeColors() {
+            // Apply color to buttons and interactive elements
+            ELEMENT_IDS.buttons.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.backgroundColor = THEME_HEX;
+                    element.style.color = THEME_TEXT_COLOR;
                 }
-            } catch(e) { console.error("Erreur import"); }
-        };
-        reader.readAsText(file);
-        event.target.value = "";
-    }
+            });
 
-    function exportPDF() {
-        const profNom = localStorage.getItem('nom_enseignant') || "Enseignant";
-        const quotite = localStorage.getItem('quotite_pro') || 100;
-        const dateFichier = new Date().toISOString().split('T')[0];
-        const fileName = `outilsprofs_108h_${profNom}_${dateFichier}.pdf`;
-        const element = document.createElement('div');
-        element.style.padding = '20px'; element.style.color = 'black'; element.style.backgroundColor = 'white';
-        let html = `<div style="text-align:center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; font-family: Arial;">
-            <h1 style="font-size:18px; margin:0;">BILAN 108 HEURES</h1>
-            <p>${profNom} - Quotité : ${quotite}%</p>
-            <p style="font-size:10px;">Le ${new Date().toLocaleDateString('fr-FR')}</p></div>`;
+            // Apply to specific elements
+            document.getElementById('stats-title').style.color = THEME_HEX;
+            document.getElementById('aide-label').style.color = THEME_HEX;
+            document.getElementById('range-quotite').style.accentColor = THEME_HEX;
 
-        Object.keys(QUOTAS).forEach(catKey => {
-            const reuCat = reunions.filter(r => r.cat === catKey);
-            const fait = reuCat.reduce((sum, r) => sum + r.minutes, 0);
-            html += `<div style="margin-bottom: 15px; border: 1px solid #ddd; font-family: Arial;">
-                <div style="background:#f0f0f0; padding:8px; font-weight:bold;">${LABELS_BASE[catKey]} (${formatDuree(fait)} / ${formatDuree(QUOTAS[catKey])})</div>
-                <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                    <thead><tr style="border-bottom:1px solid #000;"><th style="text-align:left; padding:6px;">Date</th><th style="text-align:left; padding:6px;">Objet</th><th style="text-align:right; padding:6px;">Durée</th></tr></thead>
-                    <tbody>`;
-            if (reuCat.length === 0) html += `<tr><td colspan="3" style="padding:10px; color:gray;">Aucune saisie</td></tr>`;
-            else {
-                reuCat.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-                    html += `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;">${new Date(r.date).toLocaleDateString('fr-FR')}</td><td style="padding:6px;">${r.comm || '-'}</td><td style="padding:6px; text-align:right;">${formatDuree(r.minutes)}</td></tr>`;
+            // Apply to range input track
+            const styleSlider = document.createElement('style');
+            styleSlider.innerHTML = `
+                input[type=range]::-webkit-slider-runnable-track { background: ${THEME_HEX}44 !important; }
+                input[type=range]::-moz-range-track { background: ${THEME_HEX}44 !important; }
+            `;
+            document.head.appendChild(styleSlider);
+        }
+
+        // ============================================================================
+        // MODAL MANAGEMENT
+        // ============================================================================
+
+        function ouvrirAide() {
+            document.getElementById('modal-aide').style.display = 'flex';
+        }
+
+        function fermerAide() {
+            document.getElementById('modal-aide').style.display = 'none';
+        }
+
+        function openForm() {
+            const form = document.getElementById('form-container');
+            form.style.display = 'flex';
+            document.getElementById('form-title').innerText = editId ? "Modifier la saisie" : "Nouvelle Saisie";
+        }
+
+        function closeForm() {
+            if (editId) cancelEdit();
+            document.getElementById('form-container').style.display = 'none';
+        }
+
+        function customConfirm(message, action) {
+            document.getElementById('confirm-msg').innerText = message;
+            confirmAction = action;
+            document.getElementById('custom-confirm').style.display = 'flex';
+        }
+
+        function closeConfirm(confirmed) {
+            document.getElementById('custom-confirm').style.display = 'none';
+            if (confirmed && confirmAction) {
+                confirmAction();
+            }
+            confirmAction = null;
+        }
+
+        document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
+
+        // ============================================================================
+        // DATE MANAGEMENT
+        // ============================================================================
+
+        function initDate() {
+            setSelectedDate(new Date().toISOString().split('T')[0]);
+            document.getElementById('sel-h').value = "1";
+            document.getElementById('sel-m').value = "0";
+        }
+
+        function setSelectedDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+            const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
+            const year = date.getFullYear();
+
+            document.getElementById('sel-jour').value = day;
+            document.getElementById('sel-mois').value = month;
+            document.getElementById('sel-annee').value = year;
+        }
+
+        function getSelectedDate() {
+            const year = document.getElementById('sel-annee').value;
+            const month = document.getElementById('sel-mois').value;
+            const day = document.getElementById('sel-jour').value;
+            return `${year}-${month}-${day}`;
+        }
+
+        // ============================================================================
+        // QUOTITÉ MANAGEMENT
+        // ============================================================================
+
+        function updateQuotite(value) {
+            const quotite = parseInt(value);
+            document.getElementById('val-quotite').innerText = quotite + "%";
+            localStorage.setItem('quotite_pro', quotite);
+
+            const ratio = quotite / 100;
+            Object.keys(DEFAULT_QUOTAS_BASE).forEach(key => {
+                QUOTAS[key] = DEFAULT_QUOTAS_BASE[key] * ratio;
+            });
+            TOTAL_ANNUEL = (108 * 60) * ratio;
+
+            render();
+        }
+
+        // ============================================================================
+        // FORM MANAGEMENT
+        // ============================================================================
+
+        document.getElementById('heuresForm').onsubmit = function(event) {
+            event.preventDefault();
+
+            const category = document.querySelector('input[name="cat"]:checked').value;
+            const date = getSelectedDate();
+            const hours = parseInt(document.getElementById('sel-h').value) || 0;
+            const minutes = parseInt(document.getElementById('sel-m').value) || 0;
+            const totalMinutes = (hours * 60) + minutes;
+            const comment = document.getElementById('comm').value;
+
+            if (totalMinutes <= 0) return;
+
+            if (editId) {
+                const index = reunions.findIndex(r => r.id === editId);
+                reunions[index] = {
+                    ...reunions[index],
+                    cat: category,
+                    date: date,
+                    minutes: totalMinutes,
+                    comm: comment
+                };
+                editId = null;
+                document.getElementById('submitBtn').innerText = "Enregistrer";
+                document.getElementById('edit-actions').classList.add('hidden');
+            } else {
+                reunions.push({
+                    id: Date.now(),
+                    cat: category,
+                    date: date,
+                    minutes: totalMinutes,
+                    comm: comment
                 });
             }
-            html += `</tbody></table></div>`;
-        });
-        element.innerHTML = html;
-        const opt = { margin: 10, filename: fileName, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }};
-        if (window.Android && window.Android.savePdfFromBase64) {
-            html2pdf().set(opt).from(element).output('datauristring').then((pdfBase64) => {
-                window.Android.savePdfFromBase64(pdfBase64.split(',')[1], fileName);
-            });
-        } else { html2pdf().set(opt).from(element).save(); }
-    }
-    
-    window.addEventListener('DOMContentLoaded', () => { 
-        initSelectors();
-        appliquerCouleursTheme(); 
-        const savedQuotite = localStorage.getItem('quotite_pro') || 100;
-        document.getElementById('range-quotite').value = savedQuotite;
-        updateQuotite(savedQuotite);
-        initDate(); 
-        if (localStorage.getItem('needsExport_108h') === 'true') {
-            document.getElementById('badge-export').classList.remove('hidden');
+
+            saveAndRender();
+            this.reset();
+            initDate();
+            closeForm();
+        };
+
+        function chargerPourEdition(id) {
+            const reunion = reunions.find(item => item.id === id);
+            if (!reunion) return;
+
+            editId = id;
+            document.querySelector(`input[name="cat"][value="${reunion.cat}"]`).checked = true;
+            setSelectedDate(reunion.date);
+            document.getElementById('sel-h').value = Math.floor(reunion.minutes / 60);
+            document.getElementById('sel-m').value = (Math.round(reunion.minutes % 60 / 5) * 5) % 60;
+            document.getElementById('comm').value = reunion.comm || "";
+            document.getElementById('submitBtn').innerText = "Mettre à jour";
+            document.getElementById('edit-actions').classList.remove('hidden');
+            openForm();
         }
-    });
-</script>
+
+        function cancelEdit() {
+            editId = null;
+            document.getElementById('heuresForm').reset();
+            document.getElementById('submitBtn').innerText = "Enregistrer";
+            document.getElementById('edit-actions').classList.add('hidden');
+            initDate();
+        }
+
+        function deleteEntry() {
+            customConfirm("Supprimer cette entrée ?", () => {
+                reunions = reunions.filter(r => r.id !== editId);
+                cancelEdit();
+                saveAndRender();
+                closeForm();
+            });
+        }
+
+        function resetHeures() {
+            customConfirm("Voulez-vous vraiment tout effacer ?", () => {
+                reunions = [];
+                saveAndRender();
+            });
+        }
+
+        // ============================================================================
+        // DATA PERSISTENCE
+        // ============================================================================
+
+        function saveAndRender() {
+            localStorage.setItem('mesHeuresReu', JSON.stringify(reunions));
+            updateExportBadge(true);
+            render();
+        }
+
+        function updateExportBadge(needsExport) {
+            const badge = document.getElementById('badge-export');
+            if (needsExport) {
+                badge.classList.remove('hidden');
+                localStorage.setItem('needsExport_108h', 'true');
+            } else {
+                badge.classList.add('hidden');
+                localStorage.removeItem('needsExport_108h');
+            }
+        }
+
+        // ============================================================================
+        // FORMATTING UTILITIES
+        // ============================================================================
+
+        function formatDuree(totalMinutes) {
+            const isNegative = totalMinutes < 0;
+            const absMinutes = Math.abs(Math.round(totalMinutes));
+            const hours = Math.floor(absMinutes / 60);
+            const mins = absMinutes % 60;
+            const prefix = isNegative ? "-" : "";
+            const minutePart = mins > 0 ? mins.toString().padStart(2, '0') : '';
+            return `${prefix}${hours}h${minutePart}`;
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+        }
+
+        // ============================================================================
+        // RENDERING
+        // ============================================================================
+
+        function render() {
+            const container = document.getElementById('displayContainer');
+            container.innerHTML = "";
+            let globalMinutes = 0;
+
+            document.getElementById('stats-title').innerText = `Total Annuel (${formatDuree(TOTAL_ANNUEL)})`;
+
+            // Render each category column
+            Object.keys(QUOTAS).forEach(categoryKey => {
+                const categoryReunions = reunions.filter(r => r.cat === categoryKey);
+                const totalMinutes = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
+                globalMinutes += totalMinutes;
+
+                const isExceeded = totalMinutes > QUOTAS[categoryKey];
+                const progressPercent = Math.min((totalMinutes / QUOTAS[categoryKey]) * 100, 100);
+
+                const column = document.createElement('div');
+                column.className = "level-column";
+                column.innerHTML = `
+                    <div class="mb-1 relative">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <h3 class="text-[9px] font-black uppercase opacity-60">${CATEGORY_LABELS[categoryKey]}</h3>
+                            ${isExceeded ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${progressPercent}%; background-color: ${THEME_HEX}"></div>
+                        </div>
+                        <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(totalMinutes)} / ${formatDuree(QUOTAS[categoryKey])}</p>
+                    </div>
+                    <button id="btn-${categoryKey}" onclick="toggleListe('${categoryKey}')" class="toggle-list-btn">Détails</button>
+                    <div id="list-${categoryKey}" class="mt-2 space-y-1" style="display:none"></div>
+                `;
+
+                const listDiv = column.querySelector(`#list-${categoryKey}`);
+                categoryReunions
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(reunion => {
+                        const formattedDate = formatDate(reunion.date);
+                        const item = document.createElement('div');
+                        item.className = "reunion-item";
+                        item.style.borderLeftColor = THEME_HEX;
+                        item.onclick = () => chargerPourEdition(reunion.id);
+                        item.innerHTML = `
+                            <div class="flex-1 overflow-hidden">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-[10px]" style="color: ${THEME_HEX}">${formattedDate}</span>
+                                    <span class="font-bold text-[10px]">${formatDuree(reunion.minutes)}</span>
+                                </div>
+                                ${reunion.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${reunion.comm}</div>` : ''}
+                            </div>
+                        `;
+                        listDiv.appendChild(item);
+                    });
+
+                container.appendChild(column);
+            });
+
+            // Update global stats
+            const globalRemaining = TOTAL_ANNUEL - globalMinutes;
+            const globalPercent = Math.min((globalMinutes / TOTAL_ANNUEL) * 100, 100);
+
+            document.getElementById('globalFait').innerText = `Fait : ${formatDuree(globalMinutes)}`;
+            document.getElementById('globalReste').innerText = `Reste : ${formatDuree(globalRemaining)}`;
+            document.getElementById('globalReste').style.color = THEME_HEX;
+            document.getElementById('globalPercent').innerText = `${Math.round(globalPercent)}%`;
+            document.getElementById('globalBar').style.width = globalPercent + "%";
+            document.getElementById('globalBar').style.backgroundColor = THEME_HEX;
+        }
+
+        function toggleListe(categoryKey) {
+            const listDiv = document.getElementById(`list-${categoryKey}`);
+            const btn = document.getElementById(`btn-${categoryKey}`);
+            const isHidden = listDiv.style.display === "none";
+
+            listDiv.style.display = isHidden ? "block" : "none";
+            btn.innerText = isHidden ? "Masquer" : "Détails";
+        }
+
+        // ============================================================================
+        // IMPORT/EXPORT
+        // ============================================================================
+
+        function exportData() {
+            if (reunions.length === 0) {
+                alert("Aucune donnée.");
+                return;
+            }
+
+            const date = new Date().toISOString().split('T')[0];
+            const fileName = `outilsprofs_108heures_${date}.txt`;
+            const content = JSON.stringify(reunions);
+
+            if (window.Android && window.Android.exportTxt) {
+                window.Android.exportTxt(content, fileName);
+                updateExportBadge(false);
+            } else {
+                const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    updateExportBadge(false);
+                }, 100);
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        customConfirm("Remplacer les données ?", () => {
+                            reunions = imported;
+                            saveAndRender();
+                            updateExportBadge(false);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de l'import:", error);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        function exportPDF() {
+            const professorName = localStorage.getItem('nom_enseignant') || "Enseignant";
+            const quotite = localStorage.getItem('quotite_pro') || 100;
+            const exportDate = new Date().toISOString().split('T')[0];
+            const fileName = `outilsprofs_108h_${professorName}_${exportDate}.pdf`;
+
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            container.style.color = 'black';
+            container.style.backgroundColor = 'white';
+
+            let htmlContent = `
+                <div style="text-align:center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; font-family: Arial;">
+                    <h1 style="font-size:18px; margin:0;">BILAN 108 HEURES</h1>
+                    <p>${professorName} - Quotité : ${quotite}%</p>
+                    <p style="font-size:10px;">Le ${new Date().toLocaleDateString('fr-FR')}</p>
+                </div>
+            `;
+
+            Object.keys(QUOTAS).forEach(categoryKey => {
+                const categoryReunions = reunions.filter(r => r.cat === categoryKey);
+                const totalMinutes = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
+
+                htmlContent += `
+                    <div style="margin-bottom: 15px; border: 1px solid #ddd; font-family: Arial;">
+                        <div style="background:#f0f0f0; padding:8px; font-weight:bold;">
+                            ${CATEGORY_LABELS[categoryKey]} (${formatDuree(totalMinutes)} / ${formatDuree(QUOTAS[categoryKey])})
+                        </div>
+                        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom:1px solid #000;">
+                                    <th style="text-align:left; padding:6px;">Date</th>
+                                    <th style="text-align:left; padding:6px;">Objet</th>
+                                    <th style="text-align:right; padding:6px;">Durée</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${categoryReunions.length === 0
+                                    ? '<tr><td colspan="3" style="padding:10px; color:gray;">Aucune saisie</td></tr>'
+                                    : categoryReunions
+                                        .sort((a, b) => new Date(a.date) - new Date(b.date))
+                                        .map(reunion => `
+                                            <tr style="border-bottom:1px solid #eee;">
+                                                <td style="padding:6px;">${formatDate(reunion.date)}</td>
+                                                <td style="padding:6px;">${reunion.comm || '-'}</td>
+                                                <td style="padding:6px; text-align:right;">${formatDuree(reunion.minutes)}</td>
+                                            </tr>
+                                        `)
+                                        .join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+
+            const options = {
+                margin: 10,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            if (window.Android && window.Android.savePdfFromBase64) {
+                html2pdf()
+                    .set(options)
+                    .from(container)
+                    .output('datauristring')
+                    .then((pdfBase64) => {
+                        window.Android.savePdfFromBase64(pdfBase64.split(',')[1], fileName);
+                    });
+            } else {
+                html2pdf().set(options).from(container).save();
+            }
+        }
+    </script>
 </body>
 </html>

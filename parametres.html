@@ -6,72 +6,48 @@
     <title>Infos et paramètres - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
         :root {
-            --bg-page: #121212;
-            --text-main: #eee;
-            --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: #111; 
-            --card-text: #eee;
-            --card-sub: #9ca3af;
-            --btn-back-bg: #555555;
-            --warning-border: #ef4444;
-            --warning-text: #fca5a5;
+            --bg-page: #121212; --text-main: #eee; --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #111; --card-text: #eee; --card-sub: #9ca3af;
+            --btn-back-bg: #555555; --warning-border: #ef4444; --warning-text: #fca5a5;
         }
 
         .light-mode {
-            --bg-page: #eeeeee;
-            --text-main: #111;
-            --header-bg: #ffffff;
-            --header-border: #ddd;
-            --card-bg: #ffffff;
-            --card-text: #111827;
-            --card-sub: #4b5563;
-            --btn-back-bg: #cccccc;
-            --warning-border: #b91c1c;
-            --warning-text: #7f1d1d;
+            --bg-page: #eeeeee; --text-main: #111; --header-bg: #ffffff;
+            --header-border: #ddd; --card-bg: #ffffff; --card-text: #111827;
+            --card-sub: #4b5563; --btn-back-bg: #cccccc;
+            --warning-border: #b91c1c; --warning-text: #7f1d1d;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-page); 
-            color: var(--text-main); 
-            padding: 0; margin: 0; 
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
-            overflow-x: hidden;
-            transition: background 0.3s;
+            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); 
+            padding: 0; margin: 0; padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+            overflow-x: hidden; transition: background 0.3s;
         }
-        
+
+        /* Header */
         header { 
-            background: var(--header-bg); 
-            border-bottom: 1px solid var(--header-border);
-            position: sticky; top: 0; z-index: 100; 
-            display: flex; align-items: center; justify-content: space-between;
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center; 
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
             width: calc(100% + 30px); margin-left: -15px;
         }
 
         #btn-retour { 
-            background-color: var(--btn-back-bg); 
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 9999px;
+            background-color: var(--btn-back-bg); color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 9999px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-            cursor: pointer;
+            transition: all 0.3s; cursor: pointer;
         }
-        
+
         .light-mode #btn-retour { border-color: rgba(0,0,0,0.1); }
 
+        /* Tabs Navigation */
         .tab-btn { 
             padding: 12px 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; 
             letter-spacing: 0.5px; color: #666; border-bottom: 2px solid transparent;
@@ -79,65 +55,88 @@
             background: none; border-top: none; border-left: none; border-right: none;
         }
         .tab-btn.active { color: var(--text-main); border-bottom-color: var(--text-main); }
-        
-        /* CORRECTIF : Gestion stricte de l'affichage des onglets */
+
         .tab-content { display: none !important; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block !important; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* ====================== PINTEREST GRID POUR ONGLET AIDE ====================== */
+        #emploi.active {
+            column-count: 1;
+            column-gap: 15px;
+        }
+
+        @media (min-width: 640px) {
+            #emploi.active {
+                column-count: 2;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #emploi.active {
+                column-count: 3;
+            }
+        }
 
         .card-info { 
-            background: var(--card-bg); 
-            color: var(--card-text); 
-            border-radius: 1.2rem; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: var(--card-bg); color: var(--card-text); border-radius: 1.2rem; 
+            padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border: 1px solid var(--header-border);
-        }
-        
-        .tile-config { 
-            background: var(--card-bg); 
-            border: 1px solid var(--header-border); 
-            border-radius: 1rem; 
-            padding: 10px; 
-            margin-bottom: 8px; 
-            color: var(--card-text);
-        }
-        
-        .color-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        .color-dot.active { 
-            transform: scale(1.4); 
-            border: 2px solid white; 
-            box-shadow: 0 0 10px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-        .light-mode .color-dot.active { 
-            border-color: #000;
-            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            break-inside: avoid;
+            display: inline-block;
+            width: 100%;
         }
 
-        .btn-nav { font-weight: 900; padding: 14px 4px; border-radius: 50px; font-size: 10px; text-align: center; text-transform: uppercase; cursor: pointer; border: none; }
-        
+        .card-warning { 
+            background: var(--card-bg); border: 2px solid var(--warning-border); 
+            border-radius: 1.2rem; padding: 15px; margin-bottom: 15px; color: var(--warning-text);
+            break-inside: avoid;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .card-info p, .card-info li { color: var(--card-sub); }
+        .card-info h3 { color: var(--text-main); }
+
+        /* Tile Configuration */
+        .tile-config { 
+            background: var(--card-bg); border: 1px solid var(--header-border); 
+            border-radius: 1rem; padding: 10px; margin-bottom: 8px; color: var(--card-text);
+        }
+
+        /* Color Dots */
+        .color-dot { 
+            width: 16px; height: 16px; border-radius: 50%; 
+            border: 1px solid rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .color-dot.active { 
+            transform: scale(1.4); border: 2px solid white; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .light-mode .color-dot.active { 
+            border-color: #000; box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+
+        /* Buttons */
+        .btn-nav { 
+            font-weight: 900; padding: 14px 4px; border-radius: 50px; 
+            font-size: 10px; text-align: center; text-transform: uppercase; 
+            cursor: pointer; border: none;
+        }
+
+        /* Handle Preview */
         .handle-preview {
             display: inline-grid; grid-template-columns: repeat(3, 3px); gap: 2px;
             padding: 4px; background: #cbd5e1; border-radius: 3px; vertical-align: middle; margin: 0 4px;
         }
         .handle-dot { width: 3px; height: 3px; background-color: #64748b; border-radius: 50%; }
 
-        .card-warning { 
-            background: var(--card-bg); 
-            border: 2px solid var(--warning-border); 
-            border-radius: 1.2rem; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            color: var(--warning-text);
-        }
-        
-        .card-info p, .card-info li { color: var(--card-sub); }
-        .card-info h3 { color: var(--text-main); }
-
+        /* Theme Choice Buttons */
         .theme-choice-btn {
             flex: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--header-border);
             display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -145,51 +144,82 @@
         }
         .theme-choice-btn:active { transform: scale(0.95); }
 
-        #avatar-propos { width: 128px; height: auto; margin-bottom: 24px; transition: filter 0.3s ease; }
+        /* Avatar */
+        #avatar-propos { 
+            width: 128px; height: auto; margin-bottom: 24px; 
+            transition: filter 0.3s ease;
+        }
 
+        /* Layout Grid */
         #settingsContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; justify-items: center; }
 
+        /* Tabs Navigation Sticky */
         #tabs-nav { 
-            position: sticky; 
-            top: 60px; 
-            z-index: 90; 
-            background: var(--bg-page);
-            width: calc(100% + 30px); 
-            margin-left: -15px; 
-            padding: 0 15px;
+            position: sticky; top: 60px; z-index: 90; background: var(--bg-page);
+            width: calc(100% + 30px); margin-left: -15px; padding: 0 15px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
-        /* --- ADAPTATION PC --- */
+
+        /* Responsive */
         @media (min-width: 768px) {
             .max-w-md { max-width: 1000px !important; }
-            #emploi.active { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            #emploi .card-info:first-child { grid-column: span 2; }
             #settingsContainer { grid-template-columns: repeat(3, 1fr); }
             .theme-choice-btn { max-width: 200px; }
         }
 
+        /* ====================== URL COPY BOX - AMÉLIORÉ ====================== */
+        .url-copy-box {
+            background: #1f2937; border-radius: 0.5rem; padding: 0.75rem; 
+            border: 1px solid #374151; display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        .light-mode .url-copy-box {
+            background: #f3f4f6; border-color: #d1d5db;
+        }
+
+        #app-url {
+            font-size: 0.625rem; color: #1f2937; font-weight: bold; 
+            word-break: break-all; font-family: monospace; letter-spacing: 0.05em;
+            padding: 0.5rem;
+            background: #ffffff;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+        }
+
+        .light-mode #app-url {
+            color: #111827;
+            background: #ffffff;
+            border-color: #d1d5db;
+        }
+
+        .copy-btn {
+            background: #2563eb; color: white; font-size: 0.5rem; font-weight: 900; 
+            padding: 0.375rem 0.75rem; border-radius: 0.375rem; text-transform: uppercase; 
+            cursor: pointer; transition: all 0.2s; width: 100%; border: none;
+        }
+        .copy-btn:active { transform: scale(0.95); }
+
+        .light-mode .copy-btn {
+            background: #1d4ed8;
+        }
+
+        /* Animations */
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
             50% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(0.9); opacity: 0.5; }
         }
         .mini-pastille {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #f97316;
-            border-radius: 50%;
-            margin-left: 4px;
-            margin-right: 2px;
-            box-shadow: 0 0 5px #f97316;
-            animation: blink-point 1.5s infinite;
+            display: inline-block; width: 8px; height: 8px; background-color: #f97316;
+            border-radius: 50%; margin-left: 4px; margin-right: 2px;
+            box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
         }
-
     </style>
 </head>
 <body class="pb-10">
+
+    <!-- ====================== HEADER ====================== -->
     <header>
         <button onclick="goBack()" id="btn-retour" class="shadow-lg active:scale-90">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,6 +231,7 @@
 
     <div class="max-w-md mx-auto">
         
+        <!-- ====================== TABS NAVIGATION ====================== -->
         <div class="flex border-b border-gray-800" id="tabs-nav">
             <button class="tab-btn active" onclick="openTab(event, 'emploi')">Aide</button>
             <button class="tab-btn" onclick="openTab(event, 'perso')">Apparence</button>
@@ -209,8 +240,11 @@
         </div>
 
         <div class="p-4">
+            
+            <!-- ====================== TAB: AIDE (PINTEREST MODE) ====================== -->
             <div id="emploi" class="tab-content active">
 
+                <!-- Organisation Section -->
                 <div class="card-info">
                     <div class="flex items-center gap-2 mb-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -231,24 +265,24 @@
                     </div>
                 </div>
 
-				<div class="card-info border-2 border-blue-500/30">
-    <div class="flex items-center gap-2 mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 21h6l-.75-4M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        <h3 class="font-black text-xs uppercase">Usage sur PC et VPI</h3>
-    </div>
-    <p class="text-xs leading-relaxed mb-3">
-        OutilsProfs est parfaitement adapté pour une utilisation sur <strong>ordinateur</strong> ou une projection sur <strong>VPI/TBI</strong> en classe.
-    </p>
-    <div class="flex flex-col items-center gap-2 bg-black/50 p-2.5 rounded-lg border border-white/10 shadow-inner">
-		<code id="app-url" class="text-[10px] text-blue-100 font-bold truncate tracking-wide">https://ecolebernardet.github.io/outilsprofs/</code>
-		<button onclick="copyUrl(this)" class="bg-blue-600 text-white text-[9px] font-black px-3 py-1.5 rounded-md uppercase active:scale-90 transition-all w-full">
-			Copier
-		</button>
-</div>
-</div>
+                <!-- PC Usage Section -->
+                <div class="card-info border-2 border-blue-500/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 21h6l-.75-4M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="font-black text-xs uppercase">Usage sur PC et VPI</h3>
+                    </div>
+                    <p class="text-xs leading-relaxed mb-3">
+                        OutilsProfs est parfaitement adapté pour une utilisation sur <strong>ordinateur</strong> ou une projection sur <strong>VPI/TBI</strong> en classe.
+                    </p>
+                    <div class="url-copy-box">
+                        <code id="app-url">https://ecolebernardet.github.io/outilsprofs/</code>
+                        <button onclick="copyUrl(this)" class="copy-btn">Copier</button>
+                    </div>
+                </div>
 
+                <!-- Ma Classe Section -->
                 <div class="card-info">
                     <h3 id="title-inscriptions" class="font-black text-xs uppercase mb-2">📌 Ma classe</h3>
                     <ul class="text-xs space-y-2 leading-relaxed">
@@ -266,6 +300,7 @@
                     </ul>
                 </div>
 
+                <!-- Liens Section -->
                 <div class="card-info">
                     <h3 id="title-liens" class="font-black text-xs uppercase mb-2">🔗️ Liens</h3>
                     <p class="text-xs leading-relaxed">
@@ -275,7 +310,8 @@
                         • Cliquez sur la poubelle pour supprimer un lien.
                     </p>
                 </div>
-                
+
+                <!-- 108 Heures Section -->
                 <div class="card-info">
                     <h3 id="title-108h" class="font-black text-xs uppercase mb-2">⏱️ 108 Heures</h3>
                     <p class="text-xs leading-relaxed">
@@ -287,7 +323,8 @@
                         • Corriger une information en cliquant sur la réunion en question.
                     </p>
                 </div>
-                
+
+                <!-- Mémos Section -->
                 <div class="card-info">
                     <h3 id="title-memos" class="font-black text-xs uppercase mb-2">📒️ Mémos</h3>
                     <p class="text-xs leading-relaxed">
@@ -297,6 +334,7 @@
                     </p>
                 </div>
 
+                <!-- Tirage Section -->
                 <div class="card-info">
                     <h3 id="title-tirage" class="font-black text-xs uppercase mb-2">🎲 Tirage</h3>
                     <p class="text-xs leading-relaxed">
@@ -304,6 +342,7 @@
                     </p>
                 </div>
 
+                <!-- Équipes Section -->
                 <div class="card-info">
                     <h3 id="title-equipes" class="font-black text-xs uppercase mb-2">👥 Équipes</h3>
                     <p class="text-xs leading-relaxed">
@@ -311,6 +350,7 @@
                     </p>
                 </div>
 
+                <!-- Observations Section -->
                 <div class="card-info">
                     <h3 id="title-observations" class="font-black text-xs uppercase mb-2">✏️ Observations</h3>
                     <p class="text-xs leading-relaxed">
@@ -318,6 +358,7 @@
                     </p>
                 </div>
 
+                <!-- Compteur Section -->
                 <div class="card-info">
                     <h3 id="title-compteur" class="font-black text-xs uppercase mb-2">🚥 Compteur</h3>
                     <p class="text-xs leading-relaxed">
@@ -327,29 +368,32 @@
                         • Les points peuvent être remis à zéro d'un seul coup via le bouton en bas de page.
                     </p>
                 </div>
-                
+
+                <!-- Générateurs Section -->
                 <div class="card-info">
                     <h3 id="title-gen" class="font-black text-xs uppercase mb-2">🛠️ Générateurs</h3>
                     <p class="text-xs leading-relaxed">
                         Générez des acitivités et des exercices personnalisés : <strong>calcul mental, rituel opérations, fractions, compte est bon, calculs en pyramide, sudokus, dominos, mots mêlés, pixel art, quizz...</strong><br><br>
-						• <strong>Configuration</strong> : Paramétrez chaque activité en fonction du niveau de la classe ou selon vos propres critères.<br>
+                        • <strong>Configuration</strong> : Paramétrez chaque activité en fonction du niveau de la classe ou selon vos propres critères.<br>
                         • <strong>Export</strong> : Générez un PDF prêt à imprimer incluant les exercices et la correction.<br>
-						• <strong>Interactivité</strong> : Certaines activités peuvent se jouer directement en ligne (calcul mental, sudokus, mots mêlés, calcul mental...)<br>
+                        • <strong>Interactivité</strong> : Certaines activités peuvent se jouer directement en ligne (calcul mental, sudokus, mots mêlés, calcul mental...)<br>
                     </p>
                 </div>
-                
-				<div class="card-info">
+
+                <!-- Outils Section -->
+                <div class="card-info">
                     <h3 id="title-outils" class="font-black text-xs uppercase mb-2">🧰 Outils</h3>
                     <p class="text-xs leading-relaxed">
-                        • Optimisez l'organisation de vos séances avec des outils interactifs conçus pour le quotidien des professeurs : 
-						<strong>chronomètre, timer, gestion du bruit...</strong><br><br>
-						• Créez le <strong>plan</strong> de votre classe.<br><br>
+                        • Optimisez l'organisation de vos séances et la gestion de votre classe avec des outils interactifs conçus pour le quotidien des professeurs : 
+                        <strong>chronomètre, timer, gestion du bruit, plan de la classe, édition de listes et d'étiquettes, structure de l'école...</strong><br><br>
                     </p>
                 </div>
-				
             </div>
 
+            <!-- ====================== TAB: APPARENCE ====================== -->
             <div id="perso" class="tab-content">
+                
+                <!-- Theme Selection -->
                 <div class="card-info">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="text-lg">🌓</span>
@@ -367,13 +411,16 @@
                     </div>
                 </div>
 
+                <!-- Tile Color Configuration -->
                 <div id="settingsContainer"></div>
-                
+
+                <!-- Save Button -->
                 <div class="flex mt-6 pb-10">
                     <button onclick="goBack()" class="btn-nav bg-green-600 text-white flex items-center justify-center shadow-lg flex-1 active:scale-95">Enregistrer et quitter</button>
                 </div>
             </div>
 
+            <!-- ====================== TAB: DONNÉES ====================== -->
             <div id="gestion" class="tab-content">
                 <div class="card-warning">
                     <h3 class="font-black text-xs uppercase mb-2" style="color: var(--warning-border)"><center>⚠️ Attention ⚠️</center></h3>
@@ -389,27 +436,42 @@
                         <br>- <strong>Sérénité</strong> : quoi qu'il arrive à votre navigateur, votre travail est à l'abri dans votre dossier "Téléchargements".<br>
                         <br>Et pour encore plus de sécurité, si vous avez effectué une modification ou une suppression, ou encore si vous n'avez pas réalisé d'exportations de fichiers de sauvegarde .txt depuis plus de 7 jours, une <strong>pastille orange clignotante</strong><span class="mini-pastille"></span></strong> apparaitra sur le bouton d'export pour vous rappeler de le faire.<br>
                         <br>
-                        </p>
+                    </p>
                 </div>
             </div>
 
+            <!-- ====================== TAB: À PROPOS ====================== -->
             <div id="propos" class="tab-content text-center py-6">
                 <div class="card-info flex flex-col items-center">
                     <img src="outilsprofs_icone.png" id="avatar-propos" alt="Avatar">
-                    <p class="text-sm font-bold">Application conçue par Nicolas BERNARDET<br>avec la grande aide de Gemini et de Claude AI<br>pour la programmation.</p>
+                    <p class="text-sm font-bold">Application conçue par Nicolas BERNARDET<br>avec la grande aide de l'IA<br>pour la programmation du code.</p>
                     <div class="h-[1px] bg-gray-700 w-full my-6"></div>
-                    <p class="text-[15px] font-black text-gray-500 ">OutilsProfs version 6.5</p>
+                    <p class="text-[15px] font-black text-gray-500 ">OutilsProfs version 6.6</p>
+                </div>
+
+                <!-- PC Usage Section dans À Propos -->
+                <div class="card-info border-2 border-blue-500/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 21h6l-.75-4M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="font-black text-xs uppercase">Usage sur PC et VPI</h3>
+                    </div>
+                    <p class="text-xs leading-relaxed mb-3">
+                        OutilsProfs est parfaitement adapté pour une utilisation sur <strong>ordinateur</strong> ou une projection sur <strong>VPI/TBI</strong> en classe.
+                    </p>
+                    <div class="url-copy-box">
+                        <code id="app-url-propos">https://ecolebernardet.github.io/outilsprofs/</code>
+                        <button onclick="copyUrl(this)" class="copy-btn">Copier</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function goBack() {
-            window.location.href = 'index.html';
-        }
-
-        const mapCouleurs = {
+        // ====================== CONFIGURATION & CONSTANTS ====================== 
+        const COLOR_MAP = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
             'cyan': '#06b6d4', 'blue': '#3b82f6', 'indigo': '#6366f1',
@@ -417,7 +479,7 @@
             'rose': '#f43f5e'
         };
 
-        const nomsFr = {
+        const COLOR_LABELS_FR = {
             'red': 'Rouge', 'orange': 'Orange', 'amber': 'Ambre', 'yellow': 'Jaune',
             'lime': 'Citron', 'green': 'Vert', 'emerald': 'Émeraude', 'teal': 'Sarcelle',
             'cyan': 'Cyan', 'blue': 'Bleu', 'indigo': 'Indigo',
@@ -425,10 +487,10 @@
             'rose': 'Rosé'
         };
 
-        const tuiles = [
+        const TILES = [
             { id: 'fille', label: 'Filles', emoji: '👧' },
             { id: 'garcon', label: 'Garçons', emoji: '👦' },
-            { id: 'inscr', label: 'Ma classe', emoji: '📝' },
+            { id: 'inscr', label: 'Inscriptions', emoji: '📝' },
             { id: 'liens', label: 'Liens', emoji: '🔗' },
             { id: 'h108', label: '108 Heures', emoji: '⏲️' },
             { id: 'memos', label: 'Mémos', emoji: '📒' },
@@ -440,26 +502,50 @@
             { id: 'outils', label: 'Outils', emoji: '🧰' }
         ];
 
-        const couleurs = Object.keys(mapCouleurs);
-        let prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {
-            fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange', 
-            liens: 'indigo', tirage: 'yellow', equipes: 'rose', 
+        const STORAGE_KEYS = {
+            themePrefs: 'theme_tuiles',
+            themeMode: 'theme_mode'
+        };
+
+        const DEFAULT_PREFS = {
+            fille: 'pink', garcon: 'blue', inscr: 'lime', h108: 'orange',
+            liens: 'indigo', tirage: 'yellow', equipes: 'rose',
             memos: 'purple', obs: 'green', compt: 'blue', gen: 'cyan', outils: 'blue'
         };
 
-        function selectTheme(mode) {
-            document.body.classList.toggle('light-mode', mode === 'light');
-            localStorage.setItem('theme_mode', mode);
-            appliquerCouleursGlobales(); 
+        const TITLE_TO_TILE = {
+            'title-liens': 'liens', 'title-inscriptions': 'inscr', 'title-108h': 'h108',
+            'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
+            'title-observations': 'obs', 'title-compteur': 'compt', 'title-gen': 'gen',
+            'title-outils': 'outils'
+        };
+
+        const HELP_SECTIONS = [
+            { titleId: 'title-liens', storageKey: 'aide_liens' },
+            { titleId: 'title-inscriptions', storageKey: 'aide_inscr' },
+            { titleId: 'title-memos', storageKey: 'aide_memos' },
+            { titleId: 'title-108h', storageKey: 'aide_h108' },
+            { titleId: 'title-tirage', storageKey: 'aide_tirage' },
+            { titleId: 'title-equipes', storageKey: 'aide_equipes' },
+            { titleId: 'title-observations', storageKey: 'aide_obs' },
+            { titleId: 'title-compteur', storageKey: 'aide_compt_text' },
+            { titleId: 'title-gen', storageKey: 'aide_gen' },
+            { titleId: 'title-outils', storageKey: 'aide_outils' }
+        ];
+
+        let prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.themePrefs)) || DEFAULT_PREFS;
+        const colors = Object.keys(COLOR_MAP);
+
+        // ====================== NAVIGATION ====================== 
+        function goBack() {
+            window.location.href = 'index.html';
         }
 
-        // CORRECTIF : Gestion propre de la navigation entre onglets
         function openTab(evt, tabName) {
             const contents = document.querySelectorAll(".tab-content");
             contents.forEach(c => {
                 c.classList.remove("active");
-                // On s'assure que le style inline ne force pas l'affichage
-                c.style.display = ""; 
+                c.style.display = "";
             });
 
             const links = document.querySelectorAll(".tab-btn");
@@ -468,107 +554,121 @@
             const target = document.getElementById(tabName);
             target.classList.add("active");
             evt.currentTarget.classList.add("active");
-            
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ====================== THEME SELECTION ====================== 
+        function selectTheme(mode) {
+            document.body.classList.toggle('light-mode', mode === 'light');
+            localStorage.setItem(STORAGE_KEYS.themeMode, mode);
+            applyGlobalColors();
+        }
+
+        // ====================== TILE COLOR MANAGEMENT ====================== 
+        function setTileColor(tileId, color) {
+            prefs[tileId] = color;
+            localStorage.setItem(STORAGE_KEYS.themePrefs, JSON.stringify(prefs));
+            renderSettings();
         }
 
         function renderSettings() {
             const container = document.getElementById('settingsContainer');
-            if(!container) return;
+            if (!container) return;
+            
             container.innerHTML = '';
-            tuiles.forEach(tuile => {
+            TILES.forEach(tile => {
                 const configDiv = document.createElement('div');
-                const isGender = tuile.id === 'fille' || tuile.id === 'garcon';
-                
-                configDiv.className = isGender 
-                    ? 'tile-config border-2 border-dashed relative' 
+                const isGender = tile.id === 'fille' || tile.id === 'garcon';
+
+                configDiv.className = isGender
+                    ? 'tile-config border-2 border-dashed relative'
                     : 'tile-config';
-                
-                const currentColor = prefs[tuile.id] || 'blue';
-                
+
+                const currentColor = prefs[tile.id] || 'blue';
+
                 if (isGender) {
-                    configDiv.style.borderColor = mapCouleurs[currentColor];
+                    configDiv.style.borderColor = COLOR_MAP[currentColor];
                 }
 
                 configDiv.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center gap-1.5 overflow-hidden">
-                            <span class="text-xs">${tuile.emoji}</span>
-                            <span class="text-[8px] font-black uppercase tracking-tight opacity-70 truncate">${tuile.label}</span>
+                            <span class="text-xs">${tile.emoji}</span>
+                            <span class="text-[8px] font-black uppercase tracking-tight opacity-70 truncate">${tile.label}</span>
                         </div>
-                        <span class="text-[8px] font-bold uppercase border border-gray-400/30 px-1.5 rounded whitespace-nowrap" style="color: ${mapCouleurs[currentColor]}">${nomsFr[currentColor]}</span>
+                        <span class="text-[8px] font-bold uppercase border border-gray-400/30 px-1.5 rounded whitespace-nowrap" style="color: ${COLOR_MAP[currentColor]}">${COLOR_LABELS_FR[currentColor]}</span>
                     </div>
                     <div class="color-grid">
-                        ${couleurs.map(c => `
-                            <button onclick="setTileColor('${tuile.id}', '${c}')" 
+                        ${colors.map(c => `
+                            <button onclick="setTileColor('${tile.id}', '${c}')"
                                     class="color-dot ${currentColor === c ? 'active' : ''}"
-                                    style="background-color: ${mapCouleurs[c]}">
+                                    style="background-color: ${COLOR_MAP[c]}">
                             </button>`).join('')}
                     </div>`;
+
                 container.appendChild(configDiv);
             });
-            appliquerCouleursGlobales();
+
+            applyGlobalColors();
         }
 
-        function setTileColor(tuileId, couleur) {
-            prefs[tuileId] = couleur;
-            localStorage.setItem('theme_tuiles', JSON.stringify(prefs));
-            renderSettings();
-        }
-
-        function appliquerCouleursGlobales() {
+        // ====================== COLOR APPLICATION ====================== 
+        function applyGlobalColors() {
             const isLight = document.body.classList.contains('light-mode');
             const avatar = document.getElementById('avatar-propos');
-            if (avatar) avatar.style.filter = isLight ? 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(4px 4px 8px rgba(255,255,255,0.15))';
 
-            const mapping = {
-                'title-inscriptions': 'inscr', 'title-liens': 'liens', 'title-108h': 'h108',
-                'title-memos': 'memos', 'title-tirage': 'tirage', 'title-equipes': 'equipes',
-                'title-observations': 'obs', 'title-compteur': 'compt', 'title-gen': 'gen',
-                'title-outils': 'outils' 
-            };
-            for (let [elId, prefId] of Object.entries(mapping)) {
-                const el = document.getElementById(elId);
-                if (el) el.style.color = mapCouleurs[prefs[prefId] || 'blue'];
+            if (avatar) {
+                avatar.style.filter = isLight
+                    ? 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))'
+                    : 'drop-shadow(4px 4px 8px rgba(255,255,255,0.15))';
             }
-        }
 
-        function sauvegarderToutesLesAides() {
-            const rubriques = [
-                { id: 'title-liens', key: 'aide_liens' }, { id: 'title-inscriptions', key: 'aide_inscr' },
-                { id: 'title-memos', key: 'aide_memos' }, { id: 'title-108h', key: 'aide_h108' },
-                { id: 'title-tirage', key: 'aide_tirage' }, { id: 'title-equipes', key: 'aide_equipes' },
-                { id: 'title-observations', key: 'aide_obs' }, { id: 'title-compteur', key: 'aide_compt_text' },
-                { id: 'title-gen', key: 'aide_gen'}, { id: 'title-outils', key: 'aide_outils'}
-            ];
-            rubriques.forEach(item => {
-                const titreEl = document.getElementById(item.id);
-                if (titreEl) {
-                    const blocAide = titreEl.closest('.card-info');
-                    if (blocAide) localStorage.setItem(item.key, blocAide.innerHTML);
+            Object.entries(TITLE_TO_TILE).forEach(([titleId, prefId]) => {
+                const el = document.getElementById(titleId);
+                if (el) {
+                    el.style.color = COLOR_MAP[prefs[prefId] || 'blue'];
                 }
             });
         }
 
-			function copyUrl(btn) {
-    const url = "https://ecolebernardet.github.io/outilsprofs/";
-    navigator.clipboard.writeText(url).then(() => {
-        const originalText = btn.innerText;
-        btn.innerText = "Copié !";
-        btn.style.backgroundColor = "#16a34a"; // Vert (green-600)
-        
-        setTimeout(() => {
-            btn.innerText = originalText;
-            btn.style.backgroundColor = ""; // Retour au bleu original
-        }, 2000);
-    }).catch(err => {
-        console.error('Erreur :', err);
-    });
+        // ====================== URL COPY ====================== 
+        function copyUrl(btn) {
+            const url = "https://ecolebernardet.github.io/outilsprofs/";
+            navigator.clipboard.writeText(url).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "Copié !";
+                btn.style.backgroundColor = "#16a34a";
 
-}
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.backgroundColor = "";
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur :', err);
+            });
+        }
 
-        window.addEventListener('load', sauvegarderToutesLesAides);
-        if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+        // ====================== HELP SECTIONS SAVE ====================== 
+        function saveHelpSections() {
+            HELP_SECTIONS.forEach(item => {
+                const titleEl = document.getElementById(item.titleId);
+                if (titleEl) {
+                    const helpBlock = titleEl.closest('.card-info');
+                    if (helpBlock) {
+                        localStorage.setItem(item.storageKey, helpBlock.innerHTML);
+                    }
+                }
+            });
+        }
+
+        // ====================== INITIALIZATION ====================== 
+        window.addEventListener('load', saveHelpSections);
+
+        if (localStorage.getItem(STORAGE_KEYS.themeMode) === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
         renderSettings();
     </script>
 </body>

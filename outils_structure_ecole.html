@@ -5,46 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Structure École - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-page: #f4f7f9; --text-page: #1a1a1a; --card-bg: #ffffff;
-            --border-color: #e2e8f0; --header-bg: #ffffff;
-            /* Couleurs niveaux maclasse.html */
-            --color-cp: #ec4899; --color-ce1: #3b82f6; --color-ce2: #eab308;
-            --color-cm1: #ef4444; --color-cm2: #22c55e; --color-autre: #8b5cf6;
+            --bg-page: #f4f7f9;
+            --text-page: #1a1a1a;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --header-bg: #ffffff;
+            --color-cp: #ec4899;
+            --color-ce1: #3b82f6;
+            --color-ce2: #eab308;
+            --color-cm1: #ef4444;
+            --color-cm2: #22c55e;
+            --color-autre: #8b5cf6;
         }
 
         body.dark-mode {
-            --bg-page: #121212; --text-page: #ffffff; --card-bg: #1e1e1e;
-            --border-color: #333333; --header-bg: #1a1a1a;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --card-bg: #1e1e1e;
+            --border-color: #333333;
+            --header-bg: #1a1a1a;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
-            margin: 0; padding: 0; transition: all 0.3s ease; min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page); 
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+            min-height: 100vh;
         }
 
         header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--border-color);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            display: flex; align-items: center; justify-content: space-between; width: 100%;
-			position: sticky;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-        header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
+        #btn-retour, #btn-aide {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
 
-        .main-content { padding: 20px; max-width: 1000px; margin: auto; }
+        header h1 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .main-content {
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
 
         .container-box { 
-            background: var(--card-bg); padding: 10px; border-radius: 24px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         h3 { 
@@ -55,99 +97,207 @@
             margin-bottom: 20px; 
             letter-spacing: 1px; 
             text-align: center;
-            padding-bottom: 15px;                         /* Espace entre texte et ligne */
-            padding-bottom: 15px;width: auto;
+            padding-bottom: 15px;
+            width: auto;
             margin-left: auto;
             margin-right: auto;
-            display: table;                              /* Technique pour centrer un bloc de largeur auto */
+            display: table;
         }
 
+        .section {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.01);
+        }
+
+        .grid-effectifs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .grid-contraintes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .grid-resultats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        }
         
-        .section { border: 1px solid var(--border-color); padding: 20px; border-radius: 18px; margin-bottom: 20px; background: rgba(0,0,0,0.01); }
+        #resultats {
+            margin-top: 25px;
+        }
 
-		/* Grille des effectifs : 3 colonnes */
-		.grid-effectifs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        label {
+            display: block;
+            font-weight: 800;
+            font-size: 0.6rem;
+            margin-bottom: -10px;
+            text-align: center;
+            line-height: 1.2;
+            min-height: 1.5rem;
+        }
 
-/* Grille des contraintes : 2 colonnes */
-		.grid-contraintes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        label2 {
+            display: block;
+            font-weight: 800;
+            font-size: 0.6rem;
+            margin-bottom: 5px;
+            text-align: center;
+            line-height: 1.2;
+            min-height: 1.5rem;
+        }
 
-/* Grille des classes dans les résultats : 2 colonnes */
-		.grid-resultats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
-		
-		#resultats { margin-top: 25px; }
-
-		label { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: -10px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
-		label2 { display: block; font-weight: 800; font-size: 0.6rem; margin-bottom: 5px; text-align: center; line-height: 1.2; min-height: 1.5rem; }
-
-		/* Classes de couleurs pour les labels */
-		.label-cp { color: var(--color-cp); }
-		.label-ce1 { color: var(--color-ce1); }
-		.label-ce2 { color: #926b00; }
-		.label-cm1 { color: var(--color-cm1); }
-		.label-cm2 { color: var(--color-cm2); }
-		
-		input[type="number"] { 
-            margin-top: 0; width: 100%; padding: 2px; border-radius: 20px; border: 1px solid var(--border-color); 
-            background: var(--bg-page); color: var(--text-page); font-weight: 600; text-align: center;
+        .label-cp { color: var(--color-cp); }
+        .label-ce1 { color: var(--color-ce1); }
+        .label-ce2 { color: #926b00; }
+        .label-cm1 { color: var(--color-cm1); }
+        .label-cm2 { color: var(--color-cm2); }
+        
+        input[type="number"] { 
+            margin-top: 0;
+            width: 100%;
+            padding: 2px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color); 
+            background: var(--bg-page);
+            color: var(--text-page);
+            font-weight: 600;
+            text-align: center;
         }
 
         .main-btn { 
-            padding: 12px; border-radius: 50px; cursor: pointer; font-size: 0.7rem; 
-            font-weight: 900; text-transform: uppercase; width: 100%; border: none;
-            transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.7rem; 
+            font-weight: 900;
+            text-transform: uppercase;
+            width: 100%;
+            border: none;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .main-btn:active { transform: scale(0.98); }
+
+        .main-btn:active {
+            transform: scale(0.98);
+        }
 
         .proposition .grid { 
-			display: grid; 
-			grid-template-columns: repeat(2, 1fr); /* Force 2 colonnes même sur mobile */
-			gap: 8px; 
-			margin-bottom: 20px; 
-		}
-
-		.classe-item { background: var(--bg-page); padding: 10px; border-radius: 15px; border: 1px solid var(--border-color); }
-			
-		@media (min-width: 768px) {
-			.proposition .grid { 
-				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-			}
-		}
-			
-        /* Badges de niveaux */
-        .badge-niv {
-            display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; 
-            border-radius: 6px; font-weight: 800; font-size: 0.75rem; margin-right: 4px; margin-bottom: 4px;
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px; 
+            margin-bottom: 20px; 
         }
-		.badge-cp { background: color-mix(in srgb, var(--color-cp), transparent 80%); color: var(--color-cp); }
+
+        .classe-item {
+            background: var(--bg-page);
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+            
+        @media (min-width: 768px) {
+            .proposition .grid { 
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            }
+        }
+            
+        .badge-niv {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px; 
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .badge-cp { background: color-mix(in srgb, var(--color-cp), transparent 80%); color: var(--color-cp); }
         .badge-ce1 { background: color-mix(in srgb, var(--color-ce1), transparent 80%); color: var(--color-ce1); }
-        .badge-ce2 { background: color-mix(in srgb, var(--color-ce2), transparent 80%); color: #926b00; } /* Texte un peu plus sombre pour le jaune */
+        .badge-ce2 { background: color-mix(in srgb, var(--color-ce2), transparent 80%); color: #926b00; }
         .badge-cm1 { background: color-mix(in srgb, var(--color-cm1), transparent 80%); color: var(--color-cm1); }
         .badge-cm2 { background: color-mix(in srgb, var(--color-cm2), transparent 80%); color: var(--color-cm2); }
 
-        .error { color: #ef4444; background: #fee2e2; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 700; font-size: 0.8rem; text-align: center; display: none; }
+        .error {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-align: center;
+            display: none;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-		@media print {
-			header, #container-retour-liste, #monForm, #btn-aide, .main-btn { display: none !important; }
-			body { background: white !important; color: black !important; }
-			.main-content { padding: 0; margin: 0; width: 100%; }
-			.proposition { border: 2px solid #000 !important; page-break-inside: avoid; margin-bottom: 20px; }
-			.container-box { box-shadow: none !important; border: none !important; }
-		}
+        @media print {
+            header, #container-retour-liste, #monForm, #btn-aide, .main-btn { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .main-content { padding: 0; margin: 0; width: 100%; }
+            .proposition { border: 2px solid #000 !important; page-break-inside: avoid; margin-bottom: 20px; }
+            .container-box { box-shadow: none !important; border: none !important; }
+        }
 
-        .check-group { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 700; }
-        input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--theme-color); }
+        .check-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--border-color); padding: 25px; position: relative; }
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--theme-color);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            position: relative;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <a href="index.html" id="btn-retour">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
     </a>
     <h1 id="pageTitle">Structure École</h1>
     <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
@@ -156,7 +306,9 @@
 <div class="main-content">
     <div id="container-retour-liste" style="margin-bottom: 1.5rem;">
         <a href="outils.html" id="btn-retour-liste" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
             Retour aux outils
         </a>
     </div>
@@ -166,16 +318,16 @@
 
         <form id="monForm">
             <div class="section">
-    <h3>Effectifs par niveau</h3>
-    <div class="grid-effectifs">
-        <div><label class="label-cp">CP</label><input type="number" id="cp" value="28"></div>
-        <div><label class="label-ce1">CE1</label><input type="number" id="ce1" value="31"></div>
-        <div><label class="label-ce2">CE2</label><input type="number" id="ce2" value="36"></div>
-        <div><label class="label-cm1">CM1</label><input type="number" id="cm1" value="41"></div>
-        <div><label class="label-cm2">CM2</label><input type="number" id="cm2" value="29"></div>
-        <div><label>Nb Classes</label><input type="number" id="nbC" value="7"></div>
-    </div>
-</div>
+                <h3>Effectifs par niveau</h3>
+                <div class="grid-effectifs">
+                    <div><label class="label-cp">CP</label><input type="number" id="cp" value="28"></div>
+                    <div><label class="label-ce1">CE1</label><input type="number" id="ce1" value="31"></div>
+                    <div><label class="label-ce2">CE2</label><input type="number" id="ce2" value="36"></div>
+                    <div><label class="label-cm1">CM1</label><input type="number" id="cm1" value="41"></div>
+                    <div><label class="label-cm2">CM2</label><input type="number" id="cm2" value="29"></div>
+                    <div><label>Nb Classes</label><input type="number" id="nbC" value="7"></div>
+                </div>
+            </div>
 
             <div class="section">
                 <h3>Contraintes de calcul</h3>
@@ -213,18 +365,18 @@
                     <span class="check-group"><input type="checkbox" class="avoid" value="3-5"> CE2/CM2</span>
                 </div>
             </div>
-			<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 15px;">
-				<button type="button" class="main-btn" id="btn-calculer" onclick="calculer()" style="grid-column: span 2;">Générer les propositions</button>
-				<button type="button" class="main-btn" id="btn-pdf" onclick="exporterPDF()" style="background: #22c55e; color: white;">💾 Enregistrer PDF</button>
-				<button type="button" class="main-btn" id="btn-effacer" onclick="effacerResultats()" style="background: #ef4444; color: white;">Effacer</button>
-			</div>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 15px;">
+                <button type="button" class="main-btn" id="btn-calculer" onclick="calculer()" style="grid-column: span 2;">Générer les propositions</button>
+                <button type="button" class="main-btn" id="btn-pdf" onclick="exporterPDF()" style="background: #22c55e; color: white;">💾 Enregistrer PDF</button>
+                <button type="button" class="main-btn" id="btn-effacer" onclick="effacerResultats()" style="background: #ef4444; color: white;">Effacer</button>
+            </div>
         </form>
-
 
         <div id="resultats"></div>
     </div>
 </div>
 
+<!-- Modal Aide -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Structure</h2>
@@ -242,6 +394,10 @@
                 </li>
                 <li style="margin-bottom: 10px; display: flex; gap: 8px;">
                     <span style="color: var(--theme-color);">•</span>
+                    <span><strong>Optimisation :</strong> Les effectifs sont automatiquement rééquilibrés entre classes simples et doubles pour éviter les surcharges inutiles.</span>
+                </li>
+                <li style="margin-bottom: 10px; display: flex; gap: 8px;">
+                    <span style="color: var(--theme-color);">•</span>
                     <span><strong>Contraintes :</strong> Si aucune solution n'est trouvée, essayez d'augmenter "l'écart effectif max" ou de décocher certaines cases "Éviter".</span>
                 </li>
             </ul>
@@ -254,6 +410,7 @@
     </div>
 </div>
 
+<!-- Modal Alerte -->
 <div id="modal-alerte" class="modal-overlay" onclick="fermerModale('modal-alerte')">
     <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
@@ -263,6 +420,7 @@
     </div>
 </div>
 
+<!-- Modal Confirmation -->
 <div id="modal-confirm" class="modal-overlay" onclick="fermerModale('modal-confirm')">
     <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
         <div style="font-size: 3rem; margin-bottom: 10px;">🗑️</div>
@@ -276,8 +434,20 @@
 </div>
 
 <script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
+    // Initialisation du thème
+    if (localStorage.getItem('theme_mode') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+    // Configuration des couleurs
+    const mapCouleurs = {
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+        'rose': '#f43f5e'
+    };
+
     const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
     const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
     const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
@@ -286,13 +456,54 @@
     document.documentElement.style.setProperty('--theme-color', themeColor);
     document.documentElement.style.setProperty('--contrast-color', contrast);
 
-    const uiElements = [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('btn-retour-liste'), document.getElementById('btn-calculer'), document.getElementById('btn-effacer')];
-    uiElements.forEach(el => { if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; } });
+    // Application du thème aux boutons
+    const uiElements = [
+        document.getElementById('btn-retour'),
+        document.getElementById('btn-aide'),
+        document.getElementById('btn-fermer-aide'),
+        document.getElementById('btn-retour-liste'),
+        document.getElementById('btn-calculer'),
+        document.getElementById('btn-effacer')
+    ];
+    uiElements.forEach(el => {
+        if (el) {
+            el.style.backgroundColor = themeColor;
+            el.style.color = contrast;
+        }
+    });
     document.getElementById('titre-aide').style.color = themeColor;
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+    // Gestion des modales
+    function ouvrirAide() {
+        document.getElementById('modal-aide').style.display = 'flex';
+    }
 
+    function fermerAide() {
+        document.getElementById('modal-aide').style.display = 'none';
+    }
+
+    function ouvrirModale(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function fermerModale(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function effacerResultats() {
+        const res = document.getElementById('resultats');
+        if (res.innerHTML.trim() !== "") {
+            ouvrirModale('modal-confirm');
+        }
+    }
+
+    function confirmerEffacer() {
+        document.getElementById('resultats').innerHTML = "";
+        document.getElementById('errorBox').style.display = "none";
+        fermerModale('modal-confirm');
+    }
+
+    // Fonction principale de calcul
     function calculer() {
         const errorBox = document.getElementById('errorBox');
         const resDiv = document.getElementById('resultats');
@@ -310,8 +521,8 @@
             nbClasses: parseInt(document.getElementById('nbC').value),
             maxNiv: parseInt(document.getElementById('maxNiv').value),
             gapNiv: parseInt(document.getElementById('gapNiv').value),
-			gapEffectif: parseInt(document.getElementById('gapEffectif').value), // Nouvelle ligne
-			limit24: document.getElementById('limit24').checked,
+            gapEffectif: parseInt(document.getElementById('gapEffectif').value),
+            limit24: document.getElementById('limit24').checked,
             avoid: Array.from(document.querySelectorAll('.avoid:checked')).map(c => c.value)
         };
 
@@ -321,8 +532,16 @@
             tentatives++;
             const sol = genererUneSolution(JSON.parse(JSON.stringify(data)));
             if (sol) {
-                const signature = sol.map(c => c.eleves.map(e => e.nom).sort().join('+')).sort().join(' / ');
-                if (!solutions.find(s => s.sig === signature)) solutions.push({ data: sol, sig: signature });
+                // ÉTAPE 1 : Optimiser entre classes simples et doubles
+                const solOptimisee = optimiserEffectifs(sol, data);
+                
+                // ÉTAPE 2 : Équilibrer les classes ayant la même composition
+                const solEquilibree = equilibrerClassesIdentiques(solOptimisee, data);
+                
+                const signature = solEquilibree.map(c => c.eleves.map(e => e.nom).sort().join('+')).sort().join(' / ');
+                if (!solutions.find(s => s.sig === signature)) {
+                    solutions.push({ data: solEquilibree, sig: signature });
+                }
             }
         }
 
@@ -335,11 +554,14 @@
         }
     }
 
+    // Génération d'une solution initiale
     function genererUneSolution(data) {
         const totalE = data.niveaux.reduce((s, n) => s + n.n, 0);
         const moyenne = totalE / data.nbClasses;
         let classes = Array.from({ length: data.nbClasses }, (_, i) => ({
-            id: i + 1, eleves: [], total: 0,
+            id: i + 1,
+            eleves: [],
+            total: 0,
             cible: Math.floor(moyenne) + (i < (totalE % data.nbClasses) ? 1 : 0),
             niveaux: new Set()
         }));
@@ -353,10 +575,15 @@
                     const dejaNiv = c.niveaux.has(niv.id);
                     if (!dejaNiv && c.niveaux.size >= data.maxNiv) return false;
                     if (c.niveaux.size > 0 && !dejaNiv) {
-                        const min = Math.min(...c.niveaux); const max = Math.max(...c.niveaux);
+                        const min = Math.min(...c.niveaux);
+                        const max = Math.max(...c.niveaux);
                         if (Math.abs(niv.id - min) > data.gapNiv || Math.abs(niv.id - max) > data.gapNiv) return false;
                         let respecteAvoid = true;
-                        c.niveaux.forEach(ex => { if (data.avoid.includes(`${ex}-${niv.id}`) || data.avoid.includes(`${niv.id}-${ex}`)) respecteAvoid = false; });
+                        c.niveaux.forEach(ex => {
+                            if (data.avoid.includes(`${ex}-${niv.id}`) || data.avoid.includes(`${niv.id}-${ex}`)) {
+                                respecteAvoid = false;
+                            }
+                        });
                         if (!respecteAvoid) return false;
                     }
                     if (data.limit24 && (niv.id <= 2) && c.total >= 24) return false;
@@ -368,56 +595,257 @@
                 let placeDispo = (c.cible + 2) - c.total;
                 let aPrendre;
 
-                if (niv.n <= placeDispo) aPrendre = niv.n;
-                else {
+                if (niv.n <= placeDispo) {
+                    aPrendre = niv.n;
+                } else {
                     aPrendre = Math.floor(Math.random() * (placeDispo - 6 + 1)) + 6;
-                    if (niv.n - aPrendre > 0 && niv.n - aPrendre < 6) aPrendre = niv.n - 6; 
+                    if (niv.n - aPrendre > 0 && niv.n - aPrendre < 6) {
+                        aPrendre = niv.n - 6;
+                    }
                 }
 
                 if (aPrendre < 6 && !c.niveaux.has(niv.id)) {
-                    if (niv.n <= placeDispo) aPrendre = niv.n; else return null;
+                    if (niv.n <= placeDispo) {
+                        aPrendre = niv.n;
+                    } else {
+                        return null;
+                    }
                 }
                 if (aPrendre <= 0) return null;
 
                 let elIdx = c.eleves.findIndex(e => e.nom === niv.nom);
-                if (elIdx > -1) c.eleves[elIdx].count += aPrendre;
-                else c.eleves.push({ nom: niv.nom, count: aPrendre });
+                if (elIdx > -1) {
+                    c.eleves[elIdx].count += aPrendre;
+                } else {
+                    c.eleves.push({ nom: niv.nom, count: aPrendre });
+                }
 
-                c.total += aPrendre; c.niveaux.add(niv.id); niv.n -= aPrendre;
+                c.total += aPrendre;
+                c.niveaux.add(niv.id);
+                niv.n -= aPrendre;
             }
         }
 
         const effectifs = classes.map(c => c.total);
         if (Math.max(...effectifs) - Math.min(...effectifs) > data.gapEffectif) return null;
+        
         for (let cl of classes) {
             if (cl.niveaux.size > 1 && cl.eleves.some(e => e.count < 6)) return null;
             if (data.limit24 && (cl.niveaux.has(1) || cl.niveaux.has(2)) && cl.total > 24) return null;
         }
+        
         return classes;
     }
 
-    function afficher(classes, num) {
-    const resDiv = document.getElementById('resultats');
-    const ordreNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
-    
-    // 1. Trier les élèves à l'intérieur de chaque classe
-    classes.forEach(c => c.eleves.sort((a, b) => ordreNiveaux[a.nom] - ordreNiveaux[b.nom]));
+    /**
+     * NOUVELLE FONCTION : Optimise les effectifs entre classes simples et doubles
+     * Transfère des élèves des cours doubles vers les cours simples du même niveau
+     * si cela permet de mieux équilibrer les effectifs
+     */
+    function optimiserEffectifs(classes, data) {
+        const mapNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+        let modifie = true;
+        let iterations = 0;
+        const maxIterations = 50; // Limite de sécurité
 
-    // 2. Trier les classes entre elles (Logique : Simple < Double < Simple suivant)
-    classes.sort((a, b) => {
-        const valA = a.niveaux.size > 1 ? Math.min(...a.niveaux) + 0.5 : Math.min(...a.niveaux);
-        const valB = b.niveaux.size > 1 ? Math.min(...b.niveaux) + 0.5 : Math.min(...b.niveaux);
-        return valA - valB;
-    });
+        while (modifie && iterations < maxIterations) {
+            modifie = false;
+            iterations++;
+
+            // Pour chaque niveau
+            for (let niveauNom of ["CP", "CE1", "CE2", "CM1", "CM2"]) {
+                const niveauId = mapNiveaux[niveauNom];
+
+                // Trouver les classes doubles avec ce niveau
+                const classesDoubles = classes.filter(c => 
+                    c.niveaux.size > 1 && 
+                    c.niveaux.has(niveauId) &&
+                    c.eleves.find(e => e.nom === niveauNom && e.count > 6) // Au moins 7 élèves pour pouvoir en déplacer
+                );
+
+                // Trouver les classes simples avec ce niveau
+                const classesSimples = classes.filter(c => 
+                    c.niveaux.size === 1 && 
+                    c.niveaux.has(niveauId)
+                );
+
+                // S'il y a au moins une classe double et une classe simple avec ce niveau
+                if (classesDoubles.length > 0 && classesSimples.length > 0) {
+                    // Trier les classes doubles par effectif décroissant
+                    classesDoubles.sort((a, b) => b.total - a.total);
+                    // Trier les classes simples par effectif croissant
+                    classesSimples.sort((a, b) => a.total - b.total);
+
+                    const classeDouble = classesDoubles[0];
+                    const classeSimple = classesSimples[0];
+
+                    // Si la classe double a plus d'élèves que la classe simple
+                    if (classeDouble.total > classeSimple.total + 1) {
+                        // Trouver l'élève du niveau concerné dans la classe double
+                        const eleveDouble = classeDouble.eleves.find(e => e.nom === niveauNom);
+                        const eleveSimple = classeSimple.eleves.find(e => e.nom === niveauNom);
+
+                        if (eleveDouble && eleveDouble.count > 6) {
+                            // Calculer combien d'élèves déplacer (1 ou 2 pour ne pas trop perturber)
+                            const ecart = classeDouble.total - classeSimple.total;
+                            let aDeplacer = Math.min(
+                                Math.floor(ecart / 2), // La moitié de l'écart
+                                eleveDouble.count - 6, // Ne pas descendre sous 6 dans le double niveau
+                                2 // Maximum 2 élèves à la fois
+                            );
+
+                            if (aDeplacer > 0) {
+                                // Vérifier que ça ne dépasse pas la limite de 24 si applicable
+                                if (data.limit24 && niveauId <= 2 && classeSimple.total + aDeplacer > 24) {
+                                    aDeplacer = Math.max(0, 24 - classeSimple.total);
+                                }
+
+                                if (aDeplacer > 0) {
+                                    // Effectuer le transfert
+                                    eleveDouble.count -= aDeplacer;
+                                    classeDouble.total -= aDeplacer;
+
+                                    if (eleveSimple) {
+                                        eleveSimple.count += aDeplacer;
+                                    } else {
+                                        classeSimple.eleves.push({ nom: niveauNom, count: aDeplacer });
+                                    }
+                                    classeSimple.total += aDeplacer;
+
+                                    modifie = true;
+
+                                    // Nettoyer si count = 0
+                                    if (eleveDouble.count === 0) {
+                                        classeDouble.eleves = classeDouble.eleves.filter(e => e.count > 0);
+                                        classeDouble.niveaux.delete(niveauId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return classes;
+    }
+
+    /**
+     * NOUVELLE FONCTION : Équilibre les classes ayant exactement la même composition
+     * Ex: deux classes CP/CE1 avec des effectifs différents
+     */
+    function equilibrerClassesIdentiques(classes, data) {
+        const mapNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+        let modifie = true;
+        let iterations = 0;
+        const maxIterations = 50;
+
+        while (modifie && iterations < maxIterations) {
+            modifie = false;
+            iterations++;
+
+            // Grouper les classes par composition identique
+            const groupes = {};
+            
+            classes.forEach((classe, idx) => {
+                // Créer une signature unique pour la composition (ex: "CP-CE1")
+                const signature = Array.from(classe.niveaux).sort((a, b) => a - b).join('-');
+                
+                if (!groupes[signature]) {
+                    groupes[signature] = [];
+                }
+                groupes[signature].push({ classe, idx });
+            });
+
+            // Pour chaque groupe de classes identiques
+            for (let signature in groupes) {
+                const groupe = groupes[signature];
+                
+                // S'il y a au moins 2 classes avec la même composition
+                if (groupe.length >= 2) {
+                    // Trier par effectif total
+                    groupe.sort((a, b) => b.classe.total - a.classe.total);
+                    
+                    const classePlus = groupe[0].classe;
+                    const classeMoins = groupe[groupe.length - 1].classe;
+                    
+                    // Si l'écart est de 2 ou plus
+                    if (classePlus.total - classeMoins.total >= 2) {
+                        // Pour chaque niveau dans ces classes
+                        for (let niveauNom of ["CP", "CE1", "CE2", "CM1", "CM2"]) {
+                            const niveauId = mapNiveaux[niveauNom];
+                            
+                            if (classePlus.niveaux.has(niveauId) && classeMoins.niveaux.has(niveauId)) {
+                                const elevePlus = classePlus.eleves.find(e => e.nom === niveauNom);
+                                const eleveMoins = classeMoins.eleves.find(e => e.nom === niveauNom);
+                                
+                                if (elevePlus && eleveMoins && elevePlus.count > eleveMoins.count) {
+                                    // Calculer combien déplacer
+                                    const ecartNiveau = elevePlus.count - eleveMoins.count;
+                                    const ecartTotal = classePlus.total - classeMoins.total;
+                                    
+                                    let aDeplacer = Math.min(
+                                        Math.floor(ecartNiveau / 2),
+                                        Math.floor(ecartTotal / 2),
+                                        3 // Maximum 3 élèves à la fois
+                                    );
+                                    
+                                    // Si c'est une classe double, ne pas descendre sous 6
+                                    if (classePlus.niveaux.size > 1 && elevePlus.count - aDeplacer < 6) {
+                                        aDeplacer = Math.max(0, elevePlus.count - 6);
+                                    }
+                                    
+                                    if (aDeplacer > 0) {
+                                        // Vérifier la limite de 24 pour CP/CE1 si applicable
+                                        if (data.limit24 && niveauId <= 2 && classeMoins.total + aDeplacer > 24) {
+                                            aDeplacer = Math.max(0, 24 - classeMoins.total);
+                                        }
+                                        
+                                        if (aDeplacer > 0) {
+                                            // Effectuer le transfert
+                                            elevePlus.count -= aDeplacer;
+                                            classePlus.total -= aDeplacer;
+                                            
+                                            eleveMoins.count += aDeplacer;
+                                            classeMoins.total += aDeplacer;
+                                            
+                                            modifie = true;
+                                            break; // Une seule modification à la fois
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return classes;
+    }
+
+    // Affichage des résultats
+    function afficher(classes, num) {
+        const resDiv = document.getElementById('resultats');
+        const ordreNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+        
+        // Trier les élèves à l'intérieur de chaque classe
+        classes.forEach(c => c.eleves.sort((a, b) => ordreNiveaux[a.nom] - ordreNiveaux[b.nom]));
+
+        // Trier les classes entre elles
+        classes.sort((a, b) => {
+            const valA = a.niveaux.size > 1 ? Math.min(...a.niveaux) + 0.5 : Math.min(...a.niveaux);
+            const valB = b.niveaux.size > 1 ? Math.min(...b.niveaux) + 0.5 : Math.min(...b.niveaux);
+            return valA - valB;
+        });
 
         let html = `<div class="proposition">
-			<h2 style="font-weight:900; font-size:0.8rem; text-transform:uppercase; color:var(--theme-color); margin-bottom:20px;">
-			Proposition n°${num}
-			</h2>
-			<div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 8px;">`;
+            <h2 style="font-weight:900; font-size:0.8rem; text-transform:uppercase; color:var(--theme-color); margin-bottom:20px;">
+            Proposition n°${num}
+            </h2>
+            <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 8px;">`;
         
         classes.forEach((c, index) => {
-            // Extraction des noms de niveaux pour le titre (ex: CP/CE1)
             const nomsNiveaux = c.eleves.map(e => e.nom).join('/');
             
             let detailsHtml = c.eleves.map(e => {
@@ -427,162 +855,134 @@
 
             html += `
                 <div class="classe-item">
-                    <div style="font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; margin-bottom: 8px;">Classe ${index + 1} : <span style="font-size: 0.8rem; color: #000;">${nomsNiveaux}</div>
+                    <div style="font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; margin-bottom: 8px;">
+                        Classe ${index + 1} : <span style="font-size: 0.8rem; color: var(--text-page);">${nomsNiveaux}</span>
+                    </div>
                     <div style="margin-bottom: 10px; display: flex; flex-wrap: wrap;">${detailsHtml}</div>
-                    <div style="font-size: 0.65rem; font-weight: 700; background: var(--theme-color); color: var(--contrast-color); display: inline-block; padding: 2px 8px; border-radius: 5px;">Total : ${c.total}</div>
+                    <div style="font-size: 0.65rem; font-weight: 700; background: var(--theme-color); color: var(--contrast-color); display: inline-block; padding: 2px 8px; border-radius: 5px;">
+                        Total : ${c.total}
+                    </div>
                 </div>`;
         });
         html += `</div></div>`;
         resDiv.innerHTML += html;
     }
-	
-	function ouvrirModale(id) { document.getElementById(id).style.display = 'flex'; }
-	function fermerModale(id) { document.getElementById(id).style.display = 'none'; }
-	
-	function effacerResultats() {
-    const res = document.getElementById('resultats');
-    // On n'ouvre la modale que s'il y a quelque chose à effacer
-    if (res.innerHTML.trim() !== "") {
-        ouvrirModale('modal-confirm');
-    }
-}
 
-function confirmerEffacer() {
-    document.getElementById('resultats').innerHTML = "";
-    document.getElementById('errorBox').style.display = "none";
-    fermerModale('modal-confirm');
-}
+    // Export PDF
+    async function exporterPDF() {
+        try {
+            const { jsPDF } = window.jspdf;
+            const resDiv = document.getElementById('resultats');
+            const propositions = resDiv.querySelectorAll('.proposition');
 
-async function exporterPDF() {
-    try {
-        const { jsPDF } = window.jspdf;
-        const resDiv = document.getElementById('resultats');
-        const propositions = resDiv.querySelectorAll('.proposition');
+            if (propositions.length === 0) {
+                ouvrirModale('modal-alerte');
+                return;
+            }
 
-        if (propositions.length === 0) {
-            ouvrirModale('modal-alerte');
-            return;
-        }
-
-        // Changement : On passe en portrait ('p') pour une meilleure compatibilité mobile
-        // ou on s'assure que l'initialisation est robuste
-        const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-            putOnlyUsedFonts: true
-        });
-
-        const d = new Date();
-        const dateStr = d.getFullYear() + 
-                        String(d.getMonth() + 1).padStart(2, '0') + 
-                        String(d.getDate()).padStart(2, '0');
-        const fileName = `outilsprofs_structure_ecole_${dateStr}.pdf`;
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("COMPARAISON DES STRUCTURES", 148, 12, { align: "center" });
-
-        const tableBody = [];
-        const mapping = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
-
-        // Correction de la logique de récupération des données pour éviter les erreurs de sélection
-        const propsArray = Array.from(propositions);
-        const rowsCount = Math.max(...propsArray.map(p => p.querySelectorAll('.classe-item').length));
-
-        for (let i = 0; i < rowsCount; i++) {
-            let row = [];
-            propsArray.forEach(prop => {
-                const classesDocs = Array.from(prop.querySelectorAll('.classe-item'));
-                const cl = classesDocs[i];
-                if (cl) {
-                    const labelClasse = `CLASSE ${i + 1}`;
-                    const niveauxElement = cl.querySelector('div span');
-                    const niveaux = niveauxElement ? niveauxElement.innerText : "";
-                    const effectifs = Array.from(cl.querySelectorAll('.badge-niv'))
-                                           .map(b => b.innerText).join(' / ');
-                    const totalDiv = cl.querySelector('div[style*="background"]');
-                    const total = totalDiv ? totalDiv.innerText : "";
-
-                    row.push({
-						label: labelClasse,
-						niv: niveaux,
-						eff: effectifs,
-						tot: total
-					});
-				} else {
-					row.push("");
-				}
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4',
+                putOnlyUsedFonts: true
             });
-            tableBody.push(row);
-        }
 
-        // Génération du tableau
-        doc.autoTable({
-    startY: 18,
-    head: [['PROPOSITION 1', 'PROPOSITION 2', 'PROPOSITION 3']],
-    body: tableBody,
-    theme: 'grid',
-	headStyles: { fillColor: false, textColor: [0, 0, 0], halign: 'center' },
-    styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle', minCellHeight: 22 },
-    didDrawCell: function(data) {
-        if (data.section === 'body' && data.cell.raw && typeof data.cell.raw === 'object') {
-            const { label, niv, eff, tot } = data.cell.raw;
-            const x = data.cell.x + data.cell.width / 2;
-            let y = data.cell.y + 6;
+            const d = new Date();
+            const dateStr = d.getFullYear() + 
+                            String(d.getMonth() + 1).padStart(2, '0') + 
+                            String(d.getDate()).padStart(2, '0');
+            const fileName = `outilsprofs_structure_ecole_${dateStr}.pdf`;
 
-            // 1. Dessiner le fond blanc pour effacer le texte par défaut
-            doc.setFillColor(255, 255, 255);
-            doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
-            
-            doc.setTextColor(0, 0, 0);
-			
-
-            // 2. Classe et Niveaux en GRAS
             doc.setFont("helvetica", "bold");
-			doc.setFontSize(9);        // On augmente la taille (de 8 à 9) pour l'impact visuel
-			doc.setLineWidth(0.2);      // Contour plus épais
-			doc.setDrawColor(0, 0, 0);  // Contour noir
+            doc.setFontSize(14);
+            doc.text("COMPARAISON DES STRUCTURES", 148, 12, { align: "center" });
 
-			// 'fillAndStroke' remplit la lettre ET dessine le contour, ce qui l'épaissit
-			doc.text(`${label} : ${niv}`, x, y, { 
-				align: "center", 
-				renderingMode: 'fillAndStroke' 
-			});
+            const tableBody = [];
+            const propsArray = Array.from(propositions);
+            const rowsCount = Math.max(...propsArray.map(p => p.querySelectorAll('.classe-item').length));
 
-            // 3. Effectifs et Total en NORMAL
-			doc.setFontSize(8);         // On repasse à 8 pour les détails
-			doc.setLineWidth(0); // Réinitialise l'épaisseur pour ne pas impacter le reste
-            doc.setFont("helvetica", "normal");
-            doc.text(eff, x, y + 6, { align: "center" });
-            doc.text(tot, x, y + 11, { align: "center" });
+            for (let i = 0; i < rowsCount; i++) {
+                let row = [];
+                propsArray.forEach(prop => {
+                    const classesDocs = Array.from(prop.querySelectorAll('.classe-item'));
+                    const cl = classesDocs[i];
+                    if (cl) {
+                        const labelClasse = `CLASSE ${i + 1}`;
+                        const niveauxElement = cl.querySelector('div span');
+                        const niveaux = niveauxElement ? niveauxElement.innerText : "";
+                        const effectifs = Array.from(cl.querySelectorAll('.badge-niv'))
+                                               .map(b => b.innerText).join(' / ');
+                        const totalDiv = cl.querySelector('div[style*="background"]');
+                        const total = totalDiv ? totalDiv.innerText : "";
+
+                        row.push({
+                            label: labelClasse,
+                            niv: niveaux,
+                            eff: effectifs,
+                            tot: total
+                        });
+                    } else {
+                        row.push("");
+                    }
+                });
+                tableBody.push(row);
+            }
+
+            doc.autoTable({
+                startY: 18,
+                head: [['PROPOSITION 1', 'PROPOSITION 2', 'PROPOSITION 3']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: false, textColor: [0, 0, 0], halign: 'center' },
+                styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle', minCellHeight: 22 },
+                didDrawCell: function(data) {
+                    if (data.section === 'body' && data.cell.raw && typeof data.cell.raw === 'object') {
+                        const { label, niv, eff, tot } = data.cell.raw;
+                        const x = data.cell.x + data.cell.width / 2;
+                        let y = data.cell.y + 6;
+
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(data.cell.x + 0.5, data.cell.y + 0.5, data.cell.width - 1, data.cell.height - 1, 'F');
+                        
+                        doc.setTextColor(0, 0, 0);
+
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(9);
+                        doc.setLineWidth(0.2);
+                        doc.setDrawColor(0, 0, 0);
+
+                        doc.text(`${label} : ${niv}`, x, y, { 
+                            align: "center", 
+                            renderingMode: 'fillAndStroke' 
+                        });
+
+                        doc.setFontSize(8);
+                        doc.setLineWidth(0);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(eff, x, y + 6, { align: "center" });
+                        doc.text(tot, x, y + 11, { align: "center" });
+                    }
+                }
+            });
+
+            const pdfBase64 = doc.output('datauristring').split(',')[1];
+            if (window.Android && window.Android.savePdfFromBase64) {
+                window.Android.savePdfFromBase64(pdfBase64, fileName);
+            } else {
+                const blob = doc.output('blob');
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            }
+
+        } catch (error) {
+            console.error("Erreur PDF:", error);
+            alert("L'exportation a échoué. Essayez de faire une capture d'écran ou d'utiliser un navigateur comme Chrome.");
         }
     }
-});
-
-        // CRUCIAL POUR ANDROID : Utiliser output('bloburl') puis ouvrir ou save direct
-        // Certains navigateurs mobiles bloquent doc.save() direct
-        const pdfBase64 = doc.output('datauristring').split(',')[1];
-        if (window.Android && window.Android.savePdfFromBase64) {
-            window.Android.savePdfFromBase64(pdfBase64, fileName);
-        } else {
-            // Repli pour le navigateur classique
-            const blob = doc.output('blob');
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            link.click();
-            setTimeout(() => URL.revokeObjectURL(url), 100);
-        }
-
-    } catch (error) {
-        console.error("Erreur PDF:", error);
-        alert("L'exportation a échoué. Essayez de faire une capture d'écran ou d'utiliser un navigateur comme Chrome.");
-    }
-}
-
-
 </script>
 </body>
 </html>

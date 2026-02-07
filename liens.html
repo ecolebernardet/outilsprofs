@@ -9,135 +9,434 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ============ CSS CUSTOM PROPERTIES ============ */
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --column-bg: #1e1e1e; 
-            --column-border: rgba(255, 255, 255, 0.1); --header-bg: #1e1e1e; 
-            --card-bg: #1e1e1e; --input-bg: #2a2a2a; --input-text: #ffffff;
-            --item-bg: #2a2a2a; --item-text-url: #a1a1aa; 
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --column-bg: #1e1e1e;
+            --column-border: rgba(255, 255, 255, 0.1);
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --input-bg: #2a2a2a;
+            --input-text: #ffffff;
+            --item-bg: #2a2a2a;
+            --item-text-url: #a1a1aa;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
             --modal-overlay: rgba(0, 0, 0, 0.85);
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --text-page: #111827; --column-bg: #ffffff; 
-            --column-border: #ddd; --header-bg: #ffffff; --card-bg: #ffffff;
-            --input-bg: #f3f4f6; --input-text: #111827; --item-bg: #f3f4f6; 
-            --item-text-url: #71717a; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --bg-page: #eeeeee;
+            --text-page: #111827;
+            --column-bg: #ffffff;
+            --column-border: #ddd;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --input-bg: #f3f4f6;
+            --input-text: #111827;
+            --item-bg: #f3f4f6;
+            --item-text-url: #71717a;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             --modal-overlay: rgba(0, 0, 0, 0.6);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
-        
-        header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: 100%; margin-bottom: 12px;
+        /* ============ GLOBAL STYLES ============ */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s ease;
         }
 
-        #btn-retour, #btn-aide { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; 
+        /* ============ HEADER ============ */
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            width: 100%;
+            margin-bottom: 12px;
         }
 
-        header h1 { 
-            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
-            text-align: center; flex-grow: 1; 
+        header h1 {
+            font-size: 1.125rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            flex-grow: 1;
         }
 
-        .main-wrapper { 
-			width: 100%; 
-			max-width: 100%;
-			margin: 0 auto; 
-			padding: 10px 15px 20px 15px; 
-		}
+        /* ============ BUTTONS (Header & Generic) ============ */
+        #btn-retour,
+        #btn-aide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
 
-		#categoriesContainer {
-			display: grid;
-			grid-template-columns: 1fr; /* Par défaut une seule colonne (mobile) */
-			gap: 15px;
-			width: 100%;
-		}
+        #btn-retour:active,
+        #btn-aide:active {
+            transform: scale(0.95);
+        }
 
-		/* Version PC : 2 colonnes sur tablettes, 4 colonnes sur PC */
-		@media (min-width: 1024px) {
-			#categoriesContainer {
-				grid-template-columns: repeat(4, 1fr); /* 4 colonnes égales */
-			}
-			.main-wrapper {
-				padding: 20px 40px; /* Plus de marge sur les côtés sur PC */
-			}
-		}
+        /* ============ MAIN LAYOUT ============ */
+        .main-wrapper {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px 15px 20px 15px;
+        }
 
-		@media (min-width: 1024px) {
-			#categoriesContainer {
-				grid-template-columns: repeat(4, 1fr);
-			}
-			.main-wrapper {
-				max-width: 95%; /* Prend presque toute la largeur sur très grand écran */
-			}
-		}
-        .light-card, .column { background: var(--card-bg); border-radius: 1.5rem; padding: 15px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
-        .column { min-width: 0; scroll-margin-top: 90px; height: fit-content; }
-        .column-header { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; align-items: center; }
+        #categoriesContainer {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            width: 100%;
+        }
 
-        .dots-handle { display: grid; grid-template-columns: repeat(3, 2.5px); grid-template-rows: repeat(3, 2.5px); gap: 2.2px; opacity: 0.3; cursor: grab; flex-shrink: 0; padding: 10px; margin: -10px; }
-        .dots-handle span { width: 2.5px; height: 2.5px; background-color: currentColor; border-radius: 50%; }
+        @media (min-width: 1024px) {
+            .main-wrapper {
+                padding: 20px 40px;
+                max-width: 95%;
+            }
 
-        .link-item { background: var(--item-bg); border-radius: 0.75rem; padding: 8px 12px; display: flex; align-items: center; margin-bottom: 6px; border: 1px solid var(--column-border); touch-action: none; }
-        .link-info { flex: 1; cursor: pointer; min-width: 0; padding: 0 10px; }
-        .link-name { font-weight: 800; font-size: 11px; text-transform: uppercase; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-        .link-url { font-size: 9px; color: var(--item-text-url); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .link-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-        .btn-action { color: #6b7280; opacity: 0.8; cursor: pointer; padding: 4px; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+            #categoriesContainer {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.75rem; font-weight: 600; width: 100%; margin-bottom: 10px; color: var(--input-text); outline: none; }
-        .cat-btn { flex: 1; padding: 10px 4px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--input-bg); color: var(--item-text-url); border: 1px solid var(--column-border); transition: all 0.2s; }
-        .cat-btn.active { background: #4b5563 !important; color: white !important; border-color: transparent !important; }
-        .btn-add { width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; color: white; }
-        
-        .bottom-nav { width: 100%; max-width: 600px; margin: 20px auto 0; padding-bottom: 40px; display: flex; flex-direction: column; gap: 8px; }
-        .nav-btn { font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
-        
-        /* MODALES ET FORMULAIRE */
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: var(--modal-overlay); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; box-shadow: var(--shadow-custom); }
-        
-        #form-container-modal { z-index: 900; }
-        #modal-aide, #modal-alerte { z-index: 1100; }
+        /* ============ CARDS & COLUMNS ============ */
+        .light-card,
+        .column {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 15px;
+            border: 1px solid var(--column-border);
+            box-shadow: var(--shadow-custom);
+            margin-bottom: 20px;
+        }
 
+        .column {
+            min-width: 0;
+            scroll-margin-top: 90px;
+            height: fit-content;
+        }
+
+        .column-header {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ============ HANDLE (Drag Handle) ============ */
+        .dots-handle {
+            display: grid;
+            grid-template-columns: repeat(3, 2.5px);
+            grid-template-rows: repeat(3, 2.5px);
+            gap: 2.2px;
+            opacity: 0.3;
+            cursor: grab;
+            flex-shrink: 0;
+            padding: 10px;
+            margin: -10px;
+        }
+
+        .dots-handle span {
+            width: 2.5px;
+            height: 2.5px;
+            background-color: currentColor;
+            border-radius: 50%;
+        }
+
+        /* ============ LINK ITEMS ============ */
+        .link-item {
+            background: var(--item-bg);
+            border-radius: 0.75rem;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            border: 1px solid var(--column-border);
+            touch-action: none;
+        }
+
+        .link-info {
+            flex: 1;
+            cursor: pointer;
+            min-width: 0;
+            padding: 0 10px;
+        }
+
+        .link-name {
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .link-url {
+            font-size: 9px;
+            color: var(--item-text-url);
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .btn-action {
+            color: #6b7280;
+            opacity: 0.8;
+            cursor: pointer;
+            padding: 4px;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .btn-action:active {
+            opacity: 1;
+        }
+
+        /* ============ FORM INPUTS ============ */
+        .input-field {
+            background: var(--input-bg);
+            border: 1px solid var(--column-border);
+            border-radius: 0.75rem;
+            padding: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 10px;
+            color: var(--input-text);
+            outline: none;
+        }
+
+        /* ============ CATEGORY BUTTONS ============ */
+        .cat-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: var(--input-bg);
+            color: var(--item-text-url);
+            border: 1px solid var(--column-border);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .cat-btn.active {
+            background: #4b5563 !important;
+            color: white !important;
+            border-color: transparent !important;
+        }
+
+        /* ============ BUTTONS (Primary Actions) ============ */
+        .btn-add,
+        .nav-btn,
+        #btn-fermer-aide,
+        #alerte-cancel,
+        #alerte-confirm {
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
+            color: white;
+        }
+
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        /* ============ NAVIGATION BUTTONS ============ */
+        .bottom-nav {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto 0;
+            padding-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            border-radius: 50px;
+            font-size: 9px;
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ============ MODALS ============ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: var(--modal-overlay);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #modal-aide,
+        #modal-alerte {
+            z-index: 1100;
+        }
+
+        #form-container-modal {
+            z-index: 900;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            border: 1px solid var(--column-border);
+            padding: 25px;
+            position: relative;
+            box-shadow: var(--shadow-custom);
+        }
+
+        .modal-content h2 {
+            font-size: 1.125rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        #btn-fermer-aide,
+        #alerte-cancel,
+        #alerte-confirm {
+            border-radius: 0.75rem;
+            font-size: 10px;
+            tracking-widest: true;
+            padding: 12px;
+        }
+
+        #alerte-cancel {
+            background: rgba(115, 115, 115, 0.2);
+        }
+
+        /* ============ FLOATING ACTION BUTTON ============ */
         .fab-add {
-            position: fixed; bottom: 40px; right: 30px;
-            width: 64px; height: 64px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 800; border: none; cursor: pointer; transition: all 0.2s ease;
+            position: fixed;
+            bottom: 60px;
+            right: 30px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
-			z-index: 500;
+            color: white;
         }
-        .fab-add:hover { transform: scale(1.1); } /* Effet de survol identique aux mémos */
-		.fab-add:active { transform: scale(0.9); }
 
-        @keyframes blink-point {
-            0% { transform: scale(0.9); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.5; }
+        .fab-add:hover {
+            transform: scale(1.1);
         }
+
+        .fab-add:active {
+            transform: scale(0.9);
+        }
+
+        /* ============ ANIMATIONS ============ */
+        @keyframes blink-point {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.9);
+                opacity: 0.5;
+            }
+        }
+
         .mini-pastille {
-            display: inline-block; width: 8px; height: 8px; background-color: #f97316;
-            border-radius: 50%; margin-left: 4px; margin-right: 2px;
-            box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+            margin-left: 4px;
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316;
+            animation: blink-point 1.5s infinite;
         }
     </style>
 </head>
 <body class="pb-10">
 
 <script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    if (localStorage.getItem('theme_mode') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 </script>
 
+<!-- ============ MODAL: Form ============ -->
 <div id="form-container-modal" class="modal-overlay" onclick="fermerFormulaire()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="form-title" class="text-sm font-black uppercase mb-4 opacity-50">Nouveau Lien</h2>
+        <h2 id="form-title">Nouveau Lien</h2>
         <input type="text" id="linkName" class="input-field" placeholder="Nom du lien..." autocomplete="off">
         <input type="text" id="linkUrl" class="input-field" placeholder="URL (ex: google.fr)" autocomplete="off">
         <div class="flex gap-2 mb-6">
@@ -148,15 +447,15 @@
         </div>
         <div class="flex gap-2">
             <button onclick="fermerFormulaire()" class="flex-1 py-3 rounded-xl bg-neutral-500/10 text-[10px] font-black uppercase">Annuler</button>
-            <button id="mainAddBtn" onclick="addLink()" class="flex-[2] btn-add transition-transform">Ajouter</button>
+            <button id="mainAddBtn" onclick="addLink()" class="flex-[2] btn-add">Ajouter</button>
         </div>
     </div>
 </div>
 
+<!-- ============ MODAL: Help ============ -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Mes Liens</h2>
-        
+        <h2 id="titre-aide">💡 Mes Liens</h2>
         <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
             <div>
                 <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Organisation</p>
@@ -166,33 +465,32 @@
                     <li>• <b>Actions :</b> Cliquez sur ✏️ pour modifier ou 🗑️ pour supprimer.</li>
                 </ul>
             </div>
-
             <div>
                 <p class="font-bold uppercase text-[9px] mb-1 opacity-50">Sauvegarde</p>
                 <p>Vos liens sont stockés sur cet appareil. Pensez à <b>Exporter</b> régulièrement votre liste pour ne pas la perdre en cas de changement de navigateur.</p>
             </div>
-
             <div class="bg-neutral-500/5 p-3 rounded-lg border border-neutral-500/10">
                 <p><strong>Alerte <span class="mini-pastille"></span> :</strong></p>
                 <p class="mt-1">Si cette pastille clignote sur l'export, vos dernières modifications n'ont pas encore été sauvegardées dans un fichier .txt.</p>
             </div>
         </div>
-
-        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
+        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">J'ai compris</button>
     </div>
 </div>
 
+<!-- ============ MODAL: Alert ============ -->
 <div id="modal-alerte" class="modal-overlay">
     <div class="modal-content">
-        <h2 id="alerte-titre" class="text-lg font-black uppercase mb-4">Alerte</h2>
+        <h2 id="alerte-titre">Alerte</h2>
         <div id="alerte-texte" class="text-[11px] leading-relaxed opacity-80 mb-6 text-center"></div>
         <div class="flex gap-3">
-            <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
+            <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
             <button id="alerte-confirm" class="flex-1 py-3 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Confirmer</button>
         </div>
     </div>
 </div>
 
+<!-- ============ HEADER ============ -->
 <header>
     <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,12 +498,14 @@
         </svg>
     </a>
     <h1 id="pageTitle">Mes Liens</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+    <button id="btn-aide" onclick="ouvrirAide()">💡</button>
 </header>
 
+<!-- ============ MAIN CONTENT ============ -->
 <div class="main-wrapper">
     <div id="categoriesContainer"></div>
 
+    <!-- ============ FOOTER NAVIGATION ============ -->
     <footer class="bottom-nav">
         <div class="flex gap-2">
             <label for="importFile" class="nav-btn bg-black text-white cursor-pointer text-center flex-1">👇 importer .txt 👇</label>
@@ -219,6 +519,7 @@
     </footer>
 </div>
 
+<!-- ============ FLOATING ACTION BUTTON ============ -->
 <button id="fab-plus" onclick="ouvrirFormulaire()" class="fab-add">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
@@ -226,175 +527,207 @@
 </button>
 
 <script>
-    let catOrder = JSON.parse(localStorage.getItem('eduCatOrder')) || ["École", "Institutionnel", "Ressources", "Autres"];
-    let links = JSON.parse(localStorage.getItem('eduLinksList')) || [];
-    let currentSelectedCat = "École";
-    let editingLinkId = null;
-
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+    // ============ CONFIGURATION & STATE ============
+    const CATEGORIES = ["École", "Institutionnel", "Ressources", "Autres"];
     
-    const config = {
+    const COLOR_MAP = {
+        'red': '#ef4444',
+        'orange': '#f97316',
+        'amber': '#f59e0b',
+        'yellow': '#eab308',
+        'lime': '#84cc16',
+        'green': '#22c55e',
+        'emerald': '#10b981',
+        'teal': '#14b8a6',
+        'cyan': '#06b6d4',
+        'sky': '#0ea5e9',
+        'blue': '#3b82f6',
+        'indigo': '#6366f1',
+        'violet': '#8b5cf6',
+        'purple': '#a855f7',
+        'fuchsia': '#d946ef',
+        'pink': '#ec4899',
+        'rose': '#f43f5e',
+        'gray': '#6b7280'
+    };
+
+    const CATEGORY_CONFIG = {
         'École': { text: 'text-rose-500', border: 'border-rose-500', emoji: '🏫' },
         'Institutionnel': { text: 'text-purple-500', border: 'border-purple-500', emoji: '🧑🏻‍💼' },
         'Ressources': { text: 'text-blue-500', border: 'border-blue-500', emoji: '🧰' },
         'Autres': { text: 'text-emerald-500', border: 'border-emerald-500', emoji: '🌍' }
     };
 
+    // Application State
+    let catOrder = JSON.parse(localStorage.getItem('eduCatOrder')) || CATEGORIES;
+    let links = JSON.parse(localStorage.getItem('eduLinksList')) || [];
+    let currentSelectedCat = "École";
+    let editingLinkId = null;
+
+    // ============ DOM SELECTORS (Cached) ============
+    const DOM = {
+        // Modals
+        formModal: document.getElementById('form-container-modal'),
+        formTitle: document.getElementById('form-title'),
+        alertModal: document.getElementById('modal-alerte'),
+        helpModal: document.getElementById('modal-aide'),
+
+        // Form Inputs
+        linkName: document.getElementById('linkName'),
+        linkUrl: document.getElementById('linkUrl'),
+        mainAddBtn: document.getElementById('mainAddBtn'),
+
+        // Buttons
+        btn_retour: document.getElementById('btn-retour'),
+        btn_aide: document.getElementById('btn-aide'),
+        btn_fermerAide: document.getElementById('btn-fermer-aide'),
+        btn_export: document.getElementById('btn-export'),
+        badge_export: document.getElementById('badge-export'),
+        fab_plus: document.getElementById('fab-plus'),
+
+        // Alerts
+        alertTitle: document.getElementById('alerte-titre'),
+        alertText: document.getElementById('alerte-texte'),
+        alertConfirm: document.getElementById('alerte-confirm'),
+
+        // Containers
+        categoriesContainer: document.getElementById('categoriesContainer')
+    };
+
+    // ============ UTILITIES ============
+    function getThemeColor() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colorName = themePrefs.liens || 'emerald';
+        return COLOR_MAP[colorName];
+    }
+
+    function isDarkText(colorName) {
+        const darkColors = ['yellow', 'lime', 'amber', 'cyan'];
+        return darkColors.includes(colorName);
+    }
+
+    function getTextColor(colorName) {
+        return isDarkText(colorName) ? '#000' : '#fff';
+    }
+
+    function formatUrl(urlInput) {
+        urlInput = urlInput.trim().replace(/\s/g, '');
+        return /^(http|https):\/\//i.test(urlInput) ? urlInput : 'https://' + urlInput;
+    }
+
+    // ============ STORAGE & PERSISTENCE ============
     function updateExportBadge(needsExport) {
-        const badge = document.getElementById('badge-export');
-        const btnExport = document.getElementById('btn-export');
         if (needsExport) {
-            badge.classList.remove('hidden');
+            DOM.badge_export.classList.remove('hidden');
             localStorage.setItem('needsExport_liens', 'true');
-            if (btnExport) btnExport.style.border = '2px solid #f97316';
+            DOM.btn_export.style.border = '2px solid #f97316';
         } else {
-            badge.classList.add('hidden');
+            DOM.badge_export.classList.add('hidden');
             localStorage.removeItem('needsExport_liens');
             localStorage.setItem('last_export_liens', Date.now());
-            if (btnExport) btnExport.style.border = 'none';
+            DOM.btn_export.style.border = 'none';
         }
     }
 
     function checkBadgeStatus() {
         const lastExport = localStorage.getItem('last_export_liens');
         const needsExport = localStorage.getItem('needsExport_liens') === 'true';
-        if (needsExport) { updateExportBadge(true); return; }
-        if (lastExport) {
-            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-            if (Date.now() - parseInt(lastExport) > sevenDaysInMs) updateExportBadge(true);
-        } else {
+        
+        if (needsExport) {
+            updateExportBadge(true);
+            return;
+        }
+
+        const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+        if (lastExport && Date.now() - parseInt(lastExport) > SEVEN_DAYS_MS) {
+            updateExportBadge(true);
+        } else if (!lastExport) {
             localStorage.setItem('last_export_liens', Date.now());
         }
     }
 
-    function render() {
-        const container = document.getElementById('categoriesContainer');
-        container.innerHTML = '';
-        catOrder.forEach(cat => {
-            const catLinks = links.filter(l => l.cat === cat);
-            const conf = config[cat];
-            const col = document.createElement('div');
-            col.className = `column`;
-            col.setAttribute('data-cat', cat);
-            col.innerHTML = `
-                <div class="column-header ${conf.text} ${conf.border}">
-                    <div class="dots-handle handle-cat mr-3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                    <span class="mr-2">${conf.emoji}</span> ${cat}
-                </div>
-                <div class="links-list" data-cat="${cat}">
-                    ${catLinks.length === 0 ? '<p class="text-[10px] opacity-30 italic py-2 text-center">Vide</p>' : ''}
-                    ${catLinks.map(link => `
-                        <div class="link-item" data-id="${link.id}">
-                            <div class="dots-handle handle-link"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                            <div class="link-info" onclick="window.open('${link.url}', '_blank')">
-                                <span class="link-name ${conf.text}">${link.name}</span>
-                                <span class="link-url">${link.url}</span>
-                            </div>
-                            <div class="link-actions">
-                                <div class="btn-action" onclick="event.stopPropagation(); editLink(${link.id})">✏️</div>
-                                <div class="btn-action" onclick="event.stopPropagation(); deleteLink(${link.id})">🗑️</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            container.appendChild(col);
-        });
-        initSortables();
-    }
-
-    function initSortables() {
-        new Sortable(document.getElementById('categoriesContainer'), {
-            handle: '.handle-cat', animation: 150, delay: 150, delayOnTouchOnly: true,
-            onEnd: () => {
-                catOrder = Array.from(document.querySelectorAll('.column')).map(el => el.getAttribute('data-cat'));
-                localStorage.setItem('eduCatOrder', JSON.stringify(catOrder));
-                updateExportBadge(true);
-            }
-        });
-        document.querySelectorAll('.links-list').forEach(listEl => {
-            new Sortable(listEl, {
-                group: 'sharedLinks', handle: '.handle-link', animation: 150,
-                delay: 200, delayOnTouchOnly: true, touchStartThreshold: 3,
-                onEnd: () => {
-                    const newLinks = [];
-                    document.querySelectorAll('.column').forEach(col => {
-                        const catName = col.getAttribute('data-cat');
-                        col.querySelectorAll('.link-item').forEach(item => {
-                            const id = parseInt(item.getAttribute('data-id'));
-                            const link = links.find(l => l.id === id);
-                            if (link) newLinks.push({ ...link, cat: catName });
-                        });
-                    });
-                    links = newLinks;
-                    localStorage.setItem('eduLinksList', JSON.stringify(links));
-                    updateExportBadge(true);
-                    render();
-                }
-            });
-        });
-    }
-
-    /* --- Uniquement la partie modifier dans ouvrirFormulaire et les boutons de catégorie --- */
-
-function ouvrirFormulaire() {
-    document.getElementById('form-container-modal').style.display = 'flex';
-    document.getElementById('form-title').innerText = editingLinkId ? "Modifier le lien" : "Nouveau Lien";
-    
-    // S'assurer que le bouton visuel correspond à currentSelectedCat
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-value') === currentSelectedCat);
-    });
-}
-
+    // ============ MODAL MANAGEMENT ============
     function fermerFormulaire() {
-        document.getElementById('form-container-modal').style.display = 'none';
+        DOM.formModal.style.display = 'none';
         if (editingLinkId) {
             editingLinkId = null;
-            document.getElementById('linkName').value = '';
-            document.getElementById('linkUrl').value = '';
-            document.getElementById('mainAddBtn').innerText = "Ajouter";
+            DOM.linkName.value = '';
+            DOM.linkUrl.value = '';
+            DOM.mainAddBtn.innerText = "Ajouter";
         }
     }
 
-    /* --- Uniquement la logique de traitement d'URL dans addLink --- */
+    function fermerModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
 
-function addLink() {
-    const name = document.getElementById('linkName').value.trim();
-    let urlInput = document.getElementById('linkUrl').value.trim().replace(/\s/g, ''); // Supprime les espaces
-    
-    if (name && urlInput) {
-        // Ajoute https:// seulement s'il n'y a pas déjà de protocole
-        const url = /^(http|https):\/\//i.test(urlInput) ? urlInput : 'https://' + urlInput;
-        
+    function ouvrirFormulaire() {
+        DOM.formModal.style.display = 'flex';
+        DOM.formTitle.innerText = editingLinkId ? "Modifier le lien" : "Nouveau Lien";
+        updateCategoryButtons();
+    }
+
+    function ouvrirAide() {
+        applyTheme();
+        DOM.helpModal.style.display = 'flex';
+    }
+
+    // ============ CATEGORY BUTTONS ============
+    function updateCategoryButtons() {
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-value') === currentSelectedCat);
+        });
+    }
+
+    function initCategoryButtonListeners() {
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.onclick = () => {
+                currentSelectedCat = btn.getAttribute('data-value');
+                updateCategoryButtons();
+            };
+        });
+    }
+
+    // ============ LINK MANAGEMENT ============
+    function addLink() {
+        const name = DOM.linkName.value.trim();
+        const url = formatUrl(DOM.linkUrl.value);
+
+        if (!name || !DOM.linkUrl.value.trim()) {
+            return;
+        }
+
         if (editingLinkId) {
             const index = links.findIndex(l => l.id === editingLinkId);
-            if (index !== -1) links[index] = { ...links[index], name, url, cat: currentSelectedCat };
+            if (index !== -1) {
+                links[index] = { ...links[index], name, url, cat: currentSelectedCat };
+            }
             editingLinkId = null;
-            document.getElementById('mainAddBtn').innerText = "Ajouter";
+            DOM.mainAddBtn.innerText = "Ajouter";
         } else {
             links.push({ id: Date.now(), name, url, cat: currentSelectedCat });
         }
+
         localStorage.setItem('eduLinksList', JSON.stringify(links));
-        document.getElementById('linkName').value = '';
-        document.getElementById('linkUrl').value = '';
+        DOM.linkName.value = '';
+        DOM.linkUrl.value = '';
         updateExportBadge(true);
         fermerFormulaire();
         render();
     }
-}
 
     function editLink(id) {
         const link = links.find(l => l.id === id);
-        if (link) {
-            document.getElementById('linkName').value = link.name;
-            document.getElementById('linkUrl').value = link.url;
-            currentSelectedCat = link.cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-value') === link.cat));
-            editingLinkId = id;
-            document.getElementById('mainAddBtn').innerText = "Mettre à jour";
-            ouvrirFormulaire();
-        }
+        if (!link) return;
+
+        DOM.linkName.value = link.name;
+        DOM.linkUrl.value = link.url;
+        currentSelectedCat = link.cat;
+        editingLinkId = id;
+        DOM.mainAddBtn.innerText = "Mettre à jour";
+        
+        updateCategoryButtons();
+        ouvrirFormulaire();
     }
 
     function deleteLink(id) {
@@ -406,36 +739,45 @@ function addLink() {
         });
     }
 
+    // ============ IMPORT/EXPORT ============
     function exportLinks() {
         if (links.length === 0) return;
+
         const dataStr = JSON.stringify(links);
         const nomFichier = `outilsprofs_liens_${new Date().toISOString().split('T')[0]}.txt`;
+
         if (window.Android && typeof window.Android.exportTxt === "function") {
             window.Android.exportTxt(dataStr, nomFichier);
         } else {
             const blob = new Blob([dataStr], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = nomFichier; a.click();
+            a.href = url;
+            a.download = nomFichier;
+            a.click();
             URL.revokeObjectURL(url);
         }
+
         updateExportBadge(false);
     }
 
     function importLinks(event) {
         const file = event.target.files[0];
         if (!file) return;
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if(Array.isArray(imported)) {
+                if (Array.isArray(imported)) {
                     links = imported;
                     localStorage.setItem('eduLinksList', JSON.stringify(links));
                     updateExportBadge(false);
                     render();
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error('Import error:', err);
+            }
             event.target.value = '';
         };
         reader.readAsText(file);
@@ -443,52 +785,160 @@ function addLink() {
 
     function resetLinks() {
         afficherMessage("Réinitialisation", "Effacer TOUS vos liens ?", () => {
-            links = []; localStorage.removeItem('eduLinksList'); 
+            links = [];
+            localStorage.removeItem('eduLinksList');
             updateExportBadge(true);
             render();
         });
     }
 
+    // ============ ALERTS ============
     function afficherMessage(titre, texte, callback) {
-        document.getElementById('alerte-titre').innerText = titre;
-        document.getElementById('alerte-texte').innerText = texte;
-        const modal = document.getElementById('modal-alerte');
+        DOM.alertTitle.innerText = titre;
+        DOM.alertText.innerText = texte;
+        
+        const themeColor = getThemeColor();
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const hexa = mapCouleurs[themePrefs.liens || 'emerald'];
-        const confirmBtn = document.getElementById('alerte-confirm');
-        confirmBtn.style.backgroundColor = hexa;
-        modal.style.display = 'flex';
-        confirmBtn.onclick = () => { modal.style.display = 'none'; callback(); };
-    }
-
-    function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.liens || 'emerald';
-        const hexa = mapCouleurs[colPref];
-        const isDark = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref);
-        const contrast = isDark ? '#000' : '#fff';
-        [document.getElementById('mainAddBtn'), document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide'), document.getElementById('fab-plus')].forEach(el => {
-            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
-        });
-        if(document.getElementById('titre-aide')) document.getElementById('titre-aide').style.color = hexa;
-    }
-
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.onclick = () => {
-            currentSelectedCat = btn.getAttribute('data-value');
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        const isDark = isDarkText(themePrefs.liens || 'emerald');
+        
+        DOM.alertConfirm.style.backgroundColor = themeColor;
+        DOM.alertConfirm.style.color = isDark ? '#000' : '#fff';
+        DOM.alertModal.style.display = 'flex';
+        
+        DOM.alertConfirm.onclick = () => {
+            DOM.alertModal.style.display = 'none';
+            callback();
         };
-    });
+    }
 
-    function ouvrirAide() { appliquerTheme(); document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-    
-    window.onload = () => { 
-        appliquerTheme(); 
-        render(); 
-        checkBadgeStatus(); 
-    };
+    // ============ RENDERING ============
+    function render() {
+        DOM.categoriesContainer.innerHTML = '';
+
+        catOrder.forEach(cat => {
+            const catLinks = links.filter(l => l.cat === cat);
+            const conf = CATEGORY_CONFIG[cat];
+            
+            const col = document.createElement('div');
+            col.className = 'column';
+            col.setAttribute('data-cat', cat);
+
+            const linksHtml = catLinks.length === 0
+                ? '<p class="text-[10px] opacity-30 italic py-2 text-center">Vide</p>'
+                : catLinks.map(link => createLinkItemHtml(link, conf)).join('');
+
+            col.innerHTML = `
+                <div class="column-header ${conf.text} ${conf.border}">
+                    <div class="dots-handle handle-cat mr-3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                    <span class="mr-2">${conf.emoji}</span> ${cat}
+                </div>
+                <div class="links-list" data-cat="${cat}">
+                    ${linksHtml}
+                </div>
+            `;
+
+            DOM.categoriesContainer.appendChild(col);
+        });
+
+        initSortables();
+    }
+
+    function createLinkItemHtml(link, conf) {
+        return `
+            <div class="link-item" data-id="${link.id}">
+                <div class="dots-handle handle-link"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="link-info" onclick="window.open('${link.url}', '_blank')">
+                    <span class="link-name ${conf.text}">${link.name}</span>
+                    <span class="link-url">${link.url}</span>
+                </div>
+                <div class="link-actions">
+                    <div class="btn-action" onclick="event.stopPropagation(); editLink(${link.id})">✏️</div>
+                    <div class="btn-action" onclick="event.stopPropagation(); deleteLink(${link.id})">🗑️</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============ DRAG & DROP ============
+    function initSortables() {
+        // Column sorting
+        new Sortable(DOM.categoriesContainer, {
+            handle: '.handle-cat',
+            animation: 150,
+            delay: 150,
+            delayOnTouchOnly: true,
+            onEnd: () => {
+                catOrder = Array.from(document.querySelectorAll('.column')).map(el => el.getAttribute('data-cat'));
+                localStorage.setItem('eduCatOrder', JSON.stringify(catOrder));
+                updateExportBadge(true);
+            }
+        });
+
+        // Link sorting within categories
+        document.querySelectorAll('.links-list').forEach(listEl => {
+            new Sortable(listEl, {
+                group: 'sharedLinks',
+                handle: '.handle-link',
+                animation: 150,
+                delay: 200,
+                delayOnTouchOnly: true,
+                touchStartThreshold: 3,
+                onEnd: () => {
+                    const newLinks = [];
+                    document.querySelectorAll('.column').forEach(col => {
+                        const catName = col.getAttribute('data-cat');
+                        col.querySelectorAll('.link-item').forEach(item => {
+                            const id = parseInt(item.getAttribute('data-id'));
+                            const link = links.find(l => l.id === id);
+                            if (link) {
+                                newLinks.push({ ...link, cat: catName });
+                            }
+                        });
+                    });
+                    links = newLinks;
+                    localStorage.setItem('eduLinksList', JSON.stringify(links));
+                    updateExportBadge(true);
+                    render();
+                }
+            });
+        });
+    }
+
+    // ============ THEMING ============
+    function applyTheme() {
+        const themeColor = getThemeColor();
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const isDark = isDarkText(themePrefs.liens || 'emerald');
+        const textColor = isDark ? '#000' : '#fff';
+
+        const elementsToStyle = [
+            DOM.mainAddBtn,
+            DOM.btn_retour,
+            DOM.btn_aide,
+            DOM.btn_fermerAide,
+            DOM.fab_plus
+        ];
+
+        elementsToStyle.forEach(el => {
+            if (el) {
+                el.style.backgroundColor = themeColor;
+                el.style.color = textColor;
+            }
+        });
+
+        const titleAide = document.getElementById('titre-aide');
+        if (titleAide) {
+            titleAide.style.color = themeColor;
+        }
+    }
+
+    // ============ INITIALIZATION ============
+    window.addEventListener('load', () => {
+        applyTheme();
+        initCategoryButtonListeners();
+        render();
+        checkBadgeStatus();
+    });
 </script>
 </body>
 </html>

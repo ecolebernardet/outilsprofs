@@ -50,26 +50,21 @@
             transition: transform 0.2s ease;
         }
         
-        .menu-card:active { transform: scale(0.96); }
+        .menu-card:active { 
+            transform: scale(0.96); 
+        }
 
         .icon-box {
-            width: 42px; height: 42px;
+            width: 42px;
+            height: 42px;
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: rgba(128, 128, 128, 0.1);
             margin-bottom: 4px;
             font-size: 22px;
             border: 1px solid var(--border-color);
-        }
-
-        /* Adaptation des icônes sur PC */
-        @media (min-width: 768px) {
-            .icon-box {
-                width: 64px; height: 64px;
-                font-size: 32px;
-                border-radius: 16px;
-                margin-bottom: 12px;
-            }
         }
 
         .tile-subtitle {
@@ -81,7 +76,8 @@
 
         .drag-handle {
             position: absolute;
-            top: 10px; right: 10px;
+            top: 10px;
+            right: 10px;
             display: grid;
             grid-template-columns: repeat(3, 2px);
             gap: 2px;
@@ -90,27 +86,44 @@
         }
 
         .drag-handle span {
-            width: 2px; height: 2px;
+            width: 2px;
+            height: 2px;
             background-color: var(--text-muted);
             border-radius: 50%;
         }
 
         .ui-btn {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 10px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
         }
 
         .header-avatar {
-            width: 38px; height: 38px;
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             border: 2px solid var(--card-bg);
+        }
+
+        /* Responsive design pour PC */
+        @media (min-width: 768px) {
+            .icon-box {
+                width: 64px;
+                height: 64px;
+                font-size: 32px;
+                border-radius: 16px;
+                margin-bottom: 12px;
+            }
         }
     </style>
 </head>
 <body class="flex flex-col items-center">
+    <!-- Chargement du thème avant le rendu -->
     <script>
         if (localStorage.getItem('theme_mode') === 'light') {
             document.body.classList.add('light-mode');
@@ -118,8 +131,9 @@
     </script>
 
     <div class="w-full max-w-[360px] md:max-w-6xl md:px-6">
+        <!-- En-tête -->
         <header class="flex justify-between items-center mb-6 px-1">
-            <button onclick="goToSettings()" class="ui-btn active:scale-90">
+            <button onclick="goToSettings()" class="ui-btn active:scale-90" aria-label="Menu paramètres">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -128,9 +142,15 @@
             <img src="outilsprofs_icone.png" alt="Avatar" class="header-avatar">
         </header>
 
+        <!-- Grille de navigation -->
         <nav id="grid-menu" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+            <!-- Ma classe -->
             <div data-id="inscr" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="maclasse.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📝</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Ma classe</h2>
@@ -138,8 +158,13 @@
                 </a>
             </div>
 
+            <!-- Liens -->
             <div data-id="liens" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="liens.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🔗</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Liens</h2>
@@ -147,8 +172,13 @@
                 </a>
             </div>
 
+            <!-- 108 heures -->
             <div data-id="h108" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="108heures.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">⏱️</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">108 heures</h2>
@@ -156,8 +186,13 @@
                 </a>
             </div>
 
+            <!-- Mémos -->
             <div data-id="memos" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="memos.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">📒</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Mémos</h2>
@@ -165,8 +200,13 @@
                 </a>
             </div>
 
+            <!-- Tirage -->
             <div data-id="tirage" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="tirage.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🎲</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Tirage</h2>
@@ -174,8 +214,13 @@
                 </a>
             </div>
 
+            <!-- Équipes -->
             <div data-id="equipes" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="equipes.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">👥</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Équipes</h2>
@@ -183,8 +228,13 @@
                 </a>
             </div>
 
+            <!-- Observations -->
             <div data-id="obs" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="observations.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">✏️</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Observations</h2>
@@ -192,8 +242,13 @@
                 </a>
             </div>
 
+            <!-- Compteur -->
             <div data-id="compt" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="compteur.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🚥</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Compteur</h2>
@@ -201,8 +256,13 @@
                 </a>
             </div>
 
+            <!-- Générateurs -->
             <div data-id="gen" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="generateurs.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🛠️</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Générateurs</h2>
@@ -210,8 +270,13 @@
                 </a>
             </div>
 
+            <!-- Outils -->
             <div data-id="outils" class="menu-card p-3 md:p-6">
-                <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
                 <a href="outils.html" class="flex flex-col items-center text-center">
                     <div class="icon-box">🧰</div>
                     <h2 class="font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Outils</h2>
@@ -221,62 +286,112 @@
         </nav>
     </div>
 
-<script>
-    function goToSettings() { window.location.href = 'parametres.html'; }
-
-    const colorMap = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e'
-    };
-
-    function applyColors() {
-        const isLight = document.body.classList.contains('light-mode');
-        const defaultColors = {
-            inscr: 'lime', h108: 'orange', liens: 'indigo', tirage: 'yellow', 
-            equipes: 'rose', memos: 'purple', obs: 'green', compt: 'sky', gen: 'cyan', outils: 'blue'
-        };
-        const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
-
-        document.querySelectorAll('.menu-card').forEach(el => {
-            const id = el.getAttribute('data-id');
-            const colorName = prefs[id] || 'blue';
-            const hexColor = colorMap[colorName];
-            const iconBox = el.querySelector('.icon-box');
-            const title = el.querySelector('h2');
-
-            if (iconBox) {
-                iconBox.style.backgroundColor = `${hexColor}15`; 
-                iconBox.style.color = hexColor;
-                iconBox.style.borderColor = `${hexColor}30`;
-                iconBox.style.boxShadow = !isLight ? `0 0 12px ${hexColor}20` : 'none';
-            }
-            if (title) title.style.color = hexColor;
-        });
-    }
-
-    applyColors();
-
-    const gridMenu = document.getElementById('grid-menu');
-    const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
-    if (savedOrder) {
-        savedOrder.forEach(id => {
-            const tile = document.querySelector(`[data-id="${id}"]`);
-            if (tile) gridMenu.appendChild(tile);
-        });
-    }
-
-    new Sortable(gridMenu, {
-        handle: '.drag-handle',
-        animation: 200,
-        ghostClass: 'opacity-0',
-        onEnd: function() {
-            const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
-            localStorage.setItem('menu_order', JSON.stringify(order));
+    <script>
+        // Navigation vers paramètres
+        function goToSettings() {
+            window.location.href = 'parametres.html';
         }
-    });
-</script>
+
+        // Palette de couleurs
+        const colorMap = {
+            'red': '#ef4444',
+            'orange': '#f97316',
+            'amber': '#f59e0b',
+            'yellow': '#eab308',
+            'lime': '#84cc16',
+            'green': '#22c55e',
+            'emerald': '#10b981',
+            'teal': '#14b8a6',
+            'cyan': '#06b6d4',
+            'sky': '#0ea5e9',
+            'blue': '#3b82f6',
+            'indigo': '#6366f1',
+            'violet': '#8b5cf6',
+            'purple': '#a855f7',
+            'fuchsia': '#d946ef',
+            'pink': '#ec4899',
+            'rose': '#f43f5e'
+        };
+
+        // Couleurs par défaut des tuiles
+        const defaultColors = {
+            inscr: 'lime',
+            h108: 'orange',
+            liens: 'indigo',
+            tirage: 'yellow',
+            equipes: 'rose',
+            memos: 'purple',
+            obs: 'green',
+            compt: 'sky',
+            gen: 'cyan',
+            outils: 'blue'
+        };
+
+        // Application des couleurs personnalisées
+        function applyColors() {
+            const isLight = document.body.classList.contains('light-mode');
+            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || defaultColors;
+
+            document.querySelectorAll('.menu-card').forEach(el => {
+                const id = el.getAttribute('data-id');
+                const colorName = prefs[id] || 'blue';
+                const hexColor = colorMap[colorName];
+                const iconBox = el.querySelector('.icon-box');
+                const title = el.querySelector('h2');
+
+                if (iconBox) {
+                    iconBox.style.backgroundColor = `${hexColor}15`;
+                    iconBox.style.color = hexColor;
+                    iconBox.style.borderColor = `${hexColor}30`;
+                    iconBox.style.boxShadow = !isLight ? `0 0 12px ${hexColor}20` : 'none';
+                }
+                if (title) {
+                    title.style.color = hexColor;
+                }
+            });
+        }
+
+        // Restauration de l'ordre des tuiles
+        function restoreTileOrder() {
+            const gridMenu = document.getElementById('grid-menu');
+            const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
+            
+            if (savedOrder) {
+                savedOrder.forEach(id => {
+                    const tile = document.querySelector(`[data-id="${id}"]`);
+                    if (tile) {
+                        gridMenu.appendChild(tile);
+                    }
+                });
+            }
+        }
+
+        // Initialisation du drag & drop
+        function initializeSortable() {
+            const gridMenu = document.getElementById('grid-menu');
+            
+            new Sortable(gridMenu, {
+                handle: '.drag-handle',
+                animation: 200,
+                ghostClass: 'opacity-0',
+                onEnd: function() {
+                    const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
+                    localStorage.setItem('menu_order', JSON.stringify(order));
+                }
+            });
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            applyColors();
+            restoreTileOrder();
+            initializeSortable();
+        });
+
+        // Application immédiate pour éviter le flash
+        applyColors();
+        restoreTileOrder();
+        initializeSortable();
+    </script>
 </body>
 </html>

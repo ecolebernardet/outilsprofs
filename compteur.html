@@ -15,113 +15,91 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         :root { 
-            --primary: #6366f1; 
-            --bg-page: #121212; 
-            --text-main: #ffffff;
-            --card-student: #1a1a1a; 
-            --header-bg: #1e1e1e;    
-            --header-border: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --card-sub: #a3a3a3;
-            --color-fille: #f9a8d4;
-            --color-garcon: #93c5fd;
+            --primary: #6366f1; --bg-page: #121212; --text-main: #ffffff;
+            --card-student: #1a1a1a; --header-bg: #1e1e1e;    
+            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
+            --card-sub: #a3a3a3; --color-fille: #f9a8d4; --color-garcon: #93c5fd;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee;
-            --text-main: #111827;
-            --card-student: #ffffff;
-            --header-bg: #ffffff;
-            --header-border: #ddd;
-            --card-sub: #4b5563;
+            --bg-page: #eeeeee; --text-main: #111827; --card-student: #ffffff;
+            --header-bg: #ffffff; --header-border: #ddd; --card-sub: #4b5563;
         }
 
+        /* Base Styles */
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-page); 
-            color: var(--text-main); 
-            padding: 0; margin: 0; 
-            transition: background 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
-            touch-action: manipulation;
+            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); 
+            padding: 0; margin: 0; transition: background 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+            touch-action: manipulation; overflow-x: hidden;
         }
 
+        /* Header */
         header { 
-            background: var(--header-bg); 
-            border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0; 
-            z-index: 100; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: calc(100% + 30px); 
-            margin-left: -15px;
-            margin-bottom: 10px;
+            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 10px;
         }
 
-        #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
-        #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
+        #btn-retour, #btn-aide { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 40px; height: 40px; border-radius: 50%; 
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
 
-        /* Pinterest Layout */
+        #mainTitle { 
+            text-align: center; font-weight: 800; font-size: 1.1rem; 
+            letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;
+        }
+
+        /* Layout Grid */
         .columns-container { 
-            column-count: 2;
-            column-gap: 15px;
-            width: 100%; 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 0 10px; 
-        }
-        
-        /* break-inside prevent group splitting between columns */
-        .level-group { 
-            margin-bottom: 20px; 
-            break-inside: avoid;
-            display: inline-block;
-            width: 100%;
+            column-count: 2; column-gap: 15px; width: 100%; 
+            max-width: 600px; margin: 0 auto; padding: 0 10px;
         }
 
+        /* Level Groups */
+        .level-group { 
+            margin-bottom: 20px; break-inside: avoid;
+            display: inline-block; width: 100%;
+        }
+
+        .level-title { 
+            font-size: 0.6875rem; font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 0.05em; text-align: center; margin-bottom: 0.5rem;
+        }
+
+        /* Student Items */
         .student-item { 
-            background-color: var(--card-student); 
-            padding: 6px 10px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            cursor: pointer; 
-            border-radius: 50px; 
-            margin-bottom: 3px; 
-            transition: all 0.1s;
-            border: 1.5px solid transparent;
-            min-width: 0;
+            background-color: var(--card-student); padding: 6px 10px; display: flex; 
+            justify-content: space-between; align-items: center; cursor: pointer; 
+            border-radius: 50px; margin-bottom: 3px; transition: all 0.1s;
+            border: 1.5px solid transparent; min-width: 0;
+            -webkit-tap-highlight-color: transparent; user-select: none;
         }
 
         body.light-mode .student-item, html.light-mode-init body .student-item {
             border-color: #e5e7eb;
         }
 
-        .text-girl { color: var(--color-fille) !important; } 
-        .text-boy { color: var(--color-garcon) !important; } 
-        
         .student-name { 
-            font-weight: 800; 
-            font-size: 0.7rem; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
-            margin-right: 8px;
-            flex: 1; 
+            font-weight: 800; font-size: 0.7rem; overflow: hidden; 
+            text-overflow: ellipsis; white-space: nowrap; 
+            margin-right: 8px; flex: 1;
         }
 
+        .text-girl { color: var(--color-fille) !important; }
+        .text-boy { color: var(--color-garcon) !important; }
+
+        /* Counter Badge */
         .counter-badge {
             width: 1.1rem; height: 1.1rem; min-width: 1.1rem;
             display: flex; align-items: center; justify-content: center;
@@ -129,6 +107,7 @@
             transition: all 0.1s ease; border: 1px solid rgba(0,0,0,0.1);
             background-color: #999999; color: #1e1e1e;
         }
+
         .count-1 { color: #000; background-color: #aee386; }
         .count-2 { color: #000; background-color: #fcff21; }
         .count-3 { color: #000; background-color: #ffc20a; }
@@ -139,30 +118,84 @@
             animation: pulse 0.5s infinite alternate;
         }
 
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-        .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
+        @keyframes pulse { 
+            from { transform: scale(1); } 
+            to { transform: scale(1.05); } 
+        }
 
-        #modal-aide .modal-card { background-color: var(--card-student); border: 1px solid var(--header-border); }
-        #aide-content h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        #aide-content p, #aide-content li { font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); margin-bottom: 8px; }
+        /* Navigation */
+        .bottom-nav { 
+            width: 100%; max-width: 350px; margin: 25px auto 0 auto; 
+            padding-bottom: 60px; padding-left: 10px; padding-right: 10px;
+        }
+
+        .nav-btn { 
+            font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; 
+            border: none; width: 100%; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; transition: all 0.2s;
+        }
+
+        .nav-btn:active { transform: scale(0.95); }
+
+        /* Help Modal */
+        #modal-aide .modal-card { 
+            background-color: var(--card-student); border: 1px solid var(--header-border);
+        }
+
+        #aide-content h3 { 
+            font-weight: 900; text-transform: uppercase; font-size: 0.8rem; 
+            margin-bottom: 10px; margin-top: 0; display: flex; align-items: center; gap: 8px;
+        }
+
+        #aide-content p, #aide-content li { 
+            font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); 
+            margin-bottom: 8px; margin: 0 0 8px 0;
+        }
+
         #aide-content ul { list-style: none; padding: 0; }
 
-        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(4px); }
-        .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
-        .alert-title { font-size: 18px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; color: #000; }
-        .alert-text { font-size: 14px; text-align: center; line-height: 1.5; font-weight: 600; color: #4b5563; }
-        .alert-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-alert { flex: 1; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
-        .btn-alert-cancel { background: #f3f4f6; color: #4b5563; }
+        body.light-mode .modal-card, html.light-mode-init body .modal-card { 
+            background: #ffffff; border-color: #d1d5db;
+        }
 
-        .bottom-nav { width: 100%; max-width: 350px; margin: 25px auto 0 auto; padding-bottom: 60px; padding-left: 10px; padding-right: 10px; }
-        .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
-        
-        body.light-mode .modal-card, html.light-mode-init body .modal-card { background: #ffffff; border-color: #d1d5db; }
+        /* Alert Modal */
+        .alert-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            align-items: center; justify-content: center; z-index: 2000; padding: 20px; 
+            backdrop-filter: blur(4px);
+        }
+
+        .alert-content { 
+            background: white; padding: 25px; border-radius: 24px; 
+            width: 100%; max-width: 350px; color: #111;
+        }
+
+        .alert-title { 
+            font-size: 18px; font-weight: 900; text-transform: uppercase; 
+            text-align: center; margin-bottom: 10px; margin: 0 0 10px 0; color: #000;
+        }
+
+        .alert-text { 
+            font-size: 14px; text-align: center; line-height: 1.5; 
+            font-weight: 600; color: #4b5563; margin-bottom: 20px; margin: 0 0 20px 0;
+        }
+
+        .alert-btns { display: flex; gap: 10px; }
+
+        .btn-alert { 
+            flex: 1; padding: 14px; border-radius: 50px; font-weight: 900; 
+            font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; 
+            transition: all 0.2s;
+        }
+
+        .btn-alert:active { transform: scale(0.95); }
+
+        .btn-alert-cancel { background: #f3f4f6; color: #4b5563; }
     </style>
 </head>
 <body>
 
+    <!-- ====================== HEADER ====================== -->
     <header>
         <a href="index.html" id="btn-retour">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,14 +206,17 @@
         <button id="btn-aide" onclick="ouvrirAide()" style="font-size: 1.2rem;">💡</button>
     </header>
 
+    <!-- ====================== MAIN CONTENT ====================== -->
     <div id="mainContent" class="columns-container"></div>
 
+    <!-- ====================== FOOTER NAVIGATION ====================== -->
     <div class="bottom-nav">
-        <button id="reset-button" class="nav-btn bg-red-500 text-red-50 shadow-lg active:scale-95">
+        <button id="reset-button" class="nav-btn bg-red-500 text-red-50 shadow-lg">
             ⚠️ RàZ des données
         </button>
     </div>
 
+    <!-- ====================== HELP MODAL ====================== -->
     <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6">
         <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
             <div id="aide-content"></div>
@@ -190,6 +226,7 @@
         </div>
     </div>
 
+    <!-- ====================== ALERT MODAL ====================== -->
     <div id="alertModal" class="alert-overlay">
         <div class="alert-content">
             <h3 id="alertTitle" class="alert-title">Confirmation</h3>
@@ -202,8 +239,8 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'studentCounterState';
-        const mapCouleurs = {
+        // ====================== CONFIGURATION & CONSTANTS ====================== 
+        const COLOR_MAP = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
             'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
@@ -211,18 +248,254 @@
             'rose': '#f43f5e'
         };
 
-        const couleursDecidees = {
-            "CP": "#ec4899", "CE1": "#3b82f6", "CE2": "#eab308", 
-            "CM1": "#ef4444", "CM2": "#22c55e", "AUTRE": "#a855f7"
+        const LEVEL_COLORS = {
+            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
+            'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#a855f7'
         };
 
+        const LEVEL_ORDER = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
+
+        const STORAGE_KEYS = {
+            counterState: 'studentCounterState',
+            students: 'maListeEleves',
+            theme: 'theme_tuiles',
+            themeMode: 'theme_mode',
+            levelPalette: 'palette_niveaux'
+        };
+
+        const COUNTER_CONFIG = {
+            maxValue: 5,
+            clickTimeout: 250
+        };
+
+        let allStudents = JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || [];
+
+        // ====================== UTILITY FUNCTIONS ====================== 
+        function formatNameDisplay(fullName) {
+            if (!fullName) return "";
+            const parts = fullName.trim().split(' ');
+            const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+            const last = parts.slice(1).join(' ').toUpperCase();
+            return (first + ' ' + last).trim();
+        }
+
+        function getNormalizedLevel(student) {
+            return student.niveau.trim().toUpperCase();
+        }
+
+        function getGenderClass(sexe) {
+            const isFemale = sexe && (sexe.toLowerCase() === 'f' || sexe.toLowerCase() === 'fille');
+            return isFemale ? 'text-girl' : 'text-boy';
+        }
+
+        function getCountClass(value) {
+            if (value === 0) return '';
+            const safeValue = Math.min(value, COUNTER_CONFIG.maxValue);
+            return `count-${safeValue}`;
+        }
+
+        // ====================== STATE MANAGEMENT ====================== 
+        function saveState() {
+            const state = {};
+            document.querySelectorAll('.counter-val').forEach(span => {
+                state[span.getAttribute('data-name')] = span.innerText;
+            });
+            localStorage.setItem(STORAGE_KEYS.counterState, JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEYS.counterState);
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.keys(state).forEach(name => {
+                    const span = document.querySelector(`[data-name="${name}"]`);
+                    if (span) {
+                        const value = parseInt(state[name]);
+                        span.innerText = value;
+                        updateBadgeStyle(span.parentElement, value);
+                    }
+                });
+            }
+        }
+
+        function updateBadgeStyle(badgeElement, value) {
+            badgeElement.classList.remove('count-1', 'count-2', 'count-3', 'count-4', 'count-5');
+            if (value > 0) {
+                badgeElement.classList.add(getCountClass(value));
+            }
+        }
+
+        // ====================== COUNTER OPERATIONS ====================== 
+        function incrementCounter(counterSpan, badgeElement) {
+            let value = parseInt(counterSpan.innerText);
+            if (value < COUNTER_CONFIG.maxValue) {
+                value++;
+                counterSpan.innerText = value;
+                updateBadgeStyle(badgeElement, value);
+                saveState();
+            }
+        }
+
+        function decrementCounter(counterSpan, badgeElement) {
+            let value = parseInt(counterSpan.innerText);
+            if (value > 0) {
+                value--;
+                counterSpan.innerText = value;
+                updateBadgeStyle(badgeElement, value);
+                saveState();
+            }
+        }
+
+        // ====================== STUDENT ROW CREATION ====================== 
+        function createStudentRow(studentName, gender) {
+            const card = document.createElement('div');
+            const genderClass = getGenderClass(gender);
+            card.className = `student-item ${genderClass}`;
+
+            // Name element
+            const nameEl = document.createElement('span');
+            nameEl.className = 'student-name';
+            nameEl.innerText = formatNameDisplay(studentName);
+
+            // Counter badge
+            const badge = document.createElement('div');
+            badge.className = 'counter-badge';
+
+            const counterSpan = document.createElement('span');
+            counterSpan.setAttribute('data-name', studentName);
+            counterSpan.className = 'counter-val';
+            counterSpan.innerText = '0';
+
+            badge.appendChild(counterSpan);
+
+            // Click handler for single/double click
+            let clickCount = 0;
+            let clickTimer;
+
+            card.addEventListener('click', () => {
+                clickCount++;
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        if (clickCount === 1) {
+                            incrementCounter(counterSpan, badge);
+                        }
+                        clickCount = 0;
+                    }, COUNTER_CONFIG.clickTimeout);
+                } else if (clickCount === 2) {
+                    clearTimeout(clickTimer);
+                    decrementCounter(counterSpan, badge);
+                    clickCount = 0;
+                }
+            });
+
+            card.oncontextmenu = (e) => { e.preventDefault(); };
+            card.appendChild(nameEl);
+            card.appendChild(badge);
+            return card;
+        }
+
+        // ====================== THEME APPLICATION ====================== 
+        function applyTheme() {
+            const savedMode = localStorage.getItem(STORAGE_KEYS.themeMode);
+            const isLight = savedMode === 'light';
+            document.body.classList.toggle('light-mode', isLight);
+
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+
+            // Apply gender colors
+            const girlColor = prefs.fille && COLOR_MAP[prefs.fille]
+                ? COLOR_MAP[prefs.fille]
+                : (isLight ? '#db2777' : '#f9a8d4');
+            const boyColor = prefs.garcon && COLOR_MAP[prefs.garcon]
+                ? COLOR_MAP[prefs.garcon]
+                : (isLight ? '#2563eb' : '#93c5fd');
+
+            document.documentElement.style.setProperty('--color-fille', girlColor);
+            document.documentElement.style.setProperty('--color-garcon', boyColor);
+
+            // Apply theme color
+            const colorName = prefs['compt'] || 'indigo';
+            const colorHex = COLOR_MAP[colorName] || '#6366f1';
+            const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
+            const textColor = isDarkText ? 'black' : 'white';
+
+            document.getElementById('mainTitle').style.color = isLight ? '#000000' : '#ffffff';
+
+            const themeButtons = [
+                document.getElementById('btn-retour'),
+                document.getElementById('btn-aide'),
+                document.getElementById('btn-fermer-aide')
+            ];
+
+            themeButtons.forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = colorHex;
+                    el.style.color = textColor;
+                    const svg = el.querySelector('svg');
+                    if (svg) svg.style.color = textColor;
+                }
+            });
+        }
+
+        // ====================== RENDERING ====================== 
+        function renderStudents() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '';
+
+            const customPalette = JSON.parse(localStorage.getItem(STORAGE_KEYS.levelPalette)) || {};
+
+            const groups = {};
+            allStudents.forEach(student => {
+                const level = getNormalizedLevel(student);
+                if (!groups[level]) groups[level] = [];
+                groups[level].push(student);
+            });
+
+            const sortedLevels = Object.keys(groups).sort((a, b) => {
+                const indexA = LEVEL_ORDER.indexOf(a);
+                const indexB = LEVEL_ORDER.indexOf(b);
+                return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+            });
+
+            // Adjust layout for 2 levels
+            if (sortedLevels.length === 2) {
+                mainContent.className = "grid grid-cols-2 gap-4 w-full max-w-[600px] mx-auto px-2";
+            } else {
+                mainContent.className = "columns-container";
+            }
+
+            sortedLevels.forEach(level => {
+                const levelWrapper = document.createElement('div');
+                levelWrapper.className = sortedLevels.length === 2 ? "w-full" : "level-group";
+
+                const levelColor = customPalette[level] || customPalette[level.toLowerCase()] || LEVEL_COLORS[level] || '#ffffff';
+
+                const title = document.createElement('h2');
+                title.className = 'level-title';
+                title.style.color = levelColor;
+                title.innerText = level;
+                levelWrapper.appendChild(title);
+
+                const list = document.createElement('div');
+                groups[level]
+                    .sort((a, b) => a.identite.localeCompare(b.identite))
+                    .forEach(student => {
+                        list.appendChild(createStudentRow(student.identite, student.sexe));
+                    });
+
+                levelWrapper.appendChild(list);
+                mainContent.appendChild(levelWrapper);
+            });
+        }
+
+        // ====================== MODAL MANAGEMENT ====================== 
         function ouvrirAide() {
             const display = document.getElementById('aide-content');
-            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const couleurCompt = mapCouleurs[prefs.compt] || '#6366f1';
-            
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[prefs.compt] || '#6366f1';
+
             display.innerHTML = `
-                <h3 style="color:${couleurCompt}">💡 Compteur</h3>
+                <h3 style="color:${colorHex}">💡 Compteur</h3>
                 <p>Suivez en temps réel le comportement de vos élèves par un système de clics simples.</p>
                 <ul>
                     <li>• <strong>Ajouter (+1) :</strong> Cliquez une fois sur le nom de l'élève.</li>
@@ -234,236 +507,69 @@
             document.getElementById('modal-aide').style.display = 'flex';
         }
 
-        function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
-        function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
-
-        function appliquerTheme() {
-            const savedMode = localStorage.getItem('theme_mode');
-            const isLight = savedMode === 'light';
-            document.body.classList.toggle('light-mode', isLight);
-
-            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            
-            if (prefs.fille && mapCouleurs[prefs.fille]) {
-                document.documentElement.style.setProperty('--color-fille', mapCouleurs[prefs.fille]);
-            } else {
-                document.documentElement.style.setProperty('--color-fille', isLight ? '#db2777' : '#f9a8d4');
-            }
-            
-            if (prefs.garcon && mapCouleurs[prefs.garcon]) {
-                document.documentElement.style.setProperty('--color-garcon', mapCouleurs[prefs.garcon]);
-            } else {
-                document.documentElement.style.setProperty('--color-garcon', isLight ? '#2563eb' : '#93c5fd');
-            }
-
-            const nomCouleur = prefs['compt'] || 'indigo'; 
-            const couleurHexa = mapCouleurs[nomCouleur] || '#6366f1';
-            
-            const titre = document.getElementById('mainTitle');
-            const btnRetour = document.getElementById('btn-retour');
-            const btnAide = document.getElementById('btn-aide');
-            const btnFermerAide = document.getElementById('btn-fermer-aide');
-
-            if (titre) titre.style.color = isLight ? '#000000' : '#ffffff';
-
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
-            const textColor = isLightColor ? 'black' : 'white';
-
-            [btnRetour, btnAide, btnFermerAide].forEach(el => {
-                if (el) {
-                    el.style.backgroundColor = couleurHexa;
-                    el.style.color = textColor;
-                    const svg = el.querySelector('svg');
-                    if(svg) svg.style.color = textColor;
-                }
-            });
+        function fermerAide() {
+            document.getElementById('modal-aide').style.display = 'none';
         }
 
-        function formatNameDisplay(fullName) {
-            const parts = fullName.trim().split(' ');
-            if (parts.length === 0) return "";
-            const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-            const last = parts.slice(1).join(' ').toUpperCase();
-            return (first + ' ' + last).trim();
+        function closeAlert() {
+            document.getElementById('alertModal').style.display = 'none';
         }
 
-        const saveState = () => {
-            const state = {};
-            document.querySelectorAll('.counter-val').forEach(span => {
-                state[span.getAttribute('data-name')] = span.innerText;
-            });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        };
-
-        const loadState = () => {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const state = JSON.parse(saved);
-                Object.keys(state).forEach(name => {
-                    const span = document.querySelector(`[data-name="${name}"]`);
-                    if (span) {
-                        const val = parseInt(state[name]);
-                        span.innerText = val;
-                        updateBadgeStyle(span.parentElement, val);
-                    }
-                });
-            }
-        };
-
-        function updateBadgeStyle(badge, val) {
-            badge.classList.remove('count-1', 'count-2', 'count-3', 'count-4', 'count-5');
-            if (val > 0) {
-                const safeVal = Math.min(val, 5);
-                badge.classList.add(`count-${safeVal}`);
-            }
-        }
-
-        function createRow(name, sexe) {
-            const card = document.createElement('div');
-            const isF = (sexe && (sexe.toLowerCase() === 'f' || sexe.toLowerCase() === 'fille'));
-            const genderClass = isF ? 'text-girl' : 'text-boy';
-            
-            card.className = `student-item no-select ${genderClass}`;
-
-            const nameEl = document.createElement('span');
-            nameEl.className = 'student-name';
-            nameEl.innerText = formatNameDisplay(name);
-
-            const badge = document.createElement('div');
-            badge.className = 'counter-badge';
-            
-            const counterSpan = document.createElement('span');
-            counterSpan.setAttribute('data-name', name);
-            counterSpan.className = 'counter-val';
-            counterSpan.innerText = '0';
-            
-            badge.appendChild(counterSpan);
-
-            let clickCount = 0;
-            let clickTimer;
-
-            card.addEventListener('click', () => {
-                clickCount++;
-                if (clickCount === 1) {
-                    clickTimer = setTimeout(() => {
-                        if (clickCount === 1) {
-                            let val = parseInt(counterSpan.innerText);
-                            if (val < 5) {
-                                val++;
-                                counterSpan.innerText = val;
-                                updateBadgeStyle(badge, val);
-                                saveState();
-                            }
-                        }
-                        clickCount = 0;
-                    }, 250);
-                } else if (clickCount === 2) {
-                    clearTimeout(clickTimer);
-                    let val = parseInt(counterSpan.innerText);
-                    if (val > 0) {
-                        val--;
-                        counterSpan.innerText = val;
-                        updateBadgeStyle(badge, val);
-                        saveState();
-                    }
-                    clickCount = 0;
-                }
-            });
-
-            card.oncontextmenu = (e) => { e.preventDefault(); };
-            card.appendChild(nameEl);
-            card.appendChild(badge);
-            return card;
-        }
-
-function initApp() {
-            appliquerTheme();
-            const mainContent = document.getElementById('mainContent');
-            const allStudents = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-            const paletteNiveaux = JSON.parse(localStorage.getItem('palette_niveaux')) || {};
-            
-            const groupes = {};
-            allStudents.forEach(s => {
-                const niv = s.niveau.trim().toUpperCase();
-                if (!groupes[niv]) groupes[niv] = [];
-                groupes[niv].push(s);
-            });
-
-            const ordreNiveaux = ["CP", "CE1", "CE2", "CM1", "CM2", "AUTRE"];
-            const niveauxTries = Object.keys(groupes).sort((a, b) => {
-                let indexA = ordreNiveaux.indexOf(a);
-                let indexB = ordreNiveaux.indexOf(b);
-                if (indexA === -1) indexA = 99;
-                if (indexB === -1) indexB = 99;
-                return indexA - indexB;
-            });
-
-            // Gestion de l'affichage sur 2 colonnes si exactement 2 niveaux
-            if (niveauxTries.length === 2) {
-                mainContent.className = "grid grid-cols-2 gap-4 w-full max-w-[600px] mx-auto px-2";
-            } else {
-                mainContent.className = "columns-container";
-            }
-
-            niveauxTries.forEach(niv => {
-                const levelWrapper = document.createElement('div');
-                // Ajustement de la classe selon le mode
-                levelWrapper.className = niveauxTries.length === 2 ? "w-full" : "level-group";
-                
-                const couleurNiveau = paletteNiveaux[niv] || couleursDecidees[niv] || '#ffffff';
-                
-                levelWrapper.innerHTML = `<h2 style="color:${couleurNiveau}" class="text-[11px] font-black uppercase tracking-widest text-center mb-2">${niv}</h2>`;
-                
-                const list = document.createElement('div');
-                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(student => {
-                    list.appendChild(createRow(student.identite, student.sexe));
-                });
-
-                levelWrapper.appendChild(list);
-                mainContent.appendChild(levelWrapper);
-            });
-
-            loadState();
-        }
-
+        // ====================== ALERT MANAGEMENT ====================== 
         function showAlert(title, text, onConfirm) {
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertText').innerText = text;
+
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[prefs.compt || 'indigo'] || '#6366f1';
+
             const confirmBtn = document.getElementById('alertConfirmBtn');
-            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const colorHex = mapCouleurs[themePrefs.compt || 'indigo'] || '#6366f1';
             confirmBtn.style.backgroundColor = colorHex;
+
             const newBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            newBtn.onclick = () => {
+                closeAlert();
+                if (onConfirm) onConfirm();
+            };
+
             document.getElementById('alertModal').style.display = 'flex';
         }
 
-        document.getElementById('reset-button').onclick = () => {
-            showAlert("Remise à zéro ?", "Voulez-vous remettre tous les compteurs à zéro ?", () => {
-                document.querySelectorAll('.counter-val').forEach(span => {
-                    span.innerText = '0';
-                    updateBadgeStyle(span.parentElement, 0);
-                });
-                localStorage.removeItem(STORAGE_KEY);
+        // ====================== RESET FUNCTION ====================== 
+        function resetAllCounters() {
+            document.querySelectorAll('.counter-val').forEach(span => {
+                span.innerText = '0';
+                updateBadgeStyle(span.parentElement, 0);
             });
-        };
+            localStorage.removeItem(STORAGE_KEYS.counterState);
+        }
 
-        window.onload = initApp;
-        
+        // ====================== EVENT LISTENERS ====================== 
+        document.getElementById('reset-button').addEventListener('click', () => {
+            showAlert("Remise à zéro ?", "Voulez-vous remettre tous les compteurs à zéro ?", resetAllCounters);
+        });
+
         window.onclick = function(event) {
             const modalAide = document.getElementById('modal-aide');
             const modalAlert = document.getElementById('alertModal');
             if (event.target === modalAide) fermerAide();
             if (event.target === modalAlert) closeAlert();
-        }
+        };
 
         window.onkeydown = function(event) {
             if (event.key === "Escape") {
                 fermerAide();
                 closeAlert();
             }
-        }
+        };
+
+        // ====================== INITIALIZATION ====================== 
+        window.onload = () => {
+            applyTheme();
+            renderStudents();
+            loadState();
+        };
     </script>
 </body>
 </html>

@@ -15,162 +15,223 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
-            --primary: #ff637e; 
-            --bg-page: #121212; 
-            --text-main: #ffffff;
-            --card-student: #1a1a1a; 
-            --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --card-sub: #9ca3af;
-            --student-name-girl: #f9a8d4;
-            --student-name-boy: #93c5fd;
+            --primary: #ff637e; --bg-page: #121212; --text-main: #ffffff;
+            --card-student: #1a1a1a; --header-bg: #1e1e1e; --header-border: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1); --card-sub: #9ca3af;
+            --student-name-girl: #f9a8d4; --student-name-boy: #93c5fd;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee;
-            --text-main: #111827;
-            --card-student: #ffffff;
-            --header-bg: #ffffff;
-            --header-border: #ddd;
-            --card-sub: #4b5563;
+            --bg-page: #eeeeee; --text-main: #111827; --card-student: #ffffff;
+            --header-bg: #ffffff; --header-border: #ddd; --card-sub: #4b5563;
         }
 
+        /* Base Styles */
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-page); 
-            color: var(--text-main); 
-            padding: 0; margin: 0; 
-            transition: background 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            padding-bottom: 20px;
-            overflow-x: hidden;
+            font-family: 'Inter', sans-serif; background: var(--bg-page); 
+            color: var(--text-main); padding: 0; margin: 0; transition: background 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+            padding-left: 15px; padding-right: 15px; padding-bottom: 20px; overflow-x: hidden;
         }
 
+        /* Header */
         header { 
-            background: var(--header-bg); 
-            border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0; 
-            z-index: 100; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: calc(100% + 30px); 
-            margin-left: -15px;
-            margin-bottom: 10px;
+            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 10px;
         }
 
-        #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: all 0.3s ease; }
-        #mainTitle { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;}
+        #btn-retour, #btn-aide { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 40px; height: 40px; border-radius: 50%; 
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
 
+        #mainTitle { 
+            text-align: center; font-weight: 800; font-size: 1.1rem; 
+            letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;
+        }
+
+        /* Layout Grid */
         .columns-container { 
-            column-count: 2;
-            column-gap: 12px;
-            width: 100%; 
-            max-width: 600px; 
-            margin: 0 auto; 
+            column-count: 2; column-gap: 12px; width: 100%; 
+            max-width: 600px; margin: 0 auto;
         }
 
+        @media (min-width: 640px) {
+            .columns-container { max-width: 95%; }
+        }
+
+        /* Level Groups */
         .level-group { 
-            break-inside: avoid;
-            margin-bottom: 20px; 
-            display: inline-block;
-            width: 100%;
+            break-inside: avoid; margin-bottom: 20px; 
+            display: inline-block; width: 100%;
         }
 
+        .level-title { 
+            color: var(--text-main); font-size: 0.6875rem; font-weight: 900; 
+            text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin-bottom: 0.5rem;
+        }
+
+        /* Student Items */
         .student-item { 
-            background-color: var(--card-student); 
-            padding: 6px 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            cursor: pointer; 
-            border-radius: 50px; 
-            margin-bottom: 4px; 
-            transition: all 0.1s;
-            border: 1.5px solid transparent;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-width: 0;
+            background-color: var(--card-student); padding: 6px 12px; display: flex; 
+            justify-content: space-between; align-items: center; cursor: pointer; 
+            border-radius: 50px; margin-bottom: 4px; transition: all 0.1s;
+            border: 1.5px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 0; -webkit-tap-highlight-color: transparent; user-select: none;
         }
 
-        body.light-mode .student-item, html.light-mode-init .student-item { border-color: #e5e7eb; }
+        body.light-mode .student-item, html.light-mode-init .student-item { 
+            border-color: #e5e7eb;
+        }
 
-        .text-girl { color: var(--student-name-girl); } 
-        .text-boy { color: var(--student-name-boy); } 
-        
+        .student-item:hover { transform: translateY(-1px); }
+
         .student-name { 
-            font-weight: 800; 
-            font-size: 0.7rem; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
-            flex: 1; 
-            min-width: 0;
-        }
-        
-        .status-icon { 
-            font-size: 0.65rem; 
-            opacity: 0.8; 
-            margin-left: 5px; 
-            flex-shrink: 0;
+            font-weight: 800; font-size: 0.7rem; overflow: hidden; 
+            text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;
         }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
-        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 92%; max-width: 400px; border: 1px solid #333; }
-        textarea { width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; border: 1px solid #333; font-size: 0.85rem; background: #000; color: #fff; outline: none; resize: none; }
-        .btns { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 10px; }
-        .btn-save { background: var(--primary); color: white; }
+        .status-icon { 
+            font-size: 0.65rem; opacity: 0.8; margin-left: 5px; flex-shrink: 0;
+        }
+
+        .text-girl { color: var(--student-name-girl); }
+        .text-boy { color: var(--student-name-boy); }
+
+        /* Navigation */
+        .bottom-nav { 
+            width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px;
+        }
+
+        .nav-btn { 
+            font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; 
+            border: none; flex: 1; display: flex; align-items: center; justify-content: center; 
+            gap: 5px; cursor: pointer; transition: all 0.2s;
+        }
+
+        .nav-btn:active { transform: scale(0.95); }
+
+        /* Modals */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
+            align-items: center; justify-content: center; z-index: 1000; 
+            backdrop-filter: blur(4px); padding: 20px;
+        }
+
+        .modal-content { 
+            background: var(--card-student); padding: 20px; border-radius: 20px; 
+            width: 100%; max-width: 400px; border: 1px solid var(--header-border);
+        }
+
+        .modal-title { 
+            margin: 0; font-size: 1.1rem; font-weight: 800; 
+            color: var(--text-main); margin-bottom: 12px;
+        }
+
+        textarea { 
+            width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; 
+            border: 1px solid var(--header-border); font-size: 0.85rem; 
+            background: var(--card-student); color: var(--text-main); 
+            outline: none; resize: none; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus { border-color: var(--primary); }
+
+        body.light-mode textarea { background: #f3f4f6; }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
+
+        .modal-btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 50px; 
+            font-weight: 900; cursor: pointer; text-transform: uppercase; 
+            font-size: 10px; transition: all 0.2s;
+        }
+
+        .btn-save { color: white; }
         .btn-cancel { background: #333; color: #ccc; }
 
-        #modal-aide .modal-card { background-color: var(--card-student); border: 1px solid var(--header-border); }
-        #aide-content h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; }
-        #aide-content p, #aide-content li { font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); margin-bottom: 8px; }
+        /* Help Modal */
+        #modal-aide .modal-card { 
+            background-color: var(--card-student); border: 1px solid var(--header-border);
+        }
 
-        body.light-mode .modal-content, body.light-mode #modal-aide .modal-card { background: #ffffff; border-color: #d1d5db; }
-        body.light-mode textarea { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+        #aide-content h3 { 
+            font-weight: 900; text-transform: uppercase; font-size: 0.8rem; 
+            margin-bottom: 10px; margin-top: 0;
+        }
 
-        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .alert-content { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 350px; color: #111; }
-        .btn-alert { flex: 1; padding: 14px; border-radius: 15px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
+        #aide-content p, #aide-content li { 
+            font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); 
+            margin-bottom: 8px; margin: 0 0 8px 0;
+        }
 
-        .bottom-nav { width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px; }
-        .nav-btn { font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; border: none; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
-		
-		@keyframes blink-point {
-			0% { transform: scale(0.9); opacity: 0.5; }
-			50% { transform: scale(1.2); opacity: 1; }
-			100% { transform: scale(0.9); opacity: 0.5; }
-		}
-		.mini-pastille {
-			display: inline-block;
-			width: 8px;
-			height: 8px;
-			background-color: #f97316;
-			border-radius: 50%;
-			margin-left: 4px;
-			margin-right: 2px;
-			box-shadow: 0 0 5px #f97316;
-			animation: blink-point 1.5s infinite;
-		}
-		
+        /* Alert Modal */
+        .alert-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            align-items: center; justify-content: center; z-index: 2000; padding: 20px;
+        }
+
+        .alert-content { 
+            background: white; padding: 25px; border-radius: 24px; 
+            width: 100%; max-width: 350px; color: #111;
+        }
+
+        .alert-title { 
+            font-size: 1rem; font-weight: 900; text-transform: uppercase; 
+            text-align: center; margin-bottom: 1rem; margin: 0 0 1rem 0;
+        }
+
+        .alert-text { 
+            font-size: 0.875rem; font-weight: 600; text-align: center; 
+            color: #4b5563; margin-bottom: 1.5rem; margin: 0 0 1.5rem 0;
+        }
+
+        .alert-btns { display: flex; gap: 0.5rem; }
+
+        .btn-alert { 
+            flex: 1; padding: 14px; border-radius: 15px; font-weight: 900; 
+            font-size: 11px; text-transform: uppercase; cursor: pointer; 
+            border: none; transition: all 0.2s;
+        }
+
+        .btn-alert:active { transform: scale(0.95); }
+
+        /* Animations */
+        @keyframes blink-point {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+
+        .mini-pastille {
+            display: inline-block; width: 8px; height: 8px; 
+            background-color: #f97316; border-radius: 50%; margin-left: 4px; 
+            margin-right: 2px; box-shadow: 0 0 5px #f97316; 
+            animation: blink-point 1.5s infinite;
+        }
+
+        .badge-pulse { animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ====================== HEADER ====================== -->
     <header>
         <a href="index.html" id="btn-retour">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,8 +242,10 @@
         <button id="btn-aide" onclick="ouvrirAide()" style="font-size: 1.2rem;">💡</button>
     </header>
 
+    <!-- ====================== MAIN CONTENT ====================== -->
     <div id="listeContainer" class="columns-container"></div>
 
+    <!-- ====================== FOOTER NAVIGATION ====================== -->
     <footer class="bottom-nav flex flex-col gap-3 px-2">
         <div class="flex gap-2">
             <label class="nav-btn bg-neutral-800 text-white cursor-pointer text-center">
@@ -193,21 +256,23 @@
                 👆exporter .txt👆
                 <span id="badge-export" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border-2 border-white"></span>
             </button>
-            <button onclick="genererPDF()" class="nav-btn bg-neutral-800 text-white ">📄 récapitulatif PDF</button>
+            <button onclick="genererPDF()" class="nav-btn bg-neutral-800 text-white">📄 récapitulatif PDF</button>
         </div>
         <button onclick="toutEffacer()" class="nav-btn bg-red-500 text-red-100 shadow-lg">⚠️ effacer les données</button>
     </footer>
 
+    <!-- ====================== COMMENT MODAL ====================== -->
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
-            <h2 id="modalTitle" style="margin:0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);">Élève</h2>
+            <h2 class="modal-title" id="modalTitle">Élève</h2>
             <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
-            <div class="btns">
+            <div class="modal-btns">
                 <button class="modal-btn btn-save" onclick="saveData()">Enregistrer</button>
             </div>
         </div>
     </div>
 
+    <!-- ====================== HELP MODAL ====================== -->
     <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6" onclick="fermerAide()">
         <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl" onclick="event.stopPropagation()">
             <div id="aide-content"></div>
@@ -217,11 +282,12 @@
         </div>
     </div>
 
+    <!-- ====================== ALERT MODAL ====================== -->
     <div id="alertModal" class="alert-overlay">
         <div class="alert-content">
-            <h3 id="alertTitle" class="text-lg font-black uppercase text-center mb-2" style="color:#000">Confirmation</h3>
-            <p id="alertText" class="text-sm font-semibold text-center text-gray-600 mb-6">Message</p>
-            <div class="alert-btns flex gap-2">
+            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
+            <p id="alertText" class="alert-text">Message</p>
+            <div class="alert-btns">
                 <button id="alertCancelBtn" class="btn-alert bg-gray-100 text-gray-500" onclick="closeAlert()">Annuler</button>
                 <button id="alertConfirmBtn" class="btn-alert text-white">Confirmer</button>
             </div>
@@ -229,174 +295,287 @@
     </div>
 
     <script>
-        let elevesInscrits = JSON.parse(localStorage.getItem('maListeEleves')) || [];
-        let savedComments = JSON.parse(localStorage.getItem('studentObservations')) || {};
+        // ====================== CONFIGURATION & CONSTANTS ====================== 
+        const COLOR_MAP = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e'
+        };
+
+        const LEVEL_COLORS = {
+            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
+            'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6'
+        };
+
+        const LEVEL_ORDER = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
+
+        const STORAGE_KEYS = {
+            students: 'maListeEleves',
+            observations: 'studentObservations',
+            theme: 'theme_tuiles',
+            themeMode: 'theme_mode',
+            needsExport: 'needsExport_obs',
+            lastExport: 'last_export_obs',
+            teacherName: 'nom_enseignant'
+        };
+
+        const EXPORT_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
+        const LINE_BREAK_MARKER = '[BR]';
+
+        let inscribedStudents = JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || [];
+        let savedObservations = JSON.parse(localStorage.getItem(STORAGE_KEYS.observations)) || {};
         let currentStudentId = "";
         let currentStudentName = "";
 
-        const ordreNiveaux = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
-        const couleurParNiveau = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
-        const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
+        // ====================== UTILITY FUNCTIONS ====================== 
+        function formatName(fullName) {
+            if (!fullName) return "";
+            const parts = fullName.trim().split(' ');
+            const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+            const last = parts.slice(1).join(' ').toUpperCase();
+            return (first + ' ' + last).trim();
+        }
 
+        function getNormalizedLevel(student) {
+            return student.nivel.toString().toUpperCase();
+        }
+
+        function getGenderClass(student) {
+            return student.sexe.toLowerCase().startsWith('f') ? 'text-girl' : 'text-boy';
+        }
+
+        function hasObservation(studentName) {
+            return savedObservations[studentName] && savedObservations[studentName].trim().length > 0;
+        }
+
+        function getStatusIcon(studentName) {
+            return hasObservation(studentName) ? '🔎' : '＋';
+        }
+
+        // ====================== EXPORT BADGE MANAGEMENT ====================== 
         function updateExportBadge(needsExport) {
             const badge = document.getElementById('badge-export');
             if (needsExport) {
                 badge.classList.remove('hidden');
-                localStorage.setItem('needsExport_obs', 'true');
+                localStorage.setItem(STORAGE_KEYS.needsExport, 'true');
             } else {
                 badge.classList.add('hidden');
-                localStorage.removeItem('needsExport_obs');
-                localStorage.setItem('last_export_obs', Date.now());
+                localStorage.removeItem(STORAGE_KEYS.needsExport);
+                localStorage.setItem(STORAGE_KEYS.lastExport, Date.now());
             }
         }
 
         function checkBadgeStatus() {
-            const lastExport = localStorage.getItem('last_export_obs');
-            const needsExport = localStorage.getItem('needsExport_obs') === 'true';
-            
+            const lastExport = localStorage.getItem(STORAGE_KEYS.lastExport);
+            const needsExport = localStorage.getItem(STORAGE_KEYS.needsExport) === 'true';
+
             if (needsExport) {
                 updateExportBadge(true);
                 return;
             }
 
             if (lastExport) {
-                const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-                if (Date.now() - parseInt(lastExport) > sevenDaysInMs) {
+                if (Date.now() - parseInt(lastExport) > EXPORT_INTERVAL) {
                     updateExportBadge(true);
                 }
             } else {
-                localStorage.setItem('last_export_obs', Date.now());
+                localStorage.setItem(STORAGE_KEYS.lastExport, Date.now());
             }
         }
 
-        function appliquerTheme() {
-            const savedMode = localStorage.getItem('theme_mode');
+        // ====================== THEME APPLICATION ====================== 
+        function applyTheme() {
+            const savedMode = localStorage.getItem(STORAGE_KEYS.themeMode);
             const isLight = savedMode === 'light';
             document.body.classList.toggle('light-mode', isLight);
 
-            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const nomCouleur = prefs['obs'] || 'green';
-            const couleurHexa = mapCouleurs[nomCouleur] || '#22c55e';
-            
-            if (prefs.fille && mapCouleurs[prefs.fille]) {
-                document.documentElement.style.setProperty('--student-name-girl', mapCouleurs[prefs.fille]);
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorName = prefs['obs'] || 'green';
+            const colorHex = COLOR_MAP[colorName] || '#22c55e';
+
+            // Apply sex colors
+            if (prefs.fille && COLOR_MAP[prefs.fille]) {
+                document.documentElement.style.setProperty('--student-name-girl', COLOR_MAP[prefs.fille]);
             }
-            if (prefs.garcon && mapCouleurs[prefs.garcon]) {
-                document.documentElement.style.setProperty('--student-name-boy', mapCouleurs[prefs.garcon]);
+            if (prefs.garcon && COLOR_MAP[prefs.garcon]) {
+                document.documentElement.style.setProperty('--student-name-boy', COLOR_MAP[prefs.garcon]);
             }
 
-            const mainTitle = document.getElementById('mainTitle');
-            const btnRetour = document.getElementById('btn-retour');
-            const btnAide = document.getElementById('btn-aide');
-            const btnSave = document.querySelector('.btn-save');
-            const btnFermerAide = document.getElementById('btn-fermer-aide');
+            document.getElementById('mainTitle').style.color = isLight ? '#000000' : '#ffffff';
 
-            if(mainTitle) mainTitle.style.color = isLight ? '#000000' : '#ffffff';
-            const isLightColor = ['yellow', 'lime', 'amber', 'cyan'].includes(nomCouleur);
-            const textColor = isLightColor ? 'black' : 'white';
+            const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
+            const textColor = isDarkText ? 'black' : 'white';
 
-            [btnRetour, btnAide, btnSave, btnFermerAide].forEach(el => {
-                if(el) {
-                    el.style.backgroundColor = couleurHexa;
+            const themeButtons = [
+                document.getElementById('btn-retour'),
+                document.getElementById('btn-aide'),
+                document.querySelector('.btn-save'),
+                document.getElementById('btn-fermer-aide')
+            ];
+
+            themeButtons.forEach(el => {
+                if (el) {
+                    el.style.backgroundColor = colorHex;
                     el.style.color = textColor;
                     const svg = el.querySelector('svg');
-                    if(svg) svg.style.color = textColor;
+                    if (svg) svg.style.color = textColor;
                 }
             });
-            document.documentElement.style.setProperty('--primary', couleurHexa);
+
+            document.documentElement.style.setProperty('--primary', colorHex);
         }
 
-        function formatName(str) {
-            if(!str) return "";
-            const parts = str.trim().split(' ');
-            const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-            const last = parts.slice(1).join(' ').toUpperCase();
-            return (first + ' ' + last).trim();
-        }
-
-        function renderList() {
+        // ====================== RENDERING ====================== 
+        function renderStudentList() {
             const container = document.getElementById('listeContainer');
             container.innerHTML = "";
-            if (elevesInscrits.length === 0) {
+
+            if (inscribedStudents.length === 0) {
                 container.innerHTML = `<div class="text-center p-10 text-neutral-500 text-[10px] font-bold uppercase w-full" style="column-span: all;">Aucun élève inscrit.</div>`;
                 return;
             }
-            const groupes = {};
-            elevesInscrits.forEach(el => {
-                const niv = el.niveau.toUpperCase();
-                if (!groupes[niv]) groupes[niv] = [];
-                groupes[niv].push(el);
+
+            const groups = {};
+            inscribedStudents.forEach(student => {
+                const level = student.niveau.toUpperCase();
+                if (!groups[level]) groups[level] = [];
+                groups[level].push(student);
             });
-            const niveauxPresents = Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b));
-            
-            if (niveauxPresents.length === 2) {
+
+            const levelOrder = Object.keys(groups).sort((a, b) =>
+                LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b)
+            );
+
+            if (levelOrder.length === 2) {
                 container.className = "grid grid-cols-2 gap-3 w-full max-w-[600px] mx-auto";
             } else {
                 container.className = "columns-container";
             }
 
-            niveauxPresents.forEach(niv => {
+            levelOrder.forEach(level => {
                 const levelWrapper = document.createElement('div');
-                levelWrapper.className = niveauxPresents.length === 2 ? "w-full" : "level-group";
-                
-                const colorTitle = couleurParNiveau[niv] || '#ffffff';
-                levelWrapper.innerHTML = `<h2 style="color:${colorTitle}" class="text-[11px] font-black uppercase tracking-widest text-center mb-2">${niv}</h2>`;
+                levelWrapper.className = levelOrder.length === 2 ? "w-full" : "level-group";
+
+                const levelColor = LEVEL_COLORS[level] || '#ffffff';
+                const levelTitle = document.createElement('h2');
+                levelTitle.className = "level-title";
+                levelTitle.style.color = levelColor;
+                levelTitle.innerText = level;
+                levelWrapper.appendChild(levelTitle);
+
                 const list = document.createElement('div');
-                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
-                    const genderClass = (el.sexe.toLowerCase().startsWith('f')) ? 'text-girl' : 'text-boy';
-                    const item = document.createElement('div');
-                    item.className = `student-item no-select ${genderClass}`;
-                    
-                    const noteText = savedComments[el.identite] || "";
-                    const hasNote = noteText.trim().length > 0;
-                    
-                    item.innerHTML = `<span class="student-name">${formatName(el.identite)}</span><span class="status-icon">${hasNote ? '🔎' : '＋'}</span>`;
-                    item.onclick = () => openCommentModal(el);
-                    list.appendChild(item);
-                });
+                groups[level]
+                    .sort((a, b) => a.identite.localeCompare(b.identite))
+                    .forEach(student => {
+                        const item = document.createElement('div');
+                        item.className = `student-item ${getGenderClass(student)}`;
+                        item.innerHTML = `<span class="student-name">${formatName(student.identite)}</span><span class="status-icon">${getStatusIcon(student.identite)}</span>`;
+                        item.onclick = () => openCommentModal(student);
+                        list.appendChild(item);
+                    });
+
                 levelWrapper.appendChild(list);
                 container.appendChild(levelWrapper);
             });
         }
 
-        function openCommentModal(el) {
-            currentStudentId = el.id;
-            currentStudentName = el.identite;
-            document.getElementById('modalTitle').innerText = formatName(el.identite);
-            document.getElementById('commentInput').value = savedComments[el.identite] || "";
+        // ====================== MODAL MANAGEMENT ====================== 
+        function openCommentModal(student) {
+            currentStudentId = student.id;
+            currentStudentName = student.identite;
+            document.getElementById('modalTitle').innerText = formatName(student.identite);
+            document.getElementById('commentInput').value = savedObservations[student.identite] || "";
             document.getElementById('modal').style.display = 'flex';
             setTimeout(() => document.getElementById('commentInput').focus(), 100);
         }
 
-        function closeAllModals() { 
-            // La fermeture ne se fait plus que via saveData()
-            document.getElementById('modal').style.display = 'none'; 
+        function closeAllModals() {
+            document.getElementById('modal').style.display = 'none';
         }
 
         function saveData() {
-            const val = document.getElementById('commentInput').value;
-            if(val.trim() === "") {
-                delete savedComments[currentStudentName];
+            const value = document.getElementById('commentInput').value;
+            if (value.trim() === "") {
+                delete savedObservations[currentStudentName];
             } else {
-                savedComments[currentStudentName] = val;
+                savedObservations[currentStudentName] = value;
             }
-            localStorage.setItem('studentObservations', JSON.stringify(savedComments));
+            localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
             updateExportBadge(true);
-            renderList(); 
-            closeAllModals(); // Seule manière de fermer la modale
+            renderStudentList();
+            closeAllModals();
         }
 
-        function toutEffacer() {
-            showAlert("Tout effacer ?", "Supprimer toutes les observations ?", () => {
-                savedComments = {};
-                localStorage.setItem('studentObservations', JSON.stringify(savedComments));
-                updateExportBadge(true);
-                renderList();
-            });
+        // ====================== EXPORT/IMPORT ====================== 
+        function exportToFile() {
+            if (Object.keys(savedObservations).length === 0) {
+                showAlert("Vide", "Il n'y a aucune observation à exporter.", null, false);
+                return;
+            }
+
+            const content = Object.entries(savedObservations)
+                .map(([name, obs]) => `${name};${obs.replace(/\n/g, LINE_BREAK_MARKER)}`)
+                .join("\n");
+
+            const fileName = `outilsprofs_observations_${new Date().toISOString().split('T')[0]}.txt`;
+
+            if (window.Android && typeof window.Android.exportTxt === "function") {
+                window.Android.exportTxt(content, fileName);
+            } else {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }
+
+            updateExportBadge(false);
         }
-        
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const lines = event.target.result.split(/\r?\n/);
+                    const newObservations = {};
+
+                    lines.forEach(line => {
+                        const parts = line.split(";");
+                        if (parts.length >= 2) {
+                            const name = parts[0];
+                            const obs = parts.slice(1).join(";").replace(/\[BR\]/g, "\n");
+                            newObservations[name] = obs;
+                        }
+                    });
+
+                    if (Object.keys(newObservations).length > 0) {
+                        showAlert("Importer ?", "Fusionner avec les données existantes ?", () => {
+                            savedObservations = { ...savedObservations, ...newObservations };
+                            localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
+                            updateExportBadge(false);
+                            renderStudentList();
+                        });
+                    }
+                } catch (err) {
+                    showAlert("Erreur", "Fichier invalide.", null, false);
+                }
+            };
+            reader.readAsText(file);
+            this.value = "";
+        });
+
+        // ====================== PDF GENERATION ====================== 
         async function genererPDF() {
-            if (Object.keys(savedComments).length === 0) {
+            if (Object.keys(savedObservations).length === 0) {
                 showAlert("Vide", "Aucune observation à inclure.", null, false);
                 return;
             }
@@ -406,11 +585,10 @@
                 return;
             }
 
-            const profNom = localStorage.getItem('nom_enseignant') || "Enseignant";
+            const teacherName = localStorage.getItem(STORAGE_KEYS.teacherName) || "Enseignant";
             const dateStr = new Date().toLocaleDateString('fr-FR');
             const fileName = `observations_${new Date().toISOString().split('T')[0]}.pdf`;
-            
-            // Création de l'élément invisible pour le rendu
+
             const element = document.createElement('div');
             element.style.padding = '20px';
             element.style.color = 'black';
@@ -420,28 +598,32 @@
             let html = `
                 <div style="text-align:center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px;">
                     <h1 style="font-size:18px; margin:0;">OBSERVATIONS DES ÉLÈVES</h1>
-                    <p style="margin:5px 0;">${profNom} - ${dateStr}</p>
+                    <p style="margin:5px 0;">${teacherName} - ${dateStr}</p>
                 </div>`;
 
-            const groupes = {};
-            elevesInscrits.forEach(el => {
-                const niv = el.niveau.toUpperCase();
-                if (savedComments[el.identite]) {
-                    if (!groupes[niv]) groupes[niv] = [];
-                    groupes[niv].push(el);
+            const groups = {};
+            inscribedStudents.forEach(student => {
+                const level = student.niveau.toUpperCase();
+                if (savedObservations[student.identite]) {
+                    if (!groups[level]) groups[level] = [];
+                    groups[level].push(student);
                 }
             });
 
-            Object.keys(groupes).sort((a, b) => ordreNiveaux.indexOf(a) - ordreNiveaux.indexOf(b)).forEach(niv => {
-                html += `<h2 style="background:#f0f0f0; padding:8px; font-size:14px; margin-top:15px; border-left:4px solid #333;">${niv}</h2>`;
-                groupes[niv].sort((a,b) => a.identite.localeCompare(b.identite)).forEach(el => {
-                    html += `
-                        <div style="margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:5px; page-break-inside:avoid;">
-                            <b style="font-size:12px;">${formatName(el.identite)}</b><br>
-                            <p style="font-size:11px; margin:4px 0; white-space:pre-wrap;">${savedComments[el.identite]}</p>
-                        </div>`;
+            Object.keys(groups)
+                .sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b))
+                .forEach(level => {
+                    html += `<h2 style="background:#f0f0f0; padding:8px; font-size:14px; margin-top:15px; border-left:4px solid #333;">${level}</h2>`;
+                    groups[level]
+                        .sort((a, b) => a.identite.localeCompare(b.identite))
+                        .forEach(student => {
+                            html += `
+                                <div style="margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:5px; page-break-inside:avoid;">
+                                    <b style="font-size:12px;">${formatName(student.identite)}</b><br>
+                                    <p style="font-size:11px; margin:4px 0; white-space:pre-wrap;">${savedObservations[student.identite]}</p>
+                                </div>`;
+                        });
                 });
-            });
 
             element.innerHTML = html;
 
@@ -453,7 +635,6 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // LOGIQUE D'EXPORTATION ANDROID
             if (window.Android && window.Android.savePdfFromBase64) {
                 html2pdf().set(opt).from(element).output('datauristring').then((pdfBase64) => {
                     const base64Clean = pdfBase64.split(',')[1];
@@ -462,115 +643,76 @@
                     alert("Erreur PDF : " + err);
                 });
             } else {
-                // Mode PC
                 html2pdf().set(opt).from(element).save();
             }
         }
-        
-        function exportToFile() {
-            if (Object.keys(savedComments).length === 0) {
-                showAlert("Vide", "Il n'y a aucune observation à exporter.", null, false);
-                return;
-            }
 
-            // 1. Préparation du contenu
-            let contenu = Object.entries(savedComments)
-                .map(([nom, obs]) => `${nom};${obs.replace(/\n/g, '[BR]')}`)
-                .join("\n");
-            
-            const nomFichier = `outilsprofs_observations_${new Date().toISOString().split('T')[0]}.txt`;
-
-            // 2. VÉRIFICATION INTERFACE ANDROID
-            if (window.Android && typeof window.Android.exportTxt === "function") {
-                // Envoi à l'application Android
-                window.Android.exportTxt(contenu, nomFichier);
-            } else {
-                // Mode navigateur classique (PC)
-                const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = nomFichier; 
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }
-
-            // 3. Mise à jour de la pastille
-            updateExportBadge(false);
+        // ====================== DELETE DATA ====================== 
+        function toutEffacer() {
+            showAlert("Tout effacer ?", "Supprimer toutes les observations ?", () => {
+                savedObservations = {};
+                localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
+                updateExportBadge(true);
+                renderStudentList();
+            });
         }
 
-        document.getElementById('importFile').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const lignes = event.target.result.split(/\r?\n/);
-                    const nouveauxComments = {};
-                    
-                    lignes.forEach(l => {
-                        const parts = l.split(";");
-                        if (parts.length >= 2) {
-                            const nom = parts[0];
-                            const obs = parts.slice(1).join(";").replace(/\[BR\]/g, "\n");
-                            nouveauxComments[nom] = obs;
-                        }
-                    });
-
-                    if (Object.keys(nouveauxComments).length > 0) {
-                        showAlert("Importer ?", "Fusionner avec les données existantes ?", () => {
-                            savedComments = { ...savedComments, ...nouveauxComments };
-                            localStorage.setItem('studentObservations', JSON.stringify(savedComments));
-                            updateExportBadge(false);
-                            renderList();
-                        });
-                    }
-                } catch (err) { showAlert("Erreur", "Fichier invalide.", null, false); }
-            };
-            if(e.target.files[0]) reader.readAsText(e.target.files[0]);
-            this.value = "";
-        });
-
+        // ====================== HELP MODAL ====================== 
         function ouvrirAide() {
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[prefs.obs] || '#22c55e';
+
             const display = document.getElementById('aide-content');
-            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const couleurObs = mapCouleurs[prefs.obs] || '#22c55e';
             display.innerHTML = `
-                <h3 style="color:${couleurObs}">💡 Observations</h3>
+                <h3 style="color:${colorHex}">💡 Observations</h3>
                 <p>Gérez ici les remarques liées à vos élèves.</p>
                 <ul class="space-y-2">
                     <li>• <strong>Icone 🔎 :</strong> Indique qu'une note est enregistrée.</li>
                     <li>• <strong>Icone ＋ :</strong> Aucune note pour cet élève.</li>
                     <li>• <strong>Portabilité :</strong> L'export et l'import se basent sur le NOM et le PRÉNOM. Vous pouvez transférer vos notes d'un appareil à l'autre sans problème.</li>
-					<li><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".</li>
-                 </ul>`;
+                    <li><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".</li>
+                </ul>`;
             document.getElementById('modal-aide').style.display = 'flex';
         }
-        function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
 
+        function fermerAide() {
+            document.getElementById('modal-aide').style.display = 'none';
+        }
+
+        // ====================== ALERT MANAGEMENT ====================== 
         function showAlert(title, text, onConfirm, showCancel = true) {
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertText').innerText = text;
+
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[prefs.obs || 'green'] || '#22c55e';
+
             const confirmBtn = document.getElementById('alertConfirmBtn');
             const cancelBtn = document.getElementById('alertCancelBtn');
-            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-            const colorHex = mapCouleurs[themePrefs.obs || 'green'] || '#22c55e';
+
             confirmBtn.style.backgroundColor = colorHex;
             cancelBtn.style.display = showCancel ? 'block' : 'none';
+
             const newBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-            newBtn.onclick = () => { closeAlert(); if(onConfirm) onConfirm(); };
+            newBtn.onclick = () => {
+                closeAlert();
+                if (onConfirm) onConfirm();
+            };
+
             document.getElementById('alertModal').style.display = 'flex';
         }
-        function closeAlert() { document.getElementById('alertModal').style.display = 'none'; }
 
-        window.onload = () => { 
-            appliquerTheme(); 
-            renderList(); 
+        function closeAlert() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        // ====================== INITIALIZATION ====================== 
+        window.onload = () => {
+            applyTheme();
+            renderStudentList();
             checkBadgeStatus();
         };
-        
-        // Suppression du window.onclick global pour empêcher la fermeture au clic extérieur
     </script>
 </body>
 </html>
