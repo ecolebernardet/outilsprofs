@@ -186,47 +186,64 @@
     }
 
     async function genererPlanchePDF() {
-        const text = document.getElementById('qr-input').value;
-        const labelText = document.getElementById('qr-label').value;
-        const count = parseInt(document.getElementById('qr-count').value) || 1;
-        const sizeMm = parseInt(document.getElementById('qr-size').value) || 30;
-        if (!text) return alert("Veuillez saisir un lien ou un texte.");
+    const text = document.getElementById('qr-input').value;
+    const labelText = document.getElementById('qr-label').value;
+    const count = parseInt(document.getElementById('qr-count').value) || 1;
+    const sizeMm = parseInt(document.getElementById('qr-size').value) || 30;
+    
+    if (!text) return alert("Veuillez saisir un lien ou un texte.");
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const holder = document.getElementById('temp-qr-holder');
-        holder.innerHTML = '';
-        new QRCode(holder, { text: text, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.H });
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const holder = document.getElementById('temp-qr-holder');
+    holder.innerHTML = '';
+    
+    // Génération du QR Code
+    new QRCode(holder, { text: text, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.H });
 
-        setTimeout(() => {
-            const canvas = holder.querySelector('canvas');
-            const imgData = canvas.toDataURL("image/png");
-            const margin = 15;
-            const gap = 8;
-            let x = margin;
-            let y = margin;
+    setTimeout(() => {
+        const canvas = holder.querySelector('canvas');
+        const imgData = canvas.toDataURL("image/png");
+        const margin = 15;
+        const gap = 8;
+        let x = margin;
+        let y = margin;
 
-            for (let i = 0; i < count; i++) {
-                doc.addImage(imgData, 'PNG', x, y, sizeMm, sizeMm);
-                if (labelText) {
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(7);
-                    doc.text(labelText, x + (sizeMm / 2), y + sizeMm + 4, { align: "center", maxWidth: sizeMm });
-                }
-                x += sizeMm + gap;
-                if (x + sizeMm > 210 - margin) {
-                    x = margin;
-                    y += sizeMm + (labelText ? 12 : gap);
-                }
-                if (y + sizeMm > 297 - margin && i < count - 1) {
-                    doc.addPage();
-                    x = margin; y = margin;
-                }
+        for (let i = 0; i < count; i++) {
+            doc.addImage(imgData, 'PNG', x, y, sizeMm, sizeMm);
+            if (labelText) {
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(7);
+                doc.text(labelText, x + (sizeMm / 2), y + sizeMm + 4, { align: "center", maxWidth: sizeMm });
             }
-            const dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
-            doc.save(`outilsprofs_qrcodes_${dateStr}.pdf`);
-        }, 200);
-    }
+            x += sizeMm + gap;
+            if (x + sizeMm > 210 - margin) {
+                x = margin;
+                y += sizeMm + (labelText ? 12 : gap);
+            }
+            if (y + sizeMm > 297 - margin && i < count - 1) {
+                doc.addPage();
+                x = margin; y = margin;
+            }
+        }
+
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const fileName = `outilsprofs_qrcodes_${dateStr}.pdf`;
+
+        // --- ADAPTATION POUR ANDROID ---
+        if (window.Android && window.Android.savePdfFromBase64) {
+            // On génère le PDF en URI de données, puis on extrait le Base64 pur
+            const pdfDataUri = doc.output('datauristring');
+            const base64Content = pdfDataUri.split(',')[1];
+            
+            // Appel à la fonction Kotlin de votre MainActivity
+            window.Android.savePdfFromBase64(base64Content, fileName);
+        } else {
+            // Fallback pour navigateur PC classique
+            doc.save(fileName);
+        }
+    }, 200);
+}
 
     function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
     function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
