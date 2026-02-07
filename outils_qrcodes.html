@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>QR-Planche - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
+            --header-bg: #1e1e1e; --card-bg: #1e1e1e; --input-bg: #2a2a2a;
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
+            --header-bg: #ffffff; --card-bg: #ffffff; --input-bg: #f3f4f6;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        header { 
+            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            display: flex; align-items: center; justify-content: space-between; width: 100%;
+        }
+
+        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
+        header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
+        #container-retour-liste { width: 100%; max-width: 500px; margin: 0 auto 1.5rem auto; text-align: left; }
+        #btn-retour-liste {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
+            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
+            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        #btn-retour-liste:active { transform: scale(0.95); }
+
+        .bg-card { background: var(--card-bg); border: 1px solid var(--column-border); border-radius: 1.5rem; padding: 25px; width: 100%; max-width: 500px; }
+        .bg-input { background: var(--input-bg); color: var(--text-page); }
+
+        /* Modale */
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        .btn-modal-close { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
+
+        #qr-preview {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            background: white; padding: 15px; border-radius: 12px; margin-top: 15px;
+        }
+        .qr-item-preview { display: flex; flex-direction: column; align-items: center; }
+        .qr-item-preview canvas, .qr-item-preview img { width: 60px !important; height: 60px !important; }
+        .qr-label-preview { color: black; font-size: 8px; font-weight: bold; margin-top: 2px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" id="btn-retour">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+    <h1>QR-Planche</h1>
+    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+</header>
+
+<div class="main-content">
+    <div id="container-retour-liste">
+        <a href="outils.html" id="btn-retour-liste">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux outils
+        </a>
+    </div>
+
+    <div class="bg-card shadow-xl">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black uppercase opacity-50 mb-1 ml-1">Lien ou contenu</label>
+                <input type="text" id="qr-input" oninput="updatePreview()" placeholder="https://..." class="w-full p-4 rounded-2xl bg-input border-none focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase opacity-50 mb-1 ml-1">Légende (sous le code)</label>
+                <input type="text" id="qr-label" oninput="updatePreview()" placeholder="Ex: Vidéo Calcul P1" class="w-full p-4 rounded-2xl bg-input border-none focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase opacity-50 mb-1 ml-1">Nombre</label>
+                    <input type="number" id="qr-count" value="30" class="w-full p-4 rounded-2xl bg-input border-none outline-none text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase opacity-50 mb-1 ml-1">Taille (mm)</label>
+                    <input type="number" id="qr-size" value="30" class="w-full p-4 rounded-2xl bg-input border-none outline-none text-sm font-semibold">
+                </div>
+            </div>
+        </div>
+
+        <div id="qr-preview" class="hidden"></div>
+
+        <div class="mt-8">
+            <button onclick="genererPlanchePDF()" id="btn-main" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-transform">
+                Générer la planche PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : QR-Planche</h2>
+        <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
+            <p>Créez des planches de QR Codes identiques pour vos élèves :</p>
+            <p>1. Collez le <strong>lien</strong> (vidéo, leçon, audio).</p>
+            <p>2. Ajoutez une <strong>légende</strong> pour identifier le code après découpage.</p>
+            <p>3. Réglez le <strong>nombre</strong> de copies et la <strong>taille</strong>.</p>
+            <p>Le PDF généré place automatiquement les codes pour optimiser l'espace.</p>
+        </div>
+        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close" style="background: var(--theme-color); color: var(--contrast-color);">Fermer</button>
+    </div>
+</div>
+
+<div id="temp-qr-holder" style="display:none;"></div>
+
+<script>
+    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+
+    const mapCouleurs = { 
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 
+        'rose': '#f43f5e' 
+    };
+
+    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+    const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
+    const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
+    const contrast = isDarkText ? '#000' : '#fff';
+
+    document.documentElement.style.setProperty('--theme-color', themeColor);
+    document.documentElement.style.setProperty('--contrast-color', contrast);
+
+    // Thématique des éléments UI
+    const uiElements = {
+        retour: document.getElementById('btn-retour'),
+        aide: document.getElementById('btn-aide'),
+        fermer: document.getElementById('btn-fermer-aide'),
+        liste: document.getElementById('btn-retour-liste'),
+        main: document.getElementById('btn-main')
+    };
+
+    Object.values(uiElements).forEach(el => {
+        if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
+    });
+    document.getElementById('titre-aide').style.color = themeColor;
+
+    function updatePreview() {
+        const input = document.getElementById('qr-input').value;
+        const label = document.getElementById('qr-label').value;
+        const preview = document.getElementById('qr-preview');
+        if (!input) { preview.classList.add('hidden'); return; }
+        preview.classList.remove('hidden');
+        preview.innerHTML = '';
+        for(let i=0; i<3; i++) {
+            const div = document.createElement('div');
+            div.className = 'qr-item-preview';
+            const qrDiv = document.createElement('div');
+            new QRCode(qrDiv, { text: input, width: 128, height: 128 });
+            div.appendChild(qrDiv);
+            if(label) {
+                const span = document.createElement('span');
+                span.className = 'qr-label-preview';
+                span.innerText = label;
+                div.appendChild(span);
+            }
+            preview.appendChild(div);
+        }
+    }
+
+    async function genererPlanchePDF() {
+        const text = document.getElementById('qr-input').value;
+        const labelText = document.getElementById('qr-label').value;
+        const count = parseInt(document.getElementById('qr-count').value) || 1;
+        const sizeMm = parseInt(document.getElementById('qr-size').value) || 30;
+        if (!text) return alert("Veuillez saisir un lien ou un texte.");
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const holder = document.getElementById('temp-qr-holder');
+        holder.innerHTML = '';
+        new QRCode(holder, { text: text, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.H });
+
+        setTimeout(() => {
+            const canvas = holder.querySelector('canvas');
+            const imgData = canvas.toDataURL("image/png");
+            const margin = 15;
+            const gap = 8;
+            let x = margin;
+            let y = margin;
+
+            for (let i = 0; i < count; i++) {
+                doc.addImage(imgData, 'PNG', x, y, sizeMm, sizeMm);
+                if (labelText) {
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(7);
+                    doc.text(labelText, x + (sizeMm / 2), y + sizeMm + 4, { align: "center", maxWidth: sizeMm });
+                }
+                x += sizeMm + gap;
+                if (x + sizeMm > 210 - margin) {
+                    x = margin;
+                    y += sizeMm + (labelText ? 12 : gap);
+                }
+                if (y + sizeMm > 297 - margin && i < count - 1) {
+                    doc.addPage();
+                    x = margin; y = margin;
+                }
+            }
+            const dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
+            doc.save(`outilsprofs_qrcodes_${dateStr}.pdf`);
+        }, 200);
+    }
+
+    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+</script>
+</body>
+</html>
