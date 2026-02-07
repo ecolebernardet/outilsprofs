@@ -227,18 +227,21 @@
             position: relative;
             background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 20px 12px;
+            padding: 16px;
             border: 1px solid var(--column-border);
             box-shadow: var(--shadow-custom);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            text-align: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
             cursor: pointer;
             outline: 2px solid transparent;
             outline-offset: 2px;
+            width: 100%;
         }
 
         .tool-card:focus {
@@ -248,7 +251,10 @@
         @media (min-width: 768px) {
             .tool-card { 
                 padding: 20px; 
-                gap: 16px;
+                gap: 12px;
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
             }
             .tool-card:hover { 
                 transform: translateY(-4px); 
@@ -280,31 +286,14 @@
             }
         }
 
-        /* Drag Handle */
-        .drag-handle {
-            position: absolute;
-            top: 10px; 
-            right: 10px;
-            display: grid;
-            grid-template-columns: repeat(3, 2px);
-            gap: 2px;
-            cursor: grab;
-            opacity: 0.2;
-            transition: opacity 0.3s;
-            padding: 4px;
-        }
-
-        .drag-handle:active { cursor: grabbing; }
-
-        .drag-handle span {
-            width: 2px; height: 2px;
-            background-color: var(--text-page);
-            border-radius: 50%;
-        }
-
-        .tool-card:hover .drag-handle { opacity: 0.5; }
-
         /* Tool Info */
+        .tool-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
         .tool-info h2 { 
             font-size: 0.75rem;
             line-height: 1.2;
@@ -318,7 +307,7 @@
         .tool-info p { 
             font-size: 0.5625rem;
             opacity: 0.5;
-            margin: 4px 0 0 0;
+            margin: 0;
         }
 
         @media (min-width: 768px) {
@@ -677,11 +666,6 @@
                 });
 
                 card.innerHTML = `
-                    <div class="drag-handle" aria-hidden="true">
-                        <span></span><span></span><span></span>
-                        <span></span><span></span><span></span>
-                        <span></span><span></span><span></span>
-                    </div>
                     <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
                     <div class="tool-info">
                         <h3 class="font-black text-[12px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
@@ -713,8 +697,8 @@
             const searchTerm = e.target.value;
             clearBtn.classList.toggle('visible', searchTerm.length > 0);
             renderTools(searchTerm);
-            applyTheme(); // Reapply theme to new elements
-            setupCategoryDragDrop(); // Reinitialize drag & drop
+            applyTheme();
+            setupCategoryDragDrop();
         });
 
         clearBtn.addEventListener('click', () => {
