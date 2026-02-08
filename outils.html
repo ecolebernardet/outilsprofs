@@ -228,6 +228,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
+			width: 100%;
         }
 
         @media (min-width: 768px) {
@@ -257,7 +258,9 @@
             cursor: pointer;
             outline: 2px solid transparent;
             outline-offset: 2px;
-            width: 100%;
+            width: 100%; /* La tuile remplit sa cellule de grille */
+			min-width: 0; /* Important : permet à la tuile de ne pas déborder si le contenu est long */
+			overflow: hidden; /* Coupe ce qui dépasse au cas où */
         }
 
         .tool-card:focus {
