@@ -377,7 +377,7 @@
         }
 
         .modal-text {
-            font-size: 0.6875rem;
+            font-size: 0.65rem;
             line-height: 1.5;
             opacity: 0.8;
             font-weight: 600;
@@ -454,7 +454,7 @@
 <!-- ====================== HELP MODAL ====================== -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()" role="dialog" aria-modal="true">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="modal-title">💡 Aide</h2>
+        <h2 id="titre-aide" class="modal-title">💡 Outils</h2>
         <div id="aide-content" class="modal-text space-y-3"></div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close">Compris</button>
     </div>
@@ -612,23 +612,23 @@
 
     const HELP_CONTENT = [
         'Cette section regroupe des utilitaires classés par thématiques pour faciliter la gestion de votre classe :',
-        '<br><strong>🤫 AMBIANCE DE CLASSE</strong>',
-        '• <strong>Niveau Sonore</strong> : Pour réguler le volume sonore durant les ateliers.',
-        '• <strong>Défi calme</strong> : Encourage le silence pour faire apparaître une image mystère.',
-		'• <strong>Pause Calme</strong> : Des exercices de respiration pour apaiser le groupe.',
-        '• <strong>Feux tricolores</strong> : Indique visuellement le mode de travail autorisé.',
-		'<br><strong>🏫 ORGANISATION</strong>',
-        '• <strong>Plan de classe</strong> : Pour placer vos élèves et mémoriser les prénoms.',
-        '• <strong>Structure École</strong> : Pour simuler et équilibrer la répartition des effectifs.',
-        '• <strong>Éphéméride</strong> : La date, le saint du jour et un rituel matinal.',
-		'• <strong>Sondage Express</strong> : Recueillir l\'avis des élèves en temps réel.',
-		'• <strong>Minuteur et timer</strong> : Pour rythmer les séances, les activités et les transitions.',
-		'• <strong>Tirage</strong> : Décochez les élèves absents puis tirez un prénom d\'élève au hasard parmi les présents.',
-		'• <strong>Équipes</strong> : Décochez les élèves absents et générez des groupes mixtes et équilibrés par genre et par niveau automatiquement.',
-        '<br><strong>📜 ÉDITION & DOCUMENTS</strong>',
-        '• <strong>Module Édition</strong> : Génère vos listes, étiquettes et fiches de suivi en PDF.',
-        '• <strong>Mots aux familles</strong> : Crée des billets de liaison (Rdv, info) prêts à imprimer (10 par page).',
-        '• <strong>QR-Planches</strong> : Crée des séries de QR Codes identiques avec légendes pour vos documents.',
+        '<br><br><strong>🤫 AMBIANCE DE CLASSE</strong>',
+        '<br>• <strong>Niveau Sonore</strong> : Pour réguler le volume sonore durant les ateliers.',
+        '<br>• <strong>Défi calme</strong> : Encourage le silence pour faire apparaître une image mystère.',
+		'<br>• <strong>Pause Calme</strong> : Des exercices de respiration pour apaiser le groupe.',
+        '<br>• <strong>Feux tricolores</strong> : Indique visuellement le mode de travail autorisé.',
+		'<br><br><strong>🏫 ORGANISATION</strong>',
+        '<br>• <strong>Plan de classe</strong> : Pour placer vos élèves et mémoriser les prénoms.',
+        '<br>• <strong>Structure École</strong> : Pour simuler et équilibrer la répartition des effectifs.',
+        '<br>• <strong>Éphéméride</strong> : La date, le saint du jour et un rituel matinal.',
+		'<br>• <strong>Sondage Express</strong> : Recueillir l\'avis des élèves en temps réel.',
+		'<br>• <strong>Minuteur et timer</strong> : Pour rythmer les séances, les activités et les transitions.',
+		'<br>• <strong>Tirage</strong> : Décochez les élèves absents puis tirez un prénom d\'élève au hasard parmi les présents.',
+		'<br>• <strong>Équipes</strong> : Décochez les élèves absents et générez des groupes mixtes et équilibrés par genre et par niveau automatiquement.',
+        '<br><br><strong>📜 ÉDITION & DOCUMENTS</strong>',
+        '<br>• <strong>Module Édition</strong> : Génère vos listes, étiquettes et fiches de suivi en PDF.',
+        '<br>• <strong>Mots aux familles</strong> : Crée des billets de liaison (Rdv, info) prêts à imprimer (10 par page).',
+        '<br>• <strong>QR-Planches</strong> : Crée des séries de QR Codes identiques avec légendes pour vos documents.',
     ];
 
     // ====================== UTILITY FUNCTIONS ======================
@@ -730,10 +730,10 @@
                 card.innerHTML = `
                     <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
                     <div class="tool-info">
-                        <h3 class="font-black text-[10px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
+                        <h3 class="font-black text-[11px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
                             ${tool.title}
                         </h3>
-                        <p class="text-[9px] md:text-[12px] font-bold opacity-50 tracking-tighter">
+                        <p class="text-[10px] md:text-[12px] font-bold opacity-50 tracking-tighter">
                             ${tool.description}
                         </p>
                     </div>
@@ -890,7 +890,7 @@
     // ====================== MODAL MANAGEMENT ======================
     function ouvrirAide() {
         const content = document.getElementById('aide-content');
-        content.innerHTML = HELP_CONTENT.map(text => `<p>${text}</p>`).join('');
+        content.innerHTML = HELP_CONTENT.map(text => `${text}`).join('');
         document.getElementById('modal-aide').classList.add('active');
     }
 

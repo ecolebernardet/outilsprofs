@@ -377,7 +377,7 @@
 
         .modal-text { 
             font-size: 0.6875rem;
-            line-height: 1.5;
+            line-height: 1.7;
             opacity: 0.8;
             font-weight: 600;
         }
@@ -453,7 +453,7 @@
 <!-- ====================== HELP MODAL ====================== -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerAide()" role="dialog" aria-modal="true">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="modal-title">💡 Aide</h2>
+        <h2 id="titre-aide" class="modal-title">💡 Générateurs</h2>
         <div id="aide-content" class="modal-text space-y-3"></div>
         <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close">Compris</button>
     </div>
@@ -576,7 +576,7 @@
             id: 'repro',
             href: 'gene_repro_quadrillage.html',
             icon: '📐',
-            title: 'Repro',
+            title: 'Reproduction',
             description: 'reproduction dans un quadrillage',
             category: 'geometrie'
         },
@@ -591,18 +591,18 @@
     ];
 
     const HELP_CONTENT = [
-        'Cette section regroupe vos outils de création pédagogique.',
-        '🧮 Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.',
-        '📅 Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens.',
-        '🎯 Le <strong>Compte est Bon</strong> génère des tirages de nombres à atteindre avec des solutions garanties.',
-        '🔺 Le <strong>Générateur de Pyramides</strong> crée des défis de calcul basés sur la somme ou le produit de briques adjacentes.',
-        '➗ Le <strong>Générateur de Fractions</strong> crée des exercices de lecture, d\'écriture et de comparaison de fractions.',
-        '📐 Le <strong>Générateur de Reproduction</strong> permet de créer des grilles de reproduction de figures géométriques.',
-        '🀄 Le <strong>Générateur de Dominos</strong> crée des chaînes de calculs ou de révisions thématiques avec sens de lecture.',
-        '🔢 Le <strong>Générateur de Sudokus</strong> crée des grilles de logique de différents niveaux avec leurs corrections.',
-        '📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.',
-        '🎨 Le <strong>Générateur de Pixel Art</strong> permet de transformer des images en grilles à colorier.',
-        '❓ Le <strong>Générateur de Quizz</strong> permet de créer des séries de questions/réponses avec minuteur et export PDF/TXT.'
+        'Cette section regroupe vos générateurs d\'outils pédagogiques.',
+        '<br>🧮 Le <strong>Générateur de Calcul Mental</strong> vous permet de créer des fiches PDF ou de lancer des sessions chrono.',
+        '<br>📅 Le <strong>Rituel Opérations</strong> permet de configurer une semaine complète de calculs quotidiens.',
+        '<br>🎯 Le <strong>Compte est Bon</strong> génère des tirages de nombres à atteindre avec des solutions garanties.',
+        '<br>🔺 Le <strong>Générateur de Pyramides</strong> crée des défis de calcul basés sur la somme ou le produit de briques adjacentes.',
+        '<br>➗ Le <strong>Générateur de Fractions</strong> crée des exercices de lecture, d\'écriture et de comparaison de fractions.',
+        '<br>📐 Le <strong>Générateur de Reproduction</strong> permet de créer des grilles de reproduction de figures géométriques.',
+        '<br>🀄 Le <strong>Générateur de Dominos</strong> crée des chaînes de calculs ou de révisions thématiques avec sens de lecture.',
+        '<br>🔢 Le <strong>Générateur de Sudokus</strong> crée des grilles de logique de différents niveaux avec leurs corrections.',
+        '<br>📝 Le <strong>Générateur de mots mêlés</strong> crée des grilles personnalisées avec correction.',
+        '<br>🎨 Le <strong>Générateur de Pixel Art</strong> permet de transformer des images en grilles à colorier.',
+        '<br>❓ Le <strong>Générateur de Quizz</strong> permet de créer des séries de questions/réponses avec minuteur et export PDF/TXT.'
     ];
 
     // ====================== UTILITY FUNCTIONS ====================== 
@@ -704,10 +704,10 @@
                 card.innerHTML = `
                     <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
                     <div class="tool-info">
-                        <h3 class="font-black text-[10px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
+                        <h3 class="font-black text-[11px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">
                             ${tool.title}
                         </h3>
-                        <p class="text-[9px] md:text-[12px] font-bold opacity-50 tracking-tighter">
+                        <p class="text-[10px] md:text-[12px] font-bold opacity-50 tracking-tighter">
                             ${tool.description}
                         </p>
                     </div>
@@ -865,7 +865,7 @@ function setupSearch() {
     // ====================== MODAL MANAGEMENT ====================== 
     function ouvrirAide() {
         const content = document.getElementById('aide-content');
-        content.innerHTML = HELP_CONTENT.map(text => `<p>${text}</p>`).join('');
+        content.innerHTML = HELP_CONTENT.map(text => `${text}`).join('');
         document.getElementById('modal-aide').classList.add('active');
     }
 
