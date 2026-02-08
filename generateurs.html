@@ -137,12 +137,12 @@
             border-radius: 1.2rem;
             padding: 0 8px 8px 8px;
             background: rgba(128, 128, 128, 0.02);
-            border: 1px solid var(--column-border);
+            border: 0px solid var(--column-border);
             transition: all 0.3s ease;
         }
 
         .category-section:hover {
-            background: rgba(128, 128, 128, 0.04);
+            background: rgba(128, 128, 128, 0.1);
         }
 
         .category-section.sortable-ghost {
@@ -160,7 +160,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 4px;
-            padding: 0 8px 0px 8px;
+            padding: 0 0px 0px 0px;
             border-bottom: 2px solid var(--column-border);
             position: relative;
         }
@@ -172,8 +172,9 @@
             cursor: grab;
             opacity: 0.2;
             transition: opacity 0.3s;
-            padding: 4px 8px;
-            margin-right: 4px;
+            padding: 10px 4px;
+            margin-right: 0px;
+			order: 3;
             flex-shrink: 0;
         }
 
@@ -463,22 +464,22 @@
         calcul: {
             icon: '🧮',
             name: 'Calcul',
-            color: '#3b82f6'
+            color: '#000000'
         },
         logique: {
             icon: '🧩',
             name: 'Logique & Réflexion',
-            color: '#8b5cf6'
+            color: '#000000'
         },
         langage: {
             icon: '📝',
             name: 'Langage & Vocabulaire',
-            color: '#ec4899'
+            color: '#000000'
         },
         geometrie: {
             icon: '📐',
             name: 'Géométrie & Spatial',
-            color: '#f59e0b'
+            color: '#000000'
         }
     };
 
