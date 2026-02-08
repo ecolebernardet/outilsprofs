@@ -8,9 +8,22 @@
     <script>
         (function() {
             const mode = localStorage.getItem('theme_mode');
-            if (mode === 'light') {
-                document.documentElement.classList.add('light-mode-init');
-            }
+            const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const themeColorKey = themePrefs.outils || 'blue';
+            const colors = {
+                'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+                'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+                'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+                'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+                'rose': '#f43f5e', 'gray': '#6b7280'
+            };
+            const hex = colors[themeColorKey] || '#3b82f6';
+            const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(themeColorKey);
+            const contrast = isDarkText ? '#000000' : '#ffffff';
+
+            if (mode === 'light') document.documentElement.classList.add('light-mode-init');
+            document.documentElement.style.setProperty('--theme-color', hex);
+            document.documentElement.style.setProperty('--contrast-color', contrast);
         })();
     </script>
 
@@ -18,104 +31,39 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        
-        :root {
-            --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: #1e1e1e; --input-bg: #2a2a2a;
-        }
-
-        body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee; --text-page: #111827; --header-bg: #ffffff;
-            --header-border: #ddd; --border-color: #ddd; --card-bg: #ffffff;
-            --input-bg: #f3f4f6;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
-            padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
-        }
-
-        header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 12px;
-        }
-
+        :root { --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e; --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1); --card-bg: #1e1e1e; --input-bg: #2a2a2a; }
+        html.light-mode-init body, body.light-mode { --bg-page: #eeeeee; --text-page: #111827; --header-bg: #ffffff; --header-border: #ddd; --border-color: #ddd; --card-bg: #ffffff; --input-bg: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-left: 15px; padding-right: 15px; padding-bottom: 20px; }
+        header { background: var(--header-bg); border-bottom: 1px solid var(--header-border); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; width: calc(100% + 30px); margin-left: -15px; margin-bottom: 12px; }
         .container { width: 100%; max-width: 600px; padding: 0 4px; flex-grow: 1; display: flex; flex-direction: column; }
-
-        #btn-retour, #btn-aide { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-        }
-
-        #btn-retour-liste {
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
-            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
-            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-
-        .breathe-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 300px; margin: 20px 0;
-        }
-
-        .breathe-circle {
-            width: 180px; height: 180px; border-radius: 50%;
-            background: var(--theme-color); opacity: 0.7;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; transition: transform 0.1s ease-in-out;
-            box-shadow: 0 0 40px -10px var(--theme-color);
-        }
-
-        .breathe-text { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; pointer-events: none; }
-
-        .config-panel {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 1.5rem; padding: 20px; width: 100%; margin-top: 20px;
-        }
-
+        #btn-retour, #btn-aide, #btn-fermer-aide, #btnActionMain, #btn-retour-liste { background-color: var(--theme-color); color: var(--contrast-color); }
+        #btn-retour, #btn-aide { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
+        #btn-retour-liste { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        #pageTitle, #session-title { color: var(--theme-color); }
+        .breathe-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; margin: 20px 0; }
+        .breathe-circle { width: 250px; height: 250px; border-radius: 50%; background: var(--theme-color); opacity: 0.7; display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.1s ease-in-out; box-shadow: 0 0 40px -10px var(--theme-color); }
+        .breathe-text { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; pointer-events: none; color: var(--contrast-color); }
+        .config-panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 1.5rem; padding: 20px; width: 100%; margin-top: 20px; }
         .select-wrapper { position: relative; display: block; }
-        .select-wrapper::after {
-            content: '▼'; font-size: 10px; position: absolute; right: 15px; top: 50%;
-            transform: translateY(-50%); pointer-events: none; opacity: 0.5;
-        }
-
-        .option-select { 
-            background: var(--input-bg); border: 1px solid var(--border-color); 
-            color: var(--text-page); padding: 10px 35px 10px 12px; border-radius: 12px; 
-            width: 100%; font-weight: 700; font-size: 13px;
-            appearance: none; -webkit-appearance: none; cursor: pointer;
-        }
-
-        /* Switch Musique */
+        .select-wrapper::after { content: '▼'; font-size: 10px; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.5; }
+        .option-select { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-page); padding: 10px 35px 10px 12px; border-radius: 12px; width: 100%; font-weight: 700; font-size: 13px; appearance: none; -webkit-appearance: none; cursor: pointer; }
         .music-control { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; user-select: none; }
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(128, 128, 128, 0.3); transition: .4s; border-radius: 20px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 14px; width: 14px;
-            left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(128, 128, 128, 0.3); transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--theme-color); }
         input:checked + .slider:before { transform: translateX(20px); }
         input:disabled + .slider { opacity: 0.5; cursor: not-allowed; }
-
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 1.5rem; width: 100%; max-width: 450px; border: 1px solid var(--border-color); }
-        
         .unit-label { text-transform: lowercase !important; display: inline-block; font-variant: normal !important; }
     </style>
 </head>
 <body>
 
-    <audio id="audio-zen" loop>
-        <source src="https://www.archive.org/download/GymnopedieNo.1/GnossienneNo1.mp3" type="audio/mpeg">
+    <audio id="audio-zen" loop playsinline preload="auto">
+        <source src="https://ecolebernardet.github.io/outilsprofs/Satie - Gnossienne n°1.mp3" type="audio/mpeg">
     </audio>
 
     <header>
@@ -150,14 +98,14 @@
 
             <div class="mt-8 flex flex-col items-center">
                 <label class="music-control">
-                    <span class="text-[10px] font-black uppercase opacity-60">Musique (Satie)</span>
+                    <span class="text-[10px] font-black uppercase opacity-60">Musique (Gnossienne n°1 de Satie)</span>
                     <div class="switch">
                         <input type="checkbox" id="toggle-music" checked>
                         <span class="slider"></span>
                     </div>
                 </label>
 
-                <button id="btnActionMain" onclick="toggleExercice()" class="px-12 py-4 rounded-full text-white font-black uppercase tracking-widest text-xs shadow-xl transition-transform active:scale-95">
+                <button id="btnActionMain" onclick="toggleExercice()" class="px-12 py-4 rounded-full font-black uppercase tracking-widest text-xs shadow-xl transition-transform active:scale-95">
                     Commencer
                 </button>
             </div>
@@ -189,24 +137,9 @@
             <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
                 <div class="bg-black/5 p-3 rounded-xl space-y-2">
                     <p class="font-bold uppercase text-[9px] opacity-60 mb-1 text-center">Comment suivre :</p>
-                    <p>• <b>Inspire :</b> Le cercle gonfle, remplissez vos poumons.</p>
-                    <p>• <b>Bloque :</b> Le cercle ne bouge plus, retenez l'air.</p>
-                    <p>• <b>Expire :</b> Le cercle rétrécit, videz l'air doucement.</p>
-                </div>
-                <div class="space-y-3 px-1">
-                    <p class="font-bold uppercase text-[9px] opacity-60">Les modes :</p>
-                    <div>
-                        <p class="font-bold text-[12px]">1. Cohérence Cardiaque</p>
-                        <p class="opacity-75 text-[10px]">Équilibre le stress et les émotions (5s/5s).</p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-[12px]">2. Respiration Carrée</p>
-                        <p class="opacity-75 text-[10px]">Améliore la concentration grâce aux temps de rétention.</p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-[12px]">3. Urgence Calme</p>
-                        <p class="opacity-75 text-[10px]">Expiration longue pour calmer un pic d'énervement.</p>
-                    </div>
+                    <p>• <b>Inspire :</b> Le cercle gonfle.</p>
+                    <p>• <b>Bloque :</b> Retenez l'air.</p>
+                    <p>• <b>Expire :</b> Le cercle rétrécit.</p>
                 </div>
             </div>
             <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase">J'ai compris</button>
@@ -214,19 +147,6 @@
     </div>
 
     <script>
-        const COLOR_MAP = {
-            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
-        };
-
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const THEME_HEX = COLOR_MAP[themePrefs.outils || 'blue'] || '#3b82f6';
-        const IS_DARK_TEXT = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue');
-        const CONTRAST = IS_DARK_TEXT ? '#000' : '#fff';
-
         let timerInterval = null;
         let isRunning = false;
         let timeLeft = 0;
@@ -242,30 +162,13 @@
             const totalSecondes = Math.round(minutesDecimales * 60);
             const m = Math.floor(totalSecondes / 60);
             const s = totalSecondes % 60;
-            const minUnit = '<span class="unit-label">min</span>';
-            const secUnit = '<span class="unit-label">s</span>';
-            if (s === 0) return `${m} ${minUnit}`;
-            return `${m} ${minUnit} ${s < 10 ? '0' + s : s} ${secUnit}`;
+            return s === 0 ? `${m} <span class="unit-label">min</span>` : `${m} <span class="unit-label">min</span> ${s < 10 ? '0' + s : s} <span class="unit-label">s</span>`;
         }
 
-        function appliquerTheme() {
-            const isLight = localStorage.getItem('theme_mode') === 'light';
-            document.body.classList.toggle('light-mode', isLight);
-            document.documentElement.style.setProperty('--theme-color', THEME_HEX);
-            
+        function initialiserInterface() {
             const inputDuree = document.getElementById('input-duree');
             document.getElementById('val-duree').innerHTML = formatDuree(parseFloat(inputDuree.value));
-            document.getElementById('timer').innerHTML = `Durée : 0 <span class="unit-label">min</span>`;
-
-            const elements = [
-                document.getElementById('btn-retour'), document.getElementById('btn-aide'),
-                document.getElementById('btnActionMain'), document.getElementById('btn-fermer-aide'), 
-                document.getElementById('btn-retour-liste')
-            ];
-            elements.forEach(el => { if(el) { el.style.backgroundColor = THEME_HEX; el.style.color = CONTRAST; }});
-            document.getElementById('pageTitle').style.color = THEME_HEX;
-            document.getElementById('breathe-text').style.color = CONTRAST;
-            document.getElementById('session-title').style.color = THEME_HEX;
+            if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
         }
 
         function toggleExercice() {
@@ -279,23 +182,26 @@
             const isMusicEnabled = document.getElementById('toggle-music').checked;
             timeLeft = parseFloat(document.getElementById('input-duree').value) * 60;
             
+            // MUSIQUE : Tentative de lecture robuste
             if (isMusicEnabled) {
-                audio.currentTime = 0;
-                audio.volume = 0.5;
-                audio.play().catch(e => console.log("Audio bloqué"));
+                audio.volume = 0.4;
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Lecture bloquée : tentative après interaction");
+                    });
+                }
             }
 
-            updateTimerDisplay();
             document.getElementById('session-title').innerText = mode.label;
             document.getElementById('btnActionMain').innerText = "Arrêter";
-            document.getElementById('toggle-music').disabled = true;
             document.getElementById('settings-area').style.opacity = "0.3";
             document.getElementById('settings-area').style.pointerEvents = "none";
             
             runCycle(mode);
             timerInterval = setInterval(() => {
                 timeLeft--;
-                updateTimerDisplay();
+                document.getElementById('timer').innerHTML = `Durée : ${formatDuree(timeLeft / 60)}`;
                 if (timeLeft <= 0) stopExercice();
             }, 1000);
         }
@@ -329,8 +235,7 @@
             isRunning = false;
             clearInterval(timerInterval);
             audio.pause();
-            
-            document.getElementById('toggle-music').disabled = false;
+            audio.currentTime = 0;
             document.getElementById('btnActionMain').innerText = "Commencer";
             document.getElementById('session-title').innerText = "Prêt ?";
             document.getElementById('breathe-text').innerText = "...";
@@ -340,19 +245,12 @@
             document.getElementById('breathe-circle').style.transform = "scale(0.6)";
         }
 
-        function updateTimerDisplay() {
-            document.getElementById('timer').innerHTML = `Durée : ${formatDuree(timeLeft / 60)}`;
-        }
-
         function wait(s) { return new Promise(resolve => setTimeout(resolve, s * 1000)); }
         function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
         function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
+        document.getElementById('input-duree').oninput = function() { document.getElementById('val-duree').innerHTML = formatDuree(parseFloat(this.value)); };
 
-        document.getElementById('input-duree').oninput = function() {
-            document.getElementById('val-duree').innerHTML = formatDuree(parseFloat(this.value));
-        };
-
-        window.onload = appliquerTheme;
+        window.onload = initialiserInterface;
     </script>
 </body>
 </html>
