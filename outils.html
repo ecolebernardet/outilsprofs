@@ -10,48 +10,48 @@
     <style>
         /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        
+
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
+            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1);
             --header-bg: #1e1e1e; --card-bg: #1e1e1e; --input-bg: #2a2a2a;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
+            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd;
             --header-bg: #ffffff; --card-bg: #ffffff; --input-bg: #f3f4f6;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         /* Base Styles */
-        body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); 
-            color: var(--text-page); margin: 0; padding: 0; 
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg-page);
+            color: var(--text-page); margin: 0; padding: 0;
             transition: background 0.3s ease;
         }
 
         /* Header */
-        header { 
+        header {
             background: var(--header-bg); border-bottom: 1px solid var(--column-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
             width: 100%; margin-bottom: 20px;
         }
 
-        #btn-retour, #btn-search-trigger, #btn-aide { 
-            display: flex; align-items: center; justify-content: center; 
+        #btn-retour, #btn-search-trigger, #btn-aide {
+            display: flex; align-items: center; justify-content: center;
             width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
             transition: all 0.3s ease; border: none; cursor: pointer;
         }
 
-        header h1 { 
-            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
+        header h1 {
+            font-size: 1.125rem; font-weight: 900; text-transform: uppercase;
             text-align: center; flex-grow: 1; letter-spacing: 0.1em;
         }
 
         /* Main Container */
-        .main-wrapper { 
-            width: 100%; max-width: 500px; margin: 0 auto; 
+        .main-wrapper {
+            width: 100%; max-width: 500px; margin: 0 auto;
             padding: 0 15px 40px 15px; transition: max-width 0.4s ease;
         }
 
@@ -64,13 +64,13 @@
         }
 
         /* Search Bar */
-        #searchWrapper { 
-            max-height: 0; overflow: hidden; 
-            transition: max-height 0.4s ease, opacity 0.3s, margin-bottom 0.3s; 
+        #searchWrapper {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s, margin-bottom 0.3s;
             opacity: 0; margin-bottom: 0;
         }
 
-        #searchWrapper.open { 
+        #searchWrapper.open {
             max-height: 100px; opacity: 1; margin-bottom: 1.5rem;
         }
 
@@ -138,7 +138,7 @@
             padding: 0 8px 8px 8px;
             background: rgba(128, 128, 128, 0.02);
             border: 0px solid var(--column-border);
-			margin-bottom: 4px; /* Ajout d'une marge légère entre sections */
+            margin-bottom: 4px;
             transition: all 0.3s ease;
         }
 
@@ -164,7 +164,7 @@
             padding: 0 0px 0px 0px;
             border-bottom: 0px solid var(--column-border);
             position: relative;
-			justify-content: space-between;
+            justify-content: space-between;
         }
 
         .category-drag-handle {
@@ -176,7 +176,7 @@
             transition: opacity 0.3s;
             padding: 10px 4px;
             margin-right: 0px;
-			order: 3;
+            order: 3;
             flex-shrink: 0;
         }
 
@@ -196,12 +196,12 @@
             border-radius: 50%;
         }
 
-        .category-icon { 
+        .category-icon {
             font-size: 1.2rem;
             flex-shrink: 0;
         }
 
-        .category-title { 
+        .category-title {
             font-size: 0.8rem;
             font-weight: 900;
             text-transform: uppercase;
@@ -219,18 +219,12 @@
             flex-shrink: 0;
         }
 
-		#categoriesContainer {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-		
         /* Tools Grid */
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-			width: 100%;
+            width: 100%;
         }
 
         @media (min-width: 768px) {
@@ -260,9 +254,9 @@
             cursor: pointer;
             outline: 2px solid transparent;
             outline-offset: 2px;
-            width: 100%; /* La tuile remplit sa cellule de grille */
-			min-width: 0; /* Important : permet à la tuile de ne pas déborder si le contenu est long */
-			overflow: hidden; /* Coupe ce qui dépasse au cas où */
+            width: 100%;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .tool-card:focus {
@@ -270,38 +264,37 @@
         }
 
         @media (min-width: 768px) {
-            .tool-card { 
-                padding: 20px; 
+            .tool-card {
+                padding: 20px;
                 gap: 12px;
                 flex-direction: row;
                 text-align: left;
                 align-items: flex-start;
             }
-            .tool-card:hover { 
-                transform: translateY(-4px); 
-                border-color: currentColor; 
+            .tool-card:hover {
+                transform: translateY(-4px);
+                border-color: currentColor;
                 background: rgba(128, 128, 128, 0.03);
             }
-            .tool-card:hover .icon-box { 
-                transform: rotate(-5deg) scale(1.1); 
+            .tool-card:hover .icon-box {
+                transform: rotate(-5deg) scale(1.1);
             }
         }
 
         .tool-card:active { transform: scale(0.97); }
 
         /* Icon Box */
-		
-		.category-icon-wrapper {
-			width: 32px;
-			height: 32px;
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			font-size: 1.1rem;
-			transition: all 0.3s ease;
-		}
+        .category-icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
 
         .icon-box {
             width: 35px; height: 35px; border-radius: 12px;
@@ -313,9 +306,9 @@
         }
 
         @media (min-width: 768px) {
-            .icon-box { 
-                width: 52px; 
-                height: 52px; 
+            .icon-box {
+                width: 52px;
+                height: 52px;
                 font-size: 26px;
             }
         }
@@ -328,7 +321,7 @@
             min-width: 0;
         }
 
-        .tool-info h2 { 
+        .tool-info h2 {
             font-size: 0.75rem;
             line-height: 1.2;
             margin: 0;
@@ -338,7 +331,7 @@
             .tool-info h2 { font-size: 0.875rem; }
         }
 
-        .tool-info p { 
+        .tool-info p {
             font-size: 0.5625rem;
             opacity: 0.5;
             margin: 0;
@@ -362,9 +355,9 @@
         }
 
         /* Modals */
-        .modal-overlay { 
-            display: none; position: fixed; inset: 0; z-index: 1000; 
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             align-items: center; justify-content: center; padding: 20px;
         }
 
@@ -372,18 +365,18 @@
             display: flex;
         }
 
-        .modal-content { 
-            background: var(--card-bg); width: 100%; max-width: 450px; 
-            border-radius: 1.5rem; border: 1px solid var(--column-border); 
+        .modal-content {
+            background: var(--card-bg); width: 100%; max-width: 450px;
+            border-radius: 1.5rem; border: 1px solid var(--column-border);
             padding: 30px; position: relative;
         }
 
-        .modal-title { 
-            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
+        .modal-title {
+            font-size: 1.125rem; font-weight: 900; text-transform: uppercase;
             margin-bottom: 1rem; margin-top: 0;
         }
 
-        .modal-text { 
+        .modal-text {
             font-size: 0.6875rem;
             line-height: 1.5;
             opacity: 0.8;
@@ -399,7 +392,7 @@
         .btn-modal-close {
             width: 100%; padding: 14px; border-radius: 12px;
             font-weight: 900; font-size: 11px; text-transform: uppercase;
-            margin-top: 20px; cursor: pointer; border: none; 
+            margin-top: 20px; cursor: pointer; border: none;
             transition: transform 0.2s; color: white;
         }
 
@@ -437,10 +430,10 @@
     <div id="searchWrapper">
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Rechercher un outil..." 
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Rechercher un outil..."
                 aria-label="Rechercher parmi les outils"
                 autocomplete="off"
             >
@@ -468,7 +461,7 @@
 </div>
 
 <script>
-    // ====================== CONFIGURATION & CONSTANTS ====================== 
+    // ====================== CONFIGURATION & CONSTANTS ======================
     const COLOR_MAP = {
         'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
         'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
@@ -540,6 +533,14 @@
             description: 'Mode de travail',
             category: 'ambiance'
         },
+		{
+            id: 'sondage',
+            href: 'outils_sondage.html',
+            icon: '📊',
+            title: 'Sondage Express',
+            description: 'Prendre le pouls de la classe',
+            category: 'ambiance'
+        },
         {
             id: 'plan',
             href: 'outils_plan.html',
@@ -564,23 +565,23 @@
             description: 'Listes, étiquettes et suivis',
             category: 'edition'
         },
-		{
-        id: 'ephemeride',
-        href: 'outils_ephemeride.html',
-        icon: '📅',
-        title: 'Éphéméride',
-        description: 'Date, fête et rituel du jour',
-        category: 'organisation'
-		},
-		{
+        {
+            id: 'ephemeride',
+            href: 'outils_ephemeride.html',
+            icon: '📅',
+            title: 'Éphéméride',
+            description: 'Date, fête et rituel du jour',
+            category: 'organisation'
+        },
+        {
             id: 'motsfamilles',
             href: 'outils_mots_familles.html',
-            icon: '✒️️',
+            icon: '✒️',
             title: 'Mots aux familles',
             description: 'Générer des billets de liaison',
             category: 'edition'
         },
-		{
+        {
             id: 'qrcodes',
             href: 'outils_qrcodes.html',
             icon: '📱',
@@ -591,24 +592,25 @@
     ];
 
     const HELP_CONTENT = [
-    'Cette section regroupe des utilitaires classés par thématiques pour faciliter la gestion de votre classe :',
-    '<br><strong>🔈 AMBIANCE DE CLASSE</strong>',
-    '• <strong>Niveau Sonore</strong> : Pour réguler le volume sonore durant les ateliers.',
-    '• <strong>Défi calme</strong> : Encourage le silence pour faire apparaître une image mystère.',
-    '• <strong>Feux tricolores</strong> : Indique visuellement le mode de travail autorisé.',
-    '<br><strong>🏫 ORGANISATION</strong>',
-    '• <strong>Plan de classe</strong> : Pour placer vos élèves et mémoriser les prénoms.',
-    '• <strong>Structure École</strong> : Pour simuler et équilibrer la répartition des effectifs.',
-    '• <strong>Éphéméride</strong> : La date, le saint du jour et un rituel matinal.',
-    '<br><strong>📄 ÉDITION & DOCUMENTS</strong>',
-    '• <strong>Module Édition</strong> : Génère vos listes, étiquettes et fiches de suivi en PDF.',
-    '• <strong>Mots aux familles</strong> : Crée des billets de liaison (Rdv, info) prêts à imprimer (10 par page).',
-	'• <strong>QR-Planches</strong> : Crée des séries de QR Codes identiques avec légendes pour vos documents.',
-	'<br><strong>⏱️ GESTION DU TEMPS</strong>',
-    '• <strong>Minuteur et timer</strong> : Pour rythmer les séances, les activités et les transitions.',
-];
+        'Cette section regroupe des utilitaires classés par thématiques pour faciliter la gestion de votre classe :',
+        '<br><strong>🔈 AMBIANCE DE CLASSE</strong>',
+        '• <strong>Niveau Sonore</strong> : Pour réguler le volume sonore durant les ateliers.',
+        '• <strong>Défi calme</strong> : Encourage le silence pour faire apparaître une image mystère.',
+        '• <strong>Feux tricolores</strong> : Indique visuellement le mode de travail autorisé.',
+		'• <strong>Sondage Express</strong> : Recueillir l\'avis des élèves en temps réel.',
+        '<br><strong>🏫 ORGANISATION</strong>',
+        '• <strong>Plan de classe</strong> : Pour placer vos élèves et mémoriser les prénoms.',
+        '• <strong>Structure École</strong> : Pour simuler et équilibrer la répartition des effectifs.',
+        '• <strong>Éphéméride</strong> : La date, le saint du jour et un rituel matinal.',
+        '<br><strong>📄 ÉDITION & DOCUMENTS</strong>',
+        '• <strong>Module Édition</strong> : Génère vos listes, étiquettes et fiches de suivi en PDF.',
+        '• <strong>Mots aux familles</strong> : Crée des billets de liaison (Rdv, info) prêts à imprimer (10 par page).',
+        '• <strong>QR-Planches</strong> : Crée des séries de QR Codes identiques avec légendes pour vos documents.',
+        '<br><strong>⏱️ GESTION DU TEMPS</strong>',
+        '• <strong>Minuteur et timer</strong> : Pour rythmer les séances, les activités et les transitions.',
+    ];
 
-    // ====================== UTILITY FUNCTIONS ====================== 
+    // ====================== UTILITY FUNCTIONS ======================
     function isDarkText(colorName) {
         return ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
     }
@@ -630,12 +632,12 @@
         return Object.keys(CATEGORIES);
     }
 
-    // ====================== RENDER TOOLS ====================== 
+    // ====================== RENDER TOOLS ======================
     function renderTools(searchTerm = '') {
         const container = document.getElementById('categoriesContainer');
         const noResults = document.getElementById('noResults');
         container.innerHTML = '';
-        
+
         let totalVisibleTools = 0;
 
         // Group tools by category
@@ -657,10 +659,10 @@
         // Render each category with tools
         orderedCategories.forEach(catKey => {
             if (!CATEGORIES[catKey]) return;
-            
+
             const catData = CATEGORIES[catKey];
             const tools = toolsByCategory[catKey];
-            if (tools.length === 0) return; // Skip empty categories
+            if (tools.length === 0) return;
 
             const section = document.createElement('div');
             section.className = 'category-section';
@@ -727,7 +729,7 @@
         noResults.style.display = totalVisibleTools === 0 ? 'block' : 'none';
     }
 
-    // ====================== SEARCH FUNCTIONALITY ====================== 
+    // ====================== SEARCH FUNCTIONALITY ======================
     function toggleSearch() {
         const searchWrapper = document.getElementById('searchWrapper');
         searchWrapper.classList.toggle('open');
@@ -778,10 +780,10 @@
         });
     }
 
-    // ====================== CATEGORY DRAG & DROP (avec Sortable) ====================== 
+    // ====================== CATEGORY DRAG & DROP (avec Sortable) ======================
     function setupCategoryDragDrop() {
         const container = document.getElementById('categoriesContainer');
-        
+
         // Détruire l'instance précédente si elle existe
         if (container._sortableInstance) {
             container._sortableInstance.destroy();
@@ -807,7 +809,7 @@
         localStorage.setItem(STORAGE_KEYS.categoryOrder, JSON.stringify(order));
     }
 
-    // ====================== THEME APPLICATION ====================== 
+    // ====================== THEME APPLICATION ======================
     function applyTheme() {
         const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
         const colorPref = themePrefs.outils || 'blue';
@@ -855,16 +857,16 @@
             closeBtn.style.backgroundColor = colorHex;
             closeBtn.style.color = textColor;
         }
-		
-		// Apply theme to category icon circles
+
+        // Apply theme to category icon circles
         const categoryCircles = document.querySelectorAll('[data-category-circle]');
         categoryCircles.forEach(circle => {
             circle.style.backgroundColor = colorHex + '33';
-			circle.style.color = colorHex; // Optionnel : garde l'icône ou le texte en couleur pleine
+            circle.style.color = colorHex;
         });
     }
 
-    // ====================== MODAL MANAGEMENT ====================== 
+    // ====================== MODAL MANAGEMENT ======================
     function ouvrirAide() {
         const content = document.getElementById('aide-content');
         content.innerHTML = HELP_CONTENT.map(text => `<p>${text}</p>`).join('');
@@ -882,7 +884,7 @@
         }
     });
 
-    // ====================== KEYBOARD SHORTCUTS ====================== 
+    // ====================== KEYBOARD SHORTCUTS ======================
     function setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
             // ? to open help
@@ -893,7 +895,7 @@
         });
     }
 
-    // ====================== INITIALIZATION ====================== 
+    // ====================== INITIALIZATION ======================
     window.onload = () => {
         renderTools();
         applyTheme();
