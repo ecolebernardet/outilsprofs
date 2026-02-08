@@ -162,7 +162,7 @@
             gap: 8px;
             margin-bottom: 4px;
             padding: 0 0px 0px 0px;
-            border-bottom: 1px solid var(--column-border);
+            border-bottom: 0px solid var(--column-border);
             position: relative;
 			justify-content: space-between;
         }
@@ -290,6 +290,19 @@
         .tool-card:active { transform: scale(0.97); }
 
         /* Icon Box */
+		
+		.category-icon-wrapper {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			font-size: 1.1rem;
+			transition: all 0.3s ease;
+		}
+
         .icon-box {
             width: 35px; height: 35px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -663,9 +676,10 @@
                     <span></span><span></span><span></span>
                     <span></span><span></span><span></span>
                 </div>
-                <span class="category-icon">${catData.icon}</span>
-                <h2 class="category-title" style="color: ${catData.color};">${catData.name}</h2>
-                <span class="category-badge" style="background-color: ${catData.color}20; color: ${catData.color};">${tools.length}</span>
+                <div class="category-icon-wrapper" data-category-circle="${catKey}">
+                    ${catData.icon}
+                </div>
+                <h2 class="category-title" style="margin-left: 8px;">${catData.name}</h2>
             `;
             section.appendChild(header);
 
@@ -841,6 +855,13 @@
             closeBtn.style.backgroundColor = colorHex;
             closeBtn.style.color = textColor;
         }
+		
+		// Apply theme to category icon circles
+        const categoryCircles = document.querySelectorAll('[data-category-circle]');
+        categoryCircles.forEach(circle => {
+            circle.style.backgroundColor = colorHex + '33';
+			circle.style.color = colorHex; // Optionnel : garde l'icône ou le texte en couleur pleine
+        });
     }
 
     // ====================== MODAL MANAGEMENT ====================== 
