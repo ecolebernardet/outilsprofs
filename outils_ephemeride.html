@@ -93,27 +93,27 @@
 </div>
 
 <div class="main-wrapper">
-    <div class="ephem-card p-10 text-center mt-4">
-        <p id="mois" class="uppercase tracking-[0.2em] font-black text-indigo-500 mb-2 text-sm"></p>
-        <h2 id="jour-num" class="text-8xl font-black mb-2 tracking-tighter"></h2>
-        <p id="jour-nom" class="text-2xl font-bold opacity-80 mb-8 capitalize"></p>
+    <div class="ephem-card p-10 text-center mt-4 flex flex-col items-center">
+		<p id="jour-nom" class="text-2xl font-bold opacity-80 mb-1 capitalize leading-none"></p>
+		<h2 id="jour-num" class="text-8xl font-black mb-2 leading-none"></h2>
+		<p id="mois" class="uppercase tracking-[0.2em] font-black text-lg mb-8 leading-none"></p>
+    
+		<div class="h-px bg-gray-500/20 w-full mb-8"></div>
+    
+		<div class="space-y-6 w-full">
+			<div>
+				<p class="text-[10px] uppercase font-black opacity-40 mb-1">Aujourd'hui, nous fêtons </p>
+				<p id="saints" class="text-xl font-bold text-indigo-500">Chargement...</p>
+			</div>
         
-        <div class="h-px bg-gray-500/20 w-full mb-8"></div>
-        
-        <div class="space-y-6">
-            <div>
-                <p class="text-[10px] uppercase font-black opacity-40 mb-1">On fête les</p>
-                <p id="saints" class="text-xl font-bold text-indigo-500">Chargement...</p>
-            </div>
-            
-            <div class="p-5 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
-                <p class="text-[10px] uppercase font-black opacity-40 mb-2">Le défi du matin</p>
-                <p id="enigme" class="text-sm font-semibold italic opacity-90">
-                    " "
-                </p>
-            </div>
-        </div>
-    </div>
+			<div class="p-5 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
+				<p class="text-[10px] uppercase font-black opacity-40 mb-2">Le défi du jour</p>
+				<p id="enigme" class="text-sm font-semibold opacity-90">
+					" "
+				</p>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div id="modal-aide" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -311,20 +311,18 @@ const DEFIS_365 = {
         const cle = `${moisNum}-${String(maintenant.getDate()).padStart(2, '0')}`;
 
         // Affichage Date
-        document.getElementById('mois').textContent = maintenant.toLocaleDateString('fr-FR', { month: 'long' });
-        document.getElementById('jour-num').textContent = maintenant.getDate();
         document.getElementById('jour-nom').textContent = maintenant.toLocaleDateString('fr-FR', { weekday: 'long' });
+		document.getElementById('jour-num').textContent = maintenant.getDate();
+		document.getElementById('mois').textContent = maintenant.toLocaleDateString('fr-FR', { month: 'long' });
 
         // Affichage Saint
         const saint = SAINTS[cle] || "la Bonne Fête";
-        // Si le nom contient déjà "le", "la" ou "les", on n'ajoute pas "la St"
-        const prefixe = (saint.includes("le ") || saint.includes("la ") || saint.includes("les ")) ? "" : "la St ";
-        document.getElementById('saints').textContent = prefixe + saint;
+        document.getElementById('saints').textContent = "les " + saint;
 
         // Affichage Défi (change chaque jour)
         const listeDefisMois = DEFIS_365[moisNum] || DEFIS_365["09"]; // Septembre par défaut
         const defiDuJour = listeDefisMois[jourIdx % listeDefisMois.length];
-        document.getElementById('enigme').textContent = `"${defiDuJour}"`;
+        document.getElementById('enigme').textContent = `${defiDuJour}`;
     }
 
 function ouvrirAide() {
