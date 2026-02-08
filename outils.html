@@ -222,7 +222,7 @@
         /* Tools Grid */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             width: 100%;
         }
@@ -568,6 +568,22 @@
             description: 'Gérer le temps des activités',
             category: 'organisation'
         },
+		{
+            id: 'tirage',
+            href: 'outils_tirage.html',
+            icon: '🎲',
+            title: 'Tirage au sort',
+            description: 'Tirer un prénom au hasard',
+            category: 'organisation'
+        },
+		{
+            id: 'equipes',
+            href: 'outils_equipes.html',
+            icon: '👥',
+            title: 'Équipes',
+            description: 'Générer des groupes équilibrés',
+            category: 'organisation'
+        },
         {
             id: 'edition',
             href: 'outils_edition.html',
@@ -596,7 +612,7 @@
 
     const HELP_CONTENT = [
         'Cette section regroupe des utilitaires classés par thématiques pour faciliter la gestion de votre classe :',
-        '<br><strong>🔈 AMBIANCE DE CLASSE</strong>',
+        '<br><strong>🤫 AMBIANCE DE CLASSE</strong>',
         '• <strong>Niveau Sonore</strong> : Pour réguler le volume sonore durant les ateliers.',
         '• <strong>Défi calme</strong> : Encourage le silence pour faire apparaître une image mystère.',
 		'• <strong>Pause Calme</strong> : Des exercices de respiration pour apaiser le groupe.',
@@ -607,7 +623,9 @@
         '• <strong>Éphéméride</strong> : La date, le saint du jour et un rituel matinal.',
 		'• <strong>Sondage Express</strong> : Recueillir l\'avis des élèves en temps réel.',
 		'• <strong>Minuteur et timer</strong> : Pour rythmer les séances, les activités et les transitions.',
-        '<br><strong>📄 ÉDITION & DOCUMENTS</strong>',
+		'• <strong>Tirage</strong> : Décochez les élèves absents puis tirez un prénom d\'élève au hasard parmi les présents.',
+		'• <strong>Équipes</strong> : Décochez les élèves absents et générez des groupes mixtes et équilibrés par genre et par niveau automatiquement.',
+        '<br><strong>📜 ÉDITION & DOCUMENTS</strong>',
         '• <strong>Module Édition</strong> : Génère vos listes, étiquettes et fiches de suivi en PDF.',
         '• <strong>Mots aux familles</strong> : Crée des billets de liaison (Rdv, info) prêts à imprimer (10 par page).',
         '• <strong>QR-Planches</strong> : Crée des séries de QR Codes identiques avec légendes pour vos documents.',
