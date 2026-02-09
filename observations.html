@@ -56,9 +56,14 @@
 
         /* Barre de contrôle générale (au-dessus de la grille) */
         .general-controls {
-            display: flex; justify-content: center; gap: 15px; 
-            margin-bottom: 20px; width: 100%; max-width: 900px;
-        }
+			display: flex; 
+			justify-content: center; 
+			gap: 15px; /* Espace entre les deux boutons */
+			margin-bottom: 5px; /* Espace sous les boutons réduit de 20px à 10px */
+			margin-top: -10px; /* Remonte légèrement le bloc vers le header */
+			width: 100%; 
+			max-width: 900px;
+		}
         .ctrl-btn-gen {
             font-size: 9px; font-weight: 900; text-transform: uppercase; padding: 5px 12px;
             border-radius: 50px; border: 1.5px solid var(--primary); background: transparent;
@@ -78,12 +83,12 @@
 
         .level-group { width: 100%; min-width: 0; }
         .level-title { 
-            font-size: 0.75rem; font-weight: 900; text-transform: uppercase; 
-            text-align: center; margin-bottom: 12px; padding: 5px; 
+            font-size: 0.65rem; font-weight: 900; text-transform: uppercase; 
+            text-align: center; margin-bottom: 8px; padding: 3px; 
             border-radius: 6px; background: rgba(128,128,128,0.1);
         }
 
-        .student-container { margin-bottom: 8px; }
+        .student-container { margin-bottom: 4px; }
         .student-item { 
             background-color: var(--card-student); padding: 5px 14px; display: flex; 
             justify-content: space-between; align-items: center; cursor: pointer; 
@@ -111,7 +116,7 @@
 
         .drawer-textarea {
             width: 100%; background: transparent; border: none;
-            padding: 12px; font-size: 0.85rem; color: var(--text-main);
+            padding: 5px 10px 5px 10px; font-size: 0.8rem; color: var(--text-main);
             outline: none; resize: none; font-family: 'Inter', sans-serif;
             display: block; overflow: hidden; min-height: 60px;
         }
@@ -354,36 +359,219 @@ function renderStudentList() {
             [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => { if(el){el.style.backgroundColor = colorHex; el.style.color = txt;} });
         }
 
-        function exportToFile() {
-            if (Object.keys(savedObservations).length === 0) return;
-            const content = Object.entries(savedObservations).map(([n, o]) => `${n};${o.replace(/\n/g, '[BR]')}`).join("\n");
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `obs_${new Date().toISOString().slice(0,10)}.txt`; a.click();
-            updateExportBadge(false);
-        }
+		// --- FONCTION UTILITAIRE POUR LA DATE ---
+function getFormattedDate() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+}
 
-        document.getElementById('importFile').onchange = function(e) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                ev.target.result.split(/\r?\n/).forEach(l => { const p = l.split(";"); if(p.length>=2) savedObservations[p[0]] = p.slice(1).join(";").replace(/\[BR\]/g, "\n"); });
-                localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
-                renderStudentList();
-            };
-            reader.readAsText(e.target.files[0]);
-        };
+        // --- EXPORT TXT ---
+function exportToFile() {
+    if (Object.keys(savedObservations).length === 0) {
+        alert("Aucune note à exporter.");
+        return;
+    }
+    const content = Object.entries(savedObservations)
+        .map(([n, o]) => `${n};${o.replace(/\n/g, '[BR]')}`)
+        .join("\n");
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Nommage : outilsprofs_observations_aaaammjj.txt
+    a.download = `outilsprofs_observations_${getFormattedDate()}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+    
+    updateExportBadge(false);
+}
 
-        function genererPDF() {
-            const element = document.createElement('div');
-            element.style.padding = '20px'; element.style.color = 'black'; element.style.backgroundColor = 'white';
-            let html = `<h1 style="text-align:center; font-size:16px; margin-bottom:20px;">OBSERVATIONS</h1>`;
-            Object.keys(savedObservations).sort().forEach(name => {
-                html += `<div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;"><b>${name}</b><p style="font-size:11px; white-space:pre-wrap; margin:5px 0;">${savedObservations[name]}</p></div>`;
+// --- MODALE DE SUCCÈS PERSONNALISÉE ---
+function showSuccessModal(message) {
+    // On réutilise la structure de la modale d'aide pour la cohérence
+    const aideContent = document.getElementById('aide-content');
+    const colorHex = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+    
+    aideContent.innerHTML = `
+        <div class="text-center py-4">
+            <div class="text-5xl mb-4">✅</div>
+            <h2 class="text-sm font-black uppercase mb-2 tracking-tighter" style="color: var(--primary)">Importation réussie</h2>
+            <p class="text-[11px] opacity-80">${message}</p>
+        </div>
+    `;
+    
+    // On change temporairement le texte du bouton de la modale d'aide
+    const btnFermer = document.getElementById('btn-fermer-aide');
+    const originalText = btnFermer.innerText;
+    btnFermer.innerText = "GÉNIAL";
+    
+    document.getElementById('modal-aide').style.display = 'flex';
+
+    // On remet le texte original quand on ferme
+    const originalClose = fermerAide;
+    window.fermerAide = function() {
+        originalClose();
+        btnFermer.innerText = originalText;
+        window.fermerAide = originalClose; // Reset la fonction
+    };
+}
+
+// --- IMPORT TXT CORRIGÉ ---
+document.getElementById('importFile').onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const lines = ev.target.result.split(/\r?\n/);
+            let countTotal = 0;
+            let countVisible = 0;
+
+            // On récupère la liste des noms des élèves actuellement inscrits (pour comparer)
+            const nomsInscrits = inscribedStudents.map(s => s.identite.trim());
+
+            lines.forEach(l => {
+                const p = l.split(";");
+                if (p.length >= 2) {
+                    const name = p[0].trim();
+                    const obs = p.slice(1).join(";").replace(/\[BR\]/g, "\n");
+                    
+                    // On enregistre la note
+                    savedObservations[name] = obs;
+                    countTotal++;
+
+                    // On vérifie si cet élève fait partie des 25 actuels
+                    if (nomsInscrits.includes(name)) {
+                        countVisible++;
+                    }
+                }
             });
-            element.innerHTML = html;
-            html2pdf().from(element).save('observations.pdf');
-        }
 
+            localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
+            renderStudentList();
+            
+            // On affiche un message plus précis
+            const message = countVisible > 0 
+                ? `${countVisible} notes mises à jour pour vos élèves actuels.`
+                : `Importation terminée (${countTotal} notes en mémoire, mais aucune ne correspond à vos élèves actuels).`;
+            
+            showSuccessModal(message);
+            
+        } catch (err) {
+            alert("Erreur lors de la lecture du fichier.");
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+};
+
+// --- EXPORT PDF ---
+function genererPDF() {
+    if (inscribedStudents.length === 0) {
+        alert("Aucun élève inscrit.");
+        return;
+    }
+
+    // Récupération du nom de l'enseignant (ou valeur par défaut)
+    const nomEnseignant = localStorage.getItem('nom_enseignant') || "Enseignant non renseigné";
+
+    const element = document.createElement('div');
+    element.style.width = '700px'; 
+    element.style.padding = '20px';
+    element.style.color = 'black';
+    element.style.backgroundColor = 'white';
+    element.style.boxSizing = 'border-box';
+
+    // Préparation des groupes et des niveaux pour l'entête
+    const groups = {};
+    inscribedStudents.forEach(s => {
+        const lvl = s.niveau.toUpperCase();
+        if (!groups[lvl]) groups[lvl] = [];
+        groups[lvl].push(s);
+    });
+    const sortedLevels = Object.keys(groups).sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b));
+    
+    // Texte des niveaux (ex: "CP / CE1")
+    const texteNiveaux = sortedLevels.join(' / ');
+
+    let html = `
+        <div style="text-align:center; margin-bottom:25px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+            <h1 style="font-size:18px; font-weight:900; text-transform:uppercase; margin:0;">
+                Observations de classe
+            </h1>
+            <div style="font-size:12px; font-weight:600; margin-top:5px; color:#444;">
+                Classe : ${texteNiveaux} — Enseignant : ${nomEnseignant}
+            </div>
+        </div>
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: none;">
+            <tr>
+    `;
+
+    sortedLevels.forEach(level => {
+        html += `<td style="width: 50%; vertical-align: top; padding: 0 10px; border: none;">`;
+        html += `<h2 style="font-size:12px; font-weight:900; background:#f0f0f0; padding:6px; border-radius:4px; text-align:center; margin-bottom:15px; border:1px solid #ddd; text-transform:uppercase;">${level}</h2>`;
+
+        const students = groups[level].sort((a, b) => a.identite.localeCompare(b.identite));
+        
+        students.forEach(student => {
+            const obs = savedObservations[student.identite];
+            if (obs && obs.trim() !== "") {
+                const parts = student.identite.trim().split(' ');
+                const prenomFormate = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+                const nomFormate = parts.slice(1).join(' ').toUpperCase();
+                const identiteFormatee = nomFormate ? `${prenomFormate} ${nomFormate}` : prenomFormate;
+
+                html += `
+                    <div style="margin-bottom:8px; border: 1px solid #eee; padding:5px; border-radius:6px; page-break-inside: avoid; background: #fafafa;">
+                        <div style="font-size:9px; font-weight:800; color:#333; margin-bottom:3px; border-bottom:1px solid #eee; padding-bottom:2px;">
+                            ${identiteFormatee}
+                        </div>
+                        <div style="font-size:8px; white-space:pre-wrap; color:#333; line-height:1.3;">${obs}</div>
+                    </div>`;
+            }
+        });
+        html += `</td>`;
+    });
+
+    if (sortedLevels.length === 1) {
+        html += `<td style="width: 50%; border: none;"></td>`;
+    }
+
+    html += `</tr></table>`; 
+    element.innerHTML = html;
+
+    const opt = {
+        margin: 10,
+        filename: `outilsprofs_observations_${getFormattedDate()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, width: 700 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    const btnPdf = event.currentTarget;
+    const originalText = btnPdf.innerText;
+    btnPdf.innerText = "⌛ Génération...";
+    btnPdf.disabled = true;
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        btnPdf.innerText = originalText;
+        btnPdf.disabled = false;
+    }).catch(err => {
+        btnPdf.innerText = originalText;
+        btnPdf.disabled = false;
+    });
+}
         function toutEffacer() { showAlert("Effacer ?", "Supprimer tout ?", () => { savedObservations = {}; localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations)); updateExportBadge(true); renderStudentList(); }); }
 		
         function ouvrirAide() {
