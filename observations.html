@@ -18,13 +18,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
         :root { 
             --primary: #ff637e; --bg-page: #121212; --text-main: #ffffff;
             --card-student: #1a1a1a; --header-bg: #1e1e1e; --header-border: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1); --card-sub: #9ca3af;
+            --card-sub: #9ca3af;
             --student-name-girl: #f9a8d4; --student-name-boy: #93c5fd;
         }
 
@@ -33,205 +32,105 @@
             --header-bg: #ffffff; --header-border: #ddd; --card-sub: #4b5563;
         }
 
-        /* Base Styles */
         body { 
             font-family: 'Inter', sans-serif; background: var(--bg-page); 
-            color: var(--text-main); padding: 0; margin: 0; transition: background 0.3s;
+            color: var(--text-main); margin: 0; transition: background 0.3s;
             display: flex; flex-direction: column; align-items: center;
-            padding-left: 15px; padding-right: 15px; padding-bottom: 20px; overflow-x: hidden;
+            padding: 0 10px 20px 10px; overflow-x: hidden;
         }
 
-        /* Header */
         header { 
             background: var(--header-bg); border-bottom: 1px solid var(--header-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
             justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 10px;
+            width: calc(100% + 20px); margin-bottom: 15px;
         }
 
         #btn-retour, #btn-aide { 
             display: flex; align-items: center; justify-content: center; 
-            width: 40px; height: 40px; border-radius: 50%; 
+            width: 38px; height: 38px; border-radius: 50%; 
             transition: all 0.3s ease; border: none; cursor: pointer;
         }
 
-        #mainTitle { 
-            text-align: center; font-weight: 800; font-size: 1.1rem; 
-            letter-spacing: 1px; margin: 0; flex-grow: 1; text-transform: uppercase;
+        #mainTitle { text-align: center; font-weight: 900; font-size: 1rem; text-transform: uppercase; flex-grow: 1; }
+
+        /* Barre de contrôle générale (au-dessus de la grille) */
+        .general-controls {
+            display: flex; justify-content: center; gap: 15px; 
+            margin-bottom: 20px; width: 100%; max-width: 900px;
+        }
+        .ctrl-btn-gen {
+            font-size: 9px; font-weight: 900; text-transform: uppercase; padding: 5px 12px;
+            border-radius: 50px; border: 1.5px solid var(--primary); background: transparent;
+            color: var(--primary); cursor: pointer; transition: all 0.2s;
+        }
+        .ctrl-btn-gen:active { background: var(--primary); color: white; }
+
+        /* Layout Grid 2 Colonnes */
+        #listeContainer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 900px;
+            align-items: start;
         }
 
-        /* Layout Grid */
-        .columns-container { 
-            column-count: 2; column-gap: 12px; width: 100%; 
-            max-width: 600px; margin: 0 auto;
-        }
-
-        @media (min-width: 640px) {
-            .columns-container { max-width: 95%; }
-        }
-
-        /* Level Groups */
-        .level-group { 
-            break-inside: avoid; margin-bottom: 20px; 
-            display: inline-block; width: 100%;
-        }
-
+        .level-group { width: 100%; min-width: 0; }
         .level-title { 
-            color: var(--text-main); font-size: 0.6875rem; font-weight: 900; 
-            text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin-bottom: 0.5rem;
+            font-size: 0.75rem; font-weight: 900; text-transform: uppercase; 
+            text-align: center; margin-bottom: 12px; padding: 5px; 
+            border-radius: 6px; background: rgba(128,128,128,0.1);
         }
 
-        /* Student Items */
+        .student-container { margin-bottom: 8px; }
         .student-item { 
-            background-color: var(--card-student); padding: 6px 12px; display: flex; 
+            background-color: var(--card-student); padding: 10px 14px; display: flex; 
             justify-content: space-between; align-items: center; cursor: pointer; 
-            border-radius: 50px; margin-bottom: 4px; transition: all 0.1s;
+            border-radius: 50px; transition: all 0.2s;
             border: 1.5px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-width: 0; -webkit-tap-highlight-color: transparent; user-select: none;
         }
 
-        body.light-mode .student-item, html.light-mode-init .student-item { 
-            border-color: #e5e7eb;
+        .student-item.active {
+            border-color: var(--primary);
+            border-radius: 15px 15px 0 0;
         }
 
-        .student-item:hover { transform: translateY(-1px); }
-
-        .student-name { 
-            font-weight: 800; font-size: 0.7rem; overflow: hidden; 
-            text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;
-        }
-
-        .status-icon { 
-            font-size: 0.65rem; opacity: 0.8; margin-left: 5px; flex-shrink: 0;
-        }
-
+        .student-name { font-weight: 800; font-size: 0.68rem; flex: 1; }
+        .status-icon { font-size: 0.7rem; opacity: 0.8; margin-left: 5px; }
         .text-girl { color: var(--student-name-girl); }
         .text-boy { color: var(--student-name-boy); }
 
-        /* Navigation */
-        .bottom-nav { 
-            width: 100%; max-width: 500px; margin: 25px auto 0; padding-bottom: 40px;
+        .obs-drawer {
+            display: none; overflow: hidden;
+            background: var(--card-student);
+            border: 1.5px solid var(--primary); border-top: none;
+            border-radius: 0 0 15px 15px; margin-top: -1px;
         }
+        .obs-drawer.open { display: block; }
 
-        .nav-btn { 
-            font-weight: 800; border-radius: 50px; font-size: 9px; padding: 12px; 
-            border: none; flex: 1; display: flex; align-items: center; justify-content: center; 
-            gap: 5px; cursor: pointer; transition: all 0.2s;
-        }
-
-        .nav-btn:active { transform: scale(0.95); }
-
-        /* Modals */
-        .modal-overlay { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-            align-items: center; justify-content: center; z-index: 1000; 
-            backdrop-filter: blur(4px); padding: 20px;
-        }
-
-        .modal-content { 
-            background: var(--card-student); padding: 20px; border-radius: 20px; 
-            width: 100%; max-width: 400px; border: 1px solid var(--header-border);
-        }
-
-        .modal-title { 
-            margin: 0; font-size: 1.1rem; font-weight: 800; 
-            color: var(--text-main); margin-bottom: 12px;
-        }
-
-        textarea { 
-            width: 100%; margin: 10px 0; padding: 12px; border-radius: 12px; 
-            border: 1px solid var(--header-border); font-size: 0.85rem; 
-            background: var(--card-student); color: var(--text-main); 
+        .drawer-textarea {
+            width: 100%; background: transparent; border: none;
+            padding: 12px; font-size: 0.85rem; color: var(--text-main);
             outline: none; resize: none; font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
+            display: block; overflow: hidden; min-height: 60px;
         }
 
-        textarea:focus { border-color: var(--primary); }
-
-        body.light-mode textarea { background: #f3f4f6; }
-
-        .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
-
-        .modal-btn { 
-            flex: 1; padding: 14px; border: none; border-radius: 50px; 
-            font-weight: 900; cursor: pointer; text-transform: uppercase; 
-            font-size: 10px; transition: all 0.2s;
+        .bottom-nav { width: 100%; max-width: 500px; margin-top: 30px; }
+        .nav-btn { 
+            font-weight: 800; border-radius: 50px; font-size: 10px; padding: 14px; 
+            border: none; flex: 1; display: flex; align-items: center; justify-content: center; 
+            gap: 5px; cursor: pointer;
         }
 
-        .btn-save { color: white; }
-        .btn-cancel { background: #333; color: #ccc; }
-
-        /* Help Modal */
-        #modal-aide .modal-card { 
-            background-color: var(--card-student); border: 1px solid var(--header-border);
-        }
-
-        #aide-content h3 { 
-            font-weight: 900; text-transform: uppercase; font-size: 0.8rem; 
-            margin-bottom: 10px; margin-top: 0;
-        }
-
-        #aide-content p, #aide-content li { 
-            font-size: 0.75rem; line-height: 1.5; color: var(--card-sub); 
-            margin-bottom: 8px; margin: 0 0 8px 0;
-        }
-
-        /* Alert Modal */
-        .alert-overlay { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
-            align-items: center; justify-content: center; z-index: 2000; padding: 20px;
-        }
-
-        .alert-content { 
-            background: white; padding: 25px; border-radius: 24px; 
-            width: 100%; max-width: 350px; color: #111;
-        }
-
-        .alert-title { 
-            font-size: 1rem; font-weight: 900; text-transform: uppercase; 
-            text-align: center; margin-bottom: 1rem; margin: 0 0 1rem 0;
-        }
-
-        .alert-text { 
-            font-size: 0.875rem; font-weight: 600; text-align: center; 
-            color: #4b5563; margin-bottom: 1.5rem; margin: 0 0 1.5rem 0;
-        }
-
-        .alert-btns { display: flex; gap: 0.5rem; }
-
-        .btn-alert { 
-            flex: 1; padding: 14px; border-radius: 15px; font-weight: 900; 
-            font-size: 11px; text-transform: uppercase; cursor: pointer; 
-            border: none; transition: all 0.2s;
-        }
-
-        .btn-alert:active { transform: scale(0.95); }
-
-        /* Animations */
-        @keyframes blink-point {
-            0% { transform: scale(0.9); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.5; }
-        }
-
-        .mini-pastille {
-            display: inline-block; width: 8px; height: 8px; 
-            background-color: #f97316; border-radius: 50%; margin-left: 4px; 
-            margin-right: 2px; box-shadow: 0 0 5px #f97316; 
-            animation: blink-point 1.5s infinite;
-        }
-
-        .badge-pulse { animation: pulse 2s infinite; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-card { background: var(--card-student); padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; }
+        .alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; }
+        .alert-content { background: white; padding: 25px; border-radius: 25px; width: 85%; max-width: 320px; color: #111; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- ====================== HEADER ====================== -->
     <header>
         <a href="index.html" id="btn-retour">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,8 +141,12 @@
         <button id="btn-aide" onclick="ouvrirAide()" style="font-size: 1.2rem;">💡</button>
     </header>
 
-    <!-- ====================== MAIN CONTENT ====================== -->
-    <div id="listeContainer" class="columns-container"></div>
+    <div class="general-controls">
+        <button class="ctrl-btn-gen" onclick="toggleAllDrawers(true)">Tout ouvrir</button>
+        <button class="ctrl-btn-gen" onclick="toggleAllDrawers(false)">Tout fermer</button>
+    </div>
+
+    <div id="listeContainer"></div>
 
     <!-- ====================== FOOTER NAVIGATION ====================== -->
     <footer class="bottom-nav flex flex-col gap-3 px-2">
@@ -261,54 +164,33 @@
         <button onclick="toutEffacer()" class="nav-btn bg-red-500 text-red-100 shadow-lg">⚠️ effacer les données</button>
     </footer>
 
-    <!-- ====================== COMMENT MODAL ====================== -->
-    <div id="modal" class="modal-overlay">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 class="modal-title" id="modalTitle">Élève</h2>
-            <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
-            <div class="modal-btns">
-                <button class="modal-btn btn-save" onclick="saveData()">Enregistrer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====================== HELP MODAL ====================== -->
-    <div id="modal-aide" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] hidden items-center justify-center p-6" onclick="fermerAide()">
-        <div class="modal-card w-full max-w-sm rounded-3xl p-6 shadow-2xl" onclick="event.stopPropagation()">
+    <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <div id="aide-content"></div>
-            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-4 mt-2 font-black rounded-2xl uppercase text-[10px] tracking-widest active:scale-95 transition-all">
-                Fermer
-            </button>
+            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-4 mt-4 font-black rounded-2xl uppercase text-[10px] tracking-widest">Fermer</button>
         </div>
     </div>
 
-    <!-- ====================== ALERT MODAL ====================== -->
     <div id="alertModal" class="alert-overlay">
         <div class="alert-content">
-            <h3 id="alertTitle" class="alert-title">Confirmation</h3>
-            <p id="alertText" class="alert-text">Message</p>
-            <div class="alert-btns">
-                <button id="alertCancelBtn" class="btn-alert bg-gray-100 text-gray-500" onclick="closeAlert()">Annuler</button>
-                <button id="alertConfirmBtn" class="btn-alert text-white">Confirmer</button>
+            <h3 id="alertTitle" class="font-black uppercase mb-2">Confirmation</h3>
+            <p id="alertText" class="text-xs text-gray-600 mb-6"></p>
+            <div class="flex gap-2">
+                <button class="flex-1 p-3 bg-gray-100 rounded-xl font-bold" onclick="closeAlert()">Non</button>
+                <button id="alertConfirmBtn" class="flex-1 p-3 text-white rounded-xl font-bold">Oui</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ====================== CONFIGURATION & CONSTANTS ====================== 
         const COLOR_MAP = {
             'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
             'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
             'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e'
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e'
         };
 
-        const LEVEL_COLORS = {
-            'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
-            'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6'
-        };
-
+        const LEVEL_COLORS = { 'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#8b5cf6' };
         const LEVEL_ORDER = ['CP', 'CE1', 'CE2', 'CM1', 'CM2', 'AUTRE'];
 
         const STORAGE_KEYS = {
@@ -316,427 +198,163 @@
             observations: 'studentObservations',
             theme: 'theme_tuiles',
             themeMode: 'theme_mode',
-            needsExport: 'needsExport_obs',
-            lastExport: 'last_export_obs',
-            teacherName: 'nom_enseignant'
+            needsExport: 'needsExport_obs'
         };
-
-        const EXPORT_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
-        const LINE_BREAK_MARKER = '[BR]';
 
         let inscribedStudents = JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || [];
         let savedObservations = JSON.parse(localStorage.getItem(STORAGE_KEYS.observations)) || {};
-        let currentStudentId = "";
-        let currentStudentName = "";
 
-        // ====================== UTILITY FUNCTIONS ====================== 
-        function formatName(fullName) {
-            if (!fullName) return "";
-            const parts = fullName.trim().split(' ');
-            const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-            const last = parts.slice(1).join(' ').toUpperCase();
-            return (first + ' ' + last).trim();
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
         }
 
-        function getNormalizedLevel(student) {
-            return student.nivel.toString().toUpperCase();
-        }
-
-        function getGenderClass(student) {
-            return student.sexe.toLowerCase().startsWith('f') ? 'text-girl' : 'text-boy';
-        }
-
-        function hasObservation(studentName) {
-            return savedObservations[studentName] && savedObservations[studentName].trim().length > 0;
-        }
-
-        function getStatusIcon(studentName) {
-            return hasObservation(studentName) ? '🔎' : '＋';
-        }
-
-        // ====================== EXPORT BADGE MANAGEMENT ====================== 
-        function updateExportBadge(needsExport) {
-            const badge = document.getElementById('badge-export');
-            if (needsExport) {
-                badge.classList.remove('hidden');
-                localStorage.setItem(STORAGE_KEYS.needsExport, 'true');
-            } else {
-                badge.classList.add('hidden');
-                localStorage.removeItem(STORAGE_KEYS.needsExport);
-                localStorage.setItem(STORAGE_KEYS.lastExport, Date.now());
-            }
-        }
-
-        function checkBadgeStatus() {
-            const lastExport = localStorage.getItem(STORAGE_KEYS.lastExport);
-            const needsExport = localStorage.getItem(STORAGE_KEYS.needsExport) === 'true';
-
-            if (needsExport) {
-                updateExportBadge(true);
-                return;
-            }
-
-            if (lastExport) {
-                if (Date.now() - parseInt(lastExport) > EXPORT_INTERVAL) {
-                    updateExportBadge(true);
-                }
-            } else {
-                localStorage.setItem(STORAGE_KEYS.lastExport, Date.now());
-            }
-        }
-
-        // ====================== THEME APPLICATION ====================== 
-        function applyTheme() {
-            const savedMode = localStorage.getItem(STORAGE_KEYS.themeMode);
-            const isLight = savedMode === 'light';
-            document.body.classList.toggle('light-mode', isLight);
-
-            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
-            const colorName = prefs['obs'] || 'green';
-            const colorHex = COLOR_MAP[colorName] || '#22c55e';
-
-            // Apply sex colors
-            if (prefs.fille && COLOR_MAP[prefs.fille]) {
-                document.documentElement.style.setProperty('--student-name-girl', COLOR_MAP[prefs.fille]);
-            }
-            if (prefs.garcon && COLOR_MAP[prefs.garcon]) {
-                document.documentElement.style.setProperty('--student-name-boy', COLOR_MAP[prefs.garcon]);
-            }
-
-            document.getElementById('mainTitle').style.color = isLight ? '#000000' : '#ffffff';
-
-            const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
-            const textColor = isDarkText ? 'black' : 'white';
-
-            const themeButtons = [
-                document.getElementById('btn-retour'),
-                document.getElementById('btn-aide'),
-                document.querySelector('.btn-save'),
-                document.getElementById('btn-fermer-aide')
-            ];
-
-            themeButtons.forEach(el => {
-                if (el) {
-                    el.style.backgroundColor = colorHex;
-                    el.style.color = textColor;
-                    const svg = el.querySelector('svg');
-                    if (svg) svg.style.color = textColor;
+        // Action globale sur TOUS les tiroirs
+        function toggleAllDrawers(open) {
+            document.querySelectorAll('.obs-drawer').forEach(drawer => {
+                const item = drawer.previousElementSibling;
+                const area = drawer.querySelector('textarea');
+                if (open) {
+                    drawer.classList.add('open');
+                    item.classList.add('active');
+                    autoResize(area);
+                } else {
+                    drawer.classList.remove('open');
+                    item.classList.remove('active');
                 }
             });
-
-            document.documentElement.style.setProperty('--primary', colorHex);
         }
 
-        // ====================== RENDERING ====================== 
         function renderStudentList() {
             const container = document.getElementById('listeContainer');
             container.innerHTML = "";
-
             if (inscribedStudents.length === 0) {
-                container.innerHTML = `<div class="text-center p-10 text-neutral-500 text-[10px] font-bold uppercase w-full" style="column-span: all;">Aucun élève inscrit.</div>`;
+                container.style.display = "block";
+                container.innerHTML = `<div class="text-center p-10 text-neutral-500 text-[10px] font-bold uppercase">Aucun élève.</div>`;
                 return;
             }
+            container.style.display = "grid";
 
             const groups = {};
-            inscribedStudents.forEach(student => {
-                const level = student.niveau.toUpperCase();
-                if (!groups[level]) groups[level] = [];
-                groups[level].push(student);
+            inscribedStudents.forEach(s => {
+                const lvl = s.niveau.toUpperCase();
+                if (!groups[lvl]) groups[lvl] = [];
+                groups[lvl].push(s);
             });
 
-            const levelOrder = Object.keys(groups).sort((a, b) =>
-                LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b)
-            );
+            const sortedLevels = Object.keys(groups).sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b));
 
-            if (levelOrder.length === 2) {
-                container.className = "grid grid-cols-2 gap-3 w-full max-w-[600px] mx-auto";
-            } else {
-                container.className = "columns-container";
-            }
-
-            levelOrder.forEach(level => {
-                const levelWrapper = document.createElement('div');
-                levelWrapper.className = levelOrder.length === 2 ? "w-full" : "level-group";
-
-                const levelColor = LEVEL_COLORS[level] || '#ffffff';
-                const levelTitle = document.createElement('h2');
-                levelTitle.className = "level-title";
-                levelTitle.style.color = levelColor;
-                levelTitle.innerText = level;
-                levelWrapper.appendChild(levelTitle);
+            sortedLevels.forEach(level => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "level-group";
+                wrapper.innerHTML = `<h2 class="level-title" style="color:${LEVEL_COLORS[level] || '#fff'}">${level}</h2>`;
 
                 const list = document.createElement('div');
-                groups[level]
-                    .sort((a, b) => a.identite.localeCompare(b.identite))
-                    .forEach(student => {
-                        const item = document.createElement('div');
-                        item.className = `student-item ${getGenderClass(student)}`;
-                        item.innerHTML = `<span class="student-name">${formatName(student.identite)}</span><span class="status-icon">${getStatusIcon(student.identite)}</span>`;
-                        item.onclick = () => openCommentModal(student);
-                        list.appendChild(item);
-                    });
+                groups[level].sort((a, b) => a.identite.localeCompare(b.identite)).forEach(student => {
+                    const block = document.createElement('div');
+                    block.className = "student-container";
 
-                levelWrapper.appendChild(list);
-                container.appendChild(levelWrapper);
+                    const item = document.createElement('div');
+                    item.className = `student-item ${student.sexe.toLowerCase().startsWith('f') ? 'text-girl' : 'text-boy'}`;
+                    item.innerHTML = `
+                        <span class="student-name">${student.identite}</span>
+                        <span class="status-icon" id="icon-${student.id}">${savedObservations[student.identite] ? '🔎' : '＋'}</span>
+                    `;
+
+                    const drawer = document.createElement('div');
+                    drawer.className = "obs-drawer";
+                    
+                    const area = document.createElement('textarea');
+                    area.className = "drawer-textarea";
+                    area.value = savedObservations[student.identite] || "";
+                    
+                    area.oninput = () => {
+                        savedObservations[student.identite] = area.value;
+                        if (!area.value.trim()) delete savedObservations[student.identite];
+                        localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
+                        document.getElementById(`icon-${student.id}`).innerText = savedObservations[student.identite] ? '🔎' : '＋';
+                        autoResize(area);
+                        updateExportBadge(true);
+                    };
+
+                    item.onclick = () => {
+                        const isOpen = drawer.classList.contains('open');
+                        if (isOpen) {
+                            drawer.classList.remove('open');
+                            item.classList.remove('active');
+                        } else {
+                            drawer.classList.add('open');
+                            item.classList.add('active');
+                            autoResize(area);
+                            setTimeout(() => area.focus(), 10);
+                        }
+                    };
+
+                    drawer.appendChild(area);
+                    block.appendChild(item);
+                    block.appendChild(drawer);
+                    list.appendChild(block);
+                });
+                wrapper.appendChild(list);
+                container.appendChild(wrapper);
             });
         }
 
-        // ====================== MODAL MANAGEMENT ====================== 
-        function openCommentModal(student) {
-            currentStudentId = student.id;
-            currentStudentName = student.identite;
-            document.getElementById('modalTitle').innerText = formatName(student.identite);
-            document.getElementById('commentInput').value = savedObservations[student.identite] || "";
-            
-            const modal = document.getElementById('modal');
-            modal.style.display = 'flex';
-
-            // Sauvegarde automatique lors d'un clic sur le fond noir
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    saveData();
-                }
-            };
-
-            setTimeout(() => document.getElementById('commentInput').focus(), 100);
+        function updateExportBadge(val) {
+            const b = document.getElementById('badge-export');
+            if (val) { b.classList.remove('hidden'); localStorage.setItem(STORAGE_KEYS.needsExport, 'true'); }
+            else { b.classList.add('hidden'); localStorage.removeItem(STORAGE_KEYS.needsExport); }
         }
 
-        function closeAllModals() {
-            document.getElementById('modal').style.display = 'none';
-            document.getElementById('modal-aide').style.display = 'none';
-            document.getElementById('alertModal').style.display = 'none';
+        function applyTheme() {
+            const savedMode = localStorage.getItem(STORAGE_KEYS.themeMode);
+            document.body.classList.toggle('light-mode', savedMode === 'light');
+            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+            const colorHex = COLOR_MAP[prefs['obs'] || 'green'] || '#22c55e';
+            document.documentElement.style.setProperty('--primary', colorHex);
+            if (prefs.fille) document.documentElement.style.setProperty('--student-name-girl', COLOR_MAP[prefs.fille]);
+            if (prefs.garcon) document.documentElement.style.setProperty('--student-name-boy', COLOR_MAP[prefs.garcon]);
+            const txt = ['yellow', 'lime', 'amber', 'cyan'].includes(prefs['obs']) ? 'black' : 'white';
+            [document.getElementById('btn-retour'), document.getElementById('btn-aide'), document.getElementById('btn-fermer-aide')].forEach(el => { if(el){el.style.backgroundColor = colorHex; el.style.color = txt;} });
         }
 
-        function saveData() {
-            const value = document.getElementById('commentInput').value;
-            if (value.trim() === "") {
-                delete savedObservations[currentStudentName];
-            } else {
-                savedObservations[currentStudentName] = value;
-            }
-            localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
-            updateExportBadge(true);
-            renderStudentList();
-            closeAllModals(); 
-        }
-
-        // ====================== EXPORT/IMPORT ====================== 
         function exportToFile() {
-            if (Object.keys(savedObservations).length === 0) {
-                showAlert("Vide", "Il n'y a aucune observation à exporter.", null, false);
-                return;
-            }
-
-            const content = Object.entries(savedObservations)
-                .map(([name, obs]) => `${name};${obs.replace(/\n/g, LINE_BREAK_MARKER)}`)
-                .join("\n");
-
-            const fileName = `outilsprofs_observations_${new Date().toISOString().split('T')[0]}.txt`;
-
-            if (window.Android && typeof window.Android.exportTxt === "function") {
-                window.Android.exportTxt(content, fileName);
-            } else {
-                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }
-
+            if (Object.keys(savedObservations).length === 0) return;
+            const content = Object.entries(savedObservations).map(([n, o]) => `${n};${o.replace(/\n/g, '[BR]')}`).join("\n");
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `obs_${new Date().toISOString().slice(0,10)}.txt`; a.click();
             updateExportBadge(false);
         }
 
-        document.getElementById('importFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
+        document.getElementById('importFile').onchange = function(e) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const lines = event.target.result.split(/\r?\n/);
-                    const newObservations = {};
-
-                    lines.forEach(line => {
-                        const parts = line.split(";");
-                        if (parts.length >= 2) {
-                            const name = parts[0];
-                            const obs = parts.slice(1).join(";").replace(/\[BR\]/g, "\n");
-                            newObservations[name] = obs;
-                        }
-                    });
-
-                    if (Object.keys(newObservations).length > 0) {
-                        showAlert("Importer ?", "Fusionner avec les données existantes ?", () => {
-                            savedObservations = { ...savedObservations, ...newObservations };
-                            localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
-                            updateExportBadge(false);
-                            renderStudentList();
-                        });
-                    }
-                } catch (err) {
-                    showAlert("Erreur", "Fichier invalide.", null, false);
-                }
-            };
-            reader.readAsText(file);
-            this.value = "";
-        });
-
-        // ====================== PDF GENERATION ====================== 
-        async function genererPDF() {
-            if (Object.keys(savedObservations).length === 0) {
-                showAlert("Vide", "Aucune observation à inclure.", null, false);
-                return;
-            }
-
-            if (typeof html2pdf === 'undefined') {
-                alert("Erreur : La bibliothèque n'est pas chargée.");
-                return;
-            }
-
-            const teacherName = localStorage.getItem(STORAGE_KEYS.teacherName) || "Enseignant";
-            const dateStr = new Date().toLocaleDateString('fr-FR');
-            const fileName = `observations_${new Date().toISOString().split('T')[0]}.pdf`;
-
-            const element = document.createElement('div');
-            element.style.padding = '20px';
-            element.style.color = 'black';
-            element.style.backgroundColor = 'white';
-            element.style.fontFamily = 'Arial, sans-serif';
-
-            let html = `
-                <div style="text-align:center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px;">
-                    <h1 style="font-size:18px; margin:0;">OBSERVATIONS DES ÉLÈVES</h1>
-                    <p style="margin:5px 0;">${teacherName} - ${dateStr}</p>
-                </div>`;
-
-            const groups = {};
-            inscribedStudents.forEach(student => {
-                const level = student.niveau.toUpperCase();
-                if (savedObservations[student.identite]) {
-                    if (!groups[level]) groups[level] = [];
-                    groups[level].push(student);
-                }
-            });
-
-            Object.keys(groups)
-                .sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b))
-                .forEach(level => {
-                    html += `<h2 style="background:#f0f0f0; padding:8px; font-size:14px; margin-top:15px; border-left:4px solid #333;">${level}</h2>`;
-                    groups[level]
-                        .sort((a, b) => a.identite.localeCompare(b.identite))
-                        .forEach(student => {
-                            html += `
-                                <div style="margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:5px; page-break-inside:avoid;">
-                                    <b style="font-size:12px;">${formatName(student.identite)}</b><br>
-                                    <p style="font-size:11px; margin:4px 0; white-space:pre-wrap;">${savedObservations[student.identite]}</p>
-                                </div>`;
-                        });
-                });
-
-            element.innerHTML = html;
-
-            const opt = {
-                margin: 10,
-                filename: fileName,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            if (window.Android && window.Android.savePdfFromBase64) {
-                html2pdf().set(opt).from(element).output('datauristring').then((pdfBase64) => {
-                    const base64Clean = pdfBase64.split(',')[1];
-                    window.Android.savePdfFromBase64(base64Clean, fileName);
-                }).catch(err => {
-                    alert("Erreur PDF : " + err);
-                });
-            } else {
-                html2pdf().set(opt).from(element).save();
-            }
-        }
-
-        // ====================== DELETE DATA ====================== 
-        function toutEffacer() {
-            showAlert("Tout effacer ?", "Supprimer toutes les observations ?", () => {
-                savedObservations = {};
+            reader.onload = (ev) => {
+                ev.target.result.split(/\r?\n/).forEach(l => { const p = l.split(";"); if(p.length>=2) savedObservations[p[0]] = p.slice(1).join(";").replace(/\[BR\]/g, "\n"); });
                 localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
-                updateExportBadge(true);
                 renderStudentList();
-            });
-        }
-
-        // ====================== HELP MODAL ====================== 
-        function ouvrirAide() {
-            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
-            const colorHex = COLOR_MAP[prefs.obs] || '#22c55e';
-
-            const display = document.getElementById('aide-content');
-            display.innerHTML = `
-                <h3 style="color:${colorHex}">💡 Observations</h3>
-                <p>Gérez ici les remarques liées à vos élèves.</p>
-                <ul class="space-y-2">
-                    <li>• <strong>Icone 🔎 :</strong> Indique qu'une note est enregistrée.</li>
-                    <li>• <strong>Icone ＋ :</strong> Aucune note pour cet élève.</li>
-                    <li>• <strong>Portabilité :</strong> L'export et l'import se basent sur le NOM et le PRÉNOM. Vous pouvez transférer vos notes d'un appareil à l'autre sans problème.</li>
-                    <li><strong>Pastille <span class="mini-pastille"></span> :</strong> Si elle apparaît sur le bouton export, cela signifie que vos données locales ne sont pas synchronisées avec votre dernier fichier de sauvegarde. Il est alors temps d'utiliser le bouton "👆 exporter.txt 👆".</li>
-                </ul>`;
-            document.getElementById('modal-aide').style.display = 'flex';
-        }
-
-        function fermerAide() {
-            closeAllModals();
-        }
-
-        // ====================== ALERT MANAGEMENT ====================== 
-        function showAlert(title, text, onConfirm, showCancel = true) {
-            document.getElementById('alertTitle').innerText = title;
-            document.getElementById('alertText').innerText = text;
-
-            const prefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
-            const colorHex = COLOR_MAP[prefs.obs || 'green'] || '#22c55e';
-
-            const confirmBtn = document.getElementById('alertConfirmBtn');
-            const cancelBtn = document.getElementById('alertCancelBtn');
-
-            confirmBtn.style.backgroundColor = colorHex;
-            cancelBtn.style.display = showCancel ? 'block' : 'none';
-
-            const newBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-            newBtn.onclick = () => {
-                closeAlert();
-                if (onConfirm) onConfirm();
             };
-
-            document.getElementById('alertModal').style.display = 'flex';
-        }
-
-        function closeAlert() {
-            closeAllModals();
-        }
-
-		// ====================== GESTION DES TOUCHES CLAVIER ====================== 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                // Si la modale de saisie est ouverte, on sauvegarde avant de fermer
-                if (document.getElementById('modal').style.display === 'flex') {
-                    saveData();
-                } else {
-                    closeAllModals();
-                }
-            }
-        });
-
-        // ====================== INITIALIZATION ====================== 
-        window.onload = () => {
-            applyTheme();
-            renderStudentList();
-            checkBadgeStatus();
+            reader.readAsText(e.target.files[0]);
         };
+
+        function genererPDF() {
+            const element = document.createElement('div');
+            element.style.padding = '20px'; element.style.color = 'black'; element.style.backgroundColor = 'white';
+            let html = `<h1 style="text-align:center; font-size:16px; margin-bottom:20px;">OBSERVATIONS</h1>`;
+            Object.keys(savedObservations).sort().forEach(name => {
+                html += `<div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;"><b>${name}</b><p style="font-size:11px; white-space:pre-wrap; margin:5px 0;">${savedObservations[name]}</p></div>`;
+            });
+            element.innerHTML = html;
+            html2pdf().from(element).save('observations.pdf');
+        }
+
+        function toutEffacer() { showAlert("Effacer ?", "Supprimer tout ?", () => { savedObservations = {}; localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations)); updateExportBadge(true); renderStudentList(); }); }
+        function ouvrirAide() { document.getElementById('modal-aide').style.display='flex'; document.getElementById('aide-content').innerHTML='<p class="text-xs">Les deux boutons en haut agissent sur tous les niveaux en même temps.</p>'; }
+        function fermerAide() { document.getElementById('modal-aide').style.display='none'; }
+        function showAlert(t, tx, c) { document.getElementById('alertTitle').innerText=t; document.getElementById('alertText').innerText=tx; const cb=document.getElementById('alertConfirmBtn'); cb.style.backgroundColor=getComputedStyle(document.documentElement).getPropertyValue('--primary'); cb.onclick=()=>{closeAlert(); if(c)c();}; document.getElementById('alertModal').style.display='flex'; }
+        function closeAlert() { document.getElementById('alertModal').style.display='none'; }
+
+        window.onload = () => { applyTheme(); renderStudentList(); if (localStorage.getItem(STORAGE_KEYS.needsExport) === 'true') updateExportBadge(true); };
     </script>
 </body>
 </html>
