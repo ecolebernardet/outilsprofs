@@ -491,7 +491,7 @@
             const modal = document.getElementById('modal');
             modal.style.display = 'flex';
 
-            // Si on clique sur le fond noir, on SAUVEGARDE puis on ferme
+            // Sauvegarde automatique lors d'un clic sur le fond noir
             modal.onclick = function(e) {
                 if (e.target === modal) {
                     saveData();
@@ -517,7 +517,7 @@
             localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
             updateExportBadge(true);
             renderStudentList();
-            closeAllModals(); // On ferme APRES avoir enregistré
+            closeAllModals(); 
         }
 
         // ====================== EXPORT/IMPORT ====================== 
@@ -722,6 +722,7 @@
 		// ====================== GESTION DES TOUCHES CLAVIER ====================== 
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape") {
+                // Si la modale de saisie est ouverte, on sauvegarde avant de fermer
                 if (document.getElementById('modal').style.display === 'flex') {
                     saveData();
                 } else {
