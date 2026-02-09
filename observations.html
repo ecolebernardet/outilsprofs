@@ -263,7 +263,7 @@
 
     <!-- ====================== COMMENT MODAL ====================== -->
     <div id="modal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <h2 class="modal-title" id="modalTitle">Élève</h2>
             <textarea id="commentInput" rows="8" placeholder="Écrire une observation..."></textarea>
             <div class="modal-btns">
@@ -487,12 +487,24 @@
             currentStudentName = student.identite;
             document.getElementById('modalTitle').innerText = formatName(student.identite);
             document.getElementById('commentInput').value = savedObservations[student.identite] || "";
-            document.getElementById('modal').style.display = 'flex';
+            
+            const modal = document.getElementById('modal');
+            modal.style.display = 'flex';
+
+            // Si on clique sur le fond noir, on SAUVEGARDE puis on ferme
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    saveData();
+                }
+            };
+
             setTimeout(() => document.getElementById('commentInput').focus(), 100);
         }
 
         function closeAllModals() {
             document.getElementById('modal').style.display = 'none';
+            document.getElementById('modal-aide').style.display = 'none';
+            document.getElementById('alertModal').style.display = 'none';
         }
 
         function saveData() {
@@ -505,7 +517,7 @@
             localStorage.setItem(STORAGE_KEYS.observations, JSON.stringify(savedObservations));
             updateExportBadge(true);
             renderStudentList();
-            closeAllModals();
+            closeAllModals(); // On ferme APRES avoir enregistré
         }
 
         // ====================== EXPORT/IMPORT ====================== 
@@ -676,7 +688,7 @@
         }
 
         function fermerAide() {
-            document.getElementById('modal-aide').style.display = 'none';
+            closeAllModals();
         }
 
         // ====================== ALERT MANAGEMENT ====================== 
@@ -704,8 +716,19 @@
         }
 
         function closeAlert() {
-            document.getElementById('alertModal').style.display = 'none';
+            closeAllModals();
         }
+
+		// ====================== GESTION DES TOUCHES CLAVIER ====================== 
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                if (document.getElementById('modal').style.display === 'flex') {
+                    saveData();
+                } else {
+                    closeAllModals();
+                }
+            }
+        });
 
         // ====================== INITIALIZATION ====================== 
         window.onload = () => {
