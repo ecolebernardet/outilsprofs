@@ -174,7 +174,7 @@
             grid-template-columns: repeat(3, 2px);
             gap: 2px;
             cursor: grab;
-            opacity: 0.2;
+            opacity: 0.3;
             transition: opacity 0.3s;
             padding: 10px 4px;
             margin-right: 0px;
@@ -286,40 +286,40 @@
         .tool-card:active { transform: scale(0.97); }
 
 		/* Tool Drag Handle */
-.tool-drag-handle {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: grid;
-    grid-template-columns: repeat(2, 2px);
-    gap: 2px;
-    cursor: grab;
-    opacity: 0;
-    transition: opacity 0.3s;
-    padding: 5px;
-    z-index: 10;
-}
+		.tool-drag-handle {
+			position: absolute;
+			top: 8px;
+			right: 8px;
+			display: grid;
+			grid-template-columns: repeat(3, 2px);
+			gap: 2px;
+			cursor: grab;
+			opacity: 0.15;
+			transition: opacity 0.3s;
+			padding: 5px;
+			z-index: 10;
+		}
 
-.tool-card:hover .tool-drag-handle {
-    opacity: 0.3;
-}
+		.tool-card:hover .tool-drag-handle {
+			opacity: 0.4;
+		}
 
-.tool-drag-handle:hover {
-    opacity: 1 !important;
-}
+		.tool-drag-handle:hover {
+			opacity: 1 !important;
+		}
 
-.tool-drag-handle span {
-    width: 2px;
-    height: 2px;
-    background-color: var(--text-page);
-    border-radius: 50%;
-}
+		.tool-drag-handle span {
+			width: 2px;
+			height: 2px;
+			background-color: var(--text-page);
+			border-radius: 50%;
+		}
 
-/* Style pendant le déplacement */
-.tool-card.sortable-ghost {
-    opacity: 0.4;
-    transform: scale(0.9);
-}
+		/* Style pendant le déplacement */
+		.tool-card.sortable-ghost {
+			opacity: 0.4;
+			transform: scale(0.9);
+		}
 
         /* Icon Box */
         .category-icon-wrapper {
@@ -785,10 +785,10 @@
 
                 card.innerHTML = `
                     <div class="tool-drag-handle" title="Réorganiser l'outil">
-                        <span></span><span></span>
-                        <span></span><span></span>
-                        <span></span><span></span>
-                    </div>
+                        <span></span><span></span><span></span>
+						<span></span><span></span><span></span>
+						<span></span><span></span><span></span>
+					</div>
                     <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
                     <div class="tool-info">
                         <h3 class="font-black text-[11px] md:text-[14px] uppercase tracking-wide leading-tight" id="title-${tool.id}">

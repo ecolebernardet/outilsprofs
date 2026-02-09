@@ -172,7 +172,7 @@
             grid-template-columns: repeat(3, 2px);
             gap: 2px;
             cursor: grab;
-            opacity: 0.2;
+            opacity: 0.3;
             transition: opacity 0.3s;
             padding: 10px 4px;
             margin-right: 0px;
@@ -284,34 +284,34 @@
         .tool-card:active { transform: scale(0.97); }
 		
 		/* Poignée pour les tuiles individuelles */
-.tool-drag-handle {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: grid;
-    grid-template-columns: repeat(2, 2px);
-    gap: 2px;
-    cursor: grab;
-    opacity: 0;
-    transition: opacity 0.3s;
-    padding: 4px;
-    z-index: 10;
-}
+		.tool-drag-handle {
+			position: absolute;
+			top: 8px;
+			right: 8px;
+			display: grid;
+			grid-template-columns: repeat(3, 2px);
+			gap: 2px;
+			cursor: grab;
+			opacity: 0.15;
+			transition: opacity 0.3s;
+			padding: 4px;
+			z-index: 10;
+		}
 
-.tool-card:hover .tool-drag-handle {
-    opacity: 0.4;
-}
+		.tool-card:hover .tool-drag-handle {
+			opacity: 0.4;
+		}
 
-.tool-drag-handle:hover {
-    opacity: 1 !important;
-}
+		.tool-drag-handle:hover {
+			opacity: 1 !important;
+		}
 
-.tool-drag-handle span {
-    width: 2px;
-    height: 2px;
-    background-color: var(--text-page);
-    border-radius: 50%;
-}
+		.tool-drag-handle span {
+			width: 2px;
+			height: 2px;
+			background-color: var(--text-page);
+			border-radius: 50%;
+		}
 
         /* Icon Box */
 		
@@ -745,9 +745,9 @@
             // Ajout de la poignée de déplacement (tool-drag-handle)
             card.innerHTML = `
                 <div class="tool-drag-handle" title="Réorganiser l'outil">
-                    <span></span><span></span>
-                    <span></span><span></span>
-                    <span></span><span></span>
+                    <span></span><span></span><span></span>
+					<span></span><span></span><span></span>
+					<span></span><span></span><span></span>
                 </div>
                 <div class="icon-box" id="icon-${tool.id}">${tool.icon}</div>
                 <div class="tool-info">
