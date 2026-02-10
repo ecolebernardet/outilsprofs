@@ -62,7 +62,7 @@
             justify-content: space-between;
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 0;
         }
 
         header h1 {
@@ -92,6 +92,61 @@
         #btn-aide:active {
             transform: scale(0.95);
         }
+
+        /* ============ TAB NAVIGATION ============ */
+        .tabs-container {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            position: sticky;
+            top: 58px;
+            z-index: 99;
+            padding: 10px 15px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: var(--input-bg);
+            color: var(--item-text-url);
+            border: 1px solid var(--column-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .tab-button:active {
+            transform: scale(0.95);
+        }
+
+        .tab-button.active {
+            background: var(--card-bg);
+            border: 2px solid;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-button.tab-ecole { border-color: #f43f5e; color: #f43f5e; }
+        .tab-button.tab-ressources { border-color: #3b82f6; color: #3b82f6; }
+        .tab-button.tab-institutionnel { border-color: #a855f7; color: #a855f7; }
+        .tab-button.tab-autres { border-color: #10b981; color: #10b981; }
 
         /* ============ MAIN LAYOUT ============ */
         .main-wrapper {
@@ -134,6 +189,17 @@
             min-width: 0;
             scroll-margin-top: 90px;
             height: fit-content;
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        }
+
+        .column.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+            opacity: 0.6;
+        }
+
+        .column.collapsed .links-list {
+            display: none;
         }
 
         .column-header {
@@ -145,6 +211,12 @@
             border-bottom: 2px solid;
             display: flex;
             align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .column-header:hover {
+            opacity: 0.8;
         }
 
         /* ============ HANDLE (Drag Handle) ============ */
@@ -501,6 +573,22 @@
     <button id="btn-aide" onclick="ouvrirAide()">💡</button>
 </header>
 
+<!-- ============ TAB NAVIGATION ============ -->
+<div class="tabs-container">
+    <button class="tab-button tab-ecole active" data-tab="École" onclick="switchTab('École')">
+        <span>🏫</span> École
+    </button>
+    <button class="tab-button tab-ressources" data-tab="Ressources" onclick="switchTab('Ressources')">
+        <span>🧰</span> Ressources
+    </button>
+    <button class="tab-button tab-institutionnel" data-tab="Institutionnel" onclick="switchTab('Institutionnel')">
+        <span>🧑🏻‍💼</span> Inst.
+    </button>
+    <button class="tab-button tab-autres" data-tab="Autres" onclick="switchTab('Autres')">
+        <span>🌍</span> Autres
+    </button>
+</div>
+
 <!-- ============ MAIN CONTENT ============ -->
 <div class="main-wrapper">
     <div id="categoriesContainer"></div>
@@ -563,6 +651,10 @@
     let links = JSON.parse(localStorage.getItem('eduLinksList')) || [];
     let currentSelectedCat = "École";
     let editingLinkId = null;
+    
+    // Load active tab from localStorage with validation
+    const storedActiveTab = localStorage.getItem('eduActiveTab');
+    let activeTab = (storedActiveTab && CATEGORIES.includes(storedActiveTab)) ? storedActiveTab : "École";
 
     // ============ DOM SELECTORS (Cached) ============
     const DOM = {
@@ -811,6 +903,49 @@
         };
     }
 
+    // ============ TAB MANAGEMENT ============
+    // Timing constants for UI animations
+    const SCROLL_DELAY_MS = 100; // Delay before scrolling to allow accordion animation to complete
+    const ACCORDION_RENDER_DELAY_MS = 10; // Short delay to ensure DOM is ready for accordion state
+    const TAB_BUTTON_UPDATE_DELAY_MS = 20; // Delay to update tab buttons after render
+    
+    function switchTab(tabName) {
+        activeTab = tabName;
+        localStorage.setItem('eduActiveTab', activeTab);
+        
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+        });
+        
+        // Apply accordion behavior to columns
+        applyAccordionBehavior();
+        
+        // Scroll the active category to view after animation completes
+        setTimeout(() => {
+            const activeCol = document.querySelector(`.column[data-cat="${tabName}"]`);
+            if (activeCol) {
+                activeCol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, SCROLL_DELAY_MS);
+    }
+
+    function applyAccordionBehavior() {
+        document.querySelectorAll('.column').forEach(col => {
+            const cat = col.getAttribute('data-cat');
+            if (cat === activeTab) {
+                col.classList.remove('collapsed');
+            } else {
+                col.classList.add('collapsed');
+            }
+        });
+    }
+
+    function toggleCategory(categoryName) {
+        // When clicking a category header, switch to that tab
+        switchTab(categoryName);
+    }
+
     // ============ RENDERING ============
     function render() {
         DOM.categoriesContainer.innerHTML = '';
@@ -828,8 +963,8 @@
                 : catLinks.map(link => createLinkItemHtml(link, conf)).join('');
 
             col.innerHTML = `
-                <div class="column-header ${conf.text} ${conf.border}">
-                    <div class="dots-handle handle-cat mr-3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="column-header ${conf.text} ${conf.border}" onclick="toggleCategory('${cat}')">
+                    <div class="dots-handle handle-cat mr-3" onclick="event.stopPropagation()"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                     <span class="mr-2">${conf.emoji}</span> ${cat}
                 </div>
                 <div class="links-list" data-cat="${cat}">
@@ -841,6 +976,9 @@
         });
 
         initSortables();
+        
+        // Apply accordion behavior after DOM is updated
+        setTimeout(() => applyAccordionBehavior(), ACCORDION_RENDER_DELAY_MS);
     }
 
     function createLinkItemHtml(link, conf) {
@@ -938,6 +1076,13 @@
         initCategoryButtonListeners();
         render();
         checkBadgeStatus();
+        
+        // Update tab button states to match active tab after render
+        setTimeout(() => {
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTab);
+            });
+        }, TAB_BUTTON_UPDATE_DELAY_MS);
     });
 </script>
 </body>
