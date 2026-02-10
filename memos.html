@@ -21,165 +21,380 @@
         /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ====================== THEME VARIABLES ====================== */
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --header-bg: #1e1e1e;
-            --header-border: rgba(255, 255, 255, 0.1); --border-color: rgba(255, 255, 255, 0.1);
-            --card-bg: #1e1e1e; --card-text: #ffffff; --input-bg: #2a2a2a;
-            --input-border: rgba(255, 255, 255, 0.1); --input-text: #ffffff;
+            --bg-page: #121212; 
+            --text-page: #ffffff; 
+            --header-bg: #1e1e1e;
+            --header-border: rgba(255, 255, 255, 0.1); 
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e1e1e; 
+            --card-text: #ffffff; 
+            --input-bg: #2a2a2a;
+            --input-border: rgba(255, 255, 255, 0.1); 
+            --input-text: #ffffff;
+            --theme-color: #a855f7;
         }
 
         body.light-mode, html.light-mode-init body {
-            --bg-page: #eeeeee; --text-page: #111827; --header-bg: #ffffff;
-            --header-border: #ddd; --border-color: #ddd; --card-bg: #ffffff;
-            --card-text: #111827; --input-bg: #f3f4f6; --input-border: #9ca3af;
+            --bg-page: #eeeeee; 
+            --text-page: #111827; 
+            --header-bg: #ffffff;
+            --header-border: #ddd; 
+            --border-color: #ddd; 
+            --card-bg: #ffffff;
+            --card-text: #111827; 
+            --input-bg: #f3f4f6; 
+            --input-border: #9ca3af;
             --input-text: #111827;
         }
 
+        /* ====================== BASE STYLES ====================== */
         body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); 
-            padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center;
-            padding-left: 15px; padding-right: 15px; padding-bottom: 20px;
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-page); 
+            padding: 0 15px 20px 15px; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            transition: background 0.3s ease;
         }
 
-        /* Header */
+        /* ====================== HEADER & NAVIGATION ====================== */
         header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--header-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: calc(100% + 30px); margin-left: -15px; margin-bottom: 12px;
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--header-border);
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            display: flex; 
+            align-items: center;
+            justify-content: space-between; 
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: calc(100% + 30px); 
+            margin-left: -15px; 
+            margin-bottom: 12px;
         }
 
-        .container { width: 100%; max-width: 600px; padding: 0 4px; }
-
-        /* Input Fields */
-        .input-field { 
-            background: var(--input-bg); border: 1px solid var(--input-border); 
-            color: var(--input-text); border-radius: 0.75rem; padding: 10px; 
-            outline: none; font-size: 0.8rem; font-weight: 600; width: 100%;
+        #btn-retour, 
+        #btn-aide, 
+        #btn-search-trigger { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
-        /* Header Buttons */
-        #btn-retour, #btn-aide, #btn-search-trigger { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+        .container { 
+            width: 100%; 
+            max-width: 600px; 
+            padding: 0 4px; 
         }
 
-        /* Search Bar */
+        /* ====================== SEARCH BAR ====================== */
         #searchWrapper { 
-            max-height: 0; overflow: hidden; 
-            transition: max-height 0.4s ease, opacity 0.3s; opacity: 0;
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s ease, opacity 0.3s; 
+            opacity: 0;
         }
+
         #searchWrapper.open { 
-            max-height: 100px; margin-bottom: 1.5rem; opacity: 1;
+            max-height: 100px; 
+            margin-bottom: 1.5rem; 
+            opacity: 1;
         }
 
-        /* Color Picker */
+        /* ====================== FORM & INPUT ELEMENTS ====================== */
+        .input-field { 
+            background: var(--input-bg); 
+            border: 1px solid var(--input-border); 
+            color: var(--input-text); 
+            border-radius: 0.75rem; 
+            padding: 10px; 
+            outline: none; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--theme-color);
+        }
+
+        /* ====================== COLOR PICKER ====================== */
         .color-dot { 
-            width: 22px; height: 22px; border-radius: 50%; cursor: pointer; 
-            border: 1px solid rgba(0, 0, 0, 0.2); flex-shrink: 0;
+            width: 22px; 
+            height: 22px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            border: 1px solid rgba(0, 0, 0, 0.2); 
+            flex-shrink: 0;
+            transition: all 0.2s ease;
         }
+
         .color-dot.active { 
-            border: 2.5px solid white !important; box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            border: 2.5px solid white !important; 
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* Notes Grid */
-        .note-grid { column-count: 2; column-gap: 10px; width: 100%; }
-        @media (min-width: 600px) { .note-grid { column-count: 3; } }
+        /* ====================== NOTES GRID ====================== */
+        .note-grid { 
+            column-count: 2; 
+            column-gap: 10px; 
+            width: 100%; 
+            margin-bottom: 1.5rem;
+        }
 
+        @media (min-width: 600px) { 
+            .note-grid { 
+                column-count: 3; 
+            } 
+        }
+
+        /* ====================== NOTE CARD ====================== */
         .note-card { 
-            break-inside: avoid; display: inline-block; width: 100%; margin-bottom: 10px; 
-            border-radius: 12px; padding: 10px; border: 1px solid rgba(0,0,0,0.1); 
-            position: relative; cursor: pointer; transition: all 0.2s;
+            break-inside: avoid; 
+            display: inline-block; 
+            width: 100%; 
+            margin-bottom: 10px; 
+            border-radius: 12px; 
+            padding: 10px; 
+            border: 1px solid rgba(0, 0, 0, 0.1); 
+            position: relative; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
         .note-card.editing { 
-            ring: 3px solid var(--theme-color); transform: scale(0.98);
+            transform: scale(0.98);
+            box-shadow: 0 0 0 3px var(--theme-color);
         }
 
-        /* Drag Handle */
-        .drag-handle { 
-            display: grid; grid-template-columns: repeat(3, 2px); gap: 2px; 
-            opacity: 0.3; cursor: grab; padding: 4px; margin-left: 8px; flex-shrink: 0;
-        }
-        .drag-handle span { 
-            width: 2px; height: 2px; background-color: currentColor; border-radius: 50%;
-        }
-
-        /* Note Content */
         .note-header { 
-            display: flex; align-items: flex-start; justify-content: space-between; 
-            border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 4px; margin-bottom: 6px;
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: space-between; 
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1); 
+            padding-bottom: 4px; 
+            margin-bottom: 6px;
         }
+
         .note-title { 
-            font-size: 10px; font-weight: 800; text-transform: uppercase; 
-            line-height: 1.2; word-break: break-word;
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            line-height: 1.2; 
+            word-break: break-word;
         }
+
+        .note-date {
+            font-size: 8px;
+            font-weight: 700;
+            opacity: 0.5;
+            margin-top: 2px;
+        }
+
         .note-card-content { 
-            font-size: 11px; font-weight: 500; line-height: 1.3; 
-            white-space: pre-wrap; word-break: break-word;
+            font-size: 11px; 
+            font-weight: 500; 
+            line-height: 1.3; 
+            white-space: pre-wrap; 
+            word-break: break-word;
         }
 
-        /* Navigation */
-        .bottom-nav { width: 100%; max-width: 400px; margin: 25px auto 0; padding-bottom: 40px; }
+        /* ====================== DRAG HANDLE ====================== */
+        .drag-handle { 
+            display: grid; 
+            grid-template-columns: repeat(3, 2px); 
+            gap: 2px; 
+            opacity: 0.3; 
+            cursor: grab; 
+            padding: 4px; 
+            margin-left: 8px; 
+            flex-shrink: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .drag-handle:hover {
+            opacity: 0.6;
+        }
+
+        .drag-handle span { 
+            width: 2px; 
+            height: 2px; 
+            background-color: currentColor; 
+            border-radius: 50%;
+        }
+
+        /* ====================== NAVIGATION ====================== */
+        .bottom-nav { 
+            width: 100%; 
+            max-width: 400px; 
+            margin: 25px auto 0; 
+            padding-bottom: 40px;
+        }
+
         .nav-btn { 
-            font-weight: 900; border-radius: 50px; font-size: 9px; padding: 12px; 
-            border: none; flex: 1; display: flex; align-items: center; justify-content: center; 
-            gap: 5px; cursor: pointer;
+            font-weight: 900; 
+            border-radius: 50px; 
+            font-size: 9px; 
+            padding: 12px; 
+            border: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #000;
+            color: white;
         }
 
-        /* Modals */
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ====================== MODALS ====================== */
         .modal-overlay { 
-            display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
-            align-items: center; justify-content: center; padding: 20px;
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0, 0, 0, 0.8); 
+            backdrop-filter: blur(5px); 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
         }
+
         .modal-content { 
-            background: var(--card-bg); padding: 25px; border-radius: 1.5rem; 
-            width: 100%; max-width: 400px; border: 1px solid var(--border-color); position: relative;
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 1.5rem; 
+            width: 100%; 
+            max-width: 400px; 
+            border: 1px solid var(--border-color); 
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
-        .btns { display: flex; gap: 10px; margin-top: 20px; }
 
-        #modal-form { z-index: 1000; }
-        #modal-alerte { z-index: 1100; }
-        #modal-aide { z-index: 1200; }
+        #modal-form .modal-content {
+            max-width: 500px;
+        }
 
-        #form-title { color: var(--theme-color); }
+        #modal-form { 
+            z-index: 1000; 
+        }
 
-        /* Animations */
+        #modal-alerte { 
+            z-index: 1100; 
+        }
+
+        #modal-aide { 
+            z-index: 1200; 
+        }
+
+        #form-title { 
+            color: var(--theme-color); 
+            text-align: center;
+        }
+
+        .btns { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 20px; 
+        }
+
+        /* ====================== ANIMATIONS ====================== */
         @keyframes pulse-orange {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+            0% { 
+                transform: scale(0.95); 
+                box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); 
+            }
+            70% { 
+                transform: scale(1); 
+                box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); 
+            }
+            100% { 
+                transform: scale(0.95); 
+                box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); 
+            }
         }
-        .badge-pulse { animation: pulse-orange 2s infinite; }
+
+        .badge-pulse { 
+            animation: pulse-orange 2s infinite; 
+        }
 
         @keyframes blink-point {
-            0% { transform: scale(0.9); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.5; }
-        }
-        .mini-pastille {
-            display: inline-block; width: 8px; height: 8px; background-color: #f97316;
-            border-radius: 50%; margin-left: 4px; margin-right: 2px;
-            box-shadow: 0 0 5px #f97316; animation: blink-point 1.5s infinite;
+            0% { 
+                transform: scale(0.9); 
+                opacity: 0.5; 
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(0.9); 
+                opacity: 0.5; 
+            }
         }
 
-        /* FAB Button */
+        .mini-pastille {
+            display: inline-block; 
+            width: 8px; 
+            height: 8px; 
+            background-color: #f97316;
+            border-radius: 50%; 
+            margin-left: 4px; 
+            margin-right: 2px;
+            box-shadow: 0 0 5px #f97316; 
+            animation: blink-point 1.5s infinite;
+        }
+
+        /* ====================== FAB BUTTON ====================== */
         #btnAddMemo {
-            position: fixed; bottom: 60px; right: 20px; width: 64px; height: 64px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            z-index: 50; border: none; cursor: pointer; transition: all 0.2s;
+            position: fixed; 
+            bottom: 60px; 
+            right: 20px; 
+            width: 64px; 
+            height: 64px;
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 50; 
+            border: none; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
         }
-        #btnAddMemo:active { transform: scale(0.9); }
+
+        #btnAddMemo:active { 
+            transform: scale(0.9); 
+        }
+
         @media (hover: hover) {
-            #btnAddMemo:hover { transform: scale(1.1); }
+            #btnAddMemo:hover { 
+                transform: scale(1.1); 
+            }
         }
     </style>
 </head>
 <body>
 
     <!-- ====================== FAB BUTTON ====================== -->
-    <button id="btnAddMemo" onclick="ouvrirFormulaire()">
+    <button id="btnAddMemo" onclick="UI.openForm()">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
         </svg>
@@ -187,7 +402,7 @@
 
     <!-- ====================== MODALS ====================== -->
     <!-- Help Modal -->
-    <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+    <div id="modal-aide" class="modal-overlay" onclick="Modal.close('modal-aide')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Mémos</h2>
             <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
@@ -209,7 +424,7 @@
                     <p class="mt-1">Cette pastille signale que vos mémos ont été modifiés depuis votre dernier export .txt.</p>
                 </div>
             </div>
-            <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
+            <button id="btn-fermer-aide" onclick="Modal.close('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
         </div>
     </div>
 
@@ -219,18 +434,18 @@
             <h2 id="alerte-titre" class="text-lg font-black uppercase mb-4">Alerte</h2>
             <div id="alerte-texte" class="text-[11px] leading-relaxed opacity-80 mb-6 text-center"></div>
             <div class="btns">
-                <button id="alerte-cancel" onclick="fermerModal('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
+                <button id="alerte-cancel" onclick="Modal.close('modal-alerte')" class="flex-1 py-3 bg-neutral-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">Annuler</button>
                 <button id="alerte-confirm" class="flex-1 py-3 text-white rounded-xl text-[10px] font-black uppercase tracking-widest"></button>
             </div>
         </div>
     </div>
 
     <!-- Form Modal -->
-    <div id="modal-form" class="modal-overlay" onclick="cancelEdit()">
-        <div class="modal-content !max-w-[500px]" onclick="event.stopPropagation()">
-            <h2 id="form-title" class="text-lg font-black uppercase mb-4 text-center">Nouveau Mémo</h2>
+    <div id="modal-form" class="modal-overlay" onclick="Form.cancel()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="form-title" class="text-lg font-black uppercase mb-4">Nouveau Mémo</h2>
             <textarea id="noteTitle" class="input-field resize-none h-[45px] mb-2" placeholder="Titre..."></textarea>
-            <textarea id="noteInput" class="input-field mb-3 min-h-[100px] resize-none" placeholder="Saisir une note..." oninput="autoExpand(this)"></textarea>
+            <textarea id="noteInput" class="input-field mb-3 min-h-[100px] resize-none" placeholder="Saisir une note..." oninput="Form.expandTextarea(this)"></textarea>
             
             <div class="flex flex-col gap-4">
                 <!-- Color Picker -->
@@ -246,9 +461,9 @@
                 
                 <!-- Action Buttons -->
                 <div class="flex gap-2 justify-center items-center">
-                    <button id="btnDelete" onclick="deleteSelectedNote()" class="hidden px-4 py-2.5 rounded-full bg-red-500 text-white text-[10px] font-black uppercase shadow-md active:scale-90">Effacer</button>
-                    <button id="btnAction" onclick="saveNote()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
-                    <button onclick="cancelEdit()" class="px-5 py-2.5 rounded-full bg-neutral-500/20 text-[10px] font-black uppercase active:scale-90">Fermer</button>
+                    <button id="btnDelete" onclick="Form.delete()" class="hidden px-4 py-2.5 rounded-full bg-red-500 text-white text-[10px] font-black uppercase shadow-md active:scale-90">Effacer</button>
+                    <button id="btnAction" onclick="Form.save()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase shadow-md active:scale-90 transition-transform">Ajouter</button>
+                    <button onclick="Form.cancel()" class="px-5 py-2.5 rounded-full bg-neutral-500/20 text-[10px] font-black uppercase active:scale-90">Fermer</button>
                 </div>
             </div>
         </div>
@@ -256,19 +471,19 @@
 
     <!-- ====================== HEADER ====================== -->
     <header>
-        <a href="index.html" id="btn-retour">
+        <a href="index.html" id="btn-retour" class="border border-current">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
         </a>
         <h1 id="pageTitle" class="font-black text-lg uppercase tracking-normal text-center flex-grow">Mémos</h1>
         <div class="flex gap-1">
-            <button id="btn-search-trigger" onclick="toggleSearch()">
+            <button id="btn-search-trigger" onclick="UI.toggleSearch()" class="border border-current">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </button>
-            <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+            <button id="btn-aide" onclick="Modal.open('modal-aide')" class="text-lg border border-current">💡</button>
         </div>
     </header>
 
@@ -276,263 +491,364 @@
     <div class="container">
         <!-- Search Bar -->
         <div id="searchWrapper">
-            <input type="text" id="searchInput" class="input-field shadow-sm mb-4" placeholder="Rechercher..." onkeyup="renderNotes()">
+            <input type="text" id="searchInput" class="input-field shadow-sm mb-4" placeholder="Rechercher..." onkeyup="Render.all()">
         </div>
 
         <!-- Notes Grid -->
-        <div id="notesGrid" class="note-grid mb-6"></div>
+        <div id="notesGrid" class="note-grid"></div>
 
         <!-- Footer Navigation -->
         <footer class="bottom-nav flex flex-col gap-2">
             <div class="flex gap-2 w-full">
-                <label class="nav-btn bg-black text-white cursor-pointer flex-1">
+                <label class="nav-btn cursor-pointer flex-1">
                     👇importer .txt👇
                     <input type="file" id="importNotesFile" class="hidden" accept=".txt">
                 </label>
-                <button id="btn-export" onclick="exportNotesToFile()" class="nav-btn bg-black text-white flex-1 relative overflow-visible">
+                <button id="btn-export" onclick="DataManager.export()" class="nav-btn flex-1 relative overflow-visible">
                     👆exporter .txt👆
                     <span id="badge-export" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-500 rounded-full border-2 border-white badge-pulse"></span>
                 </button>
             </div>
-            <button onclick="confirmResetAll()" class="nav-btn bg-red-500 text-white w-full shadow-lg">⚠️ effacer tous les mémos</button>
+            <button onclick="App.confirmResetAll()" class="nav-btn bg-red-500 w-full shadow-lg">⚠️ effacer tous les mémos</button>
         </footer>
     </div>
 
     <script>
-        // ====================== CONFIGURATION & CONSTANTS ====================== 
-        const COLOR_MAP = {
-            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
+        // ====================== CONFIGURATION ====================== 
+        const CONFIG = {
+            colors: {
+                'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+                'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+                'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+                'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+                'rose': '#f43f5e', 'gray': '#6b7280'
+            },
+            storage: {
+                notes: 'myKeepNotes',
+                needsExport: 'memos_needs_export',
+                lastExport: 'memos_last_export_date'
+            },
+            exportInterval: 604800000 // 7 days in milliseconds
         };
 
-        const STORAGE_KEYS = {
-            notes: 'myKeepNotes',
-            needsExport: 'memos_needs_export',
-            lastExport: 'memos_last_export_date'
+        // ====================== THEME ====================== 
+        const THEME = (() => {
+            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const colorName = prefs.memos || 'purple';
+            const hex = CONFIG.colors[colorName] || '#a855f7';
+            const needsDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
+            return { hex, textColor: needsDarkText ? 'black' : 'white' };
+        })();
+
+        // ====================== STATE ====================== 
+        const State = {
+            notes: JSON.parse(localStorage.getItem(CONFIG.storage.notes)) || [],
+            editingIndex: -1,
+            selectedColor: '#fef9c3',
+
+            save() {
+                localStorage.setItem(CONFIG.storage.notes, JSON.stringify(this.notes));
+            },
+
+            addNote(title, content, color) {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+                this.notes.unshift({ title, content, color, date: dateStr });
+                this.save();
+            },
+
+            updateNote(index, title, content, color) {
+                const originalDate = this.notes[index].date;
+                this.notes[index] = { title, content, color, date: originalDate };
+                this.save();
+            },
+
+            removeNote(index) {
+                this.notes.splice(index, 1);
+                this.save();
+            },
+
+            reorderNotes(indices) {
+                const reordered = indices.map(i => this.notes[i]);
+                this.notes = reordered;
+                this.save();
+            }
         };
 
-        const EXPORT_INTERVAL = 604800000; // 7 days in milliseconds
+        // ====================== UTILITIES ====================== 
+        const Utils = {
+            shadeColor(color, percent) {
+                let f = parseInt(color.slice(1), 16);
+                let t = percent < 0 ? 0 : 255;
+                let p = percent < 0 ? percent * -1 : percent;
+                let R = f >> 16;
+                let G = (f >> 8) & 0x00FF;
+                let B = f & 0x0000FF;
+                return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+            },
 
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const THEME_COLOR_NAME = themePrefs.memos || 'purple';
-        const THEME_HEX = COLOR_MAP[THEME_COLOR_NAME] || '#a855f7';
-        const NEEDS_DARK_TEXT = ['yellow', 'lime', 'amber', 'cyan'].includes(THEME_COLOR_NAME);
-        const THEME_TEXT_COLOR = NEEDS_DARK_TEXT ? 'black' : 'white';
+            getCardColor(cardColor) {
+                const isDark = !document.body.classList.contains('light-mode');
+                if (isDark) {
+                    return this.shadeColor(cardColor, -0.6);
+                }
+                return cardColor;
+            },
 
-        let notes = JSON.parse(localStorage.getItem(STORAGE_KEYS.notes)) || [];
-        let editingIndex = -1;
-        let selectedColor = '#fef9c3';
+            getCardTextColor(cardColor) {
+                const isDark = !document.body.classList.contains('light-mode');
+                if (isDark) return 'white';
+                return cardColor === '#6b7280' ? 'white' : '#121212';
+            }
+        };
+
+        // ====================== DOM HELPERS ====================== 
+        const DOM = {
+            get(id) {
+                return document.getElementById(id);
+            },
+
+            all(selector) {
+                return document.querySelectorAll(selector);
+            },
+
+            setStyle(id, prop, value) {
+                const el = this.get(id);
+                if (el) el.style[prop] = value;
+            },
+
+            addClass(id, className) {
+                const el = this.get(id);
+                if (el) el.classList.add(className);
+            },
+
+            removeClass(id, className) {
+                const el = this.get(id);
+                if (el) el.classList.remove(className);
+            },
+
+            toggleClass(id, className, force) {
+                const el = this.get(id);
+                if (el) el.classList.toggle(className, force);
+            },
+
+            applyButtonStyle(id) {
+                const el = this.get(id);
+                if (el) {
+                    el.style.backgroundColor = THEME.hex;
+                    el.style.color = THEME.textColor;
+                }
+            }
+        };
 
         // ====================== MODAL MANAGEMENT ====================== 
-        function ouvrirAide() {
-            appliquerTheme();
-            document.getElementById('modal-aide').style.display = 'flex';
-        }
+        const Modal = {
+            open(id) {
+                DOM.get(id).style.display = 'flex';
+            },
 
-        function fermerModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
+            close(id) {
+                DOM.get(id).style.display = 'none';
+            },
 
-        function afficherMessage(titre, texte, callback) {
-            document.getElementById('alerte-titre').innerText = titre;
-            document.getElementById('alerte-texte').innerText = texte;
-            const modal = document.getElementById('modal-alerte');
-            const confirmBtn = document.getElementById('alerte-confirm');
-            confirmBtn.style.backgroundColor = THEME_HEX;
-            confirmBtn.innerText = 'Confirmer';
-            confirmBtn.onclick = () => {
-                fermerModal('modal-alerte');
-                callback();
-            };
-            modal.style.display = 'flex';
-        }
+            showAlert(title, message, callback) {
+                DOM.get('alerte-titre').innerText = title;
+                DOM.get('alerte-texte').innerText = message;
+                const confirmBtn = DOM.get('alerte-confirm');
+                confirmBtn.style.backgroundColor = THEME.hex;
+                confirmBtn.innerText = 'Confirmer';
+                confirmBtn.onclick = () => {
+                    this.close('modal-alerte');
+                    callback();
+                };
+                this.open('modal-alerte');
+            }
+        };
 
         // ====================== FORM MANAGEMENT ====================== 
-        function ouvrirFormulaire() {
-            editingIndex = -1;
-            document.getElementById('form-title').innerText = "Nouveau Mémo";
-            document.getElementById('btnAction').innerText = "Ajouter";
-            document.getElementById('btnDelete').classList.add('hidden');
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteInput').value = '';
-            document.getElementById('noteInput').style.height = '60px';
-            selectedColor = '#fef9c3';
-            document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
-                d.classList.toggle('active', d.dataset.color === selectedColor);
-            });
-            document.getElementById('modal-form').style.display = 'flex';
-            document.getElementById('noteTitle').focus();
-        }
+        const Form = {
+            resetForm() {
+                DOM.get('noteTitle').value = '';
+                DOM.get('noteInput').value = '';
+                DOM.get('noteInput').style.height = '60px';
+                State.selectedColor = '#fef9c3';
+                this.updateColorPicker();
+            },
 
-        function saveNote() {
-			const title = document.getElementById('noteTitle').value.trim();
-			const content = document.getElementById('noteInput').value.trim();
-			if (!content) return;
+            updateColorPicker() {
+                DOM.all('#colorPicker .color-dot').forEach(d => {
+                    d.classList.toggle('active', d.dataset.color === State.selectedColor);
+                });
+            },
 
-			// On récupère la date actuelle
-			const now = new Date();
-			const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            expandTextarea(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+            },
 
-			const noteObj = { 
-				title, 
-				content, 
-				color: selectedColor,
-				date: editingIndex > -1 ? notes[editingIndex].date : dateStr // Garde l'ancienne date si on édite, sinon nouvelle date
-			};
+            setupColorPicker() {
+                DOM.all('#colorPicker .color-dot').forEach(dot => {
+                    dot.addEventListener('click', function() {
+                        DOM.all('#colorPicker .color-dot').forEach(d => d.classList.remove('active'));
+                        this.classList.add('active');
+                        State.selectedColor = this.dataset.color;
+                    });
+                });
+            },
 
-			if (editingIndex > -1) {
-				notes[editingIndex] = noteObj;
-			} else {
-				notes.unshift(noteObj);
-			}
+            save() {
+                const title = DOM.get('noteTitle').value.trim();
+                const content = DOM.get('noteInput').value.trim();
+                if (!content) return;
 
-			cancelEdit();
-			updateExportBadge(true);
-			saveAndRender();
-		}
+                if (State.editingIndex > -1) {
+                    State.updateNote(State.editingIndex, title, content, State.selectedColor);
+                } else {
+                    State.addNote(title, content, State.selectedColor);
+                }
 
-        function cancelEdit() {
-            editingIndex = -1;
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteInput').value = '';
-            document.getElementById('noteInput').style.height = '60px';
-            document.getElementById('modal-form').style.display = 'none';
-            renderNotes();
-        }
+                this.cancel();
+                DataExport.updateBadge(true);
+                Render.all();
+            },
 
-        function selectNote(index) {
-            editingIndex = index;
-            const note = notes[index];
-            document.getElementById('form-title').innerText = "Modifier le mémo";
-            document.getElementById('noteTitle').value = note.title || '';
-            document.getElementById('noteInput').value = note.content;
-            selectedColor = note.color;
+            delete() {
+                if (State.editingIndex === -1) return;
+                Modal.showAlert('Supprimer ?', 'Voulez-vous supprimer ce mémo ?', () => {
+                    State.removeNote(State.editingIndex);
+                    this.cancel();
+                    DataExport.updateBadge(true);
+                    Render.all();
+                });
+            },
 
-            document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
-                d.classList.toggle('active', d.dataset.color === selectedColor);
-            });
+            load(index) {
+                State.editingIndex = index;
+                const note = State.notes[index];
+                DOM.get('form-title').innerText = 'Modifier le mémo';
+                DOM.get('noteTitle').value = note.title || '';
+                DOM.get('noteInput').value = note.content;
+                State.selectedColor = note.color;
+                this.updateColorPicker();
+                DOM.get('btnAction').innerText = 'Mettre à jour';
+                DOM.removeClass('btnDelete', 'hidden');
+                this.expandTextarea(DOM.get('noteInput'));
+                Modal.open('modal-form');
+            },
 
-            document.getElementById('btnAction').innerText = "Mettre à jour";
-            document.getElementById('btnDelete').classList.remove('hidden');
-            document.getElementById('modal-form').style.display = 'flex';
-            autoExpand(document.getElementById('noteInput'));
-        }
-
-        function deleteSelectedNote() {
-            if (editingIndex === -1) return;
-            afficherMessage("Supprimer ?", "Voulez-vous supprimer ce mémo ?", () => {
-                notes.splice(editingIndex, 1);
-                cancelEdit();
-                updateExportBadge(true);
-                saveAndRender();
-            });
-        }
+            cancel() {
+                State.editingIndex = -1;
+                this.resetForm();
+                DOM.get('form-title').innerText = 'Nouveau Mémo';
+                DOM.get('btnAction').innerText = 'Ajouter';
+                DOM.addClass('btnDelete', 'hidden');
+                Modal.close('modal-form');
+                Render.all();
+            }
+        };
 
         // ====================== RENDERING ====================== 
-		function renderNotes() {
-			const grid = document.getElementById('notesGrid');
-			grid.innerHTML = '';
-			const search = document.getElementById('searchInput').value.toLowerCase();
-			const isDarkMode = !document.body.classList.contains('light-mode');
+        const Render = {
+            all() {
+                this.notes();
+            },
 
-			notes.forEach((note, index) => {
-				const searchText = ((note.title || '') + (note.content || '')).toLowerCase();
-				if (!searchText.includes(search)) return;
+            notes() {
+                const grid = DOM.get('notesGrid');
+                grid.innerHTML = '';
+                const search = DOM.get('searchInput').value.toLowerCase();
 
-				const card = document.createElement('div');
-				card.className = `note-card shadow-lg ${editingIndex === index ? 'editing' : ''}`;
-				card.dataset.index = index;
+                State.notes.forEach((note, index) => {
+                    const searchText = ((note.title || '') + (note.content || '')).toLowerCase();
+                    if (!searchText.includes(search)) return;
 
-				let finalColor = note.color || '#fef9c3';
-				if (isDarkMode) {
-					finalColor = shadeColor(finalColor, -0.6);
-					card.style.color = 'white';
-				} else {
-					card.style.color = (note.color === '#6b7280' ? 'white' : '#121212');
-				}
-				card.style.backgroundColor = finalColor;
+                    const card = document.createElement('div');
+                    card.className = 'note-card shadow-lg';
+                    card.dataset.index = index;
 
-				card.onclick = (e) => {
-					if (!e.target.closest('.drag-handle')) {
-						selectNote(index);
-					}
-				};
+                    const finalColor = Utils.getCardColor(note.color || '#fef9c3');
+                    card.style.backgroundColor = finalColor;
+                    card.style.color = Utils.getCardTextColor(note.color || '#fef9c3');
 
-				// Ajout du span .note-date dans le HTML interne
-				card.innerHTML = `
-					<div class="note-header">
-						<div class="flex flex-col gap-0.5">
-							<div class="note-title">${note.title || ''}</div>
-							<div class="note-date opacity-50 font-bold" style="font-size: 8px;">${note.date || ''}</div>
-						</div>
-						<div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-					</div>
-					<div class="note-card-content">${note.content}</div>
-				`;
-				grid.appendChild(card);
-			});
-		}
+                    if (State.editingIndex === index) {
+                        card.classList.add('editing');
+                    }
 
-        // ====================== DATA PERSISTENCE ====================== 
-        function saveAndRender() {
-            localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(notes));
-            renderNotes();
-        }
+                    card.addEventListener('click', (e) => {
+                        if (!e.target.closest('.drag-handle')) {
+                            Form.load(index);
+                        }
+                    });
 
-        function updateExportBadge(needsExport) {
-            const badge = document.getElementById('badge-export');
-            const btnExport = document.getElementById('btn-export');
-
-            if (needsExport) {
-                badge.classList.remove('hidden');
-                btnExport.style.border = '2px solid #f97316';
-                localStorage.setItem(STORAGE_KEYS.needsExport, 'true');
-            } else {
-                badge.classList.add('hidden');
-                btnExport.style.border = 'none';
-                localStorage.removeItem(STORAGE_KEYS.needsExport);
-                localStorage.setItem(STORAGE_KEYS.lastExport, Date.now().toString());
+                    card.innerHTML = `
+                        <div class="note-header">
+                            <div class="flex flex-col gap-0.5">
+                                <div class="note-title">${note.title || ''}</div>
+                                <div class="note-date">${note.date || ''}</div>
+                            </div>
+                            <div class="drag-handle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                        </div>
+                        <div class="note-card-content">${note.content}</div>
+                    `;
+                    grid.appendChild(card);
+                });
             }
-        }
+        };
 
-        function verifierBesoinExport() {
-            const needsExport = localStorage.getItem(STORAGE_KEYS.needsExport) === 'true';
-            const lastExport = localStorage.getItem(STORAGE_KEYS.lastExport);
+        // ====================== DATA EXPORT/IMPORT ====================== 
+        const DataExport = {
+            updateBadge(needsExport) {
+                const badge = DOM.get('badge-export');
+                const btnExport = DOM.get('btn-export');
 
-            if (needsExport || !lastExport || (Date.now() - parseInt(lastExport) > EXPORT_INTERVAL)) {
-                updateExportBadge(true);
+                if (needsExport) {
+                    badge.classList.remove('hidden');
+                    btnExport.style.border = '2px solid #f97316';
+                    localStorage.setItem(CONFIG.storage.needsExport, 'true');
+                } else {
+                    badge.classList.add('hidden');
+                    btnExport.style.border = 'none';
+                    localStorage.removeItem(CONFIG.storage.needsExport);
+                    localStorage.setItem(CONFIG.storage.lastExport, Date.now().toString());
+                }
+            },
+
+            checkExportStatus() {
+                const needsExport = localStorage.getItem(CONFIG.storage.needsExport) === 'true';
+                const lastExport = localStorage.getItem(CONFIG.storage.lastExport);
+
+                if (needsExport || !lastExport || (Date.now() - parseInt(lastExport) > CONFIG.exportInterval)) {
+                    this.updateBadge(true);
+                }
             }
-        }
+        };
 
-        // ====================== IMPORT/EXPORT ====================== 
-        function exportNotesToFile() {
-            if (notes.length === 0) return;
+        const DataManager = {
+            export() {
+                if (State.notes.length === 0) {
+                    alert('Aucune donnée.');
+                    return;
+                }
 
-            const content = JSON.stringify(notes, null, 2);
-            const fileName = `outilsprofs_memos_${new Date().toISOString().slice(0, 10)}.txt`;
+                const content = JSON.stringify(State.notes, null, 2);
+                const fileName = `outilsprofs_memos_${new Date().toISOString().slice(0, 10)}.txt`;
 
-            if (window.Android && typeof window.Android.exportTxt === "function") {
-                window.Android.exportTxt(content, fileName);
-            } else {
-                const blob = new Blob([content], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
+                if (window.Android && typeof window.Android.exportTxt === 'function') {
+                    window.Android.exportTxt(content, fileName);
+                } else {
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
 
-            updateExportBadge(false);
-        }
+                DataExport.updateBadge(false);
+            },
 
-        function setupImport() {
-            const input = document.getElementById('importNotesFile');
-            input.addEventListener('change', (e) => {
-                const file = e.target.files[0];
+            import(file) {
                 if (!file) return;
 
                 const reader = new FileReader();
@@ -540,125 +856,109 @@
                     try {
                         const imported = JSON.parse(e.target.result);
                         if (Array.isArray(imported)) {
-                            const nouveauxMemos = imported.filter(imp => {
-                                return !notes.some(existant =>
-                                    existant.title === imp.title &&
-                                    existant.content === imp.content
+                            const newNotes = imported.filter(imp => {
+                                return !State.notes.some(existing =>
+                                    existing.title === imp.title && existing.content === imp.content
                                 );
                             });
 
-                            if (nouveauxMemos.length > 0) {
-                                notes = [...nouveauxMemos, ...notes];
-                                updateExportBadge(true);
-                                saveAndRender();
+                            if (newNotes.length > 0) {
+                                State.notes = [...newNotes, ...State.notes];
+                                State.save();
+                                DataExport.updateBadge(true);
+                                Render.all();
                             }
                         }
                     } catch (err) {
-                        console.error("Erreur lors de la lecture du fichier", err);
+                        console.error('Erreur lors de la lecture du fichier', err);
                     }
-                    input.value = '';
+                    DOM.get('importNotesFile').value = '';
                 };
                 reader.readAsText(file);
-            });
-        }
+            },
 
-        // ====================== UTILITIES ====================== 
-        function autoExpand(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
-        }
-
-        function shadeColor(color, percent) {
-            let f = parseInt(color.slice(1), 16);
-            let t = percent < 0 ? 0 : 255;
-            let p = percent < 0 ? percent * -1 : percent;
-            let R = f >> 16;
-            let G = (f >> 8) & 0x00FF;
-            let B = f & 0x0000FF;
-
-            return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
-        }
-
-        function toggleSearch() {
-            const searchWrapper = document.getElementById('searchWrapper');
-            searchWrapper.classList.toggle('open');
-            if (searchWrapper.classList.contains('open')) {
-                setTimeout(() => document.getElementById('searchInput').focus(), 300);
+            setupImport() {
+                DOM.get('importNotesFile').addEventListener('change', (e) => {
+                    this.import(e.target.files[0]);
+                });
             }
-        }
+        };
 
-        // ====================== RESET FUNCTIONS ====================== 
-        function confirmResetAll() {
-            afficherMessage("Tout effacer ?", "Supprimer tous vos mémos ?", () => {
-                notes = [];
-                updateExportBadge(true);
-                saveAndRender();
-            });
-        }
+        // ====================== SORTING ====================== 
+        const Sorting = {
+            init() {
+                new Sortable(DOM.get('notesGrid'), {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    onEnd: () => {
+                        const reorderedIndices = [];
+                        DOM.all('.note-card').forEach(card => {
+                            reorderedIndices.push(parseInt(card.dataset.index));
+                        });
+                        State.reorderNotes(reorderedIndices);
+                        DataExport.updateBadge(true);
+                    }
+                });
+            }
+        };
 
         // ====================== THEME APPLICATION ====================== 
-        function appliquerTheme() {
-            const isLight = localStorage.getItem('theme_mode') === 'light';
-            document.body.classList.toggle('light-mode', isLight);
-            document.documentElement.style.setProperty('--theme-color', THEME_HEX);
+        const ThemeManager = {
+            apply() {
+                const isLight = localStorage.getItem('theme_mode') === 'light';
+                document.body.classList.toggle('light-mode', isLight);
+                document.documentElement.style.setProperty('--theme-color', THEME.hex);
 
-            const buttonElements = [
-                document.getElementById('btn-retour'),
-                document.getElementById('btn-aide'),
-                document.getElementById('btn-search-trigger'),
-                document.getElementById('btnAction'),
-                document.getElementById('btn-fermer-aide'),
-                document.getElementById('btnAddMemo')
-            ];
+                const buttonIds = ['btn-retour', 'btn-aide', 'btn-search-trigger', 'btnAction', 'btn-fermer-aide', 'btnAddMemo'];
+                buttonIds.forEach(id => DOM.applyButtonStyle(id));
 
-            buttonElements.forEach(el => {
-                if (el) {
-                    el.style.backgroundColor = THEME_HEX;
-                    el.style.color = THEME_TEXT_COLOR;
-                }
-            });
-
-            renderNotes();
-        }
-
-        // ====================== COLOR PICKER SETUP ====================== 
-        function setupColorPickers() {
-            document.querySelectorAll('#colorPicker .color-dot').forEach(dot => {
-                dot.onclick = function () {
-                    document.querySelectorAll('#colorPicker .color-dot').forEach(d => {
-                        d.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    selectedColor = this.dataset.color;
-                };
-            });
-        }
-
-        // ====================== SORTABLE SETUP ====================== 
-        function setupSortable() {
-            new Sortable(document.getElementById('notesGrid'), {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd: function () {
-                    const reorderedNotes = [];
-                    document.querySelectorAll('.note-card').forEach(card => {
-                        reorderedNotes.push(notes[card.dataset.index]);
-                    });
-                    notes = reorderedNotes;
-                    updateExportBadge(true);
-                    saveAndRender();
-                }
-            });
-        }
-
-        // ====================== INITIALIZATION ====================== 
-        window.onload = () => {
-            appliquerTheme();
-            setupColorPickers();
-            setupSortable();
-            setupImport();
-            verifierBesoinExport();
+                Render.all();
+            }
         };
+
+        // ====================== UI HELPERS ====================== 
+        const UI = {
+            openForm() {
+                State.editingIndex = -1;
+                Form.resetForm();
+                DOM.get('form-title').innerText = 'Nouveau Mémo';
+                DOM.get('btnAction').innerText = 'Ajouter';
+                DOM.addClass('btnDelete', 'hidden');
+                Modal.open('modal-form');
+                DOM.get('noteTitle').focus();
+            },
+
+            toggleSearch() {
+                const wrapper = DOM.get('searchWrapper');
+                wrapper.classList.toggle('open');
+                if (wrapper.classList.contains('open')) {
+                    setTimeout(() => DOM.get('searchInput').focus(), 300);
+                }
+            }
+        };
+
+        // ====================== APP INITIALIZATION ====================== 
+        const App = {
+            init() {
+                ThemeManager.apply();
+                Form.setupColorPicker();
+                Sorting.init();
+                DataManager.setupImport();
+                DataExport.checkExportStatus();
+                Render.all();
+            },
+
+            confirmResetAll() {
+                Modal.showAlert('Tout effacer ?', 'Supprimer tous vos mémos ?', () => {
+                    State.notes = [];
+                    State.save();
+                    DataExport.updateBadge(true);
+                    Render.all();
+                });
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
 </html>
