@@ -20,6 +20,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ============================================================================
+           THEME VARIABLES & BASE STYLES
+           ============================================================================ */
+        
         :root {
             --bg-page: #121212; 
             --text-page: #ffffff; 
@@ -64,13 +68,14 @@
             font-family: 'Inter', sans-serif; 
             background: var(--bg-page); 
             color: var(--text-page); 
-            padding: 0; 
+            padding: 0 15px 20px 15px; 
             margin: 0; 
             transition: background 0.3s ease;
-            padding-left: 15px; 
-            padding-right: 15px; 
-            padding-bottom: 20px;
         }
+
+        /* ============================================================================
+           HEADER & NAVIGATION
+           ============================================================================ */
 
         header { 
             background: var(--header-bg); 
@@ -85,109 +90,7 @@
             width: calc(100% + 30px); 
             margin-left: -15px;
         }
-        
-        /* Card Components */
-        .light-card { 
-            background: var(--card-bg); 
-            color: var(--card-text); 
-            border-radius: 1.5rem; 
-            border: 1px solid var(--border-color); 
-            box-shadow: var(--shadow-custom);
-            transition: all 0.3s; 
-        }
 
-        .level-column { 
-            background: var(--column-bg); 
-            color: var(--column-text); 
-            border-radius: 1.5rem; 
-            padding: 15px; 
-            border: 1px solid var(--border-color); 
-            box-shadow: var(--shadow-custom);
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-start; 
-            align-self: start;
-        }
-
-        /* Form Inputs */
-        .input-field { 
-            background: var(--input-bg); 
-            border: 1px solid var(--input-border); 
-            color: var(--input-text); 
-            border-radius: 0.75rem; 
-            padding: 10px; 
-            outline: none; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-        }
-
-        .field-label {
-            font-size: 10px; 
-            font-weight: 900; 
-            text-transform: uppercase;
-            opacity: 0.5; 
-            margin-bottom: 4px; 
-            margin-left: 4px; 
-            letter-spacing: 0.5px;
-        }
-
-        /* Radio Card Selection */
-        .card-input { display: none; }
-        
-        .card-label {
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center;
-            background: var(--input-bg); 
-            border: 1px solid var(--border-color); 
-            color: var(--item-subtext);
-            padding: 8px 4px; 
-            border-radius: 0.75rem; 
-            cursor: pointer;
-            font-size: 10px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            transition: all 0.2s;
-        }
-
-        .card-input:checked + .card-label { 
-            background: #4b5563; 
-            color: white; 
-            border-color: transparent; 
-        }
-
-        /* Progress */
-        .progress-container { 
-            width: 100%; 
-            background: var(--input-bg); 
-            height: 8px; 
-            border-radius: 10px; 
-            margin: 8px 0; 
-            overflow: hidden; 
-            border: 1px solid var(--border-color); 
-        }
-
-        .progress-bar { 
-            height: 100%; 
-            transition: width 0.5s ease-out; 
-        }
-
-        /* Reunion Item */
-        .reunion-item { 
-            background: var(--input-bg); 
-            padding: 8px 12px; 
-            border-radius: 0.75rem; 
-            margin-bottom: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            cursor: pointer; 
-            border: 1px solid var(--border-color); 
-            border-left-width: 4px;
-        }
-
-        /* Header Buttons */
         .header-btn { 
             display: flex; 
             align-items: center; 
@@ -199,35 +102,6 @@
             transition: all 0.2s ease;
         }
 
-        /* FAB Button */
-        .fab-add {
-            position: fixed;
-            bottom: 60px;
-            right: 30px;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 900;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
-        }
-
-        .fab-add:active {
-            transform: scale(0.9);
-        }
-
-        @media (hover: hover) {
-            .fab-add:hover {
-                transform: scale(1.1);
-            }
-        }
-
-        /* Navigation */
         .bottom-nav { 
             width: 100%; 
             max-width: 500px; 
@@ -258,9 +132,132 @@
             cursor: pointer; 
             background: #2a2a2a;
             color: white;
+            transition: all 0.2s ease;
         }
 
-        /* Toggle List */
+        .nav-btn:active {
+            scale: 0.95;
+        }
+
+        /* ============================================================================
+           CARD COMPONENTS
+           ============================================================================ */
+
+        .light-card { 
+            background: var(--card-bg); 
+            color: var(--card-text); 
+            border-radius: 1.5rem; 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-custom);
+            transition: all 0.3s; 
+        }
+
+        .level-column { 
+            background: var(--column-bg); 
+            color: var(--column-text); 
+            border-radius: 1.5rem; 
+            padding: 15px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-custom);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-self: start;
+        }
+
+        /* ============================================================================
+           FORM & INPUT ELEMENTS
+           ============================================================================ */
+
+        .input-field { 
+            background: var(--input-bg); 
+            border: 1px solid var(--input-border); 
+            color: var(--input-text); 
+            border-radius: 0.75rem; 
+            padding: 10px; 
+            outline: none; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+        }
+
+        .field-label {
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            opacity: 0.5; 
+            margin-bottom: 4px; 
+            margin-left: 4px; 
+            letter-spacing: 0.5px;
+        }
+
+        .card-input { 
+            display: none; 
+        }
+        
+        .card-label {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center;
+            background: var(--input-bg); 
+            border: 1px solid var(--border-color); 
+            color: var(--item-subtext);
+            padding: 8px 4px; 
+            border-radius: 0.75rem; 
+            cursor: pointer;
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            transition: all 0.2s;
+        }
+
+        .card-input:checked + .card-label { 
+            background: #4b5563; 
+            color: white; 
+            border-color: transparent; 
+        }
+
+        /* ============================================================================
+           PROGRESS BARS
+           ============================================================================ */
+
+        .progress-container { 
+            width: 100%; 
+            background: var(--input-bg); 
+            height: 8px; 
+            border-radius: 10px; 
+            margin: 8px 0; 
+            overflow: hidden; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .progress-bar { 
+            height: 100%; 
+            transition: width 0.5s ease-out; 
+        }
+
+        /* ============================================================================
+           REUNION ITEMS
+           ============================================================================ */
+
+        .reunion-item { 
+            background: var(--input-bg); 
+            padding: 8px 12px; 
+            border-radius: 0.75rem; 
+            margin-bottom: 6px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            cursor: pointer; 
+            border: 1px solid var(--border-color); 
+            border-left-width: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .reunion-item:active {
+            transform: scale(0.98);
+        }
+
         .toggle-list-btn { 
             width: 100%; 
             font-size: 9px; 
@@ -273,9 +270,17 @@
             border: none;
             color: inherit;
             cursor: pointer;
+            transition: opacity 0.2s ease;
         }
 
-        /* Modals */
+        .toggle-list-btn:active {
+            opacity: 0.7;
+        }
+
+        /* ============================================================================
+           MODALS
+           ============================================================================ */
+
         .modal-overlay {
             display: none; 
             position: fixed; 
@@ -285,10 +290,12 @@
             align-items: center; 
             justify-content: center; 
             padding: 20px;
+            z-index: 900;
         }
 
-        #form-container { z-index: 900; }
-        #modal-aide, #custom-confirm { z-index: 950; }
+        #modal-aide, #custom-confirm { 
+            z-index: 950; 
+        }
 
         .modal-content {
             background: var(--card-bg); 
@@ -301,7 +308,10 @@
             position: relative;
         }
 
-        /* Animation */
+        /* ============================================================================
+           BADGES & INDICATORS
+           ============================================================================ */
+
         @keyframes blink-point {
             0% { transform: scale(0.9); opacity: 0.5; }
             50% { transform: scale(1.2); opacity: 1; }
@@ -320,10 +330,58 @@
             animation: blink-point 1.5s infinite;
         }
 
-        /* Range Input */
+        .badge-export {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            background: #f97316;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        /* ============================================================================
+           FAB BUTTON
+           ============================================================================ */
+
+        .fab-add {
+            position: fixed;
+            bottom: 60px;
+            right: 30px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 900;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+        }
+
+        .fab-add:active {
+            transform: scale(0.9);
+        }
+
+        @media (hover: hover) {
+            .fab-add:hover {
+                transform: scale(1.1);
+            }
+        }
+
+        /* ============================================================================
+           RANGE INPUT
+           ============================================================================ */
+
         input[type=range] { 
             -webkit-appearance: none; 
             background: transparent; 
+            width: 100%;
+            cursor: pointer;
         }
 
         input[type=range]:focus { 
@@ -354,12 +412,22 @@
             border-radius: 10px;
             height: 6px;
         }
+
+        input[type=range]::-moz-range-thumb {
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+            background: var(--text-page);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
-<body class="pb-10">
+<body>
 
     <!-- Help Modal -->
-    <div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
+    <div id="modal-aide" class="modal-overlay" onclick="Modal.aide.close()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="aide-label" class="text-lg font-black uppercase mb-4">💡 Gestion des 108h</h2>
             
@@ -384,23 +452,23 @@
                 </div>
             </div>
 
-            <button onclick="fermerAide()" id="btn-fermer-aide" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
+            <button onclick="Modal.aide.close()" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">J'ai compris</button>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="custom-confirm" class="modal-overlay" onclick="closeConfirm(false)">
+    <div id="custom-confirm" class="modal-overlay" onclick="Modal.confirm.close(false)">
         <div class="modal-content text-center" onclick="event.stopPropagation()">
             <p id="confirm-msg" class="font-bold text-sm mb-6 leading-tight"></p>
             <div class="flex gap-3">
-                <button onclick="closeConfirm(false)" class="flex-1 py-3 rounded-xl bg-neutral-500/20 text-[10px] font-black uppercase">Annuler</button>
+                <button onclick="Modal.confirm.close(false)" class="flex-1 py-3 rounded-xl bg-neutral-500/20 text-[10px] font-black uppercase">Annuler</button>
                 <button id="confirm-yes" class="flex-1 py-3 rounded-xl text-white text-[10px] font-black uppercase shadow-lg">Confirmer</button>
             </div>
         </div>
     </div>
 
     <!-- Form Modal -->
-    <div id="form-container" class="modal-overlay" onclick="closeForm()">
+    <div id="form-container" class="modal-overlay" onclick="Modal.form.close()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="form-title" class="text-sm font-black uppercase mb-4 opacity-50">Nouvelle Saisie</h2>
             <form id="heuresForm" class="flex flex-col gap-4">
@@ -436,8 +504,8 @@
                 
                 <!-- Edit Actions (hidden by default) -->
                 <div id="edit-actions" class="hidden flex gap-2">
-                    <button type="button" onclick="cancelEdit()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-neutral-500/20">Annuler</button>
-                    <button type="button" onclick="deleteEntry()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-red-600 text-white">Supprimer</button>
+                    <button type="button" onclick="Form.cancelEdit()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-neutral-500/20">Annuler</button>
+                    <button type="button" onclick="Form.deleteEntry()" class="flex-1 font-black py-3 rounded-xl uppercase text-[10px] bg-red-600 text-white">Supprimer</button>
                 </div>
 
                 <!-- Submit -->
@@ -454,7 +522,7 @@
             </svg>
         </a>
         <h1 class="text-lg font-black uppercase tracking-normal flex-grow text-center">108 heures</h1>
-        <button id="btn-aide" onclick="ouvrirAide()" class="header-btn shadow-lg text-lg">💡</button>
+        <button id="btn-aide" onclick="Modal.aide.open()" class="header-btn shadow-lg text-lg">💡</button>
     </header>
 
     <!-- Main Content -->
@@ -464,7 +532,7 @@
         <div class="light-card p-4 mb-4">
             <p class="field-label">Ma quotité de travail</p>
             <div class="flex items-center gap-4">
-                <input type="range" id="range-quotite" min="10" max="100" step="5" value="100" class="flex-grow" oninput="updateQuotite(this.value)">
+                <input type="range" id="range-quotite" min="10" max="100" step="5" value="100" oninput="App.updateQuotite(this.value)">
                 <span id="val-quotite" class="font-black text-sm w-12 text-right">100%</span>
             </div>
         </div>
@@ -492,22 +560,22 @@
             <div class="nav-group">
                 <label class="nav-btn cursor-pointer text-center flex-1">
                     👇 importer .txt 👇
-                    <input type="file" id="importFile" class="hidden" accept=".txt" onchange="importData(event)">
+                    <input type="file" id="importFile" class="hidden" accept=".txt" onchange="DataManager.import(event)">
                 </label>
-                <button onclick="exportData()" class="nav-btn flex-1 relative">
+                <button onclick="DataManager.export()" class="nav-btn flex-1 relative">
                     👆 exporter .txt 👆
-                    <span id="badge-export" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border-2 border-white"></span>
+                    <span id="badge-export" class="badge-export hidden"></span>
                 </button>
-                <button onclick="exportPDF()" class="nav-btn flex-1">📄 PDF</button>
+                <button onclick="DataManager.exportPDF()" class="nav-btn flex-1">📄 PDF</button>
             </div>
-            <button onclick="resetHeures()" class="nav-btn bg-red-500 text-white shadow-md active:scale-95">
+            <button onclick="App.resetHeures()" class="nav-btn bg-red-500 text-white shadow-md active:scale-95">
                 ⚠️ effacer les données
             </button>
         </footer>
     </div>
 
     <!-- FAB Button -->
-    <button id="fab-plus" onclick="openForm()" class="fab-add">
+    <button id="fab-plus" onclick="Modal.form.open()" class="fab-add">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
         </svg>
@@ -515,583 +583,624 @@
 
     <script>
         // ============================================================================
-        // CONFIGURATION & STATE
+        // CONFIGURATION
         // ============================================================================
 
-        const COLOR_MAPPING = {
-            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-            'rose': '#f43f5e', 'gray': '#6b7280'
+        const CONFIG = {
+            colors: {
+                'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+                'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+                'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+                'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+                'rose': '#f43f5e', 'gray': '#6b7280'
+            },
+            categories: {
+                "APC": "APC",
+                "PEDAGO": "Réunions",
+                "FORM": "Formation",
+                "CONSEIL": "Conseils"
+            },
+            months: [
+                "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+            ],
+            defaultQuotas: {
+                "APC": 36 * 60,
+                "PEDAGO": 48 * 60,
+                "FORM": 18 * 60,
+                "CONSEIL": 6 * 60
+            },
+            buttonIds: ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'fab-plus'],
+            selectorIds: ['sel-jour', 'sel-mois', 'sel-annee', 'sel-h', 'sel-m']
         };
 
-        const CATEGORY_LABELS = {
-            "APC": "APC",
-            "PEDAGO": "Réunions",
-            "FORM": "Formation",
-            "CONSEIL": "Conseils"
+        const THEME = (() => {
+            const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+            const color = prefs.h108 || 'orange';
+            const hex = CONFIG.colors[color] || '#f97316';
+            const needsDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(color);
+            return { color, hex, textColor: needsDarkText ? '#000' : '#fff' };
+        })();
+
+        // ============================================================================
+        // STATE MANAGEMENT
+        // ============================================================================
+
+        const State = {
+            quotas: { ...CONFIG.defaultQuotas },
+            totalAnnuel: 108 * 60,
+            reunions: JSON.parse(localStorage.getItem('mesHeuresReu')) || [],
+            editId: null,
+
+            updateQuotite(percentage) {
+                const ratio = percentage / 100;
+                Object.keys(CONFIG.defaultQuotas).forEach(key => {
+                    this.quotas[key] = CONFIG.defaultQuotas[key] * ratio;
+                });
+                this.totalAnnuel = (108 * 60) * ratio;
+            },
+
+            getGlobalMinutes() {
+                return this.reunions.reduce((sum, r) => sum + r.minutes, 0);
+            },
+
+            save() {
+                localStorage.setItem('mesHeuresReu', JSON.stringify(this.reunions));
+            }
         };
 
-        const MONTHS_FR = [
-            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-        ];
+        // ============================================================================
+        // UTILITIES
+        // ============================================================================
 
-        const DEFAULT_QUOTAS_BASE = {
-            "APC": 36 * 60,
-            "PEDAGO": 48 * 60,
-            "FORM": 18 * 60,
-            "CONSEIL": 6 * 60
+        const Utils = {
+            formatDuree(totalMinutes) {
+                const isNegative = totalMinutes < 0;
+                const absMinutes = Math.abs(Math.round(totalMinutes));
+                const hours = Math.floor(absMinutes / 60);
+                const mins = absMinutes % 60;
+                const prefix = isNegative ? "-" : "";
+                const minutePart = mins > 0 ? mins.toString().padStart(2, '0') : '';
+                return `${prefix}${hours}h${minutePart}`;
+            },
+
+            formatDate(dateStr) {
+                return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            },
+
+            padZero(num) {
+                return num < 10 ? '0' + num : num;
+            },
+
+            getDateString() {
+                return new Date().toISOString().split('T')[0];
+            }
         };
 
-        const ELEMENT_IDS = {
-            buttons: ['btn-retour', 'btn-aide', 'submitBtn', 'confirm-yes', 'btn-fermer-aide', 'fab-plus'],
-            selectors: ['sel-jour', 'sel-mois', 'sel-annee', 'sel-h', 'sel-m']
-        };
-
-        // Theme colors
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const THEME_COLOR = themePrefs.h108 || 'orange';
-        const THEME_HEX = COLOR_MAPPING[THEME_COLOR] || '#f97316';
-        const NEEDS_DARK_TEXT = ['yellow', 'lime', 'amber', 'cyan'].includes(THEME_COLOR);
-        const THEME_TEXT_COLOR = NEEDS_DARK_TEXT ? '#000' : '#fff';
-
-        // State
-        let QUOTAS = { ...DEFAULT_QUOTAS_BASE };
-        let TOTAL_ANNUEL = 108 * 60;
-        let reunions = JSON.parse(localStorage.getItem('mesHeuresReu')) || [];
-        let editId = null;
-        let confirmAction = null;
-
         // ============================================================================
-        // INITIALIZATION
+        // DOM HELPERS
         // ============================================================================
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initSelectors();
-            applyThemeColors();
-            const savedQuotite = localStorage.getItem('quotite_pro') || 100;
-            document.getElementById('range-quotite').value = savedQuotite;
-            updateQuotite(savedQuotite);
-            initDate();
-            if (localStorage.getItem('needsExport_108h') === 'true') {
-                document.getElementById('badge-export').classList.remove('hidden');
-            }
-        });
+        const DOM = {
+            setColor(elementId, color) {
+                const el = document.getElementById(elementId);
+                if (el) el.style.color = color;
+            },
 
-        // ============================================================================
-        // SELECTOR INITIALIZATION
-        // ============================================================================
+            setBgColor(elementId, color) {
+                const el = document.getElementById(elementId);
+                if (el) el.style.backgroundColor = color;
+            },
 
-        function initSelectors() {
-            const daySelect = document.getElementById('sel-jour');
-            const monthSelect = document.getElementById('sel-mois');
-            const yearSelect = document.getElementById('sel-annee');
-            const hoursSelect = document.getElementById('sel-h');
-            const minutesSelect = document.getElementById('sel-m');
+            setStyle(elementId, prop, value) {
+                const el = document.getElementById(elementId);
+                if (el) el.style[prop] = value;
+            },
 
-            daySelect.innerHTML = "";
-            monthSelect.innerHTML = "";
-            yearSelect.innerHTML = "";
-            hoursSelect.innerHTML = "";
-            minutesSelect.innerHTML = "";
-
-            // Days
-            for (let i = 1; i <= 31; i++) {
-                const dayValue = i < 10 ? '0' + i : i;
-                daySelect.innerHTML += `<option value="${dayValue}">${i}</option>`;
-            }
-
-            // Months
-            MONTHS_FR.forEach((month, index) => {
-                const monthValue = (index + 1) < 10 ? '0' + (index + 1) : (index + 1);
-                monthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
-            });
-
-            // Years
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear - 1; i <= currentYear + 1; i++) {
-                yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
-            }
-
-            // Hours
-            for (let i = 0; i <= 10; i++) {
-                hoursSelect.innerHTML += `<option value="${i}">${i} h</option>`;
-            }
-
-            // Minutes
-            for (let i = 0; i < 60; i += 5) {
-                const minuteValue = i < 10 ? '0' + i : i;
-                minutesSelect.innerHTML += `<option value="${i}">${minuteValue} min</option>`;
-            }
-        }
-
-        // ============================================================================
-        // THEME APPLICATION
-        // ============================================================================
-
-        function applyThemeColors() {
-            // Apply color to buttons and interactive elements
-            ELEMENT_IDS.buttons.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.style.backgroundColor = THEME_HEX;
-                    element.style.color = THEME_TEXT_COLOR;
+            toggleClass(elementId, className, add) {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    if (add) el.classList.add(className);
+                    else el.classList.remove(className);
                 }
-            });
+            },
 
-            // Apply to specific elements
-            document.getElementById('stats-title').style.color = THEME_HEX;
-            document.getElementById('aide-label').style.color = THEME_HEX;
-            document.getElementById('range-quotite').style.accentColor = THEME_HEX;
+            getElement(id) {
+                return document.getElementById(id);
+            },
 
-            // Apply to range input track
-            const styleSlider = document.createElement('style');
-            styleSlider.innerHTML = `
-                input[type=range]::-webkit-slider-runnable-track { background: ${THEME_HEX}44 !important; }
-                input[type=range]::-moz-range-track { background: ${THEME_HEX}44 !important; }
-            `;
-            document.head.appendChild(styleSlider);
-        }
+            getValue(id) {
+                return document.getElementById(id).value;
+            },
+
+            setValue(id, value) {
+                document.getElementById(id).value = value;
+            }
+        };
 
         // ============================================================================
         // MODAL MANAGEMENT
         // ============================================================================
 
-        function ouvrirAide() {
-            document.getElementById('modal-aide').style.display = 'flex';
-        }
-
-        function fermerAide() {
-            document.getElementById('modal-aide').style.display = 'none';
-        }
-
-        function openForm() {
-            const form = document.getElementById('form-container');
-            form.style.display = 'flex';
-            document.getElementById('form-title').innerText = editId ? "Modifier la saisie" : "Nouvelle Saisie";
-        }
-
-        function closeForm() {
-            if (editId) cancelEdit();
-            document.getElementById('form-container').style.display = 'none';
-        }
-
-        function customConfirm(message, action) {
-            document.getElementById('confirm-msg').innerText = message;
-            confirmAction = action;
-            document.getElementById('custom-confirm').style.display = 'flex';
-        }
-
-        function closeConfirm(confirmed) {
-            document.getElementById('custom-confirm').style.display = 'none';
-            if (confirmed && confirmAction) {
-                confirmAction();
+        const Modal = {
+            aide: {
+                open() {
+                    DOM.getElement('modal-aide').style.display = 'flex';
+                },
+                close() {
+                    DOM.getElement('modal-aide').style.display = 'none';
+                }
+            },
+            confirm: {
+                action: null,
+                open(message, action) {
+                    DOM.getElement('confirm-msg').innerText = message;
+                    this.action = action;
+                    DOM.getElement('custom-confirm').style.display = 'flex';
+                },
+                close(confirmed) {
+                    DOM.getElement('custom-confirm').style.display = 'none';
+                    if (confirmed && this.action) {
+                        this.action();
+                    }
+                    this.action = null;
+                }
+            },
+            form: {
+                open() {
+                    const el = DOM.getElement('form-container');
+                    el.style.display = 'flex';
+                    DOM.getElement('form-title').innerText = State.editId ? "Modifier la saisie" : "Nouvelle Saisie";
+                },
+                close() {
+                    if (State.editId) Form.cancelEdit();
+                    DOM.getElement('form-container').style.display = 'none';
+                }
             }
-            confirmAction = null;
-        }
+        };
 
-        document.getElementById('confirm-yes').onclick = () => closeConfirm(true);
-
-        // ============================================================================
-        // DATE MANAGEMENT
-        // ============================================================================
-
-        function initDate() {
-            setSelectedDate(new Date().toISOString().split('T')[0]);
-            document.getElementById('sel-h').value = "1";
-            document.getElementById('sel-m').value = "0";
-        }
-
-        function setSelectedDate(dateStr) {
-            const date = new Date(dateStr);
-            const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-            const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
-            const year = date.getFullYear();
-
-            document.getElementById('sel-jour').value = day;
-            document.getElementById('sel-mois').value = month;
-            document.getElementById('sel-annee').value = year;
-        }
-
-        function getSelectedDate() {
-            const year = document.getElementById('sel-annee').value;
-            const month = document.getElementById('sel-mois').value;
-            const day = document.getElementById('sel-jour').value;
-            return `${year}-${month}-${day}`;
-        }
-
-        // ============================================================================
-        // QUOTITÉ MANAGEMENT
-        // ============================================================================
-
-        function updateQuotite(value) {
-            const quotite = parseInt(value);
-            document.getElementById('val-quotite').innerText = quotite + "%";
-            localStorage.setItem('quotite_pro', quotite);
-
-            const ratio = quotite / 100;
-            Object.keys(DEFAULT_QUOTAS_BASE).forEach(key => {
-                QUOTAS[key] = DEFAULT_QUOTAS_BASE[key] * ratio;
-            });
-            TOTAL_ANNUEL = (108 * 60) * ratio;
-
-            render();
-        }
+        document.getElementById('confirm-yes').onclick = () => Modal.confirm.close(true);
 
         // ============================================================================
         // FORM MANAGEMENT
         // ============================================================================
 
-        document.getElementById('heuresForm').onsubmit = function(event) {
-            event.preventDefault();
+        const Form = {
+            init() {
+                this.initSelectors();
+                this.initDate();
+                document.getElementById('heuresForm').onsubmit = (e) => this.submit(e);
+            },
 
-            const category = document.querySelector('input[name="cat"]:checked').value;
-            const date = getSelectedDate();
-            const hours = parseInt(document.getElementById('sel-h').value) || 0;
-            const minutes = parseInt(document.getElementById('sel-m').value) || 0;
-            const totalMinutes = (hours * 60) + minutes;
-            const comment = document.getElementById('comm').value;
-
-            if (totalMinutes <= 0) return;
-
-            if (editId) {
-                const index = reunions.findIndex(r => r.id === editId);
-                reunions[index] = {
-                    ...reunions[index],
-                    cat: category,
-                    date: date,
-                    minutes: totalMinutes,
-                    comm: comment
+            initSelectors() {
+                const ids = {
+                    jour: 'sel-jour',
+                    mois: 'sel-mois',
+                    annee: 'sel-annee',
+                    h: 'sel-h',
+                    m: 'sel-m'
                 };
-                editId = null;
-                document.getElementById('submitBtn').innerText = "Enregistrer";
-                document.getElementById('edit-actions').classList.add('hidden');
-            } else {
-                reunions.push({
-                    id: Date.now(),
-                    cat: category,
-                    date: date,
-                    minutes: totalMinutes,
-                    comm: comment
+
+                // Clear existing options
+                Object.values(ids).forEach(id => {
+                    DOM.getElement(id).innerHTML = '';
+                });
+
+                // Days
+                for (let i = 1; i <= 31; i++) {
+                    const val = Utils.padZero(i);
+                    DOM.getElement(ids.jour).innerHTML += `<option value="${val}">${i}</option>`;
+                }
+
+                // Months
+                CONFIG.months.forEach((month, idx) => {
+                    const val = Utils.padZero(idx + 1);
+                    DOM.getElement(ids.mois).innerHTML += `<option value="${val}">${month}</option>`;
+                });
+
+                // Years
+                const year = new Date().getFullYear();
+                for (let i = year - 1; i <= year + 1; i++) {
+                    DOM.getElement(ids.annee).innerHTML += `<option value="${i}">${i}</option>`;
+                }
+
+                // Hours
+                for (let i = 0; i <= 10; i++) {
+                    DOM.getElement(ids.h).innerHTML += `<option value="${i}">${i} h</option>`;
+                }
+
+                // Minutes
+                for (let i = 0; i < 60; i += 5) {
+                    const val = Utils.padZero(i);
+                    DOM.getElement(ids.m).innerHTML += `<option value="${i}">${val} min</option>`;
+                }
+            },
+
+            initDate() {
+                this.setDate(Utils.getDateString());
+                DOM.setValue('sel-h', '1');
+                DOM.setValue('sel-m', '0');
+            },
+
+            setDate(dateStr) {
+                const date = new Date(dateStr);
+                DOM.setValue('sel-jour', Utils.padZero(date.getDate()));
+                DOM.setValue('sel-mois', Utils.padZero(date.getMonth() + 1));
+                DOM.setValue('sel-annee', date.getFullYear());
+            },
+
+            getDate() {
+                return `${DOM.getValue('sel-annee')}-${DOM.getValue('sel-mois')}-${DOM.getValue('sel-jour')}`;
+            },
+
+            submit(event) {
+                event.preventDefault();
+
+                const category = document.querySelector('input[name="cat"]:checked').value;
+                const date = this.getDate();
+                const hours = parseInt(DOM.getValue('sel-h')) || 0;
+                const minutes = parseInt(DOM.getValue('sel-m')) || 0;
+                const totalMinutes = (hours * 60) + minutes;
+                const comment = DOM.getValue('comm');
+
+                if (totalMinutes <= 0) return;
+
+                if (State.editId) {
+                    const idx = State.reunions.findIndex(r => r.id === State.editId);
+                    State.reunions[idx] = { ...State.reunions[idx], cat: category, date, minutes: totalMinutes, comm: comment };
+                    State.editId = null;
+                    DOM.setValue('submitBtn', 'Enregistrer');
+                    DOM.toggleClass('edit-actions', 'hidden', true);
+                } else {
+                    State.reunions.push({ id: Date.now(), cat: category, date, minutes: totalMinutes, comm: comment });
+                }
+
+                State.save();
+                DataExport.updateBadge(true);
+                Render.all();
+                document.getElementById('heuresForm').reset();
+                this.initDate();
+                Modal.form.close();
+            },
+
+            loadForEdit(id) {
+                const reunion = State.reunions.find(r => r.id === id);
+                if (!reunion) return;
+
+                State.editId = id;
+                document.querySelector(`input[name="cat"][value="${reunion.cat}"]`).checked = true;
+                this.setDate(reunion.date);
+                DOM.setValue('sel-h', Math.floor(reunion.minutes / 60));
+                DOM.setValue('sel-m', (Math.round(reunion.minutes % 60 / 5) * 5) % 60);
+                DOM.setValue('comm', reunion.comm || '');
+                DOM.setValue('submitBtn', 'Mettre à jour');
+                DOM.toggleClass('edit-actions', 'hidden', false);
+                Modal.form.open();
+            },
+
+            cancelEdit() {
+                State.editId = null;
+                document.getElementById('heuresForm').reset();
+                DOM.setValue('submitBtn', 'Enregistrer');
+                DOM.toggleClass('edit-actions', 'hidden', true);
+                this.initDate();
+            },
+
+            deleteEntry() {
+                Modal.confirm.open('Supprimer cette entrée ?', () => {
+                    State.reunions = State.reunions.filter(r => r.id !== State.editId);
+                    this.cancelEdit();
+                    State.save();
+                    DataExport.updateBadge(true);
+                    Render.all();
+                    Modal.form.close();
                 });
             }
-
-            saveAndRender();
-            this.reset();
-            initDate();
-            closeForm();
         };
-
-        function chargerPourEdition(id) {
-            const reunion = reunions.find(item => item.id === id);
-            if (!reunion) return;
-
-            editId = id;
-            document.querySelector(`input[name="cat"][value="${reunion.cat}"]`).checked = true;
-            setSelectedDate(reunion.date);
-            document.getElementById('sel-h').value = Math.floor(reunion.minutes / 60);
-            document.getElementById('sel-m').value = (Math.round(reunion.minutes % 60 / 5) * 5) % 60;
-            document.getElementById('comm').value = reunion.comm || "";
-            document.getElementById('submitBtn').innerText = "Mettre à jour";
-            document.getElementById('edit-actions').classList.remove('hidden');
-            openForm();
-        }
-
-        function cancelEdit() {
-            editId = null;
-            document.getElementById('heuresForm').reset();
-            document.getElementById('submitBtn').innerText = "Enregistrer";
-            document.getElementById('edit-actions').classList.add('hidden');
-            initDate();
-        }
-
-        function deleteEntry() {
-            customConfirm("Supprimer cette entrée ?", () => {
-                reunions = reunions.filter(r => r.id !== editId);
-                cancelEdit();
-                saveAndRender();
-                closeForm();
-            });
-        }
-
-        function resetHeures() {
-            customConfirm("Voulez-vous vraiment tout effacer ?", () => {
-                reunions = [];
-                saveAndRender();
-            });
-        }
-
-        // ============================================================================
-        // DATA PERSISTENCE
-        // ============================================================================
-
-        function saveAndRender() {
-            localStorage.setItem('mesHeuresReu', JSON.stringify(reunions));
-            updateExportBadge(true);
-            render();
-        }
-
-        function updateExportBadge(needsExport) {
-            const badge = document.getElementById('badge-export');
-            if (needsExport) {
-                badge.classList.remove('hidden');
-                localStorage.setItem('needsExport_108h', 'true');
-            } else {
-                badge.classList.add('hidden');
-                localStorage.removeItem('needsExport_108h');
-            }
-        }
-
-        // ============================================================================
-        // FORMATTING UTILITIES
-        // ============================================================================
-
-        function formatDuree(totalMinutes) {
-            const isNegative = totalMinutes < 0;
-            const absMinutes = Math.abs(Math.round(totalMinutes));
-            const hours = Math.floor(absMinutes / 60);
-            const mins = absMinutes % 60;
-            const prefix = isNegative ? "-" : "";
-            const minutePart = mins > 0 ? mins.toString().padStart(2, '0') : '';
-            return `${prefix}${hours}h${minutePart}`;
-        }
-
-        function formatDate(dateStr) {
-            return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-        }
 
         // ============================================================================
         // RENDERING
         // ============================================================================
 
-        function render() {
-            const container = document.getElementById('displayContainer');
-            container.innerHTML = "";
-            let globalMinutes = 0;
+        const Render = {
+            all() {
+                this.stats();
+                this.categories();
+            },
 
-            document.getElementById('stats-title').innerText = `Total Annuel (${formatDuree(TOTAL_ANNUEL)})`;
+            stats() {
+                const globalMinutes = State.getGlobalMinutes();
+                const globalRemaining = State.totalAnnuel - globalMinutes;
+                const globalPercent = Math.min((globalMinutes / State.totalAnnuel) * 100, 100);
 
-            // Render each category column
-            Object.keys(QUOTAS).forEach(categoryKey => {
-                const categoryReunions = reunions.filter(r => r.cat === categoryKey);
-                const totalMinutes = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
-                globalMinutes += totalMinutes;
+                DOM.getElement('stats-title').innerText = `Total Annuel (${Utils.formatDuree(State.totalAnnuel)})`;
+                DOM.getElement('globalFait').innerText = `Fait : ${Utils.formatDuree(globalMinutes)}`;
+                DOM.getElement('globalReste').innerText = `Reste : ${Utils.formatDuree(globalRemaining)}`;
+                DOM.setColor('globalReste', THEME.hex);
+                DOM.getElement('globalPercent').innerText = `${Math.round(globalPercent)}%`;
+                DOM.getElement('globalBar').style.width = globalPercent + '%';
+                DOM.getElement('globalBar').style.backgroundColor = THEME.hex;
+            },
 
-                const isExceeded = totalMinutes > QUOTAS[categoryKey];
-                const progressPercent = Math.min((totalMinutes / QUOTAS[categoryKey]) * 100, 100);
+            categories() {
+                const container = DOM.getElement('displayContainer');
+                container.innerHTML = '';
 
-                const column = document.createElement('div');
-                column.className = "level-column";
-                column.innerHTML = `
-                    <div class="mb-1 relative">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <h3 class="text-[9px] font-black uppercase opacity-60">${CATEGORY_LABELS[categoryKey]}</h3>
-                            ${isExceeded ? `<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>` : ''}
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar" style="width: ${progressPercent}%; background-color: ${THEME_HEX}"></div>
-                        </div>
-                        <p class="text-[8px] font-extrabold opacity-40 uppercase">${formatDuree(totalMinutes)} / ${formatDuree(QUOTAS[categoryKey])}</p>
-                    </div>
-                    <button id="btn-${categoryKey}" onclick="toggleListe('${categoryKey}')" class="toggle-list-btn">Détails</button>
-                    <div id="list-${categoryKey}" class="mt-2 space-y-1" style="display:none"></div>
-                `;
+                Object.keys(State.quotas).forEach(categoryKey => {
+                    const categoryReunions = State.reunions.filter(r => r.cat === categoryKey);
+                    const totalMinutes = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
+                    const isExceeded = totalMinutes > State.quotas[categoryKey];
+                    const progressPercent = Math.min((totalMinutes / State.quotas[categoryKey]) * 100, 100);
 
-                const listDiv = column.querySelector(`#list-${categoryKey}`);
-                categoryReunions
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .forEach(reunion => {
-                        const formattedDate = formatDate(reunion.date);
-                        const item = document.createElement('div');
-                        item.className = "reunion-item";
-                        item.style.borderLeftColor = THEME_HEX;
-                        item.onclick = () => chargerPourEdition(reunion.id);
-                        item.innerHTML = `
-                            <div class="flex-1 overflow-hidden">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-black text-[10px]" style="color: ${THEME_HEX}">${formattedDate}</span>
-                                    <span class="font-bold text-[10px]">${formatDuree(reunion.minutes)}</span>
-                                </div>
-                                ${reunion.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${reunion.comm}</div>` : ''}
+                    const column = document.createElement('div');
+                    column.className = 'level-column';
+
+                    const badgeHTML = isExceeded ? '<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>' : '';
+
+                    column.innerHTML = `
+                        <div class="mb-1 relative">
+                            <div class="flex items-center gap-1.5 mb-1">
+                                <h3 class="text-[9px] font-black uppercase opacity-60">${CONFIG.categories[categoryKey]}</h3>
+                                ${badgeHTML}
                             </div>
-                        `;
-                        listDiv.appendChild(item);
-                    });
-
-                container.appendChild(column);
-            });
-
-            // Update global stats
-            const globalRemaining = TOTAL_ANNUEL - globalMinutes;
-            const globalPercent = Math.min((globalMinutes / TOTAL_ANNUEL) * 100, 100);
-
-            document.getElementById('globalFait').innerText = `Fait : ${formatDuree(globalMinutes)}`;
-            document.getElementById('globalReste').innerText = `Reste : ${formatDuree(globalRemaining)}`;
-            document.getElementById('globalReste').style.color = THEME_HEX;
-            document.getElementById('globalPercent').innerText = `${Math.round(globalPercent)}%`;
-            document.getElementById('globalBar').style.width = globalPercent + "%";
-            document.getElementById('globalBar').style.backgroundColor = THEME_HEX;
-        }
-
-        function toggleListe(categoryKey) {
-            const listDiv = document.getElementById(`list-${categoryKey}`);
-            const btn = document.getElementById(`btn-${categoryKey}`);
-            const isHidden = listDiv.style.display === "none";
-
-            listDiv.style.display = isHidden ? "block" : "none";
-            btn.innerText = isHidden ? "Masquer" : "Détails";
-        }
-
-        // ============================================================================
-        // IMPORT/EXPORT
-        // ============================================================================
-
-        function exportData() {
-            if (reunions.length === 0) {
-                alert("Aucune donnée.");
-                return;
-            }
-
-            const date = new Date().toISOString().split('T')[0];
-            const fileName = `outilsprofs_108heures_${date}.txt`;
-            const content = JSON.stringify(reunions);
-
-            if (window.Android && window.Android.exportTxt) {
-                window.Android.exportTxt(content, fileName);
-                updateExportBadge(false);
-            } else {
-                const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                    updateExportBadge(false);
-                }, 100);
-            }
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        customConfirm("Remplacer les données ?", () => {
-                            reunions = imported;
-                            saveAndRender();
-                            updateExportBadge(false);
-                        });
-                    }
-                } catch (error) {
-                    console.error("Erreur lors de l'import:", error);
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = "";
-        }
-
-        function exportPDF() {
-            const professorName = localStorage.getItem('nom_enseignant') || "Enseignant";
-            const quotite = localStorage.getItem('quotite_pro') || 100;
-            const exportDate = new Date().toISOString().split('T')[0];
-            const fileName = `outilsprofs_108h_${professorName}_${exportDate}.pdf`;
-
-            let globalMinutesFait = reunions.reduce((sum, r) => sum + r.minutes, 0);
-            const globalRemaining = TOTAL_ANNUEL - globalMinutesFait;
-
-            const container = document.createElement('div');
-            container.style.padding = '10px';
-            container.style.color = 'black';
-            container.style.backgroundColor = 'white';
-            container.style.fontFamily = 'Arial, sans-serif';
-
-            // Fonction helper pour générer le HTML d'un bloc de catégorie
-            const generateCategoryBlock = (key) => {
-                const categoryReunions = reunions.filter(r => r.cat === key);
-                const totalCat = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
-                
-                return `
-                    <div style="page-break-inside: avoid; margin-bottom: 12px; border: 0.5px solid #000;">
-                        <div style="background:#eee; padding:4px; font-weight:bold; font-size:9px; border-bottom: 0.5px solid #000; display: flex; justify-content: space-between;">
-                            <span>${CATEGORY_LABELS[key]}</span>
-                            <span>${formatDuree(totalCat)} / ${formatDuree(QUOTAS[key])}</span>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: ${progressPercent}%; background-color: ${THEME.hex}"></div>
+                            </div>
+                            <p class="text-[8px] font-extrabold opacity-40 uppercase">${Utils.formatDuree(totalMinutes)} / ${Utils.formatDuree(State.quotas[categoryKey])}</p>
                         </div>
-                        <table style="width:100%; border-collapse:collapse; font-size:8px;">
-                            <thead>
-                                <tr style="background: #fafafa; border-bottom: 0.5px solid #000;">
-                                    <th style="text-align:left; padding:2px; width:22%; border-right: 0.2px solid #ccc;">Date</th>
-                                    <th style="text-align:left; padding:2px; border-right: 0.2px solid #ccc;">Contenu</th>
-                                    <th style="text-align:right; padding:2px; width:20%;">Durée</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${categoryReunions.length === 0
-                                    ? '<tr><td colspan="3" style="padding:4px; color:gray; text-align:center;">Néant</td></tr>'
-                                    : categoryReunions
-                                        .sort((a, b) => new Date(a.date) - new Date(b.date))
-                                        .map(reunion => `
-                                            <tr style="border-bottom:0.2px solid #eee;">
-                                                <td style="padding:2px; border-right: 0.2px solid #eee;">${formatDate(reunion.date)}</td>
-                                                <td style="padding:2px; border-right: 0.2px solid #eee; word-break: break-word;">${reunion.comm || '-'}</td>
-                                                <td style="padding:2px; text-align:right; font-weight:bold;">${formatDuree(reunion.minutes)}</td>
-                                            </tr>
-                                        `).join('')
-                                }
-                            </tbody>
-                        </table>
+                        <button class="toggle-list-btn" onclick="Render.toggleCategory('${categoryKey}')">Détails</button>
+                        <div id="list-${categoryKey}" class="mt-2 space-y-1" style="display:none"></div>
+                    `;
+
+                    const listDiv = column.querySelector(`#list-${categoryKey}`);
+                    categoryReunions
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .forEach(reunion => {
+                            const item = document.createElement('div');
+                            item.className = 'reunion-item';
+                            item.style.borderLeftColor = THEME.hex;
+                            item.onclick = () => Form.loadForEdit(reunion.id);
+                            item.innerHTML = `
+                                <div class="flex-1 overflow-hidden">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-black text-[10px]" style="color: ${THEME.hex}">${Utils.formatDate(reunion.date)}</span>
+                                        <span class="font-bold text-[10px]">${Utils.formatDuree(reunion.minutes)}</span>
+                                    </div>
+                                    ${reunion.comm ? `<div class="italic text-[8px] truncate mt-0.5 opacity-50">${reunion.comm}</div>` : ''}
+                                </div>
+                            `;
+                            listDiv.appendChild(item);
+                        });
+
+                    container.appendChild(column);
+                });
+            },
+
+            toggleCategory(categoryKey) {
+                const listDiv = DOM.getElement(`list-${categoryKey}`);
+                const btn = event.target;
+                const isHidden = listDiv.style.display === 'none';
+                listDiv.style.display = isHidden ? 'block' : 'none';
+                btn.innerText = isHidden ? 'Masquer' : 'Détails';
+            }
+        };
+
+        // ============================================================================
+        // THEME APPLICATION
+        // ============================================================================
+
+        const ThemeManager = {
+            apply() {
+                CONFIG.buttonIds.forEach(id => {
+                    DOM.setBgColor(id, THEME.hex);
+                    DOM.setColor(id, THEME.textColor);
+                });
+
+                DOM.setColor('stats-title', THEME.hex);
+                DOM.setColor('aide-label', THEME.hex);
+                DOM.setStyle('range-quotite', 'accentColor', THEME.hex);
+
+                const styleSlider = document.createElement('style');
+                styleSlider.innerHTML = `
+                    input[type=range]::-webkit-slider-runnable-track { background: ${THEME.hex}44 !important; }
+                    input[type=range]::-moz-range-track { background: ${THEME.hex}44 !important; }
+                `;
+                document.head.appendChild(styleSlider);
+            }
+        };
+
+        // ============================================================================
+        // DATA EXPORT/IMPORT
+        // ============================================================================
+
+        const DataExport = {
+            updateBadge(needsExport) {
+                const badge = DOM.getElement('badge-export');
+                if (needsExport) {
+                    badge.classList.remove('hidden');
+                    localStorage.setItem('needsExport_108h', 'true');
+                } else {
+                    badge.classList.add('hidden');
+                    localStorage.removeItem('needsExport_108h');
+                }
+            }
+        };
+
+        const DataManager = {
+            export() {
+                if (State.reunions.length === 0) {
+                    alert('Aucune donnée.');
+                    return;
+                }
+
+                const fileName = `outilsprofs_108heures_${Utils.getDateString()}.txt`;
+                const content = JSON.stringify(State.reunions);
+
+                if (window.Android && window.Android.exportTxt) {
+                    window.Android.exportTxt(content, fileName);
+                    DataExport.updateBadge(false);
+                } else {
+                    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        DataExport.updateBadge(false);
+                    }, 100);
+                }
+            },
+
+            import(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            Modal.confirm.open('Remplacer les données ?', () => {
+                                State.reunions = imported;
+                                State.save();
+                                DataExport.updateBadge(false);
+                                Render.all();
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de l\'import:', error);
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            },
+
+            exportPDF() {
+                const professorName = localStorage.getItem('nom_enseignant') || 'Enseignant';
+                const quotite = localStorage.getItem('quotite_pro') || 100;
+                const fileName = `outilsprofs_108h_${professorName}_${Utils.getDateString()}.pdf`;
+                const globalMinutesFait = State.getGlobalMinutes();
+                const globalRemaining = State.totalAnnuel - globalMinutesFait;
+
+                const container = document.createElement('div');
+                container.style.cssText = 'padding: 10px; color: black; background: white; font-family: Arial, sans-serif;';
+
+                const generateCategoryBlock = (key) => {
+                    const categoryReunions = State.reunions.filter(r => r.cat === key);
+                    const totalCat = categoryReunions.reduce((sum, r) => sum + r.minutes, 0);
+                    
+                    return `
+                        <div style="page-break-inside: avoid; margin-bottom: 12px; border: 0.5px solid #000;">
+                            <div style="background:#eee; padding:4px; font-weight:bold; font-size:9px; border-bottom: 0.5px solid #000; display: flex; justify-content: space-between;">
+                                <span>${CONFIG.categories[key]}</span>
+                                <span>${Utils.formatDuree(totalCat)} / ${Utils.formatDuree(State.quotas[key])}</span>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; font-size:8px;">
+                                <thead>
+                                    <tr style="background: #fafafa; border-bottom: 0.5px solid #000;">
+                                        <th style="text-align:left; padding:2px; width:22%; border-right: 0.2px solid #ccc;">Date</th>
+                                        <th style="text-align:left; padding:2px; border-right: 0.2px solid #ccc;">Contenu</th>
+                                        <th style="text-align:right; padding:2px; width:20%;">Durée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${categoryReunions.length === 0
+                                        ? '<tr><td colspan="3" style="padding:4px; color:gray; text-align:center;">Néant</td></tr>'
+                                        : categoryReunions
+                                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                                            .map(reunion => `
+                                                <tr style="border-bottom:0.2px solid #eee;">
+                                                    <td style="padding:2px; border-right: 0.2px solid #eee;">${Utils.formatDate(reunion.date)}</td>
+                                                    <td style="padding:2px; border-right: 0.2px solid #eee; word-break: break-word;">${reunion.comm || '-'}</td>
+                                                    <td style="padding:2px; text-align:right; font-weight:bold;">${Utils.formatDuree(reunion.minutes)}</td>
+                                                </tr>
+                                            `).join('')
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                };
+
+                const htmlContent = `
+                    <div style="text-align:center; border-bottom: 1.5px solid black; padding-bottom: 5px; margin-bottom: 10px;">
+                        <h1 style="font-size:14px; margin:0; text-transform: uppercase;">Bilan des 108 heures</h1>
+                        <p style="font-size:10px; margin:2px 0;"><strong>${professorName}</strong> — Quotité : ${quotite}% — Réalisé : <strong>${Utils.formatDuree(globalMinutesFait)}</strong> / Solde : <strong>${Utils.formatDuree(globalRemaining)}</strong></p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+                        <div id="col-gauche">
+                            ${generateCategoryBlock('PEDAGO')}
+                        </div>
+
+                        <div id="col-droite">
+                            ${generateCategoryBlock('APC')}
+                            ${generateCategoryBlock('CONSEIL')}
+                            ${generateCategoryBlock('FORM')}
+                        </div>
                     </div>
                 `;
-            };
 
-            let htmlContent = `
-                <div style="text-align:center; border-bottom: 1.5px solid black; padding-bottom: 5px; margin-bottom: 10px;">
-                    <h1 style="font-size:14px; margin:0; text-transform: uppercase;">Bilan des 108 heures</h1>
-                    <p style="font-size:10px; margin:2px 0;"><strong>${professorName}</strong> — Quotité : ${quotite}% — Réalisé : <strong>${formatDuree(globalMinutesFait)}</strong> / Solde : <strong>${formatDuree(globalRemaining)}</strong></p>
-                </div>
+                container.innerHTML = htmlContent;
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
-                    <div id="col-gauche">
-                        ${generateCategoryBlock('PEDAGO')}
-                    </div>
+                const options = {
+                    margin: 8,
+                    filename: fileName,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 3, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
 
-                    <div id="col-droite">
-                        ${generateCategoryBlock('APC')}
-                        ${generateCategoryBlock('CONSEIL')}
-                        ${generateCategoryBlock('FORM')}
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = htmlContent;
-
-            const options = {
-                margin: 8,
-                filename: fileName,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-
-            if (window.Android && window.Android.savePdfFromBase64) {
-                html2pdf().set(options).from(container).output('datauristring').then((pdfBase64) => {
-                    window.Android.savePdfFromBase64(pdfBase64.split(',')[1], fileName);
-                });
-            } else {
-                html2pdf().set(options).from(container).save();
+                if (window.Android && window.Android.savePdfFromBase64) {
+                    html2pdf().set(options).from(container).output('datauristring').then((pdfBase64) => {
+                        window.Android.savePdfFromBase64(pdfBase64.split(',')[1], fileName);
+                    });
+                } else {
+                    html2pdf().set(options).from(container).save();
+                }
             }
-        }
+        };
+
+        // ============================================================================
+        // APP INITIALIZATION & PUBLIC API
+        // ============================================================================
+
+        const App = {
+            init() {
+                ThemeManager.apply();
+                Form.init();
+                const savedQuotite = localStorage.getItem('quotite_pro') || 100;
+                DOM.setValue('range-quotite', savedQuotite);
+                this.updateQuotite(savedQuotite);
+                if (localStorage.getItem('needsExport_108h') === 'true') {
+                    DataExport.updateBadge(true);
+                }
+            },
+
+            updateQuotite(value) {
+                const quotite = parseInt(value);
+                DOM.setValue('val-quotite', quotite + '%');
+                localStorage.setItem('quotite_pro', quotite);
+                State.updateQuotite(quotite);
+                Render.all();
+            },
+
+            resetHeures() {
+                Modal.confirm.open('Voulez-vous vraiment tout effacer ?', () => {
+                    State.reunions = [];
+                    State.save();
+                    DataExport.updateBadge(false);
+                    Render.all();
+                });
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
 </html>
