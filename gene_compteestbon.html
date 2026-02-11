@@ -8,18 +8,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ===== VARIABLES CSS ===== */
         :root {
-            --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
-            --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
+            --bg-page: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1);
+            --input-bg: #2a2a2a;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
-            --column-border: rgba(0, 0, 0, 0.1); --input-bg: #f3f4f6;
+            --bg-page: #eeeeee;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --column-border: rgba(0, 0, 0, 0.1);
+            --input-bg: #f3f4f6;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
+        /* ===== BASE ===== */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-page); 
@@ -27,22 +35,69 @@
             margin: 0; 
             padding: 0; 
             transition: background 0.3s ease;
-            /* Optimisation des polices pour écrans haute résolution */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         
+        /* ===== HEADER ===== */
         header { 
-            background: var(--card-bg); border-bottom: 1px solid var(--column-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            width: 100%; margin-bottom: 12px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--column-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            width: 100%;
+            margin-bottom: 12px;
         }
 
-        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
-        header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
+        header h1 {
+            font-size: 1.125rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            flex-grow: 1;
+        }
 
-        /* Adaptation PC : max-width augmenté */
+        /* ===== BOUTONS ===== */
+        .ui-btn-round {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        .op-btn {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        /* ===== LAYOUT ===== */
         .main-wrapper { 
             width: 100%; 
             max-width: 800px; 
@@ -50,7 +105,75 @@
             padding: 10px 15px 40px; 
         }
 
-        /* Mise en page PC pour le jeu */
+        .light-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 20px;
+            border: 1px solid var(--column-border);
+            box-shadow: var(--shadow-custom);
+            margin-bottom: 20px;
+        }
+        
+        /* ===== INPUTS ===== */
+        .input-field {
+            background: var(--input-bg);
+            border: 1px solid var(--column-border);
+            border-radius: 0.75rem;
+            padding: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: 100%;
+            color: var(--text-main);
+            outline: none;
+            text-align: center;
+        }
+
+        /* ===== GAME ELEMENTS ===== */
+        .number-tile { 
+            background: var(--input-bg);
+            border: 2px solid var(--column-border);
+            border-radius: 1rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .target-card {
+            background: var(--accent-color, #06b6d4);
+            color: white;
+            border-radius: 1.5rem;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            border: 1px solid var(--column-border);
+            padding: 25px;
+            position: relative;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (min-width: 768px) {
             #game-zone.game-active {
                 display: grid;
@@ -58,44 +181,29 @@
                 gap: 20px;
                 align-items: start;
             }
-            .target-card { grid-column: span 2; }
-            .game-controls-wrapper { grid-column: span 2; }
-            #btn-solution { grid-column: span 2; max-width: 400px; margin: 0 auto 1.5rem; }
+            
+            .target-card {
+                grid-column: span 2;
+            }
+            
+            .game-controls-wrapper {
+                grid-column: span 2;
+            }
+            
+            #btn-solution {
+                grid-column: span 2;
+                max-width: 400px;
+                margin: 0 auto 1.5rem;
+            }
         }
-
-        .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
-        
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border);
-            border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700;
-            width: 100%; color: var(--text-main); outline: none; text-align: center; }
-        
-        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px;
-            text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
-        .btn-add:active { transform: scale(0.95); }
-
-        .number-tile { 
-            background: var(--input-bg); border: 2px solid var(--column-border);
-            border-radius: 1rem; height: 60px; display: flex; align-items: center;
-            justify-content: center; font-size: 1.5rem; font-weight: 900;
-        }
-
-        .target-card {
-            background: var(--accent-color, #06b6d4); color: white;
-            border-radius: 1.5rem; padding: 20px; text-align: center; margin-bottom: 20px;
-        }
-
-        .op-btn { transition: all 0.2s ease; border: 2px solid transparent; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px;
-            border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
     </style>
 </head>
 <body>
 
 <script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    if (localStorage.getItem('theme_mode') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 </script>
 
 <header>
@@ -105,7 +213,7 @@
         </svg>
     </a>
     <h1>Le Compte est Bon</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="ui-btn-round active:scale-90 text-lg">💡</button>
+    <button id="btn-aide" class="ui-btn-round active:scale-90 text-lg">💡</button>
 </header>
 
 <div class="main-wrapper">
@@ -118,32 +226,41 @@
         </a>
     </div>
 
+    <!-- Setup Zone -->
     <div id="setup-zone" class="light-card space-y-4">
         <div>
             <label class="block text-[9px] font-black uppercase opacity-50 mb-3 tracking-widest text-center">Opérations autorisées</label>
             <p class="text-[10px] text-center opacity-70 mb-3 italic">Sélectionnez les opérations autorisées :</p>
             <div class="grid grid-cols-4 gap-2">
-                <button onclick="toggleOp(this)" id="btn-op-add" data-op="+" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">+</button>
-                <button onclick="toggleOp(this)" id="btn-op-sub" data-op="-" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">-</button>
-                <button onclick="toggleOp(this)" id="btn-op-mul" data-op="x" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">×</button>
-                <button onclick="toggleOp(this)" id="btn-op-div" data-op="÷" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">÷</button>
+                <button id="btn-op-add" data-op="+" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">+</button>
+                <button id="btn-op-sub" data-op="-" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">-</button>
+                <button id="btn-op-mul" data-op="x" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">×</button>
+                <button id="btn-op-div" data-op="÷" data-active="false" class="op-btn py-3 rounded-xl font-black text-gray-400 bg-black/10 shadow-sm transition-all">÷</button>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Petites (1-10)</label>
-                <select id="count-small" onchange="adjustPlates('small')" class="input-field">
-                    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-                    <option value="3">3</option><option value="4" selected>4</option><option value="5">5</option>
+                <select id="count-small" class="input-field">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
                     <option value="6">6</option>
                 </select>
             </div>
             <div>
                 <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Grandes (25-100)</label>
-                <select id="count-large" onchange="adjustPlates('large')" class="input-field">
-                    <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
-                    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                <select id="count-large" class="input-field">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
                     <option value="6">6</option>
                 </select>
             </div>
@@ -160,9 +277,10 @@
             </div>
         </div>
 
-        <button id="mainAddBtn" onclick="generateGame()" class="btn-add">Générer le défi</button>
+        <button id="btn-generate" class="btn-add">Générer le défi</button>
     </div>
 
+    <!-- Game Zone -->
     <div id="game-zone" class="hidden">
         <div class="target-card" id="target-bg">
             <span class="text-[10px] font-black uppercase tracking-widest opacity-80">Nombre à atteindre</span>
@@ -179,18 +297,19 @@
             <div id="solution-steps" class="text-center font-bold text-sm space-y-1"></div>
         </div>
 
-        <button id="btn-solution" onclick="showSolution()" class="w-full py-3 mb-6 rounded-xl border-2 border-emerald-500 text-emerald-500 font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 bg-transparent">
+        <button id="btn-solution" class="w-full py-3 mb-6 rounded-xl border-2 border-emerald-500 text-emerald-500 font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 bg-transparent">
             💡 Afficher la solution
         </button>
 
         <div class="grid grid-cols-2 gap-4 game-controls-wrapper">
-            <button onclick="retourReglages()" class="btn-add bg-gray-500 !text-white">Réglages</button>
-            <button onclick="generateGame()" class="btn-add bg-amber-500 !text-white">Nouveau</button>
+            <button id="btn-back" class="btn-add bg-gray-500 !text-white">Réglages</button>
+            <button id="btn-new-game" class="btn-add bg-amber-500 !text-white">Nouveau</button>
         </div>
     </div>
 </div>
 
-<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+<!-- Modal Aide -->
+<div id="modal-aide" class="modal-overlay">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 id="titre-aide" class="text-lg font-black uppercase mb-4 text-center">💡 Comment jouer ?</h2>
         <div class="text-[11px] leading-relaxed space-y-4 opacity-90">
@@ -220,24 +339,26 @@
                 <b>Note :</b> L'application garantit qu'une solution exacte existe toujours pour chaque tirage généré.
             </div>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">
+        <button id="btn-close-aide" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">
             J'ai compris
         </button>
     </div>
 </div>
 
-<div id="modal-erreur" class="modal-overlay" onclick="fermerModal('modal-erreur')">
+<!-- Modal Erreur -->
+<div id="modal-erreur" class="modal-overlay">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="text-center">
             <div class="text-4xl mb-4">⚠️</div>
             <h2 class="text-lg font-black uppercase mb-2">Attention</h2>
             <p class="text-[11px] opacity-80 leading-relaxed mb-6">Vous devez sélectionner au moins une opération pour pouvoir générer un calcul.</p>
-            <button id="btn-fermer-erreur" onclick="fermerModal('modal-erreur')" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">D'accord</button>
+            <button id="btn-close-erreur" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">D'accord</button>
         </div>
     </div>
 </div>
 
-<div id="modal-echec" class="modal-overlay" onclick="fermerModal('modal-echec')">
+<!-- Modal Échec -->
+<div id="modal-echec" class="modal-overlay">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="text-center">
             <div class="text-4xl mb-4">🧩</div>
@@ -246,194 +367,358 @@
                 Aucun tirage n'a été trouvé avec vos réglages actuels (cible trop haute pour les opérations choisies). 
                 Réduisez la cible ou ajoutez des opérations.
             </p>
-            <button id="btn-fermer-echec" onclick="fermerModal('modal-echec')" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">Modifier</button>
+            <button id="btn-close-echec" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white">Modifier</button>
         </div>
     </div>
 </div>
 
 <script>
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
+    // ===== CONFIGURATION =====
+    const CONFIG = {
+        maxAttempts: 60,
+        minRounds: 2,
+        maxRounds: 4,
+        maxTarget: 1000,
+        smallPlates: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10],
+        largePlates: [25, 25, 50, 50, 75, 75, 100, 100],
+        colors: {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e', 'gray': '#6b7280'
+        },
+        lightColors: ['yellow', 'lime', 'amber', 'cyan'],
+        storageKeys: {
+            theme: 'theme_mode',
+            themeTiles: 'theme_tuiles'
+        }
+    };
 
-    function toggleOp(btn) {
-        const isActive = btn.getAttribute('data-active') === 'true';
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const hexa = mapCouleurs[themePrefs.gen || 'cyan'];
-        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.gen || 'cyan') ? '#000' : '#fff';
+    // ===== STATE =====
+    let currentTarget = 0;
+    let currentPlates = [];
+
+    // ===== DOM ELEMENTS =====
+    const elements = {
+        // Setup zone
+        setupZone: document.getElementById('setup-zone'),
+        countSmall: document.getElementById('count-small'),
+        countLarge: document.getElementById('count-large'),
+        targetMin: document.getElementById('target-min'),
+        targetMax: document.getElementById('target-max'),
+        
+        // Operation buttons
+        btnOpAdd: document.getElementById('btn-op-add'),
+        btnOpSub: document.getElementById('btn-op-sub'),
+        btnOpMul: document.getElementById('btn-op-mul'),
+        btnOpDiv: document.getElementById('btn-op-div'),
+        
+        // Game zone
+        gameZone: document.getElementById('game-zone'),
+        targetNumber: document.getElementById('target-number'),
+        targetBg: document.getElementById('target-bg'),
+        platesContainer: document.getElementById('plates-container'),
+        solutionZone: document.getElementById('solution-zone'),
+        solutionSteps: document.getElementById('solution-steps'),
+        
+        // Buttons
+        btnGenerate: document.getElementById('btn-generate'),
+        btnSolution: document.getElementById('btn-solution'),
+        btnBack: document.getElementById('btn-back'),
+        btnNewGame: document.getElementById('btn-new-game'),
+        btnAide: document.getElementById('btn-aide'),
+        btnCloseAide: document.getElementById('btn-close-aide'),
+        btnCloseErreur: document.getElementById('btn-close-erreur'),
+        btnCloseEchec: document.getElementById('btn-close-echec'),
+        
+        // Modals
+        modalAide: document.getElementById('modal-aide'),
+        modalErreur: document.getElementById('modal-erreur'),
+        modalEchec: document.getElementById('modal-echec')
+    };
+
+    // ===== UTILITY FUNCTIONS =====
+    function getThemeColors() {
+        const themePrefs = JSON.parse(localStorage.getItem(CONFIG.storageKeys.themeTiles) || '{}');
+        const colorName = themePrefs.gen || 'cyan';
+        const accentColor = CONFIG.colors[colorName];
+        const isLight = CONFIG.lightColors.includes(colorName);
+        const contrastColor = isLight ? '#000' : '#fff';
+        
+        return { accentColor, contrastColor, colorName };
+    }
+
+    function randomFromArray(arr) {
+        const idx = Math.floor(Math.random() * arr.length);
+        return arr.splice(idx, 1)[0];
+    }
+
+    // ===== MODAL FUNCTIONS =====
+    function openModal(modal) {
+        modal.style.display = 'flex';
+    }
+
+    function closeModal(modal) {
+        modal.style.display = 'none';
+    }
+
+    // ===== OPERATION FUNCTIONS =====
+    function toggleOperation(button) {
+        const isActive = button.getAttribute('data-active') === 'true';
+        const { accentColor, contrastColor } = getThemeColors();
 
         if (isActive) {
-            btn.setAttribute('data-active', 'false');
-            btn.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
-            btn.style.color = 'gray';
+            button.setAttribute('data-active', 'false');
+            button.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+            button.style.color = 'gray';
         } else {
-            btn.setAttribute('data-active', 'true');
-            btn.style.backgroundColor = hexa;
-            btn.style.color = contrast;
+            button.setAttribute('data-active', 'true');
+            button.style.backgroundColor = accentColor;
+            button.style.color = contrastColor;
         }
     }
 
-    function getSelectedOps() {
-        const ops = [];
-        if(document.getElementById('btn-op-add').getAttribute('data-active') === 'true') ops.push('+');
-        if(document.getElementById('btn-op-sub').getAttribute('data-active') === 'true') ops.push('-');
-        if(document.getElementById('btn-op-mul').getAttribute('data-active') === 'true') ops.push('x');
-        if(document.getElementById('btn-op-div').getAttribute('data-active') === 'true') ops.push('÷');
-        return ops;
+    function getSelectedOperations() {
+        const operations = [];
+        if (elements.btnOpAdd.getAttribute('data-active') === 'true') operations.push('+');
+        if (elements.btnOpSub.getAttribute('data-active') === 'true') operations.push('-');
+        if (elements.btnOpMul.getAttribute('data-active') === 'true') operations.push('x');
+        if (elements.btnOpDiv.getAttribute('data-active') === 'true') operations.push('÷');
+        return operations;
     }
 
+    // ===== PLATE ADJUSTMENT =====
     function adjustPlates(source) {
-        const small = document.getElementById('count-small');
-        const large = document.getElementById('count-large');
         if (source === 'small') {
-            large.value = 6 - parseInt(small.value);
+            elements.countLarge.value = 6 - parseInt(elements.countSmall.value);
         } else {
-            small.value = 6 - parseInt(large.value);
+            elements.countSmall.value = 6 - parseInt(elements.countLarge.value);
         }
     }
-    
+
+    // ===== CALCULATION FUNCTIONS =====
+    function performOperation(a, b, op) {
+        switch (op) {
+            case '+': return a + b;
+            case '-': return Math.abs(a - b);
+            case 'x': return a * b;
+            case '÷': 
+                if (a % b === 0 && b !== 0) return a / b;
+                if (b % a === 0 && a !== 0) return b / a;
+                return a + b;
+            default: return a + b;
+        }
+    }
+
+    function isValidResult(result, op, a, b) {
+        if (result <= 0 || result >= CONFIG.maxTarget) return false;
+        if (op === '÷' && (b === 0 || a % b !== 0)) return false;
+        return true;
+    }
+
+    // ===== GAME GENERATION =====
     function generateGame() {
-        const minCible = parseInt(document.getElementById('target-min').value) || 10;
-        const maxCible = parseInt(document.getElementById('target-max').value) || 100;
-        const nbSmall = parseInt(document.getElementById('count-small').value);
-        const nbLarge = parseInt(document.getElementById('count-large').value);
-        const allowedOps = getSelectedOps();
+        const minTarget = parseInt(elements.targetMin.value) || 10;
+        const maxTarget = parseInt(elements.targetMax.value) || 100;
+        const nbSmall = parseInt(elements.countSmall.value);
+        const nbLarge = parseInt(elements.countLarge.value);
+        const allowedOps = getSelectedOperations();
         
-        if(allowedOps.length === 0) { 
-            document.getElementById('modal-erreur').style.display = 'flex';
-            return; 
-        }
-
-        let cible = 0;
-        let finalPlates = [];
-        let tentativesGénérales = 0;
-
-        while ((cible < minCible || cible > maxCible) && tentativesGénérales < 60) {
-            let petitesDispo = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
-            let grandesDispo = [25, 25, 50, 50, 75, 75, 100, 100];
-            let plaques = [];
-            
-            for(let i=0; i<nbSmall; i++) plaques.push(petitesDispo.splice(Math.floor(Math.random()*petitesDispo.length), 1)[0]);
-            for(let i=0; i<nbLarge; i++) plaques.push(grandesDispo.splice(Math.floor(Math.random()*grandesDispo.length), 1)[0]);
-
-            let temp = [...plaques];
-            let rounds = 2 + Math.floor(Math.random() * 3);
-            for(let i=0; i < rounds; i++) {
-                if(temp.length < 2) break;
-                let a = temp.splice(Math.floor(Math.random()*temp.length), 1)[0];
-                let b = temp.splice(Math.floor(Math.random()*temp.length), 1)[0];
-                let op = allowedOps[Math.floor(Math.random()*allowedOps.length)];
-                let res;
-                if(op=='+') res = a+b;
-                else if(op=='-') res = Math.abs(a-b);
-                else if(op=='x') res = a*b;
-                else res = (a%b==0 && b!=0) ? a/b : (b%a==0 && a!=0 ? b/a : a+b);
-                if(res > 0 && res < 1000) { temp.push(res); cible = res; }
-            }
-            if (cible >= minCible && cible <= maxCible) finalPlates = plaques;
-            tentativesGénérales++;
-        }
-
-        if (cible < minCible || cible > maxCible) {
-            document.getElementById('modal-echec').style.display = 'flex';
+        if (allowedOps.length === 0) {
+            openModal(elements.modalErreur);
             return;
         }
 
-        document.getElementById('target-number').innerText = cible;
-        const container = document.getElementById('plates-container');
-        container.innerHTML = '';
-        finalPlates.sort((a,b) => a - b).forEach(p => {
-            container.innerHTML += `<div class="number-tile">${p}</div>`;
-        });
+        let target = 0;
+        let plates = [];
+        let attempts = 0;
 
-        document.getElementById('solution-zone').classList.add('hidden');
-        document.getElementById('btn-solution').classList.remove('hidden');
-        document.getElementById('setup-zone').classList.add('hidden');
-        const gameZone = document.getElementById('game-zone');
-        gameZone.classList.remove('hidden');
-        gameZone.classList.add('game-active');
+        while ((target < minTarget || target > maxTarget) && attempts < CONFIG.maxAttempts) {
+            // Initialize available plates
+            const smallAvailable = [...CONFIG.smallPlates];
+            const largeAvailable = [...CONFIG.largePlates];
+            plates = [];
+            
+            // Select plates
+            for (let i = 0; i < nbSmall; i++) {
+                plates.push(randomFromArray(smallAvailable));
+            }
+            for (let i = 0; i < nbLarge; i++) {
+                plates.push(randomFromArray(largeAvailable));
+            }
+
+            // Simulate operations to generate target
+            let temp = [...plates];
+            const rounds = CONFIG.minRounds + Math.floor(Math.random() * (CONFIG.maxRounds - CONFIG.minRounds + 1));
+            
+            for (let i = 0; i < rounds; i++) {
+                if (temp.length < 2) break;
+                
+                const a = randomFromArray(temp);
+                const b = randomFromArray(temp);
+                const op = allowedOps[Math.floor(Math.random() * allowedOps.length)];
+                const result = performOperation(a, b, op);
+                
+                if (isValidResult(result, op, a, b)) {
+                    temp.push(result);
+                    target = result;
+                }
+            }
+            
+            if (target >= minTarget && target <= maxTarget) {
+                currentPlates = plates;
+                currentTarget = target;
+            }
+            
+            attempts++;
+        }
+
+        if (target < minTarget || target > maxTarget) {
+            openModal(elements.modalEchec);
+            return;
+        }
+
+        displayGame();
     }
 
+    function displayGame() {
+        // Display target
+        elements.targetNumber.innerText = currentTarget;
+        
+        // Display plates
+        elements.platesContainer.innerHTML = '';
+        currentPlates.sort((a, b) => a - b).forEach(plate => {
+            const tile = document.createElement('div');
+            tile.className = 'number-tile';
+            tile.innerText = plate;
+            elements.platesContainer.appendChild(tile);
+        });
+
+        // Hide solution and show button
+        elements.solutionZone.classList.add('hidden');
+        elements.btnSolution.classList.remove('hidden');
+        
+        // Switch screens
+        elements.setupZone.classList.add('hidden');
+        elements.gameZone.classList.remove('hidden');
+        elements.gameZone.classList.add('game-active');
+    }
+
+    // ===== SOLUTION FINDER =====
     function findShortestSolution(initialNumbers, target) {
-        const allowedOps = getSelectedOps();
-        let queue = [{ nums: initialNumbers, steps: [] }];
-        let visited = new Set();
-        visited.add(initialNumbers.sort((a,b)=>a-b).join(','));
+        const allowedOps = getSelectedOperations();
+        const queue = [{ nums: initialNumbers, steps: [] }];
+        const visited = new Set();
+        visited.add(initialNumbers.sort((a, b) => a - b).join(','));
 
         while (queue.length > 0) {
-            let { nums, steps } = queue.shift();
+            const { nums, steps } = queue.shift();
+            
             if (steps.length >= 6) continue;
 
             for (let i = 0; i < nums.length; i++) {
                 for (let j = 0; j < nums.length; j++) {
                     if (i === j) continue;
-                    const a = nums[i], b = nums[j];
+                    
+                    const a = nums[i];
+                    const b = nums[j];
                     const remaining = nums.filter((_, idx) => idx !== i && idx !== j);
-                    const ops = [
-                        {s:'+', r:a+b, sym:'+'}, {s:'-', r:a-b, sym:'-'},
-                        {s:'x', r:a*b, sym:'x'}, {s:'÷', r:a/b, sym:'÷'}
-                    ].filter(o => allowedOps.includes(o.sym));
+                    
+                    const operations = [
+                        { symbol: '+', result: a + b, op: '+' },
+                        { symbol: '-', result: a - b, op: '-' },
+                        { symbol: 'x', result: a * b, op: 'x' },
+                        { symbol: '÷', result: a / b, op: '÷' }
+                    ].filter(op => allowedOps.includes(op.op));
 
-                    for (let op of ops) {
-                        if (op.s === '-' && op.r <= 0) continue;
-                        if (op.s === '÷' && (b === 0 || a % b !== 0)) continue;
+                    for (let operation of operations) {
+                        // Validation rules
+                        if (operation.symbol === '-' && operation.result <= 0) continue;
+                        if (operation.symbol === '÷' && (b === 0 || a % b !== 0)) continue;
 
-                        const newStep = { a, b, s: op.s, r: op.r };
+                        const newStep = {
+                            a: a,
+                            b: b,
+                            s: operation.symbol,
+                            r: operation.result
+                        };
+                        
                         const allSteps = [...steps, newStep];
-                        if (op.r === target) return allSteps;
+                        
+                        // Check if target reached
+                        if (operation.result === target) {
+                            return allSteps;
+                        }
 
-                        const nextState = [...remaining, op.r].sort((x,y)=>x-y).join(',');
+                        // Add to queue
+                        const nextState = [...remaining, operation.result].sort((x, y) => x - y).join(',');
                         if (!visited.has(nextState)) {
                             visited.add(nextState);
-                            queue.push({ nums: [...remaining, op.r], steps: allSteps });
+                            queue.push({
+                                nums: [...remaining, operation.result],
+                                steps: allSteps
+                            });
                         }
                     }
                 }
             }
         }
+        
         return null;
     }
 
     function showSolution() {
-        const target = parseInt(document.getElementById('target-number').innerText);
-        const plates = Array.from(document.querySelectorAll('.number-tile')).map(el => parseInt(el.innerText));
-        const steps = findShortestSolution(plates, target);
-        document.getElementById('solution-steps').innerHTML = steps ? steps.map(s => `<div>${s.a} ${s.s} ${s.b} = ${s.r}</div>`).join('') : "Aucune solution exacte trouvée.";
-        document.getElementById('solution-zone').classList.remove('hidden');
-        document.getElementById('btn-solution').classList.add('hidden');
-    }
-
-    function retourReglages() {
-        document.getElementById('setup-zone').classList.remove('hidden');
-        const gameZone = document.getElementById('game-zone');
-        gameZone.classList.add('hidden');
-        gameZone.classList.remove('game-active');
-    }
-
-    function appliquerTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colPref = themePrefs.gen || 'cyan'; 
-        const hexa = mapCouleurs[colPref];
-        const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
-        document.documentElement.style.setProperty('--accent-color', hexa);
+        const steps = findShortestSolution(currentPlates, currentTarget);
         
-        [
-            document.getElementById('btn-retour-header'), 
-            document.getElementById('btn-retour-liste'), 
-            document.getElementById('btn-aide'), 
-            document.getElementById('mainAddBtn'), 
-            document.getElementById('btn-fermer-aide'),
-            document.getElementById('btn-fermer-erreur'),
-            document.getElementById('btn-fermer-echec'),
-            document.getElementById('target-bg')
-        ].forEach(el => {
-            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; }
+        if (steps) {
+            elements.solutionSteps.innerHTML = steps
+                .map(s => `<div>${s.a} ${s.s} ${s.b} = ${s.r}</div>`)
+                .join('');
+        } else {
+            elements.solutionSteps.innerHTML = "Aucune solution exacte trouvée.";
+        }
+        
+        elements.solutionZone.classList.remove('hidden');
+        elements.btnSolution.classList.add('hidden');
+    }
+
+    // ===== NAVIGATION =====
+    function returnToSettings() {
+        elements.setupZone.classList.remove('hidden');
+        elements.gameZone.classList.add('hidden');
+        elements.gameZone.classList.remove('game-active');
+    }
+
+    // ===== THEME APPLICATION =====
+    function applyTheme() {
+        const { accentColor, contrastColor } = getThemeColors();
+        document.documentElement.style.setProperty('--accent-color', accentColor);
+        
+        const themedElements = [
+            document.getElementById('btn-retour-header'),
+            document.getElementById('btn-retour-liste'),
+            elements.btnAide,
+            elements.btnGenerate,
+            elements.btnCloseAide,
+            elements.btnCloseErreur,
+            elements.btnCloseEchec,
+            elements.targetBg
+        ];
+
+        themedElements.forEach(el => {
+            if (el) {
+                el.style.backgroundColor = accentColor;
+                el.style.color = contrastColor;
+            }
         });
 
-        ['btn-op-add', 'btn-op-sub', 'btn-op-mul', 'btn-op-div'].forEach(id => {
-            const btn = document.getElementById(id);
-            if(btn) {
-                if(btn.getAttribute('data-active') === 'true') {
-                    btn.style.backgroundColor = hexa;
-                    btn.style.color = contrast;
+        // Apply theme to operation buttons
+        [elements.btnOpAdd, elements.btnOpSub, elements.btnOpMul, elements.btnOpDiv].forEach(btn => {
+            if (btn) {
+                if (btn.getAttribute('data-active') === 'true') {
+                    btn.style.backgroundColor = accentColor;
+                    btn.style.color = contrastColor;
                 } else {
                     btn.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
                     btn.style.color = 'gray';
@@ -442,9 +727,43 @@
         });
     }
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-    window.onload = appliquerTheme;
+    // ===== EVENT LISTENERS =====
+    function setupEventListeners() {
+        // Operation buttons
+        elements.btnOpAdd.onclick = () => toggleOperation(elements.btnOpAdd);
+        elements.btnOpSub.onclick = () => toggleOperation(elements.btnOpSub);
+        elements.btnOpMul.onclick = () => toggleOperation(elements.btnOpMul);
+        elements.btnOpDiv.onclick = () => toggleOperation(elements.btnOpDiv);
+        
+        // Plate count selectors
+        elements.countSmall.onchange = () => adjustPlates('small');
+        elements.countLarge.onchange = () => adjustPlates('large');
+        
+        // Game buttons
+        elements.btnGenerate.onclick = generateGame;
+        elements.btnSolution.onclick = showSolution;
+        elements.btnBack.onclick = returnToSettings;
+        elements.btnNewGame.onclick = generateGame;
+        
+        // Help modal
+        elements.btnAide.onclick = () => openModal(elements.modalAide);
+        elements.btnCloseAide.onclick = () => closeModal(elements.modalAide);
+        elements.modalAide.onclick = () => closeModal(elements.modalAide);
+        
+        // Error modal
+        elements.btnCloseErreur.onclick = () => closeModal(elements.modalErreur);
+        elements.modalErreur.onclick = () => closeModal(elements.modalErreur);
+        
+        // Failure modal
+        elements.btnCloseEchec.onclick = () => closeModal(elements.modalEchec);
+        elements.modalEchec.onclick = () => closeModal(elements.modalEchec);
+    }
+
+    // ===== INITIALIZATION =====
+    window.onload = () => {
+        applyTheme();
+        setupEventListeners();
+    };
 </script>
 </body>
 </html>
