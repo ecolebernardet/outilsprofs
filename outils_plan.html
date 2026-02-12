@@ -32,14 +32,14 @@
         header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
 
         .main-content { 
-    flex-grow: 1; 
-    display: flex; 
-    flex-direction: column; 
-    position: relative; 
-    overflow: hidden; 
-    /* Ajoute un espace en bas égal à la hauteur de la barre d'outils + marge */
-    padding-bottom: 80px; 
-}
+			flex-grow: 1; 
+			display: flex; 
+			flex-direction: column; 
+			position: relative; 
+			overflow: hidden; 
+			/* Ajoute un espace en bas égal à la hauteur de la barre d'outils + marge */
+			padding-bottom: 80px; 
+		}
 
         #container-retour-liste {
     position: relative;
@@ -98,35 +98,76 @@
 		}
 
         .toolbar {
-			position: fixed; 
-			bottom: 0;
-			left: 50%; 
-			transform: translateX(-50%);
-			background: var(--header-bg); 
-			width: 100%;
-			max-width: 600px; 
-			/* Augmentation du padding pour décoller de la zone de navigation Android */
-			padding: 12px 10px calc(env(safe-area-inset-bottom) + 15px) 10px;
-			border-radius: 20px 20px 0 0;
-			border-top: 1px solid rgba(128,128,128,0.3);
-			display: flex; 
-			justify-content: space-around; 
-			z-index: 9999; /* Priorité maximale pour passer au-dessus du reste */
-			pointer-events: auto; /* Force la réactivité aux clics */
-			touch-action: manipulation; /* Supprime le délai de clic sur mobile */
-		}
+    position: fixed; 
+    bottom: 0;
+    left: 50%; 
+    transform: translateX(-50%);
+    background: transparent; /* Fond supprimé */
+    width: 100%;
+    max-width: 600px; 
+    padding: 12px 10px calc(env(safe-area-inset-bottom) + 15px) 10px;
+    border-top: none; /* Suppression de la bordure supérieure */
+    display: flex; 
+    justify-content: center; 
+    gap: 8px; 
+    z-index: 9999;
+    pointer-events: none; /* Permet de cliquer à travers la zone vide de la barre */
+}
 
-        .btn-tool { flex: 1; height: 42px; border-radius: 12px; font-size: 18px; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); transition: all 0.2s; border: none; color: inherit; }
+	.toolbar .btn-tool {
+    pointer-events: auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); /* Ajout d'une ombre pour la visibilité sur fond sombre */
+}
+
+        .btn-tool { 
+			flex: 0 0 45px; /* Largeur fixe pour tous */
+			height: 45px; 
+			border-radius: 12px; 
+			font-size: 18px; 
+			display: flex; 
+			align-items: center; 
+			justify-content: center; 
+			background: var(--header-bg); 
+			border: 1px solid var(--column-border); 
+			color: inherit; 
+			transition: all 0.2s; 
+		}
         .btn-tool:disabled { opacity: 0.15; pointer-events: none; }
         
-        #add-menu { 
-			transition: all 0.2s ease-out; 
-			z-index: 9998; 
-		}
-		#add-menu.hidden { 
-			display: none !important; /* Force la disparition totale pour libérer l'espace tactile */
-			pointer-events: none; 
-		}
+		/* Barre supérieure spécifique */
+		.creation-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: transparent; 
+    z-index: 150;
+}
+
+	.creation-bar .btn-tool {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+		#add-menu { 
+    position: fixed !important; /* Force la position hors du flux */
+    top: 180px !important;      /* Position absolue sous la barre de création */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: var(--header-bg); 
+    border: 1px solid var(--column-border); 
+    padding: 12px; 
+    border-radius: 20px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    display: flex; 
+    gap: 12px; 
+    z-index: 10000 !important; /* Doit être supérieur au z-index du canvas */
+    pointer-events: auto !important;
+}
+
+#add-menu.hidden { 
+    display: none !important; 
+}
+
         #add-menu button:active { transform: scale(0.9); }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
@@ -147,12 +188,21 @@
 </header>
 
 <div class="main-content">
-    <div id="container-retour-liste" class="relative z-50" style="padding: 10px 20px 0 20px;">
-    <a href="outils.html" id="btn-retour-liste">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-        Retour aux outils
-    </a>
-</div>
+    <div id="container-retour-liste" style="padding: 10px 15px;">
+        <a href="outils.html" id="btn-retour-liste">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux outils
+        </a>
+    </div>
+
+    <div class="creation-bar">
+        <button class="btn-tool" id="btn-mode" onclick="toggleLock()">🔓</button>
+        <button class="btn-tool" id="btn-undo" onclick="undo()">↶</button>
+        <button class="btn-tool" id="btn-redo" onclick="redo()">↷</button>
+        <button class="btn-tool" id="btn-add-menu" onclick="toggleAddMenu()">➕</button>
+        <button class="btn-tool" id="btn-delete-selection" onclick="supprimerSelection()" disabled>🧽</button>
+        <button class="btn-tool" onclick="genererTablesDepuisClasse()">📋</button>
+    </div>
 
     <div id="canvas-container">
         <svg id="plan-svg" onclick="deselectAll(event)" viewBox="0 0 1800 1800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
@@ -167,41 +217,12 @@
     </div>
 </div>
 
-<div id="add-menu" class="hidden fixed bottom-[95px] left-1/2 -translate-x-1/2 bg-[var(--header-bg)] border border-[var(--column-border)] p-4 rounded-3xl shadow-2xl flex gap-4 z-[300]">
-    <button onclick="ajouterMeuble('prof')" class="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-500/10">
-        <span class="text-2xl">👨‍🏫</span>
-        <span class="text-[9px] font-bold uppercase">Bureau</span>
-    </button>
-    <button onclick="ajouterUneTable()" class="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-500/10">
-        <span class="text-2xl">🪑</span>
-        <span class="text-[9px] font-bold uppercase">Élève</span>
-    </button>
-    <button onclick="ajouterMeuble('tableau')" class="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-500/10">
-        <span class="text-2xl">⬛</span>
-        <span class="text-[9px] font-bold uppercase">Tableau</span>
-    </button>
-    <button onclick="ajouterMeuble('meuble')" class="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-500/10">
-        <span class="text-2xl">🗄️</span>
-        <span class="text-[9px] font-bold uppercase">Meuble</span>
-    </button>
-    <button onclick="ajouterMeuble('porte')" class="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-500/10">
-        <span class="text-2xl">🚪</span>
-        <span class="text-[9px] font-bold uppercase">Porte</span>
-    </button>
-</div>
-
 <div class="toolbar">
-    <button class="btn-tool" id="btn-mode" onclick="toggleLock()">🔓</button>
-    <button class="btn-tool" id="btn-undo" onclick="undo()">↶</button>
-    <button class="btn-tool" id="btn-redo" onclick="redo()">↷</button>
-    <button class="btn-tool" id="btn-add-menu" onclick="toggleAddMenu()" title="Ajouter un élément">➕</button>
-    <button class="btn-tool" id="btn-delete-selection" onclick="supprimerSelection()" title="Supprimer la sélection" disabled>🧽</button>
-    <button class="btn-tool" onclick="genererTablesDepuisClasse()" title="Générer les tables">📋</button>
-    <button class="btn-tool" onclick="confirmerToutEffacer()" title="Tout effacer">🗑️</button>
-	<button class="btn-tool" onclick="ouvrirDansOnglet()" title="Ouvrir en plein écran">🖼️</button>
+    <button class="btn-tool" onclick="confirmerToutEffacer()">🗑️</button>
     <button class="btn-tool" onclick="exporterPlan()">💾</button>
     <button class="btn-tool" onclick="importerPlan()">📂</button>
-    <button class="btn-tool" onclick="exportPDF()" title="Télécharger PDF">📄</button>
+    <button class="btn-tool" onclick="exportPDF()">📄</button>
+    <button class="btn-tool" onclick="ouvrirDansOnglet()">🖼️</button>
 </div>
 
 <div id="modal-confirm" class="modal-overlay">
@@ -262,6 +283,29 @@
     </div>
 </div>
 
+<div id="add-menu" class="hidden">
+    <button onclick="ajouterMeuble('prof')" class="add-item-btn">
+        <span class="text-2xl">👨‍🏫</span>
+        <span class="text-[9px] font-bold uppercase">Bureau</span>
+    </button>
+    <button onclick="ajouterUneTable()" class="add-item-btn">
+        <span class="text-2xl">🪑</span>
+        <span class="text-[9px] font-bold uppercase">Élève</span>
+    </button>
+    <button onclick="ajouterMeuble('tableau')" class="add-item-btn">
+        <span class="text-2xl">⬛</span>
+        <span class="text-[9px] font-bold uppercase">Tableau</span>
+    </button>
+    <button onclick="ajouterMeuble('meuble')" class="add-item-btn">
+        <span class="text-2xl">🗄️</span>
+        <span class="text-[9px] font-bold uppercase">Meuble</span>
+    </button>
+    <button onclick="ajouterMeuble('porte')" class="add-item-btn">
+        <span class="text-2xl">🚪</span>
+        <span class="text-[9px] font-bold uppercase">Porte</span>
+    </button>
+</div>
+
 <script>
     if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
 
@@ -282,7 +326,7 @@
     // --- AUGMENTATION DE LA TAILLE DES PRÉNOMS ---
     const labels = svgClone.querySelectorAll('.desk-label');
     labels.forEach(label => {
-        // On augmente la taille (passant de ~30px à 30px ou plus selon le besoin)
+        // taille de la police des prénoms à
         label.setAttribute('style', 'font-size: 30px; font-weight: 900; font-family: Inter, sans-serif; fill: #000000;');
         
         // On s'assure que le texte est bien centré
@@ -389,7 +433,21 @@
         document.getElementById('btn-redo').disabled = redoStack.length === 0; 
         document.getElementById('btn-delete-selection').disabled = selectedIndex === null;
     }
-    function toggleAddMenu() { document.getElementById('add-menu').classList.toggle('hidden'); }
+	
+    function toggleAddMenu() { 
+    const menu = document.getElementById('add-menu');
+    // On retire toute ancienne classe Tailwind de positionnement qui pourrait gêner
+    menu.classList.remove('bottom-[95px]', 'bottom-0');
+    
+    // Bascule de la visibilité
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menu.style.display = 'flex';
+    } else {
+        menu.classList.add('hidden');
+        menu.style.display = 'none';
+    }
+}
 
     // Fonctions Zoom
     function changeZoom(delta) {
