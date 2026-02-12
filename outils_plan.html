@@ -198,6 +198,7 @@
     <button class="btn-tool" id="btn-delete-selection" onclick="supprimerSelection()" title="Supprimer la sélection" disabled>🧽</button>
     <button class="btn-tool" onclick="genererTablesDepuisClasse()" title="Générer les tables">📋</button>
     <button class="btn-tool" onclick="confirmerToutEffacer()" title="Tout effacer">🗑️</button>
+	<button class="btn-tool" onclick="ouvrirDansOnglet()" title="Ouvrir en plein écran">🖼️</button>
     <button class="btn-tool" onclick="exporterPlan()">💾</button>
     <button class="btn-tool" onclick="importerPlan()">📂</button>
     <button class="btn-tool" onclick="exportPDF()" title="Télécharger PDF">📄</button>
@@ -270,6 +271,83 @@
     const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
     document.documentElement.style.setProperty('--theme-color', themeColor);
     document.documentElement.style.setProperty('--contrast-color', contrast);
+
+	function ouvrirDansOnglet() {
+    const svgElement = document.getElementById('plan-svg');
+    const svgClone = svgElement.cloneNode(true);
+    
+    // On force un fond blanc
+    svgClone.style.backgroundColor = "white";
+    
+    // --- AUGMENTATION DE LA TAILLE DES PRÉNOMS ---
+    const labels = svgClone.querySelectorAll('.desk-label');
+    labels.forEach(label => {
+        // On augmente la taille (passant de ~30px à 30px ou plus selon le besoin)
+        label.setAttribute('style', 'font-size: 30px; font-weight: 900; font-family: Inter, sans-serif; fill: #000000;');
+        
+        // On s'assure que le texte est bien centré
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('dominant-baseline', 'central');
+    });
+
+    // On s'assure que les bordures sont visibles
+    const walls = svgClone.querySelector('rect');
+    if (walls) walls.setAttribute("stroke", "#dddddd");
+
+    const svgData = new XMLSerializer().serializeToString(svgClone);
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    canvas.width = 1800;
+    canvas.height = 1800;
+
+    img.onload = function() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        
+        const pngUrl = canvas.toDataURL("image/png");
+        
+        const nouvelleFenetre = window.open();
+        if (nouvelleFenetre) {
+            nouvelleFenetre.document.write(`
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Aperçu du Plan de Classe</title>
+                        <style>
+                            body { 
+                                margin: 0; 
+                                background: #1a1a1a; 
+                                display: flex; 
+                                justify-content: center; 
+                                align-items: center; 
+                                height: 100vh; 
+                                overflow: hidden; 
+                            }
+                            img { 
+                                height: 100vh;
+                                width: auto;
+                                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+                                display: block;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${pngUrl}">
+                    </body>
+                </html>
+            `);
+        }
+        URL.revokeObjectURL(url);
+    };
+
+    img.src = url;
+}
 
     function appliquerCouleursDynamiques() {
     const ids = ['btn-retour', 'btn-aide', 'btn-retour-liste', 'btn-valider-create', 'btn-fermer-aide'];
