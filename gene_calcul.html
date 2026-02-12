@@ -41,6 +41,12 @@
             max-width: 80%; 
         }
 
+		/* Positionnement du bouton FS à droite quand activé */
+body.fullscreen-mode #container-retour-liste {
+    justify-content: flex-end; /* Aligne le bouton à droite */
+    margin-bottom: 20px;
+}
+
         /* ============================================
            STYLES GÉNÉRAUX
         ============================================ */
@@ -506,23 +512,28 @@
 
     // --- Plein Écran ---
     function toggleFullscreen() {
-        const isFullscreen = document.body.classList.toggle('fullscreen-mode');
-        const iconOpen = document.getElementById('icon-fs-open');
-        const iconClose = document.getElementById('icon-fs-close');
-        const btnRetourListe = document.getElementById('btn-retour-liste');
+    const isFullscreen = document.body.classList.toggle('fullscreen-mode');
+    const iconOpen = document.getElementById('icon-fs-open');
+    const iconClose = document.getElementById('icon-fs-close');
+    const btnRetourListe = document.getElementById('btn-retour-liste');
+    const container = document.getElementById('container-retour-liste');
 
-        if (isFullscreen) {
-            iconOpen.classList.add('hidden');
-            iconClose.classList.remove('hidden');
-            if (btnRetourListe) btnRetourListe.classList.add('hidden');
-        } else {
-            iconOpen.classList.remove('hidden');
-            iconClose.classList.add('hidden');
-            if (!document.getElementById('setup-zone').classList.contains('hidden')) {
-                if (btnRetourListe) btnRetourListe.classList.remove('hidden');
-            }
+    if (isFullscreen) {
+        iconOpen.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+        if (btnRetourListe) btnRetourListe.classList.add('hidden');
+        // On s'assure que le conteneur prend toute la largeur pour aligner à droite
+        container.classList.replace('justify-between', 'justify-end');
+    } else {
+        iconOpen.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+        // On rétablit la disposition initiale si on n'est pas dans la zone de jeu
+        if (!elements.setupZone.classList.contains('hidden')) {
+            if (btnRetourListe) btnRetourListe.classList.remove('hidden');
+            container.classList.replace('justify-end', 'justify-between');
         }
     }
+}
 
     // --- Initialisation Tables ---
     function initTables() {
