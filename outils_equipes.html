@@ -68,7 +68,7 @@
             text-transform: uppercase; letter-spacing: 1px;
         }
 
-        #attendance-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px; }
+        #attendance-container { width: 95%; margin: 0 auto; padding: 0 10px; }
 
         .attendance-grid { 
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; 
@@ -76,7 +76,7 @@
         }
 
         @media (min-width: 768px) {
-            .attendance-grid { grid-template-columns: repeat(10, 1fr); gap: 7px; }
+            .attendance-grid { grid-template-columns: repeat(10, 1fr); gap: 15px; }
         }
 
         .student-item { 
@@ -86,6 +86,14 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none;
         }
 
+		@media (min-width: 768px) {
+            .student-item { font-size: 0.7rem; padding: 10px 2px; }
+        }
+
+        @media (min-width: 1024px) {
+            .student-item { font-size: 0.9rem; padding: 10px 2px; }
+        }
+		
         .student-item.bg-f { color: var(--student-name-girl) !important; }
         .student-item.bg-m { color: var(--student-name-boy) !important; }
 
@@ -118,7 +126,11 @@
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
             width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 10px;
         }
-
+		
+		@media (min-width: 768px) {
+            .grid-teams { grid-template-columns: repeat(3, 1fr); }
+        }
+		
         @media (min-width: 1024px) {
             .grid-teams { grid-template-columns: repeat(4, 1fr); }
         }
@@ -133,11 +145,40 @@
         .team-stats { font-size: 0.5rem; color: var(--title-gray); display: block; line-height: 1.4; }
         .team-member { display: flex; align-items: center; margin-bottom: 1px; font-size: 0.65rem; font-weight: bold; }
 
+		@media (min-width: 768px) {
+            .team-member {
+                font-size: 0.8rem !important;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .team-member {
+                font-size: 0.9rem !important;
+                margin-bottom: 9px;
+            }
+        }
+		
         .tag { 
             font-size: 0.45rem; font-weight: 700; margin-right: 8px; padding: 2px 6px; 
             border-radius: 999px; color: #fff; min-width: 35px; text-align: center;
         }
+		
+		@media (min-width: 768px) {
+            .tag {
+                font-size: 0.55rem !important;
+                padding: 4px 10px;
+            }
+        }
 
+        @media (min-width: 1024px) {
+            .tag {
+                font-size: 0.6rem !important;
+                padding: 5px 12px;
+                min-width: 45px;
+            }
+        }
+		
         .name-f { color: var(--student-name-girl); }
         .name-g { color: var(--student-name-boy); }
 
