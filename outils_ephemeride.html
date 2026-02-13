@@ -4,363 +4,461 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Éphéméride - OutilsProfs</title>
+    
+    <!-- Initialisation du mode clair avant le chargement pour éviter le flash -->
+    <script>
+        (function() {
+            const mode = localStorage.getItem('theme_mode');
+            if (mode === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
+    </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        /* ====================== CONFIGURATION CSS (Identique à Outils) ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ========== VARIABLES CSS ========== */
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1);
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
-            --header-bg: #ffffff; --card-bg: #ffffff;
+            --bg-page: #eeeeee;
+            --text-page: #111827;
+            --column-border: #ddd;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
         }
 
+        /* ========== STYLES DE BASE ========== */
         body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-page); 
-            color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s ease;
         }
 
-        /* Header */
+        /* ========== HEADER ========== */
         header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
             width: 100%;
         }
 
-        #btn-retour-home, #btn-aide { 
-            display: flex; align-items: center; justify-content: center; 
-            width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
-        }
-
         header h1 { 
-            font-size: 1.125rem; font-weight: 900; text-transform: uppercase; 
-            text-align: center; flex-grow: 1; letter-spacing: 0.1em;
+            font-size: 1.125rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            flex-grow: 1;
+            letter-spacing: 0.1em;
         }
 
-        /* Bouton Spécifique "Retour aux outils" */
+        /* ========== BOUTONS DU HEADER ========== */
+        #btn-retour-home,
+        #btn-aide { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+        }
+
+        #btn-retour-home:active,
+        #btn-aide:active {
+            transform: scale(0.9);
+        }
+
+        /* ========== BOUTON DE NAVIGATION ========== */
         .btn-navigation {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 8px 16px; margin: 15px;
-            font-size: 11px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; border-radius: 12px;
-            background: var(--card-bg); border: 1px solid var(--column-border);
-            color: var(--text-page); transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            margin: 15px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--column-border);
+            color: var(--text-page);
+            transition: all 0.2s;
+            text-decoration: none;
         }
-        .btn-navigation:active { transform: scale(0.95); }
 
-        /* Conteneur Éphéméride */
+        .btn-navigation:active {
+            transform: scale(0.95);
+        }
+
+        /* ========== CONTENEUR PRINCIPAL ========== */
         .main-wrapper { 
-            width: 100%; max-width: 500px; margin: 0 auto; padding: 0 15px 40px 15px; 
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 15px 40px 15px;
         }
 
+        /* ========== CARTE ÉPHÉMÉRIDE ========== */
         .ephem-card { 
-            background: var(--card-bg); border-radius: 2rem; 
+            background: var(--card-bg);
+            border-radius: 2rem;
             border: 1px solid var(--column-border);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 28rem;
+            width: 100%;
+            padding: 2rem;
+            position: relative;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .btn-close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-page);
+        }
+
+        .btn-close-modal:hover {
+            opacity: 1;
+        }
+
+        .modal-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.875rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-modal-action {
+            width: 100%;
+            margin-top: 2rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-modal-action:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
 
-<script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-</script>
+    <!-- ========== HEADER ========== -->
+    <header>
+        <a href="index.html" id="btn-retour-home" aria-label="Retourner à l'accueil">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <h1>Éphéméride</h1>
+        <button id="btn-aide" aria-label="Ouvrir l'aide">💡</button>
+    </header>
 
-<header>
-    <a href="index.html" id="btn-retour-home" aria-label="Retourner à l'accueil">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-        </svg>
-    </a>
-    <h1>Éphéméride</h1>
-    <div class="flex gap-2">
-        <button id="btn-aide" onclick="ouvrirAide()" class="text-lg flex items-center justify-center w-[38px] height-[38px] rounded-full" aria-label="Ouvrir l'aide">💡</button>
+    <!-- ========== BOUTON RETOUR AUX OUTILS ========== -->
+    <div class="max-w-5xl mx-auto flex justify-start">
+        <a href="outils.html" class="btn-navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Retour aux outils
+        </a>
     </div>
-</header>
 
-<div class="max-w-5xl mx-auto flex justify-start">
-    <a href="outils.html" class="btn-navigation">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Retour aux outils
-    </a>
-</div>
-
-<div class="main-wrapper">
-    <div class="ephem-card p-10 text-center mt-4 flex flex-col items-center">
-		<p id="jour-nom" class="text-2xl font-bold opacity-80 mb-1 capitalize leading-none"></p>
-		<h2 id="jour-num" class="text-8xl font-black mb-2 leading-none"></h2>
-		<p id="mois" class="uppercase tracking-[0.2em] font-black text-lg mb-8 leading-none"></p>
-    
-		<div class="h-px bg-gray-500/20 w-full mb-8"></div>
-    
-		<div class="space-y-6 w-full">
-			<div>
-				<p class="text-[10px] uppercase font-black opacity-40 mb-1">Aujourd'hui, nous fêtons </p>
-				<p id="saints" class="text-xl font-bold text-indigo-500">Chargement...</p>
-			</div>
+    <!-- ========== CONTENU PRINCIPAL ========== -->
+    <div class="main-wrapper">
+        <div class="ephem-card p-10 text-center mt-4 flex flex-col items-center">
+            <p id="jour-nom" class="text-2xl font-bold opacity-80 mb-1 capitalize leading-none"></p>
+            <h2 id="jour-num" class="text-8xl font-black mb-2 leading-none"></h2>
+            <p id="mois" class="uppercase tracking-[0.2em] font-black text-lg mb-8 leading-none"></p>
         
-			<div class="p-5 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
-				<p class="text-[10px] uppercase font-black opacity-40 mb-2">Le défi du jour</p>
-				<p id="enigme" class="text-sm font-semibold opacity-90">
-					" "
-				</p>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div id="modal-aide" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="ephem-card max-w-sm w-full p-8 relative animate-in fade-in zoom-in duration-200">
-        <button onclick="fermerAide()" class="absolute top-4 right-4 opacity-50 hover:opacity-100 text-xl">✕</button>
+            <div class="h-px bg-gray-500/20 w-full mb-8"></div>
         
-        <div id="modal-icon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto shadow-lg">
-            📅
+            <div class="space-y-6 w-full">
+                <div>
+                    <p class="text-[10px] uppercase font-black opacity-40 mb-1">Aujourd'hui, nous fêtons</p>
+                    <p id="saints" class="text-xl font-bold text-indigo-500">Chargement...</p>
+                </div>
+            
+                <div id="defi-container" class="p-5 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
+                    <p class="text-[10px] uppercase font-black opacity-40 mb-2">Le défi du jour</p>
+                    <p id="enigme" class="text-sm font-semibold opacity-90">" "</p>
+                </div>
+            </div>
         </div>
-        
-        <h3 class="text-xl font-900 text-center uppercase tracking-wider mb-4">Aide Éphéméride</h3>
-        
-        <div class="space-y-4 text-sm leading-relaxed opacity-90">
-            <p>Cet outil est conçu pour votre <strong>rituel du matin</strong> en classe :</p>
-            <ul class="list-disc pl-5 space-y-2">
-                <li><strong>Date complète :</strong> Pour aider les élèves à se repérer dans le temps.</li>
-                <li><strong>Saints du jour :</strong> Une tradition pour enrichir le vocabulaire et la culture.</li>
-                <li><strong>Défi quotidien :</strong> Un petit exercice rapide de français, maths ou culture.</li>
-            </ul>
-            <p class="italic text-[11px] mt-4 opacity-60 text-center">Les défis changent automatiquement chaque jour.</p>
-        </div>
-
-        <button onclick="fermerAide()" id="btn-modal-close" class="w-full mt-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-transform active:scale-95">
-            J'ai compris
-        </button>
     </div>
-</div>
 
-<script>
-    const COLOR_MAP = {
-        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
-        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
-        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
-        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
-        'rose': '#f43f5e'
-    };
+    <!-- ========== MODAL D'AIDE ========== -->
+    <div id="modal-aide" class="modal-overlay">
+        <div class="ephem-card modal-content">
+            <button id="btn-close" class="btn-close-modal">✕</button>
+            
+            <div id="modal-icon" class="modal-icon">📅</div>
+            
+            <h3 class="text-xl font-black text-center uppercase tracking-wider mb-4">Aide Éphéméride</h3>
+            
+            <div class="space-y-4 text-sm leading-relaxed opacity-90">
+                <p>Cet outil est conçu pour votre <strong>rituel du matin</strong> en classe :</p>
+                
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>Date complète :</strong> Pour aider les élèves à se repérer dans le temps (jour, numéro, mois).</li>
+                    <li><strong>Saints du jour :</strong> Une tradition culturelle française pour enrichir le vocabulaire et découvrir des prénoms.</li>
+                    <li><strong>Défi quotidien :</strong> Un petit exercice rapide et ludique de français, mathématiques ou culture générale.</li>
+                </ul>
+                
+                <p class="text-center mt-6"><strong>💡 Astuce :</strong></p>
+                <p>Projetez cette page au tableau chaque matin pour lancer votre journée de classe !</p>
+                
+                <p class="italic text-[11px] mt-4 opacity-60 text-center">Les défis changent automatiquement chaque jour pour garder l'intérêt des élèves.</p>
+            </div>
 
-    const SAINTS = {
-        "01-01": "le Jour de l'An", "01-02": "Basile", "01-03": "Geneviève", "01-04": "Odilon", "01-05": "Edouard", "01-06": "Mélaine", "01-07": "Raymond", "01-08": "Lucien", "01-09": "Alix", "01-10": "Guillaume", "01-11": "Pauline", "01-12": "Tatiana", "01-13": "Yvette", "01-14": "Nina", "01-15": "Rémi", "01-16": "Marcel", "01-17": "Roseline", "01-18": "Prisca", "01-19": "Marius", "01-20": "Sébastien", "01-21": "Agnès", "01-22": "Vincent", "01-23": "Barnard", "01-24": "Fr. de Sales", "01-25": "Conv. de Paul", "01-26": "Paule", "01-27": "Angèle", "01-28": "Th. d'Aquin", "01-29": "Gildas", "01-30": "Martine", "01-31": "Marcelle",
-        "02-01": "Ella", "02-02": "la Présentation", "02-03": "Blaise", "02-04": "Véronique", "02-05": "Agathe", "02-06": "Gaston", "02-07": "Eugénie", "02-08": "Jacqueline", "02-09": "Apolline", "02-10": "Arnaud", "02-11": "Héloïse", "02-12": "Félix", "02-13": "Béatrice", "02-14": "Valentin", "02-15": "Claude", "02-16": "Julienne", "02-17": "Alexis", "02-18": "Bernadette", "02-19": "Gabin", "02-20": "Aimée", "02-21": "Damien", "02-22": "Isabelle", "02-23": "Lazare", "02-24": "Modeste", "02-25": "Roméo", "02-26": "Nestor", "02-27": "Honorine", "02-28": "Romain", "02-29": "Auguste",
-        "03-01": "Aubin", "03-02": "Charles le Bon", "03-03": "Guénolé", "03-04": "Casimir", "03-05": "Olive", "03-06": "Colette", "03-07": "Félicité", "03-08": "Jean de Dieu", "03-09": "Françoise", "03-10": "Vivien", "03-11": "Rosine", "03-12": "Justine", "03-13": "Rodrigue", "03-14": "Mathilde", "03-15": "Louise", "03-16": "Bénédicte", "03-17": "Patrice", "03-18": "Cyrille", "03-19": "Joseph", "03-20": "Herbert", "03-21": "Clémence", "03-22": "Léa", "03-23": "Victorien", "03-24": "Catherine", "03-25": "l'Annonciation", "03-26": "Larissa", "03-27": "Habib", "03-28": "Gontran", "03-29": "Gwladys", "03-30": "Amédée", "03-31": "Benjamin",
-        "04-01": "Hugues", "04-02": "Sandrine", "04-03": "Richard", "04-04": "Isidore", "04-05": "Irène", "04-06": "Marcellin", "04-07": "Jean-Baptiste", "04-08": "Julie", "04-09": "Gautier", "04-10": "Fulbert", "04-11": "Stanislas", "04-12": "Jules", "04-13": "Ida", "04-14": "Maxime", "04-15": "Paterne", "04-16": "Benoît-Joseph", "04-17": "Anicet", "04-18": "Parfait", "04-19": "Emma", "04-20": "Odette", "04-21": "Anselme", "04-22": "Alexandre", "04-23": "Georges", "04-24": "Fidèle", "04-25": "Marc", "04-26": "Alida", "04-27": "Zita", "04-28": "Valérie", "04-29": "Catherine", "04-30": "Robert",
-        "05-01": "la Fête du Travail", "05-02": "Boris", "05-03": "Philippe", "05-04": "Sylvain", "05-05": "Judith", "05-06": "Prudence", "05-07": "Gisèle", "05-08": "la Victoire 1945", "05-09": "Pacôme", "05-10": "Solange", "05-11": "Estelle", "05-12": "Achille", "05-13": "Rolande", "05-14": "Matthias", "05-15": "Denise", "05-16": "Honoré", "05-17": "Pascal", "05-18": "Eric", "05-19": "Yves", "05-20": "Bernardin", "05-21": "Constantin", "05-22": "Emile", "05-23": "Didier", "05-24": "Donatien", "05-25": "Sophie", "05-26": "Bérenger", "05-27": "Augustin", "05-28": "Germain", "05-29": "Aymar", "05-30": "Ferdinand", "05-31": "la Visitation",
-        "06-01": "Justin", "06-02": "Blandine", "06-03": "Kévin", "06-04": "Clotilde", "06-05": "Igor", "06-06": "Norbert", "06-07": "Gilbert", "06-08": "Médard", "06-09": "Diane", "06-10": "Landry", "06-11": "Barnabé", "06-12": "Guy", "06-13": "Antoine de P.", "06-14": "Elisée", "06-15": "Germaine", "06-16": "Jean-François", "06-17": "Hervé", "06-18": "Léonce", "06-19": "Romuald", "06-20": "Silvère", "06-21": "Rodolphe", "06-22": "Alban", "06-23": "Audrey", "06-24": "Jean-Baptiste", "06-25": "Prosper", "06-26": "Anthelme", "06-27": "Fernand", "06-28": "Irénée", "06-29": "Pierre et Paul", "06-30": "Martial",
-        "07-01": "Thierry", "07-02": "Martinien", "07-03": "Thomas", "07-04": "Florent", "07-05": "Antoine", "07-06": "Mariette", "07-07": "Raoul", "07-08": "Thibault", "07-09": "Amandine", "07-10": "Ulrich", "07-11": "Benoît", "07-12": "Olivier", "07-13": "Henri et Joël", "07-14": "la Fête Nationale", "07-15": "Donald", "07-16": "N-D Mt-Carmel", "07-17": "Charlotte", "07-18": "Frédéric", "07-19": "Arsène", "07-20": "Marina", "07-21": "Victor", "07-22": "Marie-Madeleine", "07-23": "Brigitte", "07-24": "Christine", "07-25": "Jacques", "07-26": "Anne et Joachim", "07-27": "Nathalie", "07-28": "Samson", "07-29": "Marthe", "07-30": "Juliette", "07-31": "Ignace de L.",
-        "08-01": "Alphonse", "08-02": "Julien Eymard", "08-03": "Lydie", "08-04": "Jean-M. Vianney", "08-05": "Abel", "08-06": "la Transfiguration", "08-07": "Gaétan", "08-08": "Dominique", "08-09": "Amour", "08-10": "Laurent", "08-11": "Claire", "08-12": "Clarisse", "08-13": "Hippolyte", "08-14": "Evrard", "08-15": "l'Assomption", "08-16": "Armel", "08-17": "Hyacinthe", "08-18": "Hélène", "08-19": "Jean Eudes", "08-20": "Bernard", "08-21": "Christophe", "08-22": "Fabrice", "08-23": "Rose de Lima", "08-24": "Barthélemy", "08-25": "Louis", "08-26": "Natacha", "08-27": "Monique", "08-28": "Augustin", "08-29": "Sabine", "08-30": "Fiacre", "08-31": "Aristide",
-        "09-01": "Gilles", "09-02": "Ingrid", "09-03": "Grégoire", "09-04": "Rosalie", "09-05": "Raïssa", "09-06": "Bertrand", "09-07": "Reine", "09-08": "la Nativité de Marie", "09-09": "Alain", "09-10": "Inès", "09-11": "Adelphe", "09-12": "Apollinaire", "09-13": "Aimé", "09-14": "la Croix Glorieuse", "09-15": "Roland", "09-16": "Edith", "09-17": "Renaud", "09-18": "Nadège", "09-19": "Emilie", "09-20": "Davy", "09-21": "Matthieu", "09-22": "Maurice", "09-23": "Constant", "09-24": "Thècle", "09-25": "Hermann", "09-26": "Côme et Damien", "09-27": "Vincent de Paul", "09-28": "Venceslas", "09-29": "Michel", "09-30": "Jérôme",
-        "10-01": "Thérèse de l'E.", "10-02": "Léger", "10-03": "Gérard", "10-04": "Fr. d'Assise", "10-05": "Fleur", "10-06": "Bruno", "10-07": "Serge", "10-08": "Pélagie", "10-09": "Denis", "10-10": "Ghislain", "10-11": "Firmin", "10-12": "Wilfried", "10-13": "Géraud", "10-14": "Juste", "10-15": "Thérèse d'Avila", "10-16": "Edwige", "10-17": "Baudouin", "10-18": "Luc", "10-19": "René", "10-20": "Adeline", "10-21": "Céline", "10-22": "Elodie", "10-23": "Jean de Capistran", "10-24": "Florentin", "10-25": "Crépin", "10-26": "Dimitri", "10-27": "Emeline", "10-28": "Jude", "10-29": "Narcisse", "10-30": "Bienvenue", "10-31": "Quentin",
-        "11-01": "la Toussaint", "11-02": "les Défunts", "11-03": "Hubert", "11-04": "Charles", "11-05": "Sylvie", "11-06": "Bertille", "11-07": "Carine", "11-08": "Geoffroy", "11-09": "Théodore", "11-10": "Léon", "11-11": "Martin / l'Armistice", "11-12": "Christian", "11-13": "Brice", "11-14": "Sidoine", "11-15": "Albert", "11-16": "Marguerite", "11-17": "Elisabeth", "11-18": "Aude", "11-19": "Tanguy", "11-20": "Edmond", "11-21": "Présence de Marie", "11-22": "Cécile", "11-23": "Clément", "11-24": "Flora", "11-25": "Catherine", "11-26": "Delphine", "11-27": "Séverin", "11-28": "Jacques de la M.", "11-29": "Saturnin", "11-30": "André",
-        "12-01": "Florence", "12-02": "Viviane", "12-03": "Fr.-Xavier", "12-04": "Barbara", "12-05": "Gérald", "12-06": "Nicolas", "12-07": "Ambroise", "12-08": "l'Immaculée Conception", "12-09": "Pierre Fourier", "12-10": "Romaric", "12-11": "Daniel", "12-12": "Jeanne-Françoise", "12-13": "Lucie", "12-14": "Odile", "12-15": "Ninon", "12-16": "Alice", "12-17": "Gaël", "12-18": "Gatien", "12-19": "Urbain", "12-20": "Théophile", "12-21": "Pierre Canisius", "12-22": "Fr.-Xavière", "12-23": "Armand", "12-24": "Adèle", "12-25": "Noël", "12-26": "Etienne", "12-27": "Jean", "12-28": "les Innocents", "12-29": "David", "12-30": "Roger", "12-31": "Sylvestre"
-    };
+            <button id="btn-fermer-aide" class="btn-modal-action">J'ai compris</button>
+        </div>
+    </div>
 
-const DEFIS_365 = {
-        "01": [ // JANVIER
-            "Cite 3 résolutions pour être un super élève.", "Trouve 2 mots qui riment avec 'Hiver'.", "Quel est le double de 50 ?", "Écris 'Janvier' à l'envers au tableau.", 
-            "Nomme 3 sports que l'on pratique dans la neige.", "Trouve un synonyme du mot 'Glaçon'.", "Combien font 100 - 25 ?", "Récite l'alphabet en partant de Z jusqu'à T.", 
-            "Cite 2 objets qui sont toujours froids.", "Écris une phrase avec les mots 'Ours' et 'Chocolat'.", "Trouve 3 mots commençant par la lettre J.", "Quel est le triple de 10 ?",
-            "Dessine un flocon de neige en 15 secondes.", "Nomme les 7 jours de la semaine sans hésiter.", "Trouve le contraire de 'Chaud'.", "Écris le nombre 150 en lettres.",
-            "Cite 3 vêtements que l'on porte en hiver.", "Combien y a-t-il de dizaines dans 80 ?", "Trouve 2 mots féminins qui finissent par 'eau'.", "Quel est le mois avant Janvier ?",
-            "Fais 5 sauts sur place en comptant de 2 en 2.", "Trouve une rime pour 'Galette'.", "Cite 3 prénoms de la classe.", "Combien font 25 + 25 + 10 ?",
-            "Nomme 2 animaux qui hibernent.", "Écris le mot 'Montagne' sans erreur.", "Trouve un mot de la même famille que 'Froid'.", "Quel est le plus grand nombre : 709 ou 790 ?",
-            "Cite 3 planètes du système solaire.", "Trouve 2 mots qui riment avec 'Roi'.", "Dessine une couronne au tableau."
-        ],
-        "02": [ // FÉVRIER
-            "Trouve 3 mots qui riment avec 'Classe'.", "Calcule 15 + 15 + 15 de tête.", "Cite trois pays d'Europe.", "Écris le mot 'Éléphant' sans erreur.",
-            "Compte de 2 en 2 jusqu'à 20 à l'envers.", "Nomme 3 mammifères marins.", "Quel est le double de 25 ?", "Trouve un synonyme de 'Content'.",
-            "Écris une phrase avec 'Lune' et 'Soleil'.", "Combien de pattes ont 3 araignées ?", "Trouve 3 mots avec le son 'OI'.", "Quel est le jour après mardi ?",
-            "Récite la table de 2.", "Trouve le contraire de 'Grand'.", "Nomme 3 objets rouges dans la classe.", "Écris 300 en lettres.",
-            "Combien font 50 - 15 ?", "Trouve une rime pour 'Amour'.", "Cite 2 instruments de musique à cordes.", "Quel est le mois le plus court de l'année ?",
-            "Trouve 3 mots qui finissent par 'té'.", "Dessine un cœur parfait.", "Nomme 3 fruits d'hiver.", "Combien de minutes dans une heure ?",
-            "Écris 'École' à l'envers.", "Trouve un mot avec le son 'OU'.", "Quel est le double de 100 ?", "Cite 3 métiers de l'école.", "Trouve une rime pour 'Masque'."
-        ],
-        "03": [ // MARS
-            "Cite 3 fleurs de printemps.", "Trouve 2 rimes avec 'Mars'.", "Combien font 12 + 12 ?", "Écris 'Printemps' au tableau.",
-            "Nomme 3 animaux qui pondent des œufs.", "Trouve un synonyme de 'Petit'.", "Quel est le triple de 5 ?", "Récite l'alphabet à l'endroit.",
-            "Cite 2 objets lourds.", "Écris une phrase avec 'Vent' et 'Pluie'.", "Trouve 3 mots avec le son 'AN'.", "Quel est le jour avant dimanche ?",
-            "Combien de côtés a un triangle ?", "Trouve le contraire de 'Vite'.", "Nomme 3 objets en bois.", "Écris 500 en lettres.",
-            "Combien font 100 - 50 ?", "Trouve une rime pour 'Vert'.", "Cite 2 instruments à vent.", "Quel est le mois après mars ?",
-            "Trouve 3 noms de poissons.", "Dessine un soleil.", "Nomme 3 légumes verts.", "Combien de secondes dans une minute ?",
-            "Écris 'Cahier' sans faute.", "Trouve un mot avec 'CH'.", "Quel est le double de 40 ?", "Cite 3 pays voisins de la France.",
-            "Trouve une rime pour 'Nuage'.", "Nomme 3 oiseaux.", "Quel est le plus petit : 0,5 ou 1 ?"
-        ],
-        "04": [ // AVRIL
-             "Raconte une petite blague (Poisson d'avril !).", "Trouve 2 rimes avec 'Avril'.", "Combien font 20 + 20 + 20 ?", "Écris 'Chocolat' au tableau.",
-             "Nomme 3 animaux à plumes.", "Trouve un synonyme de 'Joli'.", "Quel est le double de 60 ?", "Récite la table de 5.",
-             "Cite 2 objets légers.", "Écris une phrase avec 'Cloche' et 'Œuf'.", "Trouve 3 mots avec le son 'IN'.", "Quel est le premier jour de la semaine ?",
-             "Combien de sommets a un carré ?", "Trouve le contraire de 'Beau'.", "Nomme 3 objets bleus.", "Écris 1000 en lettres.",
-             "Combien font 80 - 20 ?", "Trouve une rime pour 'Lapin'.", "Cite 2 moyens de transport.", "Quel est le mois des poissons ?",
-             "Trouve 3 noms d'insectes.", "Dessine une cloche.", "Nomme 3 fruits rouges.", "Combien d'heures dans une journée ?",
-             "Écris 'Tableau' au pluriel.", "Trouve un mot avec 'GN'.", "Quel est le double de 15 ?", "Cite 3 continents.",
-             "Trouve une rime pour 'Pâques'.", "Nomme 3 fleurs jaunes."
-        ],
-        "05": [ // MAI (Exemple court, continuez sur ce modèle)
-            "Cite 3 mots qui commencent par 'M'.", "Trouve une rime pour 'Muguet'.", "Combien font 15 + 15 ?", "Écris 'Travail' au tableau.",
-            "Nomme 3 animaux de la ferme.", "Trouve un synonyme de 'Fatigué'.", "Quel est le double de 12 ?", "Récite l'alphabet en chantant.",
-            "Cite 2 objets qui flottent.", "Écris une phrase avec 'Soleil' et 'Fleur'.", "Trouve 3 mots avec le son 'OU'.", "Quel jour sommes-nous ?",
-            "Combien de doigts dans la classe (estimation) ?", "Trouve le contraire de 'Haut'.", "Nomme 3 objets ronds.", "Écris 80 en lettres.",
-            "Combien font 50 + 50 ?", "Trouve une rime pour 'Mai'.", "Cite 2 sports d'équipe.", "Quel est le mois de la fête des mères ?",
-            "Trouve 3 mots avec 'PH'.", "Dessine un brin de muguet.", "Nomme 3 arbres.", "Combien de jours en mai ?",
-            "Écris 'Maman' en attaché.", "Trouve un mot avec 'ILL'.", "Quel est le double de 500 ?", "Cite 3 océans.",
-            "Trouve une rime pour 'Pont'.", "Nomme 3 mammifères.", "Quel est le plus grand : 1/2 ou 1/4 ?"
-        ],
-        "06": [ // JUIN
-            "Cite 3 chansons de l'école.", "Trouve une rime pour 'Été'.", "Combien font 30 + 30 ?", "Écris 'Vacances' au tableau.",
-            "Nomme 3 animaux sauvages.", "Trouve un synonyme de 'Grand'.", "Quel est le double de 75 ?", "Récite la table de 3.",
-            "Cite 2 objets qui coulent.", "Écris une phrase avec 'Plage' et 'Sable'.", "Trouve 3 mots avec le son 'ON'.", "Quel est le dernier jour d'école ?",
-            "Combien de côtés a un hexagone ?", "Trouve le contraire de 'Plein'.", "Nomme 3 objets carrés.", "Écris 2024 en lettres.",
-            "Combien font 100 - 1 ?", "Trouve une rime pour 'Fête'.", "Cite 2 instruments de musique.", "Quel est le mois le plus chaud ?",
-            "Trouve 3 mots avec 'QU'.", "Dessine une glace.", "Nomme 3 parfums de glace.", "Combien de saisons y a-t-il ?",
-            "Écris 'Soleil' sans erreur.", "Trouve un mot avec 'TR'.", "Quel est le double de 1000 ?", "Cite 3 monuments célèbres.",
-            "Trouve une rime pour 'Bal'.", "Nomme 3 reptiles."
-        ],
-        // Note : Vous pouvez copier les blocs précédents pour Juillet/Août (vacances) ou les sauter.
-        "09": [ // SEPTEMBRE
-            "Cite 3 fournitures scolaires.", "Trouve une rime pour 'Rentrée'.", "Combien font 10 + 10 + 10 ?", "Écris ton prénom au tableau.",
-            "Nomme 3 couleurs primaires.", "Trouve un synonyme de 'Livre'.", "Quel est le double de 6 ?", "Récite l'alphabet.",
-            "Cite 2 objets dans ton sac.", "Écris une phrase avec 'Cartable' et 'Cour'.", "Trouve 3 mots avec 'S'.", "Quel est le mois de la rentrée ?",
-            "Combien de fenêtres dans la classe ?", "Trouve le contraire de 'Nouveau'.", "Nomme 3 jeux de récréation.", "Écris 10 en lettres.",
-            "Combien font 20 - 5 ?", "Trouve une rime pour 'Colle'.", "Cite 2 règles de la classe.", "Quel jour vient après jeudi ?",
-            "Trouve 3 mots avec 'OU'.", "Dessine un cartable.", "Nomme 3 fruits d'automne.", "Combien d'élèves sont présents ?",
-            "Écris 'Maîtresse' ou 'Maître' sans faute.", "Trouve un mot avec 'PR'.", "Quel est le double de 11 ?", "Cite 3 chiffres impairs.",
-            "Trouve une rime pour 'Livre'.", "Nomme 3 objets pointus."
-        ],
-        "10": [ // OCTOBRE
-            "Cite 3 mots sur Halloween.", "Trouve une rime pour 'Feuille'.", "Combien font 40 + 40 ?", "Écris 'Automne' au tableau.",
-            "Nomme 3 animaux de la forêt.", "Trouve un synonyme de 'Forêt'.", "Quel est le double de 14 ?", "Récite la table de 4.",
-            "Cite 2 objets orange.", "Écris une phrase avec 'Citrouille' et 'Chat'.", "Trouve 3 mots avec le son 'OI'.", "Quel est le mois des sorcières ?",
-            "Combien de pattes a une araignée ?", "Trouve le contraire de 'Sombre'.", "Nomme 3 vêtements chauds.", "Écris 400 en lettres.",
-            "Combien font 60 - 10 ?", "Trouve une rime pour 'Peur'.", "Cite 2 arbres de la cour.", "Quel est le mois avant novembre ?",
-            "Trouve 3 mots avec 'CH'.", "Dessine une feuille d'arbre.", "Nomme 3 champignons.", "Combien font 7 + 8 ?",
-            "Écris 'Arbre' sans erreur.", "Trouve un mot avec 'ST'.", "Quel est le double de 22 ?", "Cite 3 nombres pairs.",
-            "Trouve une rime pour 'Vent'.", "Nomme 3 oiseaux migrateurs.", "Quel est le plus grand : 101 ou 110 ?"
-        ],
-        "11": [ // NOVEMBRE
-            "Cite 3 mots avec le son 'IN'.", "Trouve une rime pour 'Pluie'.", "Combien font 25 + 25 ?", "Écris 'Novembre' au tableau.",
-            "Nomme 3 animaux qui vivent sous terre.", "Trouve un synonyme de 'Gris'.", "Quel est le triple de 2 ?", "Récite l'alphabet à l'envers.",
-            "Cite 2 objets en métal.", "Écris une phrase avec 'Bottes' et 'Flaque'.", "Trouve 3 mots avec 'V'.", "Quel est le mois après octobre ?",
-            "Combien de coins a une feuille ?", "Trouve le contraire de 'Triste'.", "Nomme 3 instruments de musique.", "Écris 60 en lettres.",
-            "Combien font 100 - 30 ?", "Trouve une rime pour 'Froid'.", "Cite 2 moyens de transport lents.", "Quel jour sommes-nous ?",
-            "Trouve 3 mots avec 'AU'.", "Dessine un parapluie.", "Nomme 3 légumes d'automne.", "Combien font 9 + 9 ?",
-            "Écris 'Soupe' sans erreur.", "Trouve un mot avec 'BR'.", "Quel est le double de 33 ?", "Cite 3 pays francophones.",
-            "Trouve une rime pour 'Nuit'.", "Nomme 3 mammifères terrestres."
-        ],
-        "12": [ // DÉCEMBRE
-            "Cite 3 mots de Noël.", "Trouve une rime pour 'Flocon'.", "Combien font 50 + 50 ?", "Écris 'Cadeau' au tableau.",
-            "Nomme 3 animaux du froid.", "Trouve un synonyme de 'Cadeau'.", "Quel est le double de 12 ?", "Récite la table de 10.",
-            "Cite 2 objets brillants.", "Écris une phrase avec 'Sapin' et 'Étoile'.", "Trouve 3 mots avec 'Z'.", "Quel est le dernier mois ?",
-            "Combien de jours avant Noël ?", "Trouve le contraire de 'Vieux'.", "Nomme 3 objets qui font du bruit.", "Écris 100 en lettres.",
-            "Combien font 100 - 10 ?", "Trouve une rime pour 'Houx'.", "Cite 2 décorations de Noël.", "Quel jour vient avant samedi ?",
-            "Trouve 3 mots avec 'EU'.", "Dessine un sapin.", "Nomme 3 gâteaux.", "Combien font 5 + 5 + 5 + 5 ?",
-            "Écris 'Hiver' sans erreur.", "Trouve un mot avec 'FL'.", "Quel est le double de 150 ?", "Cite 3 mots qui finissent par 'eau'.",
-            "Trouve une rime pour 'Renne'.", "Nomme 3 objets en plastique.", "Quel est le plus petit : 99 ou 100 ?"
-        ]
-    };
+    <script>
+        // ========== CONFIGURATION & CONSTANTES ========== 
+        const COLOR_MAP = {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+            'rose': '#f43f5e'
+        };
 
-    function applyTheme() {
-        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-        const colorPref = themePrefs.outils || 'indigo';
-        const colorHex = COLOR_MAP[colorPref];
-        
-        const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorPref);
-        const textColor = isDarkText ? '#000000' : '#ffffff';
+        const STORAGE_KEYS = {
+            theme: 'theme_tuiles',
+            themeMode: 'theme_mode'
+        };
 
-        // Boutons dynamiques
-        const dynamicButtons = [
-            document.getElementById('btn-retour-home'),
-            document.getElementById('btn-aide'),
-            document.querySelector('.btn-navigation')
-        ];
+        const LIGHT_CONTRAST_COLORS = ['yellow', 'lime', 'amber', 'cyan'];
 
-        dynamicButtons.forEach(btn => {
-            if (btn) {
-                btn.style.backgroundColor = colorHex;
-                btn.style.color = textColor;
-                btn.style.borderColor = 'transparent';
+        // ========== DONNÉES DES SAINTS ========== 
+        const SAINTS = {
+            "01-01": "le Jour de l'An", "01-02": "Basile", "01-03": "Geneviève", "01-04": "Odilon", "01-05": "Edouard", "01-06": "Mélaine", "01-07": "Raymond", "01-08": "Lucien", "01-09": "Alix", "01-10": "Guillaume", "01-11": "Pauline", "01-12": "Tatiana", "01-13": "Yvette", "01-14": "Nina", "01-15": "Rémi", "01-16": "Marcel", "01-17": "Roseline", "01-18": "Prisca", "01-19": "Marius", "01-20": "Sébastien", "01-21": "Agnès", "01-22": "Vincent", "01-23": "Barnard", "01-24": "Fr. de Sales", "01-25": "Conv. de Paul", "01-26": "Paule", "01-27": "Angèle", "01-28": "Th. d'Aquin", "01-29": "Gildas", "01-30": "Martine", "01-31": "Marcelle",
+            "02-01": "Ella", "02-02": "la Présentation", "02-03": "Blaise", "02-04": "Véronique", "02-05": "Agathe", "02-06": "Gaston", "02-07": "Eugénie", "02-08": "Jacqueline", "02-09": "Apolline", "02-10": "Arnaud", "02-11": "Héloïse", "02-12": "Félix", "02-13": "Béatrice", "02-14": "Valentin", "02-15": "Claude", "02-16": "Julienne", "02-17": "Alexis", "02-18": "Bernadette", "02-19": "Gabin", "02-20": "Aimée", "02-21": "Damien", "02-22": "Isabelle", "02-23": "Lazare", "02-24": "Modeste", "02-25": "Roméo", "02-26": "Nestor", "02-27": "Honorine", "02-28": "Romain", "02-29": "Auguste",
+            "03-01": "Aubin", "03-02": "Charles le Bon", "03-03": "Guénolé", "03-04": "Casimir", "03-05": "Olive", "03-06": "Colette", "03-07": "Félicité", "03-08": "Jean de Dieu", "03-09": "Françoise", "03-10": "Vivien", "03-11": "Rosine", "03-12": "Justine", "03-13": "Rodrigue", "03-14": "Mathilde", "03-15": "Louise", "03-16": "Bénédicte", "03-17": "Patrice", "03-18": "Cyrille", "03-19": "Joseph", "03-20": "Herbert", "03-21": "Clémence", "03-22": "Léa", "03-23": "Victorien", "03-24": "Catherine", "03-25": "l'Annonciation", "03-26": "Larissa", "03-27": "Habib", "03-28": "Gontran", "03-29": "Gwladys", "03-30": "Amédée", "03-31": "Benjamin",
+            "04-01": "Hugues", "04-02": "Sandrine", "04-03": "Richard", "04-04": "Isidore", "04-05": "Irène", "04-06": "Marcellin", "04-07": "Jean-Baptiste", "04-08": "Julie", "04-09": "Gautier", "04-10": "Fulbert", "04-11": "Stanislas", "04-12": "Jules", "04-13": "Ida", "04-14": "Maxime", "04-15": "Paterne", "04-16": "Benoît-Joseph", "04-17": "Anicet", "04-18": "Parfait", "04-19": "Emma", "04-20": "Odette", "04-21": "Anselme", "04-22": "Alexandre", "04-23": "Georges", "04-24": "Fidèle", "04-25": "Marc", "04-26": "Alida", "04-27": "Zita", "04-28": "Valérie", "04-29": "Catherine", "04-30": "Robert",
+            "05-01": "la Fête du Travail", "05-02": "Boris", "05-03": "Philippe", "05-04": "Sylvain", "05-05": "Judith", "05-06": "Prudence", "05-07": "Gisèle", "05-08": "la Victoire 1945", "05-09": "Pacôme", "05-10": "Solange", "05-11": "Estelle", "05-12": "Achille", "05-13": "Rolande", "05-14": "Matthias", "05-15": "Denise", "05-16": "Honoré", "05-17": "Pascal", "05-18": "Eric", "05-19": "Yves", "05-20": "Bernardin", "05-21": "Constantin", "05-22": "Emile", "05-23": "Didier", "05-24": "Donatien", "05-25": "Sophie", "05-26": "Bérenger", "05-27": "Augustin", "05-28": "Germain", "05-29": "Aymar", "05-30": "Ferdinand", "05-31": "la Visitation",
+            "06-01": "Justin", "06-02": "Blandine", "06-03": "Kévin", "06-04": "Clotilde", "06-05": "Igor", "06-06": "Norbert", "06-07": "Gilbert", "06-08": "Médard", "06-09": "Diane", "06-10": "Landry", "06-11": "Barnabé", "06-12": "Guy", "06-13": "Antoine de P.", "06-14": "Elisée", "06-15": "Germaine", "06-16": "Jean-François", "06-17": "Hervé", "06-18": "Léonce", "06-19": "Romuald", "06-20": "Silvère", "06-21": "Rodolphe", "06-22": "Alban", "06-23": "Audrey", "06-24": "Jean-Baptiste", "06-25": "Prosper", "06-26": "Anthelme", "06-27": "Fernand", "06-28": "Irénée", "06-29": "Pierre et Paul", "06-30": "Martial",
+            "07-01": "Thierry", "07-02": "Martinien", "07-03": "Thomas", "07-04": "Florent", "07-05": "Antoine", "07-06": "Mariette", "07-07": "Raoul", "07-08": "Thibault", "07-09": "Amandine", "07-10": "Ulrich", "07-11": "Benoît", "07-12": "Olivier", "07-13": "Henri et Joël", "07-14": "la Fête Nationale", "07-15": "Donald", "07-16": "N-D Mt-Carmel", "07-17": "Charlotte", "07-18": "Frédéric", "07-19": "Arsène", "07-20": "Marina", "07-21": "Victor", "07-22": "Marie-Madeleine", "07-23": "Brigitte", "07-24": "Christine", "07-25": "Jacques", "07-26": "Anne et Joachim", "07-27": "Nathalie", "07-28": "Samson", "07-29": "Marthe", "07-30": "Juliette", "07-31": "Ignace de L.",
+            "08-01": "Alphonse", "08-02": "Julien Eymard", "08-03": "Lydie", "08-04": "Jean-M. Vianney", "08-05": "Abel", "08-06": "la Transfiguration", "08-07": "Gaétan", "08-08": "Dominique", "08-09": "Amour", "08-10": "Laurent", "08-11": "Claire", "08-12": "Clarisse", "08-13": "Hippolyte", "08-14": "Evrard", "08-15": "l'Assomption", "08-16": "Armel", "08-17": "Hyacinthe", "08-18": "Hélène", "08-19": "Jean Eudes", "08-20": "Bernard", "08-21": "Christophe", "08-22": "Fabrice", "08-23": "Rose de Lima", "08-24": "Barthélemy", "08-25": "Louis", "08-26": "Natacha", "08-27": "Monique", "08-28": "Augustin", "08-29": "Sabine", "08-30": "Fiacre", "08-31": "Aristide",
+            "09-01": "Gilles", "09-02": "Ingrid", "09-03": "Grégoire", "09-04": "Rosalie", "09-05": "Raïssa", "09-06": "Bertrand", "09-07": "Reine", "09-08": "la Nativité de Marie", "09-09": "Alain", "09-10": "Inès", "09-11": "Adelphe", "09-12": "Apollinaire", "09-13": "Aimé", "09-14": "la Croix Glorieuse", "09-15": "Roland", "09-16": "Edith", "09-17": "Renaud", "09-18": "Nadège", "09-19": "Emilie", "09-20": "Davy", "09-21": "Matthieu", "09-22": "Maurice", "09-23": "Constant", "09-24": "Thècle", "09-25": "Hermann", "09-26": "Côme et Damien", "09-27": "Vincent de Paul", "09-28": "Venceslas", "09-29": "Michel", "09-30": "Jérôme",
+            "10-01": "Thérèse de l'E.", "10-02": "Léger", "10-03": "Gérard", "10-04": "Fr. d'Assise", "10-05": "Fleur", "10-06": "Bruno", "10-07": "Serge", "10-08": "Pélagie", "10-09": "Denis", "10-10": "Ghislain", "10-11": "Firmin", "10-12": "Wilfried", "10-13": "Géraud", "10-14": "Juste", "10-15": "Thérèse d'Avila", "10-16": "Edwige", "10-17": "Baudouin", "10-18": "Luc", "10-19": "René", "10-20": "Adeline", "10-21": "Céline", "10-22": "Elodie", "10-23": "Jean de Capistran", "10-24": "Florentin", "10-25": "Crépin", "10-26": "Dimitri", "10-27": "Emeline", "10-28": "Jude", "10-29": "Narcisse", "10-30": "Bienvenue", "10-31": "Quentin",
+            "11-01": "la Toussaint", "11-02": "les Défunts", "11-03": "Hubert", "11-04": "Charles", "11-05": "Sylvie", "11-06": "Bertille", "11-07": "Carine", "11-08": "Geoffroy", "11-09": "Théodore", "11-10": "Léon", "11-11": "Martin / l'Armistice", "11-12": "Christian", "11-13": "Brice", "11-14": "Sidoine", "11-15": "Albert", "11-16": "Marguerite", "11-17": "Elisabeth", "11-18": "Aude", "11-19": "Tanguy", "11-20": "Edmond", "11-21": "Présence de Marie", "11-22": "Cécile", "11-23": "Clément", "11-24": "Flora", "11-25": "Catherine", "11-26": "Delphine", "11-27": "Séverin", "11-28": "Jacques de la M.", "11-29": "Saturnin", "11-30": "André",
+            "12-01": "Florence", "12-02": "Viviane", "12-03": "Fr.-Xavier", "12-04": "Barbara", "12-05": "Gérald", "12-06": "Nicolas", "12-07": "Ambroise", "12-08": "l'Immaculée Conception", "12-09": "Pierre Fourier", "12-10": "Romaric", "12-11": "Daniel", "12-12": "Jeanne-Françoise", "12-13": "Lucie", "12-14": "Odile", "12-15": "Ninon", "12-16": "Alice", "12-17": "Gaël", "12-18": "Gatien", "12-19": "Urbain", "12-20": "Théophile", "12-21": "Pierre Canisius", "12-22": "Fr.-Xavière", "12-23": "Armand", "12-24": "Adèle", "12-25": "Noël", "12-26": "Etienne", "12-27": "Jean", "12-28": "les Innocents", "12-29": "David", "12-30": "Roger", "12-31": "Sylvestre"
+        };
+
+        // ========== DÉFIS QUOTIDIENS (365 jours) ========== 
+        const DEFIS_365 = {
+            "01": ["Cite 3 résolutions pour être un super élève.", "Trouve 2 mots qui riment avec 'Hiver'.", "Quel est le double de 50 ?", "Écris 'Janvier' à l'envers au tableau.", "Nomme 3 sports que l'on pratique dans la neige.", "Trouve un synonyme du mot 'Glaçon'.", "Combien font 100 - 25 ?", "Récite l'alphabet en partant de Z jusqu'à T.", "Cite 2 objets qui sont toujours froids.", "Écris une phrase avec les mots 'Ours' et 'Chocolat'.", "Trouve 3 mots commençant par la lettre J.", "Quel est le triple de 10 ?", "Dessine un flocon de neige en 15 secondes.", "Nomme les 7 jours de la semaine sans hésiter.", "Trouve le contraire de 'Chaud'.", "Écris le nombre 150 en lettres.", "Cite 3 vêtements que l'on porte en hiver.", "Combien y a-t-il de dizaines dans 80 ?", "Trouve 2 mots féminins qui finissent par 'eau'.", "Quel est le mois avant Janvier ?", "Fais 5 sauts sur place en comptant de 2 en 2.", "Trouve une rime pour 'Galette'.", "Cite 3 prénoms de la classe.", "Combien font 25 + 25 + 10 ?", "Nomme 2 animaux qui hibernent.", "Écris le mot 'Montagne' sans erreur.", "Trouve un mot de la même famille que 'Froid'.", "Quel est le plus grand nombre : 709 ou 790 ?", "Cite 3 planètes du système solaire.", "Trouve 2 mots qui riment avec 'Roi'.", "Dessine une couronne au tableau."],
+            "02": ["Trouve 3 mots qui riment avec 'Classe'.", "Calcule 15 + 15 + 15 de tête.", "Cite trois pays d'Europe.", "Écris le mot 'Éléphant' sans erreur.", "Compte de 2 en 2 jusqu'à 20 à l'envers.", "Nomme 3 mammifères marins.", "Quel est le double de 25 ?", "Trouve un synonyme de 'Content'.", "Écris une phrase avec 'Lune' et 'Soleil'.", "Combien de pattes ont 3 araignées ?", "Trouve 3 mots avec le son 'OI'.", "Quel est le jour après mardi ?", "Récite la table de 2.", "Trouve le contraire de 'Grand'.", "Nomme 3 objets rouges dans la classe.", "Écris 300 en lettres.", "Combien font 50 - 15 ?", "Trouve une rime pour 'Amour'.", "Cite 2 instruments de musique à cordes.", "Quel est le mois le plus court de l'année ?", "Trouve 3 mots qui finissent par 'té'.", "Dessine un cœur parfait.", "Nomme 3 fruits d'hiver.", "Combien de minutes dans une heure ?", "Écris 'École' à l'envers.", "Trouve un mot avec le son 'OU'.", "Quel est le double de 100 ?", "Cite 3 métiers de l'école.", "Trouve une rime pour 'Masque'."],
+            "03": ["Cite 3 fleurs de printemps.", "Trouve 2 rimes avec 'Mars'.", "Combien font 12 + 12 ?", "Écris 'Printemps' au tableau.", "Nomme 3 animaux qui pondent des œufs.", "Trouve un synonyme de 'Petit'.", "Quel est le triple de 5 ?", "Récite l'alphabet à l'endroit.", "Cite 2 objets lourds.", "Écris une phrase avec 'Vent' et 'Pluie'.", "Trouve 3 mots avec le son 'AN'.", "Quel est le jour avant dimanche ?", "Combien de côtés a un triangle ?", "Trouve le contraire de 'Vite'.", "Nomme 3 objets en bois.", "Écris 500 en lettres.", "Combien font 100 - 50 ?", "Trouve une rime pour 'Vert'.", "Cite 2 instruments à vent.", "Quel est le mois après mars ?", "Trouve 3 noms de poissons.", "Dessine un soleil.", "Nomme 3 légumes verts.", "Combien de secondes dans une minute ?", "Écris 'Cahier' sans faute.", "Trouve un mot avec 'CH'.", "Quel est le double de 40 ?", "Cite 3 pays voisins de la France.", "Trouve une rime pour 'Nuage'.", "Nomme 3 oiseaux.", "Quel est le plus petit : 0,5 ou 1 ?"],
+            "04": ["Raconte une petite blague (Poisson d'avril !).", "Trouve 2 rimes avec 'Avril'.", "Combien font 20 + 20 + 20 ?", "Écris 'Chocolat' au tableau.", "Nomme 3 animaux à plumes.", "Trouve un synonyme de 'Joli'.", "Quel est le double de 60 ?", "Récite la table de 5.", "Cite 2 objets légers.", "Écris une phrase avec 'Cloche' et 'Œuf'.", "Trouve 3 mots avec le son 'IN'.", "Quel est le premier jour de la semaine ?", "Combien de sommets a un carré ?", "Trouve le contraire de 'Beau'.", "Nomme 3 objets bleus.", "Écris 1000 en lettres.", "Combien font 80 - 20 ?", "Trouve une rime pour 'Lapin'.", "Cite 2 moyens de transport.", "Quel est le mois des poissons ?", "Trouve 3 noms d'insectes.", "Dessine une cloche.", "Nomme 3 fruits rouges.", "Combien d'heures dans une journée ?", "Écris 'Tableau' au pluriel.", "Trouve un mot avec 'GN'.", "Quel est le double de 15 ?", "Cite 3 continents.", "Trouve une rime pour 'Pâques'.", "Nomme 3 fleurs jaunes."],
+            "05": ["Cite 3 mots qui commencent par 'M'.", "Trouve une rime pour 'Muguet'.", "Combien font 15 + 15 ?", "Écris 'Travail' au tableau.", "Nomme 3 animaux de la ferme.", "Trouve un synonyme de 'Fatigué'.", "Quel est le double de 12 ?", "Récite l'alphabet en chantant.", "Cite 2 objets qui flottent.", "Écris une phrase avec 'Soleil' et 'Fleur'.", "Trouve 3 mots avec le son 'OU'.", "Quel jour sommes-nous ?", "Combien de doigts dans la classe (estimation) ?", "Trouve le contraire de 'Haut'.", "Nomme 3 objets ronds.", "Écris 80 en lettres.", "Combien font 50 + 50 ?", "Trouve une rime pour 'Mai'.", "Cite 2 sports d'équipe.", "Quel est le mois de la fête des mères ?", "Trouve 3 mots avec 'PH'.", "Dessine un brin de muguet.", "Nomme 3 arbres.", "Combien de jours en mai ?", "Écris 'Maman' en attaché.", "Trouve un mot avec 'ILL'.", "Quel est le double de 500 ?", "Cite 3 océans.", "Trouve une rime pour 'Pont'.", "Nomme 3 mammifères.", "Quel est le plus grand : 1/2 ou 1/4 ?"],
+            "06": ["Cite 3 chansons de l'école.", "Trouve une rime pour 'Été'.", "Combien font 30 + 30 ?", "Écris 'Vacances' au tableau.", "Nomme 3 animaux sauvages.", "Trouve un synonyme de 'Grand'.", "Quel est le double de 75 ?", "Récite la table de 3.", "Cite 2 objets qui coulent.", "Écris une phrase avec 'Plage' et 'Sable'.", "Trouve 3 mots avec le son 'ON'.", "Quel est le dernier jour d'école ?", "Combien de côtés a un hexagone ?", "Trouve le contraire de 'Plein'.", "Nomme 3 objets carrés.", "Écris 2024 en lettres.", "Combien font 100 - 1 ?", "Trouve une rime pour 'Fête'.", "Cite 2 instruments de musique.", "Quel est le mois le plus chaud ?", "Trouve 3 mots avec 'QU'.", "Dessine une glace.", "Nomme 3 parfums de glace.", "Combien de saisons y a-t-il ?", "Écris 'Soleil' sans erreur.", "Trouve un mot avec 'TR'.", "Quel est le double de 1000 ?", "Cite 3 monuments célèbres.", "Trouve une rime pour 'Bal'.", "Nomme 3 reptiles."],
+            "09": ["Cite 3 fournitures scolaires.", "Trouve une rime pour 'Rentrée'.", "Combien font 10 + 10 + 10 ?", "Écris ton prénom au tableau.", "Nomme 3 couleurs primaires.", "Trouve un synonyme de 'Livre'.", "Quel est le double de 6 ?", "Récite l'alphabet.", "Cite 2 objets dans ton sac.", "Écris une phrase avec 'Cartable' et 'Cour'.", "Trouve 3 mots avec 'S'.", "Quel est le mois de la rentrée ?", "Combien de fenêtres dans la classe ?", "Trouve le contraire de 'Nouveau'.", "Nomme 3 jeux de récréation.", "Écris 10 en lettres.", "Combien font 20 - 5 ?", "Trouve une rime pour 'Colle'.", "Cite 2 règles de la classe.", "Quel jour vient après jeudi ?", "Trouve 3 mots avec 'OU'.", "Dessine un cartable.", "Nomme 3 fruits d'automne.", "Combien d'élèves sont présents ?", "Écris 'Maîtresse' ou 'Maître' sans faute.", "Trouve un mot avec 'PR'.", "Quel est le double de 11 ?", "Cite 3 chiffres impairs.", "Trouve une rime pour 'Livre'.", "Nomme 3 objets pointus."],
+            "10": ["Cite 3 mots sur Halloween.", "Trouve une rime pour 'Feuille'.", "Combien font 40 + 40 ?", "Écris 'Automne' au tableau.", "Nomme 3 animaux de la forêt.", "Trouve un synonyme de 'Forêt'.", "Quel est le double de 14 ?", "Récite la table de 4.", "Cite 2 objets orange.", "Écris une phrase avec 'Citrouille' et 'Chat'.", "Trouve 3 mots avec le son 'OI'.", "Quel est le mois des sorcières ?", "Combien de pattes a une araignée ?", "Trouve le contraire de 'Sombre'.", "Nomme 3 vêtements chauds.", "Écris 400 en lettres.", "Combien font 60 - 10 ?", "Trouve une rime pour 'Peur'.", "Cite 2 arbres de la cour.", "Quel est le mois avant novembre ?", "Trouve 3 mots avec 'CH'.", "Dessine une feuille d'arbre.", "Nomme 3 champignons.", "Combien font 7 + 8 ?", "Écris 'Arbre' sans erreur.", "Trouve un mot avec 'ST'.", "Quel est le double de 22 ?", "Cite 3 nombres pairs.", "Trouve une rime pour 'Vent'.", "Nomme 3 oiseaux migrateurs.", "Quel est le plus grand : 101 ou 110 ?"],
+            "11": ["Cite 3 mots avec le son 'IN'.", "Trouve une rime pour 'Pluie'.", "Combien font 25 + 25 ?", "Écris 'Novembre' au tableau.", "Nomme 3 animaux qui vivent sous terre.", "Trouve un synonyme de 'Gris'.", "Quel est le triple de 2 ?", "Récite l'alphabet à l'envers.", "Cite 2 objets en métal.", "Écris une phrase avec 'Bottes' et 'Flaque'.", "Trouve 3 mots avec 'V'.", "Quel est le mois après octobre ?", "Combien de coins a une feuille ?", "Trouve le contraire de 'Triste'.", "Nomme 3 instruments de musique.", "Écris 60 en lettres.", "Combien font 100 - 30 ?", "Trouve une rime pour 'Froid'.", "Cite 2 moyens de transport lents.", "Quel jour sommes-nous ?", "Trouve 3 mots avec 'AU'.", "Dessine un parapluie.", "Nomme 3 légumes d'automne.", "Combien font 9 + 9 ?", "Écris 'Soupe' sans erreur.", "Trouve un mot avec 'BR'.", "Quel est le double de 33 ?", "Cite 3 pays francophones.", "Trouve une rime pour 'Nuit'.", "Nomme 3 mammifères terrestres."],
+            "12": ["Cite 3 mots de Noël.", "Trouve une rime pour 'Flocon'.", "Combien font 50 + 50 ?", "Écris 'Cadeau' au tableau.", "Nomme 3 animaux du froid.", "Trouve un synonyme de 'Cadeau'.", "Quel est le double de 12 ?", "Récite la table de 10.", "Cite 2 objets brillants.", "Écris une phrase avec 'Sapin' et 'Étoile'.", "Trouve 3 mots avec 'Z'.", "Quel est le dernier mois ?", "Combien de jours avant Noël ?", "Trouve le contraire de 'Vieux'.", "Nomme 3 objets qui font du bruit.", "Écris 100 en lettres.", "Combien font 100 - 10 ?", "Trouve une rime pour 'Houx'.", "Cite 2 décorations de Noël.", "Quel jour vient avant samedi ?", "Trouve 3 mots avec 'EU'.", "Dessine un sapin.", "Nomme 3 gâteaux.", "Combien font 5 + 5 + 5 + 5 ?", "Écris 'Hiver' sans erreur.", "Trouve un mot avec 'FL'.", "Quel est le double de 150 ?", "Cite 3 mots qui finissent par 'eau'.", "Trouve une rime pour 'Renne'.", "Nomme 3 objets en plastique.", "Quel est le plus petit : 99 ou 100 ?"]
+        };
+
+        // ========== THÈME ========== 
+        const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
+        const THEME_COLOR_NAME = themePrefs.outils || 'indigo';
+        const THEME_HEX = COLOR_MAP[THEME_COLOR_NAME] || '#6366f1';
+        const THEME_TEXT_COLOR = LIGHT_CONTRAST_COLORS.includes(THEME_COLOR_NAME) ? '#000000' : '#ffffff';
+
+        // ========== ÉLÉMENTS DOM ========== 
+        const elements = {
+            btnRetourHome: document.getElementById('btn-retour-home'),
+            btnAide: document.getElementById('btn-aide'),
+            btnNavigation: document.querySelector('.btn-navigation'),
+            jourNom: document.getElementById('jour-nom'),
+            jourNum: document.getElementById('jour-num'),
+            mois: document.getElementById('mois'),
+            saints: document.getElementById('saints'),
+            enigme: document.getElementById('enigme'),
+            defiContainer: document.getElementById('defi-container'),
+            modalAide: document.getElementById('modal-aide'),
+            modalIcon: document.getElementById('modal-icon'),
+            btnClose: document.getElementById('btn-close'),
+            btnFermerAide: document.getElementById('btn-fermer-aide')
+        };
+
+        // ========== APPLICATION DU THÈME ========== 
+        function applyTheme() {
+            // Boutons dynamiques
+            const themedButtons = [
+                elements.btnRetourHome,
+                elements.btnAide,
+                elements.btnNavigation
+            ];
+
+            themedButtons.forEach(btn => {
+                if (btn) {
+                    btn.style.backgroundColor = THEME_HEX;
+                    btn.style.color = THEME_TEXT_COLOR;
+                    btn.style.borderColor = 'transparent';
+                }
+            });
+
+            // Textes thématiques
+            [elements.mois, elements.saints].forEach(el => {
+                if (el) el.style.color = THEME_HEX;
+            });
+
+            // Encadré défi
+            if (elements.defiContainer) {
+                elements.defiContainer.style.borderColor = THEME_HEX + '33';
+                elements.defiContainer.style.backgroundColor = THEME_HEX + '10';
             }
-        });
 
-        // Textes
-        const textElements = [document.getElementById('mois'), document.getElementById('saints')];
-        textElements.forEach(el => { if (el) el.style.color = colorHex; });
+            // Modal
+            if (elements.modalIcon) {
+                elements.modalIcon.style.backgroundColor = THEME_HEX + '20';
+                elements.modalIcon.style.color = THEME_HEX;
+            }
 
-        // Encadré défi
-        const accentBox = document.querySelector('.bg-indigo-500\\/5');
-        if(accentBox) {
-            accentBox.style.borderColor = colorHex + '33';
-            accentBox.style.backgroundColor = colorHex + '10';
+            if (elements.btnFermerAide) {
+                elements.btnFermerAide.style.backgroundColor = THEME_HEX;
+                elements.btnFermerAide.style.color = THEME_TEXT_COLOR;
+            }
         }
-    }
 
-    function initEphemeride() {
-        const maintenant = new Date();
-        const jourIdx = maintenant.getDate() - 1; // 0 à 30
-        const moisNum = String(maintenant.getMonth() + 1).padStart(2, '0');
-        const cle = `${moisNum}-${String(maintenant.getDate()).padStart(2, '0')}`;
+        // ========== INITIALISATION DE L'ÉPHÉMÉRIDE ========== 
+        function initEphemeride() {
+            const now = new Date();
+            const dayIndex = now.getDate() - 1; // 0 à 30
+            const monthNum = String(now.getMonth() + 1).padStart(2, '0');
+            const dateKey = `${monthNum}-${String(now.getDate()).padStart(2, '0')}`;
 
-        // Affichage Date
-        document.getElementById('jour-nom').textContent = maintenant.toLocaleDateString('fr-FR', { weekday: 'long' });
-		document.getElementById('jour-num').textContent = maintenant.getDate();
-		document.getElementById('mois').textContent = maintenant.toLocaleDateString('fr-FR', { month: 'long' });
+            // Affichage de la date
+            elements.jourNom.textContent = now.toLocaleDateString('fr-FR', { weekday: 'long' });
+            elements.jourNum.textContent = now.getDate();
+            elements.mois.textContent = now.toLocaleDateString('fr-FR', { month: 'long' });
 
-        // Affichage Saint
-        const saint = SAINTS[cle] || "la Bonne Fête";
-        document.getElementById('saints').textContent = saint;
+            // Affichage du saint
+            const saint = SAINTS[dateKey] || "la Bonne Fête";
+            elements.saints.textContent = saint;
 
-        // Affichage Défi (change chaque jour)
-        const listeDefisMois = DEFIS_365[moisNum] || DEFIS_365["09"]; // Septembre par défaut
-        const defiDuJour = listeDefisMois[jourIdx % listeDefisMois.length];
-        document.getElementById('enigme').textContent = `${defiDuJour}`;
-    }
+            // Affichage du défi (change chaque jour)
+            const monthChallenges = DEFIS_365[monthNum] || DEFIS_365["09"]; // Septembre par défaut
+            const dailyChallenge = monthChallenges[dayIndex % monthChallenges.length];
+            elements.enigme.textContent = `${dailyChallenge}`;
+        }
 
-function ouvrirAide() {
-    const modal = document.getElementById('modal-aide');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Appliquer la couleur dynamique au bouton de fermeture et à l'icône de la modale
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const colorPref = themePrefs.outils || 'indigo';
-    const colorHex = COLOR_MAP[colorPref];
-    
-    document.getElementById('modal-icon').style.backgroundColor = colorHex + '20'; // Fond clair
-    document.getElementById('modal-icon').style.color = colorHex;
-    document.getElementById('btn-modal-close').style.backgroundColor = colorHex;
-    
-    // Contraste texte bouton
-    const isDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorPref);
-    document.getElementById('btn-modal-close').style.color = isDarkText ? '#000000' : '#ffffff';
-}
+        // ========== GESTION DE LA MODAL ========== 
+        function openHelp() {
+            elements.modalAide.classList.add('active');
+        }
 
-function fermerAide() {
-    const modal = document.getElementById('modal-aide');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
+        function closeHelp() {
+            elements.modalAide.classList.remove('active');
+        }
 
-// Fermer la modale si on clique à côté
-window.onclick = function(event) {
-    const modal = document.getElementById('modal-aide');
-    if (event.target == modal) fermerAide();
-}
+        // ========== INITIALISATION DES ÉVÉNEMENTS ========== 
+        function initEventListeners() {
+            // Boutons d'aide
+            elements.btnAide.addEventListener('click', openHelp);
+            elements.btnClose.addEventListener('click', closeHelp);
+            elements.btnFermerAide.addEventListener('click', closeHelp);
 
-    window.onload = () => {
-        initEphemeride();
-        applyTheme();
-    };
-</script>
+            // Fermeture en cliquant sur l'overlay
+            elements.modalAide.addEventListener('click', (e) => {
+                if (e.target === elements.modalAide) {
+                    closeHelp();
+                }
+            });
+
+            // Empêcher la fermeture en cliquant sur le contenu
+            const modalContent = elements.modalAide.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.addEventListener('click', (e) => e.stopPropagation());
+            }
+        }
+
+        // ========== INITIALISATION ========== 
+        function init() {
+            initEphemeride();
+            applyTheme();
+            initEventListeners();
+        }
+
+        // Démarrage de l'application
+        window.onload = init;
+    </script>
 
 </body>
 </html>
