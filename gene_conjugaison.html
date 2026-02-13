@@ -6,23 +6,46 @@
     <title>Conjugaison Flash - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ============================================
+           VARIABLES CSS
+        ============================================ */
         :root {
-            --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
-            --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
-            --accent-color: #06b6d4; --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --bg-page: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1);
+            --input-bg: #2a2a2a;
+            --accent-color: #06b6d4;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
-            --column-border: rgba(0, 0, 0, 0.1); --input-bg: #f3f4f6;
+            --bg-page: #eeeeee;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --column-border: rgba(0, 0, 0, 0.1);
+            --input-bg: #f3f4f6;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; transition: background 0.3s ease; }
-        
+        /* ============================================
+           STYLES GÉNÉRAUX
+        ============================================ */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================
+           MODE PLEIN ÉCRAN
+        ============================================ */
         body.fullscreen-mode {
             overflow: hidden;
         }
@@ -37,42 +60,188 @@
             overflow-y: auto;
             max-width: 80%;
         }
-        
-        header { background: var(--card-bg); border-bottom: 1px solid var(--column-border);
-            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
-            justify-content: space-between;    padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
-            width: 100%; margin-bottom: 20px;
+
+        /* ============================================
+           HEADER
+        ============================================ */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--column-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.125rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* ============================================
+           COMPOSANTS UI
+        ============================================ */
+        .ui-btn-round {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 10px 15px 40px;
+        }
+
+        .light-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 20px;
+            border: 1px solid var(--column-border);
+            box-shadow: var(--shadow-custom);
+        }
+
+        /* ============================================
+           FORMULAIRES
+        ============================================ */
+        .input-field {
+            background: var(--input-bg);
+            border: 1px solid var(--column-border);
+            border-radius: 0.75rem;
+            padding: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: 100%;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        /* ============================================
+           CARTES DE QUESTIONS
+        ============================================ */
+        .q-card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 15px;
+            border: 1px solid var(--column-border);
+            margin-bottom: 3px;
+        }
+
+        .conj-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .user-input-conj {
+            background: transparent;
+            border-bottom: 2px solid var(--column-border);
+            outline: none;
+            width: 130px;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        /* ============================================
+           BADGES DE TEMPS
+        ============================================ */
+        .badge-present {
+            background: #06b6d420;
+            color: #06b6d4;
+        }
+
+        .badge-imparfait {
+            background: #a855f720;
+            color: #a855f7;
+        }
+
+        .badge-futur {
+            background: #f9731620;
+            color: #f97316;
+        }
+
+        /* ============================================
+           MODALES
+        ============================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            padding: 25px;
+            border: 1px solid var(--column-border);
+        }
+
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+        @media (min-width: 768px) {
+            .main-wrapper {
+                max-width: 800px;
             }
             
-        header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
-
-        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; border: none; transition: all 0.2s ease; }
-        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 10px 15px 40px; }
-        .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); }
-        
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 10px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
-        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
-        .btn-add:active { transform: scale(0.95); }
-
-        .q-card { background: var(--card-bg); border-radius: 0.75rem; padding: 15px; border: 1px solid var(--column-border); margin-bottom: 3px; }
-        .conj-line { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 600; }
-        .user-input-conj { background: transparent; border-bottom: 2px solid var(--column-border); outline: none; width: 130px; text-align: center; color: var(--accent-color); }
-
-        .badge-present { background: #06b6d420; color: #06b6d4; }
-        .badge-imparfait { background: #a855f720; color: #a855f7; }
-        .badge-futur { background: #f9731620; color: #f97316; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 25px; border: 1px solid var(--column-border); }
-
-        @media (min-width: 768px) { .main-wrapper { max-width: 800px; } #questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; } }
+            #questions-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
     </style>
 </head>
 <body class="light-mode">
 
+<!-- ============================================
+     HEADER
+============================================ -->
 <header>
     <a href="index.html" id="btn-retour-header" class="ui-btn-round text-white active:scale-90">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
     </a>
     <h1>Conjugaison Flash</h1>
     <div class="flex gap-2">
@@ -80,56 +249,110 @@
     </div>
 </header>
 
+<!-- ============================================
+     CONTENU PRINCIPAL
+============================================ -->
 <div class="main-wrapper">
+    <!-- Barre de navigation -->
     <div id="container-retour-liste" class="mb-4 flex justify-between items-center">
         <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase text-white transition-transform active:scale-95 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
             Retour aux générateurs
         </a>
         <button id="btn-fullscreen-toggle" onclick="toggleFullscreen()" class="ui-btn-round text-white active:scale-90 shadow-md" title="Plein écran">
-            <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-            <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
         </button>
     </div>
 
+    <!-- Zone de configuration -->
     <div id="setup-zone" class="light-card space-y-4">
+        <!-- Titre de la fiche -->
         <div>
-            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Titre de la fiche</label>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">
+                Titre de la fiche
+            </label>
             <input type="text" id="quiz-title" class="input-field mb-4" placeholder="Ex: Rituel Conjugaison">
             
-            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">Verbes (un par ligne)</label>
+            <!-- Liste des verbes -->
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest text-center">
+                Verbes (un par ligne)
+            </label>
             <textarea id="quiz-data" class="input-field h-32 font-normal" placeholder="être&#10;avoir&#10;chanter"></textarea>
+            
+            <!-- Boutons d'exemple -->
             <div class="flex justify-between mt-2 gap-2">
-                <button onclick="addExample()" class="flex-1 px-3 py-1.5 rounded-lg border border-cyan-500/30 text-[8px] font-bold uppercase text-cyan-500 hover:bg-cyan-500/10 transition-colors">Exemple G1</button>
-                <button onclick="generateRandomData()" class="flex-1 px-3 py-1.5 rounded-lg border border-orange-500/30 text-[8px] font-bold uppercase text-orange-500 hover:bg-orange-500/10 transition-colors">Verbes fréquents</button>
+                <button onclick="addExample()" class="flex-1 px-3 py-1.5 rounded-lg border border-cyan-500/30 text-[8px] font-bold uppercase text-cyan-500 hover:bg-cyan-500/10 transition-colors">
+                    Exemple G1
+                </button>
+                <button onclick="generateRandomData()" class="flex-1 px-3 py-1.5 rounded-lg border border-orange-500/30 text-[8px] font-bold uppercase text-orange-500 hover:bg-orange-500/10 transition-colors">
+                    Verbes fréquents
+                </button>
             </div>
         </div>
 
+        <!-- Sélection des temps -->
         <div>
-            <label class="block text-[9px] font-black uppercase opacity-50 mb-3 text-center">Temps à inclure</label>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-3 text-center">
+                Temps à inclure
+            </label>
             <div class="flex justify-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="present" checked><span class="text-xs font-bold">Présent</span></label>
-                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="imparfait"><span class="text-xs font-bold">Imparfait</span></label>
-                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="futur"><span class="text-xs font-bold">Futur</span></label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="present" checked>
+                    <span class="text-xs font-bold">Présent</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="imparfait">
+                    <span class="text-xs font-bold">Imparfait</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="time-checkbox w-4 h-4 accent-cyan-500" value="futur">
+                    <span class="text-xs font-bold">Futur</span>
+                </label>
             </div>
         </div>
 
-        <button id="mainAddBtn" onclick="generateFlashQuiz()" class="btn-add text-white">Générer le test flash</button>
+        <!-- Bouton de génération -->
+        <button id="mainAddBtn" onclick="generateFlashQuiz()" class="btn-add text-white">
+            Générer le test flash
+        </button>
     </div>
 
+    <!-- Zone de jeu -->
     <div id="game-zone" class="hidden space-y-6">
         <div id="questions-grid"></div>
+        
+        <!-- Boutons d'action -->
         <div class="flex flex-wrap justify-center gap-3 pt-4">
-            <button onclick="retourReglages()" class="px-6 py-3 rounded-full bg-gray-500 text-white font-black uppercase text-[10px] active:scale-95">⬅️ retour</button>
-            <button id="validate-btn" onclick="showCorrection()" class="px-6 py-3 rounded-full bg-green-500 text-white font-black uppercase text-[10px] active:scale-95">👁️ correction</button>
-            <button onclick="exportToPDF()" class="px-6 py-3 rounded-full bg-blue-500 text-white font-black uppercase text-[10px] active:scale-95">📄 PDF</button>
+            <button onclick="retourReglages()" class="px-6 py-3 rounded-full bg-gray-500 text-white font-black uppercase text-[10px] active:scale-95">
+                ⬅️ retour
+            </button>
+            <button id="validate-btn" onclick="toggleCorrection()" class="px-6 py-3 rounded-full bg-green-500 text-white font-black uppercase text-[10px] active:scale-95">
+                👁️ correction
+            </button>
+            <button onclick="exportToPDF()" class="px-6 py-3 rounded-full bg-blue-500 text-white font-black uppercase text-[10px] active:scale-95">
+                📄 PDF
+            </button>
         </div>
     </div>
 </div>
 
+<!-- ============================================
+     MODALES
+============================================ -->
+
+<!-- Modale d'aide -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerSiClicExterieur(event, this)">
     <div class="modal-content">
-        <h2 class="text-center text-lg font-black uppercase mb-4" style="color: var(--accent-color)">💡 Mode d'emploi</h2>
+        <h2 class="text-center text-lg font-black uppercase mb-4" style="color: var(--accent-color)">
+            💡 Mode d'emploi
+        </h2>
         
         <div class="space-y-4 text-[11px] leading-relaxed mb-6">
             <p>Cet outil génère un test de conjugaison flash de <strong>10 questions</strong> sans aucun doublon.</p>
@@ -160,173 +383,341 @@
     </div>
 </div>
 
+<!-- Modale d'alerte -->
 <div id="modal-alerte" class="modal-overlay" onclick="fermerAlerte()">
     <div class="modal-content text-center border-red-500/50">
         <h2 class="text-lg font-black uppercase mb-4 text-red-500">⚠️ Attention</h2>
         <p id="alerte-message" class="text-[11px] leading-relaxed mb-6 font-bold"></p>
-        <button onclick="fermerAlerte()" class="w-full py-3 rounded-xl text-[10px] font-black uppercase bg-gray-500 text-white">D'accord</button>
+        <button onclick="fermerAlerte()" class="w-full py-3 rounded-xl text-[10px] font-black uppercase bg-gray-500 text-white">
+            D'accord
+        </button>
     </div>
 </div>
 
+<!-- ============================================
+     SCRIPT JAVASCRIPT
+============================================ -->
 <script>
-    const PRONOMS = ["Je", "Tu", "Il/Elle", "Nous", "Vous", "Ils/Elles"];
-    const TEMPS_COLORS = { present: 'badge-present', imparfait: 'badge-imparfait', futur: 'badge-futur' };
-    let questionsGenerees = [];
-    let correctionAffichee = false;
-    let sauvegardesUser = {};
-    let isFullscreen = false;
+// ============================================
+// CONSTANTES ET CONFIGURATION
+// ============================================
 
-    function toggleFullscreen() {
-        isFullscreen = !isFullscreen;
-        document.body.classList.toggle('fullscreen-mode', isFullscreen);
-        
-        // Basculer les icônes
-        document.getElementById('icon-fs-open').classList.toggle('hidden', isFullscreen);
-        document.getElementById('icon-fs-close').classList.toggle('hidden', !isFullscreen);
-        
-        // Gérer le bouton retour liste
-        const containerRetour = document.getElementById('container-retour-liste');
-        if (isFullscreen) {
-            containerRetour.classList.add('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
-            document.getElementById('btn-retour-liste').classList.add('hidden');
-        } else {
-            containerRetour.classList.remove('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
-            document.getElementById('btn-retour-liste').classList.remove('hidden');
-        }
+const PRONOMS = ["Je", "Tu", "Il/Elle", "Nous", "Vous", "Ils/Elles"];
+
+const TEMPS_COLORS = {
+    present: 'badge-present',
+    imparfait: 'badge-imparfait',
+    futur: 'badge-futur'
+};
+
+const THEME_COLORS = {
+    cyan: '#06b6d4',
+    orange: '#f97316',
+    green: '#22c55e',
+    purple: '#a855f7'
+};
+
+const VERBES_CONJUGUES = {
+    "être": {
+        present: ["suis", "es", "est", "sommes", "êtes", "sont"],
+        imparfait: ["étais", "étais", "était", "étions", "étiez", "étaient"],
+        futur: ["serai", "seras", "sera", "serons", "serez", "seront"]
+    },
+    "avoir": {
+        present: ["ai", "as", "a", "avons", "avez", "ont"],
+        imparfait: ["avais", "avais", "avait", "avions", "aviez", "avaient"],
+        futur: ["aurai", "auras", "aura", "aurons", "aurez", "auront"]
     }
+};
 
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
-    function fermerSiClicExterieur(e, m) { if (e.target === m) m.style.display = 'none'; }
+const TERMINAISONS = {
+    present: ["e", "es", "e", "ons", "ez", "ent"],
+    imparfait: ["ais", "ais", "ait", "ions", "iez", "aient"],
+    futur: ["ai", "as", "a", "ons", "ez", "ont"]
+};
 
-    function obtenirCorrection(verbe, pronom, temps) {
-        const v = verbe.toLowerCase().trim();
-        const pIdx = PRONOMS.indexOf(pronom);
-        const exceptions = {
-            "être": { present: ["suis","es","est","sommes","êtes","sont"], imparfait: ["étais","étais","était","étions","étiez","étaient"], futur: ["serai","seras","sera","serons","serez","seront"] },
-            "avoir": { present: ["ai","as","a","avons","avez","ont"], imparfait: ["avais","avais","avait","avions","aviez","avaient"], futur: ["aurai","auras","aura","aurons","aurez","auront"] }
-        };
-        if (exceptions[v]) return exceptions[v][temps][pIdx];
-        if (v.endsWith("er")) {
-            let rad = v.slice(0, -2);
-            if (temps === "present") return rad + ["e", "es", "e", "ons", "ez", "ent"][pIdx];
-            if (temps === "imparfait") return rad + ["ais", "ais", "ait", "ions", "iez", "aient"][pIdx];
-            return v + ["ai", "as", "a", "ons", "ez", "ont"][pIdx];
-        }
-        return "...";
-    }
+// ============================================
+// VARIABLES D'ÉTAT
+// ============================================
 
-    function addExample() {
-            document.getElementById('quiz-title').value = "Rituel Conjugaison G1";
-            document.getElementById('quiz-data').value = "chanter\ndanser\nmanger\nregarder\nparler\nécouter\njouer\naimer";
-        }
+let questionsGenerees = [];
+let correctionAffichee = false;
+let sauvegardesUser = {};
+let isFullscreen = false;
 
-    function generateRandomData() {
-            document.getElementById('quiz-title').value = "Verbes Fréquents (3ème groupe)";
-            const verbs = ["être", "avoir", "aller", "faire", "dire", "pouvoir", "vouloir", "prendre", "venir", "voir"];
-            document.getElementById('quiz-data').value = verbs.join('\n');
-        }
+// ============================================
+// GESTION DU MODE PLEIN ÉCRAN
+// ============================================
 
-    function generateFlashQuiz() {
-        const text = document.getElementById('quiz-data').value.trim();
-        const tempsSelectionnes = Array.from(document.querySelectorAll('.time-checkbox:checked')).map(cb => cb.value);
+function toggleFullscreen() {
+    isFullscreen = !isFullscreen;
+    document.body.classList.toggle('fullscreen-mode', isFullscreen);
     
-        if (!text || tempsSelectionnes.length === 0) {
-            afficherAlerte("Veuillez saisir des verbes et cocher au moins un temps.");
-            return;
-        }
+    // Basculer les icônes
+    document.getElementById('icon-fs-open').classList.toggle('hidden', isFullscreen);
+    document.getElementById('icon-fs-close').classList.toggle('hidden', !isFullscreen);
+    
+    // Gérer le bouton retour liste
+    const containerRetour = document.getElementById('container-retour-liste');
+    if (isFullscreen) {
+        containerRetour.classList.add('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
+        document.getElementById('btn-retour-liste').classList.add('hidden');
+    } else {
+        containerRetour.classList.remove('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
+        document.getElementById('btn-retour-liste').classList.remove('hidden');
+    }
+}
 
-        const verbs = text.split('\n').filter(v => v.trim());
-        let combos = [];
-        verbs.forEach(v => tempsSelectionnes.forEach(t => PRONOMS.forEach(p => combos.push({verbe: v.trim(), pronom: p, temps: t}))));
+// ============================================
+// GESTION DES MODALES
+// ============================================
+
+function ouvrirAide() {
+    document.getElementById('modal-aide').style.display = 'flex';
+}
+
+function fermerAide() {
+    document.getElementById('modal-aide').style.display = 'none';
+}
+
+function fermerSiClicExterieur(e, m) {
+    if (e.target === m) {
+        m.style.display = 'none';
+    }
+}
+
+function afficherAlerte(message) {
+    document.getElementById('alerte-message').innerText = message;
+    document.getElementById('modal-alerte').style.display = 'flex';
+}
+
+function fermerAlerte() {
+    document.getElementById('modal-alerte').style.display = 'none';
+}
+
+// ============================================
+// LOGIQUE DE CONJUGAISON
+// ============================================
+
+function obtenirCorrection(verbe, pronom, temps) {
+    const v = verbe.toLowerCase().trim();
+    const pIdx = PRONOMS.indexOf(pronom);
+    
+    // Vérifier les verbes irréguliers
+    if (VERBES_CONJUGUES[v]) {
+        return VERBES_CONJUGUES[v][temps][pIdx];
+    }
+    
+    // Traiter les verbes du premier groupe (-er)
+    if (v.endsWith("er")) {
+        const radical = v.slice(0, -2);
         
-        combos.sort(() => Math.random() - 0.5);
-        questionsGenerees = combos.slice(0, 10);
-
-        const grid = document.getElementById('questions-grid');
-        grid.innerHTML = questionsGenerees.map((q, i) => `
-            <div class="q-card">
-                <div class="flex justify-between mb-2">
-                    <span class="text-[11px] font-black opacity-40 uppercase">Question ${i+1}</span>
-                    <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded ${TEMPS_COLORS[q.temps]}">${q.temps}</span>
-                </div>
-                <div class="conj-line">
-                    <span class="w-16">${q.pronom}</span>
-                    <input type="text" class="user-input-conj" placeholder="${q.verbe.toLowerCase()}..." data-index="${i}">
-                </div>
-            </div>
-        `).join('');
-
-        document.getElementById('setup-zone').classList.add('hidden');
-        document.getElementById('game-zone').classList.remove('hidden');
-    }
-
-    function showCorrection() {
-        const btn = document.getElementById('validate-btn');
-        if (!correctionAffichee) {
-            document.querySelectorAll('.user-input-conj').forEach(input => {
-                const q = questionsGenerees[input.dataset.index];
-                const attendu = obtenirCorrection(q.verbe, q.pronom, q.temps);
-                const saisi = input.value;
-                sauvegardesUser[input.dataset.index] = saisi;
-                const estBon = saisi.toLowerCase().trim() === attendu;
-                input.style.color = estBon ? '#22c55e' : '#ef4444';
-                input.style.borderBottomColor = estBon ? '#22c55e' : '#ef4444';
-                if (!estBon) input.value = (saisi || "...") + " (" + attendu + ")";
-                input.disabled = true;
-            });
-            btn.innerHTML = "❌ Masquer";
-            btn.classList.replace('bg-green-500', 'bg-red-500');
-            correctionAffichee = true;
-        } else {
-            document.querySelectorAll('.user-input-conj').forEach(input => {
-                input.value = sauvegardesUser[input.dataset.index] || "";
-                input.style.color = ''; input.style.borderBottomColor = ''; input.disabled = false;
-            });
-            btn.innerHTML = "👁️ correction";
-            btn.classList.replace('bg-red-500', 'bg-green-500');
-            correctionAffichee = false;
+        if (temps === "present" || temps === "imparfait") {
+            return radical + TERMINAISONS[temps][pIdx];
         }
+        
+        // Futur : infinitif + terminaisons
+        return v + TERMINAISONS[temps][pIdx];
+    }
+    
+    // Verbe non reconnu
+    return "...";
+}
+
+// ============================================
+// GÉNÉRATION D'EXEMPLES
+// ============================================
+
+function addExample() {
+    document.getElementById('quiz-title').value = "Rituel Conjugaison G1";
+    document.getElementById('quiz-data').value = 
+        "chanter\ndanser\nmanger\nregarder\nparler\nécouter\njouer\naimer";
+}
+
+function generateRandomData() {
+    document.getElementById('quiz-title').value = "Verbes Fréquents (3ème groupe)";
+    const verbs = ["être", "avoir", "aller", "faire", "dire", "pouvoir", "vouloir", "prendre", "venir", "voir"];
+    document.getElementById('quiz-data').value = verbs.join('\n');
+}
+
+// ============================================
+// GÉNÉRATION DU QUIZ
+// ============================================
+
+function generateFlashQuiz() {
+    const text = document.getElementById('quiz-data').value.trim();
+    const tempsSelectionnes = Array.from(document.querySelectorAll('.time-checkbox:checked'))
+        .map(cb => cb.value);
+    
+    // Validation
+    if (!text || tempsSelectionnes.length === 0) {
+        afficherAlerte("Veuillez saisir des verbes et cocher au moins un temps.");
+        return;
     }
 
-    function exportToPDF() {
+    // Créer toutes les combinaisons possibles
+    const verbs = text.split('\n').filter(v => v.trim());
+    let combos = [];
+    
+    verbs.forEach(v => {
+        tempsSelectionnes.forEach(t => {
+            PRONOMS.forEach(p => {
+                combos.push({
+                    verbe: v.trim(),
+                    pronom: p,
+                    temps: t
+                });
+            });
+        });
+    });
+    
+    // Mélanger et sélectionner 10 questions
+    combos.sort(() => Math.random() - 0.5);
+    questionsGenerees = combos.slice(0, 10);
+
+    // Générer l'interface
+    renderQuestions();
+    
+    // Afficher la zone de jeu
+    document.getElementById('setup-zone').classList.add('hidden');
+    document.getElementById('game-zone').classList.remove('hidden');
+}
+
+function renderQuestions() {
+    const grid = document.getElementById('questions-grid');
+    
+    grid.innerHTML = questionsGenerees.map((q, i) => `
+        <div class="q-card">
+            <div class="flex justify-between mb-2">
+                <span class="text-[11px] font-black opacity-40 uppercase">Question ${i + 1}</span>
+                <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded ${TEMPS_COLORS[q.temps]}">${q.temps}</span>
+            </div>
+            <div class="conj-line">
+                <span class="w-16">${q.pronom}</span>
+                <input type="text" class="user-input-conj" placeholder="${q.verbe.toLowerCase()}..." data-index="${i}">
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// GESTION DE LA CORRECTION
+// ============================================
+
+function toggleCorrection() {
+    if (!correctionAffichee) {
+        afficherCorrection();
+    } else {
+        masquerCorrection();
+    }
+}
+
+function afficherCorrection() {
+    const btn = document.getElementById('validate-btn');
+    
+    document.querySelectorAll('.user-input-conj').forEach(input => {
+        const q = questionsGenerees[input.dataset.index];
+        const attendu = obtenirCorrection(q.verbe, q.pronom, q.temps);
+        const saisi = input.value.trim();
+        
+        // Sauvegarder la réponse de l'utilisateur
+        sauvegardesUser[input.dataset.index] = saisi;
+        
+        // Vérifier si la réponse est correcte
+        const estBon = saisi.toLowerCase() === attendu.toLowerCase();
+        
+        // Appliquer les styles
+        input.style.color = estBon ? '#22c55e' : '#ef4444';
+        input.style.borderBottomColor = estBon ? '#22c55e' : '#ef4444';
+        
+        // Afficher la correction si erreur
+        if (!estBon) {
+            input.value = (saisi || "...") + " (" + attendu + ")";
+        }
+        
+        input.disabled = true;
+    });
+    
+    btn.innerHTML = "❌ Masquer";
+    btn.classList.replace('bg-green-500', 'bg-red-500');
+    correctionAffichee = true;
+}
+
+function masquerCorrection() {
+    const btn = document.getElementById('validate-btn');
+    
+    document.querySelectorAll('.user-input-conj').forEach(input => {
+        // Restaurer la réponse originale
+        input.value = sauvegardesUser[input.dataset.index] || "";
+        input.style.color = '';
+        input.style.borderBottomColor = '';
+        input.disabled = false;
+    });
+    
+    btn.innerHTML = "👁️ correction";
+    btn.classList.replace('bg-red-500', 'bg-green-500');
+    correctionAffichee = false;
+}
+
+// ============================================
+// EXPORT PDF
+// ============================================
+
+function exportToPDF() {
     try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        
+        // Générer le nom de fichier
         const maintenant = new Date();
         const dateStr = maintenant.getFullYear() + 
                         String(maintenant.getMonth() + 1).padStart(2, '0') + 
                         String(maintenant.getDate()).padStart(2, '0');
         const nomFichier = `outilsprofs_conjugaison_${dateStr}.pdf`;
+        
+        // Récupérer le titre
         const titre = document.getElementById('quiz-title').value || "Conjugaison Flash";
-        const colonnes = [15, 108]; 
+        
+        // Positions pour 4 fiches par page (2x2)
+        const colonnes = [15, 108];
         const lignes = [25, 155];
 
+        // Générer les 4 fiches
         for (let l = 0; l < 2; l++) {
             for (let c = 0; c < 2; c++) {
-                let xBase = colonnes[c];
-                let yBase = lignes[l];
+                const xBase = colonnes[c];
+                const yBase = lignes[l];
+                
+                // Titre de la fiche
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "bold");
                 doc.text(titre, xBase, yBase);
+                
+                // Champs nom et date
                 doc.setFontSize(7);
                 doc.setFont("helvetica", "normal");
                 doc.text("Nom: ......................... Date: .............", xBase, yBase + 5);
+                
+                // Questions
                 let yQuestion = yBase + 12;
                 questionsGenerees.forEach((q, i) => {
                     doc.setFontSize(8.5);
-                    const tempsComplet = q.temps.toLowerCase();
-                    const prefixe = `${i+1}. [${tempsComplet}] ${q.pronom} (${q.verbe.toLowerCase()})`;
+                    const prefixe = `${i + 1}. [${q.temps}] ${q.pronom} (${q.verbe.toLowerCase()})`;
                     doc.text(prefixe, xBase, yQuestion);
                     doc.text("............................................", xBase + 45, yQuestion);
-                    yQuestion += 10.8; 
+                    yQuestion += 10.8;
                 });
             }
         }
+        
+        // Sauvegarder le PDF
         const pdfBase64 = doc.output('datauristring').split(',')[1];
+        
         if (window.Android && window.Android.savePdfFromBase64) {
+            // Mode Android
             window.Android.savePdfFromBase64(pdfBase64, nomFichier);
         } else {
+            // Mode navigateur
             doc.save(nomFichier);
         }
     } catch (e) {
@@ -335,35 +726,54 @@
     }
 }
 
-    function retourReglages() {
-        document.getElementById('game-zone').classList.add('hidden');
-        document.getElementById('setup-zone').classList.remove('hidden');
-        correctionAffichee = false;
-    }
+// ============================================
+// NAVIGATION
+// ============================================
 
-    function afficherAlerte(message) {
-        document.getElementById('alerte-message').innerText = message;
-        document.getElementById('modal-alerte').style.display = 'flex';
-    }
+function retourReglages() {
+    document.getElementById('game-zone').classList.add('hidden');
+    document.getElementById('setup-zone').classList.remove('hidden');
+    correctionAffichee = false;
+}
 
-    function fermerAlerte() {
-        document.getElementById('modal-alerte').style.display = 'none';
-    }
+// ============================================
+// GESTION DES ÉVÉNEMENTS CLAVIER
+// ============================================
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isFullscreen) {
-            toggleFullscreen();
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isFullscreen) {
+        toggleFullscreen();
+    }
+});
+
+// ============================================
+// INITIALISATION AU CHARGEMENT
+// ============================================
+
+window.onload = () => {
+    // Récupérer et appliquer le thème
+    const theme = JSON.parse(localStorage.getItem('theme_tuiles')) || { gen: 'cyan' };
+    const hex = THEME_COLORS[theme.gen] || THEME_COLORS.cyan;
+    
+    document.documentElement.style.setProperty('--accent-color', hex);
+    
+    // Appliquer la couleur aux boutons
+    const boutons = [
+        'btn-retour-header',
+        'btn-retour-liste',
+        'btn-aide',
+        'mainAddBtn',
+        'btn-fullscreen-toggle'
+    ];
+    
+    boutons.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.backgroundColor = hex;
         }
     });
-
-    window.onload = () => {
-        const theme = JSON.parse(localStorage.getItem('theme_tuiles')) || {gen: 'cyan'};
-        const hex = {cyan: '#06b6d4', orange: '#f97316', green: '#22c55e', purple: '#a855f7'}[theme.gen] || '#06b6d4';
-        document.documentElement.style.setProperty('--accent-color', hex);
-        ['btn-retour-header', 'btn-retour-liste', 'btn-aide', 'mainAddBtn', 'btn-fullscreen-toggle'].forEach(id => {
-            if(document.getElementById(id)) document.getElementById(id).style.backgroundColor = hex;
-        });
-    };
+};
 </script>
+
 </body>
 </html>

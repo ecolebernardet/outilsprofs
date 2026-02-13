@@ -6,118 +6,531 @@
     <title>Défi Calme - OutilsProfs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* ====================== CSS CONFIGURATION ====================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ====================== THEME VARIABLES ====================== */
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e; --input-bg: rgba(255,255,255,0.05);
+            --bg-page: #121212; 
+            --text-page: #ffffff; 
+            --column-border: rgba(255, 255, 255, 0.1); 
+            --header-bg: #1e1e1e; 
+            --card-bg: #1e1e1e; 
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --theme-color: #3b82f6;
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
-            --header-bg: #ffffff; --card-bg: #ffffff; --input-bg: rgba(0,0,0,0.05);
+            --bg-page: #eeeeee; 
+            --text-page: #111827; 
+            --column-border: #ddd; 
+            --header-bg: #ffffff; 
+            --card-bg: #ffffff; 
+            --input-bg: rgba(0, 0, 0, 0.05);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; }
-        
+        /* ====================== BASE STYLES ====================== */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-page); 
+            margin: 0; 
+            padding: 0; 
+            transition: background 0.3s ease;
+        }
+
+		/* Styles pour le mode plein écran */
+        body.fullscreen-mode {
+            overflow: hidden;
+        }
+
+        body.fullscreen-mode header {
+            display: none;
+        }
+
+        body.fullscreen-mode .main-wrapper {
+            padding: 20px 15px 40px;
+            height: 100vh;
+            overflow-y: auto;
+            max-width: 80%;
+        }
+
+        .btn-hidden { display: none !important; }
+		
+        /* ====================== HEADER ====================== */
         header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--column-border);
             padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            display: flex; align-items: center; justify-content: space-between; width: 100%;
-            position: sticky; top: 0; z-index: 100;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            width: 100%;
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
         }
 
-        .ui-btn-round { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-        header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
+        header h1 { 
+            font-size: 1rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            flex-grow: 1; 
+            text-align: center; 
+        }
 
-        .main-wrapper { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; }
+        /* ====================== BUTTONS ====================== */
+        .ui-btn-round { 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: transform 0.2s ease;
+            border: 1px solid var(--column-border);
+            cursor: pointer;
+            background-color: var(--theme-color);
+        }
+
+        #btn-retour-liste {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 9999px; 
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            background-color: var(--theme-color);
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            margin: 5px auto;
+            background-color: var(--theme-color);
+        }
+
+        /* ====================== MAIN LAYOUT ====================== */
+        .main-wrapper { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px 15px; 
+        }
 
         .gauge-container {
-            background: var(--card-bg); border-radius: 1.5rem; padding: 10px;
-            border: 1px solid var(--column-border); text-align: center;
+            background: var(--card-bg); 
+            border-radius: 1.5rem; 
+            padding: 10px;
+            border: 1px solid var(--column-border); 
+            text-align: center;
         }
 
+        /* ====================== DESKTOP LAYOUT ====================== */
         @media (min-width: 1024px) {
-            .defi-layout-container { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 30px; }
-            .side-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+            .defi-layout-container { 
+                display: grid; 
+                grid-template-columns: 80px 1fr 80px; 
+                align-items: center; 
+                gap: 30px; 
+            }
+
+            .side-panel { 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                height: 100%; 
+            }
+
             .v-gauge-bg {
-                width: 20px !important; height: 400px !important; background: var(--input-bg);
-                border-radius: 10px; overflow: hidden; position: relative; display: flex; flex-direction: column-reverse;
+                width: 20px !important; 
+                height: 400px !important; 
+                background: var(--input-bg);
+                border-radius: 10px; 
+                overflow: hidden; 
+                position: relative; 
+                display: flex; 
+                flex-direction: column-reverse;
             }
+
+            .v-gauge-bar { 
+                width: 100% !important; 
+                background: var(--theme-color); 
+                transition: height 0.1s; 
+                position: relative; 
+                z-index: 1; 
+            }
+
             .v-label {
-                writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
-                position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-                z-index: 10; font-size: 8px; font-weight: 900; text-transform: uppercase; opacity: 0.6; pointer-events: none;
+                writing-mode: vertical-rl; 
+                text-orientation: mixed; 
+                transform: rotate(180deg);
+                position: absolute; 
+                inset: 0; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center;
+                z-index: 10; 
+                font-size: 8px; 
+                font-weight: 900; 
+                text-transform: uppercase; 
+                opacity: 0.6; 
+                pointer-events: none;
             }
-            #mic-bar, #prog-bar-v { width: 100% !important; background: var(--theme-color); transition: height 0.1s; position: relative; z-index: 1; }
         }
 
+        /* ====================== REVEAL BOX ====================== */
         .reveal-box {
-            position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 850px; margin: 0 auto; 
-            background: #000; border-radius: 1rem; overflow: hidden; display: flex; 
-            align-items: center; justify-content: center; border: 2px solid var(--column-border);
+            position: relative; 
+            width: 100%; 
+            aspect-ratio: 16 / 9; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background: #000; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 2px solid var(--column-border);
         }
-        
-        #hidden-image { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease, transform 0.3s ease; }
-        #pixel-grid { position: absolute; inset: 0; display: grid; pointer-events: none; z-index: 5; }
-        .pixel-block { background-color: var(--bg-page); transition: opacity 0.2s ease; }
 
-        #btn-start, #btn-reset {
-            width: 100%; max-width: 400px; padding: 10px; border-radius: 12px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; border: none; margin: 5px auto;
+        #hidden-image { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: filter 0.3s ease, transform 0.3s ease; 
         }
 
-        /* Jauge Mobile Corrigée */
+        #pixel-grid { 
+            position: absolute; 
+            inset: 0; 
+            display: grid; 
+            pointer-events: none; 
+            z-index: 5; 
+        }
+
+        .pixel-block { 
+            background-color: var(--bg-page); 
+            transition: opacity 0.2s ease; 
+        }
+
+        #msg-start { 
+            position: absolute; 
+            inset: 0; 
+            z-index: 10; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            padding: 1.5rem; 
+            font-size: 0.875rem; 
+            font-weight: bold; 
+            opacity: 0.3;
+        }
+
+        /* ====================== MOBILE GAUGES ====================== */
         .mic-monitor-bg-mob { 
-            width: 250px; height: 16px; background: var(--input-bg); 
-            border-radius: 10px; overflow: hidden; margin: 5px auto; position: relative; 
+            width: 250px; 
+            height: 16px; 
+            background: var(--input-bg); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 5px auto; 
+            position: relative; 
         }
-        #mic-bar-mobile { height: 100%; background: var(--theme-color); width: 0%; transition: width 0.1s; position: absolute; left: 0; top: 0; z-index: 1; }
+
+        .mic-bar-mobile { 
+            height: 100%; 
+            background: var(--theme-color); 
+            width: 0%; 
+            transition: width 0.1s; 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            z-index: 1; 
+        }
+
         .label-mob { 
-            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; 
-            z-index: 10; font-size: 7px; font-weight: 900; text-transform: uppercase; opacity: 0.6; pointer-events: none; 
-        }Seuil de tolérance
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; 
+            font-size: 7px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            opacity: 0.6; 
+            pointer-events: none; 
+        }
 
-        .mode-selector { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; gap: 4px; }
+        .progress-bar-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 1rem;
+        }
+
+        .progress-fill-mobile {
+            flex-grow: 1;
+            height: 12px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill-mobile-bar {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: width 0.3s;
+            background-color: var(--theme-color);
+        }
+
+        .progress-percent {
+            font-size: 1.25rem;
+            font-weight: 900;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* ====================== CONTROLS ====================== */
+        .sensitivity-control {
+            max-width: 28rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .sensitivity-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .sensitivity-label-text {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.125em;
+            opacity: 0.4;
+        }
+
+        .sensitivity-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: var(--theme-color);
+            color: white;
+        }
+
+        .sensitivity-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            accent-color: var(--theme-color);
+        }
+
+        .sensitivity-slider::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--theme-color);
+            cursor: pointer;
+        }
+
+        .sensitivity-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--theme-color);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* ====================== MODE SELECTOR ====================== */
+        .mode-selector { 
+            display: flex; 
+            background: var(--input-bg); 
+            border-radius: 12px; 
+            padding: 4px; 
+            gap: 4px; 
+        }
+
         .mode-option {
-			flex: 1; 
-			padding: 8px; 
-			border-radius: 8px; 
-			font-size: 10px; 
-			font-weight: 800; 
-			text-transform: uppercase; 
-			cursor: pointer; 
-			transition: 0.2s; 
-			opacity: 0.6;
-			/* Ajout de la bordure pour les modes non choisis */
-			border: 1px solid var(--column-border);
-			text-align: center;
-		}
+            flex: 1; 
+            padding: 8px; 
+            border-radius: 8px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            opacity: 0.6;
+            border: 1px solid var(--column-border);
+            text-align: center;
+            background: transparent;
+            color: inherit;
+        }
 
-		.mode-option.active { 
-			background: var(--theme-color); 
-			color: #fff; 
-			opacity: 1; 
-			/* La bordure prend la couleur du thème pour l'élément actif */
-			border-color: var(--theme-color);
-		}
+        .mode-option.active { 
+            background: var(--theme-color); 
+            color: white; 
+            opacity: 1; 
+            border-color: var(--theme-color);
+        }
 
+        /* ====================== TIME PILL ====================== */
         .time-pill {
-            display: flex; align-items: center; gap: 10px;
-            background: var(--input-bg); padding: 5px 15px; border-radius: 50px; border: 1px solid var(--column-border);
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            background: var(--input-bg); 
+            padding: 5px 15px; 
+            border-radius: 50px; 
+            border: 1px solid var(--column-border);
         }
-        .time-btn { width: 28px; height: 28px; border-radius: 50%; font-weight: 900; background: var(--theme-color); display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
-        /* Modale */
-        .modal-overlay { 
-            display: none; position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); 
-            align-items: center; justify-content: center; padding: 20px; 
+        .time-value {
+            font-size: 1.125rem;
+            font-weight: 900;
+            min-width: 50px;
+            text-align: center;
         }
+
+        .time-btn { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            font-weight: 900; 
+            background: var(--theme-color); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        .time-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* ====================== CONTROLS PANEL ====================== */
+        .controls-panel {
+            display: flex;
+            flex-col;
+            md:flex-row;
+            items-center;
+            justify-between;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .control-label {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            opacity: 0.4;
+        }
+
+        /* ====================== BUTTONS CONTAINER ====================== */
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            min-height: 60px;
+            margin-top: 1rem;
+        }
+
+        .btn-hidden {
+            display: none !important;
+        }
+
+        /* ====================== MODAL ====================== */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8); 
+            backdrop-filter: blur(5px); 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
         .modal-content { 
-            background: var(--card-bg); width: 100%; max-width: 450px;
-            border-radius: 1.5rem; border: 1px solid var(--column-border); 
-            padding: 30px; position: relative; color: var(--text-page);
+            background: var(--card-bg); 
+            width: 100%; 
+            max-width: 450px;
+            border-radius: 1.5rem; 
+            border: 1px solid var(--column-border); 
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            color: var(--theme-color);
+        }
+
+        .modal-close-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.0625em;
+            background-color: var(--theme-color);
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -125,94 +538,111 @@
 
 <header>
     <a href="index.html" id="btn-retour" class="ui-btn-round">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
     </a>
     <h1 id="pageTitle">Défi Calme</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="ui-btn-round text-lg">💡</button>
+    <button id="btn-aide" onclick="Modal.open()" class="ui-btn-round text-lg">💡</button>
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste" class="mb-4 text-left">
-        <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+    <div id="container-retour-liste" class="mb-4 flex justify-between items-center">
+        <a href="outils.html" id="btn-retour-liste" class="inline-flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
             Retour aux outils
         </a>
+        <button id="btn-fullscreen-toggle" onclick="toggleFullscreen()" class="ui-btn-round text-white shadow-md" title="Plein écran">
+            <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     <div class="gauge-container">
         <div class="defi-layout-container">
+            <!-- LEFT PANEL: Micro Level (Desktop) -->
             <div class="side-panel hidden lg:flex">
                 <div class="v-gauge-bg">
-                    <div id="mic-bar" style="height: 0%"></div>
+                    <div id="mic-bar" class="v-gauge-bar" style="height: 0%"></div>
                     <span class="v-label">Niveau Micro</span>
                 </div>
             </div>
 
+            <!-- CENTER: Main Content -->
             <div>
+                <!-- Micro Level (Mobile) -->
                 <div class="mic-monitor-bg-mob lg:hidden mb-4">
-                    <div id="mic-bar-mobile"></div>
+                    <div id="mic-bar-mobile" class="mic-bar-mobile"></div>
                     <span class="label-mob">Niveau Micro</span>
                 </div>
 
+                <!-- Reveal Box -->
                 <div class="reveal-box">
                     <img id="hidden-image" src="https://picsum.photos/900/500?nature,animals" alt="Surprise">
                     <div id="pixel-grid"></div>
-                    <div id="msg-start" class="absolute inset-0 z-10 flex items-center justify-center text-center p-6 text-sm font-bold opacity-30">
-                        Restez silencieux pour<br>révéler l'image...
+                    <div id="msg-start">Restez silencieux pour<br>révéler l'image...</div>
+                </div>
+
+                <!-- Progress Bar (Mobile) -->
+                <div class="progress-bar-mobile lg:hidden mt-2">
+                    <span id="percent-text-mobile" class="progress-percent">0%</span>
+                    <div class="progress-fill-mobile">
+                        <div id="progress-fill" class="progress-fill-mobile-bar" style="width: 0%;"></div>
                     </div>
                 </div>
 
-				<div class="max-w-md mx-auto mt-2 flex lg:hidden items-center gap-3 px-4">
-                    <span id="percent-text-mobile" class="text-xl font-black min-w-[50px]">0%</span>
-                    <div class="flex-grow bg-black/10 dark:bg-white/5 h-3 rounded-full overflow-hidden relative">
-                        <div id="progress-fill" class="h-full absolute left-0 top-0 transition-all duration-300" style="width: 0%; background-color: var(--theme-color);"></div>
+                <!-- Sensitivity Control -->
+                <div class="sensitivity-control">
+                    <div class="sensitivity-label">
+                        <span class="sensitivity-label-text">Seuil de tolérance</span>
+                        <span id="sensibilite-val" class="sensitivity-badge">50</span>
                     </div>
+                    <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="sensitivity-slider" oninput="updateSensitivityDisplay(this.value)">
                 </div>
-				
-                <div class="max-w-md mx-auto mt-2 px-4">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Seuil de tolérance</span>
-                        <span id="sensibilite-val" class="text-[10px] font-black px-2 py-0.5 rounded bg-[var(--theme-color)] text-white">50</span>
-                    </div>
-                    <input type="range" id="sensibilite-slider" min="1" max="100" value="50" class="w-full h-2 bg-black/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[var(--theme-color)]" oninput="document.getElementById('sensibilite-val').textContent = this.value">
-                </div>
-
-                
             </div>
 
+            <!-- RIGHT PANEL: Progress (Desktop) -->
             <div class="side-panel hidden lg:flex">
                 <div class="flex flex-col items-center gap-2">
                     <span id="percent-text" class="text-2xl lg:text-3xl font-black">0%</span>
                     <div class="v-gauge-bg">
-                        <div id="prog-bar-v" style="height: 0%"></div>
+                        <div id="prog-bar-v" class="v-gauge-bar" style="height: 0%"></div>
                         <span class="v-label">Progression</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex justify-center items-center gap-4 min-h-[60px] mt-4">
-            <button id="btn-start" onclick="toggleDefi()">Démarrer le défi</button>
-            <button id="btn-stop" onclick="stopDefi()" style="display: none; width: 100%; max-width: 200px; padding: 16px; border-radius: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin: 10px 0;">Stop</button>
-            <button id="btn-reset" onclick="location.reload()" style="display: none;">Nouveau défi</button>
+        <!-- Buttons -->
+        <div class="buttons-container">
+            <button id="btn-start" class="action-btn" onclick="Defi.toggle()">Démarrer le défi</button>
+            <button id="btn-stop" class="action-btn btn-hidden" onclick="Defi.stop()">Stop</button>
+            <button id="btn-reset" class="action-btn btn-hidden" onclick="location.reload()">Nouveau défi</button>
         </div>
 
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-2 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5">
-            <div class="flex items-center gap-4">
-    <span class="text-[10px] font-black uppercase opacity-40">Mode</span>
-    <div class="mode-selector flex flex-row items-center min-w-[240px] gap-1">
-        <div id="mode-pixels" onclick="setMode('pixels')" class="mode-option active">Pixels</div>
-        <div id="mode-flou" onclick="setMode('flou')" class="mode-option">Flou</div>
-        <div id="mode-zoom" onclick="setMode('zoom')" class="mode-option">Zoom</div>
-    </div>
-</div>
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <div class="control-group">
+                <span class="control-label">Mode</span>
+                <div class="mode-selector">
+                    <button id="mode-pixels" onclick="Defi.setMode('pixels')" class="mode-option active">Pixels</button>
+                    <button id="mode-flou" onclick="Defi.setMode('flou')" class="mode-option">Flou</button>
+                    <button id="mode-zoom" onclick="Defi.setMode('zoom')" class="mode-option">Zoom</button>
+                </div>
+            </div>
 
-            <div class="flex items-center gap-4">
-                <span class="text-[10px] font-black uppercase opacity-40">Durée</span>
+            <div class="control-group">
+                <span class="control-label">Durée</span>
                 <div class="time-pill">
-                    <button id="btn-time-minus" class="time-btn" style="user-select: none;">-</button>
-                    <span class="text-lg font-black min-w-[50px]"><span id="min-defi-display">1</span>:<span id="sec-defi-display">00</span></span>
-                    <button id="btn-time-plus" class="time-btn" style="user-select: none;">+</button>
+                    <button id="btn-time-minus" class="time-btn" onmousedown="TimeControl.startAdjust(-1)" ontouchstart="TimeControl.startTouchAdjust(event, -1)">−</button>
+                    <span class="time-value"><span id="min-defi-display">1</span>:<span id="sec-defi-display">00</span></span>
+                    <button id="btn-time-plus" class="time-btn" onmousedown="TimeControl.startAdjust(1)" ontouchstart="TimeControl.startTouchAdjust(event, 1)">+</button>
                     <input type="hidden" id="min-defi" value="1">
                     <input type="hidden" id="sec-defi" value="00">
                 </div>
@@ -221,192 +651,496 @@
     </div>
 </div>
 
-<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+<!-- Help Modal -->
+<div id="modal-aide" class="modal-overlay" onclick="Modal.close()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 class="text-xl font-black uppercase mb-4">Le défi calme</h2>
-        <div class="space-y-4 text-sm opacity-80 leading-relaxed">
-            <p>1. <strong>Le but :</strong> Réveler l'image cachée en restant le plus silencieux possible.</p>
-            <p>2. <strong>Le son :</strong> Si le niveau sonore dépasse le seuil, la progression recule deux fois plus vite !</p>
-            <p>3. <strong>Réglages :</strong> Ajustez la <strong>sensibilité</strong> selon le bruit ambiant et choisissez le <strong>mode de révélation</strong> (Pixels, Flou ou Zoom).</p>
+        <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+            <span>💡</span> Le Défi Calme
+        </h2>
+        
+        <div class="space-y-6 text-left">
+            <div class="flex gap-4">
+                <div class="text-2xl">🎯</div>
+                <div>
+                    <h3 class="font-bold uppercase text-xs opacity-60 tracking-widest mb-1">But du jeu</h3>
+                    <p class="text-sm leading-relaxed">
+                        Restez le plus <strong>silencieux possible</strong> pour dévoiler l'image cachée. C'est l'outil idéal pour ramener le calme en classe de manière ludique.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="text-2xl">🔊</div>
+                <div>
+                    <h3 class="font-bold uppercase text-xs opacity-60 tracking-widest mb-1">Gestion du bruit</h3>
+                    <p class="text-sm leading-relaxed">
+                        Tant que le bruit est sous le seuil, la barre progresse. Si le niveau devient <strong>rouge</strong>, la progression recule <strong>deux fois plus vite</strong> !
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="text-2xl">⚙️</div>
+                <div>
+                    <h3 class="font-bold uppercase text-xs opacity-60 tracking-widest mb-1">Personnalisation</h3>
+                    <ul class="text-sm space-y-1 list-disc list-inside opacity-90">
+                        <li><strong>Pixels :</strong> L'image se découvre bloc par bloc.</li>
+                        <li><strong>Flou :</strong> L'image devient progressivement nette.</li>
+                        <li><strong>Zoom :</strong> On dézoome pour voir l'image entière.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl border-l-4" style="border-color: var(--theme-color)">
+                <p class="text-xs italic opacity-80">
+                    <strong>Conseil :</strong> Ajustez le "Seuil de tolérance" selon l'activité (travail de groupe ou silence absolu).
+                </p>
+            </div>
         </div>
-        <button onclick="fermerModal('modal-aide')" class="w-full mt-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest" style="background: var(--theme-color); color: #fff;">Compris !</button>
+
+        <button class="modal-close-btn mt-8 w-full py-4 rounded-2xl font-black uppercase tracking-wider transition-transform active:scale-95" 
+                onclick="Modal.close()" 
+                style="background-color: var(--theme-color); color: white;">
+            C'est parti !
+        </button>
     </div>
 </div>
 
 <script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    // ====================== CONFIGURATION ====================== 
+    const CONFIG = {
+        colors: {
+            'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 
+            'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 
+            'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 
+            'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 
+            'rose': '#f43f5e'
+        },
+        defaultMode: 'pixels',
+        volumeMultiplier: 3,
+        baseThreshold: 60,
+        sensitivityFactor: 0.55,
+        timeAdjustUnit: 15,
+        minTimeSeconds: 5,
+        maxTimeSeconds: 3600,
+        pixelDensityFactor: 0.4
+    };
 
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
-    const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
-    
-    document.documentElement.style.setProperty('--theme-color', themeColor);
-    document.querySelectorAll('#btn-start, #btn-reset, #btn-retour, #btn-retour-liste, #btn-aide, .time-btn').forEach(el => {
-        if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
+    // ====================== THEME SETUP ====================== 
+    const THEME = (() => {
+        const prefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const colorName = prefs.outils || 'blue';
+        const hex = CONFIG.colors[colorName] || '#3b82f6';
+        const needsDarkText = ['yellow', 'lime', 'amber', 'cyan'].includes(colorName);
+        return { hex, textColor: needsDarkText ? '#000' : '#fff' };
+    })();
+
+	// ====================== FULLSCREEN MANAGEMENT ====================== 
+    let isFullscreen = false;
+
+    function toggleFullscreen() {
+        isFullscreen = !isFullscreen;
+        document.body.classList.toggle('fullscreen-mode', isFullscreen);
+        
+        // Basculer les icônes (Agrandir / Fermer)
+        document.getElementById('icon-fs-open').classList.toggle('hidden', isFullscreen);
+        document.getElementById('icon-fs-close').classList.toggle('hidden', !isFullscreen);
+        
+        // Ciblage des éléments de navigation
+        const containerRetour = document.getElementById('container-retour-liste');
+        const btnRetourListe = document.getElementById('btn-retour-liste');
+        
+        if (isFullscreen) {
+            // Positionne le conteneur en haut à droite de l'écran
+            containerRetour.classList.add('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
+            // Cache le bouton "Retour aux outils"
+            btnRetourListe.style.display = 'none';
+        } else {
+            // Remet le conteneur à sa place normale
+            containerRetour.classList.remove('fixed', 'top-4', 'right-4', 'z-[110]', 'mb-0');
+            // Réaffiche le bouton "Retour aux outils"
+            btnRetourListe.style.display = 'inline-flex';
+        }
+
+        // Recalculer la grille si on est en mode pixels pour s'adapter à la nouvelle largeur (80%)
+        if (Defi.currentMode === 'pixels') {
+            GridManager.generate();
+        }
+    }
+
+    // Ajout de l'écouteur pour la touche Échap
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isFullscreen) toggleFullscreen();
     });
 
-    let audioContext, analyser, javascriptNode, stream, isPlaying = false, progress = 0, lastTime = 0, currentMode = 'pixels';
-    const gridContainer = document.getElementById('pixel-grid');
-    const imageEl = document.getElementById('hidden-image');
-    let pixelsOrder = [];
+    // ====================== MISE À JOUR DU THEME ====================== 
+    function applyTheme() {
+        const isLight = localStorage.getItem('theme_mode') === 'light';
+        if (isLight) document.body.classList.add('light-mode');
 
-    function setMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
-        document.getElementById(`mode-${mode}`).classList.add('active');
-        if (mode === 'pixels') generateGrid();
-        else gridContainer.innerHTML = '';
-        updateUI();
+        document.documentElement.style.setProperty('--theme-color', THEME.hex);
+
+        // Ajout de 'btn-fullscreen-toggle' à la liste
+        const buttonIds = ['btn-start', 'btn-reset', 'btn-retour', 'btn-retour-liste', 'btn-aide', 'btn-fullscreen-toggle'];
+        buttonIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.backgroundColor = THEME.hex;
+                el.style.color = THEME.textColor;
+            }
+        });
+
+        document.querySelectorAll('.time-btn').forEach(el => {
+            el.style.backgroundColor = THEME.hex;
+        });
     }
 
-    let timeInterval, timeDelay;
-    function adjustTime(delta) {
-        const minInput = document.getElementById('min-defi');
-        const secInput = document.getElementById('sec-defi');
-        let totalSeconds = (parseInt(minInput.value) * 60) + parseInt(secInput.value);
-        totalSeconds += (delta * 15);
-        if (totalSeconds < 15) totalSeconds = 5;
-        if (totalSeconds > 3600) totalSeconds = 3600;
-        const newMin = Math.floor(totalSeconds / 60);
-        const newSec = totalSeconds % 60;
-        minInput.value = newMin; secInput.value = newSec;
-        document.getElementById('min-defi-display').textContent = newMin;
-        document.getElementById('sec-defi-display').textContent = newSec.toString().padStart(2, '0');
-        if (currentMode === 'pixels') generateGrid();
-    }
+    // ====================== DOM HELPERS ====================== 
+    const DOM = {
+        get(id) {
+            return document.getElementById(id);
+        },
 
-    function startTime(delta) {
-        adjustTime(delta);
-        timeDelay = setTimeout(() => { timeInterval = setInterval(() => adjustTime(delta), 100); }, 400);
-    }
-    function stopTime() { clearTimeout(timeDelay); clearInterval(timeInterval); }
+        getAll(selector) {
+            return document.querySelectorAll(selector);
+        },
 
-    const btnMinus = document.getElementById('btn-time-minus');
-    btnMinus.addEventListener('mousedown', () => startTime(-1));
-    btnMinus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(-1); });
-    const btnPlus = document.getElementById('btn-time-plus');
-    btnPlus.addEventListener('mousedown', () => startTime(1));
-    btnPlus.addEventListener('touchstart', (e) => { e.preventDefault(); startTime(1); });
-    [window, btnMinus, btnPlus].forEach(el => {
-        el.addEventListener('mouseup', stopTime);
-        el.addEventListener('mouseleave', stopTime);
-        el.addEventListener('touchend', stopTime);
-    });    
+        setText(id, text) {
+            const el = this.get(id);
+            if (el) el.textContent = text;
+        },
 
-    function getDureeTotaleSeconds() { return (parseInt(document.getElementById('min-defi').value) * 60) + parseInt(document.getElementById('sec-defi').value) || 1; }
+        setStyle(id, prop, value) {
+            const el = this.get(id);
+            if (el) el.style[prop] = value;
+        },
 
-    function generateGrid() {
-        if (currentMode !== 'pixels') return;
-        const totalSeconds = getDureeTotaleSeconds();
-        const density = Math.max(4, Math.round(3 + (totalSeconds * 0.4))); 
-        const rows = Math.min(density, 40); const cols = Math.round(rows * (16/9));
-        gridContainer.innerHTML = '';
-        gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-        gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-        const temp = [];
-        for (let i = 0; i < rows * cols; i++) {
-            const p = document.createElement('div'); p.className = 'pixel-block';
-            gridContainer.appendChild(p); temp.push(p);
+        addClass(id, className) {
+            const el = this.get(id);
+            if (el) el.classList.add(className);
+        },
+
+        removeClass(id, className) {
+            const el = this.get(id);
+            if (el) el.classList.remove(className);
+        },
+
+        toggle(id, className) {
+            const el = this.get(id);
+            if (el) el.classList.toggle(className);
         }
-        pixelsOrder = temp.sort(() => Math.random() - 0.5);
-        updateUI();
-    }
+    };
 
-    function stopDefi() {
-        isPlaying = false; progress = 0; updateUI();
-        document.getElementById('btn-start').textContent = "Démarrer le défi";
-        document.getElementById('btn-start').style.display = "block";
-        document.getElementById('btn-stop').style.display = "none";
-        document.getElementById('msg-start').style.display = 'flex';
-        const barPC = document.getElementById('mic-bar');
-        const barMob = document.getElementById('mic-bar-mobile');
-        if(barPC) barPC.style.height = "0%";
-        if(barMob) barMob.style.width = "0%";
-    }
+    // ====================== MODAL MANAGEMENT ====================== 
+    const Modal = {
+        open() {
+            DOM.addClass('modal-aide', 'open');
+        },
 
-    async function toggleDefi() {
-        if (!isPlaying) {
+        close() {
+            DOM.removeClass('modal-aide', 'open');
+        }
+    };
+
+    // ====================== AUDIO MANAGER ====================== 
+    const AudioManager = {
+        context: null,
+        analyser: null,
+        scriptProcessor: null,
+        stream: null,
+
+        async init() {
+            if (this.context) return;
+
             try {
-                if (!stream) {
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    const source = audioContext.createMediaStreamSource(stream);
-                    javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-                    source.connect(analyser); analyser.connect(javascriptNode); javascriptNode.connect(audioContext.destination);
-                    javascriptNode.onaudioprocess = () => {
-                        if (!isPlaying) return;
-                        const now = performance.now(); const delta = (now - lastTime) / 1000; lastTime = now;
-                        let array = new Uint8Array(analyser.frequencyBinCount);
-                        analyser.getByteFrequencyData(array);
-                        let volume = array.reduce((a, b) => a + b) / array.length;
-                        const level = Math.min(volume * 3, 100) + '%';
-                        const barPC = document.getElementById('mic-bar');
-                        const barMob = document.getElementById('mic-bar-mobile');
-                        if(barPC) barPC.style.height = level;
-                        if(barMob) barMob.style.width = level;
-                        updateGame(volume, delta);
-                    };
-                }
-                isPlaying = true; lastTime = performance.now();
-                document.getElementById('btn-start').textContent = "Pause";
-                document.getElementById('btn-stop').style.display = "block";
-                document.getElementById('btn-stop').style.backgroundColor = themeColor;
-                document.getElementById('btn-stop').style.color = contrast;
-                document.getElementById('msg-start').style.display = 'none';
-            } catch (err) { alert("Micro non détecté"); }
-        } else {
-            isPlaying = false;
-            document.getElementById('btn-start').textContent = "Reprendre";
+                this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.context = new (window.AudioContext || window.webkitAudioContext)();
+                this.analyser = this.context.createAnalyser();
+                const source = this.context.createMediaStreamSource(this.stream);
+                this.scriptProcessor = this.context.createScriptProcessor(2048, 1, 1);
+                source.connect(this.analyser);
+                this.analyser.connect(this.scriptProcessor);
+                this.scriptProcessor.connect(this.context.destination);
+                return true;
+            } catch (err) {
+                alert('Micro non détecté');
+                return false;
+            }
+        },
+
+        setProcessor(callback) {
+            if (this.scriptProcessor) {
+                this.scriptProcessor.onaudioprocess = callback;
+            }
+        },
+
+        getFrequencyData() {
+            if (!this.analyser) return 0;
+            const array = new Uint8Array(this.analyser.frequencyBinCount);
+            this.analyser.getByteFrequencyData(array);
+            return array.reduce((a, b) => a + b) / array.length;
+        },
+
+        stop() {
+            if (this.scriptProcessor) {
+                this.scriptProcessor.onaudioprocess = null;
+            }
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+                this.stream = null;
+            }
         }
+    };
+
+    // ====================== GRID MANAGEMENT ====================== 
+    const GridManager = {
+        pixelsOrder: [],
+        gridContainer: DOM.get('pixel-grid'),
+
+        generate() {
+            const totalSeconds = TimeControl.getTotalSeconds();
+            const density = Math.max(4, Math.round(3 + (totalSeconds * CONFIG.pixelDensityFactor)));
+            const rows = Math.min(density, 40);
+            const cols = Math.round(rows * (16 / 9));
+
+            this.gridContainer.innerHTML = '';
+            this.gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            this.gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+            this.pixelsOrder = [];
+            for (let i = 0; i < rows * cols; i++) {
+                const p = document.createElement('div');
+                p.className = 'pixel-block';
+                this.gridContainer.appendChild(p);
+                this.pixelsOrder.push(p);
+            }
+
+            this.pixelsOrder.sort(() => Math.random() - 0.5);
+        },
+
+        revealPixels(progress) {
+            const revealCount = Math.floor((progress / 100) * this.pixelsOrder.length);
+            this.pixelsOrder.forEach((p, i) => {
+                p.style.opacity = i < revealCount ? '0' : '1';
+            });
+        },
+
+        clear() {
+            this.gridContainer.innerHTML = '';
+            this.pixelsOrder = [];
+        }
+    };
+
+    // ====================== TIME CONTROL ====================== 
+    const TimeControl = {
+        timeDelay: null,
+        timeInterval: null,
+
+        getTotalSeconds() {
+            const min = parseInt(DOM.get('min-defi').value);
+            const sec = parseInt(DOM.get('sec-defi').value);
+            return (min * 60) + sec || 1;
+        },
+
+        adjust(delta) {
+            let totalSeconds = this.getTotalSeconds();
+            totalSeconds += (delta * CONFIG.timeAdjustUnit);
+            totalSeconds = Math.max(CONFIG.minTimeSeconds, Math.min(CONFIG.maxTimeSeconds, totalSeconds));
+
+            const newMin = Math.floor(totalSeconds / 60);
+            const newSec = totalSeconds % 60;
+
+            DOM.get('min-defi').value = newMin;
+            DOM.get('sec-defi').value = newSec;
+            DOM.setText('min-defi-display', newMin);
+            DOM.setText('sec-defi-display', newSec.toString().padStart(2, '0'));
+
+            GridManager.generate();
+        },
+
+        startAdjust(delta) {
+            this.adjust(delta);
+            this.timeDelay = setTimeout(() => {
+                this.timeInterval = setInterval(() => this.adjust(delta), 100);
+            }, 400);
+        },
+
+        startTouchAdjust(event, delta) {
+            event.preventDefault();
+            this.startAdjust(delta);
+        },
+
+        stopAdjust() {
+            clearTimeout(this.timeDelay);
+            clearInterval(this.timeInterval);
+        },
+
+        setupEventListeners() {
+            const stopAdjust = () => this.stopAdjust();
+            [window, DOM.get('btn-time-minus'), DOM.get('btn-time-plus')].forEach(el => {
+                el.addEventListener('mouseup', stopAdjust);
+                el.addEventListener('mouseleave', stopAdjust);
+                el.addEventListener('touchend', stopAdjust);
+            });
+        }
+    };
+
+    // ====================== VISUALIZATION ====================== 
+    const Visualization = {
+        updateMicBar(volume) {
+            const level = Math.min(volume * CONFIG.volumeMultiplier, 100) + '%';
+            const barPC = DOM.get('mic-bar');
+            const barMob = DOM.get('mic-bar-mobile');
+
+            if (barPC) barPC.style.height = level;
+            if (barMob) barMob.style.width = level;
+        },
+
+        updateProgress(progress) {
+            const pStr = `${Math.floor(progress)}%`;
+            const percentPC = DOM.get('percent-text');
+            const percentMob = DOM.get('percent-text-mobile');
+
+            if (percentPC) percentPC.textContent = pStr;
+            if (percentMob) percentMob.textContent = pStr;
+
+            const progV = DOM.get('prog-bar-v');
+            if (progV) progV.style.height = pStr;
+
+            const progH = DOM.get('progress-fill');
+            if (progH) progH.style.width = pStr;
+        },
+
+        updateImage(progress, mode) {
+            const imageEl = DOM.get('hidden-image');
+            imageEl.style.filter = 'none';
+            imageEl.style.transform = 'scale(1)';
+
+            if (mode === 'pixels') {
+                GridManager.revealPixels(progress);
+            } else if (mode === 'flou') {
+                const blurVal = 40 - (progress * 0.4);
+                imageEl.style.filter = `blur(${blurVal}px)`;
+            } else if (mode === 'zoom') {
+                const zoomVal = 10 - (progress * 0.09);
+                const blurVal = 5 - (progress * 0.05);
+                imageEl.style.transform = `scale(${zoomVal})`;
+                imageEl.style.filter = `blur(${Math.max(0, blurVal)}px)`;
+            }
+        }
+    };
+
+    // ====================== DEFI MANAGEMENT ====================== 
+    const Defi = {
+        isPlaying: false,
+        progress: 0,
+        lastTime: 0,
+        currentMode: 'pixels',
+
+        setMode(mode) {
+            this.currentMode = mode;
+
+            document.querySelectorAll('.mode-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            DOM.get(`mode-${mode}`).classList.add('active');
+
+            if (mode === 'pixels') {
+                GridManager.generate();
+            } else {
+                GridManager.clear();
+            }
+
+            this.updateUI();
+        },
+
+        async toggle() {
+            if (!this.isPlaying) {
+                const success = await AudioManager.init();
+                if (!success) return;
+
+                this.isPlaying = true;
+                this.lastTime = performance.now();
+
+                AudioManager.setProcessor(() => {
+                    if (!this.isPlaying) return;
+
+                    const now = performance.now();
+                    const delta = (now - this.lastTime) / 1000;
+                    this.lastTime = now;
+
+                    const volume = AudioManager.getFrequencyData();
+                    Visualization.updateMicBar(volume);
+                    this.updateGame(volume, delta);
+                });
+
+                DOM.setText('btn-start', 'Pause');
+                DOM.addClass('btn-stop', 'btn-hidden');
+                DOM.removeClass('btn-stop', 'btn-hidden');
+                DOM.setText('btn-stop', 'Stop');
+                DOM.setStyle('btn-stop', 'backgroundColor', THEME.hex);
+                DOM.setStyle('btn-stop', 'color', THEME.textColor);
+                DOM.setStyle('msg-start', 'display', 'none');
+            } else {
+                this.isPlaying = false;
+                DOM.setText('btn-start', 'Reprendre');
+            }
+        },
+
+        stop() {
+            this.isPlaying = false;
+            this.progress = 0;
+            this.updateUI();
+
+            DOM.setText('btn-start', 'Démarrer le défi');
+            DOM.addClass('btn-stop', 'btn-hidden');
+            DOM.removeClass('btn-reset', 'btn-hidden');
+            DOM.setStyle('msg-start', 'display', 'flex');
+
+            const barPC = DOM.get('mic-bar');
+            const barMob = DOM.get('mic-bar-mobile');
+            if (barPC) barPC.style.height = '0%';
+            if (barMob) barMob.style.width = '0%';
+        },
+
+        updateGame(volume, deltaTime) {
+            const threshold = CONFIG.baseThreshold - (parseInt(DOM.get('sensibilite-slider').value) * CONFIG.sensitivityFactor);
+            const speed = 100 / TimeControl.getTotalSeconds();
+
+            if (volume < threshold) {
+                if (this.progress < 100) this.progress += (speed * deltaTime);
+            } else {
+                if (this.progress > 0) this.progress -= (speed * deltaTime * 2);
+            }
+
+            this.progress = Math.max(0, Math.min(100, this.progress));
+            this.updateUI();
+
+            if (this.progress >= 100) {
+                this.isPlaying = false;
+                DOM.addClass('btn-start', 'btn-hidden');
+                DOM.addClass('btn-stop', 'btn-hidden');
+                DOM.removeClass('btn-reset', 'btn-hidden');
+            }
+        },
+
+        updateUI() {
+            Visualization.updateProgress(this.progress);
+            Visualization.updateImage(this.progress, this.currentMode);
+        }
+    };
+
+    // ====================== UTILITY FUNCTIONS ====================== 
+    function updateSensitivityDisplay(value) {
+        DOM.setText('sensibilite-val', value);
     }
 
-    function updateGame(volume, deltaTime) {
-        const threshold = 60 - (parseInt(document.getElementById('sensibilite-slider').value) * 0.55);
-        const speed = 100 / getDureeTotaleSeconds(); 
-        if (volume < threshold) { if (progress < 100) progress += (speed * deltaTime); }
-        else { if (progress > 0) progress -= (speed * deltaTime * 2); }
-        progress = Math.max(0, Math.min(100, progress));
-        updateUI();
-        if (progress >= 100) {
-            isPlaying = false;
-            document.getElementById('btn-start').style.display = 'none';
-            document.getElementById('btn-stop').style.display = 'none';
-            document.getElementById('btn-reset').style.display = 'block';
-            if (javascriptNode) javascriptNode.disconnect();
-        }
-    }
-
-    function updateUI() {
-        const pStr = `${Math.floor(progress)}%`;
-        const percentPC = document.getElementById('percent-text');
-        const percentMob = document.getElementById('percent-text-mobile');
-        if(percentPC) percentPC.textContent = pStr;
-        if(percentMob) percentMob.textContent = pStr;
-        const progV = document.getElementById('prog-bar-v');
-        if(progV) progV.style.height = pStr;
-        const progH = document.getElementById('progress-fill');
-        if(progH) progH.style.width = pStr;
-
-        imageEl.style.filter = 'none'; imageEl.style.transform = 'scale(1)';
-        if (currentMode === 'pixels') {
-            const revealCount = Math.floor((progress / 100) * pixelsOrder.length);
-            pixelsOrder.forEach((p, i) => p.style.opacity = i < revealCount ? "0" : "1");
-        } else if (currentMode === 'flou') {
-            const blurVal = 40 - (progress * 0.4);
-            imageEl.style.filter = `blur(${blurVal}px)`;
-        } else if (currentMode === 'zoom') {
-            const zoomVal = 10 - (progress * 0.09);
-            const blurVal = 5 - (progress * 0.05);
-            imageEl.style.transform = `scale(${zoomVal})`;
-            imageEl.style.filter = `blur(${Math.max(0, blurVal)}px)`;
-        }
-    }
-
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-    generateGrid();
+    // ====================== INITIALIZATION ====================== 
+    window.addEventListener('DOMContentLoaded', () => {
+        applyTheme();
+        TimeControl.setupEventListeners();
+        GridManager.generate();
+    });
 </script>
 </body>
 </html>

@@ -11,172 +11,324 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ============================================
+           VARIABLES CSS
+        ============================================ */
         :root { 
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.2); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.2);
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
         }
-        body.light-mode { 
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #999; 
-            --header-bg: #ffffff; --card-bg: #ffffff;
-        }
-
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            display: flex; align-items: center; justify-content: space-between; width: 100%; z-index: 100;
+        body.light-mode { 
+            --bg-page: #eeeeee;
+            --text-page: #111827;
+            --column-border: #999;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
         }
 
-        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-        header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
+        /* ============================================
+           STYLES GÉNÉRAUX
+        ============================================ */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s ease;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .main-content { 
-			flex-grow: 1; 
-			display: flex; 
-			flex-direction: column; 
-			position: relative; 
-			overflow: hidden; 
-			/* Ajoute un espace en bas égal à la hauteur de la barre d'outils + marge */
-			padding-bottom: 80px; 
-		}
+        /* ============================================
+           HEADER
+        ============================================ */
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        #btn-retour,
+        #btn-aide {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           CONTENEUR PRINCIPAL
+        ============================================ */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 80px;
+        }
 
         #container-retour-liste {
-    position: relative;
-    width: 100%;
-    pointer-events: auto;
-    display: block;
-    padding: 10px 15px !important; /* Réduction du padding (était à p-4 / 16px) */
-}
+            position: relative;
+            width: 100%;
+            pointer-events: auto;
+            display: block;
+            padding: 10px 15px;
+        }
 
         #btn-retour-liste {
             pointer-events: auto;
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
-            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
-            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
+        /* ============================================
+           CANVAS SVG
+        ============================================ */
         #canvas-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* On peut le remettre au centre maintenant que l'espace est délimité */
-    background: var(--bg-page);
-    overflow: hidden;
-    padding: 10px; /* Petit espace de sécurité autour du plan */
-    min-height: 0; /* Force le flex-item à ne pas déborder */
-}
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-page);
+            overflow: hidden;
+            padding: 10px;
+            min-height: 0;
+        }
 
         svg {
-    height: auto;
-    width: auto;
-    max-height: 100%; /* Le SVG ne pourra jamais dépasser la hauteur de son parent */
-    max-width: 100%;
-    aspect-ratio: 1800 / 1800;
-    touch-action: none;
-    display: block;
-    border: none;
-}
+            height: auto;
+            width: auto;
+            max-height: 100%;
+            max-width: 100%;
+            aspect-ratio: 1800 / 1800;
+            touch-action: none;
+            display: block;
+            border: none;
+        }
 
-        .desk-group { cursor: grab; user-select: none; pointer-events: all; }
-        .desk-rect { stroke: rgba(0,0,0,0.3); stroke-width: 2; rx: 5; transition: stroke 0.2s; }
-        .desk-group.selected .desk-rect { stroke: var(--theme-color); stroke-width: 8; }
-        .desk-label { fill: black; font-size: 30px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; text-transform: uppercase; }
-        .chair-rect { fill: #2e7d32; rx: 2; }
+        /* ============================================
+           ÉLÉMENTS DU PLAN (BUREAUX, CHAISES)
+        ============================================ */
+        .desk-group {
+            cursor: grab;
+            user-select: none;
+            pointer-events: all;
+        }
 
-        /* Nouveaux styles pour les contrôles de zoom sous le plan */
+        .desk-rect {
+            stroke: rgba(0, 0, 0, 0.3);
+            stroke-width: 2;
+            rx: 5;
+            transition: stroke 0.2s;
+        }
+
+        .desk-group.selected .desk-rect {
+            stroke: var(--theme-color);
+            stroke-width: 8;
+        }
+
+        .desk-label {
+            fill: black;
+            font-size: 30px;
+            font-weight: 900;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .chair-rect {
+            fill: #2e7d32;
+            rx: 2;
+        }
+
+        /* ============================================
+           CONTRÔLES DE ZOOM
+        ============================================ */
         #zoom-controls {
-			display: flex;
-			flex-direction: column; /* Boutons l'un au-dessus de l'autre pour plus de discrétion */
-			gap: 10px;
-			padding: 0;
-			position: absolute;
-			right: 20px;
-			bottom: calc(env(safe-area-inset-bottom) + 100px); /* Juste au-dessus de la toolbar */
-			z-index: 50;
-			margin-bottom: 0;
-		}
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0;
+            position: absolute;
+            right: 20px;
+            bottom: calc(env(safe-area-inset-bottom) + 100px);
+            z-index: 50;
+            margin-bottom: 0;
+        }
+
+        /* ============================================
+           BARRES D'OUTILS
+        ============================================ */
+        .creation-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: transparent;
+            z-index: 150;
+        }
+
+        .creation-bar .btn-tool {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
         .toolbar {
-    position: fixed; 
-    bottom: 0;
-    left: 50%; 
-    transform: translateX(-50%);
-    background: transparent; /* Fond supprimé */
-    width: 100%;
-    max-width: 600px; 
-    padding: 12px 10px calc(env(safe-area-inset-bottom) + 15px) 10px;
-    border-top: none; /* Suppression de la bordure supérieure */
-    display: flex; 
-    justify-content: center; 
-    gap: 8px; 
-    z-index: 9999;
-    pointer-events: none; /* Permet de cliquer à travers la zone vide de la barre */
-}
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            width: 100%;
+            max-width: 600px;
+            padding: 12px 10px calc(env(safe-area-inset-bottom) + 15px) 10px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 9999;
+            pointer-events: none;
+        }
 
-	.toolbar .btn-tool {
-    pointer-events: auto;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); /* Ajout d'une ombre pour la visibilité sur fond sombre */
-}
+        .toolbar .btn-tool {
+            pointer-events: auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
 
-        .btn-tool { 
-			flex: 0 0 45px; /* Largeur fixe pour tous */
-			height: 45px; 
-			border-radius: 12px; 
-			font-size: 18px; 
-			display: flex; 
-			align-items: center; 
-			justify-content: center; 
-			background: var(--header-bg); 
-			border: 1px solid var(--column-border); 
-			color: inherit; 
-			transition: all 0.2s; 
-		}
-        .btn-tool:disabled { opacity: 0.15; pointer-events: none; }
-        
-		/* Barre supérieure spécifique */
-		.creation-bar {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 15px;
-    background: transparent; 
-    z-index: 150;
-}
+        .btn-tool {
+            flex: 0 0 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--header-bg);
+            border: 1px solid var(--column-border);
+            color: inherit;
+            transition: all 0.2s;
+        }
 
-	.creation-bar .btn-tool {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+        .btn-tool:disabled {
+            opacity: 0.15;
+            pointer-events: none;
+        }
 
-		#add-menu { 
-    position: fixed !important; /* Force la position hors du flux */
-    top: 175px !important;      /* Position absolue sous la barre de création */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    background: var(--header-bg); 
-    border: 1px solid var(--column-border); 
-    padding: 12px; 
-    border-radius: 20px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    display: flex; 
-    gap: 12px; 
-    z-index: 10000 !important; /* Doit être supérieur au z-index du canvas */
-    pointer-events: auto !important;
-}
+        /* ============================================
+           MENU D'AJOUT
+        ============================================ */
+        #add-menu {
+            position: fixed;
+            top: 175px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--header-bg);
+            border: 1px solid var(--column-border);
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            gap: 12px;
+            z-index: 10000;
+            pointer-events: auto;
+        }
 
-#add-menu.hidden { 
-    display: none !important; 
-}
+        #add-menu.hidden {
+            display: none;
+        }
 
-        #add-menu button:active { transform: scale(0.9); }
+        #add-menu button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 20000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 420px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
-        .btn-modal-action { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border: none; }
+        #add-menu button:active {
+            transform: scale(0.9);
+        }
+
+        /* ============================================
+           MODALES
+        ============================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 1.5rem;
+            border: 1px solid var(--column-border);
+            padding: 25px;
+            position: relative;
+        }
+
+        .btn-modal-action {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
+<!-- ============================================
+     HEADER
+============================================ -->
 <header>
     <a href="index.html" id="btn-retour">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,14 +339,21 @@
     <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
 </header>
 
+<!-- ============================================
+     CONTENU PRINCIPAL
+============================================ -->
 <div class="main-content">
-    <div id="container-retour-liste" style="padding: 10px 15px;">
+    <!-- Bouton retour aux outils -->
+    <div id="container-retour-liste">
         <a href="outils.html" id="btn-retour-liste">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
             Retour aux outils
         </a>
     </div>
 
+    <!-- Barre d'outils de création -->
     <div class="creation-bar">
         <button class="btn-tool" id="btn-mode" onclick="toggleLock()">🔓</button>
         <button class="btn-tool" id="btn-undo" onclick="undo()">↶</button>
@@ -204,12 +363,14 @@
         <button class="btn-tool" onclick="genererTablesDepuisClasse()">📋</button>
     </div>
 
+    <!-- Canvas SVG -->
     <div id="canvas-container">
         <svg id="plan-svg" onclick="deselectAll(event)" viewBox="0 0 1800 1800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
             <g id="main-layer"></g>
         </svg>
     </div>
 
+    <!-- Contrôles de zoom -->
     <div id="zoom-controls">
         <button onclick="changeZoom(-0.2)" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-xl font-bold flex items-center justify-center">－</button>
         <button onclick="resetZoom()" class="w-12 h-12 bg-[var(--header-bg)] border border-[var(--column-border)] rounded-full shadow-lg text-[12px] font-black flex items-center justify-center">1:1</button>
@@ -217,6 +378,9 @@
     </div>
 </div>
 
+<!-- ============================================
+     BARRE D'OUTILS PRINCIPALE (BAS)
+============================================ -->
 <div class="toolbar">
     <button class="btn-tool" onclick="confirmerToutEffacer()">🗑️</button>
     <button class="btn-tool" onclick="exporterPlan()">💾</button>
@@ -225,6 +389,37 @@
     <button class="btn-tool" onclick="ouvrirDansOnglet()">🖼️</button>
 </div>
 
+<!-- ============================================
+     MENU D'AJOUT D'ÉLÉMENTS
+============================================ -->
+<div id="add-menu" class="hidden">
+    <button onclick="ajouterMeuble('prof')" class="add-item-btn">
+        <span class="text-2xl">👨‍🏫</span>
+        <span class="text-[9px] font-bold uppercase">Bureau</span>
+    </button>
+    <button onclick="ajouterUneTable()" class="add-item-btn">
+        <span class="text-2xl">🪑</span>
+        <span class="text-[9px] font-bold uppercase">Élève</span>
+    </button>
+    <button onclick="ajouterMeuble('tableau')" class="add-item-btn">
+        <span class="text-2xl">⬛</span>
+        <span class="text-[9px] font-bold uppercase">Tableau</span>
+    </button>
+    <button onclick="ajouterMeuble('meuble')" class="add-item-btn">
+        <span class="text-2xl">🗄️</span>
+        <span class="text-[9px] font-bold uppercase">Meuble</span>
+    </button>
+    <button onclick="ajouterMeuble('porte')" class="add-item-btn">
+        <span class="text-2xl">🚪</span>
+        <span class="text-[9px] font-bold uppercase">Porte</span>
+    </button>
+</div>
+
+<!-- ============================================
+     MODALES
+============================================ -->
+
+<!-- Modale de confirmation de suppression -->
 <div id="modal-confirm" class="modal-overlay">
     <div class="modal-content text-center">
         <h2 class="font-black uppercase mb-2 text-red-500">⚠️ Attention</h2>
@@ -236,6 +431,7 @@
     </div>
 </div>
 
+<!-- Modale d'aide -->
 <div id="modal-aide" class="modal-overlay" onclick="fermerModale('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 class="font-black uppercase mb-4 flex items-center gap-2">💡 Guide de l'interface</h2>
@@ -268,8 +464,8 @@
         <button onclick="fermerModale('modal-aide')" id="btn-fermer-aide" class="mt-6 btn-modal-action">J'ai compris</button>
     </div>
 </div>
-</div>
 
+<!-- Modale de création de table -->
 <div id="modal-create" class="modal-overlay">
     <div class="modal-content">
         <h2 class="font-black uppercase mb-2">Nouvelle Table</h2>
@@ -281,63 +477,642 @@
     </div>
 </div>
 
-<div id="add-menu" class="hidden">
-    <button onclick="ajouterMeuble('prof')" class="add-item-btn">
-        <span class="text-2xl">👨‍🏫</span>
-        <span class="text-[9px] font-bold uppercase">Bureau</span>
-    </button>
-    <button onclick="ajouterUneTable()" class="add-item-btn">
-        <span class="text-2xl">🪑</span>
-        <span class="text-[9px] font-bold uppercase">Élève</span>
-    </button>
-    <button onclick="ajouterMeuble('tableau')" class="add-item-btn">
-        <span class="text-2xl">⬛</span>
-        <span class="text-[9px] font-bold uppercase">Tableau</span>
-    </button>
-    <button onclick="ajouterMeuble('meuble')" class="add-item-btn">
-        <span class="text-2xl">🗄️</span>
-        <span class="text-[9px] font-bold uppercase">Meuble</span>
-    </button>
-    <button onclick="ajouterMeuble('porte')" class="add-item-btn">
-        <span class="text-2xl">🚪</span>
-        <span class="text-[9px] font-bold uppercase">Porte</span>
-    </button>
-</div>
-
+<!-- ============================================
+     SCRIPT JAVASCRIPT
+============================================ -->
 <script>
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+// ============================================
+// CONFIGURATION INITIALE ET CONSTANTES
+// ============================================
 
-    const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e' };
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
-    const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
-    document.documentElement.style.setProperty('--theme-color', themeColor);
-    document.documentElement.style.setProperty('--contrast-color', contrast);
+// Gestion du thème
+if (localStorage.getItem('theme_mode') === 'light') {
+    document.body.classList.add('light-mode');
+}
 
-	function ouvrirDansOnglet() {
+// Constantes de couleurs
+const MAP_COULEURS = {
+    'red': '#ef4444', 'orange': '#f97316', 'amber': '#f97316', 'yellow': '#eab308',
+    'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+    'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+    'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+    'rose': '#f43f5e'
+};
+
+const COULEUR_PAR_NIVEAU = {
+    'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444',
+    'CM2': '#22c55e', 'AUTRE': '#A58F88', 'PROF': '#77615A', 'MEUBLE': '#77615A',
+    'PORTE': '#577A72', 'TABLEAU': '#1D6353'
+};
+
+// Dimensions des éléments
+const DIMENSIONS = {
+    DESK_W: 180,
+    DESK_H: 100,
+    PROF_W: 360,
+    PROF_H: 180,
+    MEUBLE_W: 320,
+    MEUBLE_H: 80,
+    DOOR_W: 200,
+    DOOR_H: 40,
+    BOARD_W: 900,
+    BOARD_H: 40
+};
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const SPEED_MULTIPLIER = 5; // Vitesse de déplacement en mode zoom
+const COULEUR_DEFAUT_BUREAU = '#5d4037';
+
+// Application du thème personnalisé
+const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+const themeColor = MAP_COULEURS[themePrefs.outils || 'blue'];
+const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
+document.documentElement.style.setProperty('--theme-color', themeColor);
+document.documentElement.style.setProperty('--contrast-color', contrast);
+
+// ============================================
+// VARIABLES D'ÉTAT
+// ============================================
+
+let studentData = JSON.parse(localStorage.getItem('plan_vector_v1')) || [];
+let historyStack = [];
+let redoStack = [];
+let selectedIndex = null;
+let isLocked = false;
+
+// Variables de zoom
+let currentScale = 1;
+let translateX = 0;
+let translateY = 0;
+
+// ============================================
+// GESTION DE L'HISTORIQUE (UNDO/REDO)
+// ============================================
+
+function pushHistory() {
+    historyStack.push(JSON.stringify(studentData));
+    if (historyStack.length > 40) {
+        historyStack.shift();
+    }
+    redoStack = [];
+    updateButtons();
+}
+
+function undo() {
+    if (historyStack.length > 0) {
+        redoStack.push(JSON.stringify(studentData));
+        studentData = JSON.parse(historyStack.pop());
+        selectedIndex = null;
+        sync();
+    }
+}
+
+function redo() {
+    if (redoStack.length > 0) {
+        historyStack.push(JSON.stringify(studentData));
+        studentData = JSON.parse(redoStack.pop());
+        selectedIndex = null;
+        sync();
+    }
+}
+
+// ============================================
+// SYNCHRONISATION ET MISE À JOUR
+// ============================================
+
+function sync() {
+    localStorage.setItem('plan_vector_v1', JSON.stringify(studentData));
+    drawPlan();
+    updateButtons();
+}
+
+function updateButtons() {
+    document.getElementById('btn-undo').disabled = historyStack.length === 0;
+    document.getElementById('btn-redo').disabled = redoStack.length === 0;
+    document.getElementById('btn-delete-selection').disabled = selectedIndex === null;
+}
+
+// ============================================
+// GESTION DU MENU D'AJOUT
+// ============================================
+
+function toggleAddMenu() {
+    const menu = document.getElementById('add-menu');
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+    }
+}
+
+// ============================================
+// GESTION DU ZOOM
+// ============================================
+
+function changeZoom(delta) {
+    const newScale = Math.min(Math.max(currentScale + delta, 1), 4);
+    if (newScale !== currentScale) {
+        currentScale = newScale;
+        if (currentScale > 1 && !isLocked) {
+            toggleLock();
+        }
+        if (currentScale === 1) {
+            translateX = 0;
+            translateY = 0;
+        }
+        applyTransform();
+    }
+}
+
+function resetZoom() {
+    currentScale = 1;
+    translateX = 0;
+    translateY = 0;
+    if (isLocked) {
+        toggleLock();
+    }
+    applyTransform();
+}
+
+function applyTransform() {
+    const layer = document.getElementById('main-layer');
+    layer.style.transition = "transform 0.15s ease-out";
+    layer.style.transformOrigin = "center center";
+    layer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+}
+
+// ============================================
+// AJOUT D'ÉLÉMENTS
+// ============================================
+
+function ajouterMeuble(type) {
+    pushHistory();
+    const item = { x: 900, y: 900, r: 0 };
+    
+    switch(type) {
+        case 'prof':
+            item.name = "PROF";
+            item.niveau = "PROF";
+            break;
+        case 'meuble':
+            item.name = "MEUBLE";
+            item.niveau = "MEUBLE";
+            break;
+        case 'porte':
+            item.name = "PORTE";
+            item.niveau = "PORTE";
+            break;
+        case 'tableau':
+            item.name = "TABLEAU";
+            item.niveau = "TABLEAU";
+            break;
+    }
+    
+    studentData.push(item);
+    sync();
+    toggleAddMenu();
+}
+
+function ajouterUneTable() {
+    document.getElementById('input-nom-eleve').value = "";
+    document.getElementById('modal-create').style.display = 'flex';
+    toggleAddMenu();
+    setTimeout(() => document.getElementById('input-nom-eleve').focus(), 100);
+}
+
+function validerCreationTable() {
+    const nom = document.getElementById('input-nom-eleve').value.trim();
+    if (nom) {
+        pushHistory();
+        studentData.push({
+            name: nom.toUpperCase(),
+            niveau: "AUTRE",
+            x: 900,
+            y: 900,
+            r: 0
+        });
+        sync();
+        fermerModale('modal-create');
+    }
+}
+
+// ============================================
+// DESSIN DU PLAN
+// ============================================
+
+function drawPlan() {
+    const layer = document.getElementById('main-layer');
+    layer.innerHTML = '';
+
+    // Dessiner les murs
+    const walls = document.createElementNS(SVG_NS, "rect");
+    walls.setAttribute("x", 5);
+    walls.setAttribute("y", 5);
+    walls.setAttribute("width", 1790);
+    walls.setAttribute("height", 1790);
+    walls.setAttribute("fill", "none");
+    walls.setAttribute("stroke", "var(--column-border)");
+    walls.setAttribute("stroke-width", "10");
+    walls.style.pointerEvents = "none";
+    layer.appendChild(walls);
+
+    // Dessiner chaque élément
+    studentData.forEach((student, index) => {
+        const g = document.createElementNS(SVG_NS, "g");
+        g.setAttribute("class", "desk-group" + (selectedIndex === index ? " selected" : ""));
+        g.setAttribute("id", `desk-${index}`);
+        
+        const x = student.x || 900;
+        const y = student.y || 900;
+        const r = student.r || 0;
+        
+        g.setAttribute("transform", `translate(${x},${y}) rotate(${r})`);
+        g.setAttribute("data-x", x);
+        g.setAttribute("data-y", y);
+        g.setAttribute("data-r", r);
+        
+        // Déterminer les dimensions selon le type
+        let currentW = DIMENSIONS.DESK_W;
+        let currentH = DIMENSIONS.DESK_H;
+        let hasChair = true;
+        
+        switch(student.niveau) {
+            case 'PROF':
+                currentW = DIMENSIONS.PROF_W;
+                currentH = DIMENSIONS.PROF_H;
+                break;
+            case 'MEUBLE':
+                currentW = DIMENSIONS.MEUBLE_W;
+                currentH = DIMENSIONS.MEUBLE_H;
+                hasChair = false;
+                break;
+            case 'PORTE':
+                currentW = DIMENSIONS.DOOR_W;
+                currentH = DIMENSIONS.DOOR_H;
+                hasChair = false;
+                break;
+            case 'TABLEAU':
+                currentW = DIMENSIONS.BOARD_W;
+                currentH = DIMENSIONS.BOARD_H;
+                hasChair = false;
+                break;
+        }
+
+        // Dessiner le rectangle principal
+        const color = COULEUR_PAR_NIVEAU[student.niveau] || COULEUR_DEFAUT_BUREAU;
+        const rect = document.createElementNS(SVG_NS, "rect");
+        rect.setAttribute("class", "desk-rect");
+        rect.setAttribute("x", -currentW / 2);
+        rect.setAttribute("y", -currentH / 2);
+        rect.setAttribute("width", currentW);
+        rect.setAttribute("height", currentH);
+        rect.style.fill = color;
+        g.appendChild(rect);
+
+        // Dessiner la chaise si nécessaire
+        if (hasChair) {
+            const chair = document.createElementNS(SVG_NS, "rect");
+            chair.setAttribute("class", "chair-rect");
+            chair.setAttribute("x", -30);
+            chair.setAttribute("y", currentH / 2 + 5);
+            chair.setAttribute("width", 60);
+            chair.setAttribute("height", 15);
+            g.appendChild(chair);
+        }
+
+        // Ajouter le texte
+        if (student.name) {
+            const text = document.createElementNS(SVG_NS, "text");
+            text.setAttribute("class", "desk-label");
+            if (student.niveau === 'TABLEAU') {
+                text.setAttribute("fill", "white");
+            }
+            text.setAttribute("x", "0");
+            text.setAttribute("y", "0");
+            text.textContent = student.name;
+            
+            // Rotation du texte pour lisibilité
+            if (r > 130 && r < 230) {
+                text.setAttribute("transform", `rotate(180)`);
+            }
+            
+            g.appendChild(text);
+        }
+
+        // Événements
+        g.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deselectAllManual();
+            g.classList.add('selected');
+            selectedIndex = index;
+            updateButtons();
+        });
+        
+        g.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            if (!isLocked) {
+                pushHistory();
+                student.r = (parseInt(student.r || 0) + 45) % 360;
+                sync();
+            }
+        });
+        
+        layer.appendChild(g);
+    });
+    
+    setupInteract();
+    applyTransform();
+}
+
+// ============================================
+// GESTION DE LA SÉLECTION
+// ============================================
+
+function deselectAllManual() {
+    document.querySelectorAll('.desk-group').forEach(el => el.classList.remove('selected'));
+    selectedIndex = null;
+    updateButtons();
+}
+
+function deselectAll(e) {
+    if (e.target.id === 'plan-svg') {
+        deselectAllManual();
+        document.getElementById('add-menu').classList.add('hidden');
+    }
+}
+
+// ============================================
+// CONFIGURATION DES INTERACTIONS (DRAG & DROP)
+// ============================================
+
+function setupInteract() {
+    // Interaction pour déplacer les bureaux
+    interact('.desk-group').draggable({
+        onstart: () => {
+            if (!isLocked) pushHistory();
+        },
+        listeners: {
+            move(event) {
+                if (isLocked) return;
+                
+                const target = event.target;
+                const svg = document.getElementById('plan-svg');
+                const point = svg.createSVGPoint();
+                point.x = event.dx;
+                point.y = event.dy;
+                
+                const ctm = svg.getScreenCTM().inverse();
+                const deltaX = point.x * ctm.a;
+                const deltaY = point.y * ctm.d;
+                
+                let x = (parseFloat(target.getAttribute('data-x')) || 0) + deltaX;
+                let y = (parseFloat(target.getAttribute('data-y')) || 0) + deltaY;
+                let r = target.getAttribute('data-r');
+                
+                target.setAttribute('transform', `translate(${x},${y}) rotate(${r})`);
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+            },
+            end(event) {
+                if (isLocked) return;
+                
+                const idx = event.target.id.split('-')[1];
+                studentData[idx].x = parseFloat(event.target.getAttribute('data-x'));
+                studentData[idx].y = parseFloat(event.target.getAttribute('data-y'));
+                localStorage.setItem('plan_vector_v1', JSON.stringify(studentData));
+            }
+        }
+    });
+
+    // Déplacement panoramique en mode zoom
+    interact('#plan-svg').draggable({
+        listeners: {
+            move(event) {
+                if (currentScale > 1) {
+                    event.preventDefault();
+                    translateX += event.dx * SPEED_MULTIPLIER;
+                    translateY += event.dy * SPEED_MULTIPLIER;
+                    applyTransform();
+                }
+            }
+        },
+        allowFrom: '#plan-svg'
+    });
+}
+
+// ============================================
+// GESTION DES MODALES
+// ============================================
+
+function ouvrirAide() {
+    document.getElementById('modal-aide').style.display = 'flex';
+}
+
+function fermerModale(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+// ============================================
+// SUPPRESSION
+// ============================================
+
+function supprimerSelection() {
+    if (selectedIndex !== null) {
+        pushHistory();
+        studentData.splice(selectedIndex, 1);
+        selectedIndex = null;
+        sync();
+    }
+}
+
+function confirmerToutEffacer() {
+    document.getElementById('modal-confirm').style.display = 'flex';
+}
+
+function toutEffacer() {
+    pushHistory();
+    studentData = [];
+    selectedIndex = null;
+    sync();
+    fermerModale('modal-confirm');
+}
+
+// ============================================
+// VERROUILLAGE
+// ============================================
+
+function toggleLock() {
+    isLocked = !isLocked;
+    const btn = document.getElementById('btn-mode');
+    btn.textContent = isLocked ? '🔒' : '🔓';
+    btn.style.background = isLocked ? 'var(--theme-color)' : 'rgba(128,128,128,0.1)';
+    btn.style.color = isLocked ? 'var(--contrast-color)' : 'inherit';
+}
+
+// ============================================
+// EXPORT / IMPORT
+// ============================================
+
+function getExportFileName(ext) {
+    const nomProf = (localStorage.getItem('nom_enseignant') || 'prof')
+        .toLowerCase()
+        .replace(/\s+/g, '_');
+    const d = new Date();
+    const dateStr = d.getFullYear() + 
+                   String(d.getMonth() + 1).padStart(2, '0') + 
+                   String(d.getDate()).padStart(2, '0');
+    return `outilsprofs_plan_classe_${nomProf}_${dateStr}.${ext}`;
+}
+
+function exporterPlan() {
+    const fileName = getExportFileName('json');
+    const content = JSON.stringify(studentData);
+
+    if (window.Android && window.Android.savePdfFromBase64) {
+        // Mode Android
+        const base64Content = btoa(unescape(encodeURIComponent(content)));
+        window.Android.savePdfFromBase64(base64Content, fileName);
+    } else {
+        // Mode navigateur
+        const blob = new Blob([content], { type: "application/json" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+    }
+}
+
+function importerPlan() {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json';
+    inp.onchange = e => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                studentData = JSON.parse(ev.target.result);
+                sync();
+            } catch (err) {
+                alert("Erreur lors de la lecture du fichier.");
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    };
+    inp.click();
+}
+
+// ============================================
+// EXPORT PDF
+// ============================================
+
+async function exportPDF() {
+    try {
+        const fileName = getExportFileName('pdf');
+        if (!window.jspdf || !window.jspdf.jsPDF) return;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        // Titre
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("PLAN DE CLASSE", 105, 15, { align: 'center' });
+
+        // Préparation du SVG
+        const svgElement = document.getElementById('plan-svg');
+        const svgClone = svgElement.cloneNode(true);
+        
+        // Correction de la bordure pour le PDF
+        const walls = svgClone.querySelector('rect[stroke="var(--column-border)"]');
+        if (walls) {
+            walls.setAttribute("stroke", "#999999");
+        }
+
+        // Adaptation des tailles de texte
+        const groups = svgClone.querySelectorAll('.desk-group');
+        groups.forEach((group) => {
+            const label = group.querySelector('.desk-label');
+            const rect = group.querySelector('.desk-rect');
+            
+            if (label && rect) {
+                const rectWidth = parseFloat(rect.getAttribute('width'));
+                const studentName = label.textContent || "";
+                
+                // Calcul de la taille de police
+                let fontSize = Math.min(30, rectWidth / (studentName.length * 0.65));
+                if (fontSize < 16) fontSize = 16;
+
+                // Centrage du texte
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('dominant-baseline', 'central');
+                label.setAttribute('x', '0');
+                label.setAttribute('y', '0');
+                label.setAttribute('style', 
+                    `font-size: ${fontSize}px; font-weight: bold; font-family: Arial, sans-serif;`);
+            }
+        });
+
+        // Conversion en image
+        const svgData = new XMLSerializer().serializeToString(svgClone);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        canvas.width = 1800;
+        canvas.height = 1800;
+
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = function() {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            doc.addImage(imgData, 'JPEG', 10, 25, 190, 190);
+            
+            if (window.Android && window.Android.savePdfFromBase64) {
+                const base64String = doc.output('datauristring').split(',')[1];
+                window.Android.savePdfFromBase64(base64String, fileName);
+            } else {
+                doc.save(fileName);
+            }
+            URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+
+    } catch (error) {
+        alert("Erreur PDF : " + error.message);
+    }
+}
+
+// ============================================
+// OUVERTURE DANS UN NOUVEL ONGLET
+// ============================================
+
+function ouvrirDansOnglet() {
     const svgElement = document.getElementById('plan-svg');
     const svgClone = svgElement.cloneNode(true);
     
-    // On force un fond blanc
     svgClone.style.backgroundColor = "white";
     
-    // --- AUGMENTATION DE LA TAILLE DES PRÉNOMS ---
+    // Augmentation de la taille des prénoms
     const labels = svgClone.querySelectorAll('.desk-label');
     labels.forEach(label => {
-        // taille de la police des prénoms à
-        label.setAttribute('style', 'font-size: 30px; font-weight: 900; font-family: Inter, sans-serif; fill: #000000;');
-        
-        // On s'assure que le texte est bien centré
+        label.setAttribute('style', 
+            'font-size: 30px; font-weight: 900; font-family: Inter, sans-serif; fill: #000000;');
         label.setAttribute('text-anchor', 'middle');
         label.setAttribute('dominant-baseline', 'central');
     });
 
-    // On s'assure que les bordures sont visibles
+    // Bordures visibles
     const walls = svgClone.querySelector('rect');
     if (walls) walls.setAttribute("stroke", "#dddddd");
 
     const svgData = new XMLSerializer().serializeToString(svgClone);
-    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
 
     const canvas = document.createElement('canvas');
@@ -391,369 +1166,47 @@
     img.src = url;
 }
 
-    function appliquerCouleursDynamiques() {
-    const ids = ['btn-retour', 'btn-aide', 'btn-retour-liste', 'btn-valider-create', 'btn-fermer-aide'];
-    ids.forEach(id => { 
-        const el = document.getElementById(id);
-        if(el) { 
-            el.style.backgroundColor = themeColor; 
-            el.style.color = contrast; 
-        } 
-    });
-}
+// ============================================
+// GÉNÉRATION AUTOMATIQUE DEPUIS "MA CLASSE"
+// ============================================
 
-    let isLocked = false;
-    let studentData = JSON.parse(localStorage.getItem('plan_vector_v1')) || [];
-    let historyStack = [], redoStack = [];
-    let selectedIndex = null;
-
-    // Variables Zoom
-    let currentScale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    const SPEED_MULTIPLIER = 5; // Déplacement plus rapide au doigt en zoom
-    
-    const SVG_NS = "http://www.w3.org/2000/svg";
-    const DESK_W = 180, DESK_H = 100, PROF_W = 360, PROF_H = 180, MEUBLE_W = 320, MEUBLE_H = 80, DOOR_W = 200, DOOR_H = 40, BOARD_W = 900, BOARD_H = 40;
-
-    const couleurParNiveau = { 
-        'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308', 'CM1': '#ef4444', 'CM2': '#22c55e', 
-        'AUTRE': '#A58F88', 'PROF': '#77615A', 'MEUBLE': '#77615A', 'PORTE': '#577A72', 'TABLEAU': '#1D6353'
-    };
-    const couleurDefautBureau = '#5d4037';
-
-    function pushHistory() { historyStack.push(JSON.stringify(studentData)); if (historyStack.length > 40) historyStack.shift(); redoStack = []; updateButtons(); }
-    function undo() { if (historyStack.length > 0) { redoStack.push(JSON.stringify(studentData)); studentData = JSON.parse(historyStack.pop()); selectedIndex = null; sync(); } }
-    function redo() { if (redoStack.length > 0) { historyStack.push(JSON.stringify(studentData)); studentData = JSON.parse(redoStack.pop()); selectedIndex = null; sync(); } }
-    function sync() { localStorage.setItem('plan_vector_v1', JSON.stringify(studentData)); drawPlan(); updateButtons(); }
-    function updateButtons() { 
-        document.getElementById('btn-undo').disabled = historyStack.length === 0; 
-        document.getElementById('btn-redo').disabled = redoStack.length === 0; 
-        document.getElementById('btn-delete-selection').disabled = selectedIndex === null;
-    }
-	
-    function toggleAddMenu() { 
-    const menu = document.getElementById('add-menu');
-    // On retire toute ancienne classe Tailwind de positionnement qui pourrait gêner
-    menu.classList.remove('bottom-[95px]', 'bottom-0');
-    
-    // Bascule de la visibilité
-    if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        menu.style.display = 'flex';
-    } else {
-        menu.classList.add('hidden');
-        menu.style.display = 'none';
-    }
-}
-
-    // Fonctions Zoom
-    function changeZoom(delta) {
-        const newScale = Math.min(Math.max(currentScale + delta, 1), 4);
-        if (newScale !== currentScale) {
-            currentScale = newScale;
-            if (currentScale > 1 && !isLocked) toggleLock();
-            if (currentScale === 1) { translateX = 0; translateY = 0; }
-            applyTransform();
-        }
-    }
-
-    function resetZoom() {
-        currentScale = 1; translateX = 0; translateY = 0;
-        if (isLocked) toggleLock();
-        applyTransform();
-    }
-
-    function applyTransform() {
-        const layer = document.getElementById('main-layer');
-        layer.style.transition = "transform 0.15s ease-out";
-        layer.style.transformOrigin = "center center";
-        layer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
-    }
-
-    function ajouterMeuble(type) {
+function genererTablesDepuisClasse() {
+    const list = JSON.parse(localStorage.getItem('maListeEleves') || "[]");
+    if (list.length) {
         pushHistory();
-        let item = { x: 900, y: 900, r: 0 };
-        if(type === 'prof') { item.name = "PROF"; item.niveau = "PROF"; }
-        else if(type === 'meuble') { item.name = "MEUBLE"; item.niveau = "MEUBLE"; }
-        else if(type === 'porte') { item.name = "PORTE"; item.niveau = "PORTE"; }
-        else if(type === 'tableau') { item.name = "TABLEAU"; item.niveau = "TABLEAU"; }
-        studentData.push(item);
+        studentData = list.map((el, i) => ({
+            name: el.identite.split(' ')[0],
+            niveau: el.niveau,
+            x: 220 + ((i % 5) * 260),
+            y: 200 + (Math.floor(i / 5) * 240),
+            r: 0
+        }));
         sync();
-        toggleAddMenu();
     }
+}
 
-    function drawPlan() {
-    const layer = document.getElementById('main-layer');
-    layer.innerHTML = '';
+// ============================================
+// APPLICATION DES COULEURS DYNAMIQUES
+// ============================================
 
-    const walls = document.createElementNS(SVG_NS, "rect");
-    walls.setAttribute("x", 5); walls.setAttribute("y", 5);
-    walls.setAttribute("width", 1790); walls.setAttribute("height", 1790);
-    walls.setAttribute("fill", "none"); walls.setAttribute("stroke", "var(--column-border)");
-    walls.setAttribute("stroke-width", "10"); walls.style.pointerEvents = "none";
-    layer.appendChild(walls);
-
-    studentData.forEach((student, index) => {
-        const g = document.createElementNS(SVG_NS, "g");
-        g.setAttribute("class", "desk-group" + (selectedIndex === index ? " selected" : ""));
-        g.setAttribute("id", `desk-${index}`);
-        const x = student.x || 900, y = student.y || 900, r = student.r || 0;
-        g.setAttribute("transform", `translate(${x},${y}) rotate(${r})`);
-        g.setAttribute("data-x", x); g.setAttribute("data-y", y); g.setAttribute("data-r", r);
-        
-        let currentW = DESK_W, currentH = DESK_H, hasChair = true;
-        if (student.niveau === 'PROF') { currentW = PROF_W; currentH = PROF_H; }
-        else if (student.niveau === 'MEUBLE') { currentW = MEUBLE_W; currentH = MEUBLE_H; hasChair = false; }
-        else if (student.niveau === 'PORTE') { currentW = DOOR_W; currentH = DOOR_H; hasChair = false; }
-        else if (student.niveau === 'TABLEAU') { currentW = BOARD_W; currentH = BOARD_H; hasChair = false; }
-
-        const color = couleurParNiveau[student.niveau] || couleurDefautBureau;
-        const rect = document.createElementNS(SVG_NS, "rect");
-        rect.setAttribute("class", "desk-rect");
-        rect.setAttribute("x", -currentW/2); rect.setAttribute("y", -currentH/2);
-        rect.setAttribute("width", currentW); rect.setAttribute("height", currentH);
-        rect.style.fill = color;
-        g.appendChild(rect);
-
-        if (hasChair) {
-            const chair = document.createElementNS(SVG_NS, "rect");
-            chair.setAttribute("class", "chair-rect");
-            chair.setAttribute("x", -30); chair.setAttribute("y", currentH/2 + 5);
-            chair.setAttribute("width", 60); chair.setAttribute("height", 15);
-            g.appendChild(chair);
+function appliquerCouleursDynamiques() {
+    const ids = ['btn-retour', 'btn-aide', 'btn-retour-liste', 'btn-valider-create', 'btn-fermer-aide'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.backgroundColor = themeColor;
+            el.style.color = contrast;
         }
-
-        if (student.name) {
-            const text = document.createElementNS(SVG_NS, "text");
-            text.setAttribute("class", "desk-label");
-            if(student.niveau === 'TABLEAU') text.setAttribute("fill", "white");
-            text.setAttribute("x", "0"); text.setAttribute("y", "0");
-            text.textContent = student.name;
-            
-            // --- LOGIQUE DE ROTATION DU NOM ---
-            // Par défaut, à 0°, le texte est face à la chaise (placée en bas).
-            // À 90°, le texte pivote avec le groupe et reste face à la chaise.
-            // On ne le retourne (180°) que si la table est entre 135° et 225° 
-            // pour éviter que le texte ne soit totalement à l'envers pour le prof.
-            if (r > 130 && r < 230) {
-                text.setAttribute("transform", `rotate(180)`);
-            }
-            
-            g.appendChild(text);
-        }
-
-        g.addEventListener('click', (e) => { e.stopPropagation(); deselectAllManual(); g.classList.add('selected'); selectedIndex = index; updateButtons(); });
-        g.addEventListener('dblclick', (e) => { e.stopPropagation(); if(!isLocked) { pushHistory(); student.r = (parseInt(student.r || 0) + 45) % 360; sync(); } });
-        layer.appendChild(g);
     });
-    setupInteract();
-    applyTransform();
 }
 
-    function deselectAllManual() { document.querySelectorAll('.desk-group').forEach(el => el.classList.remove('selected')); selectedIndex = null; updateButtons(); }
-    function deselectAll(e) { if (e.target.id === 'plan-svg') { deselectAllManual(); document.getElementById('add-menu').classList.add('hidden'); } }
+// ============================================
+// INITIALISATION
+// ============================================
 
-    function setupInteract() {
-        interact('.desk-group').draggable({
-            onstart: () => { if(!isLocked) pushHistory(); },
-            listeners: {
-                move(event) {
-                    if(isLocked) return;
-                    const target = event.target, svg = document.getElementById('plan-svg');
-                    const point = svg.createSVGPoint();
-                    point.x = event.dx; point.y = event.dy;
-                    const ctm = svg.getScreenCTM().inverse();
-                    const deltaX = point.x * ctm.a, deltaY = point.y * ctm.d;
-                    let x = (parseFloat(target.getAttribute('data-x')) || 0) + deltaX;
-                    let y = (parseFloat(target.getAttribute('data-y')) || 0) + deltaY;
-                    let r = target.getAttribute('data-r');
-                    target.setAttribute('transform', `translate(${x},${y}) rotate(${r})`);
-                    target.setAttribute('data-x', x); target.setAttribute('data-y', y);
-                },
-                end(event) {
-                    if(isLocked) return;
-                    const idx = event.target.id.split('-')[1];
-                    studentData[idx].x = parseFloat(event.target.getAttribute('data-x'));
-                    studentData[idx].y = parseFloat(event.target.getAttribute('data-y'));
-                    localStorage.setItem('plan_vector_v1', JSON.stringify(studentData));
-                }
-            }
-        });
-
-        // Déplacement panoramique (accelerated)
-        interact('#plan-svg').draggable({
-    listeners: {
-        move(event) {
-            if (currentScale > 1) {
-                // Empêche le défilement de la page pendant qu'on bouge le plan
-                event.preventDefault(); 
-                translateX += event.dx * SPEED_MULTIPLIER;
-                translateY += event.dy * SPEED_MULTIPLIER;
-                applyTransform();
-            }
-        }
-    },
-    // Empêche l'interaction de capturer les clics hors de la zone du plan
-    allowFrom: '#plan-svg' 
-});
-    }
-
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerModale(id) { document.getElementById(id).style.display = 'none'; }
-    function ajouterUneTable() { document.getElementById('input-nom-eleve').value = ""; document.getElementById('modal-create').style.display = 'flex'; toggleAddMenu(); setTimeout(() => document.getElementById('input-nom-eleve').focus(), 100); }
-    function validerCreationTable() { const nom = document.getElementById('input-nom-eleve').value.trim(); if (nom) { pushHistory(); studentData.push({ name: nom.toUpperCase(), niveau: "AUTRE", x: 900, y: 900, r: 0 }); sync(); fermerModale('modal-create'); } }
-    function supprimerSelection() { if (selectedIndex !== null) { pushHistory(); studentData.splice(selectedIndex, 1); selectedIndex = null; sync(); } }
-    function confirmerToutEffacer() { document.getElementById('modal-confirm').style.display = 'flex'; }
-    function toutEffacer() { pushHistory(); studentData = []; selectedIndex = null; sync(); fermerModale('modal-confirm'); }
-    function toggleLock() { isLocked = !isLocked; document.getElementById('btn-mode').textContent = isLocked ? '🔒' : '🔓'; document.getElementById('btn-mode').style.background = isLocked ? 'var(--theme-color)' : 'rgba(128,128,128,0.1)'; document.getElementById('btn-mode').style.color = isLocked ? 'var(--contrast-color)' : 'inherit'; }
-
-    /* --- REMPLACEZ TOUTE LA FIN DE VOTRE SCRIPT (à partir de exporterPlan) PAR CECI --- */
-
-    function getExportFileName(ext) {
-        const nomProf = (localStorage.getItem('nom_enseignant') || 'prof').toLowerCase().replace(/\s+/g, '_');
-        const d = new Date();
-        const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-        return `outilsprofs_plan_classe_${nomProf}_${dateStr}.${ext}`;
-    }
-
-    function exporterPlan() {
-        const fileName = getExportFileName('json');
-        const content = JSON.stringify(studentData);
-
-        if (window.Android && window.Android.savePdfFromBase64) {
-            // Encodage Base64 sécurisé pour Android
-            const base64Content = btoa(unescape(encodeURIComponent(content)));
-            window.Android.savePdfFromBase64(base64Content, fileName);
-        } else {
-            // Mode navigateur classique
-            const blob = new Blob([content], {type: "application/json"});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = fileName;
-            a.click();
-        }
-    }
-
-    async function exportPDF() {
-    try {
-        const fileName = getExportFileName('pdf');
-        if (!window.jspdf || !window.jspdf.jsPDF) return;
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("PLAN DE CLASSE", 105, 15, { align: 'center' });
-
-        const svgElement = document.getElementById('plan-svg');
-        const svgClone = svgElement.cloneNode(true);
-		const walls = svgClone.querySelector('rect[stroke="var(--column-border)"]');
-        if (walls) {
-            walls.setAttribute("stroke", "#999999"); // Gris moyen visible sur PDF
-        }
-		
-        
-        // --- ADAPTATION DYNAMIQUE DE LA TAILLE DU TEXTE ---
-        const groups = svgClone.querySelectorAll('.desk-group');
-        groups.forEach((group) => {
-            const label = group.querySelector('.desk-label');
-            const rect = group.querySelector('.desk-rect');
-            
-            if (label && rect) {
-                const rectWidth = parseFloat(rect.getAttribute('width'));
-                const studentName = label.textContent || "";
-                
-                // 1. Calcul de la taille de police
-                let fontSize = Math.min(30, rectWidth / (studentName.length * 0.65));
-                if (fontSize < 16) fontSize = 16;
-
-                // 2. FORCER LE CENTRAGE ABSOLU
-                // text-anchor: middle -> centre horizontalement le texte sur son point X
-                // dominant-baseline: central -> centre verticalement le texte sur son point Y
-                label.setAttribute('text-anchor', 'middle');
-                label.setAttribute('dominant-baseline', 'central');
-                
-                // On s'assure que x et y sont bien à 0 (centre du groupe translate)
-                label.setAttribute('x', '0');
-                label.setAttribute('y', '0');
-
-                label.setAttribute('style', `font-size: ${fontSize}px; font-weight: bold; font-family: Arial, sans-serif;`);
-            }
-        });
-
-        const svgData = new XMLSerializer().serializeToString(svgClone);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        
-        canvas.width = 1800;
-        canvas.height = 1800;
-
-        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = function() {
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            
-            const imgData = canvas.toDataURL('image/jpeg', 0.9);
-            doc.addImage(imgData, 'JPEG', 10, 25, 190, 190);
-            
-            if (window.Android && window.Android.savePdfFromBase64) {
-                const base64String = doc.output('datauristring').split(',')[1];
-                window.Android.savePdfFromBase64(base64String, fileName);
-            } else {
-                doc.save(fileName);
-            }
-            URL.revokeObjectURL(url);
-        };
-
-        img.src = url;
-
-    } catch (error) {
-        alert("Erreur PDF : " + error.message);
-    }
-}
-
-    function importerPlan() { 
-        const inp = document.createElement('input'); 
-        inp.type = 'file'; 
-        inp.accept = '.json'; 
-        inp.onchange = e => { 
-            const reader = new FileReader(); 
-            reader.onload = ev => { 
-                try {
-                    studentData = JSON.parse(ev.target.result); 
-                    sync(); 
-                } catch(err) {
-                    alert("Erreur lors de la lecture du fichier.");
-                }
-            }; 
-            reader.readAsText(e.target.files[0]); 
-        }; 
-        inp.click(); 
-    }
-
-    function genererTablesDepuisClasse() { 
-        const list = JSON.parse(localStorage.getItem('maListeEleves') || "[]"); 
-        if(list.length) { 
-            pushHistory(); 
-            studentData = list.map((el, i) => ({ 
-                name: el.identite.split(' ')[0], 
-                niveau: el.niveau, 
-                x: 220 + ((i % 5) * 260), 
-                y: 200 + (Math.floor(i / 5) * 240), 
-                r: 0 
-            })); 
-            sync(); 
-        } 
-    }
-
-    appliquerCouleursDynamiques();
-    drawPlan();
+appliquerCouleursDynamiques();
+drawPlan();
 </script>
+
 </body>
 </html>
