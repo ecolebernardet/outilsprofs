@@ -8,87 +8,289 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         
+        /* ========== VARIABLES CSS ========== */
         :root {
-            --bg-page: #121212; --text-page: #ffffff; --column-border: rgba(255, 255, 255, 0.1); 
-            --header-bg: #1e1e1e; --card-bg: #1e1e1e;
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1);
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
         }
 
         body.light-mode {
-            --bg-page: #eeeeee; --text-page: #111827; --column-border: #ddd; 
-            --header-bg: #ffffff; --card-bg: #ffffff;
+            --bg-page: #eeeeee;
+            --text-page: #111827;
+            --column-border: #ddd;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-page); margin: 0; padding: 0; transition: background 0.3s ease; overflow-x: hidden; }
+        /* ========== STYLES DE BASE ========== */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s ease;
+            overflow-x: hidden;
+        }
         
-        header { 
-            background: var(--header-bg); border-bottom: 1px solid var(--column-border);
-            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
-            display: flex; align-items: center; justify-content: space-between; width: 100%;
-            position: sticky; top: 0; z-index: 100;
+        /* ========== HEADER ========== */
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        #btn-retour, #btn-aide { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-        #btn-retour:active, #btn-aide:active { transform: scale(0.9); }
-        
-        header h1 { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; flex-grow: 1; text-align: center; }
+        header h1 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            flex-grow: 1;
+            text-align: center;
+        }
 
-        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; }
+        /* ========== BOUTONS DU HEADER ========== */
+        #btn-retour,
+        #btn-aide {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: none;
+        }
 
-        #container-retour-liste { width: 100%; margin-bottom: 1.5rem; text-align: left; }
+        #btn-retour:active,
+        #btn-aide:active {
+            transform: scale(0.9);
+        }
+
+        /* ========== CONTENEUR PRINCIPAL ========== */
+        .main-wrapper {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ========== BOUTON RETOUR LISTE ========== */
+        #container-retour-liste {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
         #btn-retour-liste {
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
-            border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; 
-            transition: transform 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            cursor: pointer;
         }
-        #btn-retour-liste:active { transform: scale(0.95); }
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: var(--card-bg); padding: 5px; border-radius: 15px; border: 1px solid var(--column-border); }
-        .tab-btn { padding: 8px 20px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { background: var(--theme-color); color: var(--contrast-color); }
+        #btn-retour-liste:active {
+            transform: scale(0.95);
+        }
 
-        .timer-display { position: relative; width: 260px; height: 260px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
-        svg.progress-ring { transform: rotate(-90deg); }
-        .progress-ring__circle { transition: stroke-dashoffset 0.1s linear; stroke-linecap: round; }
-        .time-text { position: absolute; font-size: 3.5rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+        /* ========== ONGLETS ========== */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 5px;
+            border-radius: 15px;
+            border: 1px solid var(--column-border);
+        }
 
-        .controls { display: flex; gap: 15px; width: 100%; justify-content: center; }
-        .btn-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: none; transition: transform 0.2s; }
-        .btn-circle:active { transform: scale(0.9); }
-        .btn-play { background: var(--theme-color); color: var(--contrast-color); }
-        .btn-reset { background: rgba(128,128,128,0.2); color: var(--text-page); }
+        .tab-btn {
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: var(--text-page);
+        }
 
-        .preset-btn { background: var(--card-bg); border: 1px solid var(--column-border); padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; }
+        .tab-btn.active {
+            background: var(--theme-color);
+            color: var(--contrast-color);
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
-        .btn-modal-close { width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; margin-top: 20px; cursor: pointer; border: none; }
+        /* ========== AFFICHAGE DU TEMPS ========== */
+        .timer-display {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        svg.progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.1s linear;
+            stroke-linecap: round;
+        }
+
+        .time-text {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ========== CONTRÔLES ========== */
+        .controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .btn-circle:active {
+            transform: scale(0.9);
+        }
+
+        .btn-play {
+            background: var(--theme-color);
+            color: var(--contrast-color);
+        }
+
+        .btn-reset {
+            background: rgba(128, 128, 128, 0.2);
+            color: var(--text-page);
+        }
+
+        /* ========== PRÉRÉGLAGES ========== */
+        .preset-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--column-border);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            color: var(--text-page);
+        }
+
+        .preset-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            border: 1px solid var(--column-border);
+            padding: 25px;
+            position: relative;
+        }
+
+        .btn-modal-close {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
+<!-- ========== HEADER ========== -->
 <header>
-    <a href="index.html" id="btn-retour">
+    <a href="index.html" id="btn-retour" aria-label="Retour à l'accueil">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
         </svg>
     </a>
-    <h1 id="pageTitle">Timer & chrono</h1>
-    <button id="btn-aide" onclick="ouvrirAide()" class="text-lg">💡</button>
+    <h1>Minuteur & chrono</h1>
+    <button id="btn-aide" aria-label="Aide">💡</button>
 </header>
 
+<!-- ========== CONTENU PRINCIPAL ========== -->
 <div class="main-wrapper">
+    <!-- Bouton retour aux outils -->
     <div id="container-retour-liste">
         <a href="outils.html" id="btn-retour-liste">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" />
+            </svg>
             Retour aux outils
         </a>
     </div>
 
+    <!-- Onglets -->
     <div class="tabs">
-        <div class="tab-btn active" onclick="switchMode('timer')">Minuteur</div>
-        <div class="tab-btn" onclick="switchMode('chrono')">Chrono</div>
+        <button class="tab-btn active" data-mode="timer">Minuteur</button>
+        <button class="tab-btn" data-mode="chrono">Chrono</button>
     </div>
 
+    <!-- Affichage du temps -->
     <div class="timer-display">
         <svg class="progress-ring" width="260" height="260">
             <circle class="opacity-10" stroke="currentColor" stroke-width="10" fill="transparent" r="115" cx="130" cy="130"/>
@@ -97,169 +299,357 @@
         <div class="time-text" id="display">05:00</div>
     </div>
 
+    <!-- Contrôles -->
     <div class="controls">
-        <button class="btn-circle btn-reset" onclick="reset()">
+        <button class="btn-circle btn-reset" id="btn-reset" aria-label="Réinitialiser">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
         </button>
-        <button class="btn-circle btn-play" id="btn-start" onclick="toggleMain()" style="padding-left: 3px;">
+        <button class="btn-circle btn-play" id="btn-start" aria-label="Démarrer" style="padding-left: 3px;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
             </svg>
         </button>
     </div>
 
+    <!-- Préréglages (visible uniquement en mode minuteur) -->
     <div id="presets" class="w-full mt-8">
+        <!-- Minuteur personnalisé -->
         <div class="flex items-center gap-2 mb-4">
             <div class="flex flex-1 gap-1">
-                <input type="number" id="custom-min" placeholder="Min" class="w-full bg-[var(--card-bg)] border border-[var(--column-border)] rounded-xl py-3 font-bold text-center outline-none focus:border-[var(--theme-color)] transition-colors" min="0">
-                <input type="number" id="custom-sec" placeholder="Sec" class="w-full bg-[var(--card-bg)] border border-[var(--column-border)] rounded-xl py-3 font-bold text-center outline-none focus:border-[var(--theme-color)] transition-colors" min="0" max="59">
+                <input type="number" id="custom-min" placeholder="Min" class="w-full bg-[var(--card-bg)] border border-[var(--column-border)] rounded-xl py-3 font-bold text-center outline-none focus:border-[var(--theme-color)] transition-colors" min="0" value="">
+                <input type="number" id="custom-sec" placeholder="Sec" class="w-full bg-[var(--card-bg)] border border-[var(--column-border)] rounded-xl py-3 font-bold text-center outline-none focus:border-[var(--theme-color)] transition-colors" min="0" max="59" value="">
             </div>
-            <button onclick="setCustomTimer()" class="px-5 rounded-xl font-black text-[11px] uppercase py-4" style="background: var(--theme-color); color: var(--contrast-color);">OK</button>
+            <button id="btn-custom-timer" class="px-5 rounded-xl font-black text-[11px] uppercase py-4" style="background: var(--theme-color); color: var(--contrast-color);">OK</button>
         </div>
 
+        <!-- Boutons de préréglages -->
         <div class="grid grid-cols-3 gap-2">
-            <button class="preset-btn" onclick="setTimer(1)">1 min</button>
-            <button class="preset-btn" onclick="setTimer(5)">5 min</button>
-            <button class="preset-btn" onclick="setTimer(10)">10 min</button>
-            <button class="preset-btn" onclick="setTimer(15)">15 min</button>
-            <button class="preset-btn" onclick="setTimer(30)">30 min</button>
-            <button class="preset-btn" onclick="setTimer(60)">60 min</button>
+            <button class="preset-btn" data-minutes="1">1 min</button>
+            <button class="preset-btn" data-minutes="5">5 min</button>
+            <button class="preset-btn" data-minutes="10">10 min</button>
+            <button class="preset-btn" data-minutes="15">15 min</button>
+            <button class="preset-btn" data-minutes="30">30 min</button>
+            <button class="preset-btn" data-minutes="60">60 min</button>
         </div>
 
+        <!-- Sonnerie -->
         <div class="mt-6 w-full">
             <label class="text-[10px] font-black uppercase opacity-60 mb-2 block text-center">Sonnerie de fin</label>
             <div class="flex gap-2">
                 <div class="flex-grow bg-[var(--card-bg)] border border-[var(--column-border)] rounded-xl px-4 py-3 font-bold text-[12px] flex items-center justify-center">
                     🔔 Gong (Zen Bowl)
                 </div>
-                <button onclick="playGong()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--card-bg)] border border-[var(--column-border)] active:scale-90 transition-transform">🔊</button>
+                <button id="btn-test-sound" class="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--card-bg)] border border-[var(--column-border)] active:scale-90 transition-transform" aria-label="Tester le son">🔊</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="modal-aide" class="modal-overlay" onclick="fermerAide()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4">💡 Aide : Temps</h2>
+<!-- ========== MODAL D'AIDE ========== -->
+<div id="modal-aide" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="text-lg font-black uppercase mb-4">💡 Aide : Temps</h2>
         <div class="text-[11px] leading-relaxed space-y-3 opacity-80 font-semibold">
             <p><strong>Minuteur :</strong> Réglez la durée souhaitée et lancez le décompte.</p>
             <p><strong>Chronomètre :</strong> Mesurez le temps de vos activités.</p>
             <p>🔊 Testez le son avec le bouton haut-parleur avant de lancer.</p>
         </div>
-        <button id="btn-fermer-aide" onclick="fermerAide()" class="btn-modal-close" style="background: var(--theme-color); color: var(--contrast-color);">Fermer</button>
+        <button id="btn-fermer-aide" class="btn-modal-close" style="background: var(--theme-color); color: var(--contrast-color);">Fermer</button>
     </div>
 </div>
 
-<audio id="alarm-sound" preload="auto"></audio>
-
 <script>
-    let audioCtx = null;
-    let audioUnlocked = false;
-
-    function unlockAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        audioUnlocked = true;
-    }
-
-    if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
-
-    const mapCouleurs = { 
-        red:'#ef4444', orange:'#f97316', amber:'#f59e0b', yellow:'#eab308',
-        lime:'#84cc16', green:'#22c55e', emerald:'#10b981', teal:'#14b8a6',
-        cyan:'#06b6d4', sky:'#0ea5e9', blue:'#3b82f6', indigo:'#6366f1',
-        violet:'#8b5cf6', purple:'#a855f7', fuchsia:'#d946ef', pink:'#ec4899', rose:'#f43f5e'
+    // ========== CONFIGURATION ========== 
+    const CONFIG = {
+        DEFAULT_TIME: 300, // 5 minutes en secondes
+        CIRCLE_RADIUS: 115,
+        CIRCUMFERENCE: 115 * 2 * Math.PI,
+        COLORS: {
+            red: '#ef4444', orange: '#f97316', amber: '#f59e0b', yellow: '#eab308',
+            lime: '#84cc16', green: '#22c55e', emerald: '#10b981', teal: '#14b8a6',
+            cyan: '#06b6d4', sky: '#0ea5e9', blue: '#3b82f6', indigo: '#6366f1',
+            violet: '#8b5cf6', purple: '#a855f7', fuchsia: '#d946ef', pink: '#ec4899', rose: '#f43f5e'
+        },
+        LIGHT_CONTRAST_COLORS: ['yellow', 'lime', 'amber', 'cyan']
     };
 
-    const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
-    const themeColor = mapCouleurs[themePrefs.outils || 'blue'];
-    const contrast = ['yellow','lime','amber','cyan'].includes(themePrefs.outils || 'blue') ? '#000' : '#fff';
+    // ========== ÉTAT DE L'APPLICATION ========== 
+    const state = {
+        mode: 'timer',
+        timeLeft: CONFIG.DEFAULT_TIME,
+        totalTime: CONFIG.DEFAULT_TIME,
+        chronoTime: 0,
+        timerId: null,
+        isRunning: false,
+        audioCtx: null,
+        audioUnlocked: false
+    };
 
-    document.documentElement.style.setProperty('--theme-color', themeColor);
-    document.documentElement.style.setProperty('--contrast-color', contrast);
+    // ========== ÉLÉMENTS DOM ========== 
+    const elements = {
+        display: document.getElementById('display'),
+        progressBar: document.getElementById('progress-bar'),
+        btnStart: document.getElementById('btn-start'),
+        btnReset: document.getElementById('btn-reset'),
+        btnAide: document.getElementById('btn-aide'),
+        btnTestSound: document.getElementById('btn-test-sound'),
+        btnCustomTimer: document.getElementById('btn-custom-timer'),
+        btnFermerAide: document.getElementById('btn-fermer-aide'),
+        modalAide: document.getElementById('modal-aide'),
+        presets: document.getElementById('presets'),
+        customMin: document.getElementById('custom-min'),
+        customSec: document.getElementById('custom-sec'),
+        tabButtons: document.querySelectorAll('.tab-btn'),
+        presetButtons: document.querySelectorAll('.preset-btn')
+    };
 
-    // Application du thème aux boutons du header et de navigation
-    const targets = ['btn-retour', 'btn-aide', 'btn-retour-liste'];
-    targets.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) { el.style.backgroundColor = themeColor; el.style.color = contrast; }
-    });
+    // ========== ICÔNES SVG ========== 
+    const icons = {
+        play: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+        pause: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+    };
 
-    let mode = 'timer', timeLeft = 300, totalTime = 300, chronoTime = 0, timerId = null, isRunning = false;
-    const display = document.getElementById('display'), progressBar = document.getElementById('progress-bar'), btnStart = document.getElementById('btn-start');
-    const circumference = 115 * 2 * Math.PI;
-
-    function updateDisplay() {
-        const t = (mode === 'timer') ? timeLeft : chronoTime;
-        const m = Math.floor(t / 60), s = t % 60;
-        display.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        if (mode === 'timer') {
-            const offset = circumference - (timeLeft / totalTime) * circumference;
-            progressBar.style.strokeDashoffset = offset;
-        } else {
-            progressBar.style.strokeDashoffset = 0;
+    // ========== INITIALISATION DU THÈME ========== 
+    function initTheme() {
+        // Mode clair/sombre
+        if (localStorage.getItem('theme_mode') === 'light') {
+            document.body.classList.add('light-mode');
         }
+
+        // Couleurs du thème
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const themeName = themePrefs.outils || 'blue';
+        const themeColor = CONFIG.COLORS[themeName];
+        const contrastColor = CONFIG.LIGHT_CONTRAST_COLORS.includes(themeName) ? '#000' : '#fff';
+
+        document.documentElement.style.setProperty('--theme-color', themeColor);
+        document.documentElement.style.setProperty('--contrast-color', contrastColor);
+
+        // Application aux boutons
+        ['btn-retour', 'btn-aide', 'btn-retour-liste'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.backgroundColor = themeColor;
+                el.style.color = contrastColor;
+            }
+        });
+    }
+
+    // ========== GESTION AUDIO ========== 
+    function unlockAudio() {
+        if (!state.audioCtx) {
+            state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (state.audioCtx.state === 'suspended') {
+            state.audioCtx.resume();
+        }
+        state.audioUnlocked = true;
     }
 
     function playGong() {
-        if (!audioUnlocked || !audioCtx) return;
-        const now = audioCtx.currentTime;
-        function tone(freq, gainVal, duration) {
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(gainVal, now); gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(now); osc.stop(now + duration);
+        if (!state.audioUnlocked || !state.audioCtx) {
+            unlockAudio();
+            if (!state.audioCtx) return;
         }
-        tone(880, 0.4, 2.5); tone(1325, 0.15, 1.5);
+
+        const now = state.audioCtx.currentTime;
+
+        function createTone(frequency, gainValue, duration) {
+            const oscillator = state.audioCtx.createOscillator();
+            const gainNode = state.audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+
+            gainNode.gain.setValueAtTime(gainValue, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(state.audioCtx.destination);
+
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        createTone(880, 0.4, 2.5);
+        createTone(1325, 0.15, 1.5);
     }
 
-    function toggleMain() {
-        unlockAudio();
-        if (isRunning) {
-            clearInterval(timerId); isRunning = false;
-            btnStart.innerHTML = playIcon(); btnStart.style.paddingLeft = "3px";
-            return;
+    // ========== AFFICHAGE DU TEMPS ========== 
+    function updateDisplay() {
+        const currentTime = state.mode === 'timer' ? state.timeLeft : state.chronoTime;
+        const minutes = Math.floor(currentTime / 60);
+        const seconds = currentTime % 60;
+
+        elements.display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        // Mise à jour de la barre de progression (seulement pour le minuteur)
+        if (state.mode === 'timer') {
+            const offset = CONFIG.CIRCUMFERENCE - (state.timeLeft / state.totalTime) * CONFIG.CIRCUMFERENCE;
+            elements.progressBar.style.strokeDashoffset = offset;
+        } else {
+            elements.progressBar.style.strokeDashoffset = 0;
         }
-        isRunning = true; btnStart.innerHTML = pauseIcon(); btnStart.style.paddingLeft = "0px";
-        timerId = setInterval(() => {
-            if (mode === 'timer') {
-                if (timeLeft > 0) { timeLeft--; updateDisplay(); } 
-                else { clearInterval(timerId); isRunning = false; playGong(); reset(); }
-            } else { chronoTime++; updateDisplay(); }
-        }, 1000);
+    }
+
+    // ========== CONTRÔLE DU TIMER ========== 
+    function toggleTimer() {
+        unlockAudio();
+
+        if (state.isRunning) {
+            // Pause
+            clearInterval(state.timerId);
+            state.isRunning = false;
+            elements.btnStart.innerHTML = icons.play;
+            elements.btnStart.style.paddingLeft = '3px';
+        } else {
+            // Démarrage
+            state.isRunning = true;
+            elements.btnStart.innerHTML = icons.pause;
+            elements.btnStart.style.paddingLeft = '0px';
+
+            state.timerId = setInterval(() => {
+                if (state.mode === 'timer') {
+                    if (state.timeLeft > 0) {
+                        state.timeLeft--;
+                        updateDisplay();
+                    } else {
+                        // Fin du minuteur
+                        clearInterval(state.timerId);
+                        state.isRunning = false;
+                        playGong();
+                        reset();
+                    }
+                } else {
+                    // Chronomètre
+                    state.chronoTime++;
+                    updateDisplay();
+                }
+            }, 1000);
+        }
     }
 
     function reset() {
-        clearInterval(timerId); isRunning = false;
-        btnStart.innerHTML = playIcon(); btnStart.style.paddingLeft = "3px";
-        if (mode === 'timer') timeLeft = totalTime; else chronoTime = 0;
+        clearInterval(state.timerId);
+        state.isRunning = false;
+        elements.btnStart.innerHTML = icons.play;
+        elements.btnStart.style.paddingLeft = '3px';
+
+        if (state.mode === 'timer') {
+            state.timeLeft = state.totalTime;
+        } else {
+            state.chronoTime = 0;
+        }
+
         updateDisplay();
     }
 
-    function setTimer(mins) { totalTime = mins * 60; timeLeft = totalTime; reset(); }
-    function setCustomTimer() {
-        const m = parseInt(document.getElementById('custom-min').value) || 0, s = parseInt(document.getElementById('custom-sec').value) || 0;
-        if (m || s) { totalTime = m * 60 + s; timeLeft = totalTime; reset(); }
-    }
-
-    function switchMode(newMode) {
-        if (isRunning) reset();
-        mode = newMode;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        document.getElementById('presets').style.display = (mode === 'timer') ? 'block' : 'none';
+    // ========== CONFIGURATION DU MINUTEUR ========== 
+    function setTimer(minutes) {
+        state.totalTime = minutes * 60;
+        state.timeLeft = state.totalTime;
         reset();
     }
 
-    function playIcon() { return '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; }
-    function pauseIcon() { return '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; }
-    function ouvrirAide() { document.getElementById('modal-aide').style.display = 'flex'; }
-    function fermerAide() { document.getElementById('modal-aide').style.display = 'none'; }
+    function setCustomTimer() {
+        const minutes = parseInt(elements.customMin.value) || 0;
+        const seconds = parseInt(elements.customSec.value) || 0;
 
-    updateDisplay();
+        if (minutes > 0 || seconds > 0) {
+            state.totalTime = minutes * 60 + seconds;
+            state.timeLeft = state.totalTime;
+            reset();
+        }
+    }
+
+    // ========== CHANGEMENT DE MODE ========== 
+    function switchMode(newMode) {
+        if (state.isRunning) {
+            reset();
+        }
+
+        state.mode = newMode;
+
+        // Mise à jour des onglets
+        elements.tabButtons.forEach(btn => {
+            if (btn.dataset.mode === newMode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Affichage/masquage des préréglages
+        elements.presets.style.display = state.mode === 'timer' ? 'block' : 'none';
+
+        reset();
+    }
+
+    // ========== MODAL ========== 
+    function openModal() {
+        elements.modalAide.style.display = 'flex';
+    }
+
+    function closeModal() {
+        elements.modalAide.style.display = 'none';
+    }
+
+    // ========== ÉVÉNEMENTS ========== 
+    function initEventListeners() {
+        // Boutons de contrôle
+        elements.btnStart.addEventListener('click', toggleTimer);
+        elements.btnReset.addEventListener('click', reset);
+        elements.btnAide.addEventListener('click', openModal);
+        elements.btnTestSound.addEventListener('click', playGong);
+        elements.btnFermerAide.addEventListener('click', closeModal);
+        elements.btnCustomTimer.addEventListener('click', setCustomTimer);
+
+        // Onglets
+        elements.tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+        });
+
+        // Boutons de préréglages
+        elements.presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const minutes = parseInt(btn.dataset.minutes);
+                setTimer(minutes);
+            });
+        });
+
+        // Fermeture de la modal en cliquant sur l'overlay
+        elements.modalAide.addEventListener('click', (e) => {
+            if (e.target === elements.modalAide) {
+                closeModal();
+            }
+        });
+
+        // Empêcher la fermeture en cliquant sur le contenu
+        elements.modalAide.querySelector('.modal-content').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Validation des inputs personnalisés avec Entrée
+        elements.customMin.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') setCustomTimer();
+        });
+        elements.customSec.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') setCustomTimer();
+        });
+    }
+
+    // ========== INITIALISATION ========== 
+    function init() {
+        initTheme();
+        initEventListeners();
+        updateDisplay();
+    }
+
+    // Démarrage de l'application
+    init();
 </script>
+
 </body>
 </html>
