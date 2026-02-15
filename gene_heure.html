@@ -36,12 +36,31 @@
         .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
         header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
         
-        .main-wrapper { width: 100%; max-width: 1100px; margin: 0 auto; padding: 10px 15px 40px; }
+        .main-wrapper { 
+			width: 100%; 
+			max-width: 1100px; 
+			margin: 0 auto; 
+			padding: 10px 15px 40px; 
+			/* Ajout de cette ligne pour s'assurer que le contenu est centré si le wrapper est plus large */
+			display: flex;
+			flex-direction: column;
+		}
 
-        #exercises-list { display: grid; grid-template-columns: 1fr; gap: 25px; padding: 10px; counter-reset: exo-counter; }
-        @media (min-width: 768px) { #exercises-list { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1280px) { #exercises-list { grid-template-columns: repeat(3, 1fr); } }
-		@media (min-width: 1600px) { #exercises-list { grid-template-columns: repeat(4, 1fr); } }
+        #exercises-list { 
+			display: grid; 
+			grid-template-columns: 1fr; 
+			gap: 25px; 
+			padding: 10px; 
+			counter-reset: exo-counter; 
+			/* Ajout de cette ligne pour centrer la grille elle-même */
+			justify-content: center;
+			/* Optionnel : centrer les cartes à l'intérieur de leurs colonnes */
+			justify-items: center; 
+		}
+        @media (min-width: 800px) { #exercises-list { grid-template-columns: repeat(2, 1fr); } }
+		@media (min-width: 1200px) { #exercises-list { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1600px) { #exercises-list { grid-template-columns: repeat(4, 1fr); } }
+
         
         .light-card { 
             background: var(--card-bg); border-radius: 1.5rem; padding: 25px 20px 20px 20px; 
@@ -223,7 +242,6 @@
 			if(prec === "demie") m1 = [0, 30][Math.floor(Math.random()*2)];
 			else if(prec === "quart") m1 = [0, 15, 30, 45][Math.floor(Math.random()*4)];
 			else if(prec === "5min") m1 = Math.floor(Math.random() * 12) * 5;
-			else if(prec === "1min") m1 = Math.floor(Math.random() * 60);
 
 			const card = document.createElement('div');
 			card.className = "light-card flex flex-col items-center gap-4 h-full";
