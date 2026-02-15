@@ -22,6 +22,38 @@
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s ease; }
         
+        /* Styles Plein Écran */
+        body.fullscreen-mode { overflow: hidden; }
+        body.fullscreen-mode header { display: none; }
+        body.fullscreen-mode .main-wrapper { 
+            padding: 20px 10px 40px; 
+            height: 100vh; 
+            overflow-y: auto; 
+            max-width: 98%; 
+        }
+
+        /* GRILLE DYNAMIQUE & NUMÉROTATION */
+        #exercises-list { 
+            display: grid; 
+            grid-template-columns: 1fr;
+            gap: 10px; 
+            padding: 10px;
+            counter-reset: exo-counter; /* Initialise le compteur */
+        }
+        @media (min-width: 640px) {
+            #exercises-list { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        }
+        @media (min-width: 1000px) {
+            body.fullscreen-mode #exercises-list { 
+                grid-template-columns: repeat(3, 1fr); 
+            }
+        }
+		 @media (min-width: 1200px) {
+            body.fullscreen-mode #exercises-list { 
+                grid-template-columns: repeat(4, 1fr); 
+            }
+        }
+		
         header { 
             background: var(--card-bg); border-bottom: 1px solid var(--column-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
@@ -31,8 +63,7 @@
         .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
         header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
         
-        /* Ajustement largeur pour accueillir 2 colonnes d'exos sur PC */
-        .main-wrapper { width: 100%; max-width: 800px; margin: 0 auto; padding: 10px 15px 40px; }
+        .main-wrapper { width: 100%; max-width: 800px; margin: 0 auto; padding: 10px 15px 40px; transition: all 0.3s ease; }
         .setup-container { max-width: 500px; margin: 0 auto; }
 
         .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
@@ -40,42 +71,55 @@
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
         
-        /* Table Design */
         .conv-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; table-layout: fixed; }
         .conv-table th, .conv-table td { border: 1px solid var(--column-border); text-align: center; padding: 8px 2px; }
         .conv-table th { background: var(--input-bg); font-weight: 900; text-transform: uppercase; }
-        
-        /* GRILLE EXERCICES : 1 col mobile, 2 cols dès 640px (tablette/PC) */
-        #exercises-list { 
-            display: grid; 
-            grid-template-columns: 1fr;
-            gap: 15px; 
-            padding: 20px;
-        }
-        @media (min-width: 640px) {
-            #exercises-list { grid-template-columns: 1fr 1fr; }
-        }
 
         .exercice-row { 
             display: flex; 
             align-items: center; 
-            justify-content: center; /* Aligne tout au début de la ligne */
-			gap: 12px; /* Espace constant entre les éléments */
+            justify-content: flex-start; /* Aligné à gauche pour la numérotation */
+            flex-wrap: wrap; 
+            gap: 8px; 
             font-weight: 700; 
-            font-size: 14px;
-            padding-bottom: 8px;
+            font-size: 13px;
+            padding: 8px 4px;
             border-bottom: 1px solid var(--column-border);
+            counter-increment: exo-counter; /* Incrémente à chaque ligne */
         }
-		
-		.exercice-row span:first-child {
-			min-width: 80px; /* Largeur minimum pour aligner les signes "=" */
-			text-align: right;
-		}
 
-        .exercice-row input { width: 100px; background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 6px; padding: 4px; text-align: center; color: var(--accent-color); outline: none; }
+        /* Affichage du numéro */
+        .exercice-row::before {
+            content: counter(exo-counter) ")";
+            min-width: 15px;
+            color: var(--accent-color);
+            font-size: 11px;
+            font-weight: 900;
+            opacity: 0.7;
+        }
+        
+        .exercice-row span:first-of-type {
+            min-width: 70px; 
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .exercice-row input { 
+            width: 85px; 
+            background: var(--input-bg); 
+            border: 1px solid var(--column-border); 
+            border-radius: 6px; 
+            padding: 4px; 
+            text-align: center; 
+            color: var(--accent-color); 
+            outline: none; 
+            min-width: 0;
+        }
 
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;  border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;  border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -91,11 +135,24 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste" class="mb-4 text-left">
-        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
-            Retour aux générateurs
-        </a>
+    <div id="container-retour-liste" class="mb-4 flex justify-between items-center w-full">
+        <div class="flex-1 flex justify-start">
+            <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+                Retour
+            </a>
+        </div>
+
+        <div class="flex justify-end">
+            <button id="btn-fullscreen-toggle" onclick="toggleFullscreen()" class="ui-btn-round active:scale-90 shadow-md">
+                <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
     </div>
 
     <div id="setup-zone" class="setup-container">
@@ -171,7 +228,6 @@
         <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">J'ai compris</button>
     </div>
 </div>
-
 <script>
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     
@@ -185,6 +241,29 @@
     let currentType = "";
     let currentExos = [];
     let isShowingCorrection = false;
+
+    // ===== FONCTION PLEIN ÉCRAN (Identique à gene_quiz) =====
+    function toggleFullscreen() {
+        const isFullscreen = document.body.classList.toggle('fullscreen-mode');
+        const iconOpen = document.getElementById('icon-fs-open');
+        const iconClose = document.getElementById('icon-fs-close');
+        const btnRetourListe = document.getElementById('btn-retour-liste');
+        const container = document.getElementById('container-retour-liste');
+
+        if (isFullscreen) {
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+            if (btnRetourListe) btnRetourListe.classList.add('hidden');
+            container.classList.replace('text-left', 'flex');
+            container.classList.add('justify-end');
+        } else {
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+            if (btnRetourListe) btnRetourListe.classList.remove('hidden');
+            container.classList.replace('flex', 'text-left');
+            container.classList.remove('justify-end');
+        }
+    }
 
     function convert(value, from, to, type) {
         const units = unitsData[type];
@@ -322,7 +401,6 @@
         const units = unitsData[currentType];
 
         const drawPage = (titleText, isCorr) => {
-            // Bloc ID
             doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(100);
             if(!isCorr) {
                 doc.text("Nom : .................................", 20, 15);
@@ -330,11 +408,9 @@
                 doc.text("Date : .................................", 150, 15);
             }
 
-            // Titre
             doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(accent);
             doc.text(titleText, 105, 30, { align: "center" });
 
-            // Tableau
             const headers = currentType === 'aires' ? units.map(u => [{content: u, colSpan: 2}]) : [units];
             const totalCols = currentType === 'aires' ? units.length * 2 : units.length;
             const tableWidth = 170; const colWidth = tableWidth / totalCols;
@@ -347,7 +423,6 @@
                 margin: { left: 20, right: 20 }
             });
 
-            // Exercices en 2 colonnes
             doc.setFontSize(11); doc.setTextColor(0);
             let yStart = doc.lastAutoTable.finalY + 15;
             doc.setFont("helvetica", "bold");
@@ -386,12 +461,22 @@
         const colPref = themePrefs.gen || 'cyan'; const hexa = mapCouleurs[colPref];
         const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
         document.documentElement.style.setProperty('--accent-color', hexa);
-        [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('btn-aide'), document.getElementById('mainAddBtn'), document.getElementById('btn-fermer-aide')].forEach(el => { if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; } });
+        [
+            document.getElementById('btn-retour-header'), 
+            document.getElementById('btn-retour-liste'), 
+            document.getElementById('btn-aide'), 
+            document.getElementById('mainAddBtn'), 
+            document.getElementById('btn-fermer-aide'),
+            document.getElementById('btn-fullscreen-toggle')
+        ].forEach(el => { if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; } });
     }
 
     function ouvrirModal(id) { document.getElementById(id).style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
-    function retourReglages() { document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
+    function retourReglages() { 
+        document.getElementById('setup-zone').classList.remove('hidden'); 
+        document.getElementById('game-zone').classList.add('hidden'); 
+    }
     window.onload = appliquerTheme;
 </script>
 </body>
