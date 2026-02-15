@@ -7,13 +7,13 @@
     
     <!-- Initialisation du mode clair avant le chargement pour éviter le flash -->
     <script>
-        (function() {
-            const mode = localStorage.getItem('theme_mode');
-            if (mode === 'light') {
-                document.body.classList.add('light-mode');
-            }
-        })();
-    </script>
+    (function() {
+        const mode = localStorage.getItem('theme_mode');
+        if (mode === 'light') {
+            document.documentElement.classList.add('light-mode');
+        }
+    })();
+</script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -29,7 +29,7 @@
             --card-bg: #1e1e1e;
         }
 
-        body.light-mode {
+        html.light-mode {
             --bg-page: #eeeeee;
             --text-page: #111827;
             --column-border: #ddd;
