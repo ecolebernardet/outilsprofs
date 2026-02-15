@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Horloges et Durées - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        :root {
+            --bg-page: #121212; --card-bg: #1e1e1e; --text-main: #ffffff;
+            --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --accent-color: #8b5cf6;
+            --contrast-color: #ffffff;
+        }
+        body.light-mode {
+            --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
+            --column-border: rgba(0, 0, 0, 0.1); --input-bg: #f3f4f6;
+            --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
+        header { 
+            background: var(--card-bg); border-bottom: 1px solid var(--column-border);
+            position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
+            justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
+            width: 100%; margin-bottom: 12px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        body.fullscreen-mode header { transform: translateY(-100%); opacity: 0; position: absolute; pointer-events: none; }
+        body.fullscreen-mode .main-wrapper { max-width: 95% !important; width: 95%; padding-top: 20px; }
+
+        .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
+        header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
+        
+        .main-wrapper { width: 100%; max-width: 1100px; margin: 0 auto; padding: 10px 15px 40px; }
+
+        #exercises-list { display: grid; grid-template-columns: 1fr; gap: 25px; padding: 10px; counter-reset: exo-counter; }
+        @media (min-width: 768px) { #exercises-list { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1280px) { #exercises-list { grid-template-columns: repeat(3, 1fr); } }
+		@media (min-width: 1600px) { #exercises-list { grid-template-columns: repeat(4, 1fr); } }
+        
+        .light-card { 
+            background: var(--card-bg); border-radius: 1.5rem; padding: 25px 20px 20px 20px; 
+            border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); position: relative;
+        }
+
+        #exercises-list .light-card { counter-increment: exo-counter; }
+        #exercises-list .light-card::before {
+            content: counter(exo-counter); position: absolute; top: -12px; left: -12px;
+            background: var(--accent-color); color: var(--contrast-color);
+            width: 30px; height: 30px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-weight: 900;
+            font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;
+        }
+        
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
+        .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
+        
+        .clock-svg { width: 140px; height: 140px; }
+        .clock-face { fill: white; stroke: #333; stroke-width: 2; }
+        .clock-hand-hour { stroke: #111827; stroke-width: 4; stroke-linecap: round; }
+        .clock-hand-min { stroke: #4b5563; stroke-width: 3; stroke-linecap: round; }
+        .clock-center { fill: #111827; }
+        .clock-text { fill: #111827; font-size: 12px; font-weight: 800; text-anchor: middle; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+    </style>
+</head>
+<body class="dark-mode">
+
+<header id="main-header">
+    <a href="index.html" id="btn-retour-header" class="ui-btn-round active:scale-90">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+    </a>
+    <h1>Horloges & Durées</h1>
+    <button id="btn-aide" onclick="ouvrirModal('modal-aide')" class="ui-btn-round active:scale-90 text-lg">💡</button>
+</header>
+
+<div class="main-wrapper">
+    <div id="container-retour-liste" class="mb-4 flex justify-between items-center gap-3">
+        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
+            Retour aux générateurs
+        </a>
+        
+        <button id="btn-fullscreen-toggle" onclick="toggleFullscreen()" class="ui-btn-round active:scale-90 shadow-md">
+            <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </div>
+
+    <div id="setup-zone" class="light-card space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Type d'exercice</label>
+                <select id="type-exo" class="input-field">
+                    <option value="lecture">Lire l'heure</option>
+                    <option value="duree">Calculer une durée</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Quantité (1-12)</label>
+                <input type="number" id="nb-questions" class="input-field" value="6" min="1" max="12">
+            </div>
+        </div>
+        <div>
+            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Précision</label>
+            <select id="precision" class="input-field">
+                <option value="heure">Heures pile</option>
+                <option value="demie">Demi-heures</option>
+                <option value="quart">Quarts d'heure</option>
+                <option value="5min" selected>Toutes les 5 min</option>
+                <option value="1min">À la minute près</option>
+            </select>
+        </div>
+        <button id="mainAddBtn" onclick="generateExercise()" class="btn-add">Générer les horloges</button>
+    </div>
+
+    <div id="game-zone" class="hidden">
+        <div id="exercises-list"></div>
+        <div class="grid grid-cols-2 gap-4 mt-8">
+            <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
+            <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
+            <button onclick="window.print()" class="btn-game-action bg-blue-500 col-span-2">📄 Imprimer / PDF</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
+    <div class="modal-content !max-w-md" onclick="event.stopPropagation()">
+        <h2 class="text-xl font-black uppercase mb-4 text-center flex items-center justify-center gap-2">
+            <span>📖</span> Guide d'utilisation
+        </h2>
+        
+        <div class="text-[13px] leading-relaxed space-y-4 overflow-y-auto max-h-[70vh] pr-2">
+            
+            <section>
+                <h3 class="font-bold text-purple-500 uppercase text-[11px] mb-1 tracking-wider">🛠️ Configuration</h3>
+                <p>Choisissez le <strong>type d'exercice</strong> (lecture ou calcul de durée) et la <strong>précision</strong> des aiguilles. Vous pouvez générer jusqu'à 12 horloges par série.</p>
+            </section>
+
+            <section>
+                <h3 class="font-bold text-purple-500 uppercase text-[11px] mb-1 tracking-wider">⌚ Lire l'heure</h3>
+                <ul class="list-disc ml-4 space-y-1">
+                    <li>Saisissez les <strong>heures</strong> dans la case de gauche et les <strong>minutes</strong> dans celle de droite.</li>
+                    <li>Le passage d'une case à l'autre est <strong>automatique</strong> dès que deux chiffres sont saisis.</li>
+                    <li>Utilisez les <strong>flèches du clavier</strong> ou la touche <strong>Tab</strong> pour naviguer entre les champs.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3 class="font-bold text-purple-500 uppercase text-[11px] mb-1 tracking-wider">⏳ Calculer une durée</h3>
+                <p>Trouvez le temps écoulé entre l'horloge de gauche et celle de droite. Répondez sous la forme <strong>1h 30min</strong> ou <strong>45min</strong>.</p>
+            </section>
+
+            <section>
+                <h3 class="font-bold text-purple-500 uppercase text-[11px] mb-1 tracking-wider">✅ Correction & Validation</h3>
+                <ul class="list-disc ml-4 space-y-1">
+                    <li>Cliquez sur <strong>"Correction"</strong> pour voir les bonnes réponses : <span class="text-green-500 font-bold">Vert</span> (juste), <span class="text-red-500 font-bold">Rouge</span> (faux).</li>
+                    <li>Le bouton <strong>"Masquer"</strong> permet de retenter les exercices ratés : les bonnes réponses restent affichées, les erreurs sont effacées.</li>
+                </ul>
+            </section>
+
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p class="text-[11px] font-medium italic">
+                    <strong>Conseil :</strong> Utilisez le mode <strong>Plein écran</strong> (bouton en haut à droite) pour projeter les horloges au tableau blanc interactif.
+                </p>
+            </div>
+        </div>
+
+        <button onclick="fermerModal('modal-aide')" class="mt-6 w-full py-3 bg-[var(--accent-color)] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
+            J'ai compris
+        </button>
+    </div>
+</div>
+
+<script>
+    const mapCouleurs = { 'violet': '#8b5cf6', 'cyan': '#06b6d4', 'emerald': '#10b981', 'rose': '#f43f5e', 'amber': '#f59e0b', 'gray': '#6b7280' };
+    let isShowingCorrection = false;
+
+    function createClockSVG(h, m) {
+        const hourDeg = (h % 12) * 30 + m * 0.5;
+        const minDeg = m * 6;
+        let numbers = "";
+        for(let i=1; i<=12; i++) {
+            const angle = (i * 30 - 90) * (Math.PI / 180);
+            const x = 70 + 52 * Math.cos(angle);
+            const y = 70 + 52 * Math.sin(angle) + 4;
+            numbers += `<text x="${x}" y="${y}" class="clock-text">${i}</text>`;
+        }
+        return `
+        <svg viewBox="0 0 140 140" class="clock-svg">
+            <circle cx="70" cy="70" r="65" class="clock-face" />
+            ${numbers}
+            <line x1="70" y1="70" x2="70" y2="35" class="clock-hand-hour" transform="rotate(${hourDeg} 70 70)" />
+            <line x1="70" y1="70" x2="70" y2="20" class="clock-hand-min" transform="rotate(${minDeg} 70 70)" />
+            <circle cx="70" cy="70" r="3" class="clock-center" />
+        </svg>`;
+    }
+
+    function generateExercise() {
+    // 1. RÉINITIALISATION DE L'ÉTAT DU BOUTON ET DU MODE
+    isShowingCorrection = false;
+    const btnCorr = document.getElementById('validate-btn');
+    if (btnCorr) {
+        btnCorr.innerHTML = "👁️ correction";
+        btnCorr.classList.remove('bg-orange-500');
+        btnCorr.classList.add('bg-green-500');
+    }
+    const type = document.getElementById('type-exo').value;
+    const nb = parseInt(document.getElementById('nb-questions').value);
+    const prec = document.getElementById('precision').value;
+    const list = document.getElementById('exercises-list');
+    list.innerHTML = "";
+
+    for (let i = 0; i < nb; i++) {
+        let h1 = Math.floor(Math.random() * 12) + 1;
+        let m1 = 0;
+        if(prec === "demie") m1 = [0, 30][Math.floor(Math.random()*2)];
+        else if(prec === "quart") m1 = [0, 15, 30, 45][Math.floor(Math.random()*4)];
+        else if(prec === "5min") m1 = Math.floor(Math.random() * 12) * 5;
+        else if(prec === "1min") m1 = Math.floor(Math.random() * 60);
+
+        const card = document.createElement('div');
+        card.className = "light-card flex flex-col items-center gap-4 h-full";
+
+        if (type === "lecture") {
+            card.innerHTML = createClockSVG(h1, m1);
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex items-center gap-2 mt-auto";
+
+            // Champ Heures
+            const hInput = document.createElement('input');
+            hInput.className = "input-field text-center exo-input-h w-16";
+            hInput.placeholder = "HH";
+            hInput.maxLength = 2;
+            hInput.dataset.ansH = h1;
+
+            const sep = document.createElement('span');
+            sep.textContent = ":";
+            sep.className = "font-black text-xl opacity-50";
+
+            // Champ Minutes
+            const mInput = document.createElement('input');
+            mInput.className = "input-field text-center exo-input-m w-16";
+            mInput.placeholder = "MM";
+            mInput.maxLength = 2;
+            mInput.dataset.ansM = m1;
+
+            // Navigation auto et touches
+            hInput.addEventListener('input', function() { if (this.value.length === 2) mInput.focus(); });
+            hInput.addEventListener('keydown', (e) => { if (e.key === "ArrowRight") mInput.focus(); });
+            mInput.addEventListener('keydown', (e) => { if (e.key === "ArrowLeft") hInput.focus(); });
+
+            wrapper.append(hInput, sep, mInput);
+            card.appendChild(wrapper);
+        } else {
+            // Mode DURÉE
+            let durationMin = (Math.floor(Math.random() * 12) + 1) * (prec === "heure" ? 60 : 15);
+            let totalM2 = (h1 * 60 + m1 + durationMin) % 720;
+            let h2 = Math.floor(totalM2 / 60) || 12;
+            let m2 = totalM2 % 60;
+
+            const clockContainer = document.createElement('div');
+            clockContainer.className = "flex items-center gap-2 scale-75 sm:scale-100";
+            clockContainer.innerHTML = createClockSVG(h1, m1) + `<span class="font-black">➔</span>` + createClockSVG(h2, m2);
+            card.appendChild(clockContainer);
+
+            const input = document.createElement('input');
+            input.className = "input-field text-center exo-input-duree mt-auto";
+            let displayDur = Math.floor(durationMin/60) + "h " + (durationMin%60 > 0 ? (durationMin%60) + "min" : "");
+            input.placeholder = "Durée ?";
+            input.dataset.ans = displayDur;
+            card.appendChild(input);
+        }
+        list.appendChild(card);
+    }
+    document.getElementById('setup-zone').classList.add('hidden');
+    document.getElementById('game-zone').classList.remove('hidden');
+}
+
+function showCorrection() {
+    const cards = document.querySelectorAll('#exercises-list .light-card');
+    const btn = document.getElementById('validate-btn');
+    
+    if (!isShowingCorrection) {
+        cards.forEach(card => {
+            const hIn = card.querySelector('.exo-input-h');
+            const mIn = card.querySelector('.exo-input-m');
+            const dIn = card.querySelector('.exo-input-duree');
+
+            if (hIn && mIn) {
+                // Correction LECTURE
+                const isHCorrect = parseInt(hIn.value, 10) === parseInt(hIn.dataset.ansH, 10);
+                const isMCorrect = parseInt(mIn.value, 10) === parseInt(mIn.dataset.ansM, 10);
+                const isAllCorrect = isHCorrect && isMCorrect;
+
+                hIn.dataset.isCorrect = isAllCorrect;
+                hIn.value = hIn.dataset.ansH.padStart(2, '0');
+                mIn.value = mIn.dataset.ansM.padStart(2, '0');
+                hIn.style.color = mIn.style.color = isAllCorrect ? '#10b981' : '#ef4444';
+                hIn.disabled = mIn.disabled = true;
+            } else if (dIn) {
+                // Correction DURÉE
+                const isCorrect = dIn.value.trim().toLowerCase().replace(/\s/g, '') === dIn.dataset.ans.toLowerCase().replace(/\s/g, '');
+                dIn.dataset.isCorrect = isCorrect;
+                dIn.value = dIn.dataset.ans;
+                dIn.style.color = isCorrect ? '#10b981' : '#ef4444';
+                dIn.disabled = true;
+            }
+        });
+        btn.innerHTML = "🙈 masquer";
+        btn.classList.replace('bg-green-500', 'bg-orange-500');
+        isShowingCorrection = true;
+    } else {
+        // Mode MASQUER
+        cards.forEach(card => {
+            const hIn = card.querySelector('.exo-input-h');
+            const mIn = card.querySelector('.exo-input-m');
+            const dIn = card.querySelector('.exo-input-duree');
+
+            if (hIn && hIn.dataset.isCorrect !== "true") {
+                hIn.value = mIn.value = "";
+                hIn.style.color = mIn.style.color = "";
+                hIn.disabled = mIn.disabled = false;
+            } else if (dIn && dIn.dataset.isCorrect !== "true") {
+                dIn.value = "";
+                dIn.style.color = "";
+                dIn.disabled = false;
+            }
+        });
+        btn.innerHTML = "👁️ correction";
+        btn.classList.replace('bg-orange-500', 'bg-green-500');
+        isShowingCorrection = false;
+    }
+}
+
+    function toggleFullscreen() {
+        const isFS = document.body.classList.toggle('fullscreen-mode');
+        document.getElementById('icon-fs-open').classList.toggle('hidden', isFS);
+        document.getElementById('icon-fs-close').classList.toggle('hidden', !isFS);
+        
+        const btnRetourListe = document.getElementById('btn-retour-liste');
+        const container = document.getElementById('container-retour-liste');
+
+        if (isFS) {
+            if (btnRetourListe) btnRetourListe.classList.add('hidden');
+            // En plein écran, on pousse le bouton "X" vers la droite
+            container.classList.replace('justify-between', 'justify-end');
+        } else {
+            if (btnRetourListe) btnRetourListe.classList.remove('hidden');
+            // Au retour, on rétablit l'espace entre les deux
+            container.classList.replace('justify-end', 'justify-between');
+        }
+    }
+
+    function appliquerTheme() {
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const hexa = mapCouleurs[themePrefs.gen || 'violet'];
+        document.documentElement.style.setProperty('--accent-color', hexa);
+        const elements = ['btn-retour-header', 'btn-retour-liste', 'btn-aide', 'mainAddBtn', 'btn-fermer-aide', 'btn-fullscreen-toggle'];
+        elements.forEach(id => { 
+            const el = document.getElementById(id);
+            if(el) { el.style.backgroundColor = hexa; el.style.color = "#fff"; }
+        });
+        if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
+    }
+
+    function ouvrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
+    function retourReglages() { document.getElementById('setup-zone').classList.remove('hidden'); document.getElementById('game-zone').classList.add('hidden'); }
+    window.onload = appliquerTheme;
+</script>
+</body>
+</html>
