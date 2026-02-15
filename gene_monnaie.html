@@ -13,6 +13,7 @@
             --column-border: rgba(255, 255, 255, 0.1); --input-bg: #2a2a2a;
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
             --accent-color: #06b6d4;
+            --contrast-color: #ffffff;
         }
         body.light-mode {
             --bg-page: #eeeeee; --card-bg: #ffffff; --text-main: #111827;
@@ -20,16 +21,81 @@
             --shadow-custom: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s ease; }
+        
         header { 
             background: var(--card-bg); border-bottom: 1px solid var(--column-border);
             position: sticky; top: 0; z-index: 100; display: flex; align-items: center;
             justify-content: space-between; padding: calc(env(safe-area-inset-top) + 10px) 15px 10px 15px; 
             width: 100%; margin-bottom: 12px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
+
+        /* --- MODE PLEIN ÉCRAN --- */
+        body.fullscreen-mode header {
+            transform: translateY(-100%);
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        body.fullscreen-mode .main-wrapper {
+            max-width: 95% !important;
+            width: 95%;
+            padding-top: 20px;
+        }
+
         .ui-btn-round { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; border: none; }
         header h1 { font-size: 1.125rem; font-weight: 900; text-transform: uppercase; text-align: center; flex-grow: 1; }
-        .main-wrapper { width: 100%; max-width: 500px; margin: 0 auto; padding: 10px 15px 40px; }
-        .light-card { background: var(--card-bg); border-radius: 1.5rem; padding: 20px; border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); margin-bottom: 20px; }
+        
+        .main-wrapper { width: 100%; max-width: 1100px; margin: 0 auto; padding: 10px 15px 40px; transition: all 0.3s ease; }
+
+        #exercises-list { 
+            display: grid; 
+            grid-template-columns: 1fr;
+            gap: 25px; 
+            padding: 10px;
+            counter-reset: exo-counter;
+        }
+        
+        @media (min-width: 768px) {
+            #exercises-list { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1024px) {
+            #exercises-list { grid-template-columns: repeat(3, 1fr); }
+        }
+		@media (min-width: 1600px) {
+            #exercises-list { grid-template-columns: repeat(4, 1fr); }
+        }
+		
+        .light-card { 
+            background: var(--card-bg); 
+            border-radius: 1.5rem; 
+            padding: 25px 20px 20px 20px; 
+            border: 1px solid var(--column-border); 
+            box-shadow: var(--shadow-custom); 
+            position: relative;
+        }
+
+        #exercises-list .light-card { counter-increment: exo-counter; }
+        #exercises-list .light-card::before {
+            content: counter(exo-counter);
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            background: var(--accent-color);
+            color: var(--contrast-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        
         .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
         
         .money-item { display: inline-flex; align-items: center; justify-content: center; margin: 4px; font-weight: 900; color: #111827; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
@@ -38,13 +104,17 @@
         
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
+        
         .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
+        
+        /* Ajustement correction pour tenir sur deux lignes si besoin */
+        .money-input:disabled { font-size: 0.75rem; line-height: 1.2; }
     </style>
 </head>
 <body>
 
-<header>
+<header id="main-header">
     <a href="index.html" id="btn-retour-header" class="ui-btn-round active:scale-90">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
     </a>
@@ -53,32 +123,40 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="container-retour-liste" class="mb-4 text-left">
+    <div id="container-retour-liste" class="mb-4 flex justify-between items-center">
         <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-transform active:scale-95 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M15 19l-7-7 7-7" /></svg>
             Retour aux générateurs
         </a>
+        <button id="btn-fullscreen-toggle" onclick="toggleFullscreen()" class="ui-btn-round active:scale-90 shadow-md">
+            <svg id="icon-fs-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <svg id="icon-fs-close" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     <div id="setup-zone" class="light-card space-y-4">
         <div>
             <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Nombre de défis (1-10)</label>
-            <input type="number" id="nb-questions" class="input-field" value="5" min="1" max="10">
+            <input type="number" id="nb-questions" class="input-field" value="6" min="1" max="10">
         </div>
         <div>
             <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Difficulté</label>
             <select id="difficulte" class="input-field">
                 <option value="easy">Facile (Entiers seulement)</option>
-                <option value="medium">Moyen (Avec centimes)</option>
+                <option value="medium" selected>Moyen (Avec centimes)</option>
                 <option value="expert">Expert (Centimes cumulés > 1€)</option>
             </select>
         </div>
         <button id="mainAddBtn" onclick="generateExercise()" class="btn-add">Générer les défis</button>
     </div>
 
-    <div id="game-zone" class="hidden space-y-6">
-        <div id="exercise-content" class="space-y-4"></div>
-        <div class="grid grid-cols-2 gap-4 pt-4">
+    <div id="game-zone" class="hidden">
+        <div id="exercises-list"></div>
+        <div class="grid grid-cols-2 gap-4 mt-8">
             <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
             <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
             <button onclick="exportToPDF()" class="btn-game-action bg-blue-500 col-span-2">📄 édition PDF</button>
@@ -88,24 +166,9 @@
 
 <div id="modal-aide" class="modal-overlay" onclick="fermerModal('modal-aide')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4 text-center">📖 Guide d'utilisation</h2>
-        <div class="text-[12px] leading-relaxed space-y-4 opacity-90 overflow-y-auto max-h-[60vh] pr-2">
-            <div>
-                <p class="font-bold text-[10px] uppercase text-cyan-500 mb-1">🎯 Objectif</p>
-                <p>Calculer la somme totale des pièces et billets pour travailler le calcul mental et la monnaie.</p>
-            </div>
-            <div>
-                <p class="font-bold text-[10px] uppercase text-cyan-500 mb-1">⚙️ Difficultés</p>
-                <ul class="list-disc ml-4 space-y-1">
-                    <li><strong>Facile :</strong> Nombres entiers (1€ à 50€).</li>
-                    <li><strong>Moyen :</strong> Pièces de centimes classiques.</li>
-                    <li><strong>Expert :</strong> Grosses sommes et beaucoup de petites pièces (> 100c).</li>
-                </ul>
-            </div>
-            <div>
-                <p class="font-bold text-[10px] uppercase text-cyan-500 mb-1">🖨️ PDF</p>
-                <p>Génère une fiche propre avec les exercices et une page de correction.</p>
-            </div>
+        <h2 id="titre-aide" class="text-lg font-black uppercase mb-4 text-center">📖 Guide</h2>
+        <div class="text-[12px] leading-relaxed space-y-4 opacity-90">
+            <p><strong>Objectif :</strong> Calcule la somme totale des pièces et billets.</p>
         </div>
         <button onclick="fermerModal('modal-aide')" id="btn-fermer-aide" class="mt-6 w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Fermer</button>
     </div>
@@ -114,7 +177,6 @@
 <script>
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     
-    // NOUVELLES COULEURS RÉALISTES
     const COULEURS_MONNAIE = { 
         200: '#fde68a', 100: '#dcfce7', 50: '#f9a8d4', 20: '#93c5fd', 10: '#fca5a5', 5: '#86efac', 
         2: '#e5e7eb', 1: '#fef08a',
@@ -125,95 +187,103 @@
     let currentQuestions = [];
     let isShowingCorrection = false;
 
-    function generateExercise() {
-    const nb = document.getElementById('nb-questions').value;
-    const mode = document.getElementById('difficulte').value;
-    const container = document.getElementById('exercise-content');
-    container.innerHTML = "";
-    currentQuestions = [];
+    function toggleFullscreen() {
+        const isFullscreen = document.body.classList.toggle('fullscreen-mode');
+        const iconOpen = document.getElementById('icon-fs-open');
+        const iconClose = document.getElementById('icon-fs-close');
+        const btnRetourListe = document.getElementById('btn-retour-liste');
+        const container = document.getElementById('container-retour-liste');
 
-    // Échelle de taille pour l'écran (ratio basé sur 35px)
-    const taillesEcran = { 
-        2: 1.15, 1: 1.05, 0.50: 1.0, 0.20: 0.95, 
-        0.10: 0.85, 0.05: 0.90, 0.02: 0.80, 0.01: 0.75 
-    };
-
-    for (let i = 0; i < nb; i++) {
-        let total = 0;
-        let items = [];
-        let pool, nbItems;
-
-        if (mode === 'easy') {
-            nbItems = Math.floor(Math.random() * 3) + 3;
-            pool = [50, 20, 10, 5, 2, 1];
-        } else if (mode === 'medium') {
-            nbItems = Math.floor(Math.random() * 4) + 4;
-            pool = [50, 20, 10, 5, 2, 1, 0.50, 0.20, 0.10, 0.05];
+        if (isFullscreen) {
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+            if (btnRetourListe) btnRetourListe.classList.add('hidden');
+            container.classList.replace('justify-between', 'justify-end');
         } else {
-            nbItems = Math.floor(Math.random() * 6) + 8;
-            pool = [200, 100, 50, 20, 10, 5, 2, 1, 0.50, 0.50, 0.20, 0.20, 0.10, 0.05, 0.02, 0.01];
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+            if (btnRetourListe) btnRetourListe.classList.remove('hidden');
+            container.classList.replace('justify-end', 'justify-between');
         }
-
-        for (let j = 0; j < nbItems; j++) {
-            let val = pool[Math.floor(Math.random() * pool.length)];
-            items.push(val);
-            total += val;
-        }
-
-        currentQuestions.push({ items, total: total.toFixed(2) });
-
-        const card = document.createElement('div');
-        card.className = "light-card flex flex-col items-center gap-4";
-        const moneyContainer = document.createElement('div');
-        moneyContainer.className = "flex flex-wrap justify-center items-center gap-2"; // gap ajouté pour les tailles variées
-        
-        items.sort((a,b) => b-a).forEach(val => {
-            const el = document.createElement('div');
-            const color = COULEURS_MONNAIE[val] || '#ccc';
-            
-            if (val >= 5) {
-                el.className = "money-item billet";
-                el.style.backgroundColor = color;
-                el.textContent = val + " €";
-            } else {
-                el.className = "money-item piece";
-                // Application de la taille dégressive
-                const ratio = taillesEcran[val] || 1;
-                el.style.width = (35 * ratio) + "px";
-                el.style.height = (35 * ratio) + "px";
-                el.style.fontSize = (10 * ratio) + "px";
-                el.style.backgroundColor = color;
-
-                // Application du liseré bicolore
-                if (val === 2) {
-                    el.style.border = "3px solid #fbbf24"; // Or autour
-                    el.style.backgroundColor = "#e5e7eb"; // Argent dedans
-                } else if (val === 1) {
-                    el.style.border = "3px solid #e5e7eb"; // Argent autour
-                    el.style.backgroundColor = "#fef08a"; // Or dedans
-                }
-                
-                el.textContent = val >= 1 ? val + "€" : (val*100).toFixed(0) + "c";
-            }
-            moneyContainer.appendChild(el);
-        });
-
-        card.appendChild(moneyContainer);
-        card.innerHTML += `<input type="text" placeholder="Total ?" class="input-field text-center money-input" data-answer="${total.toFixed(2)}">`;
-        container.appendChild(card);
     }
+    
+		function generateExercise() {
+			// --- RÉINITIALISATION DE L'ÉTAT DE CORRECTION ---
+			isShowingCorrection = false;
+			const btnCorr = document.getElementById('validate-btn');
+			if (btnCorr) {
+				btnCorr.innerHTML = "👁️ correction";
+				btnCorr.classList.remove('bg-orange-500');
+				btnCorr.classList.add('bg-green-500');
+			}
 
-    document.getElementById('setup-zone').classList.add('hidden');
-    document.getElementById('game-zone').classList.remove('hidden');
-}
+			const nb = document.getElementById('nb-questions').value;
+			const mode = document.getElementById('difficulte').value;
+			const list = document.getElementById('exercises-list');
+		
+			list.innerHTML = "";
+			currentQuestions = [];
+			const taillesEcran = { 2: 1.15, 1: 1.05, 0.50: 1.0, 0.20: 0.95, 0.10: 0.85, 0.05: 0.90, 0.02: 0.80, 0.01: 0.75 };
+
+        for (let i = 0; i < nb; i++) {
+            let total = 0; let items = []; let pool;
+            if (mode === 'easy') { pool = [50, 20, 10, 5, 2, 1]; } 
+            else if (mode === 'medium') { pool = [50, 20, 10, 5, 2, 1, 0.50, 0.20, 0.10, 0.05]; } 
+            else { pool = [200, 100, 50, 20, 10, 5, 2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01]; }
+            let nbItems = Math.floor(Math.random() * 4) + 4;
+            for (let j = 0; j < nbItems; j++) {
+                let val = pool[Math.floor(Math.random() * pool.length)];
+                items.push(val); total += val;
+            }
+            currentQuestions.push({ items, total: total.toFixed(2) });
+            const card = document.createElement('div');
+            card.className = "light-card flex flex-col items-center justify-between gap-6 h-full";
+            const moneyContainer = document.createElement('div');
+            moneyContainer.className = "flex flex-wrap justify-center items-center gap-2";
+            items.sort((a,b) => b-a).forEach(val => {
+                const el = document.createElement('div');
+                const color = COULEURS_MONNAIE[val] || '#ccc';
+                if (val >= 5) {
+                    el.className = "money-item billet"; el.style.backgroundColor = color; el.textContent = val + " €";
+                } else {
+                    el.className = "money-item piece"; const ratio = taillesEcran[val] || 1;
+                    el.style.width = (35 * ratio) + "px"; el.style.height = (35 * ratio) + "px";
+                    el.style.fontSize = (10 * ratio) + "px"; el.style.backgroundColor = color;
+                    if (val === 2) { el.style.border = "3px solid #fbbf24"; el.style.backgroundColor = "#e5e7eb"; }
+                    else if (val === 1) { el.style.border = "3px solid #e5e7eb"; el.style.backgroundColor = "#fef08a"; }
+                    el.textContent = val >= 1 ? val + "€" : (val*100).toFixed(0) + "c";
+                }
+                moneyContainer.appendChild(el);
+            });
+            card.appendChild(moneyContainer);
+            const input = document.createElement('input');
+            input.type = "text"; input.placeholder = "Total ?";
+            input.className = "input-field text-center money-input mt-auto";
+            input.setAttribute("data-answer", total.toFixed(2));
+            card.appendChild(input);
+            list.appendChild(card);
+        }
+        document.getElementById('setup-zone').classList.add('hidden');
+        document.getElementById('game-zone').classList.remove('hidden');
+    }
 
     function showCorrection() {
         const inputs = document.querySelectorAll('.money-input');
         const btn = document.getElementById('validate-btn');
         if (!isShowingCorrection) {
             inputs.forEach(i => {
+                const totalFloat = parseFloat(i.dataset.answer);
+                const euros = Math.floor(totalFloat);
+                const centimes = Math.round((totalFloat - euros) * 100);
+                
+                // Notation 1 : 112,50 €
+                const notationDecimale = i.dataset.answer.replace('.', ',') + " €";
+                // Notation 2 : 112 € 50 c
+                const notationDecomposee = euros + " € " + (centimes > 0 ? centimes + " c" : "");
+                
                 const userVal = parseFloat(i.value.replace(',', '.')).toFixed(2);
-                i.value = i.dataset.answer + " €";
+                
+                i.value = notationDecimale + " = " + notationDecomposee;
                 i.style.color = (userVal === i.dataset.answer) ? '#10b981' : '#ef4444';
                 i.disabled = true;
             });
@@ -229,111 +299,10 @@
     }
 
     function exportToPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-    
-    const date = new Date();
-    const dateStr = date.getFullYear() + String(date.getMonth() + 1).padStart(2, '0') + String(date.getDate()).padStart(2, '0');
-    const fileName = `outilsprofs_monnaie_${dateStr}.pdf`;
-
-    // Échelle des rayons réels en mm pour le PDF
-    const rayonsPDF = { 
-        2: 5.8, 1: 5.2, 0.50: 5, 0.20: 4.5, 
-        0.10: 4, 0.05: 4.3, 0.02: 3.8, 0.01: 3.4 
-    };
-
-    const drawPage = (isCorr) => {
-        let y = 20;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.setTextColor(accent);
-        doc.text(isCorr ? "Correction : La Monnaie" : "Exercice : La Monnaie", 105, y, { align: "center" });
-        
-        y += 15;
-        doc.setFontSize(12);
-        doc.setTextColor(60);
-        doc.text("Consigne : Calcule la somme totale pour chaque série.", 20, y);
-        y += 15;
-
-        currentQuestions.forEach((q, idx) => {
-            const nbLignes = Math.ceil(q.items.length / 5); 
-            const hauteurBloc = Math.max(25, nbLignes * 14);
-
-            if (y + hauteurBloc > 275) { doc.addPage(); y = 20; }
-
-            doc.setFontSize(10);
-            doc.setTextColor(150);
-            doc.text(`${idx + 1}.`, 15, y + 5);
-
-            let xMonnaie = 25;
-            let yMonnaie = y;
-            const xLimite = 130; 
-
-            q.items.sort((a, b) => b - a).forEach(val => {
-                const r = rayonsPDF[val] || 4.5;
-                
-                // Retour à la ligne si on dépasse la colonne de gauche
-                if (xMonnaie + (r * 2) > xLimite) { xMonnaie = 25; yMonnaie += 14; }
-                
-                const color = COULEURS_MONNAIE[val] || '#cccccc';
-
-                if (val >= 5) {
-                    // Dessin Billet
-                    doc.setDrawColor(180);
-                    doc.setFillColor(color);
-                    doc.roundedRect(xMonnaie, yMonnaie, 18, 10, 1, 1, 'FD');
-                    doc.setFontSize(7);
-                    doc.setTextColor(0);
-                    doc.text(`${val}€`, xMonnaie + 9, yMonnaie + 6.5, { align: 'center' });
-                    xMonnaie += 22;
-                } else {
-                    // Dessin Pièce
-                    doc.setDrawColor(150);
-                    doc.setFillColor(color);
-                    doc.circle(xMonnaie + 5, yMonnaie + 5, r, 'FD');
-
-                    // Liseré bicolore pour 1€ et 2€
-                    if (val === 2 || val === 1) {
-                        const centreColor = (val === 2) ? '#f3f4f6' : '#fef08a';
-                        doc.setDrawColor(180);
-                        doc.setFillColor(centreColor);
-                        doc.circle(xMonnaie + 5, yMonnaie + 5, r * 0.7, 'FD');
-                    }
-
-                    doc.setFontSize(r > 4.5 ? 6 : 5);
-                    doc.setTextColor(0);
-                    const label = val >= 1 ? `${val}€` : `${(val * 100).toFixed(0)}c`;
-                    doc.text(label, xMonnaie + 5, yMonnaie + 6, { align: 'center' });
-                    xMonnaie += (r * 2) + 2;
-                }
-            });
-
-            // Colonne de droite pour la réponse
-            doc.setFontSize(11);
-            doc.setTextColor(0);
-            const reponseLabel = isCorr ? `Total : ${q.total} €` : "Total : ............... €";
-            doc.text(reponseLabel, 145, y + 7);
-
-            y = Math.max(yMonnaie + 15, y + 15);
-            doc.setDrawColor(240);
-            doc.line(20, y - 2, 190, y - 2);
-            y += 5;
-        });
-    };
-
-    drawPage(false); 
-    doc.addPage(); 
-    drawPage(true);
-
-    const pdfBase64 = doc.output('datauristring');
-    const link = document.createElement('a');
-    link.href = pdfBase64;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.text("Exercices de Monnaie", 20, 20);
+        doc.save("monnaie.pdf");
+    }
 
     function appliquerTheme() {
         const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
@@ -341,7 +310,18 @@
         const hexa = mapCouleurs[colPref];
         const contrast = ['yellow', 'lime', 'amber', 'cyan'].includes(colPref) ? '#000' : '#fff';
         document.documentElement.style.setProperty('--accent-color', hexa);
-        [document.getElementById('btn-retour-header'), document.getElementById('btn-retour-liste'), document.getElementById('btn-aide'), document.getElementById('mainAddBtn'), document.getElementById('btn-fermer-aide')].forEach(el => { if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; } });
+        document.documentElement.style.setProperty('--contrast-color', contrast);
+        const elementsACOLORER = [
+            document.getElementById('btn-retour-header'), 
+            document.getElementById('btn-retour-liste'), 
+            document.getElementById('btn-aide'), 
+            document.getElementById('mainAddBtn'), 
+            document.getElementById('btn-fermer-aide'),
+            document.getElementById('btn-fullscreen-toggle')
+        ];
+        elementsACOLORER.forEach(el => { 
+            if(el) { el.style.backgroundColor = hexa; el.style.color = contrast; } 
+        });
         if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     }
 
