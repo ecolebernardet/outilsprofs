@@ -110,15 +110,14 @@
             </div>
         </div>
         <div>
-            <label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Précision</label>
-            <select id="precision" class="input-field">
-                <option value="heure">Heures pile</option>
-                <option value="demie">Demi-heures</option>
-                <option value="quart">Quarts d'heure</option>
-                <option value="5min" selected>Toutes les 5 min</option>
-                <option value="1min">À la minute près</option>
-            </select>
-        </div>
+			<label class="block text-[9px] font-black uppercase opacity-50 mb-2 tracking-widest">Précision</label>
+			<select id="precision" class="input-field">
+				<option value="heure">Heures pile</option>
+				<option value="demie">Demi-heures</option>
+				<option value="quart">Quarts d'heure</option>
+				<option value="5min" selected>Toutes les 5 min</option>
+			</select>
+		</div>
         <button id="mainAddBtn" onclick="generateExercise()" class="btn-add">Générer les horloges</button>
     </div>
 
@@ -127,7 +126,7 @@
         <div class="grid grid-cols-2 gap-4 mt-8">
             <button onclick="retourReglages()" class="btn-game-action bg-gray-500">⬅️ retour</button>
             <button id="validate-btn" onclick="showCorrection()" class="btn-game-action bg-green-500">👁️ correction</button>
-            <button onclick="window.print()" class="btn-game-action bg-blue-500 col-span-2">📄 Imprimer / PDF</button>
+            <button onclick="exportToPDF()" class="btn-game-action bg-blue-500 col-span-2">💾 Exporter en PDF</button>
         </div>
     </div>
 </div>
@@ -205,86 +204,98 @@
     }
 
     function generateExercise() {
-    // 1. RÉINITIALISATION DE L'ÉTAT DU BOUTON ET DU MODE
-    isShowingCorrection = false;
-    const btnCorr = document.getElementById('validate-btn');
-    if (btnCorr) {
-        btnCorr.innerHTML = "👁️ correction";
-        btnCorr.classList.remove('bg-orange-500');
-        btnCorr.classList.add('bg-green-500');
-    }
-    const type = document.getElementById('type-exo').value;
-    const nb = parseInt(document.getElementById('nb-questions').value);
-    const prec = document.getElementById('precision').value;
-    const list = document.getElementById('exercises-list');
-    list.innerHTML = "";
+		isShowingCorrection = false;
+		const btnCorr = document.getElementById('validate-btn');
+		if (btnCorr) {
+			btnCorr.innerHTML = "👁️ correction";
+			btnCorr.classList.replace('bg-orange-500', 'bg-green-500');
+		}
 
-    for (let i = 0; i < nb; i++) {
-        let h1 = Math.floor(Math.random() * 12) + 1;
-        let m1 = 0;
-        if(prec === "demie") m1 = [0, 30][Math.floor(Math.random()*2)];
-        else if(prec === "quart") m1 = [0, 15, 30, 45][Math.floor(Math.random()*4)];
-        else if(prec === "5min") m1 = Math.floor(Math.random() * 12) * 5;
-        else if(prec === "1min") m1 = Math.floor(Math.random() * 60);
+		const type = document.getElementById('type-exo').value;
+		const nb = parseInt(document.getElementById('nb-questions').value);
+		const prec = document.getElementById('precision').value;
+		const list = document.getElementById('exercises-list');
+		list.innerHTML = "";
 
-        const card = document.createElement('div');
-        card.className = "light-card flex flex-col items-center gap-4 h-full";
+		for (let i = 0; i < nb; i++) {
+			let h1 = Math.floor(Math.random() * 12) + 1;
+			let m1 = 0;
+			if(prec === "demie") m1 = [0, 30][Math.floor(Math.random()*2)];
+			else if(prec === "quart") m1 = [0, 15, 30, 45][Math.floor(Math.random()*4)];
+			else if(prec === "5min") m1 = Math.floor(Math.random() * 12) * 5;
+			else if(prec === "1min") m1 = Math.floor(Math.random() * 60);
 
-        if (type === "lecture") {
-            card.innerHTML = createClockSVG(h1, m1);
-            
-            const wrapper = document.createElement('div');
-            wrapper.className = "flex items-center gap-2 mt-auto";
+			const card = document.createElement('div');
+			card.className = "light-card flex flex-col items-center gap-4 h-full";
 
-            // Champ Heures
-            const hInput = document.createElement('input');
-            hInput.className = "input-field text-center exo-input-h w-16";
-            hInput.placeholder = "HH";
-            hInput.maxLength = 2;
-            hInput.dataset.ansH = h1;
+			if (type === "lecture") {
+				card.innerHTML = createClockSVG(h1, m1);
+				const wrapper = document.createElement('div');
+				wrapper.className = "flex items-center gap-2 mt-auto";
 
-            const sep = document.createElement('span');
-            sep.textContent = ":";
-            sep.className = "font-black text-xl opacity-50";
+				const hInput = document.createElement('input');
+				hInput.className = "input-field text-center exo-input-h w-16";
+				hInput.placeholder = "HH"; hInput.maxLength = 2;
+				hInput.dataset.ansH = h1;
+				hInput.dataset.ansM = m1; // Utile pour le PDF aussi
 
-            // Champ Minutes
-            const mInput = document.createElement('input');
-            mInput.className = "input-field text-center exo-input-m w-16";
-            mInput.placeholder = "MM";
-            mInput.maxLength = 2;
-            mInput.dataset.ansM = m1;
+				const sep = document.createElement('span'); sep.textContent = ":"; sep.className = "font-black text-xl opacity-50";
 
-            // Navigation auto et touches
-            hInput.addEventListener('input', function() { if (this.value.length === 2) mInput.focus(); });
-            hInput.addEventListener('keydown', (e) => { if (e.key === "ArrowRight") mInput.focus(); });
-            mInput.addEventListener('keydown', (e) => { if (e.key === "ArrowLeft") hInput.focus(); });
+				const mInput = document.createElement('input');
+				mInput.className = "input-field text-center exo-input-m w-16";
+				mInput.placeholder = "MM"; mInput.maxLength = 2;
+				mInput.dataset.ansM = m1;
 
-            wrapper.append(hInput, sep, mInput);
-            card.appendChild(wrapper);
-        } else {
-            // Mode DURÉE
-            let durationMin = (Math.floor(Math.random() * 12) + 1) * (prec === "heure" ? 60 : 15);
-            let totalM2 = (h1 * 60 + m1 + durationMin) % 720;
-            let h2 = Math.floor(totalM2 / 60) || 12;
-            let m2 = totalM2 % 60;
+				hInput.addEventListener('input', function() { if (this.value.length === 2) mInput.focus(); });
+				hInput.addEventListener('keydown', (e) => { if (e.key === "ArrowRight") mInput.focus(); });
+				mInput.addEventListener('keydown', (e) => { if (e.key === "ArrowLeft") hInput.focus(); });
 
-            const clockContainer = document.createElement('div');
-            clockContainer.className = "flex items-center gap-2 scale-75 sm:scale-100";
-            clockContainer.innerHTML = createClockSVG(h1, m1) + `<span class="font-black">➔</span>` + createClockSVG(h2, m2);
-            card.appendChild(clockContainer);
+				wrapper.append(hInput, sep, mInput);
+				card.appendChild(wrapper);
+			} else {
+				// MODE DURÉE
+				let durationMin = (Math.floor(Math.random() * 8) + 1) * (prec === "heure" ? 60 : 15);
+				let totalM2 = (h1 * 60 + m1 + durationMin) % 720;
+				let h2 = Math.floor(totalM2 / 60) || 12;
+				let m2 = totalM2 % 60;
 
-            const input = document.createElement('input');
-            input.className = "input-field text-center exo-input-duree mt-auto";
-            let displayDur = Math.floor(durationMin/60) + "h " + (durationMin%60 > 0 ? (durationMin%60) + "min" : "");
-            input.placeholder = "Durée ?";
-            input.dataset.ans = displayDur;
-            card.appendChild(input);
-        }
-        list.appendChild(card);
-    }
-    document.getElementById('setup-zone').classList.add('hidden');
-    document.getElementById('game-zone').classList.remove('hidden');
-}
+				const clockContainer = document.createElement('div');
+				clockContainer.className = "flex items-center gap-2 scale-75 sm:scale-100";
+				clockContainer.innerHTML = createClockSVG(h1, m1) + `<span class="font-black text-2xl">➔</span>` + createClockSVG(h2, m2);
+				card.appendChild(clockContainer);
+
+				const wrapper = document.createElement('div');
+				wrapper.className = "flex items-center gap-2 mt-auto";
+
+				const hInput = document.createElement('input');
+				hInput.className = "input-field text-center exo-input-h w-16";
+				hInput.placeholder = "0h"; hInput.maxLength = 2;
+				// STOCKAGE POUR LE PDF
+				hInput.dataset.ansH = Math.floor(durationMin / 60);
+				hInput.dataset.hStart = h1; hInput.dataset.mStart = m1;
+				hInput.dataset.hEnd = h2; hInput.dataset.mEnd = m2;
+
+				const sep = document.createElement('span'); sep.textContent = "h"; sep.className = "font-black text-sm opacity-50";
+
+				const mInput = document.createElement('input');
+				mInput.className = "input-field text-center exo-input-m w-16";
+				mInput.placeholder = "00"; mInput.maxLength = 2;
+				mInput.dataset.ansM = durationMin % 60;
+
+				const unit = document.createElement('span'); unit.textContent = "min"; unit.className = "font-black text-sm opacity-50";
+
+				hInput.addEventListener('input', function() { if (this.value.length === 2) mInput.focus(); });
+				hInput.addEventListener('keydown', (e) => { if (e.key === "ArrowRight") mInput.focus(); });
+				mInput.addEventListener('keydown', (e) => { if (e.key === "ArrowLeft") hInput.focus(); });
+
+				wrapper.append(hInput, sep, mInput, unit);
+				card.appendChild(wrapper);
+			}
+			list.appendChild(card);
+		}
+		document.getElementById('setup-zone').classList.add('hidden');
+		document.getElementById('game-zone').classList.remove('hidden');
+	}
 
 function showCorrection() {
     const cards = document.querySelectorAll('#exercises-list .light-card');
@@ -372,6 +383,149 @@ function showCorrection() {
         });
         if (localStorage.getItem('theme_mode') === 'light') document.body.classList.add('light-mode');
     }
+
+	async function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    const maintenant = new Date();
+    const dateStr = maintenant.getFullYear() + 
+                    String(maintenant.getMonth() + 1).padStart(2, '0') + 
+                    String(maintenant.getDate()).padStart(2, '0');
+    const nomFichier = `outilsprofs_heures_${dateStr}.pdf`;
+
+    const cards = document.querySelectorAll('#exercises-list .light-card');
+    const typeExo = document.getElementById('type-exo').value;
+
+    // Détermination du titre dynamique
+    const titrePDF = typeExo === "lecture" ? "Lire l'heure" : "Calculer des durées";
+
+    const genererContenuPage = (isCorrectionPage = false) => {
+        let yInitial = 45; // On descend le point de départ pour laisser place à l'en-tête
+        
+        doc.setFont("helvetica", "bold");
+        
+        // --- EN-TÊTE (Uniquement sur la page 1 des exercices) ---
+        if (!isCorrectionPage && doc.internal.getNumberOfPages() === 1) {
+            doc.setFontSize(10);
+            doc.text("Nom : ..........................  Prénom : ..........................  Date : ...../...../.....", 20, 15);
+        }
+
+        // --- TITRE ---
+        doc.setFontSize(18);
+        doc.text(isCorrectionPage ? "Corrigé : " + titrePDF : titrePDF, 105, 30, { align: "center" });
+
+        cards.forEach((card, index) => {
+            if (index > 0 && index % 10 === 0) { 
+                doc.addPage(); 
+                yInitial = 35; // Un peu plus haut sur les pages suivantes
+            }
+
+            const col = index % 2;
+            const row = Math.floor((index % 10) / 2);
+            const x = 20 + (col * 95);
+            const y = yInitial + (row * 48); // Ajustement de l'interligne
+            
+            const hIn = card.querySelector('.exo-input-h');
+            const mIn = card.querySelector('.exo-input-m');
+            const centerX = x + 40;
+            const centerY = y + 20;
+            const isDuree = card.innerHTML.includes('➔');
+
+            if (isDuree && hIn.dataset.hStart) {
+				// Horloge 1
+				drawClock(doc, centerX - 20, centerY, parseInt(hIn.dataset.hStart), parseInt(hIn.dataset.mStart), 13);
+				
+				// --- DESSIN D'UNE VRAIE FLÈCHE ---
+				const arrowY = centerY;
+				const arrowXStart = centerX - 5;
+				const arrowXEnd = centerX + 5;
+				
+				doc.setLineWidth(0.5);
+				doc.setDrawColor(0);
+				// Ligne principale
+				doc.line(arrowXStart, arrowY, arrowXEnd, arrowY); 
+				// Pointe de la flèche (triangle)
+				doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY - 1.5);
+				doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY + 1.5);
+				
+				// Horloge 2
+				drawClock(doc, centerX + 20, centerY, parseInt(hIn.dataset.hEnd), parseInt(hIn.dataset.mEnd), 13);
+            } else {
+                drawClock(doc, centerX, centerY, parseInt(hIn.dataset.ansH), parseInt(mIn.dataset.ansM), 13);
+            }
+
+            doc.setFontSize(9); doc.setDrawColor(200);
+            doc.roundedRect(centerX - 12, y + 36, 10, 6, 1, 1, 'S');
+            doc.text(isDuree ? "h" : ":", centerX, y + 40.5);
+            doc.roundedRect(centerX + 4, y + 36, 10, 6, 1, 1, 'S');
+            if(isDuree) doc.text("min", centerX + 15, y + 40.5);
+            
+            if (isCorrectionPage) {
+                doc.setTextColor('#10b981');
+                doc.setFontSize(8);
+                const valH = hIn.dataset.ansH.padStart(isDuree ? 1 : 2, '0');
+                const valM = mIn.dataset.ansM.padStart(2, '0');
+                doc.text(valH, centerX - 7, y + 40.5, { align: "center" });
+                doc.text(valM, centerX + 9, y + 40.5, { align: "center" });
+                doc.setTextColor(0);
+            }
+
+            doc.setFontSize(8);
+            doc.text(`${index + 1}.`, x + 5, y + 5);
+        });
+    };
+
+    const drawClock = (pdf, x, y, h, m, size) => {
+        if (isNaN(h) || isNaN(m)) return;
+        
+        // Cadran
+        pdf.setLineWidth(0.3);
+        pdf.setDrawColor(0);
+        pdf.circle(x, y, size, 'S');
+
+        // Graduation et Chiffres
+        pdf.setFontSize(size / 3);
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i * 30 - 90) * (Math.PI / 180);
+            const tx = x + (size - 2.5) * Math.cos(angle);
+            const ty = y + (size - 2.5) * Math.sin(angle) + 1.2;
+            pdf.text(i.toString(), tx, ty, { align: "center" });
+        }
+
+        // --- CALCULS DE PRÉCISION ---
+        
+        // Aiguille des MINUTES (Précision à 6° par minute)
+        // On vise 85% du rayon pour une lecture parfaite de l'index
+        const mAngle = (m * 6 - 90) * (Math.PI / 180);
+        const mLen = size * 0.82; 
+        pdf.setLineWidth(0.5);
+        pdf.line(x, y, x + mLen * Math.cos(mAngle), y + mLen * Math.sin(mAngle));
+
+        // Aiguille des HEURES (Précision incluant le décalage des minutes)
+        // L'heure avance de 0.5° par minute écoulée
+        const hAngle = ((h % 12) * 30 + (m * 0.5) - 90) * (Math.PI / 180);
+        const hLen = size * 0.55;
+        pdf.setLineWidth(1.0);
+        pdf.line(x, y, x + hLen * Math.cos(hAngle), y + hLen * Math.sin(hAngle));
+
+        // Point central (légèrement plus grand pour couvrir la jointure)
+        pdf.setFillColor(0);
+        pdf.circle(x, y, 0.7, 'F');
+    };
+
+    genererContenuPage(false); 
+    doc.addPage();
+    genererContenuPage(true); 
+
+    const pdfBase64 = doc.output('datauristring');
+    const link = document.createElement('a');
+    link.href = pdfBase64;
+    link.download = nomFichier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
     function ouvrirModal(id) { document.getElementById(id).style.display = 'flex'; }
     function fermerModal(id) { document.getElementById(id).style.display = 'none'; }
