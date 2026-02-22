@@ -540,6 +540,12 @@
 
 <div class="container">
     <div class="top-bar">
+        <!-- Logo de l'école -->
+        <img src="logo-rostand.jpg"
+             alt="Logo école"
+             onerror="this.style.display='none'"
+             style="height:80px; width:80px; object-fit:contain; border-radius:6px; flex-shrink:0;">
+
         <div class="input-group">
             <input type="text" id="newClassName" placeholder="Enregistrer une classe..." onkeypress="if(event.key==='Enter') addClass()">
             <button class="btn-add-inline" onclick="addClass()">+</button>
@@ -897,9 +903,9 @@
             <div style="background:#eaf4fd; border-left:4px solid var(--blue); border-radius:6px; padding:12px 14px; margin-bottom:18px;">
                 <p style="margin:0; font-weight:600; color:var(--blue); font-size:13px;">🚀 En un coup d'œil</p>
                 <p style="margin:6px 0 0; font-size:12px; color:#444;">
-                    L'application s'ouvre sur la <b>vue mensuelle</b> (le mois en cours).
-                    Cliquez sur le <b>nom du mois</b> (affichage ⬅) pour entrer dans la vue annuelle.
-                    Cliquez à nouveau sur le nom d'un mois pour afficher la vue détaillée du mois choisi.
+                    L'application s'ouvre sur la <b>vue annuelle</b> (toutes les classes, un résumé par mois).
+                    Cliquez sur un <b>mois</b> pour entrer dans la vue détaillée jour par jour.
+                    Cliquez à nouveau sur le mois actif (affichage ⬅) pour revenir à la vue annuelle.
                 </p>
             </div>
 
