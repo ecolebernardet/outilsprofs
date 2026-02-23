@@ -294,9 +294,9 @@
         #selection-controls .sc-rotate:hover { transform: translateY(-50%) scale(1.1); }
         #selection-controls .sc-merge:hover   { background: #e0faf8; transform: translateX(-50%) scale(1.05); }
         #selection-controls .sc-ungroup:hover { background: #fff8e6; transform: translateX(-50%) scale(1.05); }
-        /* Membres d'un groupe au repos : bordure ambrée discrète sur les widgets texte uniquement */
-        .widget[data-group-id]              { border-color: rgba(243,156,18,0.35) !important; box-shadow: none !important; }
-        .widget[data-group-id]:focus-within { border-color: rgba(243,156,18,0.5)  !important; box-shadow: none !important; }
+        /* Membres d'un groupe : pas de bordure spéciale au repos */
+        .widget[data-group-id]              { border-color: transparent !important; box-shadow: none !important; }
+        .widget[data-group-id]:focus-within { border-color: transparent !important; box-shadow: none !important; }
         /* Membres sélectionnés (groupe actif) : bordure bleue nette */
         .widget.selected[data-group-id]        { outline: 3px solid #4a90e2 !important; outline-offset: 6px; box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important; }
         .shape-widget.selected[data-group-id]  { outline: 3px solid #4a90e2 !important; outline-offset: 6px; box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important; }
@@ -384,7 +384,7 @@
 		.widget-btn .ico { font-size: 26px; line-height: 1; }
 		#main-tool-btn { background: #333; width: 100px; justify-content: center; }
 		.exit-fs-btn { display: none; position: absolute; top: 10px; right: 10px; z-index: 99999; background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-		:fullscreen .exit-fs-btn { display: block; }
+		.editor-container:fullscreen .exit-fs-btn { display: block; }
 		.bg-thumb { width: 70px; height: 50px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
 		.bg-thumb:hover { transform: scale(1.05); border-color: var(--primary-color); }
 
@@ -949,7 +949,7 @@
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#8E51FF;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">📌 Planning</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Agenda journalier avec lignes horaires.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Glisser-déposer des lignes, ajout/suppression</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#E7180B;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">🎬 YouTube</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Lecteur YouTube intégré.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Mode audio seul, plein écran</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#FFD230;color:#222;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">💻 Fenêtre Web</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Navigateur intégré pour tout site web.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Plein écran disponible</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#FF692A;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">🎒 OutilsProfs</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Ouvre directement ecolebernardet.github.io/outilsprofs.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Micro, caméra autorisés</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#FF692A;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">🎒 OutilsProfs</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Ouvre directement outilsprofs.fr</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Micro, caméra autorisés</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#480eb3;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">🧘 Défi Calme</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Outil de gestion du calme en classe.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Plein écran disponible</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><span style="background:#E74C3C;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">📄 PDF</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Affiche un fichier PDF local.</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sauvegardé automatiquement dans le navigateur ✅</td></tr>
           <tr><td style="padding:8px 12px;"><span style="background:#00AACC;color:white;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;">⛅ Météo</span></td><td style="padding:8px 12px;color:#444;">Affiche la météo réelle de la ville de l'école.</td><td style="padding:8px 12px;color:#444;">Via Open-Meteo (gratuit, sans clé). Clic sur le nom de la ville pour changer. Rafraîchi toutes les 10 min.</td></tr>
@@ -2318,6 +2318,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         contentZone.innerHTML = `<div style="padding:10px;color:#b00;font-size:12px;">Type inconnu : <code>${type}</code></div>`;
     }
     board.appendChild(widget);
+    bringToFront(widget);
 		widget.addEventListener('contextmenu', (e) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -5724,6 +5725,7 @@ function insertStickerEmoji(emoji) {
 	w.appendChild(content);
 	w.addEventListener('mousedown', () => bringToFront(w));
 	board.appendChild(w);
+	bringToFront(w);
 	makeDraggable(w);
 	makeDraggableRotate(w);
 	_addStickerResizeHandle(w, 40);
@@ -5759,6 +5761,7 @@ function insertStickerImage(url, name) {
 	w.appendChild(img);
 	w.addEventListener('mousedown', () => bringToFront(w));
 	board.appendChild(w);
+	bringToFront(w);
 	makeDraggable(w);
 	makeDraggableRotate(w);
 	_addStickerResizeHandle(w, 40);
