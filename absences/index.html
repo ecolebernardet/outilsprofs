@@ -52,6 +52,25 @@
     table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white; }
     th, td { border: 1px solid #e0e0e0; padding: 2px; text-align: center; overflow: hidden; height: 32px; }
 
+	#tableBody tr:not(.class-row):hover td {
+		background: #f0f4f8 !important;
+	}
+	#tableBody tr:not(.class-row):hover td.st-A {
+		background: var(--absent) !important;
+	}
+	#tableBody tr:not(.class-row):hover td.st-Exc {
+		background: var(--excuse) !important;
+	}
+	#tableBody tr:not(.class-row):hover td.today-highlight {
+		background: #d6eaf8 !important;
+	}
+	#tableBody tr:not(.class-row):hover td.st-A.today-highlight {
+		background: var(--absent) !important;
+	}
+	#tableBody tr:not(.class-row):hover td.st-Exc.today-highlight {
+		background: var(--excuse) !important;
+	}
+
     .month-header { 
         background: var(--dark); 
         color: white; 
@@ -106,6 +125,8 @@
     .st-A { background: var(--absent) !important; color: white !important; }
     .st-Exc { background: var(--excuse) !important; color: black !important; }
     .today-highlight { background: #eef7ff !important; box-shadow: inset 0 0 0 1.5px var(--blue) !important; }
+	.st-A.today-highlight { background: var(--absent) !important; color: white !important; }
+	.st-Exc.today-highlight { background: var(--excuse) !important; color: black !important; }
 
     .btn-main { 
         border: none; 
