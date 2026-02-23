@@ -87,6 +87,19 @@
     }
     .half-day-col.today-highlight { background: #eef7ff !important; box-shadow: inset 0 0 0 1.5px var(--blue) !important; }
 
+    /* Bordures de séparation des journées */
+    .day-start { border-left: 3px solid #4a6278 !important; }
+    .day-end   { border-right: 3px solid #4a6278 !important; }
+
+    /* Bordures renforcées sur les en-têtes */
+    .day-group-header { border-left: 3px solid #4a6278 !important; border-right: 3px solid #4a6278 !important; }
+    .half-day-col.day-start { border-left: 3px solid #4a6278 !important; }
+    .half-day-col.day-end   { border-right: 3px solid #4a6278 !important; }
+
+    /* Bordures renforcées sur la ligne des totaux */
+    #tableBody tr:last-child td.day-start { border-left: 3px solid #4a6278 !important; }
+    #tableBody tr:last-child td.day-end   { border-right: 3px solid #4a6278 !important; }
+
     .col-main { 
         width: 300px; 
         min-width: 300px; 
@@ -100,7 +113,9 @@
     }
     
     .class-row { background: #d8dfe6; font-weight: bold; }
-    .class-row td { height: 45px; }
+    .class-row td { height: 45px; border: 1px solid #b0bbc7 !important; }
+    .class-row td.day-start { border-left: 3px solid #4a6278 !important; }
+    .class-row td.day-end   { border-right: 3px solid #4a6278 !important; }
     .class-name-container { 
         display: flex; 
         align-items: center; 
@@ -798,7 +813,11 @@
                         // Deux mini-colonnes M et AM dans la 3e ligne
                         HALF_DAYS.forEach(hd => {
                             let hdTh = document.createElement('th');
-                            hdTh.className = 'half-day-col' + (today ? ' today-highlight' : '');
+                            const isStart = hd === 'M', isEnd = hd === 'AM';
+                            hdTh.className = 'half-day-col'
+                                + (today ? ' today-highlight' : '')
+                                + (isStart ? ' day-start' : '')
+                                + (isEnd   ? ' day-end'   : '');
                             hdTh.style.width = '18px';
                             hdTh.style.fontSize = '9px';
                             hdTh.textContent = hd;
@@ -903,8 +922,9 @@
                                 const display = total > 0
                                     ? `<span style="font-size:9px; font-weight:bold;">${total}<span style="font-size:7px; font-weight:normal;">(${hdE})</span></span>`
                                     : "";
+                                const borderCls = hd === 'M' ? ' day-start' : ' day-end';
                                 // Pas de today-highlight sur les lignes de classe
-                                tr.innerHTML += `<td style="text-align:center; width:18px;">${display}</td>`;
+                                tr.innerHTML += `<td class="${borderCls}" style="text-align:center; width:18px;">${display}</td>`;
                             });
                         }
                     });
@@ -945,7 +965,8 @@
                                         const key = `${mIdx}-${day.num}-${hd}`;
                                         const val = st.data[key] || '';
                                         const highlight = today ? ' today-highlight' : '';
-                                        stHtml += `<td class="cell-abs st-${val || 'none'}${highlight}" 
+                                        const borderCls = hd === 'M' ? ' day-start' : ' day-end';
+                                        stHtml += `<td class="cell-abs st-${val || 'none'}${highlight}${borderCls}" 
                                             onclick="updateStatus(${cIdx},${sIdx},'${key}')"
                                             style="width:18px; font-size:9px;">${val}</td>`;
                                     });
@@ -999,7 +1020,8 @@
                         }));
                         const total = hdA + hdE;
                         const display = total > 0 ? `${total}<span style="font-size:8px;">(${hdE})</span>` : "-";
-                        htmlFinal += `<td style="text-align:center; font-size:9px; width:18px;">${display}</td>`;
+                        const borderCls = hd === 'M' ? ' day-start' : ' day-end';
+                        htmlFinal += `<td class="${borderCls}" style="text-align:center; font-size:9px; width:18px;">${display}</td>`;
                     });
                 }
             });
