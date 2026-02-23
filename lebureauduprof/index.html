@@ -1617,7 +1617,7 @@ function undoAction() {
     localStorage.setItem('profBoardConfig', snap);
     _lastW = window.innerWidth;
     restoreBoardFromJSON(snap);
-    isRestoringState = false;
+    // isRestoringState est remis à false dans le setTimeout de restoreBoardFromJSON
     updateUndoRedoBtns();
 }
 
@@ -1637,7 +1637,7 @@ function redoAction() {
     localStorage.setItem('profBoardConfig', snap);
     _lastW = window.innerWidth;
     restoreBoardFromJSON(snap);
-    isRestoringState = false;
+    // isRestoringState est remis à false dans le setTimeout de restoreBoardFromJSON
     updateUndoRedoBtns();
 }
 
@@ -1789,6 +1789,11 @@ function loadBoard() {
                     localStorage.setItem('boardBackground', data.background);
                 }
                 restoreBoardFromJSON(json);
+                // Après restauration complète (>50ms pour le contenu HTML), resauvegarder
+                // pour que le localStorage et les scènes reflètent l'état réel avec le contenu
+                setTimeout(() => {
+                    if (!isRestoringState) saveBoard();
+                }, 200);
             })
             .catch(err => {
                 console.warn('Impossible de charger le modèle de bienvenue :', err);
@@ -1797,6 +1802,8 @@ function loadBoard() {
 }
 
 function restoreBoardFromJSON(json) {
+    // Bloquer saveBoard() pendant toute la restauration (y compris les setTimeout 50ms)
+    isRestoringState = true;
     const parsed = JSON.parse(json);
     const data = Array.isArray(parsed) ? parsed : (parsed.widgets || []);
     const refW = parsed.refWidth || 1920;
@@ -1810,6 +1817,9 @@ function restoreBoardFromJSON(json) {
         setTimeout(() => redrawStrokes(), 100);
     }
     const curW = window.innerWidth, curVH = virtualH(curW);
+    // Compter les widgets non-stickers pour savoir quand tous les setTimeout(50ms) sont terminés
+    const nonStickerCount = data.filter(w => w.type !== 'sticker').length;
+    let restoredCount = 0;
     data.forEach(w => {
         // Restauration spéciale des stickers (pas de template HTML)
         if (w.type === 'sticker') {
@@ -1935,8 +1945,17 @@ function restoreBoardFromJSON(json) {
             }
             applyEditorStyleFromConfig(widget, w.editorStyle);
             scaleFontSizesFromRef(widget, refW);
+            // Libérer isRestoringState une fois que tous les widgets ont leur contenu
+            restoredCount++;
+            if (restoredCount >= nonStickerCount) {
+                isRestoringState = false;
+            }
         }, 50);
     });
+    // Si aucun widget non-sticker, libérer immédiatement
+    if (nonStickerCount === 0) {
+        isRestoringState = false;
+    }
     if (parsed.shapes) {
         parsed.shapes.forEach(s => {
             const curW2 = window.innerWidth, curVH2 = virtualH(curW2);
