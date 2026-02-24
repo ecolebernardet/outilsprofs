@@ -13,8 +13,37 @@
             --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
             --border-radius: 18px;
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
-        #board { position: absolute; background-color: var(--bg-color); z-index: 0; transition: background 0.3s ease; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; overflow-y: auto; }
+        body.presentation-mode { overflow: hidden; }
+        /* Scrollbar discrète en mode normal */
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.55); }
+        /* Ligne repère limite basse du mode présentation */
+        #pres-limit-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 0;
+            border-top: 2px dashed rgba(255, 80, 80, 0.6);
+            z-index: 99990;
+            pointer-events: none;
+        }
+        #pres-limit-line::after {
+            content: '← limite basse présentation →';
+            position: absolute;
+            right: 16px;
+            top: -18px;
+            font-size: 11px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: rgba(255, 100, 100, 0.75);
+            background: rgba(0,0,0,0.25);
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        body.presentation-mode #pres-limit-line { display: none; }
 
         /* --- WIDGETS --- */
         .widget { position: absolute; background: var(--widget-bg); border-radius: var(--border-radius); box-shadow: var(--shadow); display: flex; flex-direction: column; z-index: 1; border: 2px solid transparent; height: auto; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
@@ -455,41 +484,56 @@
 			position: fixed !important;
 			top: 0 !important; left: 0 !important;
 		}
-		body.presentation-mode .widget .drag-handle,
-		body.presentation-mode .widget .widget-close-handle,
-		body.presentation-mode .widget .widget-pin-handle,
-		body.presentation-mode .widget .widget-back-handle,
-		body.presentation-mode .widget .widget-rotate-handle,
-		body.presentation-mode .widget .widget-menu-handle,
+		/* En mode présentation : masquer toolbar d'édition et ctx-menu */
 		body.presentation-mode .widget .editor-toolbar,
-		body.presentation-mode .widget .widget-ctx-menu,
-		body.presentation-mode .shape-widget .drag-handle,
-		body.presentation-mode .shape-widget .widget-close-handle,
-		body.presentation-mode .shape-widget .widget-pin-handle,
-		body.presentation-mode .shape-widget .widget-back-handle,
-		body.presentation-mode .shape-widget .widget-rotate-handle,
-		body.presentation-mode .shape-widget .widget-menu-handle,
-		body.presentation-mode .shape-widget .shape-resize-handle,
-		body.presentation-mode .shape-widget .resize-lock-btn,
-		body.presentation-mode .shape-widget .flip-h-btn,
-		body.presentation-mode .shape-widget .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
+		body.presentation-mode .widget .widget-ctx-menu { opacity: 0 !important; pointer-events: none !important; }
+		/* Masquer le bouton fermer en présentation (évite suppressions accidentelles) */
+		body.presentation-mode .widget .widget-close-handle,
+		body.presentation-mode .shape-widget .widget-close-handle { opacity: 0 !important; pointer-events: none !important; }
+		/* Les widgets restent interactifs en présentation */
+		body.presentation-mode .widget,
+		body.presentation-mode .shape-widget {
+			pointer-events: auto !important;
+			cursor: default !important;
+		}
+		/* Bordure subtile au survol en présentation */
+		body.presentation-mode .widget:hover,
+		body.presentation-mode .shape-widget:hover {
+			border-color: rgba(74,144,226,0.35) !important;
+		}
 		body.presentation-mode .widget:focus-within,
 		body.presentation-mode .shape-widget:focus-within {
-			border-color: transparent !important;
+			border-color: rgba(74,144,226,0.4) !important;
 			box-shadow: var(--shadow) !important;
 			outline: none !important;
 		}
-		body.presentation-mode .widget,
-		body.presentation-mode .shape-widget {
-			pointer-events: none !important;
-			cursor: default !important;
-		}
-		/* Garder les interactions internes des widgets (clics sur iframes, vidéos, météo...) */
-		body.presentation-mode .widget .editor-container,
-		body.presentation-mode .widget iframe,
-		body.presentation-mode .widget .meteo-city {
-			pointer-events: auto !important;
-		}
+		/* POIGNÉES VISIBLES AU SURVOL en mode présentation
+		   (utiliser :hover car les iframes/widgets captent le focus et bloquent :focus-within) */
+		body.presentation-mode .widget:hover .drag-handle,
+		body.presentation-mode .widget:hover .widget-pin-handle,
+		body.presentation-mode .widget:hover .widget-back-handle,
+		body.presentation-mode .widget:hover .widget-rotate-handle,
+		body.presentation-mode .widget:hover .widget-menu-handle,
+		body.presentation-mode .widget:focus-within .drag-handle,
+		body.presentation-mode .widget:focus-within .widget-pin-handle,
+		body.presentation-mode .widget:focus-within .widget-back-handle,
+		body.presentation-mode .widget:focus-within .widget-rotate-handle,
+		body.presentation-mode .widget:focus-within .widget-menu-handle { opacity: 1 !important; pointer-events: auto !important; }
+		/* Formes (shape-widget) */
+		body.presentation-mode .shape-widget:hover .drag-handle,
+		body.presentation-mode .shape-widget:hover .widget-pin-handle,
+		body.presentation-mode .shape-widget:hover .widget-back-handle,
+		body.presentation-mode .shape-widget:hover .widget-rotate-handle,
+		body.presentation-mode .shape-widget:hover .widget-menu-handle,
+		body.presentation-mode .shape-widget:hover .shape-resize-handle,
+		body.presentation-mode .shape-widget:hover .resize-lock-btn,
+		body.presentation-mode .shape-widget:focus-within .drag-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-pin-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-back-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-rotate-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-menu-handle,
+		body.presentation-mode .shape-widget:focus-within .shape-resize-handle,
+		body.presentation-mode .shape-widget:focus-within .resize-lock-btn { opacity: 1 !important; pointer-events: auto !important; }
 		body.presentation-mode #selection-controls { display: none !important; }
 		/* Bouton présentation en mode présentation : style "Quitter" discret */
 		body.presentation-mode #presentation-btn {
@@ -613,6 +657,7 @@
 <body>
 
 <div id="board">
+<div id="pres-limit-line"></div>
     <div id="selection-controls">
         <div class="sc-btn sc-move"   id="sc-move-btn"   title="Déplacer">✥</div>
         <div class="sc-btn sc-rotate" id="sc-rotate-btn" title="Faire pivoter">↻</div>
@@ -1518,6 +1563,23 @@ function applyBoardRatio(newW) {
     board.style.position = 'absolute';
     board.style.top      = Math.max(0, (window.innerHeight - vh) / 2) + 'px';
     board.style.left     = '0';
+    updatePresLimitLine();
+}
+
+function updatePresLimitLine() {
+    const line = document.getElementById('pres-limit-line');
+    if (!line) return;
+    // La limite basse présentation = 100vh de la fenêtre, mesurée depuis le haut du board
+    const boardTop = parseFloat(board.style.top) || 0;
+    const limitY = window.innerHeight - boardTop;
+    const boardH = parseFloat(board.style.height) || virtualH(window.innerWidth);
+    // N'afficher la ligne que si la limite est à l'intérieur du board (pas tout en bas ou hors board)
+    if (limitY > 20 && limitY < boardH - 10) {
+        line.style.top = limitY + 'px';
+        line.style.display = 'block';
+    } else {
+        line.style.display = 'none';
+    }
 }
 
 function scaleFontSizesBy(el, factor) {
@@ -2070,13 +2132,11 @@ function togglePresentationMode() {
         board.style.position = 'fixed';
         board.style.top = '0'; board.style.left = '0';
         board.style.width = '100vw'; board.style.height = '100vh';
-        // Mettre le bouton DANS le board (qui couvre tout) pour qu'il soit visible
         if (btn) {
             board.appendChild(btn);
             btn.innerHTML = '⛶ Quitter <span style="font-size:11px;opacity:0.65;margin-left:4px;">[Échap]</span>';
             btn.style.cssText = 'position:absolute;bottom:20px;right:20px;z-index:99999;background:rgba(20,20,20,0.85);color:white;border:2px solid rgba(255,255,255,0.3);font-size:13px;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,0.6);';
         }
-        // Plein écran navigateur
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(() => {});
         }
@@ -2087,7 +2147,6 @@ function togglePresentationMode() {
             if (el && el.dataset.ph !== undefined) { el.style.display = el.dataset.ph || ''; delete el.dataset.ph; }
         });
         if (btn) {
-            // Remettre le bouton dans le body
             document.body.appendChild(btn);
             btn.innerHTML = '📽️';
             btn.style.cssText = 'position:fixed;bottom:80px;right:24px;z-index:100000;background:#1a1a2e;color:white;border:2px solid rgba(255,255,255,0.25);font-size:20px;padding:7px 12px;border-radius:20px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.5);';
