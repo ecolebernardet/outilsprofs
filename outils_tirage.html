@@ -572,7 +572,9 @@
 
             // Ajouter les événements de clic
             document.querySelectorAll('.student-item').forEach(item => {
-                item.addEventListener('click', () => toggleStudent(parseInt(item.dataset.studentId)));
+                item.addEventListener('click', function() {
+                    toggleStudent(Number(this.dataset.studentId));
+                });
             });
 
             updateStats();
@@ -596,19 +598,22 @@
 
         // ========== INTERACTION AVEC LES ÉLÈVES ========== 
         function toggleStudent(id) {
-        id = Number(id);
+            id = Number(id);
 
-        if (state.remaining.includes(id)) {
-            // marquer absent -> retirer
-            state.remaining = state.remaining.filter(item => item !== id);
-        } else {
-            // remettre présent -> ajouter (sans doublon)
-            state.remaining = Array.from(new Set([...state.remaining, id]));
+            // S'assurer que tous les IDs dans remaining sont bien des numbers
+            state.remaining = state.remaining.map(Number);
+
+            if (state.remaining.includes(id)) {
+                // marquer absent -> retirer
+                state.remaining = state.remaining.filter(item => Number(item) !== id);
+            } else {
+                // remettre présent -> ajouter (sans doublon)
+                state.remaining = Array.from(new Set([...state.remaining, id]));
+            }
+
+            saveState();
+            renderList();
         }
-
-        saveState();
-        renderList();
-    }
 
         // ========== ANIMATION DU TIRAGE ========== 
         function drawName() {
