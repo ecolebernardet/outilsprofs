@@ -432,6 +432,42 @@
         return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === AUTH_CONFIG.hash;
     }
 
+    // ============================================================
+    //  CHIFFREMENT AES-GCM (conformité RGPD)
+    //  Clé dérivée du mot de passe — jamais stockée.
+    //  Migration automatique : les données en clair sont chiffrées
+    //  à la première connexion, de façon transparente.
+    // ============================================================
+    let _encryptionKey = null;
+
+    async function deriveEncryptionKey(password) {
+        const enc = new TextEncoder();
+        const km = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+        return crypto.subtle.deriveKey(
+            { name: "PBKDF2", salt: enc.encode("rgpd-school-enc-v1"), iterations: 200000, hash: "SHA-256" },
+            km, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+        );
+    }
+
+    async function encryptData(data) {
+        if (!_encryptionKey) return data;
+        const enc = new TextEncoder();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, _encryptionKey, enc.encode(JSON.stringify(data)));
+        const toB64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+        return { __encrypted: true, iv: toB64(iv), ct: toB64(ct) };
+    }
+
+    async function decryptData(payload) {
+        if (!payload || !payload.__encrypted) return payload; // données en clair (legacy)
+        if (!_encryptionKey) throw new Error("Clé manquante");
+        const fromB64 = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const plain = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: fromB64(payload.iv) }, _encryptionKey, fromB64(payload.ct)
+        );
+        return JSON.parse(new TextDecoder().decode(plain));
+    }
+
     function isPasswordEnabled() {
         return localStorage.getItem('password_protection_disabled') !== 'true';
     }
@@ -481,15 +517,25 @@
     }
 
     async function checkAccess() {
-        if (!isPasswordEnabled()) return;
-        if (sessionStorage.getItem('app_access_granted') === 'true') return;
+        if (!isPasswordEnabled()) {
+            _encryptionKey = await deriveEncryptionKey("no-password-default-key");
+            return;
+        }
+        // Session déjà validée : restaurer la clé
+        const cached = sessionStorage.getItem('app_session_pass');
+        if (cached && sessionStorage.getItem('app_access_granted') === 'true') {
+            _encryptionKey = await deriveEncryptionKey(cached);
+            return;
+        }
         const p = await showPrompt("Saisissez le mot de passe pour accéder à l'application.", {
             title: "Accès protégé", type: 'info', icon: MODAL_ICONS.lock,
             inputType: 'password', placeholder: '••••••••',
             labelOk: 'Entrer', labelCancel: 'Annuler'
         });
         if (p && await verifyPass(p)) {
+            _encryptionKey = await deriveEncryptionKey(p);
             sessionStorage.setItem('app_access_granted', 'true');
+            sessionStorage.setItem('app_session_pass', p);
         } else {
             document.body.innerHTML = "<div style='text-align:center;padding:50px;font-family:sans-serif;'><h1>🔒 Accès verrouillé</h1><p>Mot de passe incorrect.</p><button onclick='location.reload()' style='padding:10px 20px;border-radius:8px;background:#3498db;color:white;border:none;cursor:pointer;font-size:14px;'>Réessayer</button></div>";
             throw new Error("Unauthorized");
@@ -714,16 +760,24 @@
         try {
             const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
             if (data) {
-                schoolData = data.content.schoolData || [];
-                excludedDates = data.content.excludedDates || [];
+                const decrypted = await decryptData(data.content);
+                // Migration : données en clair détectées → re-sauvegarder chiffrées
+                if (data.content && !data.content.__encrypted) {
+                    console.log("Migration RGPD : chiffrement des données existantes…");
+                    const payload = { schoolData: decrypted.schoolData || [], excludedDates: decrypted.excludedDates || [], sharedNote: decrypted.sharedNote || '' };
+                    const encrypted = await encryptData(payload);
+                    await _supabase.from('absences_data').upsert({ id: 1, content: encrypted });
+                }
+                schoolData = decrypted.schoolData || [];
+                excludedDates = decrypted.excludedDates || [];
 
                 // Migration des anciennes clés
                 if (migrateOldKeys()) {
                     console.log("Migration des clés demi-journées effectuée.");
                 }
 
-                if (data.content.sharedNote !== undefined) {
-                    const noteText = data.content.sharedNote;
+                if (decrypted.sharedNote !== undefined) {
+                    const noteText = decrypted.sharedNote;
                     document.getElementById('noteContent').value = noteText;
                     const note = document.getElementById('stickyNote');
                     if (noteText && noteText.trim().length > 0) {
@@ -754,8 +808,10 @@
 
     async function save() {
         const currentNote = document.getElementById('noteContent').value;
-        await _supabase.from('absences_data').upsert({ id: 1, content: { schoolData, excludedDates, sharedNote: currentNote } });
-        document.getElementById('syncIndicator').innerText = "✅ Synchronisé";
+        const payload = { schoolData, excludedDates, sharedNote: currentNote };
+        const content = await encryptData(payload);
+        await _supabase.from('absences_data').upsert({ id: 1, content });
+        document.getElementById('syncIndicator').innerText = "✅ Synchronisé 🔒";
     }
 
     function refreshSchoolMonths() {
