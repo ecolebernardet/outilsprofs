@@ -348,6 +348,11 @@
                 <a href="javascript:void(0)" onclick="openVacationModal()"><i class="fas fa-umbrella-beach"></i> Configurer Vacances</a>
                 <a href="javascript:void(0)" onclick="openImportModal()"><i class="fas fa-file-import"></i> Importer / Sauvegarder</a>
                 <hr style="border:0; border-top:1px solid #eee; margin:5px 0;">
+                <a href="javascript:void(0)" onclick="togglePasswordProtection()" id="passwordToggleBtn">
+                    <i class="fas fa-lock" id="passwordToggleIcon"></i>
+                    <span id="passwordToggleLabel">Protection par mot de passe</span>
+                </a>
+                <hr style="border:0; border-top:1px solid #eee; margin:5px 0;">
                 <a href="javascript:void(0)" onclick="resetAnnualAbsences()" style="color:var(--absent)">
                     <i class="fas fa-broom"></i> Effacer toutes les absences
                 </a>
@@ -427,7 +432,56 @@
         return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === AUTH_CONFIG.hash;
     }
 
+    function isPasswordEnabled() {
+        return localStorage.getItem('password_protection_disabled') !== 'true';
+    }
+
+    function updatePasswordToggleUI() {
+        const enabled = isPasswordEnabled();
+        const btn = document.getElementById('passwordToggleBtn');
+        const icon = document.getElementById('passwordToggleIcon');
+        const label = document.getElementById('passwordToggleLabel');
+        if (!btn) return;
+        if (enabled) {
+            icon.className = 'fas fa-lock';
+            icon.style.color = 'var(--success)';
+            label.textContent = 'Protection activée (désactiver)';
+            btn.style.color = 'var(--success)';
+        } else {
+            icon.className = 'fas fa-lock-open';
+            icon.style.color = 'var(--gray)';
+            label.textContent = 'Protection désactivée (activer)';
+            btn.style.color = 'var(--gray)';
+        }
+    }
+
+    async function togglePasswordProtection() {
+        const enabled = isPasswordEnabled();
+        if (enabled) {
+            // Demander le mot de passe avant de désactiver
+            const p = await showPrompt("Confirmez le mot de passe pour désactiver la protection.", {
+                title: "Désactiver la protection", type: 'warning', icon: MODAL_ICONS.lock,
+                inputType: 'password', placeholder: '••••••••',
+                labelOk: 'Désactiver', labelCancel: 'Annuler'
+            });
+            if (!p) return;
+            if (await verifyPass(p)) {
+                localStorage.setItem('password_protection_disabled', 'true');
+                updatePasswordToggleUI();
+                showToast('🔓 Protection par mot de passe désactivée', 'warning');
+            } else {
+                showToast('❌ Mot de passe incorrect', 'error');
+            }
+        } else {
+            // Réactiver sans demander de mot de passe
+            localStorage.removeItem('password_protection_disabled');
+            updatePasswordToggleUI();
+            showToast('🔒 Protection par mot de passe activée', 'success');
+        }
+    }
+
     async function checkAccess() {
+        if (!isPasswordEnabled()) return;
         if (sessionStorage.getItem('app_access_granted') === 'true') return;
         const p = await showPrompt("Saisissez le mot de passe pour accéder à l'application.", {
             title: "Accès protégé", type: 'info', icon: MODAL_ICONS.lock,
@@ -656,6 +710,7 @@
     // --- Cloud ---
     async function loadFromCloud() {
         await checkAccess();
+        updatePasswordToggleUI();
         try {
             const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
             if (data) {
