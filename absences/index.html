@@ -428,7 +428,7 @@
     }
 
     async function checkAccess() {
-        if (sessionStorage.getItem('app_access_granted') === 'true') return;
+        if (sessionStorage.getItem('app_access_granted') === 'false') return;
         const p = await showPrompt("Saisissez le mot de passe pour accéder à l'application.", {
             title: "Accès protégé", type: 'info', icon: MODAL_ICONS.lock,
             inputType: 'password', placeholder: '••••••••',
