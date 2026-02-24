@@ -428,7 +428,7 @@
     }
 
     async function checkAccess() {
-        if (sessionStorage.getItem('app_access_granted') === 'false') return;
+        if (sessionStorage.getItem('app_access_granted') === 'true') return;
         const p = await showPrompt("Saisissez le mot de passe pour accéder à l'application.", {
             title: "Accès protégé", type: 'info', icon: MODAL_ICONS.lock,
             inputType: 'password', placeholder: '••••••••',
@@ -655,6 +655,7 @@
 
     // --- Cloud ---
     async function loadFromCloud() {
+        await checkAccess();
         try {
             const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
             if (data) {
