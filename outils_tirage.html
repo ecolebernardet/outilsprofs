@@ -447,15 +447,21 @@
 
         // ========== ÉTAT DE L'APPLICATION ========== 
         const state = {
-            rawData: JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || [],
-            remaining: JSON.parse(localStorage.getItem(STORAGE_KEYS.remaining)) || [],
-            isDrawing: false
-        };
+        rawData: (JSON.parse(localStorage.getItem(STORAGE_KEYS.students)) || []).map(s => ({
+            ...s,
+            id: Number(s.id) // <-- normalise id en number
+        })),
+        remaining: (JSON.parse(localStorage.getItem(STORAGE_KEYS.remaining)) || []).map(Number), // <-- force number
+        isDrawing: false
+    };
 
-        // Initialiser remaining si vide
-        if (state.remaining.length === 0 && state.rawData.length > 0) {
-            state.remaining = state.rawData.map(el => el.id);
-        }
+    // Initialiser remaining si vide
+    if (state.remaining.length === 0 && state.rawData.length > 0) {
+        state.remaining = state.rawData.map(el => el.id);
+    }
+
+    // Nettoyage anti-doublons (sécurité)
+    state.remaining = Array.from(new Set(state.remaining));
 
         // ========== THÈME ========== 
         const themePrefs = JSON.parse(localStorage.getItem(STORAGE_KEYS.theme)) || {};
@@ -590,14 +596,19 @@
 
         // ========== INTERACTION AVEC LES ÉLÈVES ========== 
         function toggleStudent(id) {
-            if (state.remaining.includes(id)) {
-                state.remaining = state.remaining.filter(item => item !== id);
-            } else {
-                state.remaining.push(id);
-            }
-            saveState();
-            renderList();
+        id = Number(id);
+
+        if (state.remaining.includes(id)) {
+            // marquer absent -> retirer
+            state.remaining = state.remaining.filter(item => item !== id);
+        } else {
+            // remettre présent -> ajouter (sans doublon)
+            state.remaining = Array.from(new Set([...state.remaining, id]));
         }
+
+        saveState();
+        renderList();
+    }
 
         // ========== ANIMATION DU TIRAGE ========== 
         function drawName() {
