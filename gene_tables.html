@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tables de Multiplication - OutilsProfs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+        :root {
+            --bg-page: #121212;
+            --text-page: #ffffff;
+            --column-border: rgba(255,255,255,0.1);
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --accent-color: #06b6d4;
+            --contrast-color: #fff;
+        }
+
+        body.light-mode {
+            --bg-page: #eeeeee;
+            --text-page: #111827;
+            --column-border: #ddd;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-page);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--column-border);
+            padding: calc(env(safe-area-inset-top) + 10px) 15px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .ui-btn-round {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 15px 80px;
+        }
+
+        /* Onglets */
+        .tabs-nav {
+            display: flex;
+            background: var(--card-bg);
+            padding: 5px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--column-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 13px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            color: var(--text-page);
+            opacity: 0.5;
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+            opacity: 1 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Grille Nombres */
+        .num-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .num-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--column-border);
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-page);
+        }
+
+        .num-btn.active {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+            border-color: transparent;
+        }
+
+        /* Cartes Multiplication */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .mult-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--column-border);
+            border-top: 4px solid var(--accent-color);
+        }
+
+        .mult-card .calc { font-weight: 600; opacity: 0.7; font-size: 14px; }
+        .mult-card .res { font-weight: 900; font-size: 24px; display: block; margin-top: 2px; }
+
+        /* Quiz */
+        .quiz-box {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--column-border);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .quiz-q { font-size: 42px; font-weight: 900; margin-bottom: 20px; }
+        .quiz-input {
+            width: 120px;
+            background: rgba(127,127,127,0.1);
+            border: 2px solid var(--column-border);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 32px;
+            font-weight: 900;
+            text-align: center;
+            color: var(--text-page);
+            outline: none;
+        }
+
+        /* Pythagore */
+        .pyth-container { overflow-x: auto; margin-top: 10px; }
+        table { border-collapse: collapse; margin: 0 auto; background: var(--card-bg); border-radius: 10px; overflow: hidden; }
+        td, th {
+            width: 40px; height: 40px;
+            border: 1px solid var(--column-border);
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        th { background: rgba(127,127,127,0.1); font-weight: 900; }
+        td.dcell { cursor: pointer; transition: background 0.2s; }
+        td.hl-yellow { background-color: var(--accent-color) !important; color: white !important; }
+
+        .toggle-btn { color: var(--text-page); opacity: 0.6; }
+        .toggle-btn.active { background-color: var(--accent-color) !important; color: white !important; opacity: 1; }
+
+        /* Modale */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 900;
+            border: none;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .confetti-wrapper {
+            position: fixed; inset: 0; pointer-events: none; z-index: 2000;
+        }
+        .cpiece { position: absolute; top: -10px; border-radius: 2px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(105vh) rotate(360deg); } }
+
+        @media (min-width: 768px) {
+            .num-grid { grid-template-columns: repeat(10, 1fr); }
+            td, th { width: 50px; height: 50px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" id="btn-retour" class="ui-btn-round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+    <h1 class="font-black text-lg uppercase tracking-tight">Tables</h1>
+    <button id="btn-aide" class="ui-btn-round text-xl">💡</button>
+</header>
+
+<div class="main-container">
+    <div id="container-retour-liste" class="mb-6">
+        <a href="generateurs.html" id="btn-retour-liste" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black uppercase transition-transform active:scale-95 shadow-sm bg-[var(--accent-color)] text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour aux générateurs
+        </a>
+    </div>
+
+    <div class="tabs-nav">
+        <div class="tab-btn active" onclick="switchTab('table')" id="tab-table">Tableau</div>
+        <div class="tab-btn" onclick="switchTab('quiz')" id="tab-quiz">Quiz</div>
+        <div class="tab-btn" onclick="switchTab('pyth')" id="tab-pyth">Pythagore</div>
+    </div>
+
+    <div id="zone-table">
+        <div class="num-grid" id="grid-selection"></div>
+        <div class="cards-container" id="cards-display"></div>
+    </div>
+
+    <div id="zone-quiz" class="hidden">
+        <div class="num-grid" id="grid-selection-quiz"></div>
+        <div class="quiz-box">
+            <div id="quiz-question" class="quiz-q">Prêt ?</div>
+            <input type="number" id="quiz-answer" class="quiz-input" placeholder="?" inputmode="numeric">
+            <div id="quiz-feedback" class="mt-4 font-black text-xl"></div>
+        </div>
+    </div>
+
+    <div id="zone-pyth" class="hidden">
+        <div class="flex justify-center gap-4 mb-4">
+            <button onclick="togglePythMode('full')" class="toggle-btn active px-4 py-2 rounded-lg font-bold text-sm" id="btn-pyth-full">Complète</button>
+            <button onclick="togglePythMode('empty')" class="toggle-btn px-4 py-2 rounded-lg font-bold text-sm" id="btn-pyth-empty">À trous</button>
+        </div>
+        <div class="pyth-container">
+            <table id="bigTable"></table>
+        </div>
+    </div>
+</div>
+
+<div id="modal-aide" class="modal">
+    <div class="modal-content border-t-4 border-[var(--accent-color)] shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-3xl">💡</span>
+            <h2 class="text-2xl font-black uppercase tracking-tight">Comment ça marche ?</h2>
+        </div>
+        
+        <div class="space-y-6 text-sm leading-relaxed text-[var(--text-page)]">
+            <div class="p-3 rounded-xl bg-black/5 dark:bg-white/5 border-l-4 border-[var(--accent-color)]">
+                <p class="font-bold uppercase text-[11px] opacity-60 mb-1">Mode Tableau</p>
+                <p>Appuie sur un chiffre pour afficher sa <b>table complète</b>. Idéal pour mémoriser ou recopier.</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-black/5 dark:bg-white/5 border-l-4 border-[var(--accent-color)]">
+                <p class="font-bold uppercase text-[11px] opacity-60 mb-1">Mode Quiz</p>
+                <p>Sélectionne une ou plusieurs tables pour t'entraîner. Tape la réponse : si c'est juste, tu gagnes des confettis !</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-black/5 dark:bg-white/5 border-l-4 border-[var(--accent-color)]">
+                <p class="font-bold uppercase text-[11px] opacity-60 mb-1">Mode Pythagore</p>
+                <p>Explore la grille de multiplication. Utilise le mode <b>"À trous"</b> pour tester tes connaissances en cliquant sur les cases <b>?</b>.</p>
+            </div>
+        </div>
+
+        <button id="btn-fermer-aide" class="btn-primary mt-8 transform transition-transform active:scale-95">
+            J'ai compris
+        </button>
+    </div>
+</div>
+
+<div class="confetti-wrapper" id="confettiWrap"></div>
+
+<script>
+    const COULEURS_THEME = {
+        'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308',
+        'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6',
+        'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1',
+        'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899',
+        'rose': '#f43f5e', 'gray': '#6b7280'
+    };
+
+    let currentTable = 2;
+    let selectedQuizTables = [2];
+    let quizQ = { a: 0, b: 0, r: 0 };
+    let pythMode = 'full';
+
+    function initTheme() {
+        if (localStorage.getItem('theme_mode') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        const themePrefs = JSON.parse(localStorage.getItem('theme_tuiles')) || {};
+        const hexColor = COULEURS_THEME[themePrefs.gen || 'cyan'] || '#06b6d4';
+        
+        document.documentElement.style.setProperty('--accent-color', hexColor);
+        
+        const elementsToColor = document.querySelectorAll(
+            '#btn-retour, #btn-aide, #btn-retour-liste, .tab-btn.active, .num-btn.active, .toggle-btn.active, .btn-primary'
+        );
+        
+        elementsToColor.forEach(el => {
+            if (el) {
+                el.style.backgroundColor = hexColor;
+                el.style.color = '#fff';
+            }
+        });
+    }
+
+    function switchTab(tab) {
+        ['zone-table','zone-quiz','zone-pyth'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('zone-'+tab).classList.remove('hidden');
+        
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.backgroundColor = '';
+            b.style.color = '';
+        });
+        
+        document.getElementById('tab-'+tab).classList.add('active');
+        
+        if(tab === 'pyth') renderPythagore();
+        if(tab === 'quiz') nextQuiz();
+        
+        initTheme();
+    }
+
+    function renderGrids() {
+        const grid = document.getElementById('grid-selection');
+        const gridQ = document.getElementById('grid-selection-quiz');
+        grid.innerHTML = gridQ.innerHTML = '';
+        
+        for(let i=1; i<=10; i++) {
+            const btn = document.createElement('button');
+            btn.className = `num-btn ${i===currentTable?'active':''}`;
+            btn.innerText = i;
+            btn.onclick = () => {
+                currentTable = i;
+                renderGrids();
+                renderTable();
+            };
+            grid.appendChild(btn);
+
+            const btnQ = document.createElement('button');
+            btnQ.className = `num-btn ${selectedQuizTables.includes(i)?'active':''}`;
+            btnQ.innerText = i;
+            btnQ.onclick = () => {
+                if(selectedQuizTables.includes(i)) {
+                    if(selectedQuizTables.length > 1) selectedQuizTables = selectedQuizTables.filter(x => x!==i);
+                } else {
+                    selectedQuizTables.push(i);
+                }
+                renderGrids();
+                nextQuiz();
+            };
+            gridQ.appendChild(btnQ);
+        }
+        initTheme();
+    }
+
+    function renderTable() {
+        const cont = document.getElementById('cards-display');
+        cont.innerHTML = '';
+        for(let i=1; i<=10; i++) {
+            cont.innerHTML += `
+                <div class="mult-card">
+                    <span class="calc">${i} x ${currentTable}</span>
+                    <span class="res">${i*currentTable}</span>
+                </div>
+            `;
+        }
+        initTheme();
+    }
+
+    function nextQuiz() {
+        const a = selectedQuizTables[Math.floor(Math.random()*selectedQuizTables.length)];
+        const b = Math.floor(Math.random()*10)+1;
+        quizQ = { a, b, r: a*b };
+        document.getElementById('quiz-question').innerText = `${a} x ${b}`;
+        document.getElementById('quiz-answer').value = '';
+        document.getElementById('quiz-feedback').innerText = '';
+        document.getElementById('quiz-answer').focus();
+    }
+
+    document.getElementById('quiz-answer').addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        if(val === quizQ.r) {
+            document.getElementById('quiz-feedback').innerText = 'Bravo ! 🎉';
+            document.getElementById('quiz-feedback').style.color = '#22c55e';
+            launchConfetti();
+            setTimeout(nextQuiz, 1000);
+        }
+    });
+
+    function togglePythMode(m) {
+        pythMode = m;
+        document.querySelectorAll('.toggle-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.backgroundColor = '';
+        });
+        document.getElementById('btn-pyth-'+m).classList.add('active');
+        renderPythagore();
+        initTheme();
+    }
+
+    function renderPythagore() {
+        const table = document.getElementById('bigTable');
+        let html = '<tr><th>x</th>';
+        for(let i=1; i<=10; i++) html += `<th>${i}</th>`;
+        html += '</tr>';
+
+        for(let i=1; i<=10; i++) {
+            html += `<tr><th>${i}</th>`;
+            for(let j=1; j<=10; j++) {
+                const isHidden = pythMode === 'empty' && Math.random() > 0.6;
+                if(isHidden) {
+                    html += `<td class="dcell" onclick="checkPyth(this, ${i*j})">?</td>`;
+                } else {
+                    html += `<td onclick="highlightLine(${i}, ${j})">${i*j}</td>`;
+                }
+            }
+            html += '</tr>';
+        }
+        table.innerHTML = html;
+        initTheme();
+    }
+
+    function checkPyth(el, res) {
+        const val = prompt("Combien font-ils ?");
+        if(parseInt(val) === res) {
+            el.innerText = res;
+            el.style.background = '#22c55e';
+            el.style.color = 'white';
+        } else if(val !== null) {
+            alert("Raté ! Essaie encore.");
+        }
+    }
+
+    function highlightLine(r, c) {
+        clearHl();
+        const table = document.getElementById('bigTable');
+        for(let i=1; i<=10; i++) {
+            table.rows[r].cells[i].classList.add('hl-yellow');
+            table.rows[i].cells[c].classList.add('hl-yellow');
+        }
+        initTheme();
+    }
+
+    function clearHl() {
+        document.querySelectorAll('#bigTable td, #bigTable th').forEach(td => {
+            td.classList.remove('hl-yellow');
+            td.style.backgroundColor = '';
+            td.style.color = '';
+        });
+    }
+
+    function launchConfetti() {
+        const wrap = document.getElementById('confettiWrap');
+        wrap.innerHTML = '';
+        const colors = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#a855f7','#ec4899'];
+        for (let i=0;i<80;i++) {
+            const p = document.createElement('div');
+            p.className = 'cpiece';
+            p.style.left = Math.random()*100+'vw';
+            p.style.background = colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration = (1.5+Math.random()*2)+'s';
+            p.style.animationDelay = Math.random()+'s';
+            p.style.width = p.style.height = (7+Math.random()*7)+'px';
+            wrap.appendChild(p);
+            setTimeout(() => p.remove(), 4000);
+        }
+    }
+
+    // --- Gestion de la modale d'aide ---
+    const modalAide = document.getElementById('modal-aide');
+    const btnAide = document.getElementById('btn-aide');
+    const btnFermerAide = document.getElementById('btn-fermer-aide');
+
+    btnAide.addEventListener('click', () => {
+        modalAide.style.display = 'flex';
+    });
+
+    btnFermerAide.addEventListener('click', () => {
+        modalAide.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modalAide) {
+            modalAide.style.display = 'none';
+        }
+    });
+
+    window.onload = () => {
+        initTheme();
+        renderGrids();
+        renderTable();
+    };
+</script>
+
+</body>
+</html>
