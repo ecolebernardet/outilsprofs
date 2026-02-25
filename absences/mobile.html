@@ -454,33 +454,49 @@ async function saveData() {
     document.getElementById('savingDot').classList.add('saving');
     setSync('💾 Sauvegarde…');
     try {
-        // 1. Recharger les données complètes depuis Supabase
+        // 1. Toujours recharger les données COMPLÈTES depuis Supabase en premier
         const {data, error} = await _sb.from('absences_data').select('content').eq('id',1).single();
         if (error) throw error;
         const remote = await decData(data.content);
-
-        // 2. Fusionner : on ne remplace QUE la classe CE2-CM2 dans les données distantes
-        //    Toutes les autres classes (CM1, UEEA, etc.) sont préservées telles quelles.
         const remoteSchool = remote.schoolData || [];
-        const cIdx = remoteSchool.findIndex(c => norm(c.name) === norm(CLASSE_NAME));
+
+        // Sécurité : si Supabase renvoie moins de classes qu'attendu, on annule
+        if (remoteSchool.length === 0) throw new Error('Données distantes vides — sauvegarde annulée');
+
+        // 2. Trouver CE2-CM2 dans les données distantes ET locales
+        const remoteCIdx = remoteSchool.findIndex(c => norm(c.name) === norm(CLASSE_NAME));
         const localCIdx  = schoolData.findIndex(c => norm(c.name) === norm(CLASSE_NAME));
 
-        if (cIdx !== -1 && localCIdx !== -1) {
-            // Remplace uniquement la classe CE2-CM2 dans les données distantes
-            remoteSchool[cIdx] = schoolData[localCIdx];
-        }
+        if (remoteCIdx === -1) throw new Error(`Classe "${CLASSE_NAME}" introuvable dans Supabase`);
+        if (localCIdx  === -1) throw new Error(`Classe "${CLASSE_NAME}" introuvable en local`);
 
-        // 3. Sauvegarder le tout
+        // 3. Patch chirurgical : on ne touche QUE les .data des élèves de CE2-CM2
+        //    On recopie les absences élève par élève en matchant par nom
+        const remoteStudents = remoteSchool[remoteCIdx].students || [];
+        const localStudents  = schoolData[localCIdx].students   || [];
+
+        remoteStudents.forEach(remoteSt => {
+            const localSt = localStudents.find(s => s.name === remoteSt.name);
+            if (localSt) {
+                // Fusionner les clés de données : local écrase distant pour les clés modifiées
+                remoteSt.data = { ...remoteSt.data, ...localSt.data };
+                // Supprimer les clés que local a supprimées (retour à "présent")
+                Object.keys(remoteSt.data).forEach(k => {
+                    if (!(k in localSt.data)) delete remoteSt.data[k];
+                });
+            }
+        });
+
+        // 4. Sauvegarder les données distantes patchées (toutes les classes intactes)
         const payload = {
             schoolData:    remoteSchool,
-            excludedDates: remote.excludedDates || excludedDates,
+            excludedDates: remote.excludedDates || [],
             sharedNote:    remote.sharedNote    || ''
         };
         const encrypted = await encData(payload);
         await _sb.from('absences_data').upsert({id:1, content: encrypted});
 
-        // 4. Mettre à jour schoolData local avec les données complètes distantes
-        //    (pour que le realtime et les saves suivants soient cohérents)
+        // 5. Resynchroniser le local avec le distant complet
         schoolData    = remoteSchool;
         excludedDates = payload.excludedDates;
 
@@ -488,8 +504,8 @@ async function saveData() {
         showToast('✅ Sauvegardé');
     } catch(e) {
         console.error(e);
-        setSync('❌ Erreur sauvegarde');
-        showToast('❌ Erreur de sauvegarde');
+        setSync('❌ ' + (e.message || 'Erreur sauvegarde'));
+        showToast('❌ ' + (e.message || 'Erreur de sauvegarde'));
     }
     document.getElementById('savingDot').classList.remove('saving');
 }
