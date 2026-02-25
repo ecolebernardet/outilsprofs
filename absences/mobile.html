@@ -15,7 +15,7 @@
             --bg:     #eef1f5;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #2c3e50; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #2c3e50; padding-bottom: env(safe-area-inset-bottom, 20px); }
 
         /* ── HEADER ── */
         .header {
@@ -129,7 +129,7 @@
         .cell {
             display: flex; align-items: center; justify-content: center;
             width: 36px;
-            height: calc((100dvh - 160px) / 15);
+            height: calc((100dvh - 220px) / 15);
             min-height: 28px;
             cursor: pointer; user-select: none;
             border-left: 1px solid #e8ecf0; font-weight: 800;
@@ -220,6 +220,7 @@
     <div class="grid" id="grid">
         <div class="msg"><div class="spinner"></div><span>Chargement…</span></div>
     </div>
+    <div style="height: max(env(safe-area-inset-bottom, 0px), 100px);"></div>
 </div>
 
 <div id="toast"></div>
@@ -506,7 +507,7 @@ function renderGrid() {
             if (sIdx === -1) return;
             ['M','AM'].forEach(hd => {
                 const s = getStatus(students[sIdx], hd);
-                if (s==='A' || s==='Exc') colAbs++;
+                if (s==='A' || s==='Exc') colAbs += 0.5;
             });
         });
 
@@ -519,7 +520,7 @@ function renderGrid() {
                 <div class="col-title">${label}</div>
                 <div class="col-sub">${prenoms.length} élèves</div>
                 <span class="col-badge ${colAbs>0?'red':''}">
-                    ${colAbs > 0 ? colAbs+' abs' : '✓ tous présents'}
+                    ${colAbs > 0 ? colAbs+' j abs' : '✓ tous présents'}
                 </span>
             </div>
             <div class="half-header">
@@ -560,9 +561,9 @@ function renderGrid() {
             ['M','AM'].forEach(hd => {
                 const s = getStatus(students[sIdx], hd);
 
-                if      (s === 'A')   totalA++;
-                else if (s === 'Exc') totalE++;
-                else                  totalP++;
+                if      (s === 'A')   totalA += 0.5;
+                else if (s === 'Exc') totalE += 0.5;
+                else                  totalP += 0.5;
 
                 const cell = document.createElement('div');
                 cell.className = `cell st-${s}`;
