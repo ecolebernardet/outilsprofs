@@ -24,9 +24,20 @@
             position: sticky; top: 0; z-index: 50;
             box-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
-        .header-top { display: flex; align-items: center; justify-content: space-between; }
-        .header h1  { font-size: 14px; font-weight: 700; }
-        .date       { font-size: 10px; opacity: 0.65; margin-top: 1px; }
+        .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .header h1  { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .date-btn {
+            font-size: 11px; font-weight: 600;
+            color: white;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .date-btn:active { background: rgba(255,255,255,0.3); }
         #syncStatus { font-size: 10px; opacity: 0.85; white-space: nowrap; }
 
         /* ── LOGIN ── */
@@ -195,10 +206,16 @@
 <div class="header">
     <div class="header-top">
         <h1>📋 CE2–CM2 <span class="dot" id="savingDot"></span></h1>
+        <button class="date-btn" id="dateBtn" onclick="openDatePicker()">
+            📅 <span id="todayLabel">…</span>
+        </button>
         <span id="syncStatus">…</span>
     </div>
-    <div class="date" id="todayLabel"></div>
 </div>
+<!-- Input date caché, déclenché par JS -->
+<input type="date" id="datePicker" 
+       style="position:fixed;top:-200px;left:-200px;opacity:0;pointer-events:none;width:1px;height:1px;"
+       onchange="onDatePicked(this.value)">
 
 <!-- LOGIN -->
 <div id="loginScreen">
@@ -220,7 +237,7 @@
     <div class="grid" id="grid">
         <div class="msg"><div class="spinner"></div><span>Chargement…</span></div>
     </div>
-    <div style="height: max(env(safe-area-inset-bottom, 0px), 100px);"></div>
+    <div style="height: max(env(safe-area-inset-bottom, 0px), 60px);"></div>
 </div>
 
 <div id="toast"></div>
@@ -277,15 +294,47 @@ const monthConfigs = [
 // ══════════════════════════════════════════════════════════════
 //  DATE
 // ══════════════════════════════════════════════════════════════
+const DAYS   = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const DAYS_LONG = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MONTHS = ['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+const MONTHS_LONG = ['janvier','février','mars','avril','mai','juin',
+                     'juillet','août','septembre','octobre','novembre','décembre'];
+
+function formatDateLabel(d) {
+    return `${DAYS_LONG[d.getDay()]} ${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
+}
+
+function applyDate(d) {
+    // Met à jour todayMIdx et todayDNum selon la date choisie
+    const mi = monthConfigs.findIndex(c => c.m === d.getMonth() && c.y === d.getFullYear());
+    todayMIdx = mi;
+    todayDNum = d.getDate();
+    // Label court dans le bouton
+    document.getElementById('todayLabel').textContent = formatDateLabel(d);
+    // Sync le picker natif
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    document.getElementById('datePicker').value = iso;
+}
+
+function openDatePicker() {
+    const picker = document.getElementById('datePicker');
+    try {
+        picker.showPicker();          // modern browsers / iOS 16+
+    } catch(e) {
+        picker.click();               // fallback
+    }
+}
+
+function onDatePicked(val) {
+    if (!val) return;
+    // val = "YYYY-MM-DD"
+    const [y, m, day] = val.split('-').map(Number);
+    applyDate(new Date(y, m-1, day));
+    renderGrid();
+}
+
 function initToday() {
-    const now    = new Date();
-    const DAYS   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-    const MONTHS = ['janvier','février','mars','avril','mai','juin',
-                    'juillet','août','septembre','octobre','novembre','décembre'];
-    document.getElementById('todayLabel').textContent =
-        `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
-    const mi = monthConfigs.findIndex(c => c.m === now.getMonth() && c.y === now.getFullYear());
-    if (mi !== -1) { todayMIdx = mi; todayDNum = now.getDate(); }
+    applyDate(new Date());
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -405,14 +454,40 @@ async function saveData() {
     document.getElementById('savingDot').classList.add('saving');
     setSync('💾 Sauvegarde…');
     try {
-        const {data} = await _sb.from('absences_data').select('content').eq('id',1).single();
-        let note = '';
-        try { note = (await decData(data.content)).sharedNote || ''; } catch(e) {}
-        const content = await encData({schoolData, excludedDates, sharedNote: note});
-        await _sb.from('absences_data').upsert({id:1, content});
+        // 1. Recharger les données complètes depuis Supabase
+        const {data, error} = await _sb.from('absences_data').select('content').eq('id',1).single();
+        if (error) throw error;
+        const remote = await decData(data.content);
+
+        // 2. Fusionner : on ne remplace QUE la classe CE2-CM2 dans les données distantes
+        //    Toutes les autres classes (CM1, UEEA, etc.) sont préservées telles quelles.
+        const remoteSchool = remote.schoolData || [];
+        const cIdx = remoteSchool.findIndex(c => norm(c.name) === norm(CLASSE_NAME));
+        const localCIdx  = schoolData.findIndex(c => norm(c.name) === norm(CLASSE_NAME));
+
+        if (cIdx !== -1 && localCIdx !== -1) {
+            // Remplace uniquement la classe CE2-CM2 dans les données distantes
+            remoteSchool[cIdx] = schoolData[localCIdx];
+        }
+
+        // 3. Sauvegarder le tout
+        const payload = {
+            schoolData:    remoteSchool,
+            excludedDates: remote.excludedDates || excludedDates,
+            sharedNote:    remote.sharedNote    || ''
+        };
+        const encrypted = await encData(payload);
+        await _sb.from('absences_data').upsert({id:1, content: encrypted});
+
+        // 4. Mettre à jour schoolData local avec les données complètes distantes
+        //    (pour que le realtime et les saves suivants soient cohérents)
+        schoolData    = remoteSchool;
+        excludedDates = payload.excludedDates;
+
         setSync('✅ Synchronisé 🔒');
         showToast('✅ Sauvegardé');
     } catch(e) {
+        console.error(e);
         setSync('❌ Erreur sauvegarde');
         showToast('❌ Erreur de sauvegarde');
     }
