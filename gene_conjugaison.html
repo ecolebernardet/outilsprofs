@@ -161,17 +161,19 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 19px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
         }
 
         .user-input-conj {
             background: transparent;
             border-bottom: 2px solid var(--column-border);
             outline: none;
-            width: 130px;
+            flex: 1;
+            min-width: 80px;
             text-align: center;
             color: var(--accent-color);
+            font-size: 22px;
         }
 
         /* ============================================
@@ -418,22 +420,331 @@ const THEME_COLORS = {
 };
 
 const VERBES_CONJUGUES = {
+    // ---- Auxiliaires ----
     "être": {
-        present: ["suis", "es", "est", "sommes", "êtes", "sont"],
+        present:   ["suis", "es", "est", "sommes", "êtes", "sont"],
         imparfait: ["étais", "étais", "était", "étions", "étiez", "étaient"],
-        futur: ["serai", "seras", "sera", "serons", "serez", "seront"]
+        futur:     ["serai", "seras", "sera", "serons", "serez", "seront"]
     },
     "avoir": {
-        present: ["ai", "as", "a", "avons", "avez", "ont"],
+        present:   ["ai", "as", "a", "avons", "avez", "ont"],
         imparfait: ["avais", "avais", "avait", "avions", "aviez", "avaient"],
-        futur: ["aurai", "auras", "aura", "aurons", "aurez", "auront"]
+        futur:     ["aurai", "auras", "aura", "aurons", "aurez", "auront"]
+    },
+
+    // ---- Verbes très fréquents ----
+    "aller": {
+        present:   ["vais", "vas", "va", "allons", "allez", "vont"],
+        imparfait: ["allais", "allais", "allait", "allions", "alliez", "allaient"],
+        futur:     ["irai", "iras", "ira", "irons", "irez", "iront"]
+    },
+    "faire": {
+        present:   ["fais", "fais", "fait", "faisons", "faites", "font"],
+        imparfait: ["faisais", "faisais", "faisait", "faisions", "faisiez", "faisaient"],
+        futur:     ["ferai", "feras", "fera", "ferons", "ferez", "feront"]
+    },
+    "dire": {
+        present:   ["dis", "dis", "dit", "disons", "dites", "disent"],
+        imparfait: ["disais", "disais", "disait", "disions", "disiez", "disaient"],
+        futur:     ["dirai", "diras", "dira", "dirons", "direz", "diront"]
+    },
+    "voir": {
+        present:   ["vois", "vois", "voit", "voyons", "voyez", "voient"],
+        imparfait: ["voyais", "voyais", "voyait", "voyions", "voyiez", "voyaient"],
+        futur:     ["verrai", "verras", "verra", "verrons", "verrez", "verront"]
+    },
+    "venir": {
+        present:   ["viens", "viens", "vient", "venons", "venez", "viennent"],
+        imparfait: ["venais", "venais", "venait", "venions", "veniez", "venaient"],
+        futur:     ["viendrai", "viendras", "viendra", "viendrons", "viendrez", "viendront"]
+    },
+    "tenir": {
+        present:   ["tiens", "tiens", "tient", "tenons", "tenez", "tiennent"],
+        imparfait: ["tenais", "tenais", "tenait", "tenions", "teniez", "tenaient"],
+        futur:     ["tiendrai", "tiendras", "tiendra", "tiendrons", "tiendrez", "tiendront"]
+    },
+    "prendre": {
+        present:   ["prends", "prends", "prend", "prenons", "prenez", "prennent"],
+        imparfait: ["prenais", "prenais", "prenait", "prenions", "preniez", "prenaient"],
+        futur:     ["prendrai", "prendras", "prendra", "prendrons", "prendrez", "prendront"]
+    },
+    "pouvoir": {
+        present:   ["peux", "peux", "peut", "pouvons", "pouvez", "peuvent"],
+        imparfait: ["pouvais", "pouvais", "pouvait", "pouvions", "pouviez", "pouvaient"],
+        futur:     ["pourrai", "pourras", "pourra", "pourrons", "pourrez", "pourront"]
+    },
+    "vouloir": {
+        present:   ["veux", "veux", "veut", "voulons", "voulez", "veulent"],
+        imparfait: ["voulais", "voulais", "voulait", "voulions", "vouliez", "voulaient"],
+        futur:     ["voudrai", "voudras", "voudra", "voudrons", "voudrez", "voudront"]
+    },
+    "savoir": {
+        present:   ["sais", "sais", "sait", "savons", "savez", "savent"],
+        imparfait: ["savais", "savais", "savait", "savions", "saviez", "savaient"],
+        futur:     ["saurai", "sauras", "saura", "saurons", "saurez", "sauront"]
+    },
+    "devoir": {
+        present:   ["dois", "dois", "doit", "devons", "devez", "doivent"],
+        imparfait: ["devais", "devais", "devait", "devions", "deviez", "devaient"],
+        futur:     ["devrai", "devras", "devra", "devrons", "devrez", "devront"]
+    },
+    "mettre": {
+        present:   ["mets", "mets", "met", "mettons", "mettez", "mettent"],
+        imparfait: ["mettais", "mettais", "mettait", "mettions", "mettiez", "mettaient"],
+        futur:     ["mettrai", "mettras", "mettra", "mettrons", "mettrez", "mettront"]
+    },
+    "partir": {
+        present:   ["pars", "pars", "part", "partons", "partez", "partent"],
+        imparfait: ["partais", "partais", "partait", "partions", "partiez", "partaient"],
+        futur:     ["partirai", "partiras", "partira", "partirons", "partirez", "partiront"]
+    },
+    "sortir": {
+        present:   ["sors", "sors", "sort", "sortons", "sortez", "sortent"],
+        imparfait: ["sortais", "sortais", "sortait", "sortions", "sortiez", "sortaient"],
+        futur:     ["sortirai", "sortiras", "sortira", "sortirons", "sortirez", "sortiront"]
+    },
+    "dormir": {
+        present:   ["dors", "dors", "dort", "dormons", "dormez", "dorment"],
+        imparfait: ["dormais", "dormais", "dormait", "dormions", "dormiez", "dormaient"],
+        futur:     ["dormirai", "dormiras", "dormira", "dormirons", "dormirez", "dormiront"]
+    },
+    "servir": {
+        present:   ["sers", "sers", "sert", "servons", "servez", "servent"],
+        imparfait: ["servais", "servais", "servait", "servions", "serviez", "servaient"],
+        futur:     ["servirai", "serviras", "servira", "servirons", "servirez", "serviront"]
+    },
+    "sentir": {
+        present:   ["sens", "sens", "sent", "sentons", "sentez", "sentent"],
+        imparfait: ["sentais", "sentais", "sentait", "sentions", "sentiez", "sentaient"],
+        futur:     ["sentirai", "sentiras", "sentira", "sentirons", "sentirez", "sentiront"]
+    },
+    "lire": {
+        present:   ["lis", "lis", "lit", "lisons", "lisez", "lisent"],
+        imparfait: ["lisais", "lisais", "lisait", "lisions", "lisiez", "lisaient"],
+        futur:     ["lirai", "liras", "lira", "lirons", "lirez", "liront"]
+    },
+    "écrire": {
+        present:   ["écris", "écris", "écrit", "écrivons", "écrivez", "écrivent"],
+        imparfait: ["écrivais", "écrivais", "écrivait", "écrivions", "écriviez", "écrivaient"],
+        futur:     ["écrirai", "écriras", "écrira", "écrirons", "écrirez", "écriront"]
+    },
+    "croire": {
+        present:   ["crois", "crois", "croit", "croyons", "croyez", "croient"],
+        imparfait: ["croyais", "croyais", "croyait", "croyions", "croyiez", "croyaient"],
+        futur:     ["croirai", "croiras", "croira", "croirons", "croirez", "croiront"]
+    },
+    "connaître": {
+        present:   ["connais", "connais", "connaît", "connaissons", "connaissez", "connaissent"],
+        imparfait: ["connaissais", "connaissais", "connaissait", "connaissions", "connaissiez", "connaissaient"],
+        futur:     ["connaîtrai", "connaîtras", "connaîtra", "connaîtrons", "connaîtrez", "connaîtront"]
+    },
+    "naître": {
+        present:   ["nais", "nais", "naît", "naissons", "naissez", "naissent"],
+        imparfait: ["naissais", "naissais", "naissait", "naissions", "naissiez", "naissaient"],
+        futur:     ["naîtrai", "naîtras", "naîtra", "naîtrons", "naîtrez", "naîtront"]
+    },
+    "vivre": {
+        present:   ["vis", "vis", "vit", "vivons", "vivez", "vivent"],
+        imparfait: ["vivais", "vivais", "vivait", "vivions", "viviez", "vivaient"],
+        futur:     ["vivrai", "vivras", "vivra", "vivrons", "vivrez", "vivront"]
+    },
+    "suivre": {
+        present:   ["suis", "suis", "suit", "suivons", "suivez", "suivent"],
+        imparfait: ["suivais", "suivais", "suivait", "suivions", "suiviez", "suivaient"],
+        futur:     ["suivrai", "suivras", "suivra", "suivrons", "suivrez", "suivront"]
+    },
+    "boire": {
+        present:   ["bois", "bois", "boit", "buvons", "buvez", "boivent"],
+        imparfait: ["buvais", "buvais", "buvait", "buvions", "buviez", "buvaient"],
+        futur:     ["boirai", "boiras", "boira", "boirons", "boirez", "boiront"]
+    },
+    "recevoir": {
+        present:   ["reçois", "reçois", "reçoit", "recevons", "recevez", "reçoivent"],
+        imparfait: ["recevais", "recevais", "recevait", "recevions", "receviez", "recevaient"],
+        futur:     ["recevrai", "recevras", "recevra", "recevrons", "recevrez", "recevront"]
+    },
+    "apercevoir": {
+        present:   ["aperçois", "aperçois", "aperçoit", "apercevons", "apercevez", "aperçoivent"],
+        imparfait: ["apercevais", "apercevais", "apercevait", "apercevions", "aperceviez", "apercevaient"],
+        futur:     ["apercevrai", "apercevras", "apercevra", "apercevrons", "apercevrez", "apercevront"]
+    },
+
+    // ---- Demandés spécifiquement ----
+    "entendre": {
+        present:   ["entends", "entends", "entend", "entendons", "entendez", "entendent"],
+        imparfait: ["entendais", "entendais", "entendait", "entendions", "entendiez", "entendaient"],
+        futur:     ["entendrai", "entendras", "entendra", "entendrons", "entendrez", "entendront"]
+    },
+    "rejoindre": {
+        present:   ["rejoins", "rejoins", "rejoint", "rejoignons", "rejoignez", "rejoignent"],
+        imparfait: ["rejoignais", "rejoignais", "rejoignait", "rejoignions", "rejoigniez", "rejoignaient"],
+        futur:     ["rejoindrai", "rejoindras", "rejoindra", "rejoindrons", "rejoindrez", "rejoindront"]
+    },
+    "courir": {
+        present:   ["cours", "cours", "court", "courons", "courez", "courent"],
+        imparfait: ["courais", "courais", "courait", "courions", "couriez", "couraient"],
+        futur:     ["courrai", "courras", "courra", "courrons", "courrez", "courront"]
+    },
+    "conduire": {
+        present:   ["conduis", "conduis", "conduit", "conduisons", "conduisez", "conduisent"],
+        imparfait: ["conduisais", "conduisais", "conduisait", "conduisions", "conduisiez", "conduisaient"],
+        futur:     ["conduirai", "conduiras", "conduira", "conduirons", "conduirez", "conduiront"]
+    },
+
+    // ---- Composés fréquents (même conjugaison que leur base) ----
+    "comprendre": {
+        present:   ["comprends", "comprends", "comprend", "comprenons", "comprenez", "comprennent"],
+        imparfait: ["comprenais", "comprenais", "comprenait", "comprenions", "compreniez", "comprenaient"],
+        futur:     ["comprendrai", "comprendras", "comprendra", "comprendrons", "comprendrez", "comprendront"]
+    },
+    "apprendre": {
+        present:   ["apprends", "apprends", "apprend", "apprenons", "apprenez", "apprennent"],
+        imparfait: ["apprenais", "apprenais", "apprenait", "apprenions", "appreniez", "apprenaient"],
+        futur:     ["apprendrai", "apprendras", "apprendra", "apprendrons", "apprendrez", "apprendront"]
+    },
+    "revenir": {
+        present:   ["reviens", "reviens", "revient", "revenons", "revenez", "reviennent"],
+        imparfait: ["revenais", "revenais", "revenait", "revenions", "reveniez", "revenaient"],
+        futur:     ["reviendrai", "reviendras", "reviendra", "reviendrons", "reviendrez", "reviendront"]
+    },
+    "devenir": {
+        present:   ["deviens", "deviens", "devient", "devenons", "devenez", "deviennent"],
+        imparfait: ["devenais", "devenais", "devenait", "devenions", "deveniez", "devenaient"],
+        futur:     ["deviendrai", "deviendras", "deviendra", "deviendrons", "deviendrez", "deviendront"]
+    },
+    "obtenir": {
+        present:   ["obtiens", "obtiens", "obtient", "obtenons", "obtenez", "obtiennent"],
+        imparfait: ["obtenais", "obtenais", "obtenait", "obtenions", "obteniez", "obtenaient"],
+        futur:     ["obtiendrai", "obtiendras", "obtiendra", "obtiendrons", "obtiendrez", "obtiendront"]
+    },
+    "retenir": {
+        present:   ["retiens", "retiens", "retient", "retenons", "retenez", "retiennent"],
+        imparfait: ["retenais", "retenais", "retenait", "retenions", "reteniez", "retenaient"],
+        futur:     ["retiendrai", "retiendras", "retiendra", "retiendrons", "retiendrez", "retiendront"]
+    },
+    "reprendre": {
+        present:   ["reprends", "reprends", "reprend", "reprenons", "reprenez", "reprennent"],
+        imparfait: ["reprenais", "reprenais", "reprenait", "reprenions", "repreniez", "reprenaient"],
+        futur:     ["reprendrai", "reprendras", "reprendra", "reprendrons", "reprendrez", "reprendront"]
+    },
+    "remettre": {
+        present:   ["remets", "remets", "remet", "remettons", "remettez", "remettent"],
+        imparfait: ["remettais", "remettais", "remettait", "remettions", "remettiez", "remettaient"],
+        futur:     ["remettrai", "remettras", "remettra", "remettrons", "remettrez", "remettront"]
+    },
+    "permettre": {
+        present:   ["permets", "permets", "permet", "permettons", "permettez", "permettent"],
+        imparfait: ["permettais", "permettais", "permettait", "permettions", "permettiez", "permettaient"],
+        futur:     ["permettrai", "permettras", "permettra", "permettrons", "permettrez", "permettront"]
+    },
+    "construire": {
+        present:   ["construis", "construis", "construit", "construisons", "construisez", "construisent"],
+        imparfait: ["construisais", "construisais", "construisait", "construisions", "construisiez", "construisaient"],
+        futur:     ["construirai", "construiras", "construira", "construirons", "construirez", "construiront"]
+    },
+    "produire": {
+        present:   ["produis", "produis", "produit", "produisons", "produisez", "produisent"],
+        imparfait: ["produisais", "produisais", "produisait", "produisions", "produisiez", "produisaient"],
+        futur:     ["produirai", "produiras", "produira", "produirons", "produirez", "produiront"]
+    },
+    "réduire": {
+        present:   ["réduis", "réduis", "réduit", "réduisons", "réduisez", "réduisent"],
+        imparfait: ["réduisais", "réduisais", "réduisait", "réduisions", "réduisiez", "réduisaient"],
+        futur:     ["réduirai", "réduiras", "réduira", "réduirons", "réduirez", "réduiront"]
+    },
+    "peindre": {
+        present:   ["peins", "peins", "peint", "peignons", "peignez", "peignent"],
+        imparfait: ["peignais", "peignais", "peignait", "peignions", "peigniez", "peignaient"],
+        futur:     ["peindrai", "peindras", "peindra", "peindrons", "peindrez", "peindront"]
+    },
+    "plaindre": {
+        present:   ["plains", "plains", "plaint", "plaignons", "plaignez", "plaignent"],
+        imparfait: ["plaignais", "plaignais", "plaignait", "plaignions", "plaigniez", "plaignaient"],
+        futur:     ["plaindrai", "plaindras", "plaindra", "plaindrons", "plaindrez", "plaindront"]
+    },
+    "craindre": {
+        present:   ["crains", "crains", "craint", "craignons", "craignez", "craignent"],
+        imparfait: ["craignais", "craignais", "craignait", "craignions", "craigniez", "craignaient"],
+        futur:     ["craindrai", "craindras", "craindra", "craindrons", "craindrez", "craindront"]
+    },
+    "ouvrir": {
+        present:   ["ouvre", "ouvres", "ouvre", "ouvrons", "ouvrez", "ouvrent"],
+        imparfait: ["ouvrais", "ouvrais", "ouvrait", "ouvrions", "ouvriez", "ouvraient"],
+        futur:     ["ouvrirai", "ouvriras", "ouvrira", "ouvrirons", "ouvrirez", "ouvriront"]
+    },
+    "offrir": {
+        present:   ["offre", "offres", "offre", "offrons", "offrez", "offrent"],
+        imparfait: ["offrais", "offrais", "offrait", "offrions", "offriez", "offraient"],
+        futur:     ["offrirai", "offriras", "offrira", "offrirons", "offrirez", "offriront"]
+    },
+    "souffrir": {
+        present:   ["souffre", "souffres", "souffre", "souffrons", "souffrez", "souffrent"],
+        imparfait: ["souffrais", "souffrais", "souffrait", "souffrions", "souffriez", "souffraient"],
+        futur:     ["souffrirai", "souffriras", "souffrira", "souffrirons", "souffrirez", "souffriront"]
+    },
+    "cueillir": {
+        present:   ["cueille", "cueilles", "cueille", "cueillons", "cueillez", "cueillent"],
+        imparfait: ["cueillais", "cueillais", "cueillait", "cueillions", "cueilliez", "cueillaient"],
+        futur:     ["cueillerai", "cueilleras", "cueillera", "cueillerons", "cueillerez", "cueilleront"]
+    },
+    "mourir": {
+        present:   ["meurs", "meurs", "meurt", "mourons", "mourez", "meurent"],
+        imparfait: ["mourais", "mourais", "mourait", "mourions", "mouriez", "mouraient"],
+        futur:     ["mourrai", "mourras", "mourra", "mourrons", "mourrez", "mourront"]
+    },
+    "fuir": {
+        present:   ["fuis", "fuis", "fuit", "fuyons", "fuyez", "fuient"],
+        imparfait: ["fuyais", "fuyais", "fuyait", "fuyions", "fuyiez", "fuyaient"],
+        futur:     ["fuirai", "fuiras", "fuira", "fuirons", "fuirez", "fuiront"]
+    },
+    "résoudre": {
+        present:   ["résous", "résous", "résout", "résolvons", "résolvez", "résolvent"],
+        imparfait: ["résolvais", "résolvais", "résolvait", "résolvions", "résolviez", "résolvaient"],
+        futur:     ["résoudrai", "résoudras", "résoudra", "résoudrons", "résoudrez", "résoudront"]
+    },
+    "valoir": {
+        present:   ["vaux", "vaux", "vaut", "valons", "valez", "valent"],
+        imparfait: ["valais", "valais", "valait", "valions", "valiez", "valaient"],
+        futur:     ["vaudrai", "vaudras", "vaudra", "vaudrons", "vaudrez", "vaudront"]
+    },
+    "falloir": {
+        present:   ["—", "—", "faut", "—", "—", "—"],
+        imparfait: ["—", "—", "fallait", "—", "—", "—"],
+        futur:     ["—", "—", "faudra", "—", "—", "—"]
+    },
+    "pleuvoir": {
+        present:   ["—", "—", "pleut", "—", "—", "—"],
+        imparfait: ["—", "—", "pleuvait", "—", "—", "—"],
+        futur:     ["—", "—", "pleuvra", "—", "—", "—"]
+    },
+    "rire": {
+        present:   ["ris", "ris", "rit", "rions", "riez", "rient"],
+        imparfait: ["riais", "riais", "riait", "riions", "riiez", "riaient"],
+        futur:     ["rirai", "riras", "rira", "rirons", "rirez", "riront"]
+    },
+    "sourire": {
+        present:   ["souris", "souris", "sourit", "sourions", "souriez", "sourient"],
+        imparfait: ["souriais", "souriais", "souriait", "souriions", "souriiez", "souriaient"],
+        futur:     ["sourirai", "souriras", "sourira", "sourirons", "sourirez", "souriront"]
+    },
+    "suffire": {
+        present:   ["suffis", "suffis", "suffit", "suffisons", "suffisez", "suffisent"],
+        imparfait: ["suffisais", "suffisais", "suffisait", "suffisions", "suffisiez", "suffisaient"],
+        futur:     ["suffirai", "suffiras", "suffira", "suffirons", "suffirez", "suffiront"]
     }
 };
 
 const TERMINAISONS = {
-    present: ["e", "es", "e", "ons", "ez", "ent"],
-    imparfait: ["ais", "ais", "ait", "ions", "iez", "aient"],
-    futur: ["ai", "as", "a", "ons", "ez", "ont"]
+    er: {
+        present: ["e", "es", "e", "ons", "ez", "ent"],
+        imparfait: ["ais", "ais", "ait", "ions", "iez", "aient"],
+        futur: ["ai", "as", "a", "ons", "ez", "ont"]
+    },
+    ir: {
+        present: ["is", "is", "it", "issons", "issez", "issent"],
+        imparfait: ["issais", "issais", "issait", "issions", "issiez", "issaient"],
+        futur: ["irai", "iras", "ira", "irons", "irez", "iront"]
+    }
 };
 
 // ============================================
@@ -502,26 +813,84 @@ function fermerAlerte() {
 function obtenirCorrection(verbe, pronom, temps) {
     const v = verbe.toLowerCase().trim();
     const pIdx = PRONOMS.indexOf(pronom);
-    
+
     // Vérifier les verbes irréguliers
     if (VERBES_CONJUGUES[v]) {
         return VERBES_CONJUGUES[v][temps][pIdx];
     }
-    
-    // Traiter les verbes du premier groupe (-er)
+
+    // ---- Verbes du 1er groupe (-er) ----
     if (v.endsWith("er")) {
-        const radical = v.slice(0, -2);
-        
-        if (temps === "present" || temps === "imparfait") {
-            return radical + TERMINAISONS[temps][pIdx];
+        const terminaison = TERMINAISONS.er[temps][pIdx];
+
+        // Futur : infinitif + terminaison (pas de radical modifié)
+        if (temps === "futur") {
+            // -yer → futur : y → i (ex : payer → je paierai)
+            if (v.endsWith("yer")) {
+                const radicalYer = v.slice(0, -3); // "pay"
+                return radicalYer + "i" + "er" + terminaison;
+            }
+            return v + terminaison;
         }
-        
-        // Futur : infinitif + terminaisons
-        return v + TERMINAISONS[temps][pIdx];
+
+        // Présent et imparfait : on travaille sur le radical
+        const radical = v.slice(0, -2);
+
+        // La terminaison commence-t-elle par a ou o ? (imparfait : ais/ait/aient → non ; ions/iez → non)
+        // Voyelles "sensibles" : a, o  → uniquement les terminaisons "ons" et "ait" au présent, et toutes les formes de l'imparfait
+        const debutTerminaison = terminaison[0]; // 'e','s','o','i','a'
+        const voyelleSuivante = debutTerminaison; // la lettre qui SUIT le radical
+
+        // -cer : si terminaison commence par a ou o → radical se termine par ç
+        if (v.endsWith("cer")) {
+            const radicalCer = radical.slice(0, -1); // enlève le "c" final du radical
+            if (voyelleSuivante === "a" || voyelleSuivante === "o") {
+                return radicalCer + "ç" + terminaison;
+            }
+            return radicalCer + "c" + terminaison;
+        }
+
+        // -ger : si terminaison commence par a ou o → ajouter un "e" entre radical et terminaison
+        if (v.endsWith("ger")) {
+            const radicalGer = radical; // ex : "mang"
+            if (voyelleSuivante === "a" || voyelleSuivante === "o") {
+                return radicalGer + "e" + terminaison;
+            }
+            return radicalGer + terminaison;
+        }
+
+        // -yer : au présent, y → i devant e muet (je, tu, il, ils) mais reste y devant voyelle sonore (nous, vous)
+        // pIdx : 0=je, 1=tu, 2=il, 3=nous, 4=vous, 5=ils
+        if (v.endsWith("yer")) {
+            const radicalYer = v.slice(0, -3); // "pay"
+            if (pIdx === 3 || pIdx === 4) {
+                // nous/vous : le y se maintient
+                return radicalYer + "y" + terminaison;
+            } else {
+                // je/tu/il/ils : y → i
+                return radicalYer + "i" + terminaison;
+            }
+        }
+
+        // Verbe -er standard
+        return radical + terminaison;
     }
-    
+
+    // ---- Verbes du 2e groupe (-ir, type finir) ----
+    if (v.endsWith("ir")) {
+        const radical = v.slice(0, -2);
+        if (temps === "present") {
+            return radical + TERMINAISONS.ir.present[pIdx];
+        }
+        if (temps === "imparfait") {
+            return radical + TERMINAISONS.ir.imparfait[pIdx];
+        }
+        // Futur : infinitif + terminaisons er (finir → finirai)
+        return v + TERMINAISONS.er[temps][pIdx];
+    }
+
     // Verbe non reconnu
-    return "...";
+    return "?";
 }
 
 // ============================================
@@ -557,27 +926,64 @@ function generateFlashQuiz() {
 
     // Créer toutes les combinaisons possibles
     const verbs = text.split('\n').filter(v => v.trim());
-    let combos = [];
     
+    // Nombre de questions souhaité
+    const nbQuestions = 10;
+
+    // Double équilibrage : par verbe ET par temps
+    // On crée un pool par combinaison (verbe × temps), chacun mélangé aléatoirement
+    const combosParVerbeTps = {};
     verbs.forEach(v => {
         tempsSelectionnes.forEach(t => {
-            PRONOMS.forEach(p => {
-                combos.push({
-                    verbe: v.trim(),
-                    pronom: p,
-                    temps: t
-                });
-            });
+            const cle = `${v.trim()}|${t}`;
+            combosParVerbeTps[cle] = PRONOMS.map(p => ({
+                verbe: v.trim(), pronom: p, temps: t
+            })).sort(() => Math.random() - 0.5);
         });
     });
-    
-    // Mélanger et sélectionner 10 questions
-    combos.sort(() => Math.random() - 0.5);
-    questionsGenerees = combos.slice(0, 10);
+
+    // Rotation équilibrée : on alterne les temps EN PRIORITÉ
+    // Pour 2 temps et 3 verbes, séquence : (v0,t0),(v0,t1),(v1,t0),(v1,t1),(v2,t0),(v2,t1)...
+    // Ainsi sur 10 questions : 5 de chaque temps
+    const nbV = verbs.length;
+    const nbT = tempsSelectionnes.length;
+    const sequence = [];
+    for (let slot = 0; slot < nbV * 6; slot++) {
+        const vi = Math.floor(slot / nbT) % nbV;
+        const ti = slot % nbT;
+        sequence.push(`${verbs[vi].trim()}|${tempsSelectionnes[ti]}`);
+    }
+
+    const indices = {};
+    Object.keys(combosParVerbeTps).forEach(c => { indices[c] = 0; });
+
+    let pool = [];
+    let tour = 0;
+
+    while (pool.length < nbQuestions) {
+        const cle = sequence[tour % sequence.length];
+        const idx = indices[cle];
+        if (idx < combosParVerbeTps[cle].length) {
+            pool.push(combosParVerbeTps[cle][idx]);
+            indices[cle]++;
+        }
+        tour++;
+        if (tour > sequence.length * 10) break; // sécurité anti-boucle infinie
+    }
+
+    questionsGenerees = pool;
 
     // Générer l'interface
     renderQuestions();
     
+    // Réinitialiser l'état du bouton correction
+    correctionAffichee = false;
+    sauvegardesUser = {};
+    const btn = document.getElementById('validate-btn');
+    btn.innerHTML = "👁️ correction";
+    btn.classList.remove('bg-red-500');
+    btn.classList.add('bg-green-500');
+
     // Afficher la zone de jeu
     document.getElementById('setup-zone').classList.add('hidden');
     document.getElementById('game-zone').classList.remove('hidden');
@@ -593,8 +999,8 @@ function renderQuestions() {
                 <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded ${TEMPS_COLORS[q.temps]}">${q.temps}</span>
             </div>
             <div class="conj-line">
-                <span class="w-16">${q.pronom}</span>
-                <input type="text" class="user-input-conj" placeholder="${q.verbe.toLowerCase()}..." data-index="${i}">
+                <span class="w-16 shrink-0">${q.pronom}</span>
+                <input type="text" class="user-input-conj" placeholder="${q.verbe.toLowerCase()}" data-index="${i}">
             </div>
         </div>
     `).join('');
@@ -632,7 +1038,7 @@ function afficherCorrection() {
         
         // Afficher la correction si erreur
         if (!estBon) {
-            input.value = (saisi || "...") + " (" + attendu + ")";
+            input.value = (saisi || "—") + "  →  " + attendu;
         }
         
         input.disabled = true;
@@ -647,6 +1053,7 @@ function masquerCorrection() {
     const btn = document.getElementById('validate-btn');
     
     document.querySelectorAll('.user-input-conj').forEach(input => {
+        // Supprimer l'éventuel span de correction
         // Restaurer la réponse originale
         input.value = sauvegardesUser[input.dataset.index] || "";
         input.style.color = '';
