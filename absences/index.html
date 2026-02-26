@@ -806,12 +806,32 @@
         setupStickyNote();
     }
 
-    async function save() {
-        const currentNote = document.getElementById('noteContent').value;
-        const payload = { schoolData, excludedDates, sharedNote: currentNote };
-        const content = await encryptData(payload);
-        await _supabase.from('absences_data').upsert({ id: 1, content });
-        document.getElementById('syncIndicator').innerText = "✅ Synchronisé 🔒";
+    let _saveTimer   = null;
+    let _isSaving    = false;
+    let _pendingSave = false;
+
+    function save() {
+        // Debounce : attend 1,5 s sans nouvelle frappe avant de sauvegarder
+        clearTimeout(_saveTimer);
+        _saveTimer = setTimeout(_doSave, 1500);
+    }
+
+    async function _doSave() {
+        if (_isSaving) { _pendingSave = true; return; }
+        _isSaving = true;
+        _pendingSave = false;
+        try {
+            const currentNote = document.getElementById('noteContent').value;
+            const payload = { schoolData, excludedDates, sharedNote: currentNote };
+            const content = await encryptData(payload);
+            await _supabase.from('absences_data').upsert({ id: 1, content });
+            document.getElementById('syncIndicator').innerText = "✅ Synchronisé 🔒";
+        } catch(e) {
+            document.getElementById('syncIndicator').innerText = "❌ Erreur sauvegarde";
+            console.error(e);
+        }
+        _isSaving = false;
+        if (_pendingSave) _doSave();
     }
 
     function refreshSchoolMonths() {
