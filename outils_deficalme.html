@@ -889,6 +889,12 @@
                 this.stream.getTracks().forEach(track => track.stop());
                 this.stream = null;
             }
+            if (this.context) {
+                this.context.close();
+                this.context = null;
+            }
+            this.analyser = null;
+            this.scriptProcessor = null;
         }
     };
 
@@ -915,7 +921,11 @@
                 this.pixelsOrder.push(p);
             }
 
-            this.pixelsOrder.sort(() => Math.random() - 0.5);
+            // Fisher-Yates shuffle pour un vrai mélange aléatoire
+            for (let i = this.pixelsOrder.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.pixelsOrder[i], this.pixelsOrder[j]] = [this.pixelsOrder[j], this.pixelsOrder[i]];
+            }
         },
 
         revealPixels(progress) {
@@ -1056,8 +1066,11 @@
 
         async toggle() {
             if (!this.isPlaying) {
-                const success = await AudioManager.init();
-                if (!success) return;
+                // Premier démarrage : initialiser le micro si pas encore fait
+                if (!AudioManager.context) {
+                    const success = await AudioManager.init();
+                    if (!success) return;
+                }
 
                 this.isPlaying = true;
                 this.lastTime = performance.now();
@@ -1082,7 +1095,9 @@
                 DOM.setStyle('btn-stop', 'color', THEME.textColor);
                 DOM.setStyle('msg-start', 'display', 'none');
             } else {
+                // Pause
                 this.isPlaying = false;
+                AudioManager.setProcessor(null);
                 DOM.setText('btn-start', 'Reprendre');
             }
         },
@@ -1090,9 +1105,11 @@
         stop() {
             this.isPlaying = false;
             this.progress = 0;
+            AudioManager.setProcessor(null);
+            AudioManager.stop();
             this.updateUI();
 
-            DOM.setText('btn-start', 'Démarrer le défi');
+            DOM.addClass('btn-start', 'btn-hidden');
             DOM.addClass('btn-stop', 'btn-hidden');
             DOM.removeClass('btn-reset', 'btn-hidden');
             DOM.setStyle('msg-start', 'display', 'flex');
