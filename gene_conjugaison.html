@@ -58,7 +58,7 @@
             padding: 20px 15px 40px;
             height: 100vh;
             overflow-y: auto;
-            max-width: 80%;
+            max-width: 1200px;
         }
 
         /* ============================================
@@ -152,7 +152,7 @@
         .q-card {
             background: var(--card-bg);
             border-radius: 0.75rem;
-            padding: 15px;
+            padding: 10px;
             border: 1px solid var(--column-border);
             margin-bottom: 3px;
         }
@@ -221,7 +221,7 @@
         /* ============================================
            RESPONSIVE
         ============================================ */
-        @media (min-width: 768px) {
+        @media (min-width: 800px) {
             .main-wrapper {
                 max-width: 800px;
             }
@@ -229,7 +229,7 @@
             #questions-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
+                gap: 10px;
             }
         }
     </style>
@@ -995,7 +995,7 @@ function renderQuestions() {
     grid.innerHTML = questionsGenerees.map((q, i) => `
         <div class="q-card">
             <div class="flex justify-between mb-2">
-                <span class="text-[11px] font-black opacity-40 uppercase">Question ${i + 1}</span>
+                <span class="text-[12px] font-black opacity-50 ">${i + 1})</span>
                 <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded ${TEMPS_COLORS[q.temps]}">${q.temps}</span>
             </div>
             <div class="conj-line">
