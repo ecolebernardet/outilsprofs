@@ -5418,6 +5418,11 @@ document.addEventListener('click', (e) => {
 		saveScenesMeta();
 	}
 
+	// ── Variables d'état pour le drag-and-drop des scènes ──
+	let _sceneDragIdx      = null;   // index de la ligne en cours de drag
+	let _sceneDragOver     = null;   // index de la ligne survolée
+	let _sceneDragActiveId = null;   // id de la scène active avant le drag (pour recalcul)
+
 	function renderScenesBar() {
 		const list   = document.getElementById('scenes-menu-list');
 		const addBtn = document.getElementById('scene-add-btn');
@@ -5426,7 +5431,16 @@ document.addEventListener('click', (e) => {
 
 		scenes.forEach((scene, i) => {
 			const row = document.createElement('div');
-			row.style.cssText = 'display:flex;align-items:center;gap:5px;';
+			row.dataset.sceneIdx = i;
+			row.draggable = true;
+			row.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:grab;border-radius:10px;transition:opacity 0.15s,background 0.15s;';
+
+			// ── Poignée de glissement ──
+			const grip = document.createElement('span');
+			grip.textContent = '⠿';
+			grip.title = 'Glisser pour réordonner';
+			grip.style.cssText = 'color:#555;font-size:16px;flex-shrink:0;padding:0 2px 0 4px;cursor:grab;user-select:none;line-height:1;';
+			row.appendChild(grip);
 
 			// Bouton principal
 			const btn = document.createElement('button');
@@ -5469,6 +5483,78 @@ document.addEventListener('click', (e) => {
 				del.addEventListener('click', (e) => deleteScene(i, e));
 				row.appendChild(del);
 			}
+
+			// ── Événements drag-and-drop ──
+			row.addEventListener('dragstart', (e) => {
+				_sceneDragIdx      = i;
+				_sceneDragActiveId = scenes[currentScene]?.id ?? null;
+				row.style.opacity  = '0.45';
+				e.dataTransfer.effectAllowed = 'move';
+			});
+
+			row.addEventListener('dragend', () => {
+				_sceneDragIdx  = null;
+				_sceneDragOver = null;
+				// Retirer tous les indicateurs visuels
+				list.querySelectorAll('[data-scene-idx]').forEach(r => {
+					r.style.opacity = '1';
+					r.style.borderTop    = '';
+					r.style.borderBottom = '';
+				});
+			});
+
+			row.addEventListener('dragover', (e) => {
+				e.preventDefault();
+				e.dataTransfer.dropEffect = 'move';
+				if (_sceneDragIdx === null || _sceneDragIdx === i) return;
+
+				// Indicateur visuel : trait au-dessus ou en-dessous selon position du curseur
+				const rect   = row.getBoundingClientRect();
+				const isTop  = e.clientY < rect.top + rect.height / 2;
+				list.querySelectorAll('[data-scene-idx]').forEach(r => {
+					r.style.borderTop    = '';
+					r.style.borderBottom = '';
+				});
+				if (isTop) {
+					row.style.borderTop    = '2px solid #4a90e2';
+					row.style.borderBottom = '';
+				} else {
+					row.style.borderBottom = '2px solid #4a90e2';
+					row.style.borderTop    = '';
+				}
+				_sceneDragOver = i;
+			});
+
+			row.addEventListener('dragleave', () => {
+				row.style.borderTop    = '';
+				row.style.borderBottom = '';
+			});
+
+			row.addEventListener('drop', (e) => {
+				e.preventDefault();
+				if (_sceneDragIdx === null || _sceneDragIdx === i) return;
+
+				const rect  = row.getBoundingClientRect();
+				const isTop = e.clientY < rect.top + rect.height / 2;
+				let target  = isTop ? i : i + 1;
+				if (_sceneDragIdx < target) target--;   // décalage après suppression
+
+				// Sauvegarder la scène courante avant de réordonner
+				saveCurrentSceneData();
+
+				// Réordonner le tableau
+				const [moved] = scenes.splice(_sceneDragIdx, 1);
+				scenes.splice(target, 0, moved);
+
+				// Retrouver le nouvel index de la scène active via son id
+				if (_sceneDragActiveId !== null) {
+					const newIdx = scenes.findIndex(s => s.id === _sceneDragActiveId);
+					if (newIdx !== -1) currentScene = newIdx;
+				}
+
+				saveScenesMeta();
+				renderScenesBar();
+			});
 
 			list.appendChild(row);
 		});
