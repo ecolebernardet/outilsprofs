@@ -354,7 +354,7 @@ async function deriveKey(p) {
         km, {name:"AES-GCM",length:256}, false, ["encrypt","decrypt"]);
 }
 async function encData(data) {
-    if (!_encKey) return data;
+    if (!_encKey) throw new Error('Clé de chiffrement non initialisée — sauvegarde bloquée');
     const e  = new TextEncoder();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ct = await crypto.subtle.encrypt({name:"AES-GCM",iv}, _encKey, e.encode(JSON.stringify(data)));
@@ -704,9 +704,13 @@ initToday();
 // On affiche toujours l'écran de login pour reconstruire _encKey.
 // Si la protection par mot de passe est désactivée, on charge directement.
 if (localStorage.getItem('password_protection_disabled') === 'true') {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainScreen').style.display  = 'block';
-    loadData();
+    (async () => {
+        // Même clé par défaut que index.html quand la protection est désactivée
+        _encKey = await deriveKey('no-password-default-key');
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainScreen').style.display  = 'block';
+        loadData();
+    })();
 }
 </script>
 </body>
