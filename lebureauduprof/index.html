@@ -416,6 +416,63 @@
 		.editor-container:fullscreen .exit-fs-btn { display: block; }
 		.bg-thumb { width: 70px; height: 50px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
 		.bg-thumb:hover { transform: scale(1.05); border-color: var(--primary-color); }
+		/* Vignettes réglures Séyès */
+		.bg-thumb-seyes {
+			background-color: #fffef5;
+			background-image: repeating-linear-gradient(
+				to bottom,
+				transparent 0px, transparent 7px,
+				#a8c8f0 7px, #a8c8f0 8px,
+				transparent 8px, transparent 15px,
+				#a8c8f0 15px, #a8c8f0 16px,
+				transparent 16px, transparent 23px,
+				#a8c8f0 23px, #a8c8f0 24px,
+				transparent 24px, transparent 31px,
+				#e8a0a0 31px, #e8a0a0 32px
+			),
+			repeating-linear-gradient(to right, transparent 0px, transparent 19px, #e8a0a0 19px, #e8a0a0 20px);
+		}
+		.bg-thumb-seyes-white {
+			background-color: #ffffff;
+			background-image: repeating-linear-gradient(
+				to bottom,
+				transparent 0px, transparent 7px,
+				#b8d4f5 7px, #b8d4f5 8px,
+				transparent 8px, transparent 15px,
+				#b8d4f5 15px, #b8d4f5 16px,
+				transparent 16px, transparent 23px,
+				#b8d4f5 23px, #b8d4f5 24px,
+				transparent 24px, transparent 31px,
+				#f0a0a0 31px, #f0a0a0 32px
+			),
+			repeating-linear-gradient(to right, transparent 0px, transparent 19px, #f0a0a0 19px, #f0a0a0 20px);
+		}
+		.bg-thumb-lignes {
+			background-color: #fffef5;
+			background-image: repeating-linear-gradient(
+				to bottom,
+				transparent 0px, transparent 30px,
+				#a8c8f0 30px, #a8c8f0 31px
+			);
+		}
+		.bg-thumb-grands {
+			background-color: #fffef5;
+			background-image: repeating-linear-gradient(to right, #a8c8f0 0px, #a8c8f0 1px, transparent 1px, transparent 25px),
+			                  repeating-linear-gradient(to bottom, #a8c8f0 0px, #a8c8f0 1px, transparent 1px, transparent 25px);
+		}
+		.bg-thumb-petits {
+			background-color: #ffffff;
+			background-image: repeating-linear-gradient(to right, #c8ddf5 0px, #c8ddf5 1px, transparent 1px, transparent 10px),
+			                  repeating-linear-gradient(to bottom, #c8ddf5 0px, #c8ddf5 1px, transparent 1px, transparent 10px);
+		}
+		.bg-thumb-ardoise-lignes {
+			background-color: #2f3542;
+			background-image: repeating-linear-gradient(
+				to bottom,
+				transparent 0px, transparent 30px,
+				rgba(255,255,255,0.15) 30px, rgba(255,255,255,0.15) 31px
+			);
+		}
 
 		#font-size-input::-webkit-outer-spin-button,
 		#font-size-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -864,6 +921,14 @@
 		<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');document.getElementById('bg-submenu').classList.remove('active')" title="Vieux rose"></div>
 		<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');document.getElementById('bg-submenu').classList.remove('active')" title="Beige"></div>
 		<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');document.getElementById('bg-submenu').classList.remove('active')" title="Noir"></div>
+		<!-- Séparateur Séyès -->
+		<div style="grid-column:span 3;border-top:1px solid #3a3a3f;margin:4px 0;padding-top:6px;color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">📏 Réglures</div>
+		<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');document.getElementById('bg-submenu').classList.remove('active')" title="Séyès (jaune paille)"></div>
+		<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');document.getElementById('bg-submenu').classList.remove('active')" title="Séyès (blanc)"></div>
+		<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');document.getElementById('bg-submenu').classList.remove('active')" title="Lignes simples"></div>
+		<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');document.getElementById('bg-submenu').classList.remove('active')" title="Grands carreaux"></div>
+		<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');document.getElementById('bg-submenu').classList.remove('active')" title="Petits carreaux"></div>
+		<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');document.getElementById('bg-submenu').classList.remove('active')" title="Ardoise lignes"></div>
 		<button id="bg-submenu-import" onclick="document.getElementById('bg-upload').click();document.getElementById('bg-submenu').classList.remove('active')">📷 Importer image</button>
 	</div>
 
@@ -1461,14 +1526,61 @@
 <template id="template-pdf">
     <div class="editor-container" style="height:500px;width:600px;">
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
-        <div class="editor-toolbar" style="gap:8px;">
-            <label style="cursor:pointer;background:#4a90e2;color:white;padding:3px 8px;border-radius:5px;font-size:11px;">
+
+        <!-- BARRE PRINCIPALE -->
+        <div class="editor-toolbar" style="gap:6px;flex-wrap:wrap;min-height:34px;">
+            <label style="cursor:pointer;background:#4a90e2;color:white;padding:3px 8px;border-radius:5px;font-size:11px;white-space:nowrap;">
                 📄 Ouvrir PDF
                 <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
             </label>
-            <span class="pdf-filename" style="font-size:11px;color:#666;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;" title=""></span>
-            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶ Plein écran</button>
+            <span class="pdf-filename" style="font-size:11px;color:#666;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;" title=""></span>
+
+            <!-- Navigation pages -->
+            <div class="pdf-nav" style="display:none;align-items:center;gap:3px;font-size:12px;">
+                <button class="pdf-prev" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page précédente">◀</button>
+                <span class="pdf-page-info" style="color:#555;white-space:nowrap;">1 / 1</span>
+                <button class="pdf-next" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page suivante">▶</button>
+            </div>
+
+            <!-- Zoom -->
+            <div class="pdf-zoom-bar" style="display:none;align-items:center;gap:3px;font-size:12px;">
+                <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
+                <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
+                <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
+                <button class="pdf-zoom-fit" style="padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:10px;" title="Adapter à la largeur">⊡</button>
+            </div>
+
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;">⛶</button>
         </div>
+
+        <!-- BARRE ANNOTATIONS -->
+        <div class="pdf-annot-bar" style="display:none;align-items:center;gap:4px;padding:4px 8px;background:#f8f9fa;border-bottom:1px solid #eee;flex-wrap:wrap;">
+            <!-- Outils -->
+            <button class="pdf-tool-btn" data-tool="pen"         title="Stylo"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">✏️</button>
+            <button class="pdf-tool-btn" data-tool="highlighter" title="Surligneur" style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">🖍️</button>
+            <button class="pdf-tool-btn" data-tool="text"        title="Texte"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">T</button>
+            <button class="pdf-tool-btn" data-tool="eraser"      title="Gomme"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">⬜</button>
+
+            <div style="width:1px;height:18px;background:#ddd;margin:0 2px;"></div>
+
+            <!-- Couleur -->
+            <input type="color" class="pdf-annot-color" value="#e74c3c" title="Couleur" style="width:24px;height:24px;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:1px;">
+
+            <!-- Épaisseur -->
+            <select class="pdf-annot-size" title="Épaisseur" style="padding:1px 3px;border:1px solid #ccc;border-radius:4px;font-size:11px;cursor:pointer;">
+                <option value="2">Fin</option>
+                <option value="4" selected>Moyen</option>
+                <option value="8">Épais</option>
+            </select>
+
+            <div style="width:1px;height:18px;background:#ddd;margin:0 2px;"></div>
+
+            <!-- Effacer tout / annuler -->
+            <button class="pdf-annot-undo"  title="Annuler (Ctrl+Z)" style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:12px;">↩</button>
+            <button class="pdf-annot-clear" title="Tout effacer"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:12px;color:#c0392b;">🗑️</button>
+        </div>
+
+        <!-- PLACEHOLDER -->
         <div class="pdf-placeholder" style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#aaa;font-size:13px;">
             <span style="font-size:40px;">📄</span>
             <span>Aucun PDF ouvert</span>
@@ -1477,7 +1589,14 @@
                 <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
             </label>
         </div>
-        <iframe src="" style="flex-grow:1;width:100%;border:none;background:white;display:none;"></iframe>
+
+        <!-- ZONE DE RENDU : canvas PDF + canvas annotations superposés -->
+        <div class="pdf-canvas-wrap" style="flex-grow:1;overflow:auto;display:none;background:#525659;position:relative;">
+            <div class="pdf-canvas-stack" style="position:relative;display:inline-block;margin:8px auto;display:flex;justify-content:center;">
+                <canvas class="pdf-canvas"  style="display:block;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></canvas>
+                <canvas class="pdf-annot-canvas" style="position:absolute;top:0;left:0;cursor:crosshair;touch-action:none;"></canvas>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -2924,6 +3043,8 @@ function makeDraggable(elmnt) {
             if (isDrawMode || isEraserMode) return;
             if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
+            // Pour les widgets PDF : bloquer le drag si le clic vient de la zone canvas (annotation ou pdf)
+            if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             const container = elmnt.querySelector('.editor-container');
             if (container) {
                 const rect = container.getBoundingClientRect();
@@ -3360,30 +3481,39 @@ function flipStrokes(strokesList, axis) {
 }
 
 // =========================================================================
-// PDF WIDGET
+// PDF WIDGET (rendu via PDF.js — pas d'iframe, pas d'ouverture navigateur)
 // =========================================================================
+
+// Charger PDF.js depuis CDN si pas encore chargé
+function _ensurePdfJs(cb) {
+    if (window.pdfjsLib) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        cb();
+    };
+    document.head.appendChild(s);
+}
+
 function loadPdfWidget(input) {
     const file = input.files[0]; if (!file) return;
     const widget = input.closest('.widget');
     const container = input.closest('.editor-container');
     const reader = new FileReader();
     reader.onload = function(e) {
-        const base64 = e.target.result; // "data:application/pdf;base64,..."
-        // Générer un ID unique pour ce PDF si pas déjà défini
+        const base64 = e.target.result;
         if (!widget.dataset.pdfId) {
             widget.dataset.pdfId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
         const pdfId = widget.dataset.pdfId;
-        // Stocker en localStorage
         try {
             localStorage.setItem(pdfId, base64);
         } catch(err) {
-            // localStorage plein : prévenir l'utilisateur
             alert('⚠️ Le fichier PDF est trop volumineux pour être sauvegardé automatiquement. Il restera disponible jusqu\'à la fermeture de l\'onglet.');
         }
-        // Stocker le nom du fichier
         widget.dataset.pdfName = file.name;
-        // Afficher le PDF
         _showPdfInWidget(container, base64, file.name);
         saveBoard();
     };
@@ -3391,30 +3521,352 @@ function loadPdfWidget(input) {
 }
 
 function _showPdfInWidget(container, base64OrUrl, filename) {
-    const iframe = container.querySelector('iframe');
-    const placeholder = container.querySelector('.pdf-placeholder');
-    const nameSpan = container.querySelector('.pdf-filename');
-    if (iframe) {
-        // Convertir base64 en blob URL pour l'iframe si nécessaire
-        let src = base64OrUrl;
-        if (base64OrUrl.startsWith('data:')) {
-            const arr = base64OrUrl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) u8arr[n] = bstr.charCodeAt(n);
-            const blob = new Blob([u8arr], { type: mime });
-            src = URL.createObjectURL(blob);
-        }
-        iframe.src = src;
-        iframe.style.display = 'block';
-    }
+    const placeholder   = container.querySelector('.pdf-placeholder');
+    const nameSpan      = container.querySelector('.pdf-filename');
+    const canvasWrap    = container.querySelector('.pdf-canvas-wrap');
+    const pdfCanvas     = container.querySelector('.pdf-canvas');
+    const annotCanvas   = container.querySelector('.pdf-annot-canvas');
+    const navBar        = container.querySelector('.pdf-nav');
+    const zoomBar       = container.querySelector('.pdf-zoom-bar');
+    const annotBar      = container.querySelector('.pdf-annot-bar');
+    const pageInfo      = container.querySelector('.pdf-page-info');
+
     if (placeholder) placeholder.style.display = 'none';
-    if (nameSpan && filename) {
-        nameSpan.textContent = filename;
-        nameSpan.title = filename;
+    if (canvasWrap)  canvasWrap.style.display = 'block';
+    if (navBar)      navBar.style.display = 'flex';
+    if (zoomBar)     zoomBar.style.display = 'flex';
+    if (annotBar)    annotBar.style.display = 'flex';
+    if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
+
+    function base64ToUint8Array(b64) {
+        const raw = atob(b64.split(',')[1]);
+        const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
     }
+
+    _ensurePdfJs(() => {
+        const data = base64ToUint8Array(base64OrUrl);
+        pdfjsLib.getDocument({ data }).promise.then(pdfDoc => {
+
+            // ── État ────────────────────────────────────────────────────────
+            let currentPage = 1;
+            const totalPages = pdfDoc.numPages;
+            let zoomScale = null; // null = fit-to-width
+            const ZOOM_STEP = 0.2, ZOOM_MIN = 0.3, ZOOM_MAX = 5;
+
+            // Annotations : tableau de couches, une par page
+            // Chaque couche = { strokes: [{tool,color,size,pts:[],text,x,y}], ...}
+            const annotLayers = {};
+            function getLayer(p) {
+                if (!annotLayers[p]) annotLayers[p] = { strokes: [] };
+                return annotLayers[p];
+            }
+
+            // ── Rendu PDF ────────────────────────────────────────────────────
+            let renderTask = null;
+            function fitScale(page) {
+                const vp0 = page.getViewport({ scale: 1 });
+                return (canvasWrap.clientWidth - 24) / vp0.width;
+            }
+
+            function renderPage(num) {
+                pdfDoc.getPage(num).then(page => {
+                    const scale = zoomScale ?? fitScale(page);
+                    const viewport = page.getViewport({ scale });
+                    pdfCanvas.width  = viewport.width;
+                    pdfCanvas.height = viewport.height;
+                    annotCanvas.width  = viewport.width;
+                    annotCanvas.height = viewport.height;
+
+                    // Mettre à jour label zoom
+                    const zoomLabel = container.querySelector('.pdf-zoom-label');
+                    if (zoomLabel) zoomLabel.textContent = Math.round(scale * 100) + '%';
+
+                    if (pageInfo) pageInfo.textContent = num + ' / ' + totalPages;
+
+                    const btnPrev = container.querySelector('.pdf-prev');
+                    const btnNext = container.querySelector('.pdf-next');
+                    if (btnPrev) btnPrev.disabled = num <= 1;
+                    if (btnNext) btnNext.disabled = num >= totalPages;
+
+                    if (renderTask) renderTask.cancel();
+                    renderTask = page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport });
+                    renderTask.promise.then(() => {
+                        renderTask = null;
+                        redrawAnnotations(num);
+                    }).catch(() => {});
+                });
+            }
+
+            // ── Annotations ───────────────────────────────────────────────
+            // Les coordonnées sont stockées en espace NORMALISÉ (0-1 relatif au canvas à scale=1).
+            // Au dessin, on les multiplie par la taille courante du canvas → elles suivent le zoom.
+            const actx = annotCanvas.getContext('2d');
+            let activeTool = 'pen';
+            let isDrawing  = false;
+            let currentStrokeAnnot = null;
+
+            // Convertit un point canvas-pixels → normalisé [0-1]
+            function toNorm(px, py) {
+                return { x: px / annotCanvas.width, y: py / annotCanvas.height };
+            }
+            // Convertit normalisé → pixels courants du canvas
+            function fromNorm(nx, ny) {
+                return { x: nx * annotCanvas.width, y: ny * annotCanvas.height };
+            }
+
+            // Redessiner toutes les annotations de la page (avec le zoom courant)
+            function redrawAnnotations(pageNum) {
+                actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                const layer = getLayer(pageNum);
+                for (const stroke of layer.strokes) {
+                    drawStroke(actx, stroke);
+                }
+            }
+
+            function drawStroke(ctx, stroke) {
+                // Épaisseur proportionnelle à la taille courante du canvas
+                const canvasW = annotCanvas.width;
+                const sizeScaled = stroke.size * canvasW / 600; // 600 = référence arbitraire
+
+                if (stroke.tool === 'text') {
+                    const pos = fromNorm(stroke.nx, stroke.ny);
+                    ctx.save();
+                    ctx.font = `${(stroke.size * 4 + 10) * canvasW / 600}px 'Segoe UI', sans-serif`;
+                    ctx.fillStyle = stroke.color;
+                    ctx.fillText(stroke.text || '', pos.x, pos.y);
+                    ctx.restore();
+                    return;
+                }
+                if (!stroke.pts || stroke.pts.length < 1) return;
+                ctx.save();
+                if (stroke.tool === 'highlighter') {
+                    ctx.globalAlpha = 0.35;
+                    ctx.globalCompositeOperation = 'multiply';
+                    ctx.lineWidth = sizeScaled * 5;
+                } else if (stroke.tool === 'eraser') {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = sizeScaled * 6;
+                } else {
+                    ctx.lineWidth = sizeScaled;
+                }
+                ctx.strokeStyle = stroke.color;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                const p0 = fromNorm(stroke.pts[0].x, stroke.pts[0].y);
+                ctx.moveTo(p0.x, p0.y);
+                for (let i = 1; i < stroke.pts.length; i++) {
+                    const p = fromNorm(stroke.pts[i].x, stroke.pts[i].y);
+                    ctx.lineTo(p.x, p.y);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Retourne la position en pixels canvas (tient compte du CSS scaling si le canvas est affiché plus petit)
+            function getCanvasPx(e) {
+                const rect = annotCanvas.getBoundingClientRect();
+                const scaleX = annotCanvas.width  / rect.width;
+                const scaleY = annotCanvas.height / rect.height;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+            }
+
+            // ── Barre annotations – sélection outil ──────────────────────
+            const toolBtns = container.querySelectorAll('.pdf-tool-btn');
+            function updateToolUI() {
+                toolBtns.forEach(b => {
+                    b.style.background = b.dataset.tool === activeTool ? '#4a90e2' : '#fff';
+                    b.style.color      = b.dataset.tool === activeTool ? 'white' : '';
+                });
+                annotCanvas.style.cursor =
+                    activeTool === 'eraser' ? 'cell' :
+                    activeTool === 'text'   ? 'text' : 'crosshair';
+            }
+            toolBtns.forEach(b => {
+                b.addEventListener('click', () => {
+                    activeTool = b.dataset.tool;
+                    updateToolUI();
+                });
+            });
+            updateToolUI();
+
+            // ── Events dessin ─────────────────────────────────────────────
+            function onPointerDown(e) {
+                if (e.button !== undefined && e.button !== 0) return;
+                e.preventDefault();
+                const colorInput = container.querySelector('.pdf-annot-color');
+                const sizeSelect = container.querySelector('.pdf-annot-size');
+                const color = colorInput ? colorInput.value : '#e74c3c';
+                const size  = sizeSelect ? parseInt(sizeSelect.value) : 4;
+                const px = getCanvasPx(e);
+                const norm = toNorm(px.x, px.y);
+
+                if (activeTool === 'text') {
+                    const textVal = prompt('Texte à ajouter :');
+                    if (!textVal) return;
+                    // Stocker en normalisé
+                    const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
+                    getLayer(currentPage).strokes.push(stroke);
+                    redrawAnnotations(currentPage);
+                    return;
+                }
+
+                isDrawing = true;
+                // Stocker pts en normalisé dès le départ
+                currentStrokeAnnot = { tool: activeTool, color, size, pts: [norm] };
+            }
+
+            function onPointerMove(e) {
+                if (!isDrawing || !currentStrokeAnnot) return;
+                e.preventDefault();
+                const px   = getCanvasPx(e);
+                const norm = toNorm(px.x, px.y);
+                currentStrokeAnnot.pts.push(norm);
+
+                // Dessin temps réel : convertir les 2 derniers points en pixels courants
+                const pts = currentStrokeAnnot.pts;
+                const canvasW = annotCanvas.width;
+                const sizeScaled = currentStrokeAnnot.size * canvasW / 600;
+                const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
+                const cur  = fromNorm(pts[pts.length - 1].x, pts[pts.length - 1].y);
+
+                actx.save();
+                if (currentStrokeAnnot.tool === 'highlighter') {
+                    actx.globalAlpha = 0.35;
+                    actx.globalCompositeOperation = 'multiply';
+                    actx.lineWidth = sizeScaled * 5;
+                } else if (currentStrokeAnnot.tool === 'eraser') {
+                    actx.globalCompositeOperation = 'destination-out';
+                    actx.lineWidth = sizeScaled * 6;
+                } else {
+                    actx.lineWidth = sizeScaled;
+                }
+                actx.strokeStyle = currentStrokeAnnot.color;
+                actx.lineCap = 'round';
+                actx.lineJoin = 'round';
+                actx.beginPath();
+                actx.moveTo(prev.x, prev.y);
+                actx.lineTo(cur.x, cur.y);
+                actx.stroke();
+                actx.restore();
+            }
+
+            function onPointerUp(e) {
+                if (!isDrawing) return;
+                isDrawing = false;
+                if (currentStrokeAnnot && currentStrokeAnnot.pts.length > 0) {
+                    getLayer(currentPage).strokes.push(currentStrokeAnnot);
+                    redrawAnnotations(currentPage); // redessiner proprement
+                }
+                currentStrokeAnnot = null;
+            }
+
+            annotCanvas.addEventListener('mousedown',  onPointerDown);
+            annotCanvas.addEventListener('mousemove',  onPointerMove);
+            annotCanvas.addEventListener('mouseup',    onPointerUp);
+            annotCanvas.addEventListener('mouseleave', onPointerUp);
+            annotCanvas.addEventListener('touchstart', onPointerDown, { passive: false });
+            annotCanvas.addEventListener('touchmove',  onPointerMove, { passive: false });
+            annotCanvas.addEventListener('touchend',   onPointerUp);
+
+            // ── Undo / Clear ──────────────────────────────────────────────
+            const undoBtn  = container.querySelector('.pdf-annot-undo');
+            const clearBtn = container.querySelector('.pdf-annot-clear');
+            if (undoBtn) {
+                const newUndo = undoBtn.cloneNode(true);
+                undoBtn.parentNode.replaceChild(newUndo, undoBtn);
+                newUndo.addEventListener('click', () => {
+                    const layer = getLayer(currentPage);
+                    if (layer.strokes.length > 0) {
+                        layer.strokes.pop();
+                        redrawAnnotations(currentPage);
+                    }
+                });
+            }
+            if (clearBtn) {
+                const newClear = clearBtn.cloneNode(true);
+                clearBtn.parentNode.replaceChild(newClear, clearBtn);
+                newClear.addEventListener('click', () => {
+                    if (!confirm('Effacer toutes les annotations de cette page ?')) return;
+                    getLayer(currentPage).strokes = [];
+                    redrawAnnotations(currentPage);
+                });
+            }
+
+            // Ctrl+Z dans le widget
+            container.addEventListener('keydown', e => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    e.preventDefault();
+                    const layer = getLayer(currentPage);
+                    if (layer.strokes.length > 0) { layer.strokes.pop(); redrawAnnotations(currentPage); }
+                }
+            });
+
+            // ── Zoom ──────────────────────────────────────────────────────
+            const btnZoomIn  = container.querySelector('.pdf-zoom-in');
+            const btnZoomOut = container.querySelector('.pdf-zoom-out');
+            const btnZoomFit = container.querySelector('.pdf-zoom-fit');
+
+            function applyZoom(newScale) {
+                zoomScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newScale));
+                renderPage(currentPage);
+            }
+
+            // Cloner pour éviter doublons
+            function reattach(sel, fn) {
+                const el = container.querySelector(sel);
+                if (!el) return;
+                const clone = el.cloneNode(true);
+                el.parentNode.replaceChild(clone, el);
+                clone.addEventListener('click', fn);
+            }
+
+            reattach('.pdf-zoom-in',  () => {
+                pdfDoc.getPage(currentPage).then(p => {
+                    const base = zoomScale ?? fitScale(p);
+                    applyZoom(base + ZOOM_STEP);
+                });
+            });
+            reattach('.pdf-zoom-out', () => {
+                pdfDoc.getPage(currentPage).then(p => {
+                    const base = zoomScale ?? fitScale(p);
+                    applyZoom(base - ZOOM_STEP);
+                });
+            });
+            reattach('.pdf-zoom-fit', () => {
+                zoomScale = null; // retour fit-to-width
+                renderPage(currentPage);
+            });
+
+            // Zoom molette
+            canvasWrap.addEventListener('wheel', e => {
+                if (!e.ctrlKey && !e.metaKey) return;
+                e.preventDefault();
+                pdfDoc.getPage(currentPage).then(p => {
+                    const base = zoomScale ?? fitScale(p);
+                    applyZoom(base + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+                });
+            }, { passive: false });
+
+            // ── Navigation pages ──────────────────────────────────────────
+            reattach('.pdf-prev', () => {
+                if (currentPage > 1) { redrawAnnotations(currentPage); currentPage--; renderPage(currentPage); }
+            });
+            reattach('.pdf-next', () => {
+                if (currentPage < totalPages) { redrawAnnotations(currentPage); currentPage++; renderPage(currentPage); }
+            });
+
+            renderPage(currentPage);
+
+        }).catch(err => {
+            console.error('PDF.js erreur :', err);
+            if (canvasWrap) canvasWrap.innerHTML = '<p style="color:red;padding:16px;">Impossible de lire ce PDF.</p>';
+        });
+    });
 }
 
 // =========================================================================
@@ -5001,10 +5453,79 @@ function deleteAgendaLine(btn) { snapshotNow(); btn.closest('.agenda-item').remo
 // =========================================================================
 // FOND
 // =========================================================================
+// Fonds Séyès et carreaux — CSS gradient purs (fiables cross-browser, pas de data URI)
+const PRESET_BACKGROUNDS = {
+    // Séyès jaune paille : 3 interlignes bleus (8px) + 1 ligne rouge (32px) + marge rouge verticale
+    'seyes': {
+        backgroundColor: '#fffef5',
+        backgroundImage: [
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 7px, #a8c8f0 7px, #a8c8f0 8px, transparent 8px, transparent 15px, #a8c8f0 15px, #a8c8f0 16px, transparent 16px, transparent 23px, #a8c8f0 23px, #a8c8f0 24px, transparent 24px, transparent 31px, #e8a0a0 31px, #e8a0a0 32px)',
+            'repeating-linear-gradient(to right, transparent 0px, transparent 31px, #e8a0a0 31px, #e8a0a0 32px)'
+        ].join(', '),
+        backgroundSize: 'auto 32px, 32px auto',
+    },
+    // Séyès blanc
+    'seyes-white': {
+        backgroundColor: '#ffffff',
+        backgroundImage: [
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 7px, #b8d4f5 7px, #b8d4f5 8px, transparent 8px, transparent 15px, #b8d4f5 15px, #b8d4f5 16px, transparent 16px, transparent 23px, #b8d4f5 23px, #b8d4f5 24px, transparent 24px, transparent 31px, #f0a0a0 31px, #f0a0a0 32px)',
+            'repeating-linear-gradient(to right, transparent 0px, transparent 31px, #f0a0a0 31px, #f0a0a0 32px)'
+        ].join(', '),
+        backgroundSize: 'auto 32px, 32px auto',
+    },
+    // Grands carreaux 40px
+    'grands-carreaux': {
+        backgroundColor: '#fffef5',
+        backgroundImage: [
+            'repeating-linear-gradient(to right,  transparent 0px, transparent 39px, #a8c8f0 39px, #a8c8f0 40px)',
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 39px, #a8c8f0 39px, #a8c8f0 40px)'
+        ].join(', '),
+        backgroundSize: '40px 40px',
+    },
+    // Petits carreaux 16px
+    'petits-carreaux': {
+        backgroundColor: '#ffffff',
+        backgroundImage: [
+            'repeating-linear-gradient(to right,  transparent 0px, transparent 15px, #c8ddf5 15px, #c8ddf5 16px)',
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 15px, #c8ddf5 15px, #c8ddf5 16px)'
+        ].join(', '),
+        backgroundSize: '16px 16px',
+    },
+    // Lignes simples
+    'lignes-simples': {
+        backgroundColor: '#fffef5',
+        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, #a8c8f0 31px, #a8c8f0 32px)',
+        backgroundSize: 'auto 32px',
+    },
+    // Ardoise avec lignes blanches
+    'ardoise': {
+        backgroundColor: '#2f3542',
+        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(255,255,255,0.15) 31px, rgba(255,255,255,0.15) 32px)',
+        backgroundSize: 'auto 32px',
+    },
+};
+
 function applyBackground(value) {
-    if (!value || value==='none') { board.style.background=''; board.style.backgroundColor='#eef2f5'; }
-    else if (value.startsWith('#') || value.startsWith('rgb')) { board.style.background=''; board.style.backgroundColor=value; }
-    else board.style.background = value;
+    if (!value || value === 'none') {
+        board.style.backgroundImage = '';
+        board.style.backgroundSize  = '';
+        board.style.backgroundColor = '#eef2f5';
+    } else if (PRESET_BACKGROUNDS[value]) {
+        const p = PRESET_BACKGROUNDS[value];
+        board.style.backgroundImage    = p.backgroundImage;
+        board.style.backgroundSize     = p.backgroundSize || 'auto';
+        board.style.backgroundRepeat   = 'repeat';
+        board.style.backgroundPosition = 'top left';
+        board.style.backgroundColor    = p.backgroundColor || '';
+    } else if (value.startsWith('#') || value.startsWith('rgb')) {
+        board.style.backgroundImage = '';
+        board.style.backgroundSize  = '';
+        board.style.backgroundColor = value;
+    } else {
+        board.style.backgroundImage = '';
+        board.style.backgroundSize  = '';
+        board.style.background      = value;
+    }
 }
 function saveBg(value) { snapshotNow(); localStorage.setItem('boardBackground', value); }
 function handleBgUpload(input) {
@@ -5418,11 +5939,6 @@ document.addEventListener('click', (e) => {
 		saveScenesMeta();
 	}
 
-	// ── Variables d'état pour le drag-and-drop des scènes ──
-	let _sceneDragIdx      = null;   // index de la ligne en cours de drag
-	let _sceneDragOver     = null;   // index de la ligne survolée
-	let _sceneDragActiveId = null;   // id de la scène active avant le drag (pour recalcul)
-
 	function renderScenesBar() {
 		const list   = document.getElementById('scenes-menu-list');
 		const addBtn = document.getElementById('scene-add-btn');
@@ -5431,16 +5947,7 @@ document.addEventListener('click', (e) => {
 
 		scenes.forEach((scene, i) => {
 			const row = document.createElement('div');
-			row.dataset.sceneIdx = i;
-			row.draggable = true;
-			row.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:grab;border-radius:10px;transition:opacity 0.15s,background 0.15s;';
-
-			// ── Poignée de glissement ──
-			const grip = document.createElement('span');
-			grip.textContent = '⠿';
-			grip.title = 'Glisser pour réordonner';
-			grip.style.cssText = 'color:#555;font-size:16px;flex-shrink:0;padding:0 2px 0 4px;cursor:grab;user-select:none;line-height:1;';
-			row.appendChild(grip);
+			row.style.cssText = 'display:flex;align-items:center;gap:5px;';
 
 			// Bouton principal
 			const btn = document.createElement('button');
@@ -5483,78 +5990,6 @@ document.addEventListener('click', (e) => {
 				del.addEventListener('click', (e) => deleteScene(i, e));
 				row.appendChild(del);
 			}
-
-			// ── Événements drag-and-drop ──
-			row.addEventListener('dragstart', (e) => {
-				_sceneDragIdx      = i;
-				_sceneDragActiveId = scenes[currentScene]?.id ?? null;
-				row.style.opacity  = '0.45';
-				e.dataTransfer.effectAllowed = 'move';
-			});
-
-			row.addEventListener('dragend', () => {
-				_sceneDragIdx  = null;
-				_sceneDragOver = null;
-				// Retirer tous les indicateurs visuels
-				list.querySelectorAll('[data-scene-idx]').forEach(r => {
-					r.style.opacity = '1';
-					r.style.borderTop    = '';
-					r.style.borderBottom = '';
-				});
-			});
-
-			row.addEventListener('dragover', (e) => {
-				e.preventDefault();
-				e.dataTransfer.dropEffect = 'move';
-				if (_sceneDragIdx === null || _sceneDragIdx === i) return;
-
-				// Indicateur visuel : trait au-dessus ou en-dessous selon position du curseur
-				const rect   = row.getBoundingClientRect();
-				const isTop  = e.clientY < rect.top + rect.height / 2;
-				list.querySelectorAll('[data-scene-idx]').forEach(r => {
-					r.style.borderTop    = '';
-					r.style.borderBottom = '';
-				});
-				if (isTop) {
-					row.style.borderTop    = '2px solid #4a90e2';
-					row.style.borderBottom = '';
-				} else {
-					row.style.borderBottom = '2px solid #4a90e2';
-					row.style.borderTop    = '';
-				}
-				_sceneDragOver = i;
-			});
-
-			row.addEventListener('dragleave', () => {
-				row.style.borderTop    = '';
-				row.style.borderBottom = '';
-			});
-
-			row.addEventListener('drop', (e) => {
-				e.preventDefault();
-				if (_sceneDragIdx === null || _sceneDragIdx === i) return;
-
-				const rect  = row.getBoundingClientRect();
-				const isTop = e.clientY < rect.top + rect.height / 2;
-				let target  = isTop ? i : i + 1;
-				if (_sceneDragIdx < target) target--;   // décalage après suppression
-
-				// Sauvegarder la scène courante avant de réordonner
-				saveCurrentSceneData();
-
-				// Réordonner le tableau
-				const [moved] = scenes.splice(_sceneDragIdx, 1);
-				scenes.splice(target, 0, moved);
-
-				// Retrouver le nouvel index de la scène active via son id
-				if (_sceneDragActiveId !== null) {
-					const newIdx = scenes.findIndex(s => s.id === _sceneDragActiveId);
-					if (newIdx !== -1) currentScene = newIdx;
-				}
-
-				saveScenesMeta();
-				renderScenesBar();
-			});
 
 			list.appendChild(row);
 		});
