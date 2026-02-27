@@ -770,6 +770,7 @@
                 }
                 schoolData = decrypted.schoolData || [];
                 excludedDates = decrypted.excludedDates || [];
+                _lastKnownDataCount = schoolData.length; // mémoriser pour le garde-fou
 
                 // Migration des anciennes clés
                 if (migrateOldKeys()) {
@@ -809,6 +810,7 @@
     let _saveTimer   = null;
     let _isSaving    = false;
     let _pendingSave = false;
+    let _lastKnownDataCount = 0; // garde-fou anti-écrasement
 
     function save() {
         // Debounce : attend 1,5 s sans nouvelle frappe avant de sauvegarder
@@ -818,6 +820,12 @@
 
     async function _doSave() {
         if (_isSaving) { _pendingSave = true; return; }
+        // Garde-fou : refuser d'écraser le cloud avec des données vides
+        if (schoolData.length === 0 && _lastKnownDataCount > 0) {
+            console.warn("Sauvegarde annulée : schoolData vide alors qu'on avait des données.");
+            document.getElementById('syncIndicator').innerText = "⚠️ Sauvegarde annulée (données vides)";
+            return;
+        }
         _isSaving = true;
         _pendingSave = false;
         try {
@@ -825,6 +833,7 @@
             const payload = { schoolData, excludedDates, sharedNote: currentNote };
             const content = await encryptData(payload);
             await _supabase.from('absences_data').upsert({ id: 1, content });
+            _lastKnownDataCount = schoolData.length;
             document.getElementById('syncIndicator').innerText = "✅ Synchronisé 🔒";
         } catch(e) {
             document.getElementById('syncIndicator').innerText = "❌ Erreur sauvegarde";
@@ -2023,25 +2032,32 @@ CE1-B;Petit Emma</pre>
     window._reconnectRealtime = async function() {
         document.getElementById('syncIndicator').innerText = "🔄 Reconnexion…";
         clearTimeout(_reconnectTimer);
-        // Recharger les données depuis Supabase au cas où on aurait raté des mises à jour
-        try {
-            const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
-            if (data) {
-                const decrypted = await decryptData(data.content);
-                if (decrypted && decrypted.schoolData) {
-                    schoolData    = decrypted.schoolData;
-                    excludedDates = decrypted.excludedDates || [];
-                    if (decrypted.sharedNote !== undefined) {
-                        document.getElementById('noteContent').value = decrypted.sharedNote;
-                        updateStickyDot(decrypted.sharedNote);
+        // Recharger les données depuis Supabase UNIQUEMENT si la clé de chiffrement est disponible
+        // et SANS jamais déclencher de sauvegarde
+        if (_encryptionKey) {
+            try {
+                const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
+                if (data) {
+                    const decrypted = await decryptData(data.content);
+                    if (decrypted && decrypted.schoolData && decrypted.schoolData.length > 0) {
+                        schoolData    = decrypted.schoolData;
+                        excludedDates = decrypted.excludedDates || [];
+                        if (decrypted.sharedNote !== undefined) {
+                            document.getElementById('noteContent').value = decrypted.sharedNote;
+                            updateStickyDot(decrypted.sharedNote);
+                        }
+                        refreshSchoolMonths();
+                        renderAll();
                     }
-                    refreshSchoolMonths();
-                    renderAll();
+                    // Si schoolData est vide après déchiffrement, on ne touche à rien
+                    // (protection contre écrasement accidentel)
                 }
+            } catch(e) {
+                console.error("Erreur rechargement:", e);
+                // Erreur de déchiffrement : on ne touche pas aux données en mémoire
             }
-        } catch(e) {
-            console.error("Erreur rechargement:", e);
         }
+        // Reconnecter le channel Realtime dans tous les cas
         _setupRealtimeChannel();
     };
 
@@ -2049,13 +2065,16 @@ CE1-B;Petit Emma</pre>
     window.addEventListener('online',  () => _reconnectRealtime());
     window.addEventListener('offline', () => showOfflineBanner());
 
-    // Heartbeat : vérifie la connexion toutes les 45 s
+    // Heartbeat : vérifie uniquement que Supabase répond — ne touche PAS aux données
     setInterval(async () => {
         try {
             const { error } = await _supabase.from('absences_data').select('id').eq('id', 1).single();
             if (error) throw error;
-            // Connexion OK — si le bandeau était affiché, reconnecter proprement
-            if (document.getElementById('offlineBanner')) _reconnectRealtime();
+            // Connexion OK
+            if (document.getElementById('offlineBanner')) {
+                hideOfflineBanner();
+                document.getElementById('syncIndicator').innerText = "✅ Connecté";
+            }
         } catch(e) {
             showOfflineBanner();
             document.getElementById('syncIndicator').innerText = "🔴 Déconnecté";
