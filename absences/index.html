@@ -1637,12 +1637,31 @@
     }
 
     async function importJSON(e) {
-        const file = e.target.files[0]; if (!file) return;
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+
+        const confirmed = await showConfirm(
+            `<b>⚠️ Attention — cette action est irréversible.</b><br><br>
+            Le fichier <b>${file.name}</b> va remplacer <u>toutes les données actuelles du cloud</u>,
+            y compris les absences enregistrées depuis la création de ce backup.<br><br>
+            <span style="color:#c0392b;">Les données récentes non présentes dans ce fichier seront perdues.</span><br><br>
+            Êtes-vous sûr de vouloir continuer ?`,
+            { title: 'Restaurer un backup', type: 'warning', icon: '📥', labelOk: 'Oui, restaurer', labelCancel: 'Annuler', okStyle: 'danger' }
+        );
+        if (!confirmed) return;
+
         const reader = new FileReader();
         reader.onload = async (ev) => {
-            const data = JSON.parse(ev.target.result);
-            schoolData = data.schoolData || []; excludedDates = data.excludedDates || [];
-            await save(); location.reload();
+            try {
+                const data = JSON.parse(ev.target.result);
+                schoolData    = data.schoolData    || [];
+                excludedDates = data.excludedDates || [];
+                await _doSave();
+                location.reload();
+            } catch(err) {
+                showAlert('Le fichier est invalide ou corrompu.', { title: 'Erreur de lecture', type: 'error' });
+            }
         };
         reader.readAsText(file);
     }
@@ -1930,31 +1949,120 @@ CE1-B;Petit Emma</pre>
     // ============================================================
     loadFromCloud();
 
-    // ── Realtime : recharge les données quand mobile.html (ou un autre onglet) sauvegarde ──
-    _supabase.channel('absences-realtime-index')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'absences_data' }, async payload => {
-            // Ignorer si c'est nous-mêmes qui venons de sauvegarder
-            const ind = document.getElementById('syncIndicator');
-            if (ind.innerText.includes('Synchronisé')) {
-                // Petite fenêtre d'ignorance de 2s après notre propre save
-            }
-            try {
-                const decrypted = await decryptData(payload.new.content);
-                if (!decrypted || !decrypted.schoolData) return;
-                schoolData    = decrypted.schoolData;
-                excludedDates = decrypted.excludedDates || [];
-                if (decrypted.sharedNote !== undefined) {
-                    document.getElementById('noteContent').value = decrypted.sharedNote;
-                    updateStickyDot(decrypted.sharedNote);
+    // ── Bandeau de connexion perdue ──────────────────────────────
+    function showOfflineBanner() {
+        if (document.getElementById('offlineBanner')) return;
+        const banner = document.createElement('div');
+        banner.id = 'offlineBanner';
+        banner.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 99999;
+            background: #c0392b; color: white; text-align: center;
+            padding: 10px 16px; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        `;
+        banner.innerHTML = `
+            <span>⚠️ Connexion au serveur perdue — les modifications ne sont pas sauvegardées</span>
+            <button onclick="_reconnectRealtime()" style="background:white; color:#c0392b; border:none; border-radius:6px; padding:4px 12px; cursor:pointer; font-weight:bold; font-size:12px;">🔄 Reconnecter</button>
+        `;
+        document.body.prepend(banner);
+        // Décaler le contenu pour ne pas masquer la top-bar
+        document.querySelector('.container').style.marginTop = '48px';
+    }
+
+    function hideOfflineBanner() {
+        const b = document.getElementById('offlineBanner');
+        if (b) b.remove();
+        document.querySelector('.container').style.marginTop = '';
+    }
+
+    // ── Reconnexion au channel Realtime ─────────────────────────
+    let _realtimeChannel = null;
+    let _reconnectTimer  = null;
+
+    function _setupRealtimeChannel() {
+        if (_realtimeChannel) {
+            _supabase.removeChannel(_realtimeChannel);
+        }
+        _realtimeChannel = _supabase.channel('absences-realtime-index-' + Date.now())
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'absences_data' }, async payload => {
+                try {
+                    const decrypted = await decryptData(payload.new.content);
+                    if (!decrypted || !decrypted.schoolData) return;
+                    // Ne pas écraser si on vient de sauvegarder nous-mêmes (fenêtre 3 s)
+                    if (_isSaving || _pendingSave) return;
+                    schoolData    = decrypted.schoolData;
+                    excludedDates = decrypted.excludedDates || [];
+                    if (decrypted.sharedNote !== undefined) {
+                        document.getElementById('noteContent').value = decrypted.sharedNote;
+                        updateStickyDot(decrypted.sharedNote);
+                    }
+                    refreshSchoolMonths();
+                    renderAll();
+                    document.getElementById('syncIndicator').innerText = "✅ Synchronisé";
+                } catch(e) {
+                    console.error("Realtime decrypt error:", e);
                 }
-                refreshSchoolMonths();
-                renderAll();
-                ind.innerText = "✅ Synchronisé";
-            } catch(e) {
-                console.error("Realtime decrypt error:", e);
+            })
+            .on('system', {}, status => {
+                if (status === 'SUBSCRIBED') {
+                    hideOfflineBanner();
+                    document.getElementById('syncIndicator').innerText = "✅ Connecté";
+                    clearTimeout(_reconnectTimer);
+                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                    showOfflineBanner();
+                    document.getElementById('syncIndicator').innerText = "🔴 Déconnecté";
+                    // Tentative de reconnexion automatique après 10 s
+                    clearTimeout(_reconnectTimer);
+                    _reconnectTimer = setTimeout(_reconnectRealtime, 10000);
+                }
+            })
+            .subscribe();
+    }
+
+    window._reconnectRealtime = async function() {
+        document.getElementById('syncIndicator').innerText = "🔄 Reconnexion…";
+        clearTimeout(_reconnectTimer);
+        // Recharger les données depuis Supabase au cas où on aurait raté des mises à jour
+        try {
+            const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
+            if (data) {
+                const decrypted = await decryptData(data.content);
+                if (decrypted && decrypted.schoolData) {
+                    schoolData    = decrypted.schoolData;
+                    excludedDates = decrypted.excludedDates || [];
+                    if (decrypted.sharedNote !== undefined) {
+                        document.getElementById('noteContent').value = decrypted.sharedNote;
+                        updateStickyDot(decrypted.sharedNote);
+                    }
+                    refreshSchoolMonths();
+                    renderAll();
+                }
             }
-        })
-        .subscribe();
+        } catch(e) {
+            console.error("Erreur rechargement:", e);
+        }
+        _setupRealtimeChannel();
+    };
+
+    // Reconnexion automatique quand le navigateur retrouve internet
+    window.addEventListener('online',  () => _reconnectRealtime());
+    window.addEventListener('offline', () => showOfflineBanner());
+
+    // Heartbeat : vérifie la connexion toutes les 45 s
+    setInterval(async () => {
+        try {
+            const { error } = await _supabase.from('absences_data').select('id').eq('id', 1).single();
+            if (error) throw error;
+            // Connexion OK — si le bandeau était affiché, reconnecter proprement
+            if (document.getElementById('offlineBanner')) _reconnectRealtime();
+        } catch(e) {
+            showOfflineBanner();
+            document.getElementById('syncIndicator').innerText = "🔴 Déconnecté";
+        }
+    }, 45000);
+
+    _setupRealtimeChannel();
 </script>
 </body>
 </html>
