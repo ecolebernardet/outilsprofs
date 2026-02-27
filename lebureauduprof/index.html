@@ -5939,6 +5939,46 @@ document.addEventListener('click', (e) => {
 		saveScenesMeta();
 	}
 
+	// --- Drag-to-reorder scenes ---
+	let _sceneDragIdx = null;
+	let _sceneDragOverIdx = null;
+
+	function _sceneDragStart(e, i) {
+		_sceneDragIdx = i;
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.setData('text/plain', i);
+		setTimeout(() => { if (e.target.closest('[data-scene-row]')) e.target.closest('[data-scene-row]').style.opacity = '0.4'; }, 0);
+	}
+	function _sceneDragEnd(e) {
+		document.querySelectorAll('[data-scene-row]').forEach(r => { r.style.opacity = ''; r.style.borderTop = ''; r.style.borderBottom = ''; });
+		_sceneDragIdx = null; _sceneDragOverIdx = null;
+	}
+	function _sceneDragOverHandler(e, i) {
+		e.preventDefault();
+		e.dataTransfer.dropEffect = 'move';
+		document.querySelectorAll('[data-scene-row]').forEach(r => { r.style.borderTop = ''; r.style.borderBottom = ''; });
+		const row = document.querySelector(`[data-scene-row="${i}"]`);
+		if (row && _sceneDragIdx !== null && i !== _sceneDragIdx) {
+			if (i < _sceneDragIdx) row.style.borderTop = '2px solid #4a90e2';
+			else row.style.borderBottom = '2px solid #4a90e2';
+		}
+		_sceneDragOverIdx = i;
+	}
+	function _sceneDrop(e, i) {
+		e.preventDefault();
+		if (_sceneDragIdx === null || _sceneDragIdx === i) return;
+		saveCurrentSceneData();
+		const dragged = scenes.splice(_sceneDragIdx, 1)[0];
+		const newIdx = i > _sceneDragIdx ? i - 1 : i;
+		scenes.splice(newIdx, 0, dragged);
+		// Ajuster currentScene
+		if (currentScene === _sceneDragIdx) currentScene = newIdx;
+		else if (_sceneDragIdx < currentScene && newIdx >= currentScene) currentScene--;
+		else if (_sceneDragIdx > currentScene && newIdx <= currentScene) currentScene++;
+		saveScenesMeta();
+		renderScenesBar();
+	}
+
 	function renderScenesBar() {
 		const list   = document.getElementById('scenes-menu-list');
 		const addBtn = document.getElementById('scene-add-btn');
@@ -5947,7 +5987,22 @@ document.addEventListener('click', (e) => {
 
 		scenes.forEach((scene, i) => {
 			const row = document.createElement('div');
+			row.setAttribute('data-scene-row', i);
 			row.style.cssText = 'display:flex;align-items:center;gap:5px;';
+			row.draggable = true;
+			row.addEventListener('dragstart', (e) => _sceneDragStart(e, i));
+			row.addEventListener('dragend',   _sceneDragEnd);
+			row.addEventListener('dragover',  (e) => _sceneDragOverHandler(e, i));
+			row.addEventListener('drop',      (e) => _sceneDrop(e, i));
+
+			// Poignée de réorganisation
+			const grip = document.createElement('div');
+			grip.title = 'Réorganiser';
+			grip.textContent = '⠿';
+			grip.style.cssText = 'color:#555;font-size:16px;cursor:grab;flex-shrink:0;width:18px;text-align:center;user-select:none;line-height:1;padding:4px 0;transition:color .15s;';
+			grip.onmouseover = () => grip.style.color = '#4a90e2';
+			grip.onmouseout  = () => grip.style.color = '#555';
+			row.appendChild(grip);
 
 			// Bouton principal
 			const btn = document.createElement('button');
