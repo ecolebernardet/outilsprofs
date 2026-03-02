@@ -2,322 +2,279 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Suivi Absences - École Collaboratif</title>
 <style>
-    :root { 
-        --absent: #e74c3c; 
-        --excuse: #f1c40f; 
-        --dark: #2c3e50; 
-        --light: #f4f7f6; 
-        --blue: #3498db; 
-        --success: #27ae60; 
-        --gray: #95a5a6; 
+    :root {
+        --absent: #e74c3c;
+        --excuse: #f1c40f;
+        --dark: #2c3e50;
+        --light: #f4f7f6;
+        --blue: #3498db;
+        --success: #27ae60;
+        --gray: #95a5a6;
     }
 
     * { box-sizing: border-box; }
 
-    body { 
-        font-family: 'Segoe UI', Roboto, sans-serif; 
-        background: var(--light); 
-        font-size: 11px; 
-        margin: 10px; 
-        color: #333; 
+    body {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background: var(--light);
+        font-size: 11px;
+        margin: 10px;
+        color: #333;
         -webkit-tap-highlight-color: transparent;
     }
-    
-    .container { 
-        background: white; 
-        padding: 15px; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-        width: 98vw; 
-        margin: auto; 
-        overflow-x: auto; 
+
+    .container {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        width: 98vw;
+        margin: auto;
+        overflow-x: auto;
     }
 
-    .top-bar { 
-        display: flex; 
-        gap: 10px; 
-        margin-bottom: 15px; 
-        align-items: center; 
-        background: #f8f9fa; 
-        padding: 12px; 
-        border-radius: 8px; 
-        border: 1px solid #eee; 
+    .top-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        flex-wrap: wrap;
     }
-    
+
     table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white; }
     th, td { border: 1px solid #e0e0e0; padding: 2px; text-align: center; overflow: hidden; height: 32px; }
 
-    .month-header { 
-        background: var(--dark); 
-        color: white; 
-        cursor: pointer; 
-        font-size: 12px; 
-        transition: 0.3s; 
-        font-weight: 500; 
+    .month-header {
+        background: var(--dark); color: white; cursor: pointer;
+        font-size: 12px; transition: 0.3s; font-weight: 500;
     }
     .month-header:hover { background: var(--blue); }
     .month-header.active { background: var(--blue); font-weight: bold; }
 
-    /* En-tête du numéro du jour (regroupe M et AM) */
     .day-group-header {
-        font-size: 10px;
-        background: #ecf0f1;
-        font-weight: bold;
-        cursor: pointer;
-        color: #7f8c8d;
-        padding: 2px 1px;
-        line-height: 1.2;
+        font-size: 10px; background: #ecf0f1; font-weight: bold;
+        cursor: pointer; color: #7f8c8d; padding: 2px 1px; line-height: 1.2;
+        border-left: 3px solid #4a6278 !important;
+        border-right: 3px solid #4a6278 !important;
     }
     .day-group-header:hover { background: var(--blue); color: white; }
 
-    /* Mini-colonnes M et AM */
     .half-day-col {
-        width: 18px;
-        font-size: 9px;
-        background: #f5f6fa;
-        font-weight: bold;
-        color: #aaa;
-        padding: 1px;
-        line-height: 1.2;
+        width: 18px; font-size: 9px; background: #f5f6fa;
+        font-weight: bold; color: #aaa; padding: 1px; line-height: 1.2;
     }
     .half-day-col.today-highlight { background: #eef7ff !important; box-shadow: inset 0 0 0 1.5px var(--blue) !important; }
 
-    /* Bordures de séparation des journées */
     .day-start { border-left: 3px solid #4a6278 !important; }
     .day-end   { border-right: 3px solid #4a6278 !important; }
-
-    /* Bordures renforcées sur les en-têtes */
-    .day-group-header { border-left: 3px solid #4a6278 !important; border-right: 3px solid #4a6278 !important; }
     .half-day-col.day-start { border-left: 3px solid #4a6278 !important; }
     .half-day-col.day-end   { border-right: 3px solid #4a6278 !important; }
-
-    /* Bordures renforcées sur la ligne des totaux */
     #tableBody tr:last-child td.day-start { border-left: 3px solid #4a6278 !important; }
     #tableBody tr:last-child td.day-end   { border-right: 3px solid #4a6278 !important; }
 
-    .col-main { 
-        width: 300px; 
-        min-width: 300px; 
-        text-align: left; 
-        padding-left: 12px; 
-        background: #fff; 
-        position: sticky; 
-        left: 0; 
-        z-index: 10; 
-        border-right: 2px solid #ddd; 
+    .col-main {
+        width: 300px; min-width: 300px; text-align: left; padding-left: 12px;
+        background: #fff; position: sticky; left: 0; z-index: 10; border-right: 2px solid #ddd;
     }
-    
+
     .class-row { background: #d8dfe6; font-weight: bold; }
     .class-row td { height: 45px; border: 1px solid #b0bbc7 !important; }
     .class-row td.day-start { border-left: 3px solid #4a6278 !important; }
     .class-row td.day-end   { border-right: 3px solid #4a6278 !important; }
-    .class-name-container { 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between; 
-        width: 100%; 
-        padding: 5px 0; 
-        font-size: 13px; 
+    .class-name-container {
+        display: flex; align-items: center; justify-content: space-between;
+        width: 100%; padding: 5px 0; font-size: 13px;
     }
-    
+
     .drag-handle { cursor: grab; color: #bdc3c7; padding-right: 8px; font-size: 13px; }
     .drag-handle-class { cursor: grab; color: var(--blue); padding-right: 10px; font-size: 13px; user-select: none; }
     .drag-over { border-top: 3px solid var(--blue) !important; }
 
-    /* Cellules de saisie demi-journée */
     .cell-abs { cursor: pointer; font-weight: bold; transition: 0.1s; font-size: 10px; padding: 1px; }
     .st-none { background: #fff; color: transparent; }
-    .st-A { background: var(--absent) !important; color: white !important; }
+    .st-A   { background: var(--absent) !important; color: white !important; }
     .st-Exc { background: var(--excuse) !important; color: black !important; }
 
-    /* today-highlight avec priorité aux statuts d'absence */
     .today-highlight { background: #eef7ff !important; box-shadow: inset 0 0 0 1.5px var(--blue) !important; }
-    .st-A.today-highlight { background: var(--absent) !important; color: white !important; }
+    .st-A.today-highlight   { background: var(--absent) !important; color: white !important; }
     .st-Exc.today-highlight { background: var(--excuse) !important; color: black !important; }
 
-    /* Hover sur les lignes élèves */
     #tableBody tr:not(.class-row):hover td { background: #f0f4f8 !important; }
-    #tableBody tr:not(.class-row):hover td.st-A { background: var(--absent) !important; }
+    #tableBody tr:not(.class-row):hover td.st-A   { background: var(--absent) !important; }
     #tableBody tr:not(.class-row):hover td.st-Exc { background: var(--excuse) !important; }
     #tableBody tr:not(.class-row):hover td.today-highlight { background: #d6eaf8 !important; }
-    #tableBody tr:not(.class-row):hover td.st-A.today-highlight { background: var(--absent) !important; }
+    #tableBody tr:not(.class-row):hover td.st-A.today-highlight   { background: var(--absent) !important; }
     #tableBody tr:not(.class-row):hover td.st-Exc.today-highlight { background: var(--excuse) !important; }
 
-    .btn-main { 
-        border: none; 
-        padding: 5px; 
-        border-radius: 6px; 
-        cursor: pointer; 
-        color: white; 
-        font-weight: 600; 
-        font-size: 10px; 
-        transition: 0.2s; 
-        display: inline-flex; 
-        align-items: center; 
-        justify-content: center; 
-        text-align: center; 
-        gap: 5px; 
-        line-height: 1.1; 
-        width: 80px; 
-        height: 40px; 
-        white-space: normal; 
+    .btn-main {
+        border: none; padding: 5px; border-radius: 6px; cursor: pointer;
+        color: white; font-weight: 600; font-size: 10px; transition: 0.2s;
+        display: inline-flex; align-items: center; justify-content: center;
+        text-align: center; gap: 5px; line-height: 1.1;
+        width: 80px; height: 40px; white-space: normal; flex-shrink: 0;
     }
     .btn-main:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-del { background: none; border: none; color: #bdc3c7; cursor: pointer; font-size: 14px; padding: 4px; }
 
     .input-group { position: relative; display: inline-flex; align-items: center; }
-    .input-group input { 
-        padding: 8px 30px 8px 10px; 
-        border-radius: 6px; 
-        border: 1px solid #ddd; 
-        outline: none; 
-        width: 200px;
+    .input-group input {
+        padding: 8px 30px 8px 10px; border-radius: 6px;
+        border: 1px solid #ddd; outline: none; width: 200px;
     }
     .btn-add-inline { position: absolute; right: 5px; background: none; border: none; color: var(--dark); font-weight: bold; font-size: 18px; cursor: pointer; }
 
     .stats-badge { font-size: 9px; background: white; padding: 2px 8px; border-radius: 12px; border: 1px solid #dcdde1; color: #2f3640; margin-left: auto; margin-right: 8px; }
     .stats-footer { margin-top: 20px; padding: 15px; background: var(--dark); color: white; border-radius: 10px; display: flex; gap: 20px; justify-content: center; font-size: 13px; }
-    .sync-status { font-size: 10px; color: #95a5a6; font-style: italic; }
+    .sync-status { font-size: 10px; color: #95a5a6; font-style: italic; white-space: nowrap; }
 
     .dropdown { position: relative; display: inline-flex; }
-    .dropdown-content { 
-        display: none;
-        position: absolute; 
-        top: 100%; 
-        left: 0; 
-        background-color: white; 
-        min-width: 210px; 
-        box-shadow: 0px 8px 16px rgba(0,0,0,0.15); 
-        z-index: 10000; 
-        border-radius: 8px; 
-        border: 1px solid #ddd;
-        margin-top: 5px;
+    .dropdown-content {
+        display: none; position: absolute; top: 100%; left: 0;
+        background-color: white; min-width: 210px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+        z-index: 10000; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px;
     }
-
     #gestionMenu { min-width: 300px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 8px 0; }
     #gestionMenu a { font-size: 16px; padding: 14px 22px; white-space: nowrap; }
     #gestionMenu a i { font-size: 18px; width: 25px; text-align: center; }
     #gestionMenu a:hover { background-color: var(--blue) !important; color: white !important; text-decoration: none; }
     #gestionMenu a:hover i { color: white !important; }
     #gestionMenu a[style*="color:var(--absent)"]:hover { background-color: var(--absent) !important; color: white !important; }
-
     .dropdown-content.show { display: block !important; }
-    .dropdown-content a { 
-        width: 100%; text-align: left; text-decoration: none; padding: 12px 15px; 
-        font-size: 11px; display: flex; align-items: center; gap: 10px; 
+    .dropdown-content a {
+        width: 100%; text-align: left; text-decoration: none; padding: 12px 15px;
+        font-size: 11px; display: flex; align-items: center; gap: 10px;
         color: var(--dark); border-bottom: 1px solid #f9f9f9;
     }
     .show { display: block; }
 
     .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(44, 62, 80, 0.7);
-        display: none; align-items: center; justify-content: center;
-        z-index: 2000; backdrop-filter: blur(4px);
-        padding: 16px;
+        background: rgba(44,62,80,0.7); display: none; align-items: center;
+        justify-content: center; z-index: 2000; backdrop-filter: blur(4px); padding: 16px;
     }
     .modal {
         background: white; border-radius: 16px; max-width: 560px; width: 100%;
         max-height: calc(100vh - 32px); display: flex; flex-direction: column;
-        animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden;
+        animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
     }
     .modal h2 { padding: 20px 22px 14px; margin: 0; font-size: 15px; border-bottom: 1px solid #eee; flex-shrink: 0; }
     .modal-content { overflow-y: auto; padding: 16px 22px; flex: 1; -webkit-overflow-scrolling: touch; }
     .modal-buttons { padding: 14px 22px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; background: white; }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
     .modal-input { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; margin-top: 10px; outline: none; }
 
     .nmodal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(30, 42, 56, 0.65);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 9000; backdrop-filter: blur(3px);
-        animation: nmodalFadeIn 0.18s ease;
+        background: rgba(30,42,56,0.65); display: flex; align-items: center;
+        justify-content: center; z-index: 9000; backdrop-filter: blur(3px);
+        animation: nmodalFadeIn 0.18s ease; padding: 16px;
     }
-    @keyframes nmodalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes nmodalFadeIn { from { opacity:0; } to { opacity:1; } }
     .nmodal-box {
         background: white; border-radius: 18px; padding: 32px 28px 24px;
-        max-width: 420px; width: 92%;
+        max-width: 420px; width: 100%;
         box-shadow: 0 24px 60px rgba(0,0,0,0.22);
-        animation: nmodalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: nmodalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
         text-align: center; position: relative;
     }
-    @keyframes nmodalPop { from { opacity: 0; transform: scale(0.88) translateY(16px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .nmodal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 18px; }
-    .nmodal-icon.info    { background: #eaf4fd; }
-    .nmodal-icon.success { background: #eafaf1; }
-    .nmodal-icon.warning { background: #fef9e7; }
-    .nmodal-icon.error   { background: #fdf0ef; }
-    .nmodal-icon.question { background: #f0f3ff; }
-    .nmodal-title { font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
-    .nmodal-message { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 24px; }
-    .nmodal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    .nmodal-btn { border: none; border-radius: 9px; padding: 10px 22px; font-size: 13px; font-weight: 600; cursor: pointer; transition: filter 0.15s, transform 0.15s; min-width: 100px; }
-    .nmodal-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .nmodal-btn.primary   { background: var(--blue); color: white; }
-    .nmodal-btn.success   { background: var(--success); color: white; }
-    .nmodal-btn.danger    { background: var(--absent); color: white; }
-    .nmodal-btn.secondary { background: #ecf0f1; color: #555; }
-    .nmodal-input { width: 100%; padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 9px; font-size: 13px; outline: none; margin-bottom: 20px; transition: border-color 0.2s; }
-    .nmodal-input:focus { border-color: var(--blue); }
-    .nmodal-input[type="password"] { letter-spacing: 2px; font-size: 16px; }
+    @keyframes nmodalPop { from { opacity:0; transform:scale(0.88) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    .nmodal-icon { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 18px; }
+    .nmodal-icon.info    { background:#eaf4fd; }
+    .nmodal-icon.success { background:#eafaf1; }
+    .nmodal-icon.warning { background:#fef9e7; }
+    .nmodal-icon.error   { background:#fdf0ef; }
+    .nmodal-icon.question { background:#f0f3ff; }
+    .nmodal-title   { font-size:17px; font-weight:700; color:var(--dark); margin-bottom:10px; }
+    .nmodal-message { font-size:13px; color:#555; line-height:1.6; margin-bottom:24px; }
+    .nmodal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .nmodal-btn { border:none; border-radius:9px; padding:10px 22px; font-size:13px; font-weight:600; cursor:pointer; transition:filter 0.15s,transform 0.15s; min-width:100px; }
+    .nmodal-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    .nmodal-btn.primary   { background:var(--blue); color:white; }
+    .nmodal-btn.success   { background:var(--success); color:white; }
+    .nmodal-btn.danger    { background:var(--absent); color:white; }
+    .nmodal-btn.secondary { background:#ecf0f1; color:#555; }
+    .nmodal-input { width:100%; padding:11px 14px; border:2px solid #e0e0e0; border-radius:9px; font-size:13px; outline:none; margin-bottom:20px; transition:border-color 0.2s; }
+    .nmodal-input:focus { border-color:var(--blue); }
+    .nmodal-input[type="password"] { letter-spacing:2px; font-size:16px; }
 
     #toastContainer {
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-        z-index: 99999; display: flex; flex-direction: column; gap: 8px;
-        align-items: center; pointer-events: none;
+        position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+        z-index:99999; display:flex; flex-direction:column; gap:8px;
+        align-items:center; pointer-events:none;
     }
-    .toast { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 50px; font-size: 13px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.18); pointer-events: auto; animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-width: 360px; white-space: nowrap; }
-    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(10px) scale(0.9); } }
-    .toast.info    { background: var(--dark); color: white; }
-    .toast.success { background: var(--success); color: white; }
-    .toast.warning { background: #f39c12; color: white; }
-    .toast.error   { background: var(--absent); color: white; }
+    .toast { display:flex; align-items:center; gap:10px; padding:12px 20px; border-radius:50px; font-size:13px; font-weight:500; box-shadow:0 6px 20px rgba(0,0,0,0.18); pointer-events:auto; animation:toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width:360px; white-space:nowrap; }
+    @keyframes toastIn  { from { opacity:0; transform:translateY(20px) scale(0.9); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes toastOut { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(10px) scale(0.9); } }
+    .toast.info    { background:var(--dark); color:white; }
+    .toast.success { background:var(--success); color:white; }
+    .toast.warning { background:#f39c12; color:white; }
+    .toast.error   { background:var(--absent); color:white; }
 
+    /* ── MOBILE ─────────────────────────────────────────────────── */
     @media (max-width: 768px) {
-        body { margin: 5px; }
+        body { margin: 0; font-size: 13px; }
         .container { padding: 8px; width: 100vw; border-radius: 0; }
-        th, td { height: 45px; }
-        .col-main { width: 160px; min-width: 160px; font-size: 12px; padding-left: 8px; }
-        .top-bar { flex-wrap: wrap; justify-content: space-between; padding: 8px; }
-        .input-group { width: 100%; order: -1; margin-bottom: 5px; }
+        th, td { height: 48px; }
+        .col-main { width: 150px; min-width: 150px; font-size: 12px; padding-left: 8px; }
+        .cell-abs { min-width: 36px !important; font-size: 13px !important; }
+        .half-day-col { width: 24px !important; font-size: 10px !important; }
+        .top-bar { gap: 8px; padding: 8px; }
+        .input-group { width: 100%; order: -1; margin-bottom: 5px; flex: 0 0 100%; }
         .input-group input { width: 100%; }
-        .btn-main { width: calc(33% - 5px); height: 35px; font-size: 9px; }
+        .btn-main { width: calc(33% - 5px); height: 38px; font-size: 9px; }
         .drag-handle, .drag-handle-class, .stats-badge { display: none; }
-        .modal { width: 95%; padding: 15px; }
+        .modal { width: 95%; }
         .stats-footer { flex-direction: column; gap: 10px; text-align: center; }
+        #gestionMenu { min-width: 240px; }
+        #gestionMenu a { font-size: 14px; padding: 12px 16px; }
+        .sticky-note { width: 220px !important; }
     }
 
-    /* POST-IT */
-    .sticky-note { position: fixed; bottom: 20px; right: 20px; width: 300px; min-width: 200px; min-height: 38px; background: #fff9c4; border: 1px solid #fbc02d; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.25); z-index: 10000; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.2s; }
-    .sticky-note:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
-    .sticky-header { background: #fbc02d; padding: 0 8px; cursor: move; font-size: 12px; font-weight: bold; text-align: left; display: flex; align-items: center; justify-content: space-between; height: 38px; flex-shrink: 0; user-select: none; border-radius: 5px 5px 0 0; }
-    .sticky-header-left { display: flex; align-items: center; gap: 6px; }
-    .sticky-note-dot { width: 8px; height: 8px; border-radius: 50%; background: #c0392b; display: none; flex-shrink: 0; box-shadow: 0 0 4px rgba(192,57,43,0.6); }
-    .sticky-note-dot.visible { display: inline-block; }
-    .sticky-header-actions { display: flex; align-items: center; gap: 4px; }
-    .sticky-header button { background: none; border: none; cursor: pointer; font-weight: bold; color: #5f4b00; font-size: 14px; line-height: 1; padding: 2px 5px; border-radius: 3px; transition: background 0.15s; }
-    .sticky-header button:hover { background: rgba(0,0,0,0.12); }
-    .sticky-body { display: flex; flex-direction: column; flex: 1; overflow: hidden; position: relative; }
-    .sticky-note.collapsed .sticky-body { display: none; }
-    .sticky-note.collapsed { min-height: unset; height: auto !important; resize: none; border-radius: 6px; }
-    .sticky-note.collapsed .sticky-header { border-radius: 5px; }
-    #noteContent { flex: 1; width: 100%; border: none; background: transparent; padding: 10px 10px 20px 10px; font-family: 'Handlee', 'Comic Sans MS', cursive; font-size: 13px; resize: none; outline: none; color: #333; line-height: 1.5; overflow-y: auto; min-height: 80px; }
-    .sticky-resize-handle { position: absolute; bottom: 0; right: 0; width: 18px; height: 18px; cursor: nwse-resize; display: flex; align-items: flex-end; justify-content: flex-end; padding: 2px; opacity: 0.5; transition: opacity 0.2s; z-index: 1; }
-    .sticky-resize-handle:hover { opacity: 1; }
-    .sticky-resize-handle svg { pointer-events: none; }
+    /* ── POST-IT ────────────────────────────────────────────────── */
+    .sticky-note { position:fixed; bottom:20px; right:20px; width:300px; min-width:200px; min-height:38px; background:#fff9c4; border:1px solid #fbc02d; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.25); z-index:10000; display:flex; flex-direction:column; overflow:hidden; transition:box-shadow 0.2s; }
+    .sticky-note:hover { box-shadow:0 6px 20px rgba(0,0,0,0.35); }
+    .sticky-header { background:#fbc02d; padding:0 8px; cursor:move; font-size:12px; font-weight:bold; text-align:left; display:flex; align-items:center; justify-content:space-between; height:38px; flex-shrink:0; user-select:none; border-radius:5px 5px 0 0; }
+    .sticky-header-left { display:flex; align-items:center; gap:6px; }
+    .sticky-note-dot { width:8px; height:8px; border-radius:50%; background:#c0392b; display:none; flex-shrink:0; box-shadow:0 0 4px rgba(192,57,43,0.6); }
+    .sticky-note-dot.visible { display:inline-block; }
+    .sticky-header-actions { display:flex; align-items:center; gap:4px; }
+    .sticky-header button { background:none; border:none; cursor:pointer; font-weight:bold; color:#5f4b00; font-size:14px; line-height:1; padding:2px 5px; border-radius:3px; transition:background 0.15s; }
+    .sticky-header button:hover { background:rgba(0,0,0,0.12); }
+    .sticky-body { display:flex; flex-direction:column; flex:1; overflow:hidden; position:relative; }
+    .sticky-note.collapsed .sticky-body { display:none; }
+    .sticky-note.collapsed { min-height:unset; height:auto !important; resize:none; border-radius:6px; }
+    .sticky-note.collapsed .sticky-header { border-radius:5px; }
+    #noteContent { flex:1; width:100%; border:none; background:transparent; padding:10px 10px 20px 10px; font-family:'Handlee','Comic Sans MS',cursive; font-size:13px; resize:none; outline:none; color:#333; line-height:1.5; overflow-y:auto; min-height:80px; }
+    .sticky-resize-handle { position:absolute; bottom:0; right:0; width:18px; height:18px; cursor:nwse-resize; display:flex; align-items:flex-end; justify-content:flex-end; padding:2px; opacity:0.5; transition:opacity 0.2s; z-index:1; }
+    .sticky-resize-handle:hover { opacity:1; }
+    .sticky-resize-handle svg { pointer-events:none; }
+
+    /* ── BARRE OFFLINE ──────────────────────────────────────────── */
+    #offlineBanner {
+        position:fixed; top:0; left:0; width:100%; z-index:99999;
+        background:#c0392b; color:white; text-align:center;
+        padding:10px 16px; font-size:13px; font-weight:600;
+        display:flex; align-items:center; justify-content:center; gap:12px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 
 <div id="modalOverlay" class="modal-overlay">
@@ -334,12 +291,13 @@
              style="height:80px; width:80px; object-fit:contain; border-radius:6px; flex-shrink:0;">
 
         <div class="input-group">
-            <input type="text" id="newClassName" placeholder="Enregistrer une classe..." onkeypress="if(event.key==='Enter') addClass()">
+            <input type="text" id="newClassName" placeholder="Enregistrer une classe..."
+                   onkeypress="if(event.key==='Enter') addClass()">
             <button class="btn-add-inline" onclick="addClass()">+</button>
         </div>
 
-        <button id="toggleBtn" class="btn-main" onclick="toggleAllClasses()" style="background: var(--gray);">▼ Tout<br>Déplier</button>
-        
+        <button id="toggleBtn" class="btn-main" onclick="toggleAllClasses()" style="background:var(--gray);">▼ Tout<br>Déplier</button>
+
         <div class="dropdown">
             <button class="btn-main" style="background:var(--blue)" onclick="toggleGestionMenu(event)">
                 <i class="fas fa-cog"></i> Gestion ▾
@@ -365,28 +323,27 @@
             </div>
         </div>
 
-        <button onclick="openDashboard()" style="background:var(--dark); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">
+        <button onclick="openDashboard()" style="background:var(--dark); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; white-space:nowrap;">
             📊 Tableau de Bord
         </button>
-        <button class="btn-main" onclick="openHelpModal()" style="background: #19C3E3; border-radius: 50%; width: 35px; height: 35px; min-width:35px; padding: 0;">?</button>
-        
-        <input type="file" id="importCSV" style="display:none" accept=".csv, .txt" onchange="importCSV(event)">
+        <button class="btn-main" onclick="openHelpModal()" style="background:#19C3E3; border-radius:50%; width:35px; height:35px; min-width:35px; padding:0;">?</button>
+
+        <input type="file" id="importCSV" style="display:none" accept=".csv,.txt" onchange="importCSV(event)">
         <input type="file" id="restoreInput" style="display:none" accept=".json" onchange="importJSON(event)">
         <span id="syncIndicator" class="sync-status">Initialisation...</span>
     </div>
 
-    <div class="search-container" style="margin: 10px 0; position: relative; max-width: 400px;">
-        <input type="text" id="studentSearch" placeholder="Rechercher un élève..." 
+    <div class="search-container" style="margin:10px 0; position:relative; max-width:400px;">
+        <input type="text" id="studentSearch" placeholder="Rechercher un élève..."
             oninput="handleSearch(this.value)"
-            style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-        <div id="searchResults" style="position: absolute; width: 100%; background: white; z-index: 1000; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;"></div>
+            style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);">
+        <div id="searchResults" style="position:absolute; width:100%; background:white; z-index:1000; border-radius:0 0 8px 8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); max-height:200px; overflow-y:auto;"></div>
     </div>
 
     <table id="absenceTable">
         <thead>
             <tr id="monthRow"><th class="col-main">Classes / Élèves</th></tr>
             <tr id="dayRow"><th class="col-main"></th></tr>
-            <!-- Ligne M / AM -->
             <tr id="halfDayRow"><th class="col-main" style="font-size:9px; color:#aaa; text-align:right; padding-right:6px;">matin / AM</th></tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -419,6 +376,7 @@
 </div>
 
 <script>
+    // ── CONFIG SUPABASE ──────────────────────────────────────────
     const SUPABASE_URL = 'https://osxbonycajarenugqsfa.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_oZNXxeJO2yNfZyzhJx3scQ_UipEH136';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -431,24 +389,19 @@
     async function verifyPass(p) {
         const enc = new TextEncoder();
         const km = await crypto.subtle.importKey("raw", enc.encode(p), "PBKDF2", false, ["deriveBits"]);
-        const b = await crypto.subtle.deriveBits({name: "PBKDF2", salt: enc.encode(AUTH_CONFIG.salt), iterations: 100000, hash: "SHA-256"}, km, 256);
-        return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === AUTH_CONFIG.hash;
+        const b = await crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(AUTH_CONFIG.salt),iterations:100000,hash:"SHA-256"},km,256);
+        return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===AUTH_CONFIG.hash;
     }
 
-    // ============================================================
-    //  CHIFFREMENT AES-GCM (conformité RGPD)
-    //  Clé dérivée du mot de passe — jamais stockée.
-    //  Migration automatique : les données en clair sont chiffrées
-    //  à la première connexion, de façon transparente.
-    // ============================================================
+    // ── CHIFFREMENT AES-GCM ──────────────────────────────────────
     let _encryptionKey = null;
 
     async function deriveEncryptionKey(password) {
         const enc = new TextEncoder();
-        const km = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+        const km = await crypto.subtle.importKey("raw",enc.encode(password),"PBKDF2",false,["deriveKey"]);
         return crypto.subtle.deriveKey(
-            { name: "PBKDF2", salt: enc.encode("rgpd-school-enc-v1"), iterations: 200000, hash: "SHA-256" },
-            km, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+            {name:"PBKDF2",salt:enc.encode("rgpd-school-enc-v1"),iterations:200000,hash:"SHA-256"},
+            km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
         );
     }
 
@@ -456,1633 +409,739 @@
         if (!_encryptionKey) return data;
         const enc = new TextEncoder();
         const iv = crypto.getRandomValues(new Uint8Array(12));
-        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, _encryptionKey, enc.encode(JSON.stringify(data)));
+        const ct = await crypto.subtle.encrypt({name:"AES-GCM",iv},_encryptionKey,enc.encode(JSON.stringify(data)));
         const toB64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
-        return { __encrypted: true, iv: toB64(iv), ct: toB64(ct) };
+        return {__encrypted:true,iv:toB64(iv),ct:toB64(ct)};
     }
 
     async function decryptData(payload) {
-        if (!payload || !payload.__encrypted) return payload; // données en clair (legacy)
+        if (!payload||!payload.__encrypted) return payload;
         if (!_encryptionKey) throw new Error("Clé manquante");
-        const fromB64 = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        const plain = await crypto.subtle.decrypt(
-            { name: "AES-GCM", iv: fromB64(payload.iv) }, _encryptionKey, fromB64(payload.ct)
-        );
+        const fromB64 = b64 => Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+        const plain = await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64(payload.iv)},_encryptionKey,fromB64(payload.ct));
         return JSON.parse(new TextDecoder().decode(plain));
     }
 
-    function isPasswordEnabled() {
-        return localStorage.getItem('password_protection_disabled') !== 'true';
-    }
+    function isPasswordEnabled() { return localStorage.getItem('password_protection_disabled')!=='true'; }
 
     function updatePasswordToggleUI() {
-        const enabled = isPasswordEnabled();
-        const btn = document.getElementById('passwordToggleBtn');
-        const icon = document.getElementById('passwordToggleIcon');
-        const label = document.getElementById('passwordToggleLabel');
+        const enabled=isPasswordEnabled();
+        const btn=document.getElementById('passwordToggleBtn');
+        const icon=document.getElementById('passwordToggleIcon');
+        const label=document.getElementById('passwordToggleLabel');
         if (!btn) return;
         if (enabled) {
-            icon.className = 'fas fa-lock';
-            icon.style.color = 'var(--success)';
-            label.textContent = 'Protection activée (désactiver)';
-            btn.style.color = 'var(--success)';
+            icon.className='fas fa-lock'; icon.style.color='var(--success)';
+            label.textContent='Protection activée (désactiver)'; btn.style.color='var(--success)';
         } else {
-            icon.className = 'fas fa-lock-open';
-            icon.style.color = 'var(--gray)';
-            label.textContent = 'Protection désactivée (activer)';
-            btn.style.color = 'var(--gray)';
+            icon.className='fas fa-lock-open'; icon.style.color='var(--gray)';
+            label.textContent='Protection désactivée (activer)'; btn.style.color='var(--gray)';
         }
     }
 
     async function togglePasswordProtection() {
-        const enabled = isPasswordEnabled();
-        if (enabled) {
-            // Demander le mot de passe avant de désactiver
-            const p = await showPrompt("Confirmez le mot de passe pour désactiver la protection.", {
-                title: "Désactiver la protection", type: 'warning', icon: MODAL_ICONS.lock,
-                inputType: 'password', placeholder: '••••••••',
-                labelOk: 'Désactiver', labelCancel: 'Annuler'
-            });
+        if (isPasswordEnabled()) {
+            const p = await showPrompt("Confirmez le mot de passe pour désactiver la protection.",{title:"Désactiver la protection",type:'warning',icon:MODAL_ICONS.lock,inputType:'password',placeholder:'••••••••',labelOk:'Désactiver',labelCancel:'Annuler'});
             if (!p) return;
-            if (await verifyPass(p)) {
-                localStorage.setItem('password_protection_disabled', 'true');
-                updatePasswordToggleUI();
-                showToast('🔓 Protection par mot de passe désactivée', 'warning');
-            } else {
-                showToast('❌ Mot de passe incorrect', 'error');
-            }
+            if (await verifyPass(p)) { localStorage.setItem('password_protection_disabled','true'); updatePasswordToggleUI(); showToast('🔓 Protection désactivée','warning'); }
+            else showToast('❌ Mot de passe incorrect','error');
         } else {
-            // Réactiver sans demander de mot de passe
-            localStorage.removeItem('password_protection_disabled');
-            updatePasswordToggleUI();
-            showToast('🔒 Protection par mot de passe activée', 'success');
+            localStorage.removeItem('password_protection_disabled'); updatePasswordToggleUI(); showToast('🔒 Protection activée','success');
         }
     }
 
     async function checkAccess() {
-        if (!isPasswordEnabled()) {
-            _encryptionKey = await deriveEncryptionKey("no-password-default-key");
-            return;
-        }
-        // Session déjà validée : restaurer la clé
-        const cached = sessionStorage.getItem('app_session_pass');
-        if (cached && sessionStorage.getItem('app_access_granted') === 'true') {
-            _encryptionKey = await deriveEncryptionKey(cached);
-            return;
-        }
-        const p = await showPrompt("Saisissez le mot de passe pour accéder à l'application.", {
-            title: "Accès protégé", type: 'info', icon: MODAL_ICONS.lock,
-            inputType: 'password', placeholder: '••••••••',
-            labelOk: 'Entrer', labelCancel: 'Annuler'
-        });
-        if (p && await verifyPass(p)) {
-            _encryptionKey = await deriveEncryptionKey(p);
-            sessionStorage.setItem('app_access_granted', 'true');
-            sessionStorage.setItem('app_session_pass', p);
+        if (!isPasswordEnabled()) { _encryptionKey=await deriveEncryptionKey("no-password-default-key"); return; }
+        const cached=sessionStorage.getItem('app_session_pass');
+        if (cached&&sessionStorage.getItem('app_access_granted')==='true') { _encryptionKey=await deriveEncryptionKey(cached); return; }
+        const p=await showPrompt("Saisissez le mot de passe pour accéder à l'application.",{title:"Accès protégé",type:'info',icon:MODAL_ICONS.lock,inputType:'password',placeholder:'••••••••',labelOk:'Entrer',labelCancel:'Annuler'});
+        if (p&&await verifyPass(p)) {
+            _encryptionKey=await deriveEncryptionKey(p);
+            sessionStorage.setItem('app_access_granted','true');
+            sessionStorage.setItem('app_session_pass',p);
         } else {
-            document.body.innerHTML = "<div style='text-align:center;padding:50px;font-family:sans-serif;'><h1>🔒 Accès verrouillé</h1><p>Mot de passe incorrect.</p><button onclick='location.reload()' style='padding:10px 20px;border-radius:8px;background:#3498db;color:white;border:none;cursor:pointer;font-size:14px;'>Réessayer</button></div>";
+            document.body.innerHTML="<div style='text-align:center;padding:50px;font-family:sans-serif;'><h1>🔒 Accès verrouillé</h1><p>Mot de passe incorrect.</p><button onclick='location.reload()' style='padding:10px 20px;border-radius:8px;background:#3498db;color:white;border:none;cursor:pointer;font-size:14px;'>Réessayer</button></div>";
             throw new Error("Unauthorized");
         }
     }
 
-    // ============================================================
-    //  UTILITAIRES DEMI-JOURNÉES
-    //  Les clés de données sont : "mIdx-dayNum-M" et "mIdx-dayNum-AM"
-    //  Migration automatique des anciennes clés "mIdx-dayNum" → "mIdx-dayNum-M"
-    // ============================================================
+    // ── ÉTAT GLOBAL ──────────────────────────────────────────────
+    const HALF_DAYS = ['M','AM'];
 
-    const HALF_DAYS = ['M', 'AM'];
-
-    /**
-     * Migre les anciennes clés sans suffixe vers "-M" (matin par défaut).
-     * À appeler une seule fois après le chargement.
-     */
     function migrateOldKeys() {
-        let migrated = false;
-        schoolData.forEach(classe => {
-            classe.students.forEach(st => {
-                const oldKeys = Object.keys(st.data).filter(k => {
-                    const parts = k.split('-');
-                    return parts.length === 2; // ancienne clé : "mIdx-dayNum"
-                });
-                oldKeys.forEach(k => {
-                    const newKey = k + '-M';
-                    if (!st.data[newKey]) {
-                        st.data[newKey] = st.data[k];
-                    }
-                    delete st.data[k];
-                    migrated = true;
-                });
+        let migrated=false;
+        schoolData.forEach(c=>c.students.forEach(st=>{
+            Object.keys(st.data).filter(k=>k.split('-').length===2).forEach(k=>{
+                const nk=k+'-M'; if (!st.data[nk]) st.data[nk]=st.data[k]; delete st.data[k]; migrated=true;
             });
-        });
+        }));
         return migrated;
     }
 
-    /**
-     * Calcule le total d'absences en nombre de journées (0.5 par demi-journée).
-     * Retourne { total, excused } en décimales.
-     */
-    function countAbsences(dataObj, filterFn) {
-        let total = 0, excused = 0;
-        Object.keys(dataObj).forEach(k => {
-            if (filterFn && !filterFn(k)) return;
-            const val = dataObj[k];
-            if (val === 'A') { total += 0.5; }
-            if (val === 'Exc') { total += 0.5; excused += 0.5; }
-        });
-        return { total, excused };
-    }
+    function fmt(n) { return n%1===0?n.toString():n.toFixed(1); }
 
-    /** Formate un nombre décimal d'absences : 1 → "1", 1.5 → "1.5", 0.5 → "0.5" */
-    function fmt(n) {
-        return n % 1 === 0 ? n.toString() : n.toFixed(1);
-    }
+    let schoolData=[], excludedDates=[], activeMonth=null, draggedItem=null, draggedClassIdx=null;
 
-    let schoolData = [];
-    let excludedDates = [];
-    let activeMonth = null;
-    let draggedItem = null;
-    let draggedClassIdx = null;
-
-    const monthConfigs = [
-        { name: "Septembre", m: 8, y: 2025 }, { name: "Octobre", m: 9, y: 2025 }, { name: "Novembre", m: 10, y: 2025 },
-        { name: "Décembre", m: 11, y: 2025 }, { name: "Janvier", m: 0, y: 2026 }, { name: "Février", m: 1, y: 2026 },
-        { name: "Mars", m: 2, y: 2026 }, { name: "Avril", m: 3, y: 2026 }, { name: "Mai", m: 4, y: 2026 },
-        { name: "Juin", m: 5, y: 2026 }, { name: "Juillet", m: 6, y: 2026 }
+    const monthConfigs=[
+        {name:"Septembre",m:8,y:2025},{name:"Octobre",m:9,y:2025},{name:"Novembre",m:10,y:2025},
+        {name:"Décembre",m:11,y:2025},{name:"Janvier",m:0,y:2026},{name:"Février",m:1,y:2026},
+        {name:"Mars",m:2,y:2026},{name:"Avril",m:3,y:2026},{name:"Mai",m:4,y:2026},
+        {name:"Juin",m:5,y:2026},{name:"Juillet",m:6,y:2026}
     ];
+    const dayLabels=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+    let schoolMonths=[];
 
-    const dayLabels = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-    let schoolMonths = [];
-
-    // --- STICKY NOTE ---
-    let stickyDragging = false, stickyResizing = false;
-    let stickyOffsetX = 0, stickyOffsetY = 0;
-    let stickyStartX, stickyStartY, stickyStartW, stickyStartH;
+    // ── STICKY NOTE ──────────────────────────────────────────────
+    let stickyDragging=false,stickyResizing=false,stickyOffsetX=0,stickyOffsetY=0;
+    let stickyStartX,stickyStartY,stickyStartW,stickyStartH;
 
     function initStickyPosition() {
-        const note = document.getElementById('stickyNote');
-        const savedX = localStorage.getItem('stickyX'), savedY = localStorage.getItem('stickyY');
-        const savedW = localStorage.getItem('stickyW'), savedH = localStorage.getItem('stickyH');
-        if (savedW) note.style.width = savedW + 'px';
-        if (savedH) note.style.height = savedH + 'px';
-        if (savedX && savedY) { note.style.bottom = 'auto'; note.style.right = 'auto'; note.style.left = savedX + 'px'; note.style.top = savedY + 'px'; }
+        const note=document.getElementById('stickyNote');
+        const sx=localStorage.getItem('stickyX'),sy=localStorage.getItem('stickyY');
+        const sw=localStorage.getItem('stickyW'),sh=localStorage.getItem('stickyH');
+        if (sw) note.style.width=sw+'px'; if (sh) note.style.height=sh+'px';
+        if (sx&&sy){note.style.bottom='auto';note.style.right='auto';note.style.left=sx+'px';note.style.top=sy+'px';}
     }
 
     function toggleStickyNote(e) {
         if (e) e.stopPropagation();
-        const note = document.getElementById('stickyNote'), btn = document.getElementById('stickyToggleBtn');
-        const isCollapsed = note.classList.contains('collapsed');
-        note.classList.toggle('collapsed', !isCollapsed);
-        btn.textContent = isCollapsed ? '▲' : '▼';
-        if (isCollapsed) { const h = localStorage.getItem('stickyH'); note.style.height = h ? h + 'px' : '180px'; document.getElementById('noteContent').focus(); }
-        else { note.style.height = 'auto'; }
+        const note=document.getElementById('stickyNote'),btn=document.getElementById('stickyToggleBtn');
+        const isCollapsed=note.classList.contains('collapsed');
+        note.classList.toggle('collapsed',!isCollapsed);
+        btn.textContent=isCollapsed?'▲':'▼';
+        if (isCollapsed){const h=localStorage.getItem('stickyH');note.style.height=h?h+'px':'180px';document.getElementById('noteContent').focus();}
+        else note.style.height='auto';
     }
 
     function updateStickyDot(text) {
-        const dot = document.getElementById('stickyDot'), note = document.getElementById('stickyNote');
-        dot.classList.toggle('visible', text && text.trim().length > 0 && note.classList.contains('collapsed'));
+        const dot=document.getElementById('stickyDot'),note=document.getElementById('stickyNote');
+        dot.classList.toggle('visible',!!(text&&text.trim().length>0&&note.classList.contains('collapsed')));
     }
 
-    function onNoteInput() { updateStickyDot(document.getElementById('noteContent').value); saveNote(); }
-    function saveNote() { save(); }
+    function onNoteInput(){updateStickyDot(document.getElementById('noteContent').value);save();}
 
     function setupStickyNote() {
-        const note = document.getElementById('stickyNote'), header = document.getElementById('stickyHeader'), resizeHandle = document.getElementById('stickyResizeHandle');
+        const note=document.getElementById('stickyNote'),header=document.getElementById('stickyHeader'),rh=document.getElementById('stickyResizeHandle');
         initStickyPosition();
-        header.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'BUTTON') return;
-            stickyDragging = true;
-            const rect = note.getBoundingClientRect();
-            stickyOffsetX = e.clientX - rect.left; stickyOffsetY = e.clientY - rect.top;
-            note.style.bottom = 'auto'; note.style.right = 'auto'; note.style.transition = 'none';
-            e.preventDefault();
+        header.addEventListener('mousedown',e=>{
+            if(e.target.tagName==='BUTTON')return;
+            stickyDragging=true;const rect=note.getBoundingClientRect();
+            stickyOffsetX=e.clientX-rect.left;stickyOffsetY=e.clientY-rect.top;
+            note.style.bottom='auto';note.style.right='auto';note.style.transition='none';e.preventDefault();
         });
-        resizeHandle.addEventListener('mousedown', (e) => {
-            stickyResizing = true;
-            const rect = note.getBoundingClientRect();
-            stickyStartX = e.clientX; stickyStartY = e.clientY;
-            stickyStartW = rect.width; stickyStartH = rect.height;
-            note.style.transition = 'none'; e.preventDefault(); e.stopPropagation();
+        rh.addEventListener('mousedown',e=>{
+            stickyResizing=true;const rect=note.getBoundingClientRect();
+            stickyStartX=e.clientX;stickyStartY=e.clientY;stickyStartW=rect.width;stickyStartH=rect.height;
+            note.style.transition='none';e.preventDefault();e.stopPropagation();
         });
-        document.addEventListener('mousemove', (e) => {
-            if (stickyDragging) {
-                const x = Math.max(0, Math.min(e.clientX - stickyOffsetX, window.innerWidth - note.offsetWidth));
-                const y = Math.max(0, Math.min(e.clientY - stickyOffsetY, window.innerHeight - note.offsetHeight));
-                note.style.left = x + 'px'; note.style.top = y + 'px';
-                localStorage.setItem('stickyX', x); localStorage.setItem('stickyY', y);
+        document.addEventListener('mousemove',e=>{
+            if(stickyDragging){
+                const x=Math.max(0,Math.min(e.clientX-stickyOffsetX,window.innerWidth-note.offsetWidth));
+                const y=Math.max(0,Math.min(e.clientY-stickyOffsetY,window.innerHeight-note.offsetHeight));
+                note.style.left=x+'px';note.style.top=y+'px';
+                localStorage.setItem('stickyX',x);localStorage.setItem('stickyY',y);
             }
-            if (stickyResizing) {
-                const newW = Math.max(200, stickyStartW + (e.clientX - stickyStartX));
-                const newH = Math.max(120, stickyStartH + (e.clientY - stickyStartY));
-                note.style.width = newW + 'px'; note.style.height = newH + 'px';
-                localStorage.setItem('stickyW', newW); localStorage.setItem('stickyH', newH);
+            if(stickyResizing){
+                const nw=Math.max(200,stickyStartW+(e.clientX-stickyStartX));
+                const nh=Math.max(120,stickyStartH+(e.clientY-stickyStartY));
+                note.style.width=nw+'px';note.style.height=nh+'px';
+                localStorage.setItem('stickyW',nw);localStorage.setItem('stickyH',nh);
             }
         });
-        document.addEventListener('mouseup', () => { stickyDragging = false; stickyResizing = false; });
-        header.addEventListener('touchstart', (e) => {
-            if (e.target.tagName === 'BUTTON') return;
-            stickyDragging = true;
-            const touch = e.touches[0], rect = note.getBoundingClientRect();
-            stickyOffsetX = touch.clientX - rect.left; stickyOffsetY = touch.clientY - rect.top;
-            note.style.bottom = 'auto'; note.style.right = 'auto';
-        }, { passive: true });
-        document.addEventListener('touchmove', (e) => {
-            if (!stickyDragging) return;
-            const touch = e.touches[0];
-            note.style.left = Math.max(0, touch.clientX - stickyOffsetX) + 'px';
-            note.style.top = Math.max(0, touch.clientY - stickyOffsetY) + 'px';
-        }, { passive: true });
-        document.addEventListener('touchend', () => { stickyDragging = false; });
+        document.addEventListener('mouseup',()=>{stickyDragging=false;stickyResizing=false;});
+        header.addEventListener('touchstart',e=>{
+            if(e.target.tagName==='BUTTON')return;
+            stickyDragging=true;const t=e.touches[0],rect=note.getBoundingClientRect();
+            stickyOffsetX=t.clientX-rect.left;stickyOffsetY=t.clientY-rect.top;
+            note.style.bottom='auto';note.style.right='auto';
+        },{passive:true});
+        document.addEventListener('touchmove',e=>{
+            if(!stickyDragging)return;const t=e.touches[0];
+            note.style.left=Math.max(0,t.clientX-stickyOffsetX)+'px';
+            note.style.top=Math.max(0,t.clientY-stickyOffsetY)+'px';
+        },{passive:true});
+        document.addEventListener('touchend',()=>{stickyDragging=false;});
     }
 
-    // --- Modale principale ---
-    function showModal({ title, content, buttons, showInput = false, inputValue = "" }) {
-        return new Promise((resolve) => {
-            const overlay = document.getElementById('modalOverlay');
-            document.getElementById('mTitle').innerHTML = title;
-            document.getElementById('mContent').innerHTML = content;
-            if (showInput) {
-                document.getElementById('mContent').innerHTML += `<input type="text" id="mInput" class="modal-input" value="${inputValue}">`;
-                setTimeout(() => document.getElementById('mInput').focus(), 100);
-            }
-            const footer = document.getElementById('mFooter');
-            footer.innerHTML = '';
-            const close = (val) => { overlay.style.display = 'none'; overlay.onclick = null; resolve(val); };
-            buttons.forEach(btn => {
-                const b = document.createElement('button');
-                b.className = 'btn-main'; b.style.background = btn.color || 'var(--gray)'; b.innerText = btn.text;
-                b.onclick = () => { const val = showInput ? document.getElementById('mInput').value : true; close(btn.action === 'cancel' ? null : val); };
+    // ── MODALE PRINCIPALE ────────────────────────────────────────
+    function showModal({title,content,buttons,showInput=false,inputValue=""}) {
+        return new Promise(resolve=>{
+            const overlay=document.getElementById('modalOverlay');
+            document.getElementById('mTitle').innerHTML=title;
+            document.getElementById('mContent').innerHTML=content;
+            if(showInput){document.getElementById('mContent').innerHTML+=`<input type="text" id="mInput" class="modal-input" value="${inputValue}">`;setTimeout(()=>document.getElementById('mInput').focus(),100);}
+            const footer=document.getElementById('mFooter');footer.innerHTML='';
+            const close=val=>{overlay.style.display='none';overlay.onclick=null;resolve(val);};
+            buttons.forEach(btn=>{
+                const b=document.createElement('button');
+                b.className='btn-main';b.style.background=btn.color||'var(--gray)';b.innerText=btn.text;
+                b.onclick=()=>{const val=showInput?document.getElementById('mInput').value:true;close(btn.action==='cancel'?null:val);};
                 footer.appendChild(b);
             });
-            overlay.style.display = 'flex';
-            overlay.onclick = (e) => { if (e.target === overlay) close(null); };
+            overlay.style.display='flex';
+            overlay.onclick=e=>{if(e.target===overlay)close(null);};
         });
     }
 
-    function getClassColor(idx) {
-        const colors = ['#3498db', '#e67e22', '#9b59b6', '#27ae60', '#d35400', '#2980b9', '#8e44ad', '#16a085'];
-        return colors[idx % colors.length];
-    }
+    function getClassColor(idx){const c=['#3498db','#e67e22','#9b59b6','#27ae60','#d35400','#2980b9','#8e44ad','#16a085'];return c[idx%c.length];}
 
-    function toggleGestionMenu(event) {
-        event.stopPropagation();
-        document.getElementById("gestionMenu").classList.toggle("show");
-    }
+    function toggleGestionMenu(event){event.stopPropagation();document.getElementById("gestionMenu").classList.toggle("show");}
 
-    window.onclick = function(event) {
-        if (!event.target.matches('.btn-main')) {
-            const dropdowns = document.getElementsByClassName("dropdown-content");
-            for (let i = 0; i < dropdowns.length; i++) {
-                if (dropdowns[i].classList.contains('show')) dropdowns[i].classList.remove('show');
-            }
+    window.onclick=function(event){
+        if(!event.target.matches('.btn-main')){
+            const dd=document.getElementsByClassName("dropdown-content");
+            for(let i=0;i<dd.length;i++){if(dd[i].classList.contains('show'))dd[i].classList.remove('show');}
         }
     };
 
-    function handleSearch(query) {
-        const resultsDiv = document.getElementById('searchResults');
-        if (!query || query.length < 2) { resultsDiv.innerHTML = ''; return; }
-        let results = [];
-        schoolData.forEach((classe, cIdx) => {
-            classe.students.forEach((st, sIdx) => {
-                if (st.name.toLowerCase().includes(query.toLowerCase()))
-                    results.push({ name: st.name, classe: classe.name, cIdx, sIdx });
-            });
-        });
-        resultsDiv.innerHTML = results.map(r => `
-            <div onclick="showStudentStats(${r.cIdx}, ${r.sIdx}); document.getElementById('searchResults').innerHTML='';" 
-                 style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;">
-                <b>${r.name}</b> <small style="color:#666;">(${r.classe})</small>
-            </div>
-        `).join('');
+    function handleSearch(query){
+        const rd=document.getElementById('searchResults');
+        if(!query||query.length<2){rd.innerHTML='';return;}
+        let results=[];
+        schoolData.forEach((c,cIdx)=>c.students.forEach((st,sIdx)=>{
+            if(st.name.toLowerCase().includes(query.toLowerCase()))results.push({name:st.name,classe:c.name,cIdx,sIdx});
+        }));
+        rd.innerHTML=results.map(r=>`<div onclick="showStudentStats(${r.cIdx},${r.sIdx});document.getElementById('searchResults').innerHTML='';" style="padding:10px;border-bottom:1px solid #eee;cursor:pointer;"><b>${r.name}</b> <small style="color:#666;">(${r.classe})</small></div>`).join('');
     }
 
-    // --- Cloud ---
+    // ── CLOUD ────────────────────────────────────────────────────
+    let _saveTimer=null,_isSaving=false,_pendingSave=false,_lastKnownDataCount=0;
+
     async function loadFromCloud() {
         await checkAccess();
         updatePasswordToggleUI();
         try {
-            const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
-            if (data) {
-                const decrypted = await decryptData(data.content);
-                // Migration : données en clair détectées → re-sauvegarder chiffrées
-                if (data.content && !data.content.__encrypted) {
-                    console.log("Migration RGPD : chiffrement des données existantes…");
-                    const payload = { schoolData: decrypted.schoolData || [], excludedDates: decrypted.excludedDates || [], sharedNote: decrypted.sharedNote || '' };
-                    const encrypted = await encryptData(payload);
-                    await _supabase.from('absences_data').upsert({ id: 1, content: encrypted });
+            const {data}=await _supabase.from('absences_data').select('content').eq('id',1).single();
+            if(data){
+                const decrypted=await decryptData(data.content);
+                if(data.content&&!data.content.__encrypted){
+                    console.log("Migration RGPD…");
+                    await _supabase.from('absences_data').upsert({id:1,content:await encryptData({schoolData:decrypted.schoolData||[],excludedDates:decrypted.excludedDates||[],sharedNote:decrypted.sharedNote||''})});
                 }
-                schoolData = decrypted.schoolData || [];
-                excludedDates = decrypted.excludedDates || [];
-                _lastKnownDataCount = schoolData.length; // mémoriser pour le garde-fou
-
-                // Migration des anciennes clés
-                if (migrateOldKeys()) {
-                    console.log("Migration des clés demi-journées effectuée.");
+                schoolData=decrypted.schoolData||[];
+                excludedDates=decrypted.excludedDates||[];
+                _lastKnownDataCount=schoolData.length;
+                if(migrateOldKeys())console.log("Migration clés demi-journées OK.");
+                if(decrypted.sharedNote!==undefined){
+                    const nt=decrypted.sharedNote;
+                    document.getElementById('noteContent').value=nt;
+                    const note=document.getElementById('stickyNote');
+                    if(nt&&nt.trim().length>0){note.classList.remove('collapsed');document.getElementById('stickyToggleBtn').textContent='▲';const sh=localStorage.getItem('stickyH');note.style.height=sh?sh+'px':'180px';}
+                    updateStickyDot(nt);
                 }
-
-                if (decrypted.sharedNote !== undefined) {
-                    const noteText = decrypted.sharedNote;
-                    document.getElementById('noteContent').value = noteText;
-                    const note = document.getElementById('stickyNote');
-                    if (noteText && noteText.trim().length > 0) {
-                        note.classList.remove('collapsed');
-                        document.getElementById('stickyToggleBtn').textContent = '▲';
-                        const savedH = localStorage.getItem('stickyH');
-                        note.style.height = savedH ? savedH + 'px' : '180px';
-                    }
-                    updateStickyDot(noteText);
-                }
-
-                schoolData.forEach(classe => classe.isOpen = false);
-                document.getElementById('syncIndicator').innerText = "✅ Connecté";
-
-                const now = new Date();
-                const foundIdx = monthConfigs.findIndex(m => m.m === now.getMonth() && m.y === now.getFullYear());
-                if (foundIdx !== -1) activeMonth = foundIdx;
-
-                refreshSchoolMonths();
-                renderAll();
+                schoolData.forEach(c=>c.isOpen=false);
+                document.getElementById('syncIndicator').innerText="✅ Connecté";
+                const now=new Date();
+                const fi=monthConfigs.findIndex(m=>m.m===now.getMonth()&&m.y===now.getFullYear());
+                if(fi!==-1)activeMonth=fi;
+                refreshSchoolMonths();renderAll();
             }
-        } catch (e) {
-            console.error("Erreur de chargement:", e);
-            document.getElementById('syncIndicator').innerText = "❌ Erreur de connexion";
-        }
+        } catch(e){console.error("Erreur chargement:",e);document.getElementById('syncIndicator').innerText="❌ Erreur de connexion";}
         setupStickyNote();
     }
 
-    let _saveTimer   = null;
-    let _isSaving    = false;
-    let _pendingSave = false;
-    let _lastKnownDataCount = 0; // garde-fou anti-écrasement
+    function save(){clearTimeout(_saveTimer);_saveTimer=setTimeout(_doSave,1500);}
 
-    function save() {
-        // Debounce : attend 1,5 s sans nouvelle frappe avant de sauvegarder
-        clearTimeout(_saveTimer);
-        _saveTimer = setTimeout(_doSave, 1500);
+    async function _doSave(){
+        if(_isSaving){_pendingSave=true;return;}
+        if(schoolData.length===0&&_lastKnownDataCount>0){
+            console.warn("Sauvegarde annulée : données vides.");
+            document.getElementById('syncIndicator').innerText="⚠️ Sauvegarde annulée (données vides)";return;
+        }
+        _isSaving=true;_pendingSave=false;
+        try{
+            const cn=document.getElementById('noteContent').value;
+            const content=await encryptData({schoolData,excludedDates,sharedNote:cn});
+            await _supabase.from('absences_data').upsert({id:1,content});
+            _lastKnownDataCount=schoolData.length;
+            document.getElementById('syncIndicator').innerText="✅ Synchronisé 🔒";
+        }catch(e){document.getElementById('syncIndicator').innerText="❌ Erreur sauvegarde";console.error(e);}
+        _isSaving=false;if(_pendingSave)_doSave();
     }
 
-    async function _doSave() {
-        if (_isSaving) { _pendingSave = true; return; }
-        // Garde-fou : refuser d'écraser le cloud avec des données vides
-        if (schoolData.length === 0 && _lastKnownDataCount > 0) {
-            console.warn("Sauvegarde annulée : schoolData vide alors qu'on avait des données.");
-            document.getElementById('syncIndicator').innerText = "⚠️ Sauvegarde annulée (données vides)";
-            return;
-        }
-        _isSaving = true;
-        _pendingSave = false;
-        try {
-            const currentNote = document.getElementById('noteContent').value;
-            const payload = { schoolData, excludedDates, sharedNote: currentNote };
-            const content = await encryptData(payload);
-            await _supabase.from('absences_data').upsert({ id: 1, content });
-            _lastKnownDataCount = schoolData.length;
-            document.getElementById('syncIndicator').innerText = "✅ Synchronisé 🔒";
-        } catch(e) {
-            document.getElementById('syncIndicator').innerText = "❌ Erreur sauvegarde";
-            console.error(e);
-        }
-        _isSaving = false;
-        if (_pendingSave) _doSave();
-    }
-
-    function refreshSchoolMonths() {
-        schoolMonths = monthConfigs.map((conf) => {
-            let days = [];
-            let d = new Date(conf.y, conf.m, 1, 12, 0, 0);
-            while (d.getMonth() === conf.m) {
-                const dayNum = d.getDate(), dayOfWeek = d.getDay();
-                const isWorkDay = [1, 2, 4, 5].includes(dayOfWeek);
-                const isVacation = excludedDates.some(v => {
-                    const ds = `${conf.y}-${String(conf.m + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-                    return ds >= v.start && ds <= v.end;
-                });
-                if (isWorkDay && !isVacation) days.push({ num: dayNum, label: dayLabels[dayOfWeek] });
-                d.setDate(d.getDate() + 1); d.setHours(12, 0, 0, 0);
+    // ── CALENDRIER ───────────────────────────────────────────────
+    function refreshSchoolMonths(){
+        schoolMonths=monthConfigs.map(conf=>{
+            let days=[];let d=new Date(conf.y,conf.m,1,12);
+            while(d.getMonth()===conf.m){
+                const dn=d.getDate(),dow=d.getDay();
+                const isWork=[1,2,4,5].includes(dow);
+                const ds=`${conf.y}-${String(conf.m+1).padStart(2,'0')}-${String(dn).padStart(2,'0')}`;
+                const isVac=excludedDates.some(v=>ds>=v.start&&ds<=v.end);
+                if(isWork&&!isVac)days.push({num:dn,label:dayLabels[dow]});
+                d.setDate(d.getDate()+1);d.setHours(12);
             }
-            return { name: conf.name, days };
+            return{name:conf.name,days};
         });
     }
 
-    function isDayExcluded(mIdx, dayNum) {
-        const conf = monthConfigs[mIdx];
-        const dateToCheck = new Date(conf.y, conf.m, dayNum, 12, 0, 0, 0).getTime();
-        return excludedDates.some(range => {
-            const start = new Date(range.start.replace(/-/g, '/')).setHours(12, 0, 0, 0);
-            const end = new Date(range.end.replace(/-/g, '/')).setHours(12, 0, 0, 0);
-            return dateToCheck >= start && dateToCheck <= end;
+    function isDayExcluded(mIdx,dayNum){
+        const conf=monthConfigs[mIdx];
+        const ts=new Date(conf.y,conf.m,dayNum,12).getTime();
+        return excludedDates.some(r=>{
+            const s=new Date(r.start.replace(/-/g,'/')).setHours(12);
+            const e=new Date(r.end.replace(/-/g,'/')).setHours(12);
+            return ts>=s&&ts<=e;
         });
     }
 
-    function addClass() {
-        const v = document.getElementById('newClassName').value;
-        if (v) { schoolData.push({ name: v, students: [], isOpen: true }); save(); renderAll(); document.getElementById('newClassName').value = ''; }
+    function isToday(mIdx,dNum){const now=new Date(),c=monthConfigs[mIdx];return now.getDate()===dNum&&now.getMonth()===c.m&&now.getFullYear()===c.y;}
+
+    // ── CLASSES & ÉLÈVES ─────────────────────────────────────────
+    function addClass(){const v=document.getElementById('newClassName').value.trim();if(v){schoolData.push({name:v,students:[],isOpen:true});save();renderAll();document.getElementById('newClassName').value='';}}
+    function toggleClass(cIdx){if(!schoolData[cIdx])return;schoolData[cIdx].isOpen=!schoolData[cIdx].isOpen;renderAll();}
+    function toggleAllClasses(){const a=schoolData.some(c=>c.isOpen);schoolData.forEach(c=>c.isOpen=!a);renderAll();}
+    function updateStatus(cIdx,sIdx,key){const st=schoolData[cIdx].students[sIdx];const states=['','A','Exc'];st.data[key]=states[(states.indexOf(st.data[key]||'')+1)%states.length];if(st.data[key]==='')delete st.data[key];save();renderAll();}
+
+    function onDragStart(cIdx,sIdx){draggedItem={cIdx,sIdx};draggedClassIdx=null;}
+    function onClassDragStart(cIdx){draggedClassIdx=cIdx;draggedItem=null;}
+    function onDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+    function onDragLeave(e){e.currentTarget.classList.remove('drag-over');}
+    function onDrop(e,tCIdx,tSIdx){
+        e.preventDefault();e.currentTarget.classList.remove('drag-over');
+        if(draggedClassIdx!==null){const c=schoolData.splice(draggedClassIdx,1)[0];schoolData.splice(tCIdx,0,c);draggedClassIdx=null;}
+        else if(draggedItem!==null){const s=schoolData[draggedItem.cIdx].students.splice(draggedItem.sIdx,1)[0];if(tSIdx===null)schoolData[tCIdx].students.push(s);else schoolData[tCIdx].students.splice(tSIdx,0,s);draggedItem=null;}
+        save();renderAll();
     }
 
-    function onDragStart(cIdx, sIdx) { draggedItem = { cIdx, sIdx }; draggedClassIdx = null; }
-    function onClassDragStart(cIdx) { draggedClassIdx = cIdx; draggedItem = null; }
-    function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-    function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-    function onDrop(e, targetCIdx, targetSIdx) {
-        e.preventDefault(); e.currentTarget.classList.remove('drag-over');
-        if (draggedClassIdx !== null) {
-            const c = schoolData.splice(draggedClassIdx, 1)[0]; schoolData.splice(targetCIdx, 0, c); draggedClassIdx = null;
-        } else if (draggedItem !== null) {
-            const s = schoolData[draggedItem.cIdx].students.splice(draggedItem.sIdx, 1)[0];
-            if (targetSIdx === null) schoolData[targetCIdx].students.push(s);
-            else schoolData[targetCIdx].students.splice(targetSIdx, 0, s);
-            draggedItem = null;
-        }
-        save(); renderAll();
+    async function addStudent(cIdx){
+        const name=await showModal({title:'Nouvel élève',content:`Ajouter un élève dans la classe <b>${schoolData[cIdx].name}</b> :`,showInput:true,buttons:[{text:'Annuler',action:'cancel'},{text:'Ajouter',color:'var(--success)'}]});
+        if(name&&name.trim()!==""){schoolData[cIdx].students.push({name:name.trim(),data:{}});schoolData[cIdx].isOpen=true;save();renderAll();}
     }
+    async function deleteClass(cIdx){const c=await showModal({title:'⚠️ Supprimer',content:`Supprimer <b>${schoolData[cIdx].name}</b> ?`,buttons:[{text:'Non',action:'cancel'},{text:'Oui',color:'var(--absent)'}]});if(c){schoolData.splice(cIdx,1);save();renderAll();}}
+    async function deleteStudent(cIdx,sIdx){const c=await showModal({title:'Supprimer',content:`Retirer l'élève ?`,buttons:[{text:'Non',action:'cancel'},{text:'Oui',color:'var(--absent)'}]});if(c){schoolData[cIdx].students.splice(sIdx,1);save();renderAll();}}
+    async function renameClass(cIdx){const n=await showModal({title:'Renommer',content:'Nom :',showInput:true,inputValue:schoolData[cIdx].name,buttons:[{text:'Ok',color:'var(--blue)'}]});if(n){schoolData[cIdx].name=n;save();renderAll();}}
+    async function renameStudent(cIdx,sIdx){const n=await showModal({title:'Renommer',content:'Nom :',showInput:true,inputValue:schoolData[cIdx].students[sIdx].name,buttons:[{text:'Ok',color:'var(--blue)'}]});if(n){schoolData[cIdx].students[sIdx].name=n;save();renderAll();}}
 
-    async function addStudent(cIdx) {
-        const name = await showModal({
-            title: 'Nouvel élève',
-            content: `Ajouter un élève dans la classe <b>${schoolData[cIdx].name}</b> :`,
-            showInput: true,
-            buttons: [{ text: 'Annuler', action: 'cancel' }, { text: 'Ajouter', color: 'var(--success)' }]
-        });
-        if (name && name.trim() !== "") {
-            schoolData[cIdx].students.push({ name: name.trim(), data: {} });
-            schoolData[cIdx].isOpen = true;
-            save(); renderAll();
-        }
-    }
+    // ── RENDER ───────────────────────────────────────────────────
+    function renderAll(){
+        const isMobile=window.innerWidth<=768;
+        const mRow=document.getElementById('monthRow'),dRow=document.getElementById('dayRow'),hdRow=document.getElementById('halfDayRow');
+        while(mRow.cells.length>1)mRow.deleteCell(1);
+        while(dRow.cells.length>1)dRow.deleteCell(1);
+        while(hdRow.cells.length>1)hdRow.deleteCell(1);
 
-    function toggleClass(cIdx) {
-        if (!schoolData[cIdx]) return;
-        schoolData[cIdx].isOpen = !schoolData[cIdx].isOpen;
-        renderAll();
-    }
+        schoolMonths.forEach((m,idx)=>{
+            if(activeMonth!==null&&activeMonth!==idx)return;
+            let th=document.createElement('th');
+            th.className='month-header'+(activeMonth===idx?' active':'');
+            th.innerText=activeMonth===idx?`⬅ ${m.name}`:m.name;
+            th.onclick=()=>{activeMonth=activeMonth===idx?null:idx;renderAll();};
 
-    // ============================================================
-    //  RENDER PRINCIPAL
-    // ============================================================
-    function renderAll() {
-        const isMobile = window.innerWidth <= 768;
-
-        const mRow = document.getElementById('monthRow');
-        const dRow = document.getElementById('dayRow');
-        const hdRow = document.getElementById('halfDayRow');
-
-        while (mRow.cells.length > 1) mRow.deleteCell(1);
-        while (dRow.cells.length > 1) dRow.deleteCell(1);
-        while (hdRow.cells.length > 1) hdRow.deleteCell(1);
-
-        schoolMonths.forEach((m, idx) => {
-            if (activeMonth !== null && activeMonth !== idx) return;
-
-            let th = document.createElement('th');
-            th.className = 'month-header' + (activeMonth === idx ? ' active' : '');
-            th.innerText = (activeMonth === idx) ? `⬅ ${m.name}` : m.name;
-            th.onclick = () => { activeMonth = (activeMonth === idx) ? null : idx; renderAll(); };
-
-            if (activeMonth === idx) {
-                const visibleDays = m.days.filter(d => !isDayExcluded(idx, d.num));
-                // Chaque jour = 2 demi-colonnes
-                th.colSpan = isMobile ? 2 : visibleDays.length * 2;
-
-                visibleDays.forEach(day => {
-                    const today = isToday(idx, day.num);
-                    if (!isMobile || today) {
-                        // En-tête du numéro du jour (colspan 2)
-                        let dTh = document.createElement('th');
-                        dTh.className = 'day-group-header' + (today ? ' today-highlight' : '');
-                        dTh.colSpan = 2;
-                        dTh.innerHTML = `${day.label}<br>${day.num}`;
-                        dTh.onclick = (e) => { e.stopPropagation(); showDailySummary(idx, day.num, m.name); };
+            if(activeMonth===idx){
+                const vd=m.days.filter(d=>!isDayExcluded(idx,d.num));
+                th.colSpan=isMobile?2:vd.length*2;
+                vd.forEach(day=>{
+                    const today=isToday(idx,day.num);
+                    if(!isMobile||today){
+                        let dTh=document.createElement('th');
+                        dTh.className='day-group-header'+(today?' today-highlight':'');
+                        dTh.colSpan=2;dTh.innerHTML=`${day.label}<br>${day.num}`;
+                        dTh.onclick=e=>{e.stopPropagation();showDailySummary(idx,day.num,m.name);};
                         dRow.appendChild(dTh);
-
-                        // Deux mini-colonnes M et AM dans la 3e ligne
-                        HALF_DAYS.forEach(hd => {
-                            let hdTh = document.createElement('th');
-                            const isStart = hd === 'M', isEnd = hd === 'AM';
-                            hdTh.className = 'half-day-col'
-                                + (today ? ' today-highlight' : '')
-                                + (isStart ? ' day-start' : '')
-                                + (isEnd   ? ' day-end'   : '');
-                            hdTh.style.width = '18px';
-                            hdTh.style.fontSize = '9px';
-                            hdTh.textContent = hd;
+                        HALF_DAYS.forEach(hd=>{
+                            let hdTh=document.createElement('th');
+                            hdTh.className='half-day-col'+(today?' today-highlight':'')+(hd==='M'?' day-start':'')+(hd==='AM'?' day-end':'');
+                            hdTh.style.width='18px';hdTh.style.fontSize='9px';hdTh.textContent=hd;
                             hdRow.appendChild(hdTh);
                         });
                     }
                 });
-            } else {
-                th.colSpan = 1;
-                dRow.appendChild(document.createElement('th'));
-                hdRow.appendChild(document.createElement('th'));
-            }
+            }else{th.colSpan=1;dRow.appendChild(document.createElement('th'));hdRow.appendChild(document.createElement('th'));}
             mRow.appendChild(th);
         });
 
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        let totalAbs = 0, totalExc = 0;
+        const tbody=document.getElementById('tableBody');tbody.innerHTML='';
+        let totalAbs=0,totalExc=0;
 
-        schoolData.forEach((classe, cIdx) => {
-            // Calcul des totaux globaux
-            classe.students.forEach(st => {
-                Object.keys(st.data).forEach(k => {
-                    const parts = k.split('-');
-                    if (parts.length !== 3) return;
-                    const mIdx = parseInt(parts[0]), dNum = parseInt(parts[1]);
-                    if (!isDayExcluded(mIdx, dNum)) {
-                        if (activeMonth === null || mIdx === activeMonth) {
-                            if (st.data[k] === 'A') totalAbs += 0.5;
-                            if (st.data[k] === 'Exc') { totalAbs += 0.5; totalExc += 0.5; }
-                        }
+        schoolData.forEach((classe,cIdx)=>{
+            classe.students.forEach(st=>{
+                Object.keys(st.data).forEach(k=>{
+                    const p=k.split('-');if(p.length!==3)return;
+                    const mIdx=parseInt(p[0]),dNum=parseInt(p[1]);
+                    if(!isDayExcluded(mIdx,dNum)&&(activeMonth===null||mIdx===activeMonth)){
+                        if(st.data[k]==='A')totalAbs+=0.5;
+                        if(st.data[k]==='Exc'){totalAbs+=0.5;totalExc+=0.5;}
                     }
                 });
             });
 
-            // Ligne de classe
-            let tr = document.createElement('tr');
-            tr.className = 'class-row';
-            tr.draggable = true;
-            tr.ondragstart = () => onClassDragStart(cIdx);
-            tr.ondragover = onDragOver; tr.ondragleave = onDragLeave;
-            tr.ondrop = (e) => onDrop(e, cIdx, null);
+            let tr=document.createElement('tr');tr.className='class-row';tr.draggable=true;
+            tr.ondragstart=()=>onClassDragStart(cIdx);tr.ondragover=onDragOver;tr.ondragleave=onDragLeave;tr.ondrop=e=>onDrop(e,cIdx,null);
+            tr.innerHTML=`<td class="col-main"><div class="class-name-container">
+                <span class="drag-handle-class">⠿</span>
+                <span onclick="toggleClass(${cIdx})" style="cursor:pointer;font-size:14px;">${classe.isOpen?'▲':'▼'}</span>
+                <span onclick="toggleClass(${cIdx})" oncontextmenu="event.preventDefault();renameClass(${cIdx})"
+                    style="cursor:pointer;margin-left:8px;flex-grow:1;font-weight:700;font-size:14px;user-select:none;color:${getClassColor(cIdx)};">${classe.name}</span>
+                <button class="btn-del" onclick="addStudent(${cIdx})" style="color:var(--blue);font-size:18px;font-weight:bold;margin-right:10px;">+</button>
+                <button class="btn-del" onclick="deleteClass(${cIdx})">🗑️</button>
+            </div></td>`;
 
-            tr.innerHTML = `<td class="col-main">
-                <div class="class-name-container">
-                    <span class="drag-handle-class">⠿</span>
-                    <span onclick="toggleClass(${cIdx})" style="cursor:pointer; font-size:14px;">${classe.isOpen ? '▲' : '▼'}</span>
-                    <span onclick="toggleClass(${cIdx})" 
-                        oncontextmenu="event.preventDefault(); renameClass(${cIdx})" 
-                        style="cursor:pointer; margin-left:8px; flex-grow:1; font-weight:700; font-size:14px; user-select:none; color: ${getClassColor(cIdx)};">
-                        ${classe.name}
-                    </span>
-                    <button class="btn-del" onclick="addStudent(${cIdx})" style="color:var(--blue); font-size:18px; font-weight:bold; margin-right:10px;">+</button>
-                    <button class="btn-del" onclick="deleteClass(${cIdx})">🗑️</button>
-                </div>
-            </td>`;
-
-            schoolMonths.forEach((m, mIdx) => {
-                if (activeMonth === null) {
-                    // Vue annuelle : totaux par mois pour la classe
-                    let monthAbs = 0, monthExc = 0;
-                    classe.students.forEach(st => Object.keys(st.data).forEach(k => {
-                        const parts = k.split('-');
-                        if (parts.length !== 3) return;
-                        const mK = parseInt(parts[0]), dK = parseInt(parts[1]);
-                        if (mK === mIdx && !isDayExcluded(mK, dK)) {
-                            if (st.data[k] === 'A') monthAbs += 0.5;
-                            if (st.data[k] === 'Exc') { monthAbs += 0.5; monthExc += 0.5; }
-                        }
+            schoolMonths.forEach((m,mIdx)=>{
+                if(activeMonth===null){
+                    let mA=0,mE=0;
+                    classe.students.forEach(st=>Object.keys(st.data).forEach(k=>{
+                        const p=k.split('-');if(p.length!==3)return;
+                        const mK=parseInt(p[0]),dK=parseInt(p[1]);
+                        if(mK===mIdx&&!isDayExcluded(mK,dK)){if(st.data[k]==='A')mA+=0.5;if(st.data[k]==='Exc'){mA+=0.5;mE+=0.5;}}
                     }));
-
-                    const nbDays = m.days.filter(d => !isDayExcluded(mIdx, d.num)).length;
-                    const nbStudents = classe.students.length;
-                    const potentiel = nbDays * nbStudents; // en journées
-
-                    let statsHtml = "";
-                    if (potentiel > 0) {
-                        const perAbs = ((monthAbs / potentiel) * 100).toFixed(1);
-                        const perPres = (100 - perAbs).toFixed(1);
-                        statsHtml = `<div style="font-size:10px; line-height:1.2;">
-                            <span style="display:block; margin-bottom:2px;">${fmt(monthAbs)}(${fmt(monthExc)})</span>
-                            <div style="color:#d9534f;">Abs: ${perAbs}%</div>
-                            <div style="color:#5cb85c;">Pre: ${perPres}%</div>
-                        </div>`;
-                    }
-                    tr.innerHTML += `<td style="text-align:center; vertical-align:middle; padding:4px 0;">${statsHtml}</td>`;
-
-                } else if (activeMonth === mIdx) {
-                    // Vue mensuelle : totaux par jour (2 colonnes par jour)
-                    m.days.forEach(day => {
-                        if (isDayExcluded(mIdx, day.num)) return;
-                        const today = isToday(mIdx, day.num);
-                        if (!isMobile || today) {
-                            HALF_DAYS.forEach(hd => {
-                                const key = `${mIdx}-${day.num}-${hd}`;
-                                let hdA = 0, hdE = 0;
-                                classe.students.forEach(st => {
-                                    if (st.data[key] === 'A') hdA++;
-                                    if (st.data[key] === 'Exc') hdE++;
-                                });
-                                const total = hdA + hdE;
-                                const display = total > 0
-                                    ? `<span style="font-size:9px; font-weight:bold;">${total}<span style="font-size:7px; font-weight:normal;">(${hdE})</span></span>`
-                                    : "";
-                                const borderCls = hd === 'M' ? ' day-start' : ' day-end';
-                                // Pas de today-highlight sur les lignes de classe
-                                tr.innerHTML += `<td class="${borderCls}" style="text-align:center; width:18px;">${display}</td>`;
+                    const nbD=m.days.filter(d=>!isDayExcluded(mIdx,d.num)).length,nbS=classe.students.length,pot=nbD*nbS;
+                    let sh="";
+                    if(pot>0){const pA=((mA/pot)*100).toFixed(1),pP=(100-pA).toFixed(1);sh=`<div style="font-size:10px;line-height:1.2;"><span style="display:block;margin-bottom:2px;">${fmt(mA)}(${fmt(mE)})</span><div style="color:#d9534f;">Abs: ${pA}%</div><div style="color:#5cb85c;">Pre: ${pP}%</div></div>`;}
+                    tr.innerHTML+=`<td style="text-align:center;vertical-align:middle;padding:4px 0;">${sh}</td>`;
+                }else if(activeMonth===mIdx){
+                    m.days.forEach(day=>{
+                        if(isDayExcluded(mIdx,day.num))return;
+                        const today=isToday(mIdx,day.num);
+                        if(!isMobile||today){
+                            HALF_DAYS.forEach(hd=>{
+                                const key=`${mIdx}-${day.num}-${hd}`;let hdA=0,hdE=0;
+                                classe.students.forEach(st=>{if(st.data[key]==='A')hdA++;if(st.data[key]==='Exc')hdE++;});
+                                const tot=hdA+hdE;
+                                const display=tot>0?`<span style="font-size:9px;font-weight:bold;">${tot}<span style="font-size:7px;font-weight:normal;">(${hdE})</span></span>`:"";
+                                tr.innerHTML+=`<td class="${hd==='M'?' day-start':' day-end'}" style="text-align:center;width:18px;">${display}</td>`;
                             });
                         }
                     });
                 }
             });
-
             tbody.appendChild(tr);
 
-            // Lignes des élèves
-            if (classe.isOpen) {
-                classe.students.forEach((st, sIdx) => {
-                    let trSt = document.createElement('tr');
-                    trSt.draggable = true;
-                    trSt.ondragstart = () => onDragStart(cIdx, sIdx);
-                    trSt.ondragover = onDragOver; trSt.ondragleave = onDragLeave;
-                    trSt.ondrop = (e) => onDrop(e, cIdx, sIdx);
-
-                    let stHtml = `<td class="col-main" style="padding-left:12px;">
-                        <div style="display:flex; align-items:center;">
-                            <span class="drag-handle">⠿</span>
-                            <span onclick="showStudentStats(${cIdx}, ${sIdx})" 
-                                oncontextmenu="event.preventDefault(); renameStudent(${cIdx},${sIdx})" 
-                                style="cursor:pointer; flex-grow:1;">
-                                ${st.name}
-                            </span>
-                            <button class="btn-del" onclick="deleteStudent(${cIdx},${sIdx})">×</button>
-                        </div>
-                    </td>`;
-
-                    schoolMonths.forEach((m, mIdx) => {
-                        if (activeMonth === mIdx) {
-                            // Vue mensuelle : 2 cellules par jour
-                            m.days.forEach(day => {
-                                if (isDayExcluded(mIdx, day.num)) return;
-                                const today = isToday(mIdx, day.num);
-                                if (!isMobile || today) {
-                                    HALF_DAYS.forEach(hd => {
-                                        const key = `${mIdx}-${day.num}-${hd}`;
-                                        const val = st.data[key] || '';
-                                        const highlight = today ? ' today-highlight' : '';
-                                        const borderCls = hd === 'M' ? ' day-start' : ' day-end';
-                                        stHtml += `<td class="cell-abs st-${val || 'none'}${highlight}${borderCls}" 
-                                            onclick="updateStatus(${cIdx},${sIdx},'${key}')"
-                                            style="width:18px; font-size:9px;">${val}</td>`;
+            if(classe.isOpen){
+                classe.students.forEach((st,sIdx)=>{
+                    let trSt=document.createElement('tr');trSt.draggable=true;
+                    trSt.ondragstart=()=>onDragStart(cIdx,sIdx);trSt.ondragover=onDragOver;trSt.ondragleave=onDragLeave;trSt.ondrop=e=>onDrop(e,cIdx,sIdx);
+                    let sh=`<td class="col-main" style="padding-left:12px;"><div style="display:flex;align-items:center;">
+                        <span class="drag-handle">⠿</span>
+                        <span onclick="showStudentStats(${cIdx},${sIdx})" oncontextmenu="event.preventDefault();renameStudent(${cIdx},${sIdx})" style="cursor:pointer;flex-grow:1;">${st.name}</span>
+                        <button class="btn-del" onclick="deleteStudent(${cIdx},${sIdx})">×</button>
+                    </div></td>`;
+                    schoolMonths.forEach((m,mIdx)=>{
+                        if(activeMonth===mIdx){
+                            m.days.forEach(day=>{
+                                if(isDayExcluded(mIdx,day.num))return;
+                                const today=isToday(mIdx,day.num);
+                                if(!isMobile||today){
+                                    HALF_DAYS.forEach(hd=>{
+                                        const key=`${mIdx}-${day.num}-${hd}`;const val=st.data[key]||'';
+                                        sh+=`<td class="cell-abs st-${val||'none'}${today?' today-highlight':''}${hd==='M'?' day-start':' day-end'}" onclick="updateStatus(${cIdx},${sIdx},'${key}')" style="width:18px;font-size:9px;">${val}</td>`;
                                     });
                                 }
                             });
-                        } else if (activeMonth === null) {
-                            // Vue annuelle : total du mois pour l'élève
-                            let stMonthAbs = 0, stMonthExc = 0;
-                            Object.keys(st.data).forEach(k => {
-                                const parts = k.split('-');
-                                if (parts.length !== 3) return;
-                                const mK = parseInt(parts[0]), dK = parseInt(parts[1]);
-                                if (mK === mIdx && !isDayExcluded(mK, dK)) {
-                                    if (st.data[k] === 'A') stMonthAbs += 0.5;
-                                    if (st.data[k] === 'Exc') { stMonthAbs += 0.5; stMonthExc += 0.5; }
-                                }
-                            });
-
-                            let display = "";
-                            if (stMonthAbs > 0) {
-                                display = `<span class="stats-badge" style="background:#fff; border:1px solid #ccc; color:#333; font-size:10px;">
-                                    ${fmt(stMonthAbs)}<span style="font-size:8px; opacity:0.7;">(${fmt(stMonthExc)})</span>
-                                </span>`;
-                            }
-                            stHtml += `<td style="text-align:center; background:rgba(0,0,0,0.01);">${display}</td>`;
+                        }else if(activeMonth===null){
+                            let sA=0,sE=0;
+                            Object.keys(st.data).forEach(k=>{const p=k.split('-');if(p.length!==3)return;const mK=parseInt(p[0]),dK=parseInt(p[1]);if(mK===mIdx&&!isDayExcluded(mK,dK)){if(st.data[k]==='A')sA+=0.5;if(st.data[k]==='Exc'){sA+=0.5;sE+=0.5;}}});
+                            sh+=`<td style="text-align:center;background:rgba(0,0,0,0.01);">${sA>0?`<span class="stats-badge">${fmt(sA)}<span style="font-size:8px;opacity:0.7;">(${fmt(sE)})</span></span>`:""}</td>`;
                         }
                     });
-
-                    trSt.innerHTML = stHtml;
-                    tbody.appendChild(trSt);
+                    trSt.innerHTML=sh;tbody.appendChild(trSt);
                 });
             }
         });
 
-        // Ligne des totaux journaliers / mensuels
-        let trFinal = document.createElement('tr');
-        trFinal.style.background = "#f0f0f0";
-        trFinal.style.fontWeight = "bold";
-
-        if (activeMonth !== null) {
-            let htmlFinal = `<td style="text-align:right; padding-right:10px; font-size:10px;">TOTAUX :</td>`;
-            schoolMonths[activeMonth].days.forEach(day => {
-                if (isDayExcluded(activeMonth, day.num)) return;
-                if (!isMobile || isToday(activeMonth, day.num)) {
-                    HALF_DAYS.forEach(hd => {
-                        const key = `${activeMonth}-${day.num}-${hd}`;
-                        let hdA = 0, hdE = 0;
-                        schoolData.forEach(c => c.students.forEach(st => {
-                            if (st.data[key] === 'A') hdA++;
-                            if (st.data[key] === 'Exc') hdE++;
-                        }));
-                        const total = hdA + hdE;
-                        const display = total > 0 ? `${total}<span style="font-size:8px;">(${hdE})</span>` : "-";
-                        const borderCls = hd === 'M' ? ' day-start' : ' day-end';
-                        htmlFinal += `<td class="${borderCls}" style="text-align:center; font-size:9px; width:18px;">${display}</td>`;
+        // Ligne totaux
+        let trF=document.createElement('tr');trF.style.background="#f0f0f0";trF.style.fontWeight="bold";
+        if(activeMonth!==null){
+            let hF=`<td style="text-align:right;padding-right:10px;font-size:10px;">TOTAUX :</td>`;
+            schoolMonths[activeMonth].days.forEach(day=>{
+                if(isDayExcluded(activeMonth,day.num))return;
+                if(!isMobile||isToday(activeMonth,day.num)){
+                    HALF_DAYS.forEach(hd=>{
+                        const key=`${activeMonth}-${day.num}-${hd}`;let hdA=0,hdE=0;
+                        schoolData.forEach(c=>c.students.forEach(st=>{if(st.data[key]==='A')hdA++;if(st.data[key]==='Exc')hdE++;}));
+                        const tot=hdA+hdE;
+                        hF+=`<td class="${hd==='M'?' day-start':' day-end'}" style="text-align:center;font-size:9px;width:18px;">${tot>0?`${tot}<span style="font-size:8px;">(${hdE})</span>`:"-"}</td>`;
                     });
                 }
             });
-            trFinal.innerHTML = htmlFinal;
-        } else {
-            let htmlFinal = `<td style="text-align:right; padding-right:10px;">TOTAUX MOIS :</td>`;
-            schoolMonths.forEach((m, mIdx) => {
-                let monthAbs = 0, monthExc = 0;
-                schoolData.forEach(c => c.students.forEach(st => {
-                    Object.keys(st.data).forEach(k => {
-                        const parts = k.split('-');
-                        if (parts.length !== 3) return;
-                        const mK = parseInt(parts[0]), dK = parseInt(parts[1]);
-                        if (mK === mIdx && !isDayExcluded(mK, dK)) {
-                            if (st.data[k] === 'A') monthAbs += 0.5;
-                            if (st.data[k] === 'Exc') { monthAbs += 0.5; monthExc += 0.5; }
-                        }
-                    });
-                }));
-                const display = monthAbs > 0 ? `${fmt(monthAbs)}<span style="font-size:9px;">(${fmt(monthExc)})</span>` : "-";
-                htmlFinal += `<td style="text-align:center;">${display}</td>`;
+            trF.innerHTML=hF;
+        }else{
+            let hF=`<td style="text-align:right;padding-right:10px;">TOTAUX MOIS :</td>`;
+            schoolMonths.forEach((m,mIdx)=>{
+                let mA=0,mE=0;
+                schoolData.forEach(c=>c.students.forEach(st=>{Object.keys(st.data).forEach(k=>{const p=k.split('-');if(p.length!==3)return;const mK=parseInt(p[0]),dK=parseInt(p[1]);if(mK===mIdx&&!isDayExcluded(mK,dK)){if(st.data[k]==='A')mA+=0.5;if(st.data[k]==='Exc'){mA+=0.5;mE+=0.5;}}});}));
+                hF+=`<td style="text-align:center;">${mA>0?`${fmt(mA)}<span style="font-size:9px;">(${fmt(mE)})</span>`:"-"}</td>`;
             });
-            trFinal.innerHTML = htmlFinal;
+            trF.innerHTML=hF;
         }
-        tbody.appendChild(trFinal);
+        tbody.appendChild(trF);
 
-        document.getElementById('globalStats').innerHTML =
-            `Global : &nbsp; <b>${fmt(totalAbs)}</b> jours d'absence au total &nbsp; (dont <b>${fmt(totalExc)}</b> excusés)`;
-
-        const isAnyOpen = schoolData.some(c => c.isOpen);
-        const btn = document.getElementById('toggleBtn');
-        if (btn) btn.innerHTML = isAnyOpen ? "▲ Tout<br>Replier" : "▼ Tout<br>Déplier";
+        document.getElementById('globalStats').innerHTML=`Global : &nbsp; <b>${fmt(totalAbs)}</b> jours d'absence au total &nbsp; (dont <b>${fmt(totalExc)}</b> excusés)`;
+        const btn=document.getElementById('toggleBtn');
+        if(btn)btn.innerHTML=schoolData.some(c=>c.isOpen)?"▲ Tout<br>Replier":"▼ Tout<br>Déplier";
     }
+</script>
 
-    function isToday(mIdx, dNum) {
-        const now = new Date(), conf = monthConfigs[mIdx];
-        return now.getDate() === dNum && now.getMonth() === conf.m && now.getFullYear() === conf.y;
-    }
-
-    function toggleAllClasses() {
-        const isAnyOpen = schoolData.some(c => c.isOpen);
-        schoolData.forEach(c => c.isOpen = !isAnyOpen);
-        renderAll();
-    }
-
-    function updateStatus(cIdx, sIdx, key) {
-        const st = schoolData[cIdx].students[sIdx];
-        const states = ['', 'A', 'Exc'];
-        st.data[key] = states[(states.indexOf(st.data[key] || '') + 1) % states.length];
-        if (st.data[key] === '') delete st.data[key];
-        save(); renderAll();
-    }
-
-    // ============================================================
-    //  STATS ÉLÈVE
-    // ============================================================
-    function showStudentStats(cIdx, sIdx) {
-        const student = schoolData[cIdx].students[sIdx];
-        let annualAbs = 0, annualExc = 0;
-        let rowsHtml = "";
-
-        schoolMonths.forEach((m, mIdx) => {
-            let mAbs = 0, mExc = 0;
-            let daysList = [];
-
-            // Regrouper par jour pour l'affichage
-            const daysInMonth = {};
-            Object.keys(student.data).forEach(k => {
-                const parts = k.split('-');
-                if (parts.length !== 3 || parseInt(parts[0]) !== mIdx) return;
-                const dayNum = parts[1], hd = parts[2], val = student.data[k];
-                if (!daysInMonth[dayNum]) daysInMonth[dayNum] = {};
-                daysInMonth[dayNum][hd] = val;
-                if (val === 'A') { mAbs += 0.5; annualAbs += 0.5; }
-                if (val === 'Exc') { mAbs += 0.5; mExc += 0.5; annualAbs += 0.5; annualExc += 0.5; }
+<script>
+    // ── STATS ÉLÈVE ──────────────────────────────────────────────
+    function showStudentStats(cIdx,sIdx){
+        const student=schoolData[cIdx].students[sIdx];
+        let aA=0,aE=0,rowsHtml="";
+        schoolMonths.forEach((m,mIdx)=>{
+            let mAbs=0,mExc=0;const dim={};
+            Object.keys(student.data).forEach(k=>{
+                const p=k.split('-');if(p.length!==3||parseInt(p[0])!==mIdx)return;
+                const dn=p[1],hd=p[2],val=student.data[k];
+                if(!dim[dn])dim[dn]={};dim[dn][hd]=val;
+                if(val==='A'){mAbs+=0.5;aA+=0.5;}if(val==='Exc'){mAbs+=0.5;mExc+=0.5;aA+=0.5;aE+=0.5;}
             });
-
-            Object.keys(daysInMonth).sort((a, b) => parseInt(a) - parseInt(b)).forEach(dayNum => {
-                const hdData = daysInMonth[dayNum];
-                const m_val = hdData['M'], am_val = hdData['AM'];
-                if (m_val === am_val && m_val) {
-                    // Journée entière
-                    daysList.push(`${dayNum}${m_val === 'Exc' ? ' (exc)' : ''}`);
-                } else {
-                    if (m_val) daysList.push(`${dayNum}M${m_val === 'Exc' ? '(exc)' : ''}`);
-                    if (am_val) daysList.push(`${dayNum}AM${am_val === 'Exc' ? '(exc)' : ''}`);
-                }
+            let dl=[];
+            Object.keys(dim).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(dn=>{
+                const mv=dim[dn]['M'],av=dim[dn]['AM'];
+                if(mv===av&&mv)dl.push(`${dn}${mv==='Exc'?'(exc)':''}`);
+                else{if(mv)dl.push(`${dn}M${mv==='Exc'?'(exc)':''}`);if(av)dl.push(`${dn}AM${av==='Exc'?'(exc)':''}`);}
             });
-
-            if (mAbs > 0) {
-                rowsHtml += `<tr style="border-bottom:1px solid #f2f2f2;">
-                    <td style="padding:10px; font-weight:bold; white-space:nowrap;">${m.name}</td>
-                    <td style="padding:10px; text-align:center;"><b>${fmt(mAbs)}</b> <small>(${fmt(mExc)})</small></td>
-                    <td style="padding:10px; color:#7f8c8d; font-size:11px; line-height:1.4;">${daysList.join(', ')}</td>
-                </tr>`;
-            }
+            if(mAbs>0)rowsHtml+=`<tr style="border-bottom:1px solid #f2f2f2;"><td style="padding:10px;font-weight:bold;white-space:nowrap;">${m.name}</td><td style="padding:10px;text-align:center;"><b>${fmt(mAbs)}</b> <small>(${fmt(mExc)})</small></td><td style="padding:10px;color:#7f8c8d;font-size:11px;line-height:1.4;">${dl.join(', ')}</td></tr>`;
         });
-
-        const statsHtml = `<div style="text-align:left; font-family:sans-serif;">
-            <p style="margin-bottom:15px; color:#7f8c8d;">Classe : <b>${schoolData[cIdx].name}</b></p>
-            <div style="border:1px solid #eee; border-radius:8px; overflow:hidden; background:white;">
-                <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                    <thead>
-                        <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
-                            <th style="padding:12px 10px; text-align:left;">Mois</th>
-                            <th style="padding:12px 10px; text-align:center;">Total (Exc)</th>
-                            <th style="padding:12px 10px; text-align:left;">Détail des absences</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml || '<tr><td colspan="3" style="padding:30px; text-align:center; color:#95a5a6;">Aucune absence enregistrée.</td></tr>'}
-                    </tbody>
+        showCustomModal(`Bilan : ${student.name}`,`<div style="text-align:left;font-family:sans-serif;">
+            <p style="margin-bottom:15px;color:#7f8c8d;">Classe : <b>${schoolData[cIdx].name}</b></p>
+            <div style="border:1px solid #eee;border-radius:8px;overflow:hidden;background:white;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead><tr style="background:#f8f9fa;border-bottom:2px solid #dee2e6;"><th style="padding:12px 10px;text-align:left;">Mois</th><th style="padding:12px 10px;text-align:center;">Total (Exc)</th><th style="padding:12px 10px;text-align:left;">Détail</th></tr></thead>
+                    <tbody>${rowsHtml||'<tr><td colspan="3" style="padding:30px;text-align:center;color:#95a5a6;">Aucune absence enregistrée.</td></tr>'}</tbody>
                 </table>
             </div>
-            <div style="margin-top:20px; padding:15px; background:#eef7ff; border-radius:8px; border-left:5px solid #3498db; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h4 style="margin:0; color:#2c3e50; font-size:14px;">Bilan Annuel</h4>
-                    <p style="margin:5px 0 0 0; font-size:1.2em;">Total : <b>${fmt(annualAbs)}</b> jours <small>(dont ${fmt(annualExc)} excusés)</small></p>
-                </div>
-                <div style="font-size:24px; opacity:0.2;">📊</div>
+            <div style="margin-top:20px;padding:15px;background:#eef7ff;border-radius:8px;border-left:5px solid #3498db;display:flex;justify-content:space-between;align-items:center;">
+                <div><h4 style="margin:0;color:#2c3e50;font-size:14px;">Bilan Annuel</h4><p style="margin:5px 0 0 0;font-size:1.2em;">Total : <b>${fmt(aA)}</b> jours <small>(dont ${fmt(aE)} excusés)</small></p></div>
+                <div style="font-size:24px;opacity:0.2;">📊</div>
             </div>
-        </div>`;
-
-        showCustomModal(`Bilan : ${student.name}`, statsHtml, "800px");
+        </div>`,"800px");
     }
 
-    // ============================================================
-    //  RÉSUMÉ JOURNALIER
-    // ============================================================
-    async function showDailySummary(mIdx, dNum, mName) {
-        let absM = [], abcAM = [], excM = [], excAM = [];
-        schoolData.forEach(c => c.students.forEach(st => {
-            const km = `${mIdx}-${dNum}-M`, kam = `${mIdx}-${dNum}-AM`;
-            if (st.data[km] === 'A') absM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
-            if (st.data[km] === 'Exc') excM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
-            if (st.data[kam] === 'A') abcAM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
-            if (st.data[kam] === 'Exc') excAM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
+    // ── RÉSUMÉ JOURNALIER ────────────────────────────────────────
+    async function showDailySummary(mIdx,dNum,mName){
+        let absM=[],abcAM=[],excM=[],excAM=[];
+        schoolData.forEach(c=>c.students.forEach(st=>{
+            const km=`${mIdx}-${dNum}-M`,kam=`${mIdx}-${dNum}-AM`;
+            if(st.data[km]==='A')absM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
+            if(st.data[km]==='Exc')excM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
+            if(st.data[kam]==='A')abcAM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
+            if(st.data[kam]==='Exc')excAM.push(`<li><b>[${c.name}]</b> ${st.name}</li>`);
         }));
-
-        await showModal({
-            title: `📅 ${dNum} ${mName}`,
-            content: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div>
-                    <h3 style="color:var(--absent); font-size:11px;">🌅 Absents matin</h3>
-                    <ul>${absM.join('') || '<li>-</li>'}</ul>
-                    <h3 style="color:#d4ac0d; font-size:11px;">🌅 Excusés matin</h3>
-                    <ul>${excM.join('') || '<li>-</li>'}</ul>
-                </div>
-                <div>
-                    <h3 style="color:var(--absent); font-size:11px;">🌆 Absents après-midi</h3>
-                    <ul>${abcAM.join('') || '<li>-</li>'}</ul>
-                    <h3 style="color:#d4ac0d; font-size:11px;">🌆 Excusés après-midi</h3>
-                    <ul>${excAM.join('') || '<li>-</li>'}</ul>
-                </div>
-            </div>`,
-            buttons: [{ text: 'Fermer', color: 'var(--blue)' }]
-        });
+        await showModal({title:`📅 ${dNum} ${mName}`,content:`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><h3 style="color:var(--absent);font-size:11px;">🌅 Absents matin</h3><ul>${absM.join('')||'<li>-</li>'}</ul><h3 style="color:#d4ac0d;font-size:11px;">🌅 Excusés matin</h3><ul>${excM.join('')||'<li>-</li>'}</ul></div>
+            <div><h3 style="color:var(--absent);font-size:11px;">🌆 Absents après-midi</h3><ul>${abcAM.join('')||'<li>-</li>'}</ul><h3 style="color:#d4ac0d;font-size:11px;">🌆 Excusés après-midi</h3><ul>${excAM.join('')||'<li>-</li>'}</ul></div>
+        </div>`,buttons:[{text:'Fermer',color:'var(--blue)'}]});
     }
 
-    // ============================================================
-    //  TABLEAU DE BORD
-    // ============================================================
-    function openDashboard() {
-        let totalAbs = 0, totalExc = 0;
-        const statsMois = schoolMonths.map(() => 0);
-        const statsClasses = schoolData.map(c => ({ name: c.name, count: 0 }));
-
-        schoolData.forEach((classe, cIdx) => {
-            classe.students.forEach(st => {
-                Object.keys(st.data).forEach(k => {
-                    const parts = k.split('-');
-                    if (parts.length !== 3) return;
-                    const mIdx = parseInt(parts[0]);
-                    if (st.data[k] === 'A') { totalAbs += 0.5; statsMois[mIdx] += 0.5; statsClasses[cIdx].count += 0.5; }
-                    if (st.data[k] === 'Exc') { totalAbs += 0.5; totalExc += 0.5; statsMois[mIdx] += 0.5; statsClasses[cIdx].count += 0.5; }
-                });
-            });
-        });
-
-        const maxMois = Math.max(...statsMois) || 1;
-        const maxClasses = Math.max(...statsClasses.map(c => c.count)) || 1;
-
-        const html = `
-        <div style="text-align:right; margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
-            <button onclick="saveDashboardAsPDF()" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; float:right;">
-                💾 Télécharger le Bilan PDF
-            </button>
-            <div style="clear:both;"></div>
+    // ── TABLEAU DE BORD ──────────────────────────────────────────
+    function openDashboard(){
+        let tA=0,tE=0;const sm=schoolMonths.map(()=>0);const sc=schoolData.map(c=>({name:c.name,count:0}));
+        schoolData.forEach((c,ci)=>c.students.forEach(st=>Object.keys(st.data).forEach(k=>{const p=k.split('-');if(p.length!==3)return;const mi=parseInt(p[0]);if(st.data[k]==='A'){tA+=0.5;sm[mi]+=0.5;sc[ci].count+=0.5;}if(st.data[k]==='Exc'){tA+=0.5;tE+=0.5;sm[mi]+=0.5;sc[ci].count+=0.5;}})));
+        const mm=Math.max(...sm)||1,mc=Math.max(...sc.map(c=>c.count))||1;
+        showCustomModal("Tableau de Bord de l'École",`
+        <div style="text-align:right;margin-bottom:20px;border-bottom:1px solid #eee;padding-bottom:15px;">
+            <button onclick="saveDashboardAsPDF()" style="background:#27ae60;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;float:right;">💾 Télécharger le Bilan PDF</button><div style="clear:both;"></div>
         </div>
         <div id="dashboardPrintArea" style="padding:10px;">
-            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin-bottom:30px;">
-                <div style="background:#f8f9fa; padding:15px; border-radius:10px; text-align:center; border-top:4px solid var(--absent); border:1px solid #eee; border-top:4px solid var(--absent);">
-                    <div style="font-size:0.9em; color:#666;">Total Absences (jours)</div>
-                    <div style="font-size:1.8em; font-weight:bold; color:var(--dark);">${fmt(totalAbs)}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:30px;">
+                <div style="background:#f8f9fa;padding:15px;border-radius:10px;text-align:center;border-top:4px solid var(--absent);border:1px solid #eee;border-top:4px solid var(--absent);">
+                    <div style="font-size:0.9em;color:#666;">Total Absences (jours)</div><div style="font-size:1.8em;font-weight:bold;color:var(--dark);">${fmt(tA)}</div>
                 </div>
-                <div style="background:#f8f9fa; padding:15px; border-radius:10px; text-align:center; border-top:4px solid #d4ac0d; border:1px solid #eee;">
-                    <div style="font-size:0.9em; color:#666;">Dont Excusées</div>
-                    <div style="font-size:1.8em; font-weight:bold; color:var(--dark);">${fmt(totalExc)}</div>
+                <div style="background:#f8f9fa;padding:15px;border-radius:10px;text-align:center;border-top:4px solid #d4ac0d;border:1px solid #eee;">
+                    <div style="font-size:0.9em;color:#666;">Dont Excusées</div><div style="font-size:1.8em;font-weight:bold;color:var(--dark);">${fmt(tE)}</div>
                 </div>
-                <div style="background:#f8f9fa; padding:15px; border-radius:10px; text-align:center; border-top:4px solid var(--blue); border:1px solid #eee;">
-                    <div style="font-size:0.9em; color:#666;">Taux de Justification</div>
-                    <div style="font-size:1.8em; font-weight:bold; color:var(--dark);">${totalAbs > 0 ? Math.round((totalExc / totalAbs) * 100) : 0}%</div>
+                <div style="background:#f8f9fa;padding:15px;border-radius:10px;text-align:center;border-top:4px solid var(--blue);border:1px solid #eee;">
+                    <div style="font-size:0.9em;color:#666;">Taux de Justification</div><div style="font-size:1.8em;font-weight:bold;color:var(--dark);">${tA>0?Math.round((tE/tA)*100):0}%</div>
                 </div>
             </div>
-            <h4 style="margin-bottom:20px; color:var(--dark);">📈 Évolution mensuelle</h4>
-            <div style="display:flex; align-items:flex-end; height:140px; gap:8px; margin-bottom:50px; padding:0 10px 25px 10px; border-bottom:1px solid #eee;">
-                ${statsMois.map((val, i) => `
-                    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
-                        <div style="font-size:10px; font-weight:bold; color:var(--blue);">${val > 0 ? fmt(val) : ''}</div>
-                        <div style="width:100%; background:var(--blue); border-radius:4px 4px 0 0; height:${(val/maxMois)*100}%; min-height:2px; opacity:0.8; -webkit-print-color-adjust:exact;"></div>
-                        <div style="font-size:10px; color:#666; transform:rotate(-45deg); margin-top:12px; white-space:nowrap;">${schoolMonths[i].name.substring(0,3)}.</div>
-                    </div>
-                `).join('')}
+            <h4 style="margin-bottom:20px;color:var(--dark);">📈 Évolution mensuelle</h4>
+            <div style="display:flex;align-items:flex-end;height:140px;gap:8px;margin-bottom:50px;padding:0 10px 25px 10px;border-bottom:1px solid #eee;">
+                ${sm.map((v,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="font-size:10px;font-weight:bold;color:var(--blue);">${v>0?fmt(v):''}</div><div style="width:100%;background:var(--blue);border-radius:4px 4px 0 0;height:${(v/mm)*100}%;min-height:2px;opacity:0.8;-webkit-print-color-adjust:exact;"></div><div style="font-size:10px;color:#666;transform:rotate(-45deg);margin-top:12px;white-space:nowrap;">${schoolMonths[i].name.substring(0,3)}.</div></div>`).join('')}
             </div>
-            <h4 style="margin-bottom:20px; color:var(--dark);">🏫 Comparatif par Classe</h4>
-            <div style="display:flex; align-items:flex-end; height:140px; gap:12px; margin-bottom:20px; padding:0 10px 45px 10px; border-bottom:1px solid #eee;">
-                ${statsClasses.map((c) => `
-                    <div style="flex:1; min-width:30px; display:flex; flex-direction:column; align-items:center; gap:5px;">
-                        <div style="font-size:10px; font-weight:bold; color:#2c3e50;">${c.count > 0 ? fmt(c.count) : ''}</div>
-                        <div style="width:100%; background:#34495e; border-radius:4px 4px 0 0; height:${(c.count/maxClasses)*100}%; min-height:2px; opacity:0.7; -webkit-print-color-adjust:exact;"></div>
-                        <div style="font-size:9px; color:#333; font-weight:bold; transform:rotate(-45deg); margin-top:20px; white-space:nowrap;">${c.name}</div>
-                    </div>
-                `).join('')}
+            <h4 style="margin-bottom:20px;color:var(--dark);">🏫 Comparatif par Classe</h4>
+            <div style="display:flex;align-items:flex-end;height:140px;gap:12px;margin-bottom:20px;padding:0 10px 45px 10px;border-bottom:1px solid #eee;">
+                ${sc.map(c=>`<div style="flex:1;min-width:30px;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="font-size:10px;font-weight:bold;color:#2c3e50;">${c.count>0?fmt(c.count):''}</div><div style="width:100%;background:#34495e;border-radius:4px 4px 0 0;height:${(c.count/mc)*100}%;min-height:2px;opacity:0.7;-webkit-print-color-adjust:exact;"></div><div style="font-size:9px;color:#333;font-weight:bold;transform:rotate(-45deg);margin-top:20px;white-space:nowrap;">${c.name}</div></div>`).join('')}
             </div>
-        </div>`;
-
-        showCustomModal("Tableau de Bord de l'École", html, "850px");
+        </div>`,"850px");
     }
 
-    function saveDashboardAsPDF() {
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const today = new Date().toLocaleDateString('fr-FR');
+    function saveDashboardAsPDF(){
+        try{
+            const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');const today=new Date().toLocaleDateString('fr-FR');
+            doc.setFontSize(18);doc.setTextColor(44,62,80);doc.text("Bilan Directeur : État des Absences",105,20,{align:'center'});
+            doc.setFontSize(10);doc.setTextColor(100);doc.text(`Généré le ${today}`,105,28,{align:'center'});doc.line(20,32,190,32);
+            let tA=0,tE=0;const cr=[];
+            schoolData.forEach(c=>{let cA=0,cE=0;c.students.forEach(st=>Object.keys(st.data).forEach(k=>{const p=k.split('-');if(p.length!==3)return;const mi=parseInt(p[0]),dn=parseInt(p[1]);if(!isDayExcluded(mi,dn)){if(st.data[k]==='A'){tA+=0.5;cA+=0.5;}if(st.data[k]==='Exc'){tE+=0.5;cE+=0.5;}}}));cr.push([c.name,fmt(cA+cE),fmt(cE),fmt(cA)]);});
+            const tAbs=tA+tE;doc.setFontSize(12);doc.setTextColor(0);doc.text("1. RÉSUMÉ GLOBAL",20,42);
+            doc.autoTable({startY:47,head:[['Indicateur','Valeur']],body:[['Total des absences (jours)',fmt(tAbs)],['Absences Justifiées (Excusées)',fmt(tE)],['Absences Non Justifiées',fmt(tA)],['Taux de Justification',(tAbs>0?Math.round((tE/tAbs)*100):0)+'%']],theme:'striped',headStyles:{fillColor:[52,152,219]},margin:{left:20,right:20}});
+            doc.text("2. RÉPARTITION PAR CLASSE",20,doc.lastAutoTable.finalY+15);
+            doc.autoTable({startY:doc.lastAutoTable.finalY+20,head:[['Classe','Total (j)','Excusées (j)','Injustifiées (j)']],body:cr,headStyles:{fillColor:[44,62,80]},styles:{fontSize:9},alternateRowStyles:{fillColor:[245,245,245]},margin:{left:20,right:20}});
+            doc.save(`Bilan_Directeur_${today.replace(/\//g,'-')}.pdf`);showToast("Bilan Directeur téléchargé !","success");
+        }catch(err){console.error(err);showAlert("La génération du PDF a échoué.",{title:"Erreur PDF",type:'error'});}
+    }
 
-            doc.setFontSize(18); doc.setTextColor(44, 62, 80);
-            doc.text("Bilan Directeur : État des Absences", 105, 20, { align: 'center' });
-            doc.setFontSize(10); doc.setTextColor(100);
-            doc.text(`Généré le ${today}`, 105, 28, { align: 'center' });
-            doc.line(20, 32, 190, 32);
-
-            let totalA = 0, totalE = 0;
-            const classRows = [];
-
-            schoolData.forEach(classe => {
-                let cA = 0, cE = 0;
-                classe.students.forEach(st => {
-                    Object.keys(st.data).forEach(k => {
-                        const parts = k.split('-');
-                        if (parts.length !== 3) return;
-                        const mIdx = parseInt(parts[0]), dNum = parseInt(parts[1]);
-                        if (!isDayExcluded(mIdx, dNum)) {
-                            if (st.data[k] === 'A') { totalA += 0.5; cA += 0.5; }
-                            if (st.data[k] === 'Exc') { totalE += 0.5; cE += 0.5; }
-                        }
-                    });
+    async function exportPDF(){
+        if(activeMonth===null){showAlert("Cliquez d'abord sur un mois pour le sélectionner.",{title:"Aucun mois sélectionné",type:'warning',icon:'📅'});return;}
+        const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');const mC=monthConfigs[activeMonth];
+        doc.setFontSize(14);doc.text(`Bilan des Absences : ${mC.name} ${mC.y}`,14,12);
+        let tableRows=[];
+        [...schoolData].sort((a,b)=>a.name.localeCompare(b.name)).forEach(c=>{
+            let csr=[];
+            [...c.students].sort((a,b)=>a.name.localeCompare(b.name)).forEach(st=>{
+                let aT=0,eT=0;const bD={};
+                Object.keys(st.data).filter(k=>{const p=k.split('-');return p.length===3&&parseInt(p[0])===activeMonth;}).forEach(k=>{const p=k.split('-'),day=p[1],hd=p[2];if(!bD[day])bD[day]={};bD[day][hd]=st.data[k];});
+                let details=[];
+                Object.keys(bD).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(day=>{
+                    const mv=bD[day]['M'],av=bD[day]['AM'];
+                    [mv,av].forEach(v=>{if(v==='A')aT+=0.5;if(v==='Exc'){aT+=0.5;eT+=0.5;}});
+                    if(mv===av&&mv)details.push(`${day}${mv==='Exc'?'(exc)':''}`);
+                    else{if(mv)details.push(`${day}M${mv==='Exc'?'(exc)':''}`);if(av)details.push(`${day}AM${av==='Exc'?'(exc)':''}`);}
                 });
-                classRows.push([classe.name, fmt(cA + cE), fmt(cE), fmt(cA)]);
+                if(aT>0){let d=`${fmt(aT)} j. (${details.join(', ')})`;if(eT>0)d+=` dont ${fmt(eT)} j. excusées`;csr.push([st.name,d]);}
             });
-
-            const totalAbsences = totalA + totalE;
-            doc.setFontSize(12); doc.setTextColor(0);
-            doc.text("1. RÉSUMÉ GLOBAL", 20, 42);
-            doc.autoTable({
-                startY: 47,
-                head: [['Indicateur', 'Valeur']],
-                body: [
-                    ['Total des absences (jours)', fmt(totalAbsences)],
-                    ['Absences Justifiées (Excusées)', fmt(totalE)],
-                    ['Absences Non Justifiées', fmt(totalA)],
-                    ['Taux de Justification', (totalAbsences > 0 ? Math.round((totalE / totalAbsences) * 100) : 0) + '%']
-                ],
-                theme: 'striped',
-                headStyles: { fillColor: [52, 152, 219] },
-                margin: { left: 20, right: 20 }
-            });
-
-            doc.text("2. RÉPARTITION PAR CLASSE", 20, doc.lastAutoTable.finalY + 15);
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 20,
-                head: [['Classe', 'Total (j)', 'Excusées (j)', 'Injustifiées (j)']],
-                body: classRows,
-                headStyles: { fillColor: [44, 62, 80] },
-                styles: { fontSize: 9 },
-                alternateRowStyles: { fillColor: [245, 245, 245] },
-                margin: { left: 20, right: 20 }
-            });
-
-            doc.save(`Bilan_Directeur_${today.replace(/\//g, '-')}.pdf`);
-            showToast("Bilan Directeur téléchargé avec succès !", 'success');
-        } catch (error) {
-            console.error(error);
-            showAlert("La génération du PDF a échoué.", { title: "Erreur PDF", type: 'error' });
-        }
+            if(csr.length>0){tableRows.push([{content:`CLASSE : ${c.name}`,colSpan:2,styles:{fillColor:[230,230,230],fontStyle:'bold'}}]);csr.forEach(r=>tableRows.push(r));}
+        });
+        if(tableRows.length===0){showAlert(`Aucune absence pour <b>${mC.name} ${mC.y}</b>.`,{title:"Rien à exporter",type:'info',icon:'🎉'});return;}
+        doc.autoTable({startY:20,head:[['Élève','Détail des absences']],body:tableRows,theme:'grid',styles:{fontSize:8},headStyles:{fillColor:[44,62,80]}});
+        doc.save(`Bilan_Mensuel_${mC.name}_${mC.y}.pdf`);showToast(`Bilan ${mC.name} téléchargé !`,'success');
     }
 
-    async function exportPDF() {
-        if (activeMonth === null) {
-            showAlert("Cliquez d'abord sur un mois dans le tableau pour le sélectionner, puis relancez l'export.", {
-                title: "Aucun mois sélectionné", type: 'warning', icon: '📅'
-            });
-            return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const mConf = monthConfigs[activeMonth];
-        const today = new Date().toLocaleDateString('fr-FR');
-
-        doc.setFontSize(14);
-        doc.text(`Bilan des Absences : ${mConf.name} ${mConf.y}`, 14, 12);
-
-        let tableRows = [];
-        const sortedClasses = [...schoolData].sort((a, b) => a.name.localeCompare(b.name));
-
-        sortedClasses.forEach(classe => {
-            let classStudentsRows = [];
-            const sortedSt = [...classe.students].sort((a, b) => a.name.localeCompare(b.name));
-
-            sortedSt.forEach(st => {
-                let absTotal = 0, excTotal = 0;
-                let details = [];
-
-                // Regrouper par jour
-                const byDay = {};
-                Object.keys(st.data).filter(k => {
-                    const p = k.split('-'); return p.length === 3 && parseInt(p[0]) === activeMonth;
-                }).forEach(k => {
-                    const parts = k.split('-'), day = parts[1], hd = parts[2];
-                    if (!byDay[day]) byDay[day] = {};
-                    byDay[day][hd] = st.data[k];
-                });
-
-                Object.keys(byDay).sort((a, b) => parseInt(a) - parseInt(b)).forEach(day => {
-                    const m_val = byDay[day]['M'], am_val = byDay[day]['AM'];
-                    [m_val, am_val].forEach(v => {
-                        if (v === 'A') absTotal += 0.5;
-                        if (v === 'Exc') { absTotal += 0.5; excTotal += 0.5; }
-                    });
-
-                    if (m_val === am_val && m_val) {
-                        details.push(`${day}${m_val === 'Exc' ? '(exc)' : ''}`);
-                    } else {
-                        if (m_val) details.push(`${day}M${m_val === 'Exc' ? '(exc)' : ''}`);
-                        if (am_val) details.push(`${day}AM${am_val === 'Exc' ? '(exc)' : ''}`);
-                    }
-                });
-
-                if (absTotal > 0) {
-                    let detail = `${fmt(absTotal)} j. (${details.join(', ')})`;
-                    if (excTotal > 0) detail += ` dont ${fmt(excTotal)} j. excusées`;
-                    classStudentsRows.push([st.name, detail]);
-                }
-            });
-
-            if (classStudentsRows.length > 0) {
-                tableRows.push([{ content: `CLASSE : ${classe.name}`, colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold' } }]);
-                classStudentsRows.forEach(row => tableRows.push(row));
-            }
-        });
-
-        if (tableRows.length === 0) {
-            showAlert(`Aucune absence enregistrée pour <b>${mConf.name} ${mConf.y}</b>.`, { title: "Rien à exporter", type: 'info', icon: '🎉' });
-            return;
-        }
-
-        doc.autoTable({
-            startY: 20,
-            head: [['Élève', 'Détail des absences']],
-            body: tableRows,
-            theme: 'grid',
-            styles: { fontSize: 8 },
-            headStyles: { fillColor: [44, 62, 80] }
-        });
-
-        doc.save(`Bilan_Mensuel_${mConf.name}_${mConf.y}.pdf`);
-        showToast(`Bilan ${mConf.name} téléchargé !`, 'success');
+    // ── GESTION ──────────────────────────────────────────────────
+    function resetAnnualAbsences(){
+        showCustomModal("Entretien de la base",`<div style="text-align:center;padding:10px;">
+            <div style="font-size:50px;margin-bottom:15px;">🧹</div>
+            <h3 style="color:#e74c3c;margin-top:0;">Effacer toutes les absences</h3>
+            <p style="font-size:14px;color:#2c3e50;line-height:1.6;margin-bottom:20px;">Cette action va effacer <b>toutes les absences (A et Exc)</b>.<br><span style="color:#7f8c8d;">Classes et élèves conservés.</span></p>
+            <div style="background:#fff5f5;border:1px solid #feb2b2;padding:15px;border-radius:8px;margin-bottom:25px;"><p style="margin:0;font-size:13px;color:#c53030;font-weight:bold;">Action irréversible. Voulez-vous continuer ?</p></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button onclick="executeFinalReset()" style="background:#e74c3c;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">OUI, NETTOYER</button>
+                <button onclick="this.closest('#customModal').remove()" style="background:#edf2f7;color:#4a5568;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">ANNULER</button>
+            </div></div>`,"450px");
     }
+    function executeFinalReset(){schoolData.forEach(c=>c.students.forEach(st=>{st.data={};}));const m=document.getElementById('customModal');if(m)m.remove();save();renderAll();showToast("Toutes les absences ont été supprimées.",'success',4000);}
 
-    // ============================================================
-    //  GESTION (reset, import/export, vacances)
-    // ============================================================
-    function resetAnnualAbsences() {
-        const content = `<div style="text-align:center; padding:10px;">
-            <div style="font-size:50px; margin-bottom:15px;">🧹</div>
-            <h3 style="color:#e74c3c; margin-top:0;">Effacer toutes les absences</h3>
-            <p style="font-size:14px; color:#2c3e50; line-height:1.6; margin-bottom:20px;">
-                Cette action va effacer <b>toutes les absences (A et Exc)</b> enregistrées sur l'année.<br>
-                <span style="color:#7f8c8d;">Les classes et les noms des élèves ne seront pas modifiés.</span>
-            </p>
-            <div style="background:#fff5f5; border:1px solid #feb2b2; padding:15px; border-radius:8px; margin-bottom:25px;">
-                <p style="margin:0; font-size:13px; color:#c53030; font-weight:bold;">Action irréversible. Voulez-vous continuer ?</p>
+    async function confirmClearAll(){
+        showCustomModal("Alerte de sécurité (1/2)",`<div style="text-align:center;padding:10px;font-family:sans-serif;">
+            <div style="font-size:50px;margin-bottom:15px;">🚨</div>
+            <h3 style="color:#c0392b;margin-top:0;text-transform:uppercase;">Zone de Danger</h3>
+            <p style="font-size:14px;color:#2c3e50;line-height:1.6;margin-bottom:20px;">Vous allez supprimer <b>l'intégralité des données</b>.<br><span style="color:#e74c3c;font-weight:bold;">Classes, élèves et absences seront perdus à jamais.</span></p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button onclick="secondConfirmReset()" style="background:#c0392b;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">OUI, JE SUIS SÛR</button>
+                <button onclick="this.closest('#customModal').remove()" style="background:#edf2f7;color:#4a5568;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">ANNULER</button>
+            </div></div>`,"450px");
+    }
+    function secondConfirmReset(){const m=document.getElementById('customModal');if(m)m.remove();showCustomModal("Confirmation finale (2/2)",`<div style="text-align:center;padding:15px;"><h3 style="color:#c0392b;margin-top:0;">DERNIÈRE VÉRIFICATION</h3><p style="font-size:14px;color:#4a5568;">C'est votre <b>dernière chance</b>.</p><button onclick="executeFinalGlobalReset()" style="width:100%;background:#000;color:#fff;border:none;padding:15px;border-radius:8px;cursor:pointer;font-weight:bold;margin-top:10px;">CONFIRMER LA SUPPRESSION DÉFINITIVE</button><button onclick="this.closest('#customModal').remove()" style="width:100%;background:none;color:#718096;border:none;margin-top:10px;cursor:pointer;text-decoration:underline;">Finalement, j'annule</button></div>`,"350px");}
+    async function executeFinalGlobalReset(){schoolData=[];excludedDates=[];await _doSave();location.reload();}
+
+    async function openImportModal(){
+        showCustomModal("Données",`<div style="text-align:center;padding:10px;font-family:sans-serif;">
+            <div style="font-size:40px;margin-bottom:10px;">💾</div>
+            <h3 style="margin-top:0;color:var(--dark);">GESTION DES DONNÉES</h3>
+            <div style="display:grid;gap:12px;">
+                <button onclick="exportJSON();closeCustomModal();" style="background:var(--success);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">💾 SAUVEGARDER (.json)</button>
+                <div style="border-top:1px solid #eee;margin:5px 0;"></div>
+                <button onclick="document.getElementById('restoreInput').click();closeCustomModal();" style="background:var(--blue);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">📥 RESTAURER BACKUP (.json)</button>
+                <button onclick="document.getElementById('importCSV').click();closeCustomModal();" style="background:var(--dark);color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;font-weight:bold;">👥 IMPORTER ÉLÈVES (.csv ou .txt)</button>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button onclick="executeFinalReset()" style="background:#e74c3c; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">OUI, NETTOYER</button>
-                <button onclick="this.closest('#customModal').remove()" style="background:#edf2f7; color:#4a5568; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">ANNULER</button>
+            <p style="font-size:11px;color:#999;margin-top:15px;">Format CSV : <code>Nom de Classe;Nom de l'élève</code></p>
+        </div>`,"400px");
+    }
+    function closeCustomModal(){const m=document.getElementById('customModal');if(m)m.remove();}
+    function exportJSON(){const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({schoolData,excludedDates}));const d=new Date();const ds=d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');a.download=`backup_absences_${ds}.json`;a.click();}
+
+    async function importJSON(e){
+        const file=e.target.files[0];e.target.value='';if(!file)return;
+        const ok=await showConfirm(`<b>⚠️ Attention — cette action est irréversible.</b><br><br>Le fichier <b>${file.name}</b> va remplacer <u>toutes les données actuelles</u>.<br><br><span style="color:#c0392b;">Les données récentes non présentes dans ce fichier seront perdues.</span>`,{title:'Restaurer un backup',type:'warning',icon:'📥',labelOk:'Oui, restaurer',labelCancel:'Annuler',okStyle:'danger'});
+        if(!ok)return;
+        const r=new FileReader();r.onload=async ev=>{try{const d=JSON.parse(ev.target.result);schoolData=d.schoolData||[];excludedDates=d.excludedDates||[];await _doSave();location.reload();}catch(err){showAlert('Fichier invalide ou corrompu.',{title:'Erreur de lecture',type:'error'});}};r.readAsText(file);
+    }
+    function importCSV(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{ev.target.result.split(/\r?\n/).forEach(l=>{const p=l.trim().split(/[;,]/);if(p.length>1){let c=schoolData.find(x=>x.name.toLowerCase()===p[0].trim().toLowerCase());if(!c){c={name:p[0].trim(),students:[],isOpen:true};schoolData.push(c);}c.students.push({name:p[1].trim(),data:{}});}});save();renderAll();e.target.value='';};r.readAsText(file);}
+
+    async function openVacationModal(){
+        const list=excludedDates.length>0?excludedDates.map((v,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;padding:8px 12px;border-radius:6px;margin-bottom:5px;border:1px solid #eee;"><div style="text-align:left;"><div style="font-weight:bold;color:var(--dark);font-size:12px;">${v.name}</div><div style="font-size:10px;color:#666;">Du ${new Date(v.start).toLocaleDateString()} au ${new Date(v.end).toLocaleDateString()}</div></div><button onclick="removeVacation(${i})" style="background:none;border:none;color:var(--absent);cursor:pointer;font-size:16px;padding:5px;">🗑️</button></div>`).join(''):`<p style="color:#999;font-style:italic;font-size:12px;padding:10px;">Aucune période configurée.</p>`;
+        await showModal({title:'Configuration Calendrier',content:`<div style="text-align:center;font-family:sans-serif;"><div style="font-size:40px;margin-bottom:10px;">🏖️</div><h3 style="margin-top:0;color:var(--dark);">VACANCES & FÉRIÉS</h3><div style="background:#f1f4f7;padding:15px;border-radius:10px;margin-bottom:20px;"><input type="text" id="vacName" placeholder="Nom (ex: Vacances d'Hiver)" class="modal-input" style="margin-bottom:8px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;"><div><label style="font-size:10px;display:block;text-align:left;color:#666;">Début :</label><input type="date" id="vacStart" class="modal-input" style="margin-top:2px;"></div><div><label style="font-size:10px;display:block;text-align:left;color:#666;">Fin :</label><input type="date" id="vacEnd" class="modal-input" style="margin-top:2px;"></div></div><button onclick="addVacation()" class="btn-main" style="background:var(--success);width:100%;height:35px;">+ Ajouter au calendrier</button></div><div style="text-align:left;"><h4 style="font-size:11px;color:var(--dark);margin-bottom:8px;">Périodes enregistrées :</h4><div style="max-height:180px;overflow-y:auto;padding-right:5px;">${list}</div></div></div>`,buttons:[{text:'Fermer',color:'var(--dark)'}]});
+        refreshSchoolMonths();renderAll();
+    }
+    window.addVacation=()=>{const n=document.getElementById('vacName').value,s=document.getElementById('vacStart').value,e=document.getElementById('vacEnd').value;if(n&&s&&e){excludedDates.push({name:n,start:s,end:e});save();refreshSchoolMonths();renderAll();openVacationModal();}else showAlert("Veuillez renseigner le nom et les deux dates.",{title:"Champs manquants",type:'warning'});};
+    window.removeVacation=i=>{excludedDates.splice(i,1);save();refreshSchoolMonths();renderAll();openVacationModal();};
+
+    // ── MODALE PERSONNALISÉE ─────────────────────────────────────
+    function showCustomModal(title,contentHtml,width="500px"){
+        const ex=document.getElementById('customModal');if(ex)ex.remove();
+        const m=document.createElement('div');m.id='customModal';
+        m.style.cssText=`position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(2px);padding:16px;`;
+        m.innerHTML=`<div style="background:white;border-radius:16px;width:100%;max-width:${width};max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 20px 40px rgba(0,0,0,0.3);overflow:hidden;">
+            <div style="padding:20px 24px 14px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+                <h2 style="margin:0;color:#2c3e50;font-size:1.2em;">👤 ${title}</h2>
+                <button onclick="this.closest('#customModal').remove()" style="border:none;background:#f8f9fa;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#7f8c8d;font-weight:bold;font-size:16px;">&times;</button>
+            </div>
+            <div style="overflow-y:auto;padding:20px 24px;flex:1;-webkit-overflow-scrolling:touch;">${contentHtml}</div>
+            <div style="padding:14px 24px;border-top:1px solid #f0f0f0;flex-shrink:0;background:white;">
+                <button onclick="this.closest('#customModal').remove()" style="width:100%;padding:11px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;">Fermer</button>
             </div>
         </div>`;
-        showCustomModal("Entretien de la base", content, "450px");
+        m.onclick=e=>{if(e.target===m)m.remove();};document.body.appendChild(m);
     }
 
-    function executeFinalReset() {
-        schoolData.forEach(classe => classe.students.forEach(st => { st.data = {}; }));
-        const modal = document.getElementById('customModal');
-        if (modal) modal.remove();
-        save(); renderAll();
-        showToast("Toutes les absences ont été supprimées.", 'success', 4000);
+    // ── TOASTS & MODALES SYSTÈME ─────────────────────────────────
+    const MODAL_ICONS={info:'💬',success:'✅',warning:'⚠️',error:'❌',question:'🤔',pdf:'📄',lock:'🔒'};
+
+    function showAlert(message,opts={}){return new Promise(resolve=>{const{title='',type='info',icon,btnLabel='OK'}=opts;const ic=icon||MODAL_ICONS[type]||'💬';const o=_buildNModal(`<div class="nmodal-icon ${type}">${ic}</div>${title?`<div class="nmodal-title">${title}</div>`:''}<div class="nmodal-message">${message}</div><div class="nmodal-actions"><button class="nmodal-btn primary" id="_nalertOk">${btnLabel}</button></div>`);o.querySelector('#_nalertOk').onclick=()=>{o.remove();resolve();};o.onclick=e=>{if(e.target===o){o.remove();resolve();}};});}
+
+    function showConfirm(message,opts={}){return new Promise(resolve=>{const{title='Confirmation',type='question',icon,labelOk='Confirmer',labelCancel='Annuler',okStyle='primary'}=opts;const ic=icon||MODAL_ICONS[type]||'🤔';const o=_buildNModal(`<div class="nmodal-icon ${type}">${ic}</div><div class="nmodal-title">${title}</div><div class="nmodal-message">${message}</div><div class="nmodal-actions"><button class="nmodal-btn secondary" id="_nconfirmNo">${labelCancel}</button><button class="nmodal-btn ${okStyle}" id="_nconfirmYes">${labelOk}</button></div>`);o.querySelector('#_nconfirmYes').onclick=()=>{o.remove();resolve(true);};o.querySelector('#_nconfirmNo').onclick=()=>{o.remove();resolve(false);};o.onclick=e=>{if(e.target===o){o.remove();resolve(false);}};});}
+
+    function showPrompt(message,opts={}){return new Promise(resolve=>{const{title='',type='info',icon,placeholder='',defaultValue='',inputType='text',labelOk='Valider',labelCancel='Annuler'}=opts;const ic=icon||MODAL_ICONS[type]||'💬';const o=_buildNModal(`<div class="nmodal-icon ${type}">${ic}</div>${title?`<div class="nmodal-title">${title}</div>`:''}<div class="nmodal-message">${message}</div><input class="nmodal-input" id="_npromptInput" type="${inputType}" placeholder="${placeholder}" value="${defaultValue}" autocomplete="off"><div class="nmodal-actions"><button class="nmodal-btn secondary" id="_npromptNo">${labelCancel}</button><button class="nmodal-btn primary" id="_npromptOk">${labelOk}</button></div>`);const inp=o.querySelector('#_npromptInput');setTimeout(()=>inp.focus(),80);const ok=()=>{const v=inp.value;o.remove();resolve(v||null);};o.querySelector('#_npromptOk').onclick=ok;inp.addEventListener('keydown',e=>{if(e.key==='Enter')ok();if(e.key==='Escape'){o.remove();resolve(null);}});o.querySelector('#_npromptNo').onclick=()=>{o.remove();resolve(null);};});}
+
+    function showToast(message,type='info',duration=3000){const icons={info:'💬',success:'✅',warning:'⚠️',error:'❌'};const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${icons[type]||'💬'}</span><span>${message}</span>`;c.appendChild(t);setTimeout(()=>{t.style.animation='toastOut 0.3s ease forwards';setTimeout(()=>t.remove(),300);},duration);}
+
+    function _buildNModal(innerHtml){const o=document.createElement('div');o.className='nmodal-overlay';o.innerHTML=`<div class="nmodal-box">${innerHtml}</div>`;document.body.appendChild(o);return o;}
+
+    async function openHelpModal(){
+        await showModal({title:"📖 Guide d'utilisation",content:`<div style="text-align:left;font-size:13px;line-height:1.7;color:#2c3e50;">
+            <div style="background:#eaf4fd;border-left:4px solid var(--blue);border-radius:6px;padding:12px 14px;margin-bottom:18px;"><p style="margin:0;font-weight:600;color:var(--blue);font-size:13px;">🚀 En un coup d'œil</p><p style="margin:6px 0 0;font-size:12px;color:#444;">L'application s'ouvre sur la <b>vue mensuelle</b> (mois en cours). Cliquez sur le <b>nom du mois</b> (affichage ⬅) pour revenir en vue annuelle. Cliquez à nouveau sur un mois pour la vue détaillée.</p></div>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;margin-top:0;font-size:14px;">🕐 1. Saisie par demi-journée</h3>
+            <p>Chaque jour = deux mini-colonnes <b>M</b> et <b>AM</b>. Cliquer cycle : ⬜ Présent → <span style="color:#c0392b;"><b>A</b></span> Absent → <span style="color:#8a6d00;"><b>Exc</b></span> Excusé → ⬜. Chaque demi-journée vaut <b>0,5 jour</b> dans les stats.</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">🏫 2. Classes & Élèves</h3>
+            <p>Créer une classe : champ en haut + Entrée. Ajouter un élève : <b>+ bleu</b>. Renommer : clic droit. Supprimer : 🗑️ / ×. Réorganiser : glisser-déposer sur ⠿.</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">📅 3. Navigation</h3>
+            <p>Vue annuelle : totaux + taux par mois. Vue mensuelle : saisie jour par jour. Clic sur numéro du jour = liste absents. Clic sur nom élève = bilan annuel détaillé.</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">🏖️ 4. Vacances scolaires</h3>
+            <p>Gestion → 🏖️ Configurer Vacances. Les jours exclus disparaissent du tableau et des calculs.</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">📊 5. PDF & Tableau de bord</h3>
+            <p>Bouton 📊 : synthèse visuelle + export Bilan Directeur. Gestion → 📄 Bilan Mensuel PDF (sélectionner un mois au préalable).</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">⚙️ 6. Sauvegarde & Sécurité</h3>
+            <p>Gestion → Importer/Sauvegarder : backup .json et restauration. Import CSV : <code>Classe;Prénom Nom</code>.</p>
+            <h3 style="color:var(--blue);border-bottom:2px solid #eee;padding-bottom:6px;font-size:14px;">📌 7. Note partagée (Post-it)</h3>
+            <p>Synchronisée entre tous les utilisateurs. Déplacer : glisser l'en-tête. Redimensionner : poignée ⟋. Point rouge = message présent.</p>
+            <div style="background:#f0fff4;border-left:4px solid #27ae60;border-radius:6px;padding:12px 14px;margin-top:18px;"><p style="margin:0;font-weight:600;color:#27ae60;font-size:13px;">☁️ Synchronisation Cloud automatique</p><p style="margin:8px 0 0;font-size:12px;color:#444;">Toutes les modifications sont sauvegardées automatiquement. Plusieurs utilisateurs peuvent travailler simultanément.</p></div>
+        </div>`,buttons:[{text:"J'ai compris ✓",color:'var(--dark)'}]});
     }
 
-    async function confirmClearAll() {
-        const content = `<div style="text-align:center; padding:10px; font-family:sans-serif;">
-            <div style="font-size:50px; margin-bottom:15px;">🚨</div>
-            <h3 style="color:#c0392b; margin-top:0; text-transform:uppercase;">Zone de Danger</h3>
-            <p style="font-size:14px; color:#2c3e50; line-height:1.6; margin-bottom:20px;">
-                Vous allez supprimer <b>l'intégralité des données</b>.<br>
-                <span style="color:#e74c3c; font-weight:bold;">Classes, élèves et absences seront perdus à jamais.</span>
-            </p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button onclick="secondConfirmReset()" style="background:#c0392b; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">OUI, JE SUIS SÛR</button>
-                <button onclick="this.closest('#customModal').remove()" style="background:#edf2f7; color:#4a5568; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">ANNULER</button>
-            </div>
-        </div>`;
-        showCustomModal("Alerte de sécurité (1/2)", content, "450px");
-    }
-
-    function secondConfirmReset() {
-        const modal = document.getElementById('customModal');
-        if (modal) modal.remove();
-        const content = `<div style="text-align:center; padding:15px;">
-            <h3 style="color:#c0392b; margin-top:0;">DERNIÈRE VÉRIFICATION</h3>
-            <p style="font-size:14px; color:#4a5568;">C'est votre <b>dernière chance</b>.</p>
-            <button onclick="executeFinalGlobalReset()" style="width:100%; background:#000; color:#fff; border:none; padding:15px; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:10px;">CONFIRMER LA SUPPRESSION DÉFINITIVE</button>
-            <button onclick="this.closest('#customModal').remove()" style="width:100%; background:none; color:#718096; border:none; margin-top:10px; cursor:pointer; text-decoration:underline;">Finalement, j'annule</button>
-        </div>`;
-        showCustomModal("Confirmation finale (2/2)", content, "350px");
-    }
-
-    async function executeFinalGlobalReset() { schoolData = []; excludedDates = []; await save(); location.reload(); }
-
-    async function deleteClass(cIdx) {
-        const confirm = await showModal({ title: '⚠️ Supprimer', content: `Supprimer <b>${schoolData[cIdx].name}</b> ?`, buttons: [{ text: 'Non', action: 'cancel' }, { text: 'Oui', color: 'var(--absent)' }] });
-        if (confirm) { schoolData.splice(cIdx, 1); save(); renderAll(); }
-    }
-
-    async function deleteStudent(cIdx, sIdx) {
-        const confirm = await showModal({ title: 'Supprimer', content: `Retirer l'élève ?`, buttons: [{ text: 'Non', action: 'cancel' }, { text: 'Oui', color: 'var(--absent)' }] });
-        if (confirm) { schoolData[cIdx].students.splice(sIdx, 1); save(); renderAll(); }
-    }
-
-    async function renameClass(cIdx) {
-        const n = await showModal({ title: 'Renommer', content: 'Nom :', showInput: true, inputValue: schoolData[cIdx].name, buttons: [{ text: 'Ok', color: 'var(--blue)' }] });
-        if (n) { schoolData[cIdx].name = n; save(); renderAll(); }
-    }
-
-    async function renameStudent(cIdx, sIdx) {
-        const n = await showModal({ title: 'Renommer', content: 'Nom :', showInput: true, inputValue: schoolData[cIdx].students[sIdx].name, buttons: [{ text: 'Ok', color: 'var(--blue)' }] });
-        if (n) { schoolData[cIdx].students[sIdx].name = n; save(); renderAll(); }
-    }
-
-    async function openImportModal() {
-        const content = `<div style="text-align:center; padding:10px; font-family:sans-serif;">
-            <div style="font-size:40px; margin-bottom:10px;">💾</div>
-            <h3 style="margin-top:0; color:var(--dark);">GESTION DES DONNÉES</h3>
-            <div style="display:grid; gap:12px;">
-                <button onclick="exportJSON(); closeCustomModal();" style="background:var(--success); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">💾 SAUVEGARDER (.json)</button>
-                <div style="border-top:1px solid #eee; margin:5px 0;"></div>
-                <button onclick="document.getElementById('restoreInput').click(); closeCustomModal();" style="background:var(--blue); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">📥 RESTAURER BACKUP (.json)</button>
-                <button onclick="document.getElementById('importCSV').click(); closeCustomModal();" style="background:var(--dark); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">👥 IMPORTER ÉLÈVES (.csv ou .txt)</button>
-            </div>
-            <p style="font-size:11px; color:#999; margin-top:15px;">Format CSV : <code>Nom de Classe;Nom de l'élève</code></p>
-        </div>`;
-        showCustomModal("Données", content, "400px");
-    }
-
-    function closeCustomModal() { const m = document.getElementById('customModal'); if (m) m.remove(); }
-
-    function exportJSON() {
-        const a = document.createElement('a');
-        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ schoolData, excludedDates }));
-        a.download = "backup_absences.json"; a.click();
-    }
-
-    async function importJSON(e) {
-        const file = e.target.files[0];
-        e.target.value = '';
-        if (!file) return;
-
-        const confirmed = await showConfirm(
-            `<b>⚠️ Attention — cette action est irréversible.</b><br><br>
-            Le fichier <b>${file.name}</b> va remplacer <u>toutes les données actuelles du cloud</u>,
-            y compris les absences enregistrées depuis la création de ce backup.<br><br>
-            <span style="color:#c0392b;">Les données récentes non présentes dans ce fichier seront perdues.</span><br><br>
-            Êtes-vous sûr de vouloir continuer ?`,
-            { title: 'Restaurer un backup', type: 'warning', icon: '📥', labelOk: 'Oui, restaurer', labelCancel: 'Annuler', okStyle: 'danger' }
-        );
-        if (!confirmed) return;
-
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            try {
-                const data = JSON.parse(ev.target.result);
-                schoolData    = data.schoolData    || [];
-                excludedDates = data.excludedDates || [];
-                await _doSave();
-                location.reload();
-            } catch(err) {
-                showAlert('Le fichier est invalide ou corrompu.', { title: 'Erreur de lecture', type: 'error' });
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function importCSV(e) {
-        const file = e.target.files[0]; if (!file) return;
-        const r = new FileReader();
-        r.onload = (ev) => {
-            ev.target.result.split(/\r?\n/).forEach(l => {
-                const p = l.trim().split(/[;,]/);
-                if (p.length > 1) {
-                    let c = schoolData.find(x => x.name.toLowerCase() === p[0].trim().toLowerCase());
-                    if (!c) { c = { name: p[0].trim(), students: [], isOpen: true }; schoolData.push(c); }
-                    c.students.push({ name: p[1].trim(), data: {} });
-                }
-            });
-            save(); renderAll(); e.target.value = '';
-        };
-        r.readAsText(file);
-    }
-
-    async function openVacationModal() {
-        const list = excludedDates.length > 0
-            ? excludedDates.map((v, i) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:8px 12px; border-radius:6px; margin-bottom:5px; border:1px solid #eee;">
-                    <div style="text-align:left;">
-                        <div style="font-weight:bold; color:var(--dark); font-size:12px;">${v.name}</div>
-                        <div style="font-size:10px; color:#666;">Du ${new Date(v.start).toLocaleDateString()} au ${new Date(v.end).toLocaleDateString()}</div>
-                    </div>
-                    <button onclick="removeVacation(${i})" style="background:none; border:none; color:var(--absent); cursor:pointer; font-size:16px; padding:5px;">🗑️</button>
-                </div>`).join('')
-            : `<p style="color:#999; font-style:italic; font-size:12px; padding:10px;">Aucune période configurée.</p>`;
-
-        const content = `<div style="text-align:center; font-family:sans-serif;">
-            <div style="font-size:40px; margin-bottom:10px;">🏖️</div>
-            <h3 style="margin-top:0; color:var(--dark);">VACANCES & FÉRIÉS</h3>
-            <div style="background:#f1f4f7; padding:15px; border-radius:10px; margin-bottom:20px;">
-                <input type="text" id="vacName" placeholder="Nom (ex: Vacances d'Hiver)" class="modal-input" style="margin-bottom:8px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <div><label style="font-size:10px; display:block; text-align:left; color:#666;">Début :</label><input type="date" id="vacStart" class="modal-input" style="margin-top:2px;"></div>
-                    <div><label style="font-size:10px; display:block; text-align:left; color:#666;">Fin :</label><input type="date" id="vacEnd" class="modal-input" style="margin-top:2px;"></div>
-                </div>
-                <button onclick="addVacation()" class="btn-main" style="background:var(--success); width:100%; height:35px;">+ Ajouter au calendrier</button>
-            </div>
-            <div style="text-align:left;">
-                <h4 style="font-size:11px; color:var(--dark); margin-bottom:8px;">Périodes enregistrées :</h4>
-                <div style="max-height:180px; overflow-y:auto; padding-right:5px;">${list}</div>
-            </div>
-        </div>`;
-
-        await showModal({ title: 'Configuration Calendrier', content: content, buttons: [{ text: 'Fermer', color: 'var(--dark)' }] });
-        refreshSchoolMonths(); renderAll();
-    }
-
-    window.addVacation = () => {
-        const n = document.getElementById('vacName').value, s = document.getElementById('vacStart').value, e = document.getElementById('vacEnd').value;
-        if (n && s && e) { excludedDates.push({ name: n, start: s, end: e }); save(); refreshSchoolMonths(); renderAll(); openVacationModal(); }
-        else showAlert("Veuillez renseigner le nom et les deux dates.", { title: "Champs manquants", type: 'warning' });
-    };
-
-    window.removeVacation = (i) => { excludedDates.splice(i, 1); save(); refreshSchoolMonths(); renderAll(); openVacationModal(); };
-
-    // ============================================================
-    //  MODALE PERSONNALISÉE
-    // ============================================================
-    function showCustomModal(title, contentHtml, width = "500px") {
-        const existing = document.getElementById('customModal');
-        if (existing) existing.remove();
-        const modal = document.createElement('div');
-        modal.id = 'customModal';
-        modal.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(2px); padding:16px;`;
-        modal.innerHTML = `<div style="background:white; border-radius:16px; width:100%; max-width:${width}; max-height:calc(100vh - 32px); display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden;">
-            <div style="padding:20px 24px 14px; border-bottom:1px solid #eee; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;">
-                <h2 style="margin:0; color:#2c3e50; font-size:1.2em;">👤 ${title}</h2>
-                <button onclick="this.closest('#customModal').remove()" style="border:none; background:#f8f9fa; width:30px; height:30px; border-radius:50%; cursor:pointer; color:#7f8c8d; font-weight:bold; font-size:16px;">&times;</button>
-            </div>
-            <div style="overflow-y:auto; padding:20px 24px; flex:1; -webkit-overflow-scrolling:touch;">${contentHtml}</div>
-            <div style="padding:14px 24px; border-top:1px solid #f0f0f0; flex-shrink:0; background:white;">
-                <button onclick="this.closest('#customModal').remove()" style="width:100%; padding:11px; background:#3498db; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px;">Fermer</button>
-            </div>
-        </div>`;
-        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-        document.body.appendChild(modal);
-    }
-
-    // ============================================================
-    //  SYSTÈME TOASTS & MODALES
-    // ============================================================
-    const MODAL_ICONS = { info: '💬', success: '✅', warning: '⚠️', error: '❌', question: '🤔', pdf: '📄', lock: '🔒' };
-
-    function showAlert(message, opts = {}) {
-        return new Promise(resolve => {
-            const { title = '', type = 'info', icon, btnLabel = 'OK' } = opts;
-            const ic = icon || MODAL_ICONS[type] || '💬';
-            const overlay = _buildNModal(`
-                <div class="nmodal-icon ${type}">${ic}</div>
-                ${title ? `<div class="nmodal-title">${title}</div>` : ''}
-                <div class="nmodal-message">${message}</div>
-                <div class="nmodal-actions"><button class="nmodal-btn primary" id="_nalertOk">${btnLabel}</button></div>
-            `);
-            overlay.querySelector('#_nalertOk').onclick = () => { overlay.remove(); resolve(); };
-            overlay.onclick = e => { if (e.target === overlay) { overlay.remove(); resolve(); } };
-        });
-    }
-
-    function showConfirm(message, opts = {}) {
-        return new Promise(resolve => {
-            const { title = 'Confirmation', type = 'question', icon, labelOk = 'Confirmer', labelCancel = 'Annuler', okStyle = 'primary' } = opts;
-            const ic = icon || MODAL_ICONS[type] || '🤔';
-            const overlay = _buildNModal(`
-                <div class="nmodal-icon ${type}">${ic}</div>
-                <div class="nmodal-title">${title}</div>
-                <div class="nmodal-message">${message}</div>
-                <div class="nmodal-actions">
-                    <button class="nmodal-btn secondary" id="_nconfirmNo">${labelCancel}</button>
-                    <button class="nmodal-btn ${okStyle}" id="_nconfirmYes">${labelOk}</button>
-                </div>
-            `);
-            overlay.querySelector('#_nconfirmYes').onclick = () => { overlay.remove(); resolve(true); };
-            overlay.querySelector('#_nconfirmNo').onclick  = () => { overlay.remove(); resolve(false); };
-            overlay.onclick = e => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
-        });
-    }
-
-    function showPrompt(message, opts = {}) {
-        return new Promise(resolve => {
-            const { title = '', type = 'info', icon, placeholder = '', defaultValue = '', inputType = 'text', labelOk = 'Valider', labelCancel = 'Annuler' } = opts;
-            const ic = icon || MODAL_ICONS[type] || '💬';
-            const overlay = _buildNModal(`
-                <div class="nmodal-icon ${type}">${ic}</div>
-                ${title ? `<div class="nmodal-title">${title}</div>` : ''}
-                <div class="nmodal-message">${message}</div>
-                <input class="nmodal-input" id="_npromptInput" type="${inputType}" placeholder="${placeholder}" value="${defaultValue}" autocomplete="off">
-                <div class="nmodal-actions">
-                    <button class="nmodal-btn secondary" id="_npromptNo">${labelCancel}</button>
-                    <button class="nmodal-btn primary" id="_npromptOk">${labelOk}</button>
-                </div>
-            `);
-            const input = overlay.querySelector('#_npromptInput');
-            setTimeout(() => input.focus(), 80);
-            const ok = () => { const v = input.value; overlay.remove(); resolve(v || null); };
-            overlay.querySelector('#_npromptOk').onclick = ok;
-            input.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') { overlay.remove(); resolve(null); } });
-            overlay.querySelector('#_npromptNo').onclick = () => { overlay.remove(); resolve(null); };
-        });
-    }
-
-    function showToast(message, type = 'info', duration = 3000) {
-        const icons = { info: '💬', success: '✅', warning: '⚠️', error: '❌' };
-        const container = document.getElementById('toastContainer');
-        const t = document.createElement('div');
-        t.className = `toast ${type}`;
-        t.innerHTML = `<span>${icons[type] || '💬'}</span><span>${message}</span>`;
-        container.appendChild(t);
-        setTimeout(() => { t.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, duration);
-    }
-
-    function _buildNModal(innerHtml) {
-        const overlay = document.createElement('div');
-        overlay.className = 'nmodal-overlay';
-        overlay.innerHTML = `<div class="nmodal-box">${innerHtml}</div>`;
-        document.body.appendChild(overlay);
-        return overlay;
-    }
-
-    async function openHelpModal() {
-        await showModal({
-            title: '📖 Guide d\'utilisation — Suivi des absences',
-            content: `
-        <div style="text-align:left; font-size:13px; line-height:1.7; color:#2c3e50;">
-
-            <!-- ══ DÉMARRAGE RAPIDE ══ -->
-            <div style="background:#eaf4fd; border-left:4px solid var(--blue); border-radius:6px; padding:12px 14px; margin-bottom:18px;">
-                <p style="margin:0; font-weight:600; color:var(--blue); font-size:13px;">🚀 En un coup d'œil</p>
-                <p style="margin:6px 0 0; font-size:12px; color:#444;">
-                    L'application s'ouvre sur la <b>vue mensuelle</b> (mois en cours).
-                    Cliquez sur le <b>nom du mois</b> (affichage ⬅) pour revenir sur une vue annuelle (avec les statistiques mensuelles de chaque classe).
-                    Cliquez à nouveau sur le nom d'un mois pour entrer dans la vue détaillée jour par jour.
-                </p>
-            </div>
-
-            <!-- ══ 1. DEMI-JOURNÉES ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; margin-top:0; font-size:14px;">🕐 1. Saisie par demi-journée</h3>
-
-            <p>En vue mensuelle, chaque jour est représenté par <b>deux mini-colonnes</b> côte à côte : <b>M</b> (matin) et <b>AM</b> (après-midi). Elles sont totalement indépendantes.</p>
-
-            <p><b>Enregistrer une absence :</b> Cliquez sur la cellule souhaitée. Chaque clic fait défiler les trois états :</p>
-            <div style="display:flex; gap:10px; margin:8px 0 12px 16px; flex-wrap:wrap;">
-                <span style="background:#f9f9f9; border:1px solid #ddd; border-radius:6px; padding:5px 10px; font-size:12px;">⬜ <b>Vide</b> — Présent</span>
-                <span style="background:#fde8e8; border:1px solid #e74c3c; border-radius:6px; padding:5px 10px; font-size:12px; color:#c0392b;"><b>A</b> — Absent</span>
-                <span style="background:#fef9e0; border:1px solid #f1c40f; border-radius:6px; padding:5px 10px; font-size:12px; color:#8a6d00;"><b>Exc</b> — Excusé</span>
-            </div>
-
-            <p><b>Comptage :</b> Chaque demi-journée vaut <b>0,5 jour</b> dans les statistiques, les totaux et les exports PDF. Un élève absent toute la journée accumule ainsi 1, et uniquement 0,5 s'il est absent seulement le matin ou l'après-midi.</p>
-
-            <p><b>Colonne du jour actuel :</b> Les en-têtes <b>M</b> et <b>AM</b> du jour en cours sont surlignés en bleu pour le repérer rapidement. Les cellules élèves de ce jour conservent leur couleur (rouge si A, jaune si Exc) même dans la colonne bleue.</p>
-
-            <!-- ══ 2. STRUCTURE ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">🏫 2. Structure — Classes & Élèves</h3>
-
-            <p><b>Créer une classe :</b> Saisissez son nom dans le champ en haut à gauche (ex. : <i>CP-A</i>) puis appuyez sur <kbd>Entrée</kbd> ou cliquez sur <b>+</b>.</p>
-
-            <p><b>Ajouter un élève :</b> Cliquez sur le <b>+ bleu</b> à droite du nom de la classe. Saisissez le prénom et nom dans la fenêtre qui s'ouvre.</p>
-
-            <p><b>Déplier / Replier une classe :</b> Cliquez sur la <b>flèche ▼/▲</b> ou sur le <b>nom de la classe</b>. Le bouton <b>"Tout Déplier / Replier"</b> agit sur toutes les classes simultanément. Les classes repliées apparaissent sur fond gris foncé pour les distinguer des lignes élèves.</p>
-
-            <p><b>Renommer :</b> Faites un <b>clic droit</b> sur le nom de la classe ou de l'élève. La valeur actuelle est pré-remplie dans la fenêtre de saisie.</p>
-
-            <p><b>Supprimer :</b> Icône 🗑️ pour une classe, bouton <b>×</b> pour un élève. Une confirmation est demandée.</p>
-
-            <p><b>Réorganiser par glisser-déposer :</b> Maintenez le clic sur la poignée <b>⠿</b> à gauche pour déplacer une classe ou un élève. Il est possible de <b>déplacer un élève d'une classe vers une autre</b> de la même façon.</p>
-
-            <!-- ══ 3. NAVIGATION ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">📅 3. Navigation dans le tableau</h3>
-
-            <p><b>Vue annuelle</b> (aucun mois sélectionné) : chaque cellule de classe affiche le total d'absences du mois avec le taux d'absentéisme. Chaque cellule élève affiche son total mensuel en jours décimaux.</p>
-
-            <p><b>Vue mensuelle</b> (un mois sélectionné) : affichage colonne par colonne, avec <b>M</b> et <b>AM</b> pour chaque jour ouvré (lundi, mardi, jeudi, vendredi). La dernière ligne affiche les totaux par demi-colonne pour toute l'école.</p>
-
-            <p><b>Résumé d'une journée :</b> Cliquez sur le <b>numéro du jour</b> dans l'en-tête pour voir la liste complète des absents et excusés du matin et de l'après-midi, toutes classes confondues.</p>
-
-            <p><b>Bilan individuel :</b> Cliquez sur le <b>nom d'un élève</b> pour ouvrir son bilan annuel détaillé : mois par mois, total en jours décimaux, et détail des demi-journées concernées (ex. : <i>5M, 5AM, 12M(exc)</i>).</p>
-
-            <!-- ══ 4. RECHERCHE ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">🔍 4. Recherche d'élève</h3>
-
-            <p>Tapez au moins <b>2 lettres</b> dans le champ de recherche sous la barre d'outils. Les résultats s'affichent en liste déroulante. Cliquez sur un résultat pour ouvrir directement son bilan annuel.</p>
-
-            <!-- ══ 5. CALENDRIER ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">🏖️ 5. Calendrier & Vacances scolaires</h3>
-
-            <p><b>Jours affichés :</b> Seuls les jours ouvrés (lundi, mardi, jeudi, vendredi) sont affichés. Mercredis et week-ends sont automatiquement exclus.</p>
-
-            <p><b>Configurer les vacances :</b> <b>Gestion → 🏖️ Configurer Vacances</b>. Donnez un nom à la période, définissez début et fin, cliquez sur <b>Ajouter</b>. Les jours concernés disparaissent du tableau et sont exclus de tous les calculs.</p>
-
-            <p><b>Supprimer une période :</b> Dans la même fenêtre, cliquez sur 🗑️ en face de la période à retirer.</p>
-
-            <!-- ══ 6. TABLEAU DE BORD & PDF ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">📊 6. Tableau de bord & exports PDF</h3>
-
-            <p><b>Tableau de bord :</b> Bouton <b>"📊 Tableau de Bord"</b> en haut. Affiche le total des absences en jours décimaux, le taux de justification, un graphique d'évolution mensuelle et un comparatif par classe.</p>
-
-            <p><b>Bilan Directeur PDF :</b> Depuis le tableau de bord → <b>"💾 Télécharger le Bilan PDF"</b>. Document prêt à imprimer avec résumé global et répartition par classe (tous les totaux en jours décimaux).</p>
-
-            <p><b>Bilan Mensuel PDF :</b> <b>Gestion → 📄 Bilan Mensuel PDF</b>. Export détaillé du mois sélectionné, élève par élève, avec détail des demi-journées. <i>Un mois doit être sélectionné au préalable dans le tableau.</i></p>
-
-            <!-- ══ 7. GESTION ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">⚙️ 7. Menu Gestion — Sauvegarde & Sécurité</h3>
-
-            <p><b>Sauvegarder (Backup) :</b> <b>Gestion → 💾 Importer / Sauvegarder → SAUVEGARDER (.json)</b>. Télécharge un fichier <code>.json</code> contenant toutes les données (classes, élèves, absences demi-journées, vacances).</p>
-
-            <p><b>Restaurer un backup :</b> <b>Gestion → Importer / Sauvegarder → RESTAURER BACKUP</b>. Remplace toutes les données actuelles en cloud par celles du fichier sélectionné.</p>
-
-            <p><b>Importer des élèves (CSV) :</b> Format attendu, une ligne par élève :</p>
-            <pre style="background:#f4f7f6; border-radius:6px; padding:10px; font-size:11px; margin:6px 0 12px;">Nom de la Classe;Prénom Nom de l'élève
-CP-A;Martin Sophie
-CE1-B;Petit Emma</pre>
-            <p>Les classes inexistantes sont créées automatiquement.</p>
-
-            <p><b>Effacer toutes les absences :</b> <b>Gestion → 🧹 Effacer toutes les absences</b>. Supprime uniquement les données d'absence. Classes et élèves sont conservés. Utile en début d'année scolaire.</p>
-
-            <p><b>Reset total :</b> <b>Gestion → 🗑️ RESET TOTAL</b>. Supprime absolutement tout. Nécessite deux confirmations successives. Irréversible.</p>
-
-            <!-- ══ 8. NOTE PARTAGÉE ══ -->
-            <h3 style="color:var(--blue); border-bottom:2px solid #eee; padding-bottom:6px; font-size:14px;">📌 8. Note partagée (Post-it)</h3>
-
-            <p>Le post-it jaune en bas à droite est synchronisé en temps réel entre tous les utilisateurs connectés. Idéal pour laisser un message urgent à un collègue.</p>
-            <p>• <b>Déplier/Replier :</b> bouton <b>▼/▲</b> dans l'en-tête. Un <b>point rouge</b> signale la présence d'un message quand la note est repliée.</p>
-            <p>• <b>Déplacer :</b> maintenir le clic sur l'en-tête jaune et faire glisser. Position mémorisée.</p>
-            <p>• <b>Redimensionner :</b> tirer la poignée <b>⟋</b> en bas à droite. Taille mémorisée.</p>
-
-            <!-- ══ 9. CLOUD ══ -->
-            <div style="background:#f0fff4; border-left:4px solid #27ae60; border-radius:6px; padding:12px 14px; margin-top:18px;">
-                <p style="margin:0; font-weight:600; color:#27ae60; font-size:13px;">☁️ Synchronisation Cloud en temps réel</p>
-                <p style="margin:8px 0 0; font-size:12px; color:#444;">
-                    Toutes les modifications sont <b>automatiquement sauvegardées dans le cloud</b> dès qu'elles sont effectuées. Le voyant <b>"✅ Synchronisé"</b> en haut confirme que tout est à jour. Plusieurs utilisateurs peuvent travailler simultanément sur tous leurs appareils.
-                </p>
-            </div>
-
-        </div>`,
-            buttons: [{ text: 'J\'ai compris ✓', color: 'var(--dark)' }]
-        });
-    }
-
-    // ============================================================
+    // ── DÉMARRAGE ────────────────────────────────────────────────
     loadFromCloud();
 
-    // ── Bandeau de connexion perdue ──────────────────────────────
-    function showOfflineBanner() {
-        if (document.getElementById('offlineBanner')) return;
-        const banner = document.createElement('div');
-        banner.id = 'offlineBanner';
-        banner.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 99999;
-            background: #c0392b; color: white; text-align: center;
-            padding: 10px 16px; font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        `;
-        banner.innerHTML = `
-            <span>⚠️ Connexion au serveur perdue — les modifications ne sont pas sauvegardées</span>
-            <button onclick="_reconnectRealtime()" style="background:white; color:#c0392b; border:none; border-radius:6px; padding:4px 12px; cursor:pointer; font-weight:bold; font-size:12px;">🔄 Reconnecter</button>
-        `;
-        document.body.prepend(banner);
-        // Décaler le contenu pour ne pas masquer la top-bar
-        document.querySelector('.container').style.marginTop = '48px';
-    }
+    function showOfflineBanner(){if(document.getElementById('offlineBanner'))return;const b=document.createElement('div');b.id='offlineBanner';b.innerHTML=`<span>⚠️ Connexion au serveur perdue — les modifications ne sont pas sauvegardées</span><button onclick="_reconnectRealtime()" style="background:white;color:#c0392b;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-weight:bold;font-size:12px;">🔄 Reconnecter</button>`;document.body.prepend(b);document.querySelector('.container').style.marginTop='48px';}
+    function hideOfflineBanner(){const b=document.getElementById('offlineBanner');if(b)b.remove();document.querySelector('.container').style.marginTop='';}
 
-    function hideOfflineBanner() {
-        const b = document.getElementById('offlineBanner');
-        if (b) b.remove();
-        document.querySelector('.container').style.marginTop = '';
-    }
+    let _realtimeChannel=null,_reconnectTimer=null;
 
-    // ── Reconnexion au channel Realtime ─────────────────────────
-    let _realtimeChannel = null;
-    let _reconnectTimer  = null;
-
-    function _setupRealtimeChannel() {
-        if (_realtimeChannel) {
-            _supabase.removeChannel(_realtimeChannel);
-        }
-        _realtimeChannel = _supabase.channel('absences-realtime-index-' + Date.now())
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'absences_data' }, async payload => {
-                try {
-                    const decrypted = await decryptData(payload.new.content);
-                    if (!decrypted || !decrypted.schoolData) return;
-                    // Ne pas écraser si on vient de sauvegarder nous-mêmes (fenêtre 3 s)
-                    if (_isSaving || _pendingSave) return;
-                    schoolData    = decrypted.schoolData;
-                    excludedDates = decrypted.excludedDates || [];
-                    if (decrypted.sharedNote !== undefined) {
-                        document.getElementById('noteContent').value = decrypted.sharedNote;
-                        updateStickyDot(decrypted.sharedNote);
-                    }
-                    refreshSchoolMonths();
-                    renderAll();
-                    document.getElementById('syncIndicator').innerText = "✅ Synchronisé";
-                } catch(e) {
-                    console.error("Realtime decrypt error:", e);
-                }
+    function _setupRealtimeChannel(){
+        if(_realtimeChannel)_supabase.removeChannel(_realtimeChannel);
+        _realtimeChannel=_supabase.channel('absences-realtime-index-'+Date.now())
+            .on('postgres_changes',{event:'UPDATE',schema:'public',table:'absences_data'},async payload=>{
+                try{const d=await decryptData(payload.new.content);if(!d||!d.schoolData)return;if(_isSaving||_pendingSave)return;schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();document.getElementById('syncIndicator').innerText="✅ Synchronisé";}catch(e){console.error("Realtime decrypt error:",e);}
             })
-            .on('system', {}, status => {
-                if (status === 'SUBSCRIBED') {
-                    hideOfflineBanner();
-                    document.getElementById('syncIndicator').innerText = "✅ Connecté";
-                    clearTimeout(_reconnectTimer);
-                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                    showOfflineBanner();
-                    document.getElementById('syncIndicator').innerText = "🔴 Déconnecté";
-                    // Tentative de reconnexion automatique après 10 s
-                    clearTimeout(_reconnectTimer);
-                    _reconnectTimer = setTimeout(_reconnectRealtime, 10000);
-                }
+            .on('system',{},status=>{
+                if(status==='SUBSCRIBED'){hideOfflineBanner();document.getElementById('syncIndicator').innerText="✅ Connecté";clearTimeout(_reconnectTimer);}
+                else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){showOfflineBanner();document.getElementById('syncIndicator').innerText="🔴 Déconnecté";clearTimeout(_reconnectTimer);_reconnectTimer=setTimeout(_reconnectRealtime,10000);}
             })
             .subscribe();
     }
 
-    window._reconnectRealtime = async function() {
-        document.getElementById('syncIndicator').innerText = "🔄 Reconnexion…";
-        clearTimeout(_reconnectTimer);
-        // Recharger les données depuis Supabase UNIQUEMENT si la clé de chiffrement est disponible
-        // et SANS jamais déclencher de sauvegarde
-        if (_encryptionKey) {
-            try {
-                const { data } = await _supabase.from('absences_data').select('content').eq('id', 1).single();
-                if (data) {
-                    const decrypted = await decryptData(data.content);
-                    if (decrypted && decrypted.schoolData && decrypted.schoolData.length > 0) {
-                        schoolData    = decrypted.schoolData;
-                        excludedDates = decrypted.excludedDates || [];
-                        if (decrypted.sharedNote !== undefined) {
-                            document.getElementById('noteContent').value = decrypted.sharedNote;
-                            updateStickyDot(decrypted.sharedNote);
-                        }
-                        refreshSchoolMonths();
-                        renderAll();
-                    }
-                    // Si schoolData est vide après déchiffrement, on ne touche à rien
-                    // (protection contre écrasement accidentel)
-                }
-            } catch(e) {
-                console.error("Erreur rechargement:", e);
-                // Erreur de déchiffrement : on ne touche pas aux données en mémoire
-            }
-        }
-        // Reconnecter le channel Realtime dans tous les cas
+    window._reconnectRealtime=async function(){
+        document.getElementById('syncIndicator').innerText="🔄 Reconnexion…";clearTimeout(_reconnectTimer);
+        if(_encryptionKey){try{const{data}=await _supabase.from('absences_data').select('content').eq('id',1).single();if(data){const d=await decryptData(data.content);if(d&&d.schoolData&&d.schoolData.length>0){schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();}}}catch(e){console.error("Erreur rechargement:",e);}}
         _setupRealtimeChannel();
     };
 
-    // Reconnexion automatique quand le navigateur retrouve internet
-    window.addEventListener('online',  () => _reconnectRealtime());
-    window.addEventListener('offline', () => showOfflineBanner());
+    window.addEventListener('online',()=>_reconnectRealtime());
+    window.addEventListener('offline',()=>showOfflineBanner());
 
-    // Heartbeat : vérifie uniquement que Supabase répond — ne touche PAS aux données
-    setInterval(async () => {
-        try {
-            const { error } = await _supabase.from('absences_data').select('id').eq('id', 1).single();
-            if (error) throw error;
-            // Connexion OK
-            if (document.getElementById('offlineBanner')) {
-                hideOfflineBanner();
-                document.getElementById('syncIndicator').innerText = "✅ Connecté";
-            }
-        } catch(e) {
-            showOfflineBanner();
-            document.getElementById('syncIndicator').innerText = "🔴 Déconnecté";
-        }
-    }, 45000);
+    setInterval(async()=>{
+        try{const{error}=await _supabase.from('absences_data').select('id').eq('id',1).single();if(error)throw error;if(document.getElementById('offlineBanner')){hideOfflineBanner();document.getElementById('syncIndicator').innerText="✅ Connecté";}}
+        catch(e){showOfflineBanner();document.getElementById('syncIndicator').innerText="🔴 Déconnecté";}
+    },45000);
 
     _setupRealtimeChannel();
 </script>
