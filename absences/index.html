@@ -696,7 +696,6 @@
 
     // ── RENDER ───────────────────────────────────────────────────
     function renderAll(){
-        const isMobile=window.innerWidth<=768;
         const mRow=document.getElementById('monthRow'),dRow=document.getElementById('dayRow'),hdRow=document.getElementById('halfDayRow');
         while(mRow.cells.length>1)mRow.deleteCell(1);
         while(dRow.cells.length>1)dRow.deleteCell(1);
@@ -711,22 +710,20 @@
 
             if(activeMonth===idx){
                 const vd=m.days.filter(d=>!isDayExcluded(idx,d.num));
-                th.colSpan=isMobile?2:vd.length*2;
+                th.colSpan=vd.length*2;
                 vd.forEach(day=>{
                     const today=isToday(idx,day.num);
-                    if(!isMobile||today){
-                        let dTh=document.createElement('th');
-                        dTh.className='day-group-header'+(today?' today-highlight':'');
-                        dTh.colSpan=2;dTh.innerHTML=`${day.label}<br>${day.num}`;
-                        dTh.onclick=e=>{e.stopPropagation();showDailySummary(idx,day.num,m.name);};
-                        dRow.appendChild(dTh);
-                        HALF_DAYS.forEach(hd=>{
-                            let hdTh=document.createElement('th');
-                            hdTh.className='half-day-col'+(today?' today-highlight':'')+(hd==='M'?' day-start':'')+(hd==='AM'?' day-end':'');
-                            hdTh.style.width='18px';hdTh.style.fontSize='9px';hdTh.textContent=hd;
-                            hdRow.appendChild(hdTh);
-                        });
-                    }
+                    let dTh=document.createElement('th');
+                    dTh.className='day-group-header'+(today?' today-highlight':'');
+                    dTh.colSpan=2;dTh.innerHTML=`${day.label}<br>${day.num}`;
+                    dTh.onclick=e=>{e.stopPropagation();showDailySummary(idx,day.num,m.name);};
+                    dRow.appendChild(dTh);
+                    HALF_DAYS.forEach(hd=>{
+                        let hdTh=document.createElement('th');
+                        hdTh.className='half-day-col'+(today?' today-highlight':'')+(hd==='M'?' day-start':'')+(hd==='AM'?' day-end':'');
+                        hdTh.style.width='18px';hdTh.style.fontSize='9px';hdTh.textContent=hd;
+                        hdRow.appendChild(hdTh);
+                    });
                 });
             }else{th.colSpan=1;dRow.appendChild(document.createElement('th'));hdRow.appendChild(document.createElement('th'));}
             mRow.appendChild(th);
@@ -774,7 +771,6 @@
                     m.days.forEach(day=>{
                         if(isDayExcluded(mIdx,day.num))return;
                         const today=isToday(mIdx,day.num);
-                        if(!isMobile||today){
                             HALF_DAYS.forEach(hd=>{
                                 const key=`${mIdx}-${day.num}-${hd}`;let hdA=0,hdE=0;
                                 classe.students.forEach(st=>{if(st.data[key]==='A')hdA++;if(st.data[key]==='Exc')hdE++;});
@@ -782,7 +778,6 @@
                                 const display=tot>0?`<span style="font-size:9px;font-weight:bold;">${tot}<span style="font-size:7px;font-weight:normal;">(${hdE})</span></span>`:"";
                                 tr.innerHTML+=`<td class="${hd==='M'?' day-start':' day-end'}" style="text-align:center;width:18px;">${display}</td>`;
                             });
-                        }
                     });
                 }
             });
@@ -802,12 +797,10 @@
                             m.days.forEach(day=>{
                                 if(isDayExcluded(mIdx,day.num))return;
                                 const today=isToday(mIdx,day.num);
-                                if(!isMobile||today){
-                                    HALF_DAYS.forEach(hd=>{
-                                        const key=`${mIdx}-${day.num}-${hd}`;const val=st.data[key]||'';
-                                        sh+=`<td class="cell-abs st-${val||'none'}${today?' today-highlight':''}${hd==='M'?' day-start':' day-end'}" onclick="updateStatus(${cIdx},${sIdx},'${key}')" style="width:18px;font-size:9px;">${val}</td>`;
-                                    });
-                                }
+                                HALF_DAYS.forEach(hd=>{
+                                    const key=`${mIdx}-${day.num}-${hd}`;const val=st.data[key]||'';
+                                    sh+=`<td class="cell-abs st-${val||'none'}${today?' today-highlight':''}${hd==='M'?' day-start':' day-end'}" onclick="updateStatus(${cIdx},${sIdx},'${key}')" style="width:18px;font-size:9px;">${val}</td>`;
+                                });
                             });
                         }else if(activeMonth===null){
                             let sA=0,sE=0;
@@ -826,7 +819,7 @@
             let hF=`<td style="text-align:right;padding-right:10px;font-size:10px;">TOTAUX :</td>`;
             schoolMonths[activeMonth].days.forEach(day=>{
                 if(isDayExcluded(activeMonth,day.num))return;
-                if(!isMobile||isToday(activeMonth,day.num)){
+                if(!isDayExcluded(activeMonth,day.num)){
                     HALF_DAYS.forEach(hd=>{
                         const key=`${activeMonth}-${day.num}-${hd}`;let hdA=0,hdE=0;
                         schoolData.forEach(c=>c.students.forEach(st=>{if(st.data[key]==='A')hdA++;if(st.data[key]==='Exc')hdE++;}));
