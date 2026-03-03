@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -29,7 +29,7 @@
         font-size: 11px;
         margin: 10px;
         color: #333;
-        -webkit-tap-highlight-color: transparent;
+
     }
 
     .container {
@@ -172,7 +172,7 @@
         animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
     }
     .modal h2 { padding: 20px 22px 14px; margin: 0; font-size: 15px; border-bottom: 1px solid #eee; flex-shrink: 0; }
-    .modal-content { overflow-y: auto; padding: 16px 22px; flex: 1; -webkit-overflow-scrolling: touch; }
+    .modal-content { overflow-y: auto; padding: 16px 22px; flex: 1; }
     .modal-buttons { padding: 14px 22px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; background: white; }
     @keyframes modalIn { from { opacity:0; transform:scale(0.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
     .modal-input { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; margin-top: 10px; outline: none; }
@@ -224,25 +224,6 @@
     .toast.warning { background:#f39c12; color:white; }
     .toast.error   { background:var(--absent); color:white; }
 
-    /* ── MOBILE ─────────────────────────────────────────────────── */
-    @media (max-width: 768px) {
-        body { margin: 0; font-size: 13px; }
-        .container { padding: 8px; width: 100vw; border-radius: 0; }
-        th, td { height: 48px; }
-        .col-main { width: 150px; min-width: 150px; font-size: 12px; padding-left: 8px; }
-        .cell-abs { min-width: 36px !important; font-size: 13px !important; }
-        .half-day-col { width: 24px !important; font-size: 10px !important; }
-        .top-bar { gap: 8px; padding: 8px; }
-        .input-group { width: 100%; order: -1; margin-bottom: 5px; flex: 0 0 100%; }
-        .input-group input { width: 100%; }
-        .btn-main { width: calc(33% - 5px); height: 38px; font-size: 9px; }
-        .drag-handle, .drag-handle-class, .stats-badge { display: none; }
-        .modal { width: 95%; }
-        .stats-footer { flex-direction: column; gap: 10px; text-align: center; }
-        #gestionMenu { min-width: 240px; }
-        #gestionMenu a { font-size: 14px; padding: 12px 16px; }
-        .sticky-note { width: 220px !important; }
-    }
 
     /* ── POST-IT ────────────────────────────────────────────────── */
     .sticky-note { position:fixed; bottom:20px; right:20px; width:300px; min-width:200px; min-height:38px; background:#fff9c4; border:1px solid #fbc02d; border-radius:6px; box-shadow:0 4px 15px rgba(0,0,0,0.25); z-index:10000; display:flex; flex-direction:column; overflow:hidden; transition:box-shadow 0.2s; }
@@ -1066,7 +1047,7 @@
                 <h2 style="margin:0;color:#2c3e50;font-size:1.2em;">👤 ${title}</h2>
                 <button onclick="this.closest('#customModal').remove()" style="border:none;background:#f8f9fa;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#7f8c8d;font-weight:bold;font-size:16px;">&times;</button>
             </div>
-            <div style="overflow-y:auto;padding:20px 24px;flex:1;-webkit-overflow-scrolling:touch;">${contentHtml}</div>
+            <div style="overflow-y:auto;padding:20px 24px;flex:1;">${contentHtml}</div>
             <div style="padding:14px 24px;border-top:1px solid #f0f0f0;flex-shrink:0;background:white;">
                 <button onclick="this.closest('#customModal').remove()" style="width:100%;padding:11px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;">Fermer</button>
             </div>
