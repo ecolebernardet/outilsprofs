@@ -1306,7 +1306,7 @@
     window.goToPrevDay = function() {
         const d = new Date(mobileSelectedDate);
         d.setDate(d.getDate() - 1);
-        while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+        while (d.getDay() === 0 || d.getDay() === 3 || d.getDay() === 6) d.setDate(d.getDate() - 1);
         mobileSelectedDate = d;
         updateMobileDayLabel();
         renderAll();
@@ -1315,7 +1315,7 @@
     window.goToNextDay = function() {
         const d = new Date(mobileSelectedDate);
         d.setDate(d.getDate() + 1);
-        while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+        while (d.getDay() === 0 || d.getDay() === 3 || d.getDay() === 6) d.setDate(d.getDate() + 1);
         mobileSelectedDate = d;
         updateMobileDayLabel();
         renderAll();
@@ -1362,7 +1362,7 @@
         for (let d = 1; d <= daysInMonth; d++) {
             const date = new Date(y, m, d);
             const dow = date.getDay();
-            const isWeekend = dow === 0 || dow === 6;
+            const isWeekend = dow === 0 || dow === 3 || dow === 6;
             const mIdx = monthConfigs.findIndex(mc => mc.m === m && mc.y === y);
             const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const isVac = excludedDates.some(v => ds >= v.start && ds <= v.end);
