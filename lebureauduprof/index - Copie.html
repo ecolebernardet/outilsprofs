@@ -368,10 +368,6 @@
         #selection-controls .sc-rotate { right: -16px; top: 50%; transform: translateY(-50%); color: #8E51FF; cursor: grab; }
         #selection-controls .sc-rotate:active { cursor: grabbing; }
         #selection-controls .sc-resize { right: -8px; bottom: -8px; width: 18px; height: 18px; cursor: se-resize; font-size: 11px; color: #f39c12; background: white; border-color: #f39c12; border-radius: 3px; }
-        /* Boutons flip/lock groupés près du resize (coin bas-droit) */
-        #sc-lock-btn  { position: absolute; right: 14px; bottom: -8px; }
-        #sc-flip-h-btn { position: absolute; right: 44px; bottom: -8px; }
-        #sc-flip-v-btn { position: absolute; right: 74px; bottom: -8px; }
         /* Barre d'action de selection-controls */
         #sc-action-bar {
             position: absolute;
@@ -382,7 +378,10 @@
         }
         #sc-action-bar.above { bottom: auto; top: -48px; }
         #sc-action-bar .sc-btn { position: static; }
-        #selection-controls .sc-merge   { position: static; transform: none; }
+        #sc-action-bar #sc-lock-btn,
+        #sc-action-bar #sc-flip-h-btn,
+        #sc-action-bar #sc-flip-v-btn { position: static; bottom: auto; right: auto; display: none; }
+        #selection-controls .sc-merge  { position: static; transform: none; }
         #selection-controls .sc-ungroup { position: static; transform: none; }
         #selection-controls .sc-delete { color: #ff5f56; }
         #selection-controls .sc-menu   { color: #555; }
@@ -893,11 +892,11 @@
         <div class="sc-btn sc-move"   id="sc-move-btn"   title="Déplacer">✥</div>
         <div class="sc-btn sc-rotate" id="sc-rotate-btn" title="Faire pivoter">↻</div>
         <div class="sc-btn sc-resize" id="sc-resize-btn" title="Redimensionner le groupe">↘</div>
-        <div id="sc-lock-btn"   title="Verrouiller les proportions (ou Shift)">🔓</div>
-        <div id="sc-flip-h-btn" title="Symétrie horizontale">↔</div>
-        <div id="sc-flip-v-btn" title="Symétrie verticale">↕</div>
         <div id="sc-action-bar">
             <div class="sc-btn sc-menu"    id="sc-menu-btn"    title="Menu">☰</div>
+            <div id="sc-lock-btn"          title="Verrouiller les proportions (ou Shift)">🔓</div>
+            <div id="sc-flip-h-btn"        title="Symétrie horizontale">↔</div>
+            <div id="sc-flip-v-btn"        title="Symétrie verticale">↕</div>
             <div class="sc-btn sc-merge"   id="sc-merge-btn"   title="Grouper les widgets sélectionnés">⊞ Grouper</div>
             <div class="sc-btn sc-ungroup" id="sc-ungroup-btn" title="Dissocier le groupe">⛓️ Dissocier</div>
             <div class="sc-btn sc-delete"  id="sc-delete-btn"  title="Supprimer">×</div>

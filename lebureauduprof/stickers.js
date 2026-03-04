@@ -288,12 +288,20 @@ function insertStickerEmoji(emoji) {
 	w.innerHTML = `
 		<div class="drag-handle" title="Déplacer">✥</div>
 		<div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-		<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
-		<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
-		<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
+		<div class="widget-action-bar">
+			<div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
+			<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
+			<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
+			<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
+		</div>
+		<div class="widget-ctx-menu"></div>
 	`;
 	w.appendChild(content);
-	w.addEventListener('mousedown', () => bringToFront(w));
+	w.addEventListener('mousedown', () => {
+		bringToFront(w);
+		w.focus();
+		if (typeof positionActionBar === 'function') positionActionBar(w);
+	});
 	board.appendChild(w);
 	bringToFront(w);
 	makeDraggable(w);
@@ -310,7 +318,7 @@ function insertStickerImage(url, name) {
 	w.dataset.type = 'sticker';
 	w.dataset.transparent = 'true';
 	// Forcer height explicite et overflow hidden pour que le redimensionnement fonctionne
-	w.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:130px; height:130px; overflow:hidden; flex-direction:row;`;
+	w.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:130px; height:130px; overflow:visible; flex-direction:row;`;
 	w.style.setProperty('--sticker-h', '130px');
 	w.tabIndex = 0;
 
@@ -324,12 +332,20 @@ function insertStickerImage(url, name) {
 	w.innerHTML = `
 		<div class="drag-handle" title="Déplacer">✥</div>
 		<div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-		<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
-		<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
-		<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
+		<div class="widget-action-bar">
+			<div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
+			<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
+			<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
+			<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
+		</div>
+		<div class="widget-ctx-menu"></div>
 	`;
 	w.appendChild(img);
-	w.addEventListener('mousedown', () => bringToFront(w));
+	w.addEventListener('mousedown', () => {
+		bringToFront(w);
+		w.focus();
+		if (typeof positionActionBar === 'function') positionActionBar(w);
+	});
 	board.appendChild(w);
 	bringToFront(w);
 	makeDraggable(w);

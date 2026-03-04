@@ -38,7 +38,7 @@ function resizeCanvas() {
 }
 
 function getPos(e) {
-    const rect = drawCanvas.getBoundingClientRect();
+    const rect = board.getBoundingClientRect();
     const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
     const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
     return { x: clientX - rect.left, y: clientY - rect.top };
@@ -769,7 +769,7 @@ function initBoardSelection() {
 }
 
 function onBoardMouseDown(e) {
-    if (_presentationActive) return;
+    if (document.body.classList.contains('presentation-mode')) return;
     if (isDrawMode || isEraserMode) return;
     if (e.target.closest('#selection-controls')) return;
     if (e.target.closest('#toolbar-container')) return;

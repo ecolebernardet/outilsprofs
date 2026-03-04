@@ -157,10 +157,12 @@ function createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity, svgW, s
     widget.innerHTML = `
         <div class="drag-handle" title="Déplacer">✥</div>
         <div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-        <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget, .shape-widget'))" title="Épingler">📌</div>
-        <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget, .shape-widget'))" title="Envoyer derrière">🔽</div>
-        <div class="widget-menu-handle" onclick="toggleCtxMenu(this)" title="Menu">☰</div>
-        <div class="widget-close-handle" onclick="snapshotNow();closeCtxMenuAll();this.closest('.shape-widget').remove();saveBoard();" title="Fermer">×</div>
+        <div class="widget-action-bar">
+            <div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
+            <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget, .shape-widget'))" title="Épingler">📌</div>
+            <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget, .shape-widget'))" title="Envoyer derrière">🔽</div>
+            <div class="widget-close-handle" onclick="snapshotNow();closeCtxMenuAll();this.closest('.shape-widget').remove();saveBoard();" title="Fermer">×</div>
+        </div>
         <div class="widget-ctx-menu"></div>
         <div class="shape-svg-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="overflow:visible;">${svgContent}</svg>
@@ -188,7 +190,7 @@ function createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity, svgW, s
         if (widget.dataset.background !== "true") bringToFront(widget);
     });
     widget.addEventListener('dblclick', (e) => {
-        const ignore = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.shape-resize-handle';
+        const ignore = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.shape-resize-handle';
         if (!e.target.closest(ignore)) openShapeEditPanel(widget);
     });
 
