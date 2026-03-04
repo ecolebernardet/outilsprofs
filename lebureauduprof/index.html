@@ -145,6 +145,10 @@
 
         /* Curseur crayon pour le mode insertion de texte */
         .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
+        #board.is-drawing { cursor: crosshair !important; }
+        #board.is-drawing * { cursor: crosshair !important; }
+        #board.is-erasing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         /* Curseur gomme */
         #draw-canvas.eraser-mode { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
 
@@ -261,18 +265,11 @@
         .shape-widget[data-group-id].selected .flip-h-btn,
         .shape-widget[data-group-id].selected .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
 
-        /* --- Sous-menu formes --- */
-        #shape-toolbar {
-            display: none; position: fixed; bottom: 80px; left: 30px;
-            background: #1F1F21; border-radius: 14px; padding: 16px;
-            box-shadow: 0 -4px 30px rgba(0,0,0,0.4); z-index: 9998; border: 1px solid #3a3a3f;
-            min-width: 300px;
-        }
-        #shape-toolbar.active { display: block; }
-        .shape-toolbar-title { color: #666; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #2e2e2e; }
+        /* --- Grille de formes (dans mm-panel) --- */
+
         .shape-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-bottom: 14px; }
         .shape-choice {
-            width: 52px; height: 52px; background: #28282f; border: 1px solid #2e2e38;
+            width: 62px; height: 62px; background: #28282f; border: 1px solid #2e2e38;
             border-radius: 10px; cursor: pointer; display: flex; align-items: center;
             justify-content: center; transition: 0.15s; flex-direction: column; gap: 3px;
         }
@@ -292,11 +289,6 @@
             font-weight: 700; font-size: 12px; transition: background 0.15s;
         }
         .shape-add-btn:hover { background: #35353f; color: #e8e8f0; border-style: solid; border-color: #4a90e2; }
-        .shape-toolbar-close {
-            position: absolute; top: 12px; right: 12px; background: none; border: none;
-            color: #555; cursor: pointer; font-size: 14px; padding: 3px 6px; border-radius: 6px; transition: .15s;
-        }
-        .shape-toolbar-close:hover { color: #ccc; background: #2e2e38; }
 
         /* --- OVERLAY DE SÉLECTION --- */
         #selection-controls {
@@ -346,13 +338,7 @@
 
         /* --- CONTENU --- */
 		.widget[data-type="text"] .editor-container, .widget[data-type="homework"] .editor-container { border: none; }
-		.widget[data-type="date"], .widget[data-type="time"] { min-width: unset; width: auto; }
-		.widget[data-type="date"] .editor-container, .widget[data-type="time"] .editor-container { overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; resize: none; }
-		.widget[data-type="date"] .editor-container { min-width: 150px; min-height: 180px; }
-		.widget[data-type="time"] .editor-container { min-width: 120px; min-height: 80px; }
-		.widget[data-type="time"] .editor-container { border: none; }
-		.widget[data-type="date"] .editor-container::-webkit-resizer,
-		.widget[data-type="time"] .editor-container::-webkit-resizer { background-color: transparent; background-image: none; }
+		/* date/time widget CSS → widgets-datetime.js */
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
 		.widget[data-type="iframe"] .editor-toolbar,
@@ -376,19 +362,151 @@
 		@keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
 		@keyframes slideUpModal  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
-		/* --- WIDGET MÉTÉO --- */
-		.widget[data-type="meteo"] { min-width: unset; background: transparent !important; border: none !important; box-shadow: none !important; }
-		.widget[data-type="meteo"] .editor-container { border: none; border-radius: 16px; overflow: hidden; resize: both; }
-		.meteo-city-name { text-decoration: underline dotted; }
+		/* Météo → widgets-meteo.js */
+		/* ── NOUVEAU MENU FLOTTANT ────────────────────────────── */
+		#fab-btn {
+			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
+			width: 52px; height: 52px; border-radius: 50%;
+			background: #1F1F21; border: 1.5px solid #4a4a5a;
+			color: #e8e8f0; font-size: 22px; cursor: pointer;
+			display: flex; align-items: center; justify-content: center;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+			transition: background .15s, transform .15s;
+		}
+		#fab-btn:hover { background: #2e2e3a; transform: scale(1.06); }
+		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(45deg); }
 
-		/* --- TOOLBAR & MENUS --- */
-		#toolbar-container { position: fixed; bottom: 65px; left: 30px; display: flex; flex-direction: column; align-items: flex-start; z-index: 9999; background: transparent; }
-		#bg-submenu { display: none; position: fixed; right: 30px; bottom: 80px; background: #1F1F21; border-radius: 12px; padding: 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.4); grid-template-columns: repeat(3, 1fr); gap: 10px; min-width: 200px; border: 1px solid #3a3a3f; z-index: 10001; }
-		#bg-submenu.active { display: grid; }
-		#bg-submenu-title { color:#aaa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;grid-column:span 3; }
-		#bg-submenu-import { background:#8e44ad;color:white;padding:5px 8px;font-size:11px;width:100%;margin-top:2px;border-radius:8px;border:none;cursor:pointer;grid-column:span 3; }
-		@media (max-width: 600px) { #bg-submenu { right: 10px; bottom: 120px; min-width: 180px; grid-template-columns: repeat(2, 1fr); } }
-		/* --- BOUTONS BARRE DU BAS --- */
+		/* Menu vertical principal */
+		#main-menu {
+			position: fixed; bottom: 82px; left: 20px; z-index: 14000;
+			display: flex; flex-direction: column; gap: 5px;
+			pointer-events: none; opacity: 0;
+			transition: opacity .2s ease;
+		}
+		#main-menu.open {
+			pointer-events: auto; opacity: 1;
+		}
+
+		/* Item du menu */
+		.mm-item {
+			display: flex; align-items: center; gap: 10px;
+			background: #1F1F21; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 9px 14px;
+			color: #d0d0e0; font-size: 13px; font-weight: 600;
+			cursor: pointer; white-space: nowrap;
+			transition: background .15s, border-color .15s, transform .12s;
+			min-width: 170px;
+		}
+		.mm-item:hover { background: #2a2a36; border-color: #555; transform: translateX(3px); }
+		.mm-item.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		.mm-item .mm-ico { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+		.mm-item .mm-arrow { margin-left: auto; font-size: 10px; color: #666; }
+
+		/* Séparateur */
+		.mm-sep { height: 1px; background: #2e2e3a; margin: 2px 4px; }
+
+		/* Sous-menu flyout à droite au survol */
+		.mm-has-sub { position: relative; }
+		.mm-sub {
+			position: absolute; left: 100%; top: 0;
+			padding-left: 12px; /* pont invisible élargi — zone de passage souris */
+			min-width: 178px;
+			display: flex; flex-direction: column; gap: 3px;
+			opacity: 0; pointer-events: none;
+			/* Pas de transform/translate : évite tout gap pendant la transition */
+			transition: opacity .12s ease;
+			z-index: 1;
+		}
+		.mm-sub-inner {
+			display: flex; flex-direction: column; gap: 3px;
+			background: #1a1a22; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 6px;
+			box-shadow: 4px 4px 20px rgba(0,0,0,0.5);
+			width: 100%;
+		}
+		.mm-has-sub:hover > .mm-sub {
+			opacity: 1; pointer-events: auto;
+		}
+		.mm-sub-item {
+			display: flex; align-items: center; gap: 8px;
+			padding: 8px 12px; border-radius: 8px;
+			color: #ccc; font-size: 12px; font-weight: 600;
+			cursor: pointer; transition: background .12s;
+			white-space: nowrap;
+		}
+		.mm-sub-item:hover { background: #2a2a36; color: #e8e8f0; }
+		.mm-sub-item .mm-ico { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+
+		/* mm-panel remplacé par draw-toolbar et shape-toolbar horizontaux */
+
+		/* bg-submenu désormais intégré dans le sous-menu Affichage */
+
+		/* ── Rubriques du menu ──────────────────────────────────── */
+		.mm-section {
+			border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 3px;
+		}
+		.mm-section-label {
+			font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+			padding: 2px 6px 4px; color: #666;
+		}
+		/* A — Système : teinte froide sombre */
+		.mm-section-a { background: #14161f; }
+		.mm-section-a .mm-section-label { color: #4a6a8a; }
+		.mm-section-a .mm-item { background: transparent; }
+		.mm-section-a .mm-item:hover { background: #1e2535; }
+		/* B — Annotation : teinte chaude/violette */
+		.mm-section-b { background: #1a1428; }
+		.mm-section-b .mm-section-label { color: #7a5aaa; }
+		.mm-section-b .mm-item { background: transparent; }
+		.mm-section-b .mm-item:hover { background: #251d38; }
+		/* C — Contenu : teinte verte/teal sombre */
+		.mm-section-c { background: #111d1a; }
+		.mm-section-c .mm-section-label { color: #3a7a60; }
+		.mm-section-c .mm-item { background: transparent; }
+		.mm-section-c .mm-item:hover { background: #182820; }
+		/* Ajustement : items actifs gardent la couleur bleue */
+		.mm-section .mm-item.active { background: #1a3550 !important; border-color: #4a90e2; color: #7ab8f5; }
+
+		/* ── Mini color picker custom ──────────────────────────── */
+		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
+		.cpick-swatch {
+			width: 30px; height: 26px; border-radius: 6px; border: 2px solid #555;
+			cursor: pointer; flex-shrink: 0; transition: border-color .15s;
+		}
+		.cpick-swatch:hover { border-color: #7ab8f5; }
+		.cpick-popup {
+			display: none; position: fixed;
+			background: #1a1a22; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 10px; z-index: 99000;
+			box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+			width: 188px; box-sizing: border-box; overflow: hidden;
+		}
+		.cpick-popup.open { display: block; }
+		.cpick-grid {
+			display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px;
+		}
+		.cpick-color {
+			aspect-ratio: 1; border-radius: 4px; cursor: pointer;
+			border: none; outline: 2px solid transparent; outline-offset: -1px;
+			transition: outline-color .1s, filter .1s;
+		}
+		.cpick-color:hover { filter: brightness(1.25); outline-color: #fff; }
+		.cpick-color.selected { outline-color: #7ab8f5; filter: brightness(1.1); }
+		.cpick-hex-row {
+			display: flex; gap: 6px; align-items: center; border-top: 1px solid #2e2e3a; padding-top: 8px;
+		}
+		.cpick-hex {
+			flex: 1; background: #28282f; border: 1px solid #3a3a4a; border-radius: 6px;
+			color: #e8e8f0; font-size: 12px; font-family: monospace; padding: 4px 8px;
+			outline: none;
+		}
+		.cpick-hex:focus { border-color: #4a90e2; }
+		.cpick-native {
+			width: 26px; height: 26px; border: none; border-radius: 5px;
+			cursor: pointer; padding: 0; background: none; flex-shrink: 0;
+		}
+
+		/* --- Anciens boutons (gardés pour undo/redo) --- */
 		.tool-btn {
 			background: #1F1F21; color: #ccc; border: 1px solid #3a3a4a;
 			padding: 8px 10px; border-radius: 10px; cursor: pointer;
@@ -406,12 +524,10 @@
 		.undo-btn.enabled, .redo-btn.enabled { color: #ccc; cursor: pointer; }
 		.undo-btn.enabled:hover, .redo-btn.enabled:hover { background: #2e2e3a; color: #e8e8f0; }
 		.menu-btn { display: none; }
-		#tools-menu { display: none; background: #1F1F21; border-radius: 14px; padding: 12px; box-shadow: var(--shadow); margin-bottom: 15px; gap: 8px; min-width: 220px; border: 1px solid #333; position: relative; max-height: 80vh; overflow-y: auto; overflow-x: hidden; grid-template-columns: repeat(3, 1fr); }
-		#tools-menu.active { display: grid; }
 		.widget-btn { background: #28282f; color: #ddd; border: none; padding: 14px 8px 10px; border-radius: 12px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; transition: background .15s; line-height: 1.2; text-align: center; white-space: nowrap; }
 		.widget-btn:hover { background: #35353f; }
 		.widget-btn .ico { font-size: 26px; line-height: 1; }
-		#main-tool-btn { background: #333; width: 100px; justify-content: center; }
+
 		.exit-fs-btn { display: none; position: absolute; top: 10px; right: 10px; z-index: 99999; background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
 		.editor-container:fullscreen .exit-fs-btn { display: block; }
 		.bg-thumb { width: 70px; height: 50px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
@@ -479,21 +595,11 @@
 		#font-size-input { -moz-appearance: textfield; appearance: textfield; }
 
         /* --- CANVAS --- */
-        #draw-canvas { position: absolute; top: 0; left: 0; z-index: 12000; cursor: crosshair; touch-action: none; }
-        #draw-canvas.inactive { pointer-events: none; cursor: default; z-index: 500; }
+        #draw-canvas { position: absolute; top: 0; left: 0; z-index: 50; pointer-events: none !important; touch-action: none; }
+        #draw-canvas.inactive { /* canvas toujours visible, les dessins restent affichés */ }
         #selection-rect { position: absolute; border: 2px dashed #4a90e2; background: rgba(74,144,226,0.08); pointer-events: none; z-index: 600; display: none; }
 
-        /* --- CALENDRIER & HORLOGE --- */
-        .calendar-page { width: 100%; height: 100%; display: flex; flex-direction: column; border: 1px solid #ced4da; border-radius: 8px; overflow: hidden; background: white; text-align: center; position: relative; padding-top: 15px; box-sizing: border-box; }
-        .calendar-header { background: #D17B6B; height: 20%; min-height: 30px; border-bottom: 2px solid #D17B6B; margin-bottom: 5px; }
-        .calendar-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 5px; }
-        .calendar-day-name   { font-size: 0.95em; font-weight: 700; color: #333; text-transform: lowercase; }
-        .calendar-day-number { font-size: 2.5em; font-weight: 800; color: #2c3e50; line-height: 1em; margin: 0.12em 0; }
-        .calendar-month      { font-size: 1.25em; font-weight: 600; color: #333; }
-        .clock-time { font-weight: 800; color: var(--primary-color); font-family: 'Courier New', monospace; display: flex; align-items: baseline; justify-content: center; width: 100%; gap: 4px; }
-        .clock-seconds { font-size: 0.5em; color: #888; margin-left: 0.1em; }
-        .icon-transparency { display: inline-block; width: 16px; height: 16px; border: 1px solid #333; background-color: #fff; background-image: linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size: 8px 8px; background-position: 0 0,0 4px,4px -4px,-4px 0px; vertical-align: middle; border-radius: 2px; }
-
+        /* Calendrier & horloge → widgets-datetime.js */
         /* --- AGENDA --- */
         .agenda-container { display: flex; flex-direction: column; background: #fff; border-radius: 8px; border: 1px solid #eee; overflow: hidden; min-height: 200px; }
         .agenda-header-title { background: #2b7fff; color: white; padding: 5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.6em; }
@@ -731,48 +837,7 @@
 </div>
 
 <div id="toolbar-container">
-    <div id="tools-menu">
-        <button class="widget-btn" onclick="createWidget('youtube'); toggleMenu()"><span class="ico">🎬</span>YouTube</button>
-        <button class="widget-btn" onclick="createWidget('iframe'); toggleMenu()"><span class="ico">💻</span>Fenêtre Web</button>
-		<button class="widget-btn" onclick="createWidget('outilsprofs'); toggleMenu()"><span class="ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:26px;height:26px;object-fit:contain;border-radius:6px;"></span>OutilsProfs</button>
-		<button class="widget-btn" onclick="createWidget('agenda'); toggleMenu()"><span class="ico">📌</span>Planning</button>
-        <button class="widget-btn" onclick="createWidget('pdf'); toggleMenu()"><span class="ico">📄</span>PDF</button>
-		<button class="widget-btn" onclick="createWidget('deficalme'); toggleMenu()"><span class="ico">🧘</span>Défi Calme</button>
-        <button class="widget-btn" onclick="createWidget('time'); toggleMenu()"><span class="ico">🕒</span>Heure</button>
-        <button class="widget-btn" onclick="createWidget('date'); toggleMenu()"><span class="ico">📅</span>Date</button>
-        <button class="widget-btn" onclick="createWidget('meteo'); toggleMenu()"><span class="ico">⛅</span>Météo</button>
-        <button class="widget-btn" onclick="createWidget('homework'); toggleMenu()"><span class="ico">📝</span>Devoirs</button>
-        <button class="widget-btn" onclick="createWidget('text'); toggleMenu()"><span class="ico">🖊️</span>Texte</button>
-
-
-    </div>
-	<div id="scenes-menu" style="display:none;position:fixed;bottom:80px;left:30px;background:#1F1F21;border-radius:14px;padding:14px 16px;box-shadow:0 -4px 30px rgba(0,0,0,0.4);z-index:9998;border:1px solid #3a3a3f;min-width:240px;">
-        <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #2e2e2e;">🗂️ Mes scènes</div>
-        <div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;"></div>
-        <button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:9px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:10px;cursor:pointer;font-weight:600;font-size:12px;transition:background .15s;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène (copie)</button>
-    </div>
-    <!-- Sous-menu Formes -->
-    <div id="shape-toolbar" style="position:relative;">
-        <button class="shape-toolbar-close" onclick="toggleShapeToolbar()" title="Fermer">✖</button>
-        <div class="shape-toolbar-title">Choisir une forme</div>
-        <div class="shape-grid" id="shape-grid"></div>
-        <div class="shape-controls">
-            <label>Contour :</label>
-            <input type="color" id="shape-stroke-color" value="#2c3e50" title="Couleur du contour">
-            <label>Épaisseur :</label>
-            <input type="range" id="shape-stroke-width" min="1" max="20" value="4" style="width:70px;cursor:pointer;">
-            <span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:20px;">4</span>
-            <label>Remplissage :</label>
-            <input type="color" id="shape-fill-color" value="#4a90e2" title="Couleur de remplissage">
-        </div>
-        <div class="shape-opacity-row" style="margin-top:10px;">
-            <label>Opacité remplissage :</label>
-            <input type="range" id="shape-opacity-slider" min="0" max="100" value="60">
-            <span id="shape-opacity-val">60%</span>
-        </div>
-        <button class="shape-add-btn" onclick="addShapeWidget()">＋ Ajouter la forme</button>
-    </div>
-
+<!-- scenes-menu intégré dans sub-affichage -->
     <!-- Panneau d'édition d'une forme existante -->
     <div id="shape-edit-panel">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -783,7 +848,7 @@
             <label style="color:#aaa;font-size:11px;">Contour :</label>
             <input type="color" id="edit-stroke-color" value="#2c3e50" onchange="applyShapeEdit()">
             <label style="color:#aaa;font-size:11px;">Épaisseur :</label>
-            <input type="range" id="edit-stroke-width" min="1" max="20" value="4" style="width:70px;cursor:pointer;" oninput="document.getElementById('edit-stroke-width-val').textContent=this.value+'px';applyShapeEdit()">
+            <input type="range" id="edit-stroke-width" min="0" max="20" value="4" style="width:70px;cursor:pointer;" oninput="document.getElementById('edit-stroke-width-val').textContent=this.value+'px';applyShapeEdit()">
             <span id="edit-stroke-width-val" style="color:#fff;font-size:11px;min-width:28px;">4px</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;">
@@ -795,63 +860,24 @@
         </div>
     </div>
 
-    <div id="draw-toolbar" style="display:none;position:fixed;bottom:80px;left:30px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:9998;border:1px solid #444;min-width:420px;">
-        <!-- Sélection du mode dessin -->
-        <div id="draw-mode-selector" style="display:flex;gap:6px;margin-bottom:10px;border-bottom:1px solid #333;padding-bottom:10px;">
-            <button id="draw-mode-free-btn" onclick="setDrawMode('free')" style="flex:1;padding:7px 8px;border-radius:8px;border:2px solid #4a90e2;background:#1a3550;color:#fff;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;">
-				✏️ Dessin libre
-			</button>
-			<button id="draw-mode-shape-btn" onclick="setDrawMode('shape')" style="flex:1;padding:7px 8px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;">
-				🔵 Formes
-			</button>
-        </div>
-        <!-- Contrôles communs -->
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-            <span style="color:#ccc;font-size:11px;">Couleur :</span>
-            <input type="color" id="draw-color" value="#e84393" style="width:32px;height:28px;border:none;cursor:pointer;background:none;">
-            <span style="color:#ccc;font-size:11px;">Épaisseur :</span>
-            <input type="range" id="draw-size" min="1" max="40" value="4" style="width:90px;cursor:pointer;">
-            <span id="draw-size-label" style="color:#fff;font-size:12px;min-width:20px;">4</span>
-            <!-- Options spécifiques à la reconnaissance de formes -->
-            <div id="shape-recog-options" style="display:none;align-items:center;gap:8px;">
-                <span style="color:#aaa;font-size:11px;">Remplissage :</span>
-                <input type="color" id="shape-recog-fill" value="#4a90e2" style="width:28px;height:24px;border:none;cursor:pointer;background:none;">
-                <span style="color:#aaa;font-size:11px;">Opacité :</span>
-                <input type="range" id="shape-recog-opacity" min="0" max="100" value="30" style="width:70px;cursor:pointer;">
-                <span id="shape-recog-opacity-val" style="color:#fff;font-size:11px;min-width:24px;">30%</span>
-            </div>
-            <button onclick="clearCanvas()" style="background:#ff4757;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️ Effacer</button>
-            <button onclick="stopDrawing()" style="background:#6c757d;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
-        </div>
-        <!-- Indicateur de mode formes -->
-        <div id="shape-recog-hint" style="display:none;margin-top:8px;padding:5px 8px;background:#1a2e1a;border-radius:6px;border:1px solid #2d5a2d;">
-            <span style="color:#7dba7d;font-size:11px;">💡 Dessinez un cercle, carré, rectangle ou triangle — la forme sera reconnue à la fin du tracé</span>
-        </div>
-    </div>
 
-    <div id="eraser-toolbar" style="display:none;position:fixed;bottom:80px;left:30px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:9998;border:1px solid #444;">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-            <span style="color:#ccc;font-size:12px;font-weight:600;">🧽 Gomme</span>
-            <span style="color:#ccc;font-size:11px;">Taille :</span>
-            <input type="range" id="eraser-size" min="5" max="80" value="20" style="width:90px;cursor:pointer;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
-            <span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:20px;">20</span>
-            <button onclick="stopEraserMode()" style="background:#6c757d;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
-        </div>
-    </div>
-
-    <div id="global-toolbar" style="position:fixed;bottom:80px;left:30px;right:30px;background:#1F1F21;border-radius:12px;display:none;padding:10px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:9998;border:1px solid #444;">
+    <div id="global-toolbar" style="position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;display:none;padding:10px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
 		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 			<span style="background:#eee; color: #111; border-radius:12px; border:2px solid rgba(255,255,255,0.5);box-sizing:border-box;font-size:18px; font-weight: bold; ">&nbsp; Outils texte 🖊️ &nbsp;</span>
+			<div style="width:1px;height:20px;background:#444;"></div>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 6px;" title="Aligner à gauche">⬅</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 6px;" title="Centrer">↔</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 6px;" title="Aligner à droite">➡</button>
 			<div style="width:1px;height:20px;background:#444;"></div>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('bold')" style="cursor:pointer;" title="Gras"><b>G</b></button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('italic')" style="cursor:pointer;" title="Italique"><i>I</i></button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('underline')" style="cursor:pointer;" title="Souligné"><u>S</u></button>
 			<span style="font-size:10px;color:#ccc;">Texte :</span>
-			<input type="color" onmousedown="savedSelection=saveCurrentSelection()" onchange="applyTextColor(this.value)" style="cursor:pointer;" title="Couleur du texte">
+			<div class="cpick-wrap" id="cpick-text-color"><div class="cpick-swatch" style="background:#000000;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('text-color',this)"></div><div class="cpick-popup" id="cpick-pop-text-color"></div></div>
 			<span style="font-size:10px;color:#ccc;">Surligner :</span>
-			<input type="color" onmousedown="savedSelection=saveCurrentSelection()" onchange="applyHighlightColor(this.value)" style="cursor:pointer;" title="Surligner" value="#ffff00">
+			<div class="cpick-wrap" id="cpick-highlight-color"><div class="cpick-swatch" style="background:#ffff00;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('highlight-color',this)"></div><div class="cpick-popup" id="cpick-pop-highlight-color"></div></div>
 			<span style="font-size:10px;color:#ccc;">Fond widget :</span>
-			<input type="color" onchange="changeWidgetBgGlobal(this,this.value)" style="cursor:pointer;" title="Fond du cadre" value="#ffffff">
+			<div class="cpick-wrap" id="cpick-widget-bg"><div class="cpick-swatch" style="background:#ffffff;border:1px solid #888;" onclick="cpickOpen('widget-bg',this)"></div><div class="cpick-popup" id="cpick-pop-widget-bg"></div></div>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="toggleTransparencyGlobal()" style="cursor:pointer;" title="Fond transparent"><span class="icon-transparency"></span></button>
 				<span style="font-size:10px;color:#ccc;">Opacité fond :</span>
 				<input type="range" id="widget-bg-opacity" min="0" max="100" value="100"
@@ -869,69 +895,209 @@
 				<option value="'OpenDyslexicLocal', sans-serif">🧩 OpenDyslexic</option>
 				<option value="'BelleAllureGS', cursive">📏 Belle Allure GS</option>
 			</select>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 6px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;">−</button>
-			<input type="number" id="font-size-input" value="40" min="8" max="100"
-				onmousedown="savedSelection=saveCurrentSelection()"
-				onkeydown="if(event.key==='Enter'){applyFontSizeOnBlur(this);this.blur();}"
-				onblur="applyFontSizeOnBlur(this)"
-				style="width:40px;text-align:center;">
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 6px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;">+</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
 			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;" ">✖</button>
 		</div>
 	</div>
 
-    <!-- Barre du bas -->
-	<div id="bottom-bar" style="position:fixed;bottom:16px;left:0;right:0;z-index:9999;pointer-events:none;display:flex;flex-direction:column;gap:8px;padding:0 16px;">
+    <!-- Bouton flottant principal -->
+	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal">＋</button>
 
-		<!-- Ligne des scènes -->
-		<div style="display:flex;align-items:center;gap:6px;pointer-events:auto;align-self:flex-start;">
+	<!-- Menu vertical -->
+	<div id="main-menu">
 
+		<!-- ══ RUBRIQUE C : Contenu ══ -->
+		<div class="mm-section mm-section-c">
+			<div class="mm-section-label">Contenu</div>
+
+			<!-- Médias -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🎞️</span>Médias<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-medias"><div class="mm-sub-inner">
+					<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
+					<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
+					<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
+				</div></div>
+			</div>
+
+			<!-- Outils -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🛠️</span>Outils<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
+				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
+				<div class="mm-sub-item" onclick="createWidget('deficalme');closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
+				</div></div>
+			</div>
+
+			<!-- Widgets -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">📦</span>Widgets<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
+				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>Date</div>
+				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>Heure</div>
+				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>Météo</div>
+				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>Devoirs</div>
+				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>Planning</div>
+				</div></div>
+			</div>
+
+			<!-- Texte -->
+			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
+				<span class="mm-ico">🖊️</span>Texte
+			</div>
 		</div>
 
-		<!-- Ligne des outils -->
-		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;">
-			<div style="display:flex;gap:10px;align-items:center;pointer-events:auto;flex-wrap:wrap;">
-				<button id="main-tool-btn" onclick="toggleMenu()" style="background:#1F1F21;color:#e8e8f0;border:1px solid #3a3a4a;border-radius:12px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1;transition:background .15s;box-sizing:border-box;" onmouseover="this.style.background='#2e2e3a'" onmouseout="this.style.background='#1F1F21'"><span style="font-size:20px;line-height:1;">📦</span>Widgets</button>
-				<button id="scenes-btn" onclick="toggleScenesMenu()" style="background:#1F1F21;color:#e8e8f0;border:1px solid #3a3a4a;border-radius:12px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1;transition:background .15s;box-sizing:border-box;" title="Scènes" onmouseover="this.style.background='#2e2e3a'" onmouseout="this.style.background='#1F1F21'"><span style="font-size:20px;line-height:1;">🗂️</span>Scènes</button>
-				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler">↩</button>
-				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire">↪</button>
-				<button id="draw-btn" class="tool-btn" onclick="toggleDrawToolbar()" title="Dessiner">✏️</button>
-				<button id="shape-btn" class="tool-btn" onclick="toggleShapeToolbar()" title="Ajouter une forme">🔲</button>
-				<button id="sticker-btn" class="tool-btn" onclick="toggleStickerPanel()" title="Emojis animés">😀</button>
-				<button id="eraser-btn" class="tool-btn" onclick="toggleEraserMode()" title="Gommer">🧽</button>
-				<button id="laser-btn" class="tool-btn" onclick="toggleLaser()" title="Pointeur laser">🔴</button>
+		<!-- ══ RUBRIQUE B : Annotation ══ -->
+		<div class="mm-section mm-section-b">
+			<div class="mm-section-label">Annotation</div>
+
+			<!-- Stickers -->
+			<div class="mm-item" id="sticker-btn" onclick="toggleStickerPanel()">
+				<span class="mm-ico">😀</span>Stickers
 			</div>
-			<div style="display:flex;gap:10px;align-items:center;pointer-events:auto;flex-wrap:wrap;">
-				<button class="tool-btn" onclick="toggleSubMenu(event)" title="Fond d'écran">🖼️</button>
-				<button class="tool-btn" onclick="exportConfig()" title="Sauvegarder">💾</button>
-				<button class="tool-btn" onclick="document.getElementById('import-input').click()" title="Charger">📂</button>
-				<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
-				<button class="tool-btn" onclick="clearBoard()" style="border-color:#3d2020;color:#ff6b6b;" title="Effacer tout">❌</button>
-				<button class="tool-btn" onclick="openHelpModal()" title="Aide">❓</button>
+
+			<!-- Formes -->
+			<div class="mm-item" id="mm-shapes-btn" onclick="openMmPanel('shapes')">
+				<span class="mm-ico">🔲</span>Formes
+			</div>
+
+			<!-- Dessin -->
+			<div class="mm-item" id="mm-draw-btn" onclick="openMmPanel('draw')">
+				<span class="mm-ico">✏️</span>Dessin
 			</div>
 		</div>
 
+		<!-- ══ RUBRIQUE A : Système ══ -->
+		<div class="mm-section mm-section-a">
+			<div class="mm-section-label">Système</div>
+
+			<!-- Affichage (flyout) -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🖥️</span>Affichage<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-affichage"><div class="mm-sub-inner">
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🗂️</span>Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
+							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène</button>
+						</div></div>
+					</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🖼️</span>Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');closeMainMenu()" title="Défaut"></div>
+								<div class="bg-thumb" style="background-color:#2f3542;" onclick="applyBackground('#2f3542');saveBg('#2f3542');closeMainMenu()" title="Ardoise"></div>
+								<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');closeMainMenu()" title="Vert Tableau"></div>
+								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
+								<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');closeMainMenu()" title="Beige"></div>
+								<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');closeMainMenu()" title="Noir"></div>
+							</div>
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');closeMainMenu()" title="Séyès (jaune paille)"></div>
+								<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');closeMainMenu()" title="Séyès (blanc)"></div>
+								<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');closeMainMenu()" title="Lignes simples"></div>
+								<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');closeMainMenu()" title="Grands carreaux"></div>
+								<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');closeMainMenu()" title="Petits carreaux"></div>
+								<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');closeMainMenu()" title="Ardoise lignes"></div>
+							</div>
+							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
+						</div></div>
+					</div>
+					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>Pointeur laser</div>
+				</div></div>
+			</div>
+
+			<!-- Fichier (flyout) -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🗄️</span>Fichier<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>Sauvegarder</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>Charger</div>
+					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
+					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>Effacer tout</div>
+				</div></div>
+			</div>
+
+			<!-- Undo / Redo / Aide -->
+			<div style="display:flex;gap:6px;padding:2px 0;">
+				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler" style="flex:1;border-radius:10px;">↩</button>
+				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire" style="flex:1;border-radius:10px;">↪</button>
+				<button class="tool-btn" onclick="openHelpModal()" title="Aide" style="font-size:14px;padding:8px 10px;">❓</button>
+			</div>
+		</div>
+
+	</div><!-- #main-menu -->
+
+	<!-- Barre outils DESSIN (horizontale, bas-gauche) -->
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+			<!-- Modes -->
+			<button id="draw-mode-free-btn" onclick="setDrawMode('free')" style="padding:6px 10px;border-radius:8px;border:2px solid #4a90e2;background:#1a3550;color:#fff;cursor:pointer;font-size:12px;font-weight:600;">✏️ Libre</button>
+			<button id="draw-mode-shape-btn" onclick="setDrawMode('shape')" style="padding:6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;">🔵 Formes</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Couleur & taille -->
+			<span style="color:#ccc;font-size:11px;">Couleur</span>
+			<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
+			<span style="color:#ccc;font-size:11px;">Taille</span>
+			<input type="range" id="draw-size" min="1" max="40" value="4" style="width:90px;cursor:pointer;">
+			<span id="draw-size-label" style="color:#fff;font-size:12px;min-width:18px;">4</span>
+			<!-- Options reconnaissance -->
+			<div id="shape-recog-options" style="display:none;align-items:center;gap:8px;">
+				<span style="color:#aaa;font-size:11px;">Remplissage</span>
+				<div class="cpick-wrap" id="cpick-shape-recog-fill"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-recog-fill',this)"></div><div class="cpick-popup" id="cpick-pop-shape-recog-fill"></div></div>
+				<span style="color:#aaa;font-size:11px;">Opacité</span>
+				<input type="range" id="shape-recog-opacity" min="0" max="100" value="30" style="width:70px;cursor:pointer;">
+				<span id="shape-recog-opacity-val" style="color:#fff;font-size:11px;min-width:24px;">30%</span>
+			</div>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Gomme -->
+			<span style="color:#ccc;font-size:11px;">🧽</span>
+			<input type="range" id="eraser-size" min="5" max="80" value="20" style="width:70px;cursor:pointer;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
+			<span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:18px;">20</span>
+			<button id="eraser-btn" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Actions -->
+			<button onclick="clearCanvas()" style="background:#3d1515;color:#ff6b6b;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️ Effacer</button>
+			<button onclick="stopDrawing()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+		</div>
+		<div id="shape-recog-hint" style="display:none;margin-top:8px;padding:5px 8px;background:#1a2e1a;border-radius:6px;border:1px solid #2d5a2d;">
+			<span style="color:#7dba7d;font-size:11px;">💡 Dessinez un cercle, carré, rectangle ou triangle — la forme sera reconnue</span>
+		</div>
 	</div>
 
-	<div id="bg-submenu">
-		<div id="bg-submenu-title">🖼️ Fond d'écran</div>
-		<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');document.getElementById('bg-submenu').classList.remove('active')" title="Défaut"></div>
-		<div class="bg-thumb" style="background-color:#2f3542;" onclick="applyBackground('#2f3542');saveBg('#2f3542');document.getElementById('bg-submenu').classList.remove('active')" title="Ardoise"></div>
-		<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');document.getElementById('bg-submenu').classList.remove('active')" title="Vert Tableau"></div>
-		<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');document.getElementById('bg-submenu').classList.remove('active')" title="Vieux rose"></div>
-		<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');document.getElementById('bg-submenu').classList.remove('active')" title="Beige"></div>
-		<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');document.getElementById('bg-submenu').classList.remove('active')" title="Noir"></div>
-		<!-- Séparateur Séyès -->
-		<div style="grid-column:span 3;border-top:1px solid #3a3a3f;margin:4px 0;padding-top:6px;color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">📏 Réglures</div>
-		<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');document.getElementById('bg-submenu').classList.remove('active')" title="Séyès (jaune paille)"></div>
-		<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');document.getElementById('bg-submenu').classList.remove('active')" title="Séyès (blanc)"></div>
-		<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');document.getElementById('bg-submenu').classList.remove('active')" title="Lignes simples"></div>
-		<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');document.getElementById('bg-submenu').classList.remove('active')" title="Grands carreaux"></div>
-		<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');document.getElementById('bg-submenu').classList.remove('active')" title="Petits carreaux"></div>
-		<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');document.getElementById('bg-submenu').classList.remove('active')" title="Ardoise lignes"></div>
-		<button id="bg-submenu-import" onclick="document.getElementById('bg-upload').click();document.getElementById('bg-submenu').classList.remove('active')">📷 Importer image</button>
+	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
+	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+			<div class="shape-grid" id="shape-grid" style="display:flex;gap:6px;flex-wrap:nowrap;"></div>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<span style="color:#ccc;font-size:11px;">Contour</span>
+			<div class="cpick-wrap" id="cpick-shape-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;" onclick="cpickOpen('shape-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-stroke-color"></div></div>
+			<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:60px;cursor:pointer;">
+			<span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:18px;">4</span>
+			<span style="color:#ccc;font-size:11px;">Fond</span>
+			<div class="cpick-wrap" id="cpick-shape-fill-color"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-fill-color"></div></div>
+			<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:60px;cursor:pointer;">
+			<span id="shape-opacity-val" style="color:#fff;font-size:11px;min-width:18px;">60%</span>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Gomme -->
+			<span style="color:#ccc;font-size:11px;">🧽</span>
+			<button id="eraser-btn-shapes" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<button onclick="stopShapeToolbar()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+		</div>
 	</div>
 
+
+	<!-- Ancien bottom-bar réduit à néant (undo/redo maintenant dans le menu) -->
+	<div id="bottom-bar" style="position:fixed;bottom:16px;left:0;right:0;z-index:13000;pointer-events:none;display:flex;flex-direction:column;gap:8px;padding:0 16px;">
+	</div>
+
+	<!-- bg-submenu intégré dans sous-menu Affichage -->
 </div><!-- fin #toolbar-container -->
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
@@ -1427,25 +1593,8 @@
         </div>
     </div>
 </template>
-<template id="template-date">
-    <div class="editor-container" style="width:220px;height:260px;overflow:hidden;">
-        <div class="calendar-page" style="font-size:16px;">
-            <div class="calendar-header"></div>
-            <div class="calendar-body">
-                <div class="calendar-day-name"></div>
-                <div class="calendar-day-number"></div>
-                <div class="calendar-month"></div>
-            </div>
-        </div>
-    </div>
-</template>
-<template id="template-time">
-    <div class="editor-container" style="width:200px;height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:none;">
-        <div class="clock-time" style="font-size:32px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box;">
-            <span class="clock-hm">00:00</span><span class="clock-seconds">00</span>
-        </div>
-    </div>
-</template>
+<!-- template-date → widgets-datetime.js -->
+<!-- template-time → widgets-datetime.js -->
 <template id="template-iframe">
     <div class="editor-container" style="height:400px;width:550px;">
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
@@ -1510,19 +1659,7 @@
         <iframe src="https://outilsprofs.fr/lebureauduprof/deficalme.html" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
     </div>
 </template>
-<template id="template-meteo">
-    <div class="editor-container meteo-container" style="width:280px;height:200px;background:linear-gradient(135deg,#1a6fa8,#38b6e8);border-radius:16px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;box-sizing:border-box;color:white;overflow:hidden;">
-        <div class="meteo-city" style="font-size:13px;font-weight:600;opacity:0.85;cursor:pointer;text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:6px;width:100%;" title="Cliquer pour changer de ville">📍 <span class="meteo-city-name">Chargement...</span></div>
-        <div class="meteo-icon" style="font-size:52px;line-height:1;margin:4px 0;">⛅</div>
-        <div class="meteo-temp" style="font-size:36px;font-weight:800;line-height:1;">--°</div>
-        <div class="meteo-desc" style="font-size:13px;opacity:0.9;text-align:center;">--</div>
-        <div class="meteo-details" style="font-size:11px;opacity:0.75;display:flex;gap:12px;margin-top:2px;">
-            <span class="meteo-wind">💨 --</span>
-            <span class="meteo-humidity">💧 --</span>
-        </div>
-        <div class="meteo-updated" style="font-size:9px;opacity:0.5;margin-top:2px;">--</div>
-    </div>
-</template>
+<!-- template-meteo → widgets-meteo.js -->
 <template id="template-pdf">
     <div class="editor-container" style="height:500px;width:600px;">
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
@@ -1607,9 +1744,9 @@
 // =========================================================================
 // VARIABLES GLOBALES
 // =========================================================================
-let board = document.getElementById('board');
-let undoStack = [], redoStack = [];
-const MAX_UNDO = 60;
+var board = document.getElementById('board');
+var undoStack = [], redoStack = [];
+var MAX_UNDO = 60;
 let isInitialLoading = true;
 let isRestoringState = false;
 let _pendingSnapshotTimer = null;
@@ -2216,6 +2353,10 @@ function confirmClearBoard() {
     snapshotNow();
     document.querySelectorAll('.widget').forEach(w => w.remove());
     document.querySelectorAll('.shape-widget').forEach(w => w.remove());
+    // Effacer aussi les traits de dessin
+    if (typeof strokes !== 'undefined') strokes = [];
+    if (typeof selectedStrokes !== 'undefined') selectedStrokes = [];
+    if (typeof redrawStrokes === 'function') redrawStrokes();
     saveBoard(); closeModal();
 }
 
@@ -2229,17 +2370,16 @@ function openHelpModal() {
 // =========================================================================
 // MODE PRÉSENTATION
 // =========================================================================
-let _presentationActive = false;
+var _presentationActive = false;
 
 function togglePresentationMode() {
     const btn = document.getElementById('presentation-btn');
-    const UI_IDS = ['bottom-bar','toolbar-container','draw-toolbar','eraser-toolbar','global-toolbar','shape-toolbar','bg-submenu','scenes-menu','modal-overlay','help-modal-overlay','rotation-indicator'];
+    const UI_IDS = ['bottom-bar','toolbar-container','mm-panel','main-menu','global-toolbar','scenes-menu','modal-overlay','help-modal-overlay','rotation-indicator'];
 
     _presentationActive = !_presentationActive;
     if (_presentationActive) {
-        document.getElementById('tools-menu')?.classList.remove('active');
-        document.getElementById('bg-submenu')?.classList.remove('active');
-        document.getElementById('shape-toolbar')?.classList.remove('active');
+        if (typeof closeMainMenu === 'function') closeMainMenu();
+        // shape-toolbar removed
         document.querySelectorAll('.widget.selected, .shape-widget.selected').forEach(w => w.classList.remove('selected'));
         document.getElementById('selection-controls') && (document.getElementById('selection-controls').style.display = 'none');
         document.activeElement?.blur();
@@ -2316,29 +2456,7 @@ function helpShow(item) {
 
 function closeHelpModal() { document.getElementById('help-modal-overlay').style.display = 'none'; }
 
-// =========================================================================
-// HORLOGE / DATE
-// =========================================================================
-function updateClock() {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-    const timeStr = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-    document.querySelectorAll('.agenda-current-date').forEach(el => el.textContent = dateStr);
-    document.querySelectorAll('.agenda-current-time').forEach(el => el.textContent = timeStr);
-    updateDateTime();
-}
-function updateDateTime() {
-    const now = new Date();
-    const days   = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-    const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-    document.querySelectorAll('.calendar-day-name').forEach(el   => el.textContent = days[now.getDay()]);
-    document.querySelectorAll('.calendar-day-number').forEach(el => el.textContent = now.getDate());
-    document.querySelectorAll('.calendar-month').forEach(el      => el.textContent = months[now.getMonth()]);
-    const hh = String(now.getHours()).padStart(2,'0'), mm = String(now.getMinutes()).padStart(2,'0'), ss = String(now.getSeconds()).padStart(2,'0');
-    document.querySelectorAll('.clock-hm').forEach(el      => el.textContent = ` ${hh}:${mm} `);
-    document.querySelectorAll('.clock-seconds').forEach(el => el.textContent = ss);
-}
-
+// updateClock / updateDateTime → widgets-datetime.js
 // =========================================================================
 // WIDGETS
 // =========================================================================
@@ -2530,135 +2648,60 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
 	if (type === 'text' || type === 'homework') {
 		const editor = widget.querySelector('.editor-content');
 		if (editor) {
+			// Départ : mode déplacement
 			editor.contentEditable = 'false';
 			editor.style.cursor = 'grab';
 			editor.style.userSelect = 'none';
 		}
 		widget.style.cursor = 'grab';
-		// Remettre grab quand on quitte l'édition (clic ailleurs)
+
+		function _enterEditMode() {
+			const ed = widget.querySelector('.editor-content');
+			if (!ed) return;
+			ed.contentEditable = 'true';
+			ed.style.cursor = 'text';
+			ed.style.userSelect = 'auto';
+			widget.style.cursor = 'text';
+			ed.focus();
+		}
+		function _exitEditMode() {
+			const ed = widget.querySelector('.editor-content');
+			if (!ed) return;
+			ed.contentEditable = 'false';
+			ed.style.cursor = 'grab';
+			ed.style.userSelect = 'none';
+			widget.style.cursor = 'grab';
+		}
+		// Sortir du mode édition au clic en dehors
 		document.addEventListener('mousedown', function onOutsideClick(ev) {
-			if (!widget.contains(ev.target)) {
-				// Ne pas sortir du mode édition si on clique sur la toolbar de formatage
-				if (ev.target.closest('#global-toolbar')) return;
-				const ed = widget.querySelector('.editor-content');
-				if (ed) {
-					ed.contentEditable = 'false';
-					ed.style.cursor = 'grab';
-					ed.style.userSelect = 'none';
-				}
-				widget.style.cursor = 'grab';
-			}
+			if (widget.contains(ev.target)) return;
+			if (ev.target.closest('#global-toolbar')) return;
+			if (ev.target.closest('.cpick-popup')) return;
+			if (ev.target.closest('.cpick-wrap')) return;
+			_exitEditMode();
 		});
+		// Double-clic → entrer en mode édition + ouvrir toolbar
+		widget._enterEditMode = _enterEditMode;
 	}
-	if (type === 'time') {
-		const container = widget.querySelector('.editor-container');
-		const clockTime = widget.querySelector('.clock-time');
-		if (container && clockTime) {
-			const resizeObserver = new ResizeObserver(() => {
-				// Adapter la taille de police à la hauteur du conteneur
-				const h = container.offsetHeight;
-				const w = container.offsetWidth;
-				// La taille de police = ~55% de la hauteur, limitée par la largeur
-				const sizeByH = Math.floor(h * 0.55);
-				const sizeByW = Math.floor(w * 0.28);
-				const size = Math.max(12, Math.min(sizeByH, sizeByW));
-				clockTime.style.fontSize = size + 'px';
-				// Les secondes restent proportionnellement plus petites
-				const sec = widget.querySelector('.clock-seconds');
-				if (sec) sec.style.fontSize = Math.floor(size * 0.45) + 'px';
-			});
-			resizeObserver.observe(container);
-			// Poignée custom pour éviter le bug du resizer natif
-			container.style.resize = 'none';
-			const resizeHandle = document.createElement('div');
-			resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,#aaa 50%);border-radius:0 0 4px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
-			widget.appendChild(resizeHandle);
-			// Bouton transparence
-			const transpBtn = document.createElement('button');
-			transpBtn.title = 'Fond transparent';
-			transpBtn.style.cssText = 'position:absolute;top:4px;right:30px;background:rgba(255,255,255,0.8);border:1px solid #ddd;border-radius:4px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:10;padding:0;';
-			transpBtn.innerHTML = '<span class="icon-transparency"></span>';
-			transpBtn.addEventListener('click', () => {
-				snapshotNow();
-				applyTransparency(widget, widget.dataset.transparent !== 'true');
-				saveBoard();
-			});
-			widget.appendChild(transpBtn);
-			widget.addEventListener('mouseenter', () => transpBtn.style.opacity = '1');
-			widget.addEventListener('mouseleave', () => transpBtn.style.opacity = '0');
-			widget.addEventListener('mouseenter', () => resizeHandle.style.opacity = '1');
-			widget.addEventListener('mouseleave', () => resizeHandle.style.opacity = '0');
-
-			resizeHandle.addEventListener('mousedown', (e) => {
-				e.preventDefault(); e.stopPropagation();
-				const startX = e.clientX, startY = e.clientY;
-				const startW = container.offsetWidth, startH = container.offsetHeight;
-				document.onmousemove = (ev) => {
-					container.style.width  = Math.max(100, startW + ev.clientX - startX) + 'px';
-					container.style.height = Math.max(60,  startH + ev.clientY - startY) + 'px';
-				};
-				document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-			});
-		}
-	}
-	if (type === 'date') {
-		const container = widget.querySelector('.editor-container');
-		const dayName   = widget.querySelector('.calendar-day-name');
-		const dayNumber = widget.querySelector('.calendar-day-number');
-		const month     = widget.querySelector('.calendar-month');
-		const header    = widget.querySelector('.calendar-header');
-		if (container) {
-			const resizeObserver = new ResizeObserver(() => {
-				const h = container.offsetHeight;
-				const w = container.offsetWidth;
-				// Header = 20% de la hauteur
-				if (header) header.style.height = Math.floor(h * 0.20) + 'px';
-				// Tailles de police proportionnelles
-				const baseSize = Math.min(w, h) * 0.10;
-				if (dayName)   dayName.style.fontSize   = Math.max(8,  Math.floor(baseSize * 0.75)) + 'px';
-				if (dayNumber) dayNumber.style.fontSize = Math.max(16, Math.floor(baseSize * 2.2))  + 'px';
-				if (month)     month.style.fontSize     = Math.max(8,  Math.floor(baseSize * 0.95)) + 'px';
-			});
-			resizeObserver.observe(container);
-			// Poignée custom
-			const resizeHandle = document.createElement('div');
-			resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,#aaa 50%);border-radius:0 0 4px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
-			widget.appendChild(resizeHandle);
-			widget.addEventListener('mouseenter', () => resizeHandle.style.opacity = '1');
-			widget.addEventListener('mouseleave', () => resizeHandle.style.opacity = '0');
-
-			resizeHandle.addEventListener('mousedown', (e) => {
-				e.preventDefault(); e.stopPropagation();
-				const startX = e.clientX, startY = e.clientY;
-				const startW = container.offsetWidth, startH = container.offsetHeight;
-				document.onmousemove = (ev) => {
-					container.style.width  = Math.max(150, startW + ev.clientX - startX) + 'px';
-					container.style.height = Math.max(180, startH + ev.clientY - startY) + 'px';
-				};
-				document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-			});
-
-			// Bouton transparence
-			const transpBtn = document.createElement('button');
-			transpBtn.title = 'Fond transparent';
-			transpBtn.style.cssText = 'position:absolute;top:4px;right:30px;background:rgba(255,255,255,0.8);border:1px solid #ddd;border-radius:4px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:10;padding:0;';
-			transpBtn.innerHTML = '<span class="icon-transparency"></span>';
-			transpBtn.addEventListener('click', () => {
-				snapshotNow();
-				applyTransparency(widget, widget.dataset.transparent !== 'true');
-				saveBoard();
-			});
-			widget.appendChild(transpBtn);
-			widget.addEventListener('mouseenter', () => transpBtn.style.opacity = '1');
-			widget.addEventListener('mouseleave', () => transpBtn.style.opacity = '0');
-		}
-	}
-	if (type === 'meteo') {
-		initMeteoWidget(widget);
-	}
+	if (type === 'time')  { if (typeof initTimeWidget  === 'function') initTimeWidget(widget); }
+	if (type === 'date')  { if (typeof initDateWidget  === 'function') initDateWidget(widget); }
+	if (type === 'meteo') { if (typeof initMeteoWidget === 'function') initMeteoWidget(widget); }
     if (editor) {
-        editor.addEventListener('mouseup', () => { syncFontSize(widget); syncFontSizeGlobal(); });
-		editor.addEventListener('keyup',   () => { syncFontSize(widget); syncFontSizeGlobal(); });
+        editor.addEventListener('mouseup', () => {
+            // sync seulement si on est en mode édition (contentEditable=true)
+            if (editor.contentEditable === 'true') { syncFontSize(widget); syncFontSizeGlobal(); }
+        });
+		editor.addEventListener('keyup', () => {
+			if (editor.contentEditable === 'true') { syncFontSize(widget); syncFontSizeGlobal(); }
+		});
+		// Focus + toolbar : uniquement si création explicite depuis le menu
+		if (window._nextTextOpenCreate && !isInitialLoading && !isRestoringState) {
+			window._nextTextOpenCreate = false;
+			setTimeout(() => {
+				if (widget._enterEditMode) widget._enterEditMode();
+				openTextToolbar(widget);
+			}, 30);
+		}
     }
     // Ne pas scaler ici si on est en cours de chargement/restauration :
     // scaleFontSizesFromRef sera appelé après coup avec les bonnes valeurs.
@@ -2800,151 +2843,7 @@ function showPromptModal(icon, title, subtitle, defaultValue = '', placeholder =
     });
 }
 
-const WMO_CODES = {
-    0:'Ciel dégagé',1:'Principalement dégagé',2:'Partiellement nuageux',3:'Couvert',
-    45:'Brouillard',48:'Brouillard givrant',
-    51:'Bruine légère',53:'Bruine modérée',55:'Bruine dense',
-    61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',
-    71:'Neige légère',73:'Neige modérée',75:'Neige forte',77:'Grains de neige',
-    80:'Averses légères',81:'Averses modérées',82:'Averses violentes',
-    85:'Averses de neige',86:'Averses de neige fortes',
-    95:'Orage',96:'Orage avec grêle',99:'Orage violent avec grêle'
-};
-const WMO_ICONS = {
-    0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
-    45:'🌫️',48:'🌫️',
-    51:'🌦️',53:'🌦️',55:'🌧️',
-    61:'🌧️',63:'🌧️',65:'🌧️',
-    71:'❄️',73:'❄️',75:'❄️',77:'🌨️',
-    80:'🌦️',81:'🌧️',82:'⛈️',
-    85:'🌨️',86:'🌨️',
-    95:'⛈️',96:'⛈️',99:'⛈️'
-};
-const WMO_BG = {
-    0:'linear-gradient(135deg,#f7971e,#ffd200)',
-    1:'linear-gradient(135deg,#56ccf2,#2f80ed)',
-    2:'linear-gradient(135deg,#4facfe,#6c8ce4)',
-    3:'linear-gradient(135deg,#757f9a,#d7dde8)',
-    45:'linear-gradient(135deg,#8e9eab,#c3cfe2)',48:'linear-gradient(135deg,#8e9eab,#c3cfe2)',
-    61:'linear-gradient(135deg,#1a6fa8,#38b6e8)',63:'linear-gradient(135deg,#1a6fa8,#38b6e8)',65:'linear-gradient(135deg,#0f4c75,#1b6ca8)',
-    71:'linear-gradient(135deg,#a8c0ff,#e0eafc)',73:'linear-gradient(135deg,#a8c0ff,#e0eafc)',75:'linear-gradient(135deg,#a8c0ff,#e0eafc)',
-    80:'linear-gradient(135deg,#1a6fa8,#38b6e8)',81:'linear-gradient(135deg,#1a6fa8,#38b6e8)',82:'linear-gradient(135deg,#0f4c75,#1b6ca8)',
-    95:'linear-gradient(135deg,#373b44,#4286f4)',96:'linear-gradient(135deg,#373b44,#4286f4)',99:'linear-gradient(135deg,#373b44,#4286f4)',
-};
-
-async function fetchMeteo(city) {
-    // 1. Géocodage via Open-Meteo geocoding API
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=fr&format=json`);
-    const geoData = await geoRes.json();
-    if (!geoData.results?.length) throw new Error('Ville introuvable');
-    const { latitude, longitude, name, country } = geoData.results[0];
-    // 2. Météo actuelle
-    const metRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&wind_speed_unit=kmh&timezone=auto`);
-    const metData = await metRes.json();
-    const c = metData.current;
-    return { name, country, temp: Math.round(c.temperature_2m), code: c.weathercode, wind: Math.round(c.windspeed_10m), humidity: c.relativehumidity_2m };
-}
-
-function initMeteoWidget(widget) {
-    const container = widget.querySelector('.meteo-container');
-    const cityNameEl = widget.querySelector('.meteo-city-name');
-    const iconEl     = widget.querySelector('.meteo-icon');
-    const tempEl     = widget.querySelector('.meteo-temp');
-    const descEl     = widget.querySelector('.meteo-desc');
-    const windEl     = widget.querySelector('.meteo-wind');
-    const humEl      = widget.querySelector('.meteo-humidity');
-    const updEl      = widget.querySelector('.meteo-updated');
-
-    // --- POIGNÉE DE REDIMENSIONNEMENT ---
-    const resizeHandle = document.createElement('div');
-    resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,0.4) 50%);border-radius:0 0 14px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
-    widget.appendChild(resizeHandle);
-    widget.addEventListener('mouseenter', () => resizeHandle.style.opacity = '1');
-    widget.addEventListener('mouseleave', () => resizeHandle.style.opacity = '0');
-
-    resizeHandle.addEventListener('mousedown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const startX = e.clientX, startY = e.clientY;
-        const startW = container.offsetWidth, startH = container.offsetHeight;
-        document.onmousemove = (ev) => {
-            const newW = Math.max(180, startW + ev.clientX - startX);
-            const newH = Math.max(140, startH + ev.clientY - startY);
-            container.style.width  = newW + 'px';
-            container.style.height = newH + 'px';
-            adaptMeteoFontSizes(container, newW, newH);
-        };
-        document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-    });
-
-    // Adapter les tailles de police au conteneur
-    function adaptMeteoFontSizes(c, w, h) {
-        const scale = Math.min(w / 280, h / 200);
-        iconEl.style.fontSize     = Math.round(52 * scale) + 'px';
-        tempEl.style.fontSize     = Math.round(36 * scale) + 'px';
-        descEl.style.fontSize     = Math.round(13 * scale) + 'px';
-        windEl.parentElement.style.fontSize = Math.round(11 * scale) + 'px';
-        cityNameEl.style.fontSize = Math.round(13 * scale) + 'px';
-        updEl.style.fontSize      = Math.round(9  * scale) + 'px';
-    }
-
-    // Observer les changements de taille
-    new ResizeObserver(() => {
-        adaptMeteoFontSizes(container, container.offsetWidth, container.offsetHeight);
-    }).observe(container);
-
-    // --- MODALE PERSONNALISÉE ---
-
-    let city = widget.dataset.meteoCity || '';
-
-    function applyMeteo(data) {
-        const code = data.code;
-        cityNameEl.textContent = `${data.name}, ${data.country}`;
-        iconEl.textContent  = WMO_ICONS[code] || '🌡️';
-        tempEl.textContent  = `${data.temp}°`;
-        descEl.textContent  = WMO_CODES[code] || '';
-        windEl.textContent  = `💨 ${data.wind} km/h`;
-        humEl.textContent   = `💧 ${data.humidity}%`;
-        updEl.textContent   = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-        container.style.background = WMO_BG[code] || WMO_BG[2];
-        const lightBg = [71,73,75,3];
-        container.style.color = lightBg.includes(code) ? '#222' : 'white';
-    }
-
-    async function loadCity(c) {
-        cityNameEl.textContent = 'Chargement...';
-        iconEl.textContent = '⏳'; tempEl.textContent = ''; descEl.textContent = '';
-        try {
-            const data = await fetchMeteo(c);
-            widget.dataset.meteoCity = c;
-            applyMeteo(data);
-            saveBoard();
-        } catch(e) {
-            cityNameEl.textContent = 'Ville introuvable';
-            iconEl.textContent = '❓'; tempEl.textContent = ''; descEl.textContent = '';
-        }
-    }
-
-    widget.querySelector('.meteo-city').addEventListener('click', () => {
-        showPromptModal('⛅', 'Widget Météo', 'Entrez la ville de votre école', widget.dataset.meteoCity || '', 'Ex : Paris, Lyon, Grenoble...')
-            .then(newCity => { if (newCity) loadCity(newCity); });
-    });
-
-    function scheduleRefresh() {
-        setTimeout(() => {
-            if (widget.isConnected && widget.dataset.meteoCity) loadCity(widget.dataset.meteoCity).then(scheduleRefresh);
-        }, 10 * 60 * 1000);
-    }
-
-    if (city) {
-        loadCity(city).then(scheduleRefresh);
-    } else {
-        setTimeout(() => {
-            showPromptModal('⛅', 'Widget Météo', 'Entrez la ville de votre école', '', 'Ex : Paris, Lyon, Grenoble...')
-                .then(newCity => { if (newCity) loadCity(newCity).then(scheduleRefresh); });
-        }, 200);
-    }
-}
-
+// WMO_CODES + fetchMeteo + initMeteoWidget → widgets-meteo.js
 function attachAgendaItemEvents(item) {
     item.querySelectorAll('[contenteditable="true"]').forEach(el => {
         el.addEventListener('mouseenter', () => item.draggable = false);
@@ -2997,18 +2896,25 @@ function makeDraggable(elmnt) {
             elmnt._dragPending = null;
             const editor = elmnt.querySelector('.editor-content');
             if (editor) {
-                // Si déjà en mode édition, laisser le navigateur gérer nativement (sélection de mot, etc.)
-                if (editor.contentEditable === 'true') return;
-                editor.contentEditable = 'true';
-                editor.style.cursor = 'text';
-                editor.style.userSelect = 'auto';
-                elmnt.style.cursor = 'text';
-                editor.focus();
+                if (elmnt._enterEditMode) elmnt._enterEditMode();
+                else {
+                    if (editor.contentEditable !== 'true') {
+                        editor.contentEditable = 'true';
+                        editor.style.cursor = 'text';
+                        editor.style.userSelect = 'auto';
+                        elmnt.style.cursor = 'text';
+                    }
+                    editor.focus();
+                }
                 const range = document.caretRangeFromPoint(e.clientX, e.clientY);
                 if (range) {
                     const sel = window.getSelection();
                     sel.removeAllRanges();
                     sel.addRange(range);
+                }
+                // Ouvrir toolbar texte au double-clic
+                if (elmnt.dataset.type === 'text' || elmnt.dataset.type === 'homework') {
+                    openTextToolbar(elmnt);
                 }
             }
         });
@@ -3168,319 +3074,6 @@ function getCurrentRotation(widget) {
     return m ? parseFloat(m[1]) : 0;
 }
 
-// =========================================================================
-// FORMES GÉOMÉTRIQUES
-// =========================================================================
-const SHAPES = [
-    { id: 'circle',        label: 'Cercle',         svg: (w,h,sw,f,o) => `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2-sw/2}" ry="${h/2-sw/2}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'square',        label: 'Carré',           svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'rectangle',     label: 'Rectangle',       svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'diamond',       label: 'Losange',         svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h/2} ${w/2},${h-sw} ${sw},${h/2}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'parallelogram', label: 'Parallélogramme', svg: (w,h,sw,f,o) => `<polygon points="${w*0.25},${sw} ${w-sw},${sw} ${w*0.75},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'line',          label: 'Ligne',           svg: (w,h,sw,f,o) => `<line x1="${sw}" y1="${h/2}" x2="${w-sw}" y2="${h/2}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>` },
-    { id: 'arrow',         label: 'Flèche',          svg: (w,h,sw,f,o) => `<polygon points="${sw},${h*0.35} ${w*0.6},${h*0.35} ${w*0.6},${sw} ${w-sw},${h/2} ${w*0.6},${h-sw} ${w*0.6},${h*0.65} ${sw},${h*0.65}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'triangle',      label: 'Triangle',        svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
-];
-
-let selectedShapeId = 'circle';
-
-function buildShapeSVG(shapeId, w, h, strokeColor, fillColor, fillOpacity, strokeWidth) {
-    const sw = strokeWidth || 4;
-    const shape = SHAPES.find(s => s.id === shapeId);
-    if (!shape) return '';
-    let raw = shape.svg(w, h, sw, fillColor, fillOpacity);
-    raw = raw.replace(/stroke="(\d+(?:\.\d+)?)"/g, `stroke="${strokeColor}"`);
-    raw = raw.replace(/stroke="STROKECOLOR"/g, `stroke="${strokeColor}"`);
-    return raw;
-}
-
-function initShapeToolbar() {
-    const grid = document.getElementById('shape-grid');
-    if (!grid) return;
-    SHAPES.forEach(s => {
-        const btn = document.createElement('div');
-        btn.className = 'shape-choice' + (s.id === selectedShapeId ? ' active' : '');
-        btn.dataset.id = s.id;
-        btn.title = s.label;
-        const previewSVG = `<svg width="28" height="28" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">${buildShapeSVG(s.id, 40, 40, '#ffffff', '#ffffff', 0.5)}</svg>`;
-        btn.innerHTML = previewSVG + `<span class="shape-choice-label">${s.label}</span>`;
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.shape-choice').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            selectedShapeId = s.id;
-        });
-        grid.appendChild(btn);
-    });
-    document.getElementById('shape-opacity-slider').addEventListener('input', function() {
-        document.getElementById('shape-opacity-val').textContent = this.value + '%';
-    });
-    document.getElementById('shape-stroke-width').addEventListener('input', function() {
-        document.getElementById('shape-stroke-width-val').textContent = this.value;
-    });
-}
-
-let editingShapeWidget = null;
-
-function openShapeEditPanel(widget) {
-    editingShapeWidget = widget;
-    const panel = document.getElementById('shape-edit-panel');
-    document.getElementById('edit-stroke-color').value = widget.dataset.strokeColor || '#2c3e50';
-    document.getElementById('edit-fill-color').value   = widget.dataset.fillColor   || '#4a90e2';
-    const opPct = Math.round(parseFloat(widget.dataset.fillOpacity || 0.6) * 100);
-    document.getElementById('edit-fill-opacity').value = opPct;
-    document.getElementById('edit-fill-opacity-val').textContent = opPct + '%';
-    const sw = parseInt(widget.dataset.strokeWidth || 4);
-    document.getElementById('edit-stroke-width').value = sw;
-    document.getElementById('edit-stroke-width-val').textContent = sw + 'px';
-    const br = widget.getBoundingClientRect();
-    panel.style.left = Math.min(br.right + 10, window.innerWidth - 320) + 'px';
-    panel.style.top  = Math.max(10, br.top) + 'px';
-    panel.style.display = 'block';
-}
-
-function closeShapeEditPanel() {
-    const panel = document.getElementById('shape-edit-panel');
-    if (panel) panel.style.display = 'none';
-    editingShapeWidget = null;
-}
-
-function applyShapeEdit() {
-    if (!editingShapeWidget) return;
-    const sc = document.getElementById('edit-stroke-color').value;
-    const fc = document.getElementById('edit-fill-color').value;
-    const fo = parseFloat(document.getElementById('edit-fill-opacity').value) / 100;
-    const sw = parseInt(document.getElementById('edit-stroke-width').value);
-    const svg = editingShapeWidget.querySelector('svg');
-    if (!svg) return;
-    const w = parseFloat(svg.getAttribute('width'));
-    const h = parseFloat(svg.getAttribute('height'));
-    editingShapeWidget.dataset.strokeColor = sc;
-    editingShapeWidget.dataset.fillColor   = fc;
-    editingShapeWidget.dataset.fillOpacity = fo;
-    editingShapeWidget.dataset.strokeWidth = sw;
-    svg.innerHTML = buildShapeSVG(editingShapeWidget.dataset.shapeType, w, h, sc, fc, fo, sw);
-    saveBoard();
-}
-
-function cloneShapeWidget(widget) {
-    snapshotNow();
-    const svg = widget.querySelector('svg');
-    const sw = parseFloat(svg.getAttribute('width') || 150);
-    const sh = parseFloat(svg.getAttribute('height') || 150);
-    const newW = createShapeWidget(
-        widget.dataset.shapeType, widget.dataset.strokeColor, widget.dataset.fillColor,
-        parseFloat(widget.dataset.fillOpacity), sw, sh,
-        (widget.offsetLeft + 30) + 'px', (widget.offsetTop + 30) + 'px', true,
-        parseInt(widget.dataset.strokeWidth || 4)
-    );
-    const rot = getCurrentRotation(widget);
-    if (rot) newW.style.transform = `rotate(${rot}deg)`;
-}
-
-function toggleShapeToolbar() {
-    const tb = document.getElementById('shape-toolbar');
-    const btn = document.getElementById('shape-btn');
-    const isActive = tb.classList.toggle('active');
-    btn.classList.toggle('active-tool', isActive);
-    if (isActive) {
-        stopDrawing();
-        document.getElementById('global-toolbar').style.display = 'none';
-        document.getElementById('tools-menu').classList.remove('active');
-    }
-}
-
-function addShapeWidget() {
-    const strokeColor = document.getElementById('shape-stroke-color').value;
-    const fillColor   = document.getElementById('shape-fill-color').value;
-    const fillOpacity = parseFloat(document.getElementById('shape-opacity-slider').value) / 100;
-    const strokeWidth = parseInt(document.getElementById('shape-stroke-width').value);
-    snapshotNow();
-    const p = findFreePosition();
-    const isLine = (selectedShapeId === 'line');
-    const defaultW = isLine ? Math.min(window.innerWidth * 0.18, 280) : Math.min(window.innerWidth * 0.12, 180);
-    const defaultH = isLine ? 20 : defaultW;
-    createShapeWidget(selectedShapeId, strokeColor, fillColor, fillOpacity, defaultW, defaultH, p.x + 'px', p.y + 'px', true, strokeWidth);
-    document.getElementById('shape-toolbar').classList.remove('active');
-    document.getElementById('shape-btn').classList.remove('active-tool');
-}
-
-function createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity, svgW, svgH, x, y, doSave = true, strokeWidth = 4) {
-    const widget = document.createElement('div');
-    widget.className = 'shape-widget';
-    widget.dataset.shapeType   = shapeId;
-    widget.dataset.strokeColor = strokeColor;
-    widget.dataset.fillColor   = fillColor;
-    widget.dataset.fillOpacity = fillOpacity;
-    widget.dataset.strokeWidth = strokeWidth;
-    widget.style.left = x; widget.style.top = y;
-    widget.tabIndex = 0;
-    widgetZCounter++;
-    widget.style.zIndex = widgetZCounter;
-
-    const svgContent = buildShapeSVG(shapeId, svgW, svgH, strokeColor, fillColor, fillOpacity, strokeWidth);
-
-    widget.innerHTML = `
-        <div class="drag-handle" title="Déplacer">✥</div>
-        <div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-        <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget, .shape-widget'))" title="Épingler">📌</div>
-        <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget, .shape-widget'))" title="Envoyer derrière">🔽</div>
-        <div class="widget-menu-handle" onclick="toggleCtxMenu(this)" title="Menu">☰</div>
-        <div class="widget-close-handle" onclick="snapshotNow();closeCtxMenuAll();this.closest('.shape-widget').remove();saveBoard();" title="Fermer">×</div>
-        <div class="widget-ctx-menu"></div>
-        <div class="shape-svg-wrap">
-            <svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="overflow:visible;">${svgContent}</svg>
-        </div>
-        <div class="flip-h-btn" title="Symétrie horizontale">↔</div>
-        <div class="flip-v-btn" title="Symétrie verticale">↕</div>
-        <div class="resize-lock-btn" title="Verrouiller les proportions (ou Shift)">🔓</div>
-        <div class="shape-resize-handle" title="Redimensionner"></div>
-    `;
-
-    board.appendChild(widget);
-		widget.addEventListener('contextmenu', (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		snapshotNow();
-		widget.remove();
-		saveBoard();
-	});
-    makeDraggable(widget);
-    makeDraggableRotate(widget);
-    makeShapeResizable(widget);
-
-    widget.addEventListener('mousedown', (e) => {
-        if (isDrawMode || isEraserMode) return;
-        if (widget.dataset.background !== "true") bringToFront(widget);
-    });
-    widget.addEventListener('dblclick', (e) => {
-        const ignore = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.shape-resize-handle';
-        if (!e.target.closest(ignore)) openShapeEditPanel(widget);
-    });
-
-    const curW = window.innerWidth, curVH = virtualH(curW);
-    widget.dataset.leftPercent = (parseFloat(x) / curW) * 100;
-    widget.dataset.topPercent  = (parseFloat(y) / curVH) * 100;
-    widget.dataset.wPercent    = (svgW / curW) * 100;
-    widget.dataset.hPercent    = (svgH / curVH) * 100;
-
-    if (doSave && !isInitialLoading && !isRestoringState) saveBoard();
-    return widget;
-}
-
-function makeShapeResizable(widget) {
-    const handle  = widget.querySelector('.shape-resize-handle');
-    const lockBtn = widget.querySelector('.resize-lock-btn');
-    const flipH   = widget.querySelector('.flip-h-btn');
-    const flipV   = widget.querySelector('.flip-v-btn');
-    if (!handle) return;
-
-    if (lockBtn) {
-        lockBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
-        lockBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const locked = lockBtn.classList.toggle('locked');
-            lockBtn.textContent = locked ? '🔒' : '🔓';
-        });
-    }
-    if (flipH) {
-        flipH.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        flipH.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'h'); });
-    }
-    if (flipV) {
-        flipV.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        flipV.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'v'); });
-    }
-
-    handle.addEventListener('mousedown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        snapshotNow();
-        const svg = widget.querySelector('svg');
-        const startX = e.clientX, startY = e.clientY;
-        const startW = parseFloat(svg.getAttribute('width'));
-        const startH = parseFloat(svg.getAttribute('height'));
-        const ratio = startH / startW;
-        const shapeId = widget.dataset.shapeType;
-        const sc = widget.dataset.strokeColor, fc = widget.dataset.fillColor;
-        const fo = widget.dataset.fillOpacity, sw = parseInt(widget.dataset.strokeWidth || 4);
-        document.onmousemove = (ev) => {
-            const proportional = ev.shiftKey || (lockBtn && lockBtn.classList.contains('locked'));
-            const rawW = Math.max(40, startW + ev.clientX - startX);
-            const rawH = Math.max(40, startH + ev.clientY - startY);
-            let newW, newH;
-            if (proportional) {
-                newW = rawW;
-                newH = Math.max(40, newW * ratio);
-            } else {
-                newW = rawW; newH = rawH;
-            }
-            svg.setAttribute('width', newW); svg.setAttribute('height', newH);
-            svg.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
-            svg.innerHTML = buildShapeSVG(shapeId, newW, newH, sc, fc, fo, sw);
-            const curW = window.innerWidth, curVH = virtualH(curW);
-            widget.dataset.wPercent = (newW / curW) * 100;
-            widget.dataset.hPercent = (newH / curVH) * 100;
-        };
-        document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-    });
-}
-
-// Applique une symétrie à un widget forme ou texte
-// axis : 'h' (retournement gauche/droite) ou 'v' (retournement haut/bas)
-function flipWidget(widget, axis) {
-    // Extraire la rotation existante (rotation seule sur le widget)
-    const rotMatch = (widget.style.transform || '').match(/rotate\(([-\d.]+)deg\)/);
-    const rot = rotMatch ? parseFloat(rotMatch[1]) : 0;
-
-    // Mettre à jour les données de flip
-    let sx = parseFloat(widget.dataset.flipX || 1);
-    let sy = parseFloat(widget.dataset.flipY || 1);
-    if (axis === 'h') sx = -sx;
-    if (axis === 'v') sy = -sy;
-    widget.dataset.flipX = sx;
-    widget.dataset.flipY = sy;
-
-    // Le widget ne porte QUE la rotation — les boutons restent à leur place
-    widget.style.transform = rot !== 0 ? `rotate(${rot}deg)` : '';
-
-    // Le flip est appliqué sur le SVG uniquement via CSS (transform-origin: center)
-    const svg = widget.querySelector('svg');
-    if (svg) {
-        svg.style.transformBox    = 'fill-box';
-        svg.style.transformOrigin = 'center center';
-        svg.style.transform       = (sx !== 1 || sy !== 1) ? `scale(${sx}, ${sy})` : '';
-        svg.removeAttribute('transform'); // nettoyer l'ancien attribut SVG si présent
-    } else {
-        // Widget texte : flip sur le container interne
-        const container = widget.querySelector('.editor-container');
-        if (container) {
-            container.style.transformBox    = 'border-box';
-            container.style.transformOrigin = 'center center';
-            container.style.transform       = (sx !== 1 || sy !== 1) ? `scale(${sx}, ${sy})` : '';
-        }
-    }
-    saveBoard();
-}
-
-// Applique une symétrie aux traits canvas sélectionnés
-// axis : 'h' ou 'v' — miroir autour du centre de leur bounding box
-function flipStrokes(strokesList, axis) {
-    if (!strokesList.length) return;
-    let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-    strokesList.forEach(s => s.points.forEach(p => {
-        if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
-        if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
-    }));
-    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-    strokesList.forEach(s => {
-        s.points = s.points.map(p => ({
-            x: axis === 'h' ? 2 * cx - p.x : p.x,
-            y: axis === 'v' ? 2 * cy - p.y : p.y
-        }));
-    });
-    if (drawCtx) redrawStrokes();
-}
-
-// =========================================================================
 // PDF WIDGET (rendu via PDF.js — pas d'iframe, pas d'ouverture navigateur)
 // =========================================================================
 
@@ -3867,970 +3460,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             if (canvasWrap) canvasWrap.innerHTML = '<p style="color:red;padding:16px;">Impossible de lire ce PDF.</p>';
         });
     });
-}
-
-// =========================================================================
-// DESSIN LIBRE
-// =========================================================================
-let drawCanvas = null, drawCtx = null, isPainting = false, isDrawMode = false;
-let strokes = [], currentStroke = null;
-
-function initCanvas() {
-    if (drawCanvas) return;
-    drawCanvas = document.createElement('canvas');
-    drawCanvas.id = 'draw-canvas';
-    resizeCanvas();
-    board.appendChild(drawCanvas);
-    drawCtx = drawCanvas.getContext('2d');
-    drawCanvas.addEventListener('mousedown',  startPaint);
-    drawCanvas.addEventListener('mousemove',  paint);
-    drawCanvas.addEventListener('mouseup',    endPaint);
-    drawCanvas.addEventListener('mouseleave', endPaint);
-    drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startPaint(e.touches[0]); }, { passive:false });
-    drawCanvas.addEventListener('touchmove',  e => { e.preventDefault(); paint(e.touches[0]); }, { passive:false });
-    drawCanvas.addEventListener('touchend',   endPaint);
-    document.getElementById('draw-size').addEventListener('input', function() {
-        document.getElementById('draw-size-label').textContent = this.value;
-    });
-    const opSlider = document.getElementById('shape-recog-opacity');
-    if (opSlider) opSlider.addEventListener('input', function() {
-        document.getElementById('shape-recog-opacity-val').textContent = this.value + '%';
-    });
-}
-
-function resizeCanvas() {
-    if (!drawCanvas) return;
-    drawCanvas.width = board.offsetWidth; drawCanvas.height = board.offsetHeight;
-    redrawStrokes();
-}
-
-function getPos(e) {
-    const rect = drawCanvas.getBoundingClientRect();
-    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
-}
-
-function startPaint(e) {
-    if (!isDrawMode || isEraserMode) return;
-    isPainting = true;
-    currentStroke = { points:[getPos(e)], color:document.getElementById('draw-color').value, size:parseInt(document.getElementById('draw-size').value) };
-    if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
-    if (currentDrawMode === 'text') {
-        // Annuler le timer de reconnaissance en cours
-        clearTimeout(_hwRecogTimer);
-    }
-}
-
-function paint(e) {
-    if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
-    currentStroke.points.push(getPos(e));
-    if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
-    redrawStrokes(currentStroke);
-}
-
-function endPaint() {
-    if (!isPainting || !currentStroke) return;
-    isPainting = false;
-    if (currentStroke.points.length > 1) {
-        if (currentDrawMode === 'shape') {
-            currentStroke = null;
-            redrawStrokes();
-            recognizeAndReplaceShape({ points: _lastStrokePoints, color: document.getElementById('draw-color').value, size: parseInt(document.getElementById('draw-size').value) });
-            _lastStrokePoints = null;
-            return;
-        }
-        strokes.push(currentStroke);
-        const cur = buildBoardJSON();
-        if (cur) {
-            undoStack.push(cur);
-            if (undoStack.length > MAX_UNDO) undoStack.shift();
-            redoStack = [];
-            updateUndoRedoBtns();
-        }
-        saveBoard();
-    }
-    currentStroke = null; redrawStrokes();
-}
-
-let _lastStrokePoints = null;
-
-// =========================================================================
-// RECONNAISSANCE D'ÉCRITURE MANUSCRITE
-// =========================================================================
-let _hwRecogTimer = null;
-let _hwPendingStrokes = []; // traits en attente de reconnaissance
-let _hwRecognizedText = '';
-let _hwBBox = null; // bounding box des traits manuscrits en cours
-
-function scheduleHandwritingRecognition() {
-    clearTimeout(_hwRecogTimer);
-    _hwRecogTimer = setTimeout(() => {
-        triggerHandwritingRecognition();
-    }, 2000);
-}
-
-function cancelHandwritingRecognition() {
-    clearTimeout(_hwRecogTimer);
-    // Nettoyer le panneau preview si visible
-    const preview = document.getElementById('handwriting-preview');
-    if (preview) { preview.style.display = 'none'; preview._positioned = false; }
-}
-
-function triggerHandwritingRecognition() {
-    // Collecter tous les traits textMode
-    const hwStrokes = strokes.filter(s => s.textMode);
-    if (hwStrokes.length === 0) return;
-
-    // Calculer la bounding box globale
-    let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-    hwStrokes.forEach(s => s.points.forEach(p => {
-        if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y;
-        if(p.x>maxX)maxX=p.x; if(p.y>maxY)maxY=p.y;
-    }));
-    const pad = 20;
-    minX = Math.max(0, minX-pad); minY = Math.max(0, minY-pad);
-    maxX = Math.min(drawCanvas.width,  maxX+pad);
-    maxY = Math.min(drawCanvas.height, maxY+pad);
-    _hwBBox = { x: minX, y: minY, w: maxX-minX, h: maxY-minY };
-
-    // Afficher le panneau avec état de chargement
-    showHandwritingPreview('', true, minX, minY, maxX-minX, maxY-minY);
-
-    // OCR avec Tesseract.js (traitement local, pas d'API externe)
-    callAnthropicOCR(null).then(text => {
-        _hwRecognizedText = text && text.trim() ? text : '?';
-        showHandwritingPreview(_hwRecognizedText, false, minX, minY, maxX-minX, maxY-minY);
-    }).catch(err => {
-        console.error('OCR error:', err);
-        showHandwritingPreview('⚠️ ' + (err.message || 'Erreur'), false, minX, minY, maxX-minX, maxY-minY);
-    });
-}
-
-// =========================================================================
-// MYSCRIPT iink — Reconnaissance d'écriture manuscrite
-// =========================================================================
-
-function saveMyScriptKeys() {
-    const appKey  = (document.getElementById('hw-appkey-input')?.value  || '').trim();
-    const hmacKey = (document.getElementById('hw-hmackey-input')?.value || '').trim();
-    localStorage.setItem('ms_app_key',  appKey);
-    localStorage.setItem('ms_hmac_key', hmacKey);
-    const status = document.getElementById('hw-apikey-status');
-    if (status) {
-        const ok = appKey.length > 8 && hmacKey.length > 8;
-        status.textContent = ok ? '✓' : '●';
-        status.style.color  = ok ? '#4caf50' : '#888';
-    }
-}
-
-function getMyScriptKeys() {
-    return {
-        appKey:  localStorage.getItem('ms_app_key')  || '',
-        hmacKey: localStorage.getItem('ms_hmac_key') || ''
-    };
-}
-
-// Remplir les champs au chargement
-window.addEventListener('load', () => {
-    const { appKey, hmacKey } = getMyScriptKeys();
-    const ai = document.getElementById('hw-appkey-input');
-    const hi = document.getElementById('hw-hmackey-input');
-    if (ai && appKey)  { ai.value  = appKey; }
-    if (hi && hmacKey) { hi.value = hmacKey; }
-    if (appKey || hmacKey) saveMyScriptKeys();
-});
-
-// Calcul HMAC-SHA512 pour l'authentification MyScript
-async function computeHmac(appKey, hmacKey, body) {
-    const enc = new TextEncoder();
-    const keyData = enc.encode(appKey + hmacKey);
-    const msgData = enc.encode(body);
-    const cryptoKey = await crypto.subtle.importKey(
-        'raw', keyData, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']
-    );
-    const sig = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
-    return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Convertir nos strokes en format MyScript iink (JIIX)
-function buildMyScriptStrokePayload() {
-    const hwStrokes = strokes.filter(s => s.textMode);
-    const minX = _hwBBox ? _hwBBox.x : 0;
-    const minY = _hwBBox ? _hwBBox.y : 0;
-
-    const strokeList = hwStrokes.map((s, idx) => {
-        const xs = s.points.map(p => Math.round(p.x - minX));
-        const ys = s.points.map(p => Math.round(p.y - minY));
-        // Timestamps artificiels espacés de 20ms par point
-        const ts = s.points.map((_, i) => idx * 1000 + i * 20);
-        return { x: xs, y: ys, t: ts };
-    });
-
-    const w = _hwBBox ? Math.ceil(_hwBBox.w) : 800;
-    const h = _hwBBox ? Math.ceil(_hwBBox.h) : 400;
-
-    return {
-        configuration: {
-            lang: 'fr_FR',
-            export: { 'image-resolution': 96 }
-        },
-        contentType: 'Text',
-        conversionState: 'DIGITAL_EDIT',
-        height: h,
-        width: w,
-        strokeGroups: [{ strokes: strokeList }]
-    };
-}
-
-async function callAnthropicOCR(_unused) {
-    // Lire les clés depuis les champs EN PRIORITÉ, puis depuis localStorage
-    const appKeyInput  = (document.getElementById('hw-appkey-input')?.value  || '').trim();
-    const hmacKeyInput = (document.getElementById('hw-hmackey-input')?.value || '').trim();
-    const appKey  = appKeyInput  || localStorage.getItem('ms_app_key')  || '';
-    const hmacKey = hmacKeyInput || localStorage.getItem('ms_hmac_key') || '';
-
-    if (!appKey || !hmacKey) {
-        throw new Error('Clés MyScript manquantes — saisissez-les dans le panneau (mode ✍️ Écriture)');
-    }
-
-    // Sauvegarder si pas encore fait
-    if (appKey)  localStorage.setItem('ms_app_key',  appKey);
-    if (hmacKey) localStorage.setItem('ms_hmac_key', hmacKey);
-
-    const payload = buildMyScriptStrokePayload();
-    const bodyStr = JSON.stringify(payload);
-    const hmac = await computeHmac(appKey, hmacKey, bodyStr);
-
-    const resp = await fetch('https://cloud.myscript.com/api/v4.0/iink/batch', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json,application/vnd.myscript.jiix',
-            'applicationKey': appKey,
-            'hmac': hmac
-        },
-        body: bodyStr
-    });
-
-    if (!resp.ok) {
-        const txt = await resp.text().catch(() => resp.status);
-        throw new Error('MyScript API: ' + txt);
-    }
-
-    const result = await resp.json();
-    const text = result?.label || result?.exports?.['text/plain'] || '';
-    return text.trim() || '?';
-}
-
-function showHandwritingPreview(text, loading, bx, by, bw, bh) {
-    const preview = document.getElementById('handwriting-preview');
-    const textEl  = document.getElementById('handwriting-recognized-text');
-    const loadEl  = document.getElementById('handwriting-loading');
-    const convertBtn = document.getElementById('handwriting-convert-btn');
-
-    if (loading) {
-        textEl.textContent = '';
-        loadEl.style.display = 'block';
-        if (convertBtn) convertBtn.style.display = 'none';
-    } else {
-        textEl.textContent = text;
-        loadEl.style.display = 'none';
-        if (convertBtn) convertBtn.style.display = 'inline-block';
-    }
-
-    // Positionner le panneau au-dessus de la zone dessinée (seulement à la 1ère fois)
-    if (preview.style.display === 'none' || !preview._positioned) {
-        const boardRect = board.getBoundingClientRect();
-        const panelX = boardRect.left + bx;
-        const panelY = boardRect.top  + by;
-        const maxLeft = window.innerWidth - 540;
-        const maxTop  = window.innerHeight - 220;
-        preview.style.left = Math.max(10, Math.min(panelX, maxLeft)) + 'px';
-        preview.style.top  = Math.max(10, Math.min(panelY - 150, maxTop)) + 'px';
-        preview._positioned = true;
-    }
-    preview.style.display = 'block';
-
-    // Init drag si pas encore fait
-    if (!preview._dragInited) {
-        preview._dragInited = true;
-        const header = document.getElementById('handwriting-preview-header');
-        header.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            let ox = e.clientX - preview.offsetLeft;
-            let oy = e.clientY - preview.offsetTop;
-            const onMove = (ev) => {
-                preview.style.left = Math.max(0, ev.clientX - ox) + 'px';
-                preview.style.top  = Math.max(0, ev.clientY - oy) + 'px';
-            };
-            const onUp = () => {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            };
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-    }
-}
-
-function convertHandwritingToWidget() {
-    // Lire le texte potentiellement édité par l'utilisateur dans le panneau
-    const editedEl = document.getElementById('handwriting-recognized-text');
-    if (editedEl) _hwRecognizedText = editedEl.textContent.trim();
-    if (!_hwRecognizedText || !_hwBBox) return;
-
-    const preview = document.getElementById('handwriting-preview');
-    if (preview) { preview.style.display = 'none'; preview._positioned = false; }
-
-    // Créer un widget texte à l'emplacement du dessin
-    snapshotNow();
-    const widget = createWidget('text', _hwBBox.x + 'px', _hwBBox.y + 'px', false);
-    const editor = widget.querySelector('.editor-content');
-    if (editor) {
-        editor.style.fontFamily = "'BelleAllureGS', cursive";
-        editor.style.fontSize   = '52px';
-        editor.innerHTML = `<span style="font-family:'BelleAllureGS', cursive;font-size:52px;">${_hwRecognizedText.replace(/\n/g, '<br>')}</span>`;
-    }
-
-    // Supprimer les traits manuscrits du canvas
-    strokes = strokes.filter(s => !s.textMode);
-    redrawStrokes();
-
-    // Snapshot final avec le widget texte
-    const cur = buildBoardJSON();
-    if (cur) {
-        undoStack.push(cur);
-        if (undoStack.length > MAX_UNDO) undoStack.shift();
-        redoStack = [];
-        updateUndoRedoBtns();
-        localStorage.setItem('profBoardConfig', cur);
-    }
-
-    _hwRecognizedText = '';
-    _hwBBox = null;
-}
-
-function discardHandwriting() {
-    const preview = document.getElementById('handwriting-preview');
-    if (preview) { preview.style.display = 'none'; preview._positioned = false; }
-    _hwRecognizedText = '';
-    _hwBBox = null;
-    // Garder les traits tels quels
-}
-
-function redrawStrokes(extra = null) {
-    if (!drawCtx) return;
-    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-    strokes.forEach(s => drawStroke(s));
-    if (extra) drawStroke(extra);
-    selectedStrokes.forEach(s => drawStroke(s, true));
-}
-
-function drawStroke(stroke, highlight = false) {
-    if (!stroke.points || stroke.points.length < 2) return;
-    drawCtx.save();
-    drawCtx.beginPath(); drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
-    drawCtx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
-    drawCtx.lineWidth   = highlight ? stroke.size + 6 : stroke.size;
-    if (highlight) drawCtx.globalAlpha = 0.5;
-    drawCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.forEach(p => drawCtx.lineTo(p.x, p.y));
-    drawCtx.stroke(); drawCtx.restore();
-    if (highlight) {
-        drawCtx.save(); drawCtx.beginPath(); drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
-        drawCtx.strokeStyle = stroke.color; drawCtx.lineWidth = stroke.size;
-        drawCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-        stroke.points.forEach(p => drawCtx.lineTo(p.x, p.y));
-        drawCtx.stroke(); drawCtx.restore();
-    }
-}
-
-// =========================================================================
-// MODES DESSIN
-// =========================================================================
-let currentDrawMode = 'free'; // 'free' | 'shape' | 'text'
-
-function setDrawMode(mode) {
-    currentDrawMode = mode;
-    ['free','shape'].forEach(m => {
-        const btn = document.getElementById('draw-mode-'+m+'-btn');
-        if (!btn) return;
-        if (m === mode) {
-            btn.style.borderColor = '#4a90e2'; btn.style.background = '#1a3550'; btn.style.color = '#fff';
-        } else {
-            btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa';
-        }
-    });
-    const shapeOpts = document.getElementById('shape-recog-options');
-    const shapeHint = document.getElementById('shape-recog-hint');
-    if (mode === 'shape') {
-        if (shapeOpts) shapeOpts.style.display = 'flex';
-        if (shapeHint) shapeHint.style.display = 'block';
-    } else {
-        if (shapeOpts) shapeOpts.style.display = 'none';
-        if (shapeHint) shapeHint.style.display = 'none';
-    }
-}
-
-function toggleDrawToolbar() {
-    const tb = document.getElementById('draw-toolbar');
-    if (tb.style.display === 'flex') { stopDrawing(); return; }
-    stopEraserMode();
-    document.getElementById('shape-toolbar').classList.remove('active');
-    document.getElementById('shape-btn').classList.remove('active-tool');
-    tb.style.display = 'flex';
-    initCanvas(); enableDrawing();
-    setDrawMode('free'); // always start in free mode
-}
-function enableDrawing() {
-    isDrawMode = true; drawCanvas.classList.remove('inactive');
-    document.getElementById('draw-btn').classList.add('active-tool');
-    document.getElementById('draw-btn').textContent = '✏️';
-    clearSelection();
-}
-function stopDrawing() {
-    isDrawMode = false;
-    if (drawCanvas) drawCanvas.classList.add('inactive');
-    document.getElementById('draw-toolbar').style.display = 'none';
-    document.getElementById('draw-btn').classList.remove('active-tool');
-    document.getElementById('draw-btn').textContent = '✏️';
-    cancelHandwritingRecognition();
-}
-function clearCanvas() {
-    snapshotNow();
-    strokes = []; selectedStrokes = []; redrawStrokes();
-}
-
-// =========================================================================
-// RECONNAISSANCE DE FORMES
-// =========================================================================
-
-function recognizeAndReplaceShape(stroke) {
-    if (!stroke || stroke.points.length < 4) return false;
-    const pts = stroke.points;
-
-    let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-    pts.forEach(p => {
-        if(p.x<minX)minX=p.x; if(p.y<minY)minY=p.y;
-        if(p.x>maxX)maxX=p.x; if(p.y>maxY)maxY=p.y;
-    });
-    const w = maxX - minX, h = maxY - minY;
-    if (w < 10 && h < 10) return false;
-
-    const strokeColor = document.getElementById('draw-color').value;
-    const strokeWidth = parseInt(document.getElementById('draw-size').value);
-    const fillColor   = document.getElementById('shape-recog-fill').value;
-    const fillOpacity = parseInt(document.getElementById('shape-recog-opacity').value) / 100;
-
-    const firstPt = pts[0], lastPt = pts[pts.length-1];
-    const closeDist = Math.hypot(firstPt.x-lastPt.x, firstPt.y-lastPt.y);
-    const diagLen   = Math.hypot(w, h);
-    const isClosed  = closeDist < diagLen * 0.35;
-
-    if (!isClosed) {
-        strokes.push({ ...stroke, recognized: false });
-        const cur = buildBoardJSON();
-        if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
-        saveBoard(); redrawStrokes();
-        return false;
-    }
-
-    const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
-    const radii  = pts.map(p => Math.hypot(p.x-cx, p.y-cy));
-    const avgR   = radii.reduce((a,b)=>a+b,0)/radii.length;
-    const stdDev = Math.sqrt(radii.reduce((a,v)=>a+(v-avgR)**2,0)/radii.length);
-    const cv     = stdDev / avgR; // coefficient de variation — faible = cercle
-    const aspect = Math.min(w,h) / Math.max(w,h);
-
-    // ── Critères améliorés ──
-    // Cercle : cv très faible ET aspect proche de 1
-    // On exige cv < 0.12 (était 0.20) pour éviter les faux positifs
-    const isCircle = cv < 0.12 && aspect > 0.75;
-
-    // Triangle : simplification agressive
-    const isTriangle = !isCircle && isLikelyTriangle(pts);
-
-    let shapeId;
-    if (isCircle) {
-        shapeId = 'circle';
-    } else if (isTriangle) {
-        shapeId = 'triangle';
-    } else {
-        // Carré vs rectangle : basé sur l'aspect ratio uniquement
-        shapeId = aspect > 0.85 ? 'square' : 'rectangle';
-    }
-
-    let svgW = w, svgH = h;
-    if (shapeId === 'circle') {
-        const side = Math.max(w, h);
-        svgW = side; svgH = side;
-    }
-
-    createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity, svgW, svgH, minX + 'px', minY + 'px', false, strokeWidth);
-
-    const snapCur = buildBoardJSON();
-    if (snapCur) {
-        undoStack.push(snapCur);
-        if (undoStack.length > MAX_UNDO) undoStack.shift();
-        redoStack = [];
-        updateUndoRedoBtns();
-        localStorage.setItem('profBoardConfig', snapCur);
-    }
-    redrawStrokes();
-    return true;
-}
-
-function isLikelyTriangle(pts) {
-    // Simplify and count corners — triangle = 3 corners
-    const epsilon = Math.hypot(
-        Math.max(...pts.map(p=>p.x)) - Math.min(...pts.map(p=>p.x)),
-        Math.max(...pts.map(p=>p.y)) - Math.min(...pts.map(p=>p.y))
-    ) * 0.10;
-    const simplified = rdpSimplify(pts, epsilon);
-    return simplified.length >= 3 && simplified.length <= 5;
-}
-
-function rdpSimplify(pts, epsilon) {
-    if (pts.length < 3) return pts;
-    let maxDist = 0, maxIdx = 0;
-    const first = pts[0], last = pts[pts.length-1];
-    for (let i=1; i<pts.length-1; i++) {
-        const d = perpendicularDist(pts[i], first, last);
-        if (d > maxDist) { maxDist = d; maxIdx = i; }
-    }
-    if (maxDist > epsilon) {
-        const left = rdpSimplify(pts.slice(0, maxIdx+1), epsilon);
-        const right = rdpSimplify(pts.slice(maxIdx), epsilon);
-        return [...left.slice(0,-1), ...right];
-    }
-    return [first, last];
-}
-
-function perpendicularDist(pt, lineA, lineB) {
-    const dx = lineB.x - lineA.x, dy = lineB.y - lineA.y;
-    const len = Math.hypot(dx, dy);
-    if (len === 0) return Math.hypot(pt.x - lineA.x, pt.y - lineA.y);
-    return Math.abs(dy*pt.x - dx*pt.y + lineB.x*lineA.y - lineB.y*lineA.x) / len;
-}
-
-
-
-// =========================================================================
-// GOMME
-// =========================================================================
-let isEraserMode = false, isErasing = false;
-
-function toggleEraserMode() {
-    if (isEraserMode) { stopEraserMode(); return; }
-    stopDrawing();
-    document.getElementById('shape-toolbar').classList.remove('active');
-    document.getElementById('shape-btn').classList.remove('active-tool');
-    document.getElementById('global-toolbar').style.display = 'none';
-    isEraserMode = true;
-    initCanvas();
-    drawCanvas.classList.remove('inactive');
-    drawCanvas.classList.add('eraser-mode');
-    document.getElementById('eraser-btn').classList.add('active-tool');
-    document.getElementById('eraser-btn').textContent = '🧽 en cours…';
-    document.getElementById('eraser-toolbar').style.display = 'flex';
-    drawCanvas.addEventListener('mousedown',  startErase);
-    drawCanvas.addEventListener('mousemove',  onEraserMouseMove);
-    drawCanvas.addEventListener('mouseup',    endErase);
-    drawCanvas.addEventListener('mouseleave', onEraserLeave);
-    drawCanvas.addEventListener('touchstart', eTouchStart, { passive: false });
-    drawCanvas.addEventListener('touchmove',  eTouchMove,  { passive: false });
-    drawCanvas.addEventListener('touchend',   endErase);
-    clearSelection();
-}
-
-function stopEraserMode() {
-    if (!isEraserMode) return;
-    isEraserMode = false; isErasing = false;
-    if (drawCanvas) {
-        drawCanvas.classList.add('inactive');
-        drawCanvas.classList.remove('eraser-mode');
-        drawCanvas.removeEventListener('mousedown',  startErase);
-        drawCanvas.removeEventListener('mousemove',  onEraserMouseMove);
-        drawCanvas.removeEventListener('mouseup',    endErase);
-        drawCanvas.removeEventListener('mouseleave', onEraserLeave);
-        drawCanvas.removeEventListener('touchstart', eTouchStart);
-        drawCanvas.removeEventListener('touchmove',  eTouchMove);
-        drawCanvas.removeEventListener('touchend',   endErase);
-        redrawStrokes();
-    }
-    document.getElementById('eraser-btn').classList.remove('active-tool');
-    document.getElementById('eraser-btn').textContent = '🧽';
-    document.getElementById('eraser-toolbar').style.display = 'none';
-}
-
-function eTouchStart(e) { e.preventDefault(); snapshotNow(); isErasing = true; eraseAt(getPos(e.touches[0])); }
-function eTouchMove(e)  { e.preventDefault(); if (isErasing) eraseAt(getPos(e.touches[0])); }
-
-function onEraserMouseMove(e) {
-    const pos = getPos(e);
-    const r = parseInt(document.getElementById('eraser-size').value);
-    if (isErasing) eraseAt(pos);
-    else drawEraserPreview(pos, r);
-}
-function onEraserLeave() { endErase(); redrawStrokes(); }
-function startErase(e) { if (!isEraserMode) return; snapshotNow(); isErasing = true; eraseAt(getPos(e)); }
-function endErase() { if (!isErasing) return; isErasing = false; saveBoard(); }
-
-// =========================================================================
-// DÉTECTION FORME SVG ENTIÈREMENT GOMMÉE
-// =========================================================================
-function isShapeFullyErased(widget) {
-    const svg = widget.querySelector('svg');
-    if (!svg) return false;
-    if (!svg.querySelector('mask.eraser-mask')) return false;
-    const svgW = parseFloat(svg.getAttribute('width')) || 100;
-    const svgH = parseFloat(svg.getAttribute('height')) || 100;
-    const tmpCanvas = document.createElement('canvas');
-    const scale = Math.min(1, 200 / Math.max(svgW, svgH));
-    tmpCanvas.width  = Math.ceil(svgW * scale);
-    tmpCanvas.height = Math.ceil(svgH * scale);
-    const tmpCtx = tmpCanvas.getContext('2d');
-    const svgClone = svg.cloneNode(true);
-    svgClone.setAttribute('width',  tmpCanvas.width);
-    svgClone.setAttribute('height', tmpCanvas.height);
-    svgClone.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-    const svgStr = new XMLSerializer().serializeToString(svgClone);
-    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url  = URL.createObjectURL(blob);
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            tmpCtx.clearRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-            tmpCtx.drawImage(img, 0, 0);
-            URL.revokeObjectURL(url);
-            const data = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height).data;
-            for (let i = 3; i < data.length; i += 4) {
-                if (data[i] > 5) { resolve(false); return; }
-            }
-            resolve(true);
-        };
-        img.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
-        img.src = url;
-    });
-}
-
-async function removeFullyErasedShapes() {
-    const shapeWidgets = [...document.querySelectorAll('.shape-widget')];
-    const toRemove = [];
-    for (const widget of shapeWidgets) {
-        const erased = await isShapeFullyErased(widget);
-        if (erased) toRemove.push(widget);
-    }
-    if (toRemove.length > 0) {
-        toRemove.forEach(w => w.remove());
-        saveBoard();
-    }
-}
-
-function eraseAt(pos) {
-    const r = parseInt(document.getElementById('eraser-size').value);
-    const NS = 'http://www.w3.org/2000/svg';
-    const newStrokes = [];
-    strokes.forEach(stroke => {
-        const pts = stroke.points;
-        let current = [];
-        for (let i = 0; i < pts.length; i++) {
-            if (Math.hypot(pts[i].x - pos.x, pts[i].y - pos.y) <= r) {
-                if (current.length >= 2) newStrokes.push({ ...stroke, points: current });
-                current = [];
-            } else { current.push(pts[i]); }
-        }
-        if (current.length >= 2) newStrokes.push({ ...stroke, points: current });
-    });
-    strokes = newStrokes;
-    let shapesModified = false;
-    document.querySelectorAll('.shape-widget').forEach(widget => {
-        const svg = widget.querySelector('svg');
-        if (!svg) return;
-        const bRect = board.getBoundingClientRect();
-        const svg2R = svg.getBoundingClientRect();
-        const svgX = pos.x - (svg2R.left - bRect.left);
-        const svgY = pos.y - (svg2R.top  - bRect.top);
-        if (svgX < -r || svgY < -r || svgX > svg2R.width + r || svgY > svg2R.height + r) return;
-        let mask = svg.querySelector('mask.eraser-mask');
-        if (!mask) {
-            const defs = document.createElementNS(NS, 'defs');
-            mask = document.createElementNS(NS, 'mask');
-            mask.setAttribute('class', 'eraser-mask');
-            mask.setAttribute('id', 'em-' + Math.random().toString(36).slice(2));
-            const bg = document.createElementNS(NS, 'rect');
-            bg.setAttribute('x', '-500'); bg.setAttribute('y', '-500');
-            bg.setAttribute('width', '9999'); bg.setAttribute('height', '9999');
-            bg.setAttribute('fill', 'white');
-            mask.appendChild(bg); defs.appendChild(mask);
-            svg.insertBefore(defs, svg.firstChild);
-            const g = document.createElementNS(NS, 'g');
-            g.setAttribute('mask', 'url(#' + mask.id + ')');
-            const toMove = [...svg.childNodes].filter(n => n !== defs);
-            toMove.forEach(n => g.appendChild(n));
-            svg.appendChild(g);
-        }
-        const circle = document.createElementNS(NS, 'circle');
-        circle.setAttribute('cx', svgX); circle.setAttribute('cy', svgY);
-        circle.setAttribute('r', r); circle.setAttribute('fill', 'black');
-        mask.appendChild(circle);
-        shapesModified = true;
-    });
-    drawEraserPreview(pos, r);
-    if (shapesModified) {
-        clearTimeout(eraseAt._checkTimer);
-        eraseAt._checkTimer = setTimeout(() => {
-            removeFullyErasedShapes();
-        }, 150);
-    }
-}
-
-function drawEraserPreview(pos, r) {
-    if (!drawCtx) return;
-    redrawStrokes();
-    drawCtx.save();
-    drawCtx.beginPath();
-    drawCtx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
-    drawCtx.strokeStyle = 'rgba(60,60,60,0.7)';
-    drawCtx.lineWidth = 1.5;
-    drawCtx.setLineDash([4, 3]);
-    drawCtx.stroke();
-    drawCtx.beginPath();
-    drawCtx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
-    drawCtx.fillStyle = 'rgba(60,60,60,0.5)';
-    drawCtx.fill();
-    drawCtx.restore();
-}
-
-// =========================================================================
-// SÉLECTION
-// =========================================================================
-let selectedWidgets = [], selectedStrokes = [];
-let selectionRect = null;
-let isSelectingRect = false, selectStartX = 0, selectStartY = 0;
-let mouseDownClientX = 0, mouseDownClientY = 0;
-let moveStartX = 0, moveStartY = 0;
-let widgetMoveOrigins = [], strokeMoveOrigins = [];
-let rotateCenterX = 0, rotateCenterY = 0, rotateStartAngle = 0;
-let rotateOrigWidgetTransforms = [], rotateOrigStrokePoints = [];
-
-function initSelectionRect() {
-    if (selectionRect) return;
-    selectionRect = document.createElement('div');
-    selectionRect.id = 'selection-rect';
-    board.appendChild(selectionRect);
-}
-
-function initBoardSelection() {
-    initSelectionRect();
-    board.addEventListener('mousedown', onBoardMouseDown);
-}
-
-function onBoardMouseDown(e) {
-    if (_presentationActive) return;
-    if (isDrawMode || isEraserMode) return;
-    if (e.target.closest('#selection-controls')) return;
-    if (e.target.closest('#toolbar-container')) return;
-    if (e.target.closest('.widget-ctx-menu')) return;
-    if (e.target.closest('#shape-edit-panel')) return;
-
-    // Fermer le menu widgets si ouvert
-    document.getElementById('tools-menu')?.classList.remove('active');
-
-    mouseDownClientX = e.clientX;
-    mouseDownClientY = e.clientY;
-
-    const widget = e.target.closest('.widget, .shape-widget');
-
-    if (widget) {
-        const gid = widget.dataset.groupId;
-        // Membres DOM du groupe (widgets + shape-widgets)
-        const domMembers = gid
-            ? [...document.querySelectorAll(`.widget[data-group-id="${gid}"], .shape-widget[data-group-id="${gid}"]`)]
-            : [widget];
-        // Membres traits canvas du groupe
-        const strokeMembers = gid ? strokes.filter(s => s.groupId === gid) : [];
-
-        if (e.ctrlKey || e.metaKey) {
-            const allDomSelected    = domMembers.every(m => selectedWidgets.includes(m));
-            const allStrokeSel      = strokeMembers.every(s => selectedStrokes.includes(s));
-            const allAlreadySelected = allDomSelected && allStrokeSel;
-            if (allAlreadySelected) {
-                domMembers.forEach(m => { selectedWidgets = selectedWidgets.filter(w => w !== m); m.classList.remove('selected'); });
-                selectedStrokes = selectedStrokes.filter(s => !strokeMembers.includes(s));
-            } else {
-                domMembers.forEach(m => { if (!selectedWidgets.includes(m)) { selectedWidgets.push(m); m.classList.add('selected'); } });
-                strokeMembers.forEach(s => { if (!selectedStrokes.includes(s)) selectedStrokes.push(s); });
-            }
-        } else {
-            const allDomSelected    = domMembers.every(m => selectedWidgets.includes(m));
-            const allStrokeSel      = strokeMembers.every(s => selectedStrokes.includes(s));
-            const allAlreadySelected = allDomSelected && allStrokeSel
-                && selectedWidgets.length === domMembers.length
-                && selectedStrokes.length === strokeMembers.length;
-            if (!allAlreadySelected) {
-                clearSelection();
-                domMembers.forEach(m => { selectedWidgets.push(m); m.classList.add('selected'); });
-                strokeMembers.forEach(s => selectedStrokes.push(s));
-            }
-        }
-        if (drawCtx) redrawStrokes();
-        updateSelectionOverlay();
-        return;
-    }
-
-    const pos = getBoardPos(e);
-
-    const hitStroke = findStrokeAt(pos.x, pos.y);
-	if (hitStroke) {
-		const gid = hitStroke.groupId;
-		const groupStrokes  = gid ? strokes.filter(s => s.groupId === gid) : [hitStroke];
-		const groupWidgets  = gid
-			? [...document.querySelectorAll(`.widget[data-group-id="${gid}"], .shape-widget[data-group-id="${gid}"]`)]
-			: [];
-
-		if (e.ctrlKey || e.metaKey) {
-			const allInSel = groupStrokes.every(s => selectedStrokes.includes(s))
-						  && groupWidgets.every(w => selectedWidgets.includes(w));
-			if (allInSel) {
-				selectedStrokes = selectedStrokes.filter(s => !groupStrokes.includes(s));
-				groupWidgets.forEach(w => { selectedWidgets = selectedWidgets.filter(x => x !== w); w.classList.remove('selected'); });
-			} else {
-				groupStrokes.forEach(s => { if (!selectedStrokes.includes(s)) selectedStrokes.push(s); });
-				groupWidgets.forEach(w => { if (!selectedWidgets.includes(w)) { selectedWidgets.push(w); w.classList.add('selected'); } });
-			}
-			if (drawCtx) redrawStrokes();
-			updateSelectionOverlay();
-			return;
-		}
-
-		// Sélection exclusive
-		const allInSel = groupStrokes.every(s => selectedStrokes.includes(s))
-					  && groupWidgets.every(w => selectedWidgets.includes(w))
-					  && selectedStrokes.length === groupStrokes.length
-					  && selectedWidgets.length === groupWidgets.length;
-		if (!allInSel) {
-			clearSelection();
-			groupStrokes.forEach(s => selectedStrokes.push(s));
-			groupWidgets.forEach(w => { selectedWidgets.push(w); w.classList.add('selected'); });
-		}
-		if (drawCtx) redrawStrokes();
-		updateSelectionOverlay();
-
-		// --- DRAG DIRECT sur le trait (sans poignée) ---
-		snapshotNow();
-		const dragStart = { x: pos.x, y: pos.y };
-		widgetMoveOrigins = selectedWidgets.map(w => ({ widget: w, origLeft: w.offsetLeft, origTop: w.offsetTop }));
-		strokeMoveOrigins = selectedStrokes.map(s => ({ stroke: s, origPoints: s.points.map(p => ({...p})) }));
-		let hasMoved = false;
-
-		const onStrokeDragMove = (ev) => {
-			const p = getBoardPos(ev);
-			const dx = p.x - dragStart.x, dy = p.y - dragStart.y;
-			if (!hasMoved && Math.hypot(dx, dy) < 4) return;
-			hasMoved = true;
-			if (drawCanvas) drawCanvas.style.zIndex = 13000;
-			widgetMoveOrigins.forEach(({ widget, origLeft, origTop }) => {
-				widget.style.left = (origLeft + dx) + 'px';
-				widget.style.top  = (origTop  + dy) + 'px';
-			});
-			strokeMoveOrigins.forEach(({ stroke, origPoints }) => {
-				stroke.points = origPoints.map(p2 => ({ x: p2.x + dx, y: p2.y + dy }));
-			});
-			if (drawCtx) redrawStrokes();
-			updateSelectionOverlay();
-		};
-
-		const onStrokeDragEnd = () => {
-			document.removeEventListener('mousemove', onStrokeDragMove);
-			document.removeEventListener('mouseup', onStrokeDragEnd);
-			if (drawCanvas) drawCanvas.style.zIndex = '';
-			if (hasMoved) {
-				const curW = window.innerWidth, curVH = virtualH(curW);
-				selectedWidgets.forEach(w => {
-					w.dataset.leftPercent = (w.offsetLeft / curW) * 100;
-					w.dataset.topPercent  = (w.offsetTop  / curVH) * 100;
-				});
-				saveBoard();
-			}
-			updateSelectionOverlay();
-		};
-
-		document.addEventListener('mousemove', onStrokeDragMove);
-		document.addEventListener('mouseup', onStrokeDragEnd);
-		return;
-	}
-
-    clearSelection();
-    isSelectingRect = true;
-    selectStartX = pos.x;
-    selectStartY = pos.y;
-    selectionRect.style.cssText = `display:block;left:${pos.x}px;top:${pos.y}px;width:0;height:0;`;
-
-    const onMove = (ev) => {
-        if (!isSelectingRect) return;
-        const p = getBoardPos(ev);
-        const x = Math.min(p.x, selectStartX), y = Math.min(p.y, selectStartY);
-        Object.assign(selectionRect.style, {
-            left: x+'px', top: y+'px',
-            width: Math.abs(p.x - selectStartX)+'px',
-            height: Math.abs(p.y - selectStartY)+'px'
-        });
-    };
-
-    const onUp = (ev) => {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        if (!isSelectingRect) return;
-        isSelectingRect = false;
-
-        const dx = Math.abs(ev.clientX - mouseDownClientX);
-        const dy = Math.abs(ev.clientY - mouseDownClientY);
-
-        if (dx < 5 && dy < 5) {
-            clearSelection();
-            return;
-        }
-
-        const pos2 = getBoardPos(ev);
-        const rx = Math.min(pos2.x, selectStartX), ry = Math.min(pos2.y, selectStartY);
-        const rw = Math.abs(pos2.x - selectStartX), rh = Math.abs(pos2.y - selectStartY);
-        const br = board.getBoundingClientRect();
-
-        document.querySelectorAll('.widget, .shape-widget').forEach(w => {
-            const r = w.getBoundingClientRect();
-            const wl = r.left - br.left, wt = r.top - br.top;
-            if (wl < rx+rw && wl+r.width > rx && wt < ry+rh && wt+r.height > ry) {
-                selectedWidgets.push(w);
-                w.classList.add('selected');
-            }
-        });
-
-        if (strokes) {
-            strokes.forEach(s => {
-                if (s.points.some(p => p.x >= rx && p.x <= rx+rw && p.y >= ry && p.y <= ry+rh))
-                    selectedStrokes.push(s);
-            });
-        }
-
-        if (drawCtx) redrawStrokes();
-        updateSelectionOverlay();
-        if (selectionRect) selectionRect.style.display = 'none';
-    };
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-}
-
-function clearSelection() {
-    selectedWidgets.forEach(w => w.classList.remove('selected'));
-    selectedWidgets = []; selectedStrokes = [];
-    if (drawCtx) redrawStrokes();
-    document.getElementById('selection-controls').style.display = 'none';
-    if (selectionRect) selectionRect.style.display = 'none';
-    board.classList.remove('single-select');
-    board.classList.remove('multi-select');
 }
 
 // =========================================================================
@@ -5534,46 +4163,28 @@ function handleBgUpload(input) {
     reader.onload = (e) => { const v = `url(${e.target.result})`; applyBackground(v); saveBg(v); };
     reader.readAsDataURL(file);
 }
-function toggleSubMenu(event) { event.stopPropagation(); document.getElementById('bg-submenu').classList.toggle('active'); }
+function toggleSubMenu(event) { /* bg-submenu intégré dans le menu Affichage */ }
 
 // =========================================================================
 // MENU
 // =========================================================================
 function toggleMenu() {
-    document.getElementById('tools-menu').classList.toggle('active');
-    document.getElementById('bg-submenu').classList.remove('active');
-    document.getElementById('shape-toolbar').classList.remove('active');
-    document.getElementById('shape-btn').classList.remove('active-tool');
-    // Fermer le panneau stickers si ouvert
-    const sp = document.getElementById('sticker-panel');
-    if (sp && sp.classList.contains('active')) {
-        sp.classList.remove('active');
-        const sb = document.getElementById('sticker-btn');
-        if (sb) sb.classList.remove('active-tool');
-    }
+    // Ancien menu — redirige vers closeMainMenu pour compatibilité
+    if (typeof closeMainMenu === 'function') closeMainMenu();
 }
-document.addEventListener('click', (e) => {
-    const widget = e.target.closest('.widget');
-    const isTextLike = widget && (widget.dataset.type === 'text' || widget.dataset.type === 'homework');
-    if (isTextLike) {
-        currentActiveWidget = widget;
-        document.getElementById('global-toolbar').style.display = 'flex';
-        syncFontSizeGlobal();
-        // Synchroniser le slider d'opacité
-        const opacity = parseFloat(widget.dataset.bgOpacity ?? 1);
-        const slider = document.getElementById('widget-bg-opacity');
-        const label  = document.getElementById('widget-bg-opacity-val');
-        if (slider) { slider.value = Math.round(opacity * 100); }
-        if (label)  { label.textContent = Math.round(opacity * 100) + '%'; }
-        return;
-    }
-    if (!e.target.closest('#global-toolbar') && !e.target.closest('#toolbar-toggle-btn') && !isTextLike) {
-        if (currentActiveWidget) {
-            currentActiveWidget = null;
-            document.getElementById('global-toolbar').style.display = 'none';
-        }
-    }
-});
+// toolbar close géré dans onOutsideClick per-widget
+
+function openTextToolbar(widget) {
+    currentActiveWidget = widget;
+    const tb = document.getElementById('global-toolbar');
+    tb.style.display = 'flex';
+    syncFontSizeGlobal();
+    const opacity = parseFloat(widget.dataset.bgOpacity ?? 1);
+    const slider = document.getElementById('widget-bg-opacity');
+    const label  = document.getElementById('widget-bg-opacity-val');
+    if (slider) { slider.value = Math.round(opacity * 100); }
+    if (label)  { label.textContent = Math.round(opacity * 100) + '%'; }
+}
 
 // =========================================================================
 // BARRE TEXTE GLOBALE
@@ -5581,13 +4192,13 @@ document.addEventListener('click', (e) => {
 let isTextPlacementMode = false;
 
 function toggleGlobalToolbar() {
-    const tb = document.getElementById('global-toolbar');
+    // Active le mode placement texte sur le bureau
     const boardEl = document.getElementById('board');
-    if (tb.style.display === 'none' || tb.style.display === '') {
-        tb.style.display = 'block';
+    if (!isTextPlacementMode) {
         isTextPlacementMode = true;
         boardEl.classList.add('cursor-pencil');
-        if (typeof stopDrawing === "function") stopDrawing();
+        if (typeof stopDrawing === 'function') stopDrawing();
+        if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
     } else {
         closeGlobalToolbar();
     }
@@ -5597,6 +4208,17 @@ function closeGlobalToolbar() {
     document.getElementById('global-toolbar').style.display = 'none';
     document.getElementById('board').classList.remove('cursor-pencil');
     isTextPlacementMode = false;
+    // Sortir du mode édition sur le widget actif
+    if (currentActiveWidget) {
+        const ed = currentActiveWidget.querySelector('.editor-content');
+        if (ed) {
+            ed.contentEditable = 'false';
+            ed.style.cursor = 'grab';
+            ed.style.userSelect = 'none';
+        }
+        currentActiveWidget.style.cursor = 'grab';
+        currentActiveWidget = null;
+    }
 }
 
 document.getElementById('board').addEventListener('click', function(e) {
@@ -5609,6 +4231,14 @@ document.getElementById('board').addEventListener('click', function(e) {
         if (editableArea) setTimeout(() => editableArea.focus(), 10);
         isTextPlacementMode = false;
         this.classList.remove('cursor-pencil');
+        window._nextTextOpenCreate = false; // déjà géré ci-dessous
+        const editableArea2 = widget.querySelector('.editor-content');
+        if (editableArea2) {
+            setTimeout(() => {
+                if (widget._enterEditMode) widget._enterEditMode();
+                openTextToolbar(widget);
+            }, 20);
+        }
         saveBoard();
     } else if (e.target.id === 'board') {
         const tb = document.getElementById('global-toolbar');
@@ -5696,10 +4326,31 @@ function formatFontSizeGlobal(size) {
 
 function adjustFontSize(delta) {
     if (!currentActiveWidget) return;
-    const inp = document.getElementById('font-size-input');
-    const currentSize = parseInt(inp.value) || 40;
-    const newSize = Math.max(8, Math.min(100, currentSize + delta));
-    inp.value = newSize;
+    const editor = currentActiveWidget.querySelector('.editor-content');
+    if (!editor) return;
+
+    // Restaurer la sélection sauvegardée (onmousedown du bouton)
+    if (savedSelection) {
+        try { const s = window.getSelection(); s.removeAllRanges(); s.addRange(savedSelection); } catch(e) {}
+    }
+
+    // Si toujours pas de sélection → sélectionner tout le contenu de l'éditeur
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        savedSelection = range.cloneRange();
+    }
+
+    // Lire la taille courante depuis le nœud ancre
+    let currentSize = 40;
+    if (sel.anchorNode) {
+        const el = sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+        if (el) currentSize = parseInt(window.getComputedStyle(el).fontSize) || 40;
+    }
+    const newSize = Math.max(8, Math.min(200, currentSize + delta));
     formatFontSizeGlobal(newSize);
 }
 
@@ -5742,16 +4393,7 @@ function applyHighlightColor(color) {
 }
 
 function syncFontSizeGlobal() {
-    const inp = document.getElementById('font-size-input');
-    if (!inp) return;
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    const node = sel.anchorNode;
-    if (!node) return;
-    const el = node.nodeType === 3 ? node.parentElement : node;
-    if (!el) return;
-    const size = parseInt(window.getComputedStyle(el).fontSize);
-    if (!isNaN(size)) inp.value = size;
+    // Plus d'input à synchroniser — boutons +/- seulement
 }
 
 function applyFontSizeOnBlur(input) {
@@ -5822,619 +4464,297 @@ document.addEventListener('click', (e) => {
 		if (e.key === 'Escape' && isLaserMode) toggleLaser();
 	});
 
-	// =========================================================================
-	// SCÈNES
-	// =========================================================================
-	const MAX_SCENES = 10;
-	let scenes        = [];   // [{ id, name, config, background }]
-	let currentScene  = 0;    // index de la scène active
+// ── Repositionnement des sous-menus hors écran ──────────────────────────────
+// Déclenché au mouseenter sur chaque mm-has-sub (mesure fiable car le sous-menu est visible)
+document.addEventListener('mouseenter', function(e) {
+    const parent = e.target.closest('.mm-has-sub');
+    if (!parent) return;
+    const sub = parent.querySelector(':scope > .mm-sub');
+    if (!sub) return;
+    // Réinitialiser avant mesure
+    sub.style.top = '0';
+    requestAnimationFrame(() => {
+        const rect = sub.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight - 8) {
+            const shift = rect.bottom - (window.innerHeight - 8);
+            sub.style.top = Math.max(-(rect.height - 40), -shift) + 'px';
+        }
+    });
+}, true);
 
-	function scenesInit() {
-		const saved = localStorage.getItem('profScenes');
-		if (saved) {
-			try {
-				const parsed = JSON.parse(saved);
-				scenes       = parsed.scenes       || [];
-				currentScene = parsed.currentScene || 0;
-				if (currentScene >= scenes.length) currentScene = 0;
-			} catch(e) { scenes = []; }
-		}
-		// Migration : si pas de scènes mais un bureau existant → scène 1 = bureau actuel
-		if (scenes.length === 0) {
-			const existing = localStorage.getItem('profBoardConfig');
-			const bg       = localStorage.getItem('boardBackground') || 'none';
-			scenes.push({ id: Date.now(), name: 'Scène 1', config: existing || null, background: bg });
-			currentScene = 0;
-			saveScenesMeta();
-		}
-		renderScenesBar();
-	}
+// =========================================================================
+// MINI COLOR PICKER CUSTOM
+// =========================================================================
+const CPICK_COLORS = [
+    // neutres      rouge       orange      jaune       vert        bleu        violet
+    '#000000', '#4a0000', '#4a1a00', '#4a4000', '#003a00', '#00204a', '#2d004a',
+    '#333333', '#7f0000', '#7a3300', '#6b6000', '#005200', '#003580', '#4b0082',
+    '#666666', '#c0392b', '#c0590a', '#c09000', '#1a7a1a', '#1a56b0', '#6a1aad',
+    '#999999', '#e74c3c', '#e67e22', '#e6c000', '#27ae60', '#2980b9', '#8e44ad',
+    '#bbbbbb', '#f08080', '#f0a060', '#f0d060', '#6abf6a', '#6aaee8', '#b06ad4',
+    '#ffffff', '#ffd5d5', '#ffe5cc', '#fff5cc', '#ccffcc', '#cce5ff', '#eeccff',
+];
 
-	function saveScenesMeta() {
-		localStorage.setItem('profScenes', JSON.stringify({ scenes, currentScene }));
-	}
+// État courant par picker id
+const _cpickValues = {};
 
-	function saveCurrentSceneData() {
-		if (scenes.length === 0) return;
-		scenes[currentScene].config     = buildBoardJSON();
-		scenes[currentScene].background = localStorage.getItem('boardBackground') || 'none';
-		saveScenesMeta();
-	}
+function cpickInit(id, initialValue) {
+    _cpickValues[id] = initialValue || '#000000';
+    const pop = document.getElementById('cpick-pop-' + id);
+    if (!pop || pop.dataset.built) return;
+    pop.dataset.built = '1';
 
-	function switchScene(index) {
-		if (index === currentScene) return;
-		saveCurrentSceneData();
-		currentScene = index;
-		loadScene(index);
-		renderScenesBar();
-		saveScenesMeta();
-	}
+    // Grille de couleurs
+    const grid = document.createElement('div');
+    grid.className = 'cpick-grid';
+    CPICK_COLORS.forEach(c => {
+        const cell = document.createElement('div');
+        cell.className = 'cpick-color';
+        cell.style.background = c;
+        cell.dataset.color = c;
+        cell.title = c;
+        cell.onclick = () => cpickSet(id, c);
+        grid.appendChild(cell);
+    });
+    pop.appendChild(grid);
 
-	function loadScene(index) {
-		const scene = scenes[index];
-		// Vider le bureau
-		document.querySelectorAll('.widget').forEach(w => w.remove());
-		document.querySelectorAll('.shape-widget').forEach(w => w.remove());
-		strokes = []; if (drawCtx) redrawStrokes();
-		clearSelection();
-		undoStack = []; redoStack = []; updateUndoRedoBtns();
-		// Appliquer le fond
-		const bg = scene.background || 'none';
-		applyBackground(bg);
-		localStorage.setItem('boardBackground', bg);
-		// Charger le contenu
-		if (scene.config) {
-			localStorage.setItem('profBoardConfig', scene.config);
-			_lastW = window.innerWidth;
-			restoreBoardFromJSON(scene.config);
-			// Réinitialiser l'historique avec cet état
-			setTimeout(() => {
-				const cur = buildBoardJSON();
-				if (cur) { undoStack = [cur]; updateUndoRedoBtns(); }
-			}, 600);
-		} else {
-			localStorage.removeItem('profBoardConfig');
-		}
-	}
+    // Ligne hex + native
+    const row = document.createElement('div');
+    row.className = 'cpick-hex-row';
 
-	function addScene() {
-		if (scenes.length >= MAX_SCENES) return;
-		saveCurrentSceneData();
-		const newName   = 'Scène ' + (scenes.length + 1);
-		// Copie de la scène actuelle
-		const newConfig = scenes[currentScene]?.config || null;
-		const newBg     = scenes[currentScene]?.background || 'none';
-		scenes.push({ id: Date.now(), name: newName, config: newConfig, background: newBg });
-		currentScene = scenes.length - 1;
-		loadScene(currentScene);
-		renderScenesBar();
-		saveScenesMeta();
-		// Focus sur le nom pour le renommer tout de suite
-		setTimeout(() => {
-			const tabs = document.querySelectorAll('.scene-tab');
-			const lastTab = tabs[tabs.length - 1];
-			if (lastTab) {
-				const nameEl = lastTab.querySelector('.scene-tab-name');
-				if (nameEl) { nameEl.focus(); selectAllText(nameEl); }
-			}
-		}, 100);
-	}
+    const hexInput = document.createElement('input');
+    hexInput.type = 'text';
+    hexInput.className = 'cpick-hex';
+    hexInput.id = 'cpick-hex-' + id;
+    hexInput.value = initialValue || '#000000';
+    hexInput.maxLength = 7;
+    hexInput.oninput = () => {
+        const v = hexInput.value;
+        if (/^#[0-9a-fA-F]{6}$/.test(v)) cpickSet(id, v, false);
+    };
 
-	async function deleteScene(index, e) {
-		e.stopPropagation();
-		if (scenes.length <= 1) return;
-		const ok = await showConfirm('🗂️', 'Supprimer la scène', `Voulez-vous vraiment supprimer "${scenes[index].name}" ?`, 'Supprimer', true);
-		if (!ok) return;
-		scenes.splice(index, 1);
-		if (currentScene >= scenes.length) currentScene = scenes.length - 1;
-		else if (currentScene > index) currentScene--;
-		loadScene(currentScene);
-		renderScenesBar();
-		saveScenesMeta();
-	}
+    const native = document.createElement('input');
+    native.type = 'color';
+    native.className = 'cpick-native';
+    native.id = 'cpick-native-' + id;
+    native.value = initialValue || '#000000';
+    native.title = 'Choisir une couleur personnalisée';
+    native.oninput = () => cpickSet(id, native.value);
 
-	function renameScene(index, newName) {
-		const name = newName.trim() || ('Scène ' + (index + 1));
-		scenes[index].name = name;
-		saveScenesMeta();
-	}
-
-	// --- Drag-to-reorder scenes ---
-	let _sceneDragIdx = null;
-	let _sceneDragOverIdx = null;
-
-	function _sceneDragStart(e, i) {
-		_sceneDragIdx = i;
-		e.dataTransfer.effectAllowed = 'move';
-		e.dataTransfer.setData('text/plain', i);
-		setTimeout(() => { if (e.target.closest('[data-scene-row]')) e.target.closest('[data-scene-row]').style.opacity = '0.4'; }, 0);
-	}
-	function _sceneDragEnd(e) {
-		document.querySelectorAll('[data-scene-row]').forEach(r => { r.style.opacity = ''; r.style.borderTop = ''; r.style.borderBottom = ''; });
-		_sceneDragIdx = null; _sceneDragOverIdx = null;
-	}
-	function _sceneDragOverHandler(e, i) {
-		e.preventDefault();
-		e.dataTransfer.dropEffect = 'move';
-		document.querySelectorAll('[data-scene-row]').forEach(r => { r.style.borderTop = ''; r.style.borderBottom = ''; });
-		const row = document.querySelector(`[data-scene-row="${i}"]`);
-		if (row && _sceneDragIdx !== null && i !== _sceneDragIdx) {
-			if (i < _sceneDragIdx) row.style.borderTop = '2px solid #4a90e2';
-			else row.style.borderBottom = '2px solid #4a90e2';
-		}
-		_sceneDragOverIdx = i;
-	}
-	function _sceneDrop(e, i) {
-		e.preventDefault();
-		if (_sceneDragIdx === null || _sceneDragIdx === i) return;
-		saveCurrentSceneData();
-		const dragged = scenes.splice(_sceneDragIdx, 1)[0];
-		const newIdx = i > _sceneDragIdx ? i - 1 : i;
-		scenes.splice(newIdx, 0, dragged);
-		// Ajuster currentScene
-		if (currentScene === _sceneDragIdx) currentScene = newIdx;
-		else if (_sceneDragIdx < currentScene && newIdx >= currentScene) currentScene--;
-		else if (_sceneDragIdx > currentScene && newIdx <= currentScene) currentScene++;
-		saveScenesMeta();
-		renderScenesBar();
-	}
-
-	function renderScenesBar() {
-		const list   = document.getElementById('scenes-menu-list');
-		const addBtn = document.getElementById('scene-add-btn');
-		if (!list) return;
-		list.innerHTML = '';
-
-		scenes.forEach((scene, i) => {
-			const row = document.createElement('div');
-			row.setAttribute('data-scene-row', i);
-			row.style.cssText = 'display:flex;align-items:center;gap:5px;';
-			row.draggable = true;
-			row.addEventListener('dragstart', (e) => _sceneDragStart(e, i));
-			row.addEventListener('dragend',   _sceneDragEnd);
-			row.addEventListener('dragover',  (e) => _sceneDragOverHandler(e, i));
-			row.addEventListener('drop',      (e) => _sceneDrop(e, i));
-
-			// Poignée de réorganisation
-			const grip = document.createElement('div');
-			grip.title = 'Réorganiser';
-			grip.textContent = '⠿';
-			grip.style.cssText = 'color:#555;font-size:16px;cursor:grab;flex-shrink:0;width:18px;text-align:center;user-select:none;line-height:1;padding:4px 0;transition:color .15s;';
-			grip.onmouseover = () => grip.style.color = '#4a90e2';
-			grip.onmouseout  = () => grip.style.color = '#555';
-			row.appendChild(grip);
-
-			// Bouton principal
-			const btn = document.createElement('button');
-			const isActive = i === currentScene;
-			btn.style.cssText = `
-				flex:1;text-align:left;padding:8px 12px;border-radius:10px;
-				border:1px solid ${isActive ? '#4a90e2' : '#2e2e38'};
-				cursor:pointer;font-size:12px;font-weight:700;transition:background 0.15s;
-				background:${isActive ? '#1a3550' : '#28282f'};
-				color:${isActive ? '#7ab8f5' : '#aaa'};
-				overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-			`;
-			btn.textContent = (isActive ? '▶ ' : '') + scene.name;
-			btn.title = scene.name;
-			btn.addEventListener('click', () => { switchScene(i); toggleScenesMenu(); });
-			row.appendChild(btn);
-
-			// Bouton renommer ✏️
-			const editBtn = document.createElement('button');
-			editBtn.textContent = '✏️';
-			editBtn.title = 'Renommer';
-			editBtn.style.cssText = 'background:#28282f;color:#aaa;border:1px solid #2e2e38;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s;';
-			editBtn.onmouseover = () => editBtn.style.background = '#35353f';
-			editBtn.onmouseout  = () => editBtn.style.background = '#28282f';
-			editBtn.addEventListener('click', async (e) => {
-				e.stopPropagation();
-				const newName = await showPromptModal('✏️', 'Renommer la scène', null, scene.name, 'Nom de la scène...');
-				if (newName !== null) { renameScene(i, newName); renderScenesBar(); }
-			});
-			row.appendChild(editBtn);
-
-			// Bouton supprimer ×
-			if (scenes.length > 1) {
-				const del = document.createElement('button');
-				del.textContent = '×';
-				del.title = 'Supprimer';
-				del.style.cssText = 'background:#2a1a1a;color:#ff6b6b;border:1px solid #3d2020;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:15px;font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s;';
-				del.onmouseover = () => del.style.background = '#3d1a1a';
-				del.onmouseout  = () => del.style.background = '#2a1a1a';
-				del.addEventListener('click', (e) => deleteScene(i, e));
-				row.appendChild(del);
-			}
-
-			list.appendChild(row);
-		});
-
-		if (addBtn) {
-			addBtn.disabled = scenes.length >= MAX_SCENES;
-			addBtn.style.opacity = scenes.length >= MAX_SCENES ? '0.4' : '1';
-			addBtn.style.cursor  = scenes.length >= MAX_SCENES ? 'not-allowed' : 'pointer';
-		}
-
-		const scenesBtn = document.getElementById('scenes-btn');
-		if (scenesBtn) {
-			scenesBtn.textContent = `🗂️ ${scenes[currentScene]?.name || 'Scènes'}`;
-		}
-	}
-	
-	function toggleScenesMenu() {
-		const menu = document.getElementById('scenes-menu');
-		const isOpen = menu.style.display === 'block';
-		// Fermer les autres menus ouverts
-		document.getElementById('tools-menu').classList.remove('active');
-		document.getElementById('bg-submenu').classList.remove('active');
-		document.getElementById('shape-toolbar').classList.remove('active');
-		menu.style.display = isOpen ? 'none' : 'block';
-	}
-
-	// Fermer le menu scènes au clic extérieur
-	document.addEventListener('click', (e) => {
-		if (!e.target.closest('#scenes-menu') && !e.target.closest('#scenes-btn')) {
-			const menu = document.getElementById('scenes-menu');
-			if (menu) menu.style.display = 'none';
-		}
-	});
-
-	function selectAllText(el) {
-		const range = document.createRange();
-		range.selectNodeContents(el);
-		const sel = window.getSelection();
-		sel.removeAllRanges(); sel.addRange(range);
-	}
-
-
-// ══════════════════════════════════════════════════════
-//  PANNEAU STICKERS ANIMÉS — Google Noto Emoji Animation
-//  Source : https://googlefonts.github.io/noto-emoji-animation/
-//  CDN    : https://fonts.gstatic.com/s/e/notoemoji/latest/{codepoint}/512.webp
-// ══════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════
-//  ÉMOJIS CLASSIQUES — intégrés en dur, fonctionne hors-ligne
-// ══════════════════════════════════════════════════════
-const CLASSIC_DATA = {
-  "😊 Visages": ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","🫠","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙","🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🫢","🫣","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😏","😒","🙄","😬","🤥","🫨","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","☹️","😮","😯","😲","😳","🥺","🥹","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖","😺","😸","😹","😻","😼","😽","🙀","😿","😾","🙈","🙉","🙊"],
-  "🐾 Animaux": ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐴","🦄","🐝","🦋","🐌","🐞","🐜","🐢","🐍","🦎","🦕","🦖","🐙","🦑","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🦭","🐊","🐅","🐆","🦓","🦍","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🐃","🐄","🐎","🐖","🐑","🦙","🐐","🦌","🐕","🐩","🐈","🪶","🐓","🦃","🦚","🦜","🦢","🕊️","🐇","🦔","🌵","🌲","🌳","🌴","🌱","🌿","☘️","🍀","🍄","🌾","💐","🌷","🌹","🌺","🌸","🌼","🌻","🌞","🌝","🌙","⭐","✨","⚡","🌈","❄️","🔥","💧","🌊","🌪️","🪐"],
-  "🍕 Nourriture": ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥒","🌶️","🌽","🥕","🥔","🍠","🥐","🍞","🥖","🧀","🥚","🍳","🥞","🧇","🥓","🍗","🍖","🌭","🍔","🍟","🍕","🌮","🌯","🥗","🍲","🍛","🍣","🍱","🥟","🍙","🍚","🍘","🍥","🎂","🍰","🧁","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🧃","🥤","🧋","☕","🍵","🍺","🍻","🥂","🍷","🍸","🍹","🧊"],
-  "🎉 Fêtes": ["🎉","🎊","🎈","🎁","🎀","🎗️","🎖️","🏆","🥇","🥈","🥉","🏅","🎠","🎡","🎢","🎪","🤹","🎭","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🎻","🎲","🎯","🎱","🎳","⛳","🎣","🤿","🎽","🎿","🛷","🥌","🪃","🏹","🎮","🕹️","🎰","🧩","♟️","🪄","🎩","🪅","🪩","🪆","🎑","🎐","🎏","🧧","🎎","🎋","🎆","🎇","🧨"],
-  "🏫 École": ["📚","📖","📝","✏️","🖊️","🖋️","🖌️","📐","📏","🗂️","📁","📂","📊","📈","📉","🗒️","📋","📌","📍","📎","🖇️","✂️","🔒","🔓","🔑","🗝️","🔧","🪛","🔩","⚙️","🧮","💡","🔦","🔬","🔭","📡","🧪","🧫","🧬","💉","💊","🩹","🩺","⏰","⏱️","⏲️","⌛","⏳","📅","📆","🗓️","🌐","🗺️","🧭","💻","🖥️","⌨️","🖱️","📱","📷","📹","🎥","💾","📀","🔋","🔊","📢","📣","🔔","🏫","🚗","🚌","✈️","🚀","🎒","👓","🕶️","🥽","💼","👜","👝","🎓","📡"],
-  "💡 Objets": ["💻","🖥️","🖨️","⌨️","🖱️","💾","💿","📀","📱","☎️","📞","📺","📷","📸","📹","🎥","📽️","🔋","💡","🔦","🕯️","💵","💴","💶","💷","💸","💳","🪙","💎","⚖️","🧲","🪄","🎩","🧢","👑","💍","💄","👓","🕶️","🥽","🌂","☂️","🧵","🧶","🪢","🧸","🪆","🎀","🎁","🔑","🗝️","🔧","🪛","🔩","⚙️","🪜","🧰","🔬","🔭","📡","🧪","💊","🩹","🩺","⏰","🗺️","🧭","🎒","👜","💼","📚","📖","📝","✏️","🖊️","📐","📏","🪤","🧲","⚗️","🧯"],
-  "🔣 Symboles": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","🩷","🩵","🩶","❤️‍🔥","❤️‍🩹","💔","💕","💞","💓","💗","💖","💘","💝","✅","☑️","❎","❌","⭕","🛑","⛔","📛","🚫","💯","⚠️","☢️","☣️","🔞","📵","🔕","🔇","🔊","📢","📣","🔔","▶️","⏩","⏭️","◀️","⏪","⏮️","🔼","🔽","⏸️","⏹️","⏺️","🎦","📶","🔅","🔆","➕","➖","✖️","➗","♾️","♻️","🔴","🟠","🟡","🟢","🔵","🟣","🟤","⚫","⚪","🟥","🟧","🟨","🟩","🟦","🟪","🟫","⬛","⬜","🔶","🔷","🔸","🔹","🔺","🔻","💠","🔘","⬆️","↗️","➡️","↘️","⬇️","↙️","⬅️","↖️","↕️","↔️","↩️","↪️","⤴️","⤵️","🔃","🔄","🔙","🔚","🔛","🔜","🔝","✨","💫","⚡","💥","🔥","🌟"],
-  "🌍 Nature": ["🌍","🌎","🌏","🌐","🗺️","🧭","🌋","🗻","🏔️","⛰️","🏕️","🏖️","🏜️","🏝️","🏞️","🌃","🏙️","🌄","🌅","🌆","🌇","🌉","🌌","🎇","🎆","🌠","🌊","🌬️","🌀","🌈","🌂","☂️","☔","⛱️","⚡","❄️","🌨️","☃️","⛄","🔥","💧","🌵","🌴","🌲","🌳","🌱","🌿","☘️","🌾","🍂","🍁","🌺","🌸","🌼","🌻","🌹","🌷","🪷","💐","🍄","🌞","🌝","🌛","🌜","🌚","🌕","🌔","🌓","🌒","🌑","🌙","🌟","⭐","💫","✨","🪐","☄️","🌤️","⛅","🌥️","🌦️","🌧️","🌩️","🌪️","🌫️","🪸","🪨","🪵"],
-  "👤 Personnes": ["👶","🧒","👦","👧","🧑","👱","👨","🧔","👩","🧓","👴","👵","🙍","🙎","🙅","🙆","💁","🙋","🧏","🙇","🤦","🤷","💆","💇","🚶","🧍","🧎","🏃","💃","🕺","👯","🛀","🧖","🛌","👫","👬","👭","💑","💏","👪","👮","🕵️","💂","🥷","👷","🤴","👸","👳","👲","🧕","🤵","👰","🤰","🤱","🎅","🤶","🧙","🧝","🧛","🧟","🧞","🧜","🧚","🧌","👼","👍","👎","👋","🤚","🖐️","✋","🖖","🤙","👈","👉","👆","👇","☝️","✊","👊","🤛","🤜","👏","🙌","🤲","🫶","🤝","🙏","✍️","💅","💪","🫵","🫰","🫱","🫲"]
-};
-
-let spCurrentClassicTab = Object.keys(CLASSIC_DATA)[0];
-let spMode = 'animated'; // 'animated' | 'classic'
-
-function checkStickerConnectivity() {
-  var probe = new Image();
-  probe.onload = function() {
-    var b = document.getElementById('sp-offline-badge');
-    if (b) b.style.display = 'none';
-  };
-  probe.onerror = function() {
-    var b = document.getElementById('sp-offline-badge');
-    if (b) b.style.display = 'inline-block';
-    if (spMode === 'animated') setStickerMode('classic', true);
-  };
-  probe.src = NOTO_CDN + '/1f600/512.webp?_t=' + Date.now();
+    row.appendChild(hexInput);
+    row.appendChild(native);
+    pop.appendChild(row);
 }
 
-function setStickerMode(mode, auto) {
-  auto = auto || false;
-  spMode = mode;
-  var animSection  = document.getElementById('sp-animated-section');
-  var classSection = document.getElementById('sp-classic-section');
-  var btnAnim  = document.getElementById('sp-mode-animated');
-  var btnClass = document.getElementById('sp-mode-classic');
-  var search   = document.getElementById('sp-search');
-  if (mode === 'animated') {
-    if (animSection)  animSection.style.display  = '';
-    if (classSection) classSection.style.display = 'none';
-    if (btnAnim)  btnAnim.classList.add('active');
-    if (btnClass) btnClass.classList.remove('active');
-    if (search) search.placeholder = '🔍 Rechercher dans les émojis animés…';
-  } else {
-    if (animSection)  animSection.style.display  = 'none';
-    if (classSection) classSection.style.display = '';
-    if (btnAnim)  btnAnim.classList.remove('active');
-    if (btnClass) btnClass.classList.add('active');
-    if (search) search.placeholder = '🔍 Rechercher dans les émojis classiques…';
-    if (!auto) {
-      spCurrentClassicTab = Object.keys(CLASSIC_DATA)[0];
-      document.querySelectorAll('#sp-classic-tabs .sp-tab')
-        .forEach(function(b, i) { b.classList.toggle('active', i === 0); });
+function cpickOpen(id, swatchEl) {
+    // Initialiser si pas encore fait
+    const initialColor = swatchEl.style.background || '#000000';
+    cpickInit(id, _cpickValues[id] || initialColor);
+
+    const pop = document.getElementById('cpick-pop-' + id);
+    if (!pop) return;
+
+    // Fermer tous les autres
+    document.querySelectorAll('.cpick-popup.open').forEach(p => {
+        if (p !== pop) p.classList.remove('open');
+    });
+
+    if (pop.classList.contains('open')) {
+        pop.classList.remove('open');
+        return;
     }
-  }
-  if (search) search.value = '';
-  renderStickerPanel();
+
+    // Restaurer la sélection texte AVANT d'afficher (pour qu'elle reste visible)
+    if ((id === 'text-color' || id === 'highlight-color') && savedSelection) {
+        try {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelection);
+        } catch(e) {}
+    }
+
+    // Positionner au-dessus du swatch
+    pop.classList.add('open');
+    const rect = swatchEl.getBoundingClientRect();
+    let top = rect.top - pop.offsetHeight - 8;
+    let left = rect.left;
+
+    // Ajuster si sort de l'écran
+    if (top < 8) top = rect.bottom + 8;
+    if (left + 198 > window.innerWidth - 8) left = window.innerWidth - 206;
+    if (left < 8) left = 8;
+
+    pop.style.top  = top + 'px';
+    pop.style.left = left + 'px';
+
+    // Repositionner après rendu (hauteur réelle)
+    requestAnimationFrame(() => {
+        let t = rect.top - pop.offsetHeight - 8;
+        if (t < 8) t = rect.bottom + 8;
+        pop.style.top = t + 'px';
+    });
+
+    // Mettre à jour la sélection courante
+    pop.querySelectorAll('.cpick-color').forEach(c => {
+        c.classList.toggle('selected', c.dataset.color.toLowerCase() === (_cpickValues[id]||'').toLowerCase());
+    });
+    const hexEl = document.getElementById('cpick-hex-' + id);
+    if (hexEl) hexEl.value = _cpickValues[id] || '';
+    const nativeEl = document.getElementById('cpick-native-' + id);
+    if (nativeEl) nativeEl.value = _cpickValues[id] || '#000000';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var ctabs = document.getElementById('sp-classic-tabs');
-  if (!ctabs) return;
-  ctabs.addEventListener('click', function(e) {
-    var btn = e.target.closest('[data-ctab]');
-    if (!btn) return;
-    document.querySelectorAll('#sp-classic-tabs .sp-tab')
-      .forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    spCurrentClassicTab = btn.dataset.ctab;
-    var s = document.getElementById('sp-search');
-    if (s) s.value = '';
-    renderStickerPanel();
-  });
+function cpickSet(id, color, closeAfter = true) {
+    _cpickValues[id] = color;
+
+    // Mettre à jour le swatch
+    const wrap = document.getElementById('cpick-' + id);
+    if (wrap) {
+        const swatch = wrap.querySelector('.cpick-swatch');
+        if (swatch) swatch.style.background = color;
+    }
+
+    // Sync hex & native
+    const hexEl = document.getElementById('cpick-hex-' + id);
+    if (hexEl) hexEl.value = color;
+    const nativeEl = document.getElementById('cpick-native-' + id);
+    if (nativeEl) nativeEl.value = color;
+
+    // Mettre à jour sélection dans la grille
+    const pop = document.getElementById('cpick-pop-' + id);
+    if (pop) pop.querySelectorAll('.cpick-color').forEach(c =>
+        c.classList.toggle('selected', c.dataset.color.toLowerCase() === color.toLowerCase())
+    );
+
+    // Déclencher l'action métier selon l'id
+    cpickDispatch(id, color);
+
+    if (closeAfter && id !== 'text-color' && id !== 'highlight-color') {
+        if (pop) pop.classList.remove('open');
+    }
+}
+
+function cpickDispatch(id, color) {
+    if (id === 'draw-color') {
+        window._drawColor = color;
+    } else if (id === 'shape-recog-fill') {
+        window._shapeRecogFill = color;
+    } else if (id === 'shape-stroke-color') {
+        window._shapeStrokeColor = color;
+    } else if (id === 'shape-fill-color') {
+        window._shapeFillColor = color;
+    } else if (id === 'text-color') {
+        if (savedSelection) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelection);
+            // Ne pas remettre à null : on veut pouvoir changer de couleur plusieurs fois
+        }
+        applyTextColor(color);
+    } else if (id === 'highlight-color') {
+        if (savedSelection) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelection);
+        }
+        applyHighlightColor(color);
+    } else if (id === 'widget-bg') {
+        if (currentActiveWidget) changeWidgetBgGlobal(null, color);
+    }
+}
+
+// cpick close → géré dans le mousedown principal
+
+// Helper pour lire la couleur courante d'un picker
+function cpickGetValue(id) {
+    return _cpickValues[id] || null;
+}
+
+// =========================================================================
+// NOUVEAU MENU FLOTTANT
+// =========================================================================
+function toggleMainMenu() {
+    const menu = document.getElementById('main-menu');
+    const fab  = document.getElementById('fab-btn');
+    const isOpen = menu.classList.contains('open');
+    if (isOpen) {
+        closeMainMenu();
+    } else {
+        menu.classList.add('open');
+        fab.classList.add('menu-open');
+        setTimeout(_fixSubmenuOverflow, 0);
+    }
+}
+
+function closeMainMenu() {
+    document.getElementById('main-menu').classList.remove('open');
+    document.getElementById('fab-btn').classList.remove('menu-open');
+}
+
+function _closeAllToolbars() {
+    if (typeof stopDrawing      === 'function') stopDrawing();
+    if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+    if (typeof stopEraserMode   === 'function') stopEraserMode();
+}
+
+function openMmPanel(type) {
+    closeMainMenu();
+    if (type === 'draw') {
+        if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar();
+    } else if (type === 'shapes') {
+        if (typeof toggleShapeToolbar === 'function') toggleShapeToolbar();
+    }
+}
+
+function closeMmPanel() {
+    if (typeof stopDrawing    === 'function') stopDrawing();
+    if (typeof stopEraserMode === 'function') stopEraserMode();
+    if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+}
+
+// Fermer le menu au clic extérieur
+document.addEventListener('mousedown', function(e) {
+    const menu = document.getElementById('main-menu');
+    const fab  = document.getElementById('fab-btn');
+    if (!fab.contains(e.target) && !menu.contains(e.target)) {
+        if (menu.classList.contains('open')) closeMainMenu();
+    }
+    // Fermer les color pickers si clic en dehors
+    if (!e.target.closest('.cpick-wrap') && !e.target.closest('.cpick-popup')) {
+        document.querySelectorAll('.cpick-popup.open').forEach(p => p.classList.remove('open'));
+    }
 });
 
-const NOTO_CDN = 'https://fonts.gstatic.com/s/e/notoemoji/latest';
-
-const NOTO_DATA = {
-  "\ud83d\ude0a Visages & \u00e9motions": [{"c": "1f600", "n": "smile"}, {"c": "1f603", "n": "smile with big eyes"}, {"c": "1f604", "n": "grin"}, {"c": "1f601", "n": "grinning"}, {"c": "1f606", "n": "laughing"}, {"c": "1f605", "n": "grin sweat"}, {"c": "1f602", "n": "joy"}, {"c": "1f923", "n": "rofl"}, {"c": "1f62d", "n": "loudly crying"}, {"c": "1f609", "n": "wink"}, {"c": "1f617", "n": "kissing"}, {"c": "1f619", "n": "kissing smiling eyes"}, {"c": "1f61a", "n": "kissing closed eyes"}, {"c": "1f618", "n": "kissing heart"}, {"c": "1f970", "n": "heart face"}, {"c": "1f60d", "n": "heart eyes"}, {"c": "1f929", "n": "star struck"}, {"c": "1f973", "n": "partying face"}, {"c": "1fae0", "n": "melting"}, {"c": "1f643", "n": "upside down face"}, {"c": "1f642", "n": "slightly happy"}, {"c": "1f972", "n": "happy cry"}, {"c": "1f979", "n": "holding back tears"}, {"c": "1f60a", "n": "blush"}, {"c": "263a_fe0f", "n": "warm smile"}, {"c": "1f60c", "n": "relieved"}, {"c": "1f642_200d_2195_fe0f", "n": "head nod"}, {"c": "1f642_200d_2194_fe0f", "n": "head shake"}, {"c": "1f60f", "n": "smirk"}, {"c": "1f924", "n": "drool"}, {"c": "1f60b", "n": "yum"}, {"c": "1f61b", "n": "stuck out tongue"}, {"c": "1f61d", "n": "squinting tongue"}, {"c": "1f61c", "n": "winky tongue"}, {"c": "1f92a", "n": "zany face"}, {"c": "1f974", "n": "woozy"}, {"c": "1f614", "n": "pensive"}, {"c": "1f97a", "n": "pleading"}, {"c": "1f62c", "n": "grimacing"}, {"c": "1f611", "n": "expressionless"}, {"c": "1f610", "n": "neutral face"}, {"c": "1f636", "n": "mouth none"}, {"c": "1f636_200d_1f32b_fe0f", "n": "face in clouds"}, {"c": "1fae5", "n": "dotted line face"}, {"c": "1f910", "n": "zipper face"}, {"c": "1fae1", "n": "salute"}, {"c": "1f914", "n": "thinking face"}, {"c": "1f92b", "n": "shushing face"}, {"c": "1fae2", "n": "hand over mouth"}, {"c": "1f92d", "n": "chuckling"}, {"c": "1f971", "n": "yawn"}, {"c": "1f917", "n": "hug face"}, {"c": "1fae3", "n": "peeking"}, {"c": "1f631", "n": "screaming"}, {"c": "1f928", "n": "raised eyebrow"}, {"c": "1f9d0", "n": "monocle"}, {"c": "1f612", "n": "unamused"}, {"c": "1f644", "n": "rolling eyes"}, {"c": "1f62e_200d_1f4a8", "n": "exhale"}, {"c": "1f624", "n": "triumph"}, {"c": "1f620", "n": "angry"}, {"c": "1f621", "n": "rage"}, {"c": "1f92c", "n": "cursing"}, {"c": "1f61e", "n": "sad"}, {"c": "1f613", "n": "sweat"}, {"c": "1f61f", "n": "worried"}, {"c": "1f625", "n": "concerned"}, {"c": "1f622", "n": "cry"}, {"c": "2639_fe0f", "n": "big frown"}, {"c": "1f641", "n": "frown"}, {"c": "1fae4", "n": "diagonal mouth"}, {"c": "1f615", "n": "slightly frowning"}, {"c": "1f630", "n": "anxious with sweat"}, {"c": "1f628", "n": "scared"}, {"c": "1f627", "n": "anguished"}, {"c": "1f626", "n": "gasp"}, {"c": "1f62e", "n": "mouth open"}, {"c": "1f62f", "n": "surprised"}, {"c": "1f632", "n": "astonished"}, {"c": "1f633", "n": "flushed"}, {"c": "1f92f", "n": "exploding head"}, {"c": "1f616", "n": "confounded"}, {"c": "1f623", "n": "persevering"}, {"c": "1f629", "n": "weary"}, {"c": "1f62b", "n": "distraught"}, {"c": "1f635", "n": "x eyes"}, {"c": "1f635_200d_1f4ab", "n": "dizzy face"}, {"c": "1fae8", "n": "shaking face"}, {"c": "1f976", "n": "cold face"}, {"c": "1f975", "n": "hot face"}, {"c": "1f922", "n": "nauseated"}, {"c": "1f92e", "n": "vomit"}, {"c": "1fae9", "n": "tired"}, {"c": "1f634", "n": "sleep"}, {"c": "1f62a", "n": "sleepy"}, {"c": "1f927", "n": "sneeze"}, {"c": "1f912", "n": "thermometer face"}, {"c": "1f915", "n": "bandage face"}, {"c": "1f637", "n": "mask"}, {"c": "1f925", "n": "liar"}, {"c": "1f607", "n": "halo"}, {"c": "1f920", "n": "cowboy"}, {"c": "1f911", "n": "money face"}, {"c": "1f913", "n": "nerd face"}, {"c": "1f60e", "n": "sunglasses face"}, {"c": "1f978", "n": "disguise"}, {"c": "1f921", "n": "clown"}, {"c": "1f4a9", "n": "poop"}, {"c": "1f608", "n": "imp smile"}, {"c": "1f47f", "n": "imp frown"}, {"c": "1f47b", "n": "ghost"}, {"c": "1f480", "n": "skull"}, {"c": "2603_fe0f", "n": "snowman with snow"}, {"c": "26c4", "n": "snowman"}, {"c": "1f383", "n": "jack o lantern"}, {"c": "1f916", "n": "robot"}, {"c": "1f47d", "n": "alien"}, {"c": "1f47e", "n": "alien monster"}, {"c": "1f31e", "n": "sun with face"}, {"c": "1f31b", "n": "moon face"}, {"c": "1f31c", "n": "moon face last"}, {"c": "1f63a", "n": "smiley cat"}, {"c": "1f638", "n": "smile cat"}, {"c": "1f639", "n": "joy cat"}, {"c": "1f63b", "n": "heart eyes cat"}, {"c": "1f63c", "n": "smirk cat"}, {"c": "1f63d", "n": "kissing cat"}, {"c": "1f640", "n": "scream cat"}, {"c": "1f63f", "n": "crying cat"}, {"c": "1f63e", "n": "pouting cat"}, {"c": "1f648", "n": "see no evil"}, {"c": "1f649", "n": "hear no evil"}, {"c": "1f64a", "n": "speak no evil"}, {"c": "1f31f", "n": "glowing star"}, {"c": "2728", "n": "sparkles"}, {"c": "26a1", "n": "lightning"}, {"c": "1f4a5", "n": "collision"}, {"c": "1f525", "n": "fire"}, {"c": "1f4af", "n": "100"}, {"c": "1f389", "n": "party popper"}, {"c": "1f38a", "n": "confetti ball"}, {"c": "2764_fe0f", "n": "red heart"}, {"c": "1f9e1", "n": "orange heart"}, {"c": "1f49b", "n": "yellow heart"}, {"c": "1f49a", "n": "green heart"}, {"c": "1fa75", "n": "light blue heart"}, {"c": "1f499", "n": "blue heart"}, {"c": "1f49c", "n": "purple heart"}, {"c": "1f90e", "n": "brown heart"}, {"c": "1f5a4", "n": "black heart"}, {"c": "1fa76", "n": "grey heart"}, {"c": "1f90d", "n": "white heart"}, {"c": "1fa77", "n": "pink heart"}, {"c": "1f498", "n": "cupid"}, {"c": "1f49d", "n": "gift heart"}, {"c": "1f496", "n": "sparkling heart"}, {"c": "1f497", "n": "heart grow"}, {"c": "1f493", "n": "beating heart"}, {"c": "1f49e", "n": "revolving hearts"}, {"c": "1f495", "n": "two hearts"}, {"c": "1f48c", "n": "love letter"}, {"c": "1f49f", "n": "heart box"}, {"c": "2763_fe0f", "n": "heart exclamation"}, {"c": "2764_fe0f_200d_1fa79", "n": "bandaged heart"}, {"c": "1f494", "n": "broken heart"}, {"c": "2764_fe0f_200d_1f525", "n": "fire heart"}, {"c": "1f48b", "n": "kiss"}, {"c": "1f463", "n": "footprints"}, {"c": "1fac6", "n": "fingerprint"}, {"c": "1fac0", "n": "anatomical heart"}, {"c": "1fa78", "n": "blood"}, {"c": "1f9a0", "n": "microbe"}, {"c": "1f440", "n": "eyes"}, {"c": "1f441_fe0f", "n": "eye"}, {"c": "1fae6", "n": "biting lip"}, {"c": "1f443", "n": "nose"}, {"c": "1f4aa", "n": "muscle"}, {"c": "1f44f", "n": "clap"}, {"c": "1f44d", "n": "thumbs up"}, {"c": "1f44e", "n": "thumbs down"}, {"c": "1faf6", "n": "heart hands"}, {"c": "1f64c", "n": "raising hands"}, {"c": "1f450", "n": "open hands"}, {"c": "1f932", "n": "palms up"}, {"c": "1f91c", "n": "fist right"}, {"c": "1f91b", "n": "fist left"}, {"c": "270a", "n": "raised fist"}, {"c": "1f44a", "n": "fist"}, {"c": "1faf3", "n": "palm down"}, {"c": "1faf4", "n": "palm up"}, {"c": "1faf1", "n": "hand right"}, {"c": "1faf2", "n": "hand left"}, {"c": "1faf8", "n": "push right"}, {"c": "1faf7", "n": "push left"}, {"c": "1f44b", "n": "wave"}, {"c": "1f91a", "n": "back hand"}, {"c": "1f590_fe0f", "n": "palm"}, {"c": "270b", "n": "raised hand"}, {"c": "1f596", "n": "vulcan"}, {"c": "1f91f", "n": "love you"}, {"c": "1f918", "n": "metal"}, {"c": "270c_fe0f", "n": "victory"}, {"c": "1f91e", "n": "crossed fingers"}, {"c": "1faf0", "n": "finger heart"}, {"c": "1f919", "n": "call me"}, {"c": "1f90c", "n": "pinched fingers"}, {"c": "1f90f", "n": "pinch"}, {"c": "1f44c", "n": "ok"}, {"c": "1faf5", "n": "pointing"}, {"c": "1f449", "n": "point right"}, {"c": "1f448", "n": "point left"}, {"c": "261d_fe0f", "n": "index finger"}, {"c": "1f446", "n": "point up"}, {"c": "1f447", "n": "point down"}, {"c": "1f595", "n": "middle finger"}, {"c": "270d_fe0f", "n": "writing hand"}, {"c": "1f933", "n": "selfie"}, {"c": "1f64f", "n": "pray"}, {"c": "1f485", "n": "nail care"}, {"c": "1f91d", "n": "handshake"}],
-  "\ud83d\udc65 Personnes": [{"c": "1f483", "n": "dancer"}],
-  "\ud83d\udc3e Animaux & nature": [{"c": "1f490", "n": "bouquet"}, {"c": "1f339", "n": "rose"}, {"c": "1f940", "n": "wilted flower"}, {"c": "1f342", "n": "fallen leaf"}, {"c": "1f331", "n": "plant"}, {"c": "1f343", "n": "leaves"}, {"c": "1f340", "n": "four leaf clover"}, {"c": "1fabe", "n": "leafless tree"}, {"c": "2744_fe0f", "n": "snowflake"}, {"c": "1f30b", "n": "volcano"}, {"c": "1f305", "n": "sunrise"}, {"c": "1f304", "n": "sunrise mountains"}, {"c": "1f308", "n": "rainbow"}, {"c": "1fae7", "n": "bubbles"}, {"c": "1f30a", "n": "ocean"}, {"c": "1f32c_fe0f", "n": "wind"}, {"c": "1f32a_fe0f", "n": "tornado"}, {"c": "1f4a7", "n": "droplet"}, {"c": "1f327_fe0f", "n": "rain"}, {"c": "1f329_fe0f", "n": "lightning cloud"}, {"c": "1f30d", "n": "globe europe"}, {"c": "1f30e", "n": "globe americas"}, {"c": "1f30f", "n": "globe asia"}, {"c": "2604_fe0f", "n": "comet"}, {"c": "1f42e", "n": "cow"}, {"c": "1f984", "n": "unicorn"}, {"c": "1f98e", "n": "lizard"}, {"c": "1f409", "n": "dragon"}, {"c": "1f996", "n": "t rex"}, {"c": "1f995", "n": "dinosaur"}, {"c": "1f422", "n": "turtle"}, {"c": "1f40a", "n": "crocodile"}, {"c": "1f40d", "n": "snake"}, {"c": "1f438", "n": "frog"}, {"c": "1f407", "n": "rabbit"}, {"c": "1f400", "n": "rat"}, {"c": "1f429", "n": "poodle"}, {"c": "1f415", "n": "dog"}, {"c": "1f416", "n": "pig"}, {"c": "1f40e", "n": "horse"}, {"c": "1facf", "n": "donkey"}, {"c": "1f402", "n": "ox"}, {"c": "1f410", "n": "goat"}, {"c": "1f998", "n": "kangaroo"}, {"c": "1f405", "n": "tiger"}, {"c": "1f412", "n": "monkey"}, {"c": "1f98d", "n": "gorilla"}, {"c": "1f9a7", "n": "orangutan"}, {"c": "1f43f_fe0f", "n": "chipmunk"}, {"c": "1f9a6", "n": "otter"}, {"c": "1f987", "n": "bat"}, {"c": "1f426", "n": "bird"}, {"c": "1f426_200d_2b1b", "n": "black bird"}, {"c": "1f413", "n": "rooster"}, {"c": "1f423", "n": "hatching chick"}, {"c": "1f424", "n": "baby chick"}, {"c": "1f425", "n": "hatched chick"}, {"c": "1f985", "n": "eagle"}, {"c": "1f989", "n": "owl"}, {"c": "1f54a_fe0f", "n": "dove"}, {"c": "1fabf", "n": "goose"}, {"c": "1f99a", "n": "peacock"}, {"c": "1f426_200d_1f525", "n": "phoenix"}, {"c": "1f9ad", "n": "seal"}, {"c": "1f988", "n": "shark"}, {"c": "1f42c", "n": "dolphin"}, {"c": "1f433", "n": "whale"}, {"c": "1f41f", "n": "fish"}, {"c": "1f421", "n": "blowfish"}, {"c": "1f99e", "n": "lobster"}, {"c": "1f980", "n": "crab"}, {"c": "1f419", "n": "octopus"}, {"c": "1fabc", "n": "jellyfish"}, {"c": "1f982", "n": "scorpion"}, {"c": "1f577_fe0f", "n": "spider"}, {"c": "1f40c", "n": "snail"}, {"c": "1f41c", "n": "ant"}, {"c": "1f99f", "n": "mosquito"}, {"c": "1fab3", "n": "cockroach"}, {"c": "1fab0", "n": "fly"}, {"c": "1f41d", "n": "bee"}, {"c": "1f41e", "n": "ladybug"}, {"c": "1f98b", "n": "butterfly"}, {"c": "1f41b", "n": "bug"}, {"c": "1fab1", "n": "worm"}, {"c": "1f43e", "n": "paw prints"}],
-  "\ud83c\udf55 Nourriture": [{"c": "1f345", "n": "tomato"}, {"c": "1fadc", "n": "root vegetable"}, {"c": "1f373", "n": "cooking"}, {"c": "1f32f", "n": "burrito"}, {"c": "1f35d", "n": "spaghetti"}, {"c": "1f35c", "n": "steaming bowl"}, {"c": "1f37f", "n": "popcorn"}, {"c": "2615", "n": "hot beverage"}, {"c": "1f37b", "n": "beer mugs"}, {"c": "1f942", "n": "clinking glasses"}, {"c": "1f37e", "n": "champagne"}, {"c": "1f377", "n": "wine glass"}, {"c": "1fad7", "n": "pour"}, {"c": "1f379", "n": "tropical drink"}],
-  "\ud83d\ude80 Voyages": [{"c": "1f6a7", "n": "construction"}, {"c": "1f6a8", "n": "police light"}, {"c": "1f6b2", "n": "bicycle"}, {"c": "1f697", "n": "car"}, {"c": "1f3ce_fe0f", "n": "racing car"}, {"c": "1f695", "n": "taxi"}, {"c": "1f68c", "n": "bus"}, {"c": "26f5", "n": "sailboat"}, {"c": "1f6f6", "n": "canoe"}, {"c": "1f6f8", "n": "flying saucer"}, {"c": "1f680", "n": "rocket"}, {"c": "1f6eb", "n": "airplane departure"}, {"c": "1f6ec", "n": "airplane arrival"}, {"c": "1f3a2", "n": "roller coaster"}, {"c": "1f3a1", "n": "ferris wheel"}, {"c": "1f3d5_fe0f", "n": "camping"}],
-  "\ud83c\udf89 Activit\u00e9s": [{"c": "1f388", "n": "balloon"}, {"c": "1f382", "n": "birthday cake"}, {"c": "1f381", "n": "gift"}, {"c": "1f386", "n": "fireworks"}, {"c": "1fa85", "n": "pinata"}, {"c": "1faa9", "n": "disco ball"}, {"c": "1f947", "n": "gold medal"}, {"c": "1f948", "n": "silver medal"}, {"c": "1f949", "n": "bronze medal"}, {"c": "1f3c6", "n": "trophy"}, {"c": "26bd", "n": "soccer"}, {"c": "26be", "n": "baseball"}, {"c": "1f94e", "n": "softball"}, {"c": "1f3be", "n": "tennis"}, {"c": "1f3f8", "n": "badminton"}, {"c": "1f94d", "n": "lacrosse"}, {"c": "1f3cf", "n": "cricket"}, {"c": "1f3d1", "n": "field hockey"}, {"c": "1f3d2", "n": "ice hockey"}, {"c": "26f8_fe0f", "n": "ice skate"}, {"c": "1f6fc", "n": "roller skates"}, {"c": "1fa70", "n": "ballet shoes"}, {"c": "1f6f9", "n": "skateboard"}, {"c": "26f3", "n": "golf"}, {"c": "1f3af", "n": "target"}, {"c": "1f94f", "n": "flying disc"}, {"c": "1fa83", "n": "boomerang"}, {"c": "1fa81", "n": "kite"}, {"c": "1f3a3", "n": "fishing"}, {"c": "1f94b", "n": "martial arts"}, {"c": "1f3b1", "n": "8 ball"}, {"c": "1f3d3", "n": "ping pong"}, {"c": "1f3b3", "n": "bowling"}, {"c": "1f3b2", "n": "die"}, {"c": "1f3b0", "n": "slot machine"}, {"c": "1fa84", "n": "wand"}, {"c": "1f4f8", "n": "camera flash"}, {"c": "1fadf", "n": "splatter"}, {"c": "1f3b7", "n": "saxophone"}, {"c": "1f3ba", "n": "trumpet"}, {"c": "1f3bb", "n": "violin"}, {"c": "1fa89", "n": "harp"}, {"c": "1f941", "n": "drum"}, {"c": "1fa87", "n": "maracas"}, {"c": "1f3ac", "n": "clapper"}],
-  "\ud83d\udca1 Objets": [{"c": "1f50b", "n": "battery"}, {"c": "1faab", "n": "battery low"}, {"c": "1fa99", "n": "coin"}, {"c": "1f4b8", "n": "money wings"}, {"c": "1f48e", "n": "gem"}, {"c": "2696_fe0f", "n": "balance scale"}, {"c": "1f4a1", "n": "light bulb"}, {"c": "1f393", "n": "graduation cap"}, {"c": "1f48d", "n": "ring"}, {"c": "1faad", "n": "fan"}, {"c": "2602_fe0f", "n": "umbrella"}, {"c": "1fa8f", "n": "shovel"}, {"c": "2699_fe0f", "n": "gear"}, {"c": "26d3_fe0f_200d_1f4a5", "n": "broken chain"}, {"c": "270f_fe0f", "n": "pencil"}, {"c": "23f0", "n": "alarm clock"}, {"c": "1f6ce_fe0f", "n": "bellhop"}, {"c": "1f514", "n": "bell"}, {"c": "1f52e", "n": "crystal ball"}, {"c": "1f4a3", "n": "bomb"}, {"c": "1faa4", "n": "mousetrap"}, {"c": "1f512", "n": "locked"}],
-  "\ud83d\udd23 Symboles": [{"c": "2648", "n": "aries"}, {"c": "2649", "n": "taurus"}, {"c": "264a", "n": "gemini"}, {"c": "264b", "n": "cancer"}, {"c": "264c", "n": "leo"}, {"c": "264d", "n": "virgo"}, {"c": "264e", "n": "libra"}, {"c": "264f", "n": "scorpio"}, {"c": "2650", "n": "sagittarius"}, {"c": "2651", "n": "capricorn"}, {"c": "2652", "n": "aquarius"}, {"c": "2653", "n": "pisces"}, {"c": "26ce", "n": "ophiuchus"}, {"c": "2757", "n": "exclamation"}, {"c": "2753", "n": "question"}, {"c": "2049_fe0f", "n": "interrobang"}, {"c": "203c_fe0f", "n": "double exclamation"}, {"c": "274c", "n": "cross"}, {"c": "1f198", "n": "sos"}, {"c": "1f4f4", "n": "phone off"}, {"c": "2622_fe0f", "n": "radioactive"}, {"c": "2623_fe0f", "n": "biohazard"}, {"c": "26a0_fe0f", "n": "warning"}, {"c": "2705", "n": "check"}, {"c": "1f195", "n": "new"}, {"c": "1f193", "n": "free"}, {"c": "1f199", "n": "up"}, {"c": "1f192", "n": "cool"}, {"c": "1f6ae", "n": "litter"}, {"c": "262e_fe0f", "n": "peace"}, {"c": "262f_fe0f", "n": "yin yang"}, {"c": "267e_fe0f", "n": "infinity"}, {"c": "1f3b6", "n": "musical notes"}, {"c": "2795", "n": "plus"}],
-  "\ud83c\udff3\ufe0f Drapeaux": [{"c": "1f3c1", "n": "chequered flag"}, {"c": "1f6a9", "n": "triangular flag"}, {"c": "1f3f4", "n": "black flag"}, {"c": "1f3f3_fe0f", "n": "white flag"}],
-};
-// Total: 442 emojis, 9 catégories
-
-let spCurrentTab = Object.keys(NOTO_DATA)[0];
-
-// Init des onglets
-document.getElementById('sp-tabs').addEventListener('click', (e) => {
-	const btn = e.target.closest('.sp-tab');
-	if (!btn) return;
-	document.querySelectorAll('.sp-tab').forEach(b => b.classList.remove('active'));
-	btn.classList.add('active');
-	spCurrentTab = btn.dataset.tab;
-	document.getElementById('sp-search').value = '';
-	renderStickerPanel();
+// Fermer les barres d'outils quand on clique sur un item du menu
+// (sauf les items Dessin et Formes qui les ouvrent)
+document.addEventListener('click', function(e) {
+    const item = e.target.closest('.mm-item, .mm-sub-item');
+    if (!item) return;
+    const triggersToolbar = item.id === 'mm-draw-btn' || item.id === 'mm-shapes-btn'
+        || item.closest('#mm-panel-draw') || item.closest('#mm-panel-shapes');
+    if (!triggersToolbar) {
+        _closeAllToolbars();
+    }
 });
 
-function toggleStickerPanel() {
-	const panel = document.getElementById('sticker-panel');
-	const btn   = document.getElementById('sticker-btn');
-	const open  = panel.classList.toggle('active');
-	if (btn) btn.classList.toggle('active-tool', open);
-	if (open) {
-		document.getElementById('tools-menu').classList.remove('active');
-		document.getElementById('shape-toolbar').classList.remove('active');
-		document.getElementById('bg-submenu').classList.remove('active');
-		const sm = document.getElementById('scenes-menu');
-		if (sm) sm.style.display = 'none';
-		checkStickerConnectivity();
-		renderStickerPanel();
-	}
+// Mise à jour du bouton gomme dans le panneau dessin
+function _updateEraserBtnInPanel() {
+    const btn1 = document.getElementById('eraser-btn');
+    const btn2 = document.getElementById('eraser-btn-shapes');
+    const label = isEraserMode ? '🧽 Gomme active — cliquer pour désactiver' : '🧽 Activer la gomme';
+    const bg    = isEraserMode ? '#1a3550' : '#2a2a36';
+    const bc    = isEraserMode ? '#4a90e2' : '#444';
+    if (btn1) { btn1.textContent = label; btn1.style.background = bg; btn1.style.borderColor = bc; }
+    if (btn2) { btn2.textContent = label; btn2.style.background = bg; btn2.style.borderColor = bc; }
 }
-
-function renderStickerPanel() {
-	const container = document.getElementById('sp-content');
-	if (!container) return;
-	const filter = (document.getElementById('sp-search') || {value:''}).value.trim().toLowerCase();
-
-	if (spMode === 'classic') {
-		// ── Émojis classiques Unicode (hors-ligne) ──────────────
-		const allItems = CLASSIC_DATA[spCurrentClassicTab] || [];
-		const items = filter
-			? Object.values(CLASSIC_DATA).flat().filter(emoji => {
-				const notoAll = Object.values(NOTO_DATA).flat();
-				const cp = [...emoji].map(c => c.codePointAt(0).toString(16))
-				           .join('_').replace(/_fe0f/gi, '');
-				const match = notoAll.find(n => {
-					const nc = n.c.replace(/_fe0f/gi, '');
-					return nc === cp
-						|| nc.startsWith(cp.split('_')[0])
-						|| cp.startsWith(nc.split('_')[0]);
-				});
-				return match ? match.n.toLowerCase().includes(filter) : false;
-			  })
-			: allItems;
-		if (!items.length) {
-			container.innerHTML = '<div class="sp-empty">Aucun résultat</div>';
-			return;
-		}
-		const grid = document.createElement('div');
-		grid.className = 'sp-grid-anim';
-		items.forEach(emoji => {
-			const btn = document.createElement('div');
-			btn.className = 'sp-anim-btn';
-			btn.title = emoji;
-			btn.style.fontSize = '28px';
-			btn.style.lineHeight = '1';
-			btn.textContent = emoji;
-			btn.addEventListener('click', () => insertStickerEmoji(emoji));
-			grid.appendChild(btn);
-		});
-		container.innerHTML = '';
-		if (filter) {
-			const hint = document.createElement('div');
-			hint.style.cssText = 'color:#555;font-size:10px;text-align:center;padding:0 0 8px;font-style:italic;';
-			hint.textContent = items.length + ' résultat(s) dans toutes les catégories';
-			container.appendChild(hint);
-		}
-		container.appendChild(grid);
-
-	} else {
-		// ── Émojis animés Noto (CDN WebP) ────────────────────────
-		const tab      = spCurrentTab;
-		const allItems = NOTO_DATA[tab] || [];
-		const items = filter
-			? Object.values(NOTO_DATA).flat().filter(i => i.n.toLowerCase().includes(filter))
-			: allItems;
-		if (!items.length) {
-			container.innerHTML = '<div class="sp-empty">Aucun résultat</div>';
-			return;
-		}
-		const grid = document.createElement('div');
-		grid.className = 'sp-grid-anim';
-		items.forEach(item => {
-			const webpUrl = NOTO_CDN + '/' + item.c + '/512.webp';
-			const btn = document.createElement('div');
-			btn.className = 'sp-anim-btn';
-			btn.title = item.n;
-			const img = document.createElement('img');
-			img.src = webpUrl;
-			img.alt = item.n;
-			img.loading = 'lazy';
-			img.onerror = () => { btn.style.display = 'none'; };
-			btn.appendChild(img);
-			btn.addEventListener('click', () => insertStickerImage(webpUrl, item.n));
-			grid.appendChild(btn);
-		});
-		container.innerHTML = '';
-		if (filter) {
-			const hint = document.createElement('div');
-			hint.style.cssText = 'color:#555;font-size:10px;text-align:center;padding:0 0 8px;font-style:italic;';
-			hint.textContent = items.length + ' résultat(s) dans toutes les catégories';
-			container.appendChild(hint);
-		}
-		container.appendChild(grid);
-	}
-}
-
-function _addStickerResizeHandle(w, minSize) {
-	const handle = document.createElement('div');
-	handle.title = 'Redimensionner';
-	handle.style.cssText = `
-		position:absolute; right:0; bottom:0; width:18px; height:18px;
-		cursor:se-resize; z-index:200; border-radius:0 0 6px 0;
-		background:linear-gradient(135deg, transparent 50%, #4a90e2 50%);
-		opacity:0; transition:opacity 0.2s; pointer-events:auto;
-	`;
-	w.appendChild(handle);
-
-	// Afficher/masquer au survol ou focus
-	w.addEventListener('mouseenter', () => handle.style.opacity = '1');
-	w.addEventListener('mouseleave', () => { if (!w.matches(':focus-within')) handle.style.opacity = '0'; });
-	w.addEventListener('focusin',    () => handle.style.opacity = '1');
-	w.addEventListener('focusout',   () => { if (!w.matches(':hover')) handle.style.opacity = '0'; });
-
-	handle.addEventListener('mousedown', (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		snapshotNow();
-		const startX = e.clientX, startY = e.clientY;
-		const startW = w.offsetWidth,  startH = w.offsetHeight;
-
-		// Maintenir les proportions carrées (Shift ou par défaut pour stickers)
-		const onMove = (ev) => {
-			const dx = ev.clientX - startX;
-			const dy = ev.clientY - startY;
-			const delta = Math.max(dx, dy);
-			const newSize = Math.max(minSize, startW + delta);
-			w.style.width  = newSize + 'px';
-			w.style.height = newSize + 'px';
-			w.style.setProperty('--sticker-h', newSize + 'px');
-			// Pour les émojis : mettre à jour font-size ET dimensions du content
-			const content = w.querySelector('[data-sticker-type="emoji"]');
-			if (content) {
-				content.style.width    = newSize + 'px';
-				content.style.height   = newSize + 'px';
-				content.style.fontSize = Math.round(newSize * 0.62) + 'px';
-			}
-		};
-		const onUp = () => {
-			document.removeEventListener('mousemove', onMove);
-			document.removeEventListener('mouseup', onUp);
-			saveBoard();
-		};
-		document.addEventListener('mousemove', onMove);
-		document.addEventListener('mouseup', onUp);
-	});
-}
-
-function insertStickerEmoji(emoji) {
-	snapshotNow();
-	const pos = findFreePosition();
-	const w = document.createElement('div');
-	w.className = 'widget';
-	w.dataset.type = 'sticker';
-	w.dataset.transparent = 'true';
-	// min-height:0 et height explicite pour contrer le height:auto du CSS global
-	w.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:100px; height:100px; min-height:0 !important; overflow:visible; flex-direction:row; flex-shrink:0;`;
-	w.style.setProperty('--sticker-h', '100px');
-	w.tabIndex = 0;
-
-	const content = document.createElement('div');
-	content.dataset.stickerType = 'emoji';
-	// position absolute, taille 100%x100% du widget, font-size proportionnelle
-	content.style.cssText = 'position:absolute; top:0; left:0; width:100px; height:100px; display:flex; align-items:center; justify-content:center; font-size:62px; line-height:1; user-select:none; pointer-events:none;';
-	content.textContent = emoji;
-
-	w.innerHTML = `
-		<div class="drag-handle" title="Déplacer">✥</div>
-		<div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-		<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
-		<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
-		<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
-	`;
-	w.appendChild(content);
-	w.addEventListener('mousedown', () => bringToFront(w));
-	board.appendChild(w);
-	bringToFront(w);
-	makeDraggable(w);
-	makeDraggableRotate(w);
-	_addStickerResizeHandle(w, 40);
-	saveBoard();
-}
-
-function insertStickerImage(url, name) {
-	snapshotNow();
-	const pos = findFreePosition();
-	const w = document.createElement('div');
-	w.className = 'widget';
-	w.dataset.type = 'sticker';
-	w.dataset.transparent = 'true';
-	// Forcer height explicite et overflow hidden pour que le redimensionnement fonctionne
-	w.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:130px; height:130px; overflow:hidden; flex-direction:row;`;
-	w.style.setProperty('--sticker-h', '130px');
-	w.tabIndex = 0;
-
-	// L'image occupe tout l'espace du widget directement, sans widget-content qui flex-grow
-	const img = document.createElement('img');
-	img.src = url;
-	img.alt = name;
-	img.draggable = false;
-	img.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; pointer-events:none; padding:6px; box-sizing:border-box;';
-
-	w.innerHTML = `
-		<div class="drag-handle" title="Déplacer">✥</div>
-		<div class="widget-rotate-handle" title="Faire pivoter">↻</div>
-		<div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
-		<div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
-		<div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
-	`;
-	w.appendChild(img);
-	w.addEventListener('mousedown', () => bringToFront(w));
-	board.appendChild(w);
-	bringToFront(w);
-	makeDraggable(w);
-	makeDraggableRotate(w);
-	_addStickerResizeHandle(w, 40);
-	saveBoard();
-}
-
-// Fermer au clic extérieur
-document.addEventListener('click', (e) => {
-	const sp = document.getElementById('sticker-panel');
-	if (sp && sp.classList.contains('active') &&
-		!e.target.closest('#sticker-panel') &&
-		!e.target.closest('#sticker-btn')) {
-		sp.classList.remove('active');
-		const sb = document.getElementById('sticker-btn');
-		if (sb) sb.classList.remove('active-tool');
-	}
-});
 
 </script>
+<script src="widgets-datetime.js"></script>
+<script src="widgets-meteo.js"></script>
+<script src="scenes.js"></script>
+<script src="shapes.js"></script>
+<script src="draw.js"></script>
+<script src="stickers.js"></script>
 <div id="laser-pointer"></div>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation" style="position:fixed;bottom:80px;right:24px;z-index:100000;background:#1a1a2e;color:white;border:2px solid rgba(255,255,255,0.25);font-size:20px;padding:7px 12px;border-radius:20px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.5);">📽️</button>
 </body>
