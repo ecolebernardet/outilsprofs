@@ -453,6 +453,7 @@ function stopDrawing() {
     const tb = document.getElementById('draw-toolbar');
     if (tb) tb.style.display = 'none';
     cancelHandwritingRecognition();
+    stopEraserMode();
 }
 function clearCanvas() {
     snapshotNow();
@@ -580,14 +581,16 @@ var isEraserMode = false, isErasing = false;
 
 function toggleEraserMode() {
     if (isEraserMode) { stopEraserMode(); return; }
-    stopDrawing();
-    document.getElementById('global-toolbar').style.display = 'none';
+    // Désactiver le mode dessin SANS cacher la draw-toolbar
+    isDrawMode = false;
+    if (drawCanvas) drawCanvas.classList.add('inactive');
+    board.classList.remove('is-drawing');
+    cancelHandwritingRecognition();
     isEraserMode = true;
     initCanvas();
     drawCanvas.classList.remove('inactive');
     drawCanvas.classList.add('eraser-mode');
     board.classList.add('is-erasing');
-    // Les événements sont gérés par les listeners du board (_boardDraw*)
     clearSelection();
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
 }
@@ -599,7 +602,6 @@ function stopEraserMode() {
         drawCanvas.classList.add('inactive');
         drawCanvas.classList.remove('eraser-mode');
         board.classList.remove('is-erasing');
-        // Les listeners sont sur le board, pas sur le canvas
         redrawStrokes();
     }
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();

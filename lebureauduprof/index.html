@@ -442,20 +442,21 @@
 		/* ── NOUVEAU MENU FLOTTANT ────────────────────────────── */
 		#fab-btn {
 			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
-			width: 52px; height: 52px; border-radius: 50%;
+			width: 50px; height: 50px; border-radius: 50%;
 			background: #1F1F21; border: 1.5px solid #4a4a5a;
-			color: #e8e8f0; font-size: 22px; cursor: pointer;
+			color: #e8e8f0; font-size: 35px; cursor: pointer;
+            line-height: 1; padding-bottom: 5px;
 			display: flex; align-items: center; justify-content: center;
 			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 			transition: background .15s, transform .15s;
 		}
-		#fab-btn:hover { background: #2e2e3a; transform: scale(1.06); }
+		#fab-btn:hover { background: #2e2e3a; transform: scale(1.1); }
 		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(45deg); }
 
 		/* Menu vertical principal */
 		#main-menu {
 			position: fixed; bottom: 82px; left: 20px; z-index: 14000;
-			display: flex; flex-direction: column; gap: 5px;
+			display: flex; flex-direction: column; gap: 2px;
 			pointer-events: none; opacity: 0;
 			transition: opacity .2s ease;
 		}
@@ -467,11 +468,11 @@
 		.mm-item {
 			display: flex; align-items: center; gap: 10px;
 			background: #1F1F21; border: 1px solid #3a3a4a;
-			border-radius: 12px; padding: 9px 14px;
+			border-radius: 12px; padding: 5px 10px;
 			color: #d0d0e0; font-size: 13px; font-weight: 600;
 			cursor: pointer; white-space: nowrap;
 			transition: background .15s, border-color .15s, transform .12s;
-			min-width: 170px;
+			min-width: 120px;
 		}
 		.mm-item:hover { background: #2a2a36; border-color: #555; transform: translateX(3px); }
 		.mm-item.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
@@ -485,8 +486,8 @@
 		.mm-has-sub { position: relative; }
 		.mm-sub {
 			position: absolute; left: 100%; top: 0;
-			padding-left: 12px; /* pont invisible élargi — zone de passage souris */
-			min-width: 178px;
+			padding-left: 10px; /* pont invisible élargi — zone de passage souris */
+			min-width: 120px;
 			display: flex; flex-direction: column; gap: 3px;
 			opacity: 0; pointer-events: none;
 			/* Pas de transform/translate : évite tout gap pendant la transition */
@@ -496,7 +497,7 @@
 		.mm-sub-inner {
 			display: flex; flex-direction: column; gap: 3px;
 			background: #1a1a22; border: 1px solid #3a3a4a;
-			border-radius: 12px; padding: 6px;
+			border-radius: 12px; padding: 3px;
 			box-shadow: 4px 4px 20px rgba(0,0,0,0.5);
 			width: 100%;
 		}
@@ -505,7 +506,7 @@
 		}
 		.mm-sub-item {
 			display: flex; align-items: center; gap: 8px;
-			padding: 8px 12px; border-radius: 8px;
+			padding: 5px 10px; border-radius: 8px;
 			color: #ccc; font-size: 12px; font-weight: 600;
 			cursor: pointer; transition: background .12s;
 			white-space: nowrap;
