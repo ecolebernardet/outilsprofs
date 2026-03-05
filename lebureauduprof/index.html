@@ -679,7 +679,7 @@
         /* Calendrier & horloge → widgets-datetime.js */
         /* --- AGENDA --- */
         .agenda-container { display: flex; flex-direction: column; background: #fff; border-radius: 8px; border: 1px solid #eee; overflow: hidden; min-height: 200px; }
-        .agenda-header-title { background: #2b7fff; color: white; padding: 5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.6em; }
+        .agenda-header-title { background: #2b7fff; color: white; padding: 5px; font-weight: bold; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.6em; }
         .agenda-current-time { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
         .agenda-list { padding: 1px; flex-grow: 1; }
         .agenda-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #eee; position: relative; }
@@ -691,7 +691,7 @@
         .agenda-add-btn:hover { background: #eef2f5; color: #2c3e50; }
         .agenda-row-handle { cursor: grab; color: #ccc; padding: 0 5px; font-size: 0.75em; user-select: none; }
         .agenda-row-handle:active { cursor: grabbing; }
-        .agenda-delete-row { cursor: pointer; color: #e74c3c; font-weight: bold; font-size: 1em; padding: 0 5px; opacity: 0; transition: opacity 0.2s; }
+        .agenda-delete-row { cursor: pointer; color: #e74c3c; font-weight: bold; font-size: 1.2em; padding: 0 5px; opacity: 0; transition: opacity 0.2s; }
         .agenda-item:hover .agenda-delete-row { opacity: 1; }
 
         /* --- PANNEAU ÉDITION FORME --- */
@@ -706,6 +706,19 @@
 
 
 		/* --- MODE PRÉSENTATION --- */
+		#presentation-btn {
+			position:fixed;top:10px;right:24px;
+			z-index:100000;background:#1a1a2e;color:white;
+			border:1px solid rgba(255,255,255,0.25);
+			font-size:25px;padding:5px 5px;border-radius:30px;
+			cursor:pointer;font-weight:600;display:flex;
+			align-items:center;gap:8px;
+			box-shadow:0 4px 16px rgba(0,0,0,0.5);
+			line-height: 1; padding-bottom: 10px;
+		}
+			
+		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); }
+		
 		body.presentation-mode #board {
 			position: fixed !important;
 			top: 0 !important; left: 0 !important;
@@ -1283,7 +1296,6 @@
         <div class="agenda-container" style="font-size:16px;">
             <div class="agenda-header-title">
                 <span class="agenda-current-date"></span>
-                <span class="agenda-current-time"></span>
             </div>
             <div class="agenda-list">
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">08:30</span><div class="agenda-text" contenteditable="true">Accueil / Appel / Rituels</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
@@ -3085,6 +3097,6 @@ function _updateEraserBtnInPanel() {
 <script src="draw.js"></script>
 <script src="stickers.js"></script>
 <div id="laser-pointer"></div>
-<button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation" style="position:fixed;bottom:80px;right:24px;z-index:100000;background:#1a1a2e;color:white;border:2px solid rgba(255,255,255,0.25);font-size:20px;padding:7px 12px;border-radius:20px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.5);">📽️</button>
+<button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 </body>
 </html>
