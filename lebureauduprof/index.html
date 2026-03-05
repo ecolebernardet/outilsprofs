@@ -593,8 +593,8 @@
 		.tool-btn:hover { background: #2e2e3a; color: #e8e8f0; }
 		.tool-btn.active-tool { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
 		.undo-btn, .redo-btn {
-			background: #1F1F21; color: #555; border: 1px solid #2e2e38;
-			padding: 8px 10px; border-radius: 10px; cursor: not-allowed;
+			background: #1F1F21; color: #a1a1a1; border: 1px solid #2e2e38;
+			padding: 4px 5px; border-radius: 10px; cursor: not-allowed;
 			font-size: 18px; display: flex; align-items: center; justify-content: center;
 			box-sizing: border-box; flex-shrink: 0; transition: background .15s;
 		}
@@ -607,65 +607,7 @@
 
 		.exit-fs-btn { display: none; position: absolute; top: 10px; right: 10px; z-index: 99999; background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
 		.editor-container:fullscreen .exit-fs-btn { display: block; }
-		.bg-thumb { width: 70px; height: 50px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
-		.bg-thumb:hover { transform: scale(1.05); border-color: var(--primary-color); }
-		/* Vignettes réglures Séyès */
-		.bg-thumb-seyes {
-			background-color: #fffef5;
-			background-image: repeating-linear-gradient(
-				to bottom,
-				transparent 0px, transparent 7px,
-				#a8c8f0 7px, #a8c8f0 8px,
-				transparent 8px, transparent 15px,
-				#a8c8f0 15px, #a8c8f0 16px,
-				transparent 16px, transparent 23px,
-				#a8c8f0 23px, #a8c8f0 24px,
-				transparent 24px, transparent 31px,
-				#e8a0a0 31px, #e8a0a0 32px
-			),
-			repeating-linear-gradient(to right, transparent 0px, transparent 19px, #e8a0a0 19px, #e8a0a0 20px);
-		}
-		.bg-thumb-seyes-white {
-			background-color: #ffffff;
-			background-image: repeating-linear-gradient(
-				to bottom,
-				transparent 0px, transparent 7px,
-				#b8d4f5 7px, #b8d4f5 8px,
-				transparent 8px, transparent 15px,
-				#b8d4f5 15px, #b8d4f5 16px,
-				transparent 16px, transparent 23px,
-				#b8d4f5 23px, #b8d4f5 24px,
-				transparent 24px, transparent 31px,
-				#f0a0a0 31px, #f0a0a0 32px
-			),
-			repeating-linear-gradient(to right, transparent 0px, transparent 19px, #f0a0a0 19px, #f0a0a0 20px);
-		}
-		.bg-thumb-lignes {
-			background-color: #fffef5;
-			background-image: repeating-linear-gradient(
-				to bottom,
-				transparent 0px, transparent 30px,
-				#a8c8f0 30px, #a8c8f0 31px
-			);
-		}
-		.bg-thumb-grands {
-			background-color: #fffef5;
-			background-image: repeating-linear-gradient(to right, #a8c8f0 0px, #a8c8f0 1px, transparent 1px, transparent 25px),
-			                  repeating-linear-gradient(to bottom, #a8c8f0 0px, #a8c8f0 1px, transparent 1px, transparent 25px);
-		}
-		.bg-thumb-petits {
-			background-color: #ffffff;
-			background-image: repeating-linear-gradient(to right, #c8ddf5 0px, #c8ddf5 1px, transparent 1px, transparent 10px),
-			                  repeating-linear-gradient(to bottom, #c8ddf5 0px, #c8ddf5 1px, transparent 1px, transparent 10px);
-		}
-		.bg-thumb-ardoise-lignes {
-			background-color: #2f3542;
-			background-image: repeating-linear-gradient(
-				to bottom,
-				transparent 0px, transparent 30px,
-				rgba(255,255,255,0.15) 30px, rgba(255,255,255,0.15) 31px
-			);
-		}
+		/* Styles .bg-thumb* déplacés dans background.js (lien CSS à ajouter si besoin) */
 
 		#font-size-input::-webkit-outer-spin-button,
 		#font-size-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -1073,12 +1015,16 @@
 						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');closeMainMenu()" title="Défaut"></div>
+								<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');closeMainMenu()" title="Blanc"></div>
 								<div class="bg-thumb" style="background-color:#2f3542;" onclick="applyBackground('#2f3542');saveBg('#2f3542');closeMainMenu()" title="Ardoise"></div>
-								<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');closeMainMenu()" title="Vert Tableau"></div>
+								<div class="bg-thumb" style="background-color:#6e6e6e;" onclick="applyBackground('#6e6e6e');saveBg('#6e6e6e');closeMainMenu()" title="Gris clair"></div>
 								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
 								<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');closeMainMenu()" title="Beige"></div>
+								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Nude"></div>
 								<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');closeMainMenu()" title="Noir"></div>
+								<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');closeMainMenu()" title="Vert Tableau"></div>
+								<div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');closeMainMenu()" title="Bleu nuit"></div>
+
 							</div>
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
@@ -1432,15 +1378,15 @@ let _lastW = window.innerWidth;
 // =========================================================================
 window.onload = () => {
     const savedBg = localStorage.getItem('boardBackground');
-    if (savedBg) applyBackground(savedBg);
+    if (savedBg && typeof applyBackground === 'function') applyBackground(savedBg);
     applyBoardRatio(window.innerWidth);
-    loadBoard();
-    initShapeToolbar();
+    if (typeof loadBoard        === 'function') loadBoard();
+    if (typeof initShapeToolbar === 'function') initShapeToolbar();
     setTimeout(() => {
         isInitialLoading = false;
         _lastW = window.innerWidth;
-        initSelectionControls();
-        initBoardSelection();
+        if (typeof initSelectionControls === 'function') initSelectionControls();
+        if (typeof initBoardSelection    === 'function') initBoardSelection();
         const fontSizeInput = document.getElementById('font-size-input');
         if (fontSizeInput) {
             fontSizeInput.addEventListener('focus', () => {
@@ -1452,7 +1398,7 @@ window.onload = () => {
         const cur = buildBoardJSON();
         if (cur) undoStack.push(cur);
         updateUndoRedoBtns();
-        scenesInit(); // ← ajout
+        if (typeof scenesInit === 'function') scenesInit(); // ← ajout
     }, 1000);
     setInterval(updateClock, 1000);
     window.addEventListener('resize', handleWindowResize);
@@ -1720,7 +1666,7 @@ function closeCtxMenuAll() {
 
 document.addEventListener('mousedown', (e) => {
     if (!e.target.closest('.widget-ctx-menu') && !e.target.closest('.widget-menu-handle')) closeCtxMenuAll();
-    if (!e.target.closest('#shape-edit-panel') && !e.target.closest('.shape-widget')) closeShapeEditPanel();
+    if (!e.target.closest('#shape-edit-panel') && !e.target.closest('.shape-widget')) { if (typeof closeShapeEditPanel === 'function') closeShapeEditPanel(); }
     if (!e.target.closest('#sc-ctx-menu') && !e.target.closest('#sc-menu-btn')) {
         const m = document.getElementById('sc-ctx-menu');
         if (m) m.classList.remove('open');
@@ -2342,92 +2288,6 @@ function addAgendaLine(btn) {
     list.appendChild(item); attachAgendaItemEvents(item); saveBoard();
 }
 function deleteAgendaLine(btn) { snapshotNow(); btn.closest('.agenda-item').remove(); saveBoard(); }
-
-// =========================================================================
-// FOND
-// =========================================================================
-// Fonds Séyès et carreaux — CSS gradient purs (fiables cross-browser, pas de data URI)
-const PRESET_BACKGROUNDS = {
-    // Séyès jaune paille : 3 interlignes bleus (8px) + 1 ligne rouge (32px) + marge rouge verticale
-    'seyes': {
-        backgroundColor: '#fffef5',
-        backgroundImage: [
-            'repeating-linear-gradient(to bottom, transparent 0px, transparent 7px, #a8c8f0 7px, #a8c8f0 8px, transparent 8px, transparent 15px, #a8c8f0 15px, #a8c8f0 16px, transparent 16px, transparent 23px, #a8c8f0 23px, #a8c8f0 24px, transparent 24px, transparent 31px, #e8a0a0 31px, #e8a0a0 32px)',
-            'repeating-linear-gradient(to right, transparent 0px, transparent 31px, #e8a0a0 31px, #e8a0a0 32px)'
-        ].join(', '),
-        backgroundSize: 'auto 32px, 32px auto',
-    },
-    // Séyès blanc
-    'seyes-white': {
-        backgroundColor: '#ffffff',
-        backgroundImage: [
-            'repeating-linear-gradient(to bottom, transparent 0px, transparent 7px, #b8d4f5 7px, #b8d4f5 8px, transparent 8px, transparent 15px, #b8d4f5 15px, #b8d4f5 16px, transparent 16px, transparent 23px, #b8d4f5 23px, #b8d4f5 24px, transparent 24px, transparent 31px, #f0a0a0 31px, #f0a0a0 32px)',
-            'repeating-linear-gradient(to right, transparent 0px, transparent 31px, #f0a0a0 31px, #f0a0a0 32px)'
-        ].join(', '),
-        backgroundSize: 'auto 32px, 32px auto',
-    },
-    // Grands carreaux 40px
-    'grands-carreaux': {
-        backgroundColor: '#fffef5',
-        backgroundImage: [
-            'repeating-linear-gradient(to right,  transparent 0px, transparent 39px, #a8c8f0 39px, #a8c8f0 40px)',
-            'repeating-linear-gradient(to bottom, transparent 0px, transparent 39px, #a8c8f0 39px, #a8c8f0 40px)'
-        ].join(', '),
-        backgroundSize: '40px 40px',
-    },
-    // Petits carreaux 16px
-    'petits-carreaux': {
-        backgroundColor: '#ffffff',
-        backgroundImage: [
-            'repeating-linear-gradient(to right,  transparent 0px, transparent 15px, #c8ddf5 15px, #c8ddf5 16px)',
-            'repeating-linear-gradient(to bottom, transparent 0px, transparent 15px, #c8ddf5 15px, #c8ddf5 16px)'
-        ].join(', '),
-        backgroundSize: '16px 16px',
-    },
-    // Lignes simples
-    'lignes-simples': {
-        backgroundColor: '#fffef5',
-        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, #a8c8f0 31px, #a8c8f0 32px)',
-        backgroundSize: 'auto 32px',
-    },
-    // Ardoise avec lignes blanches
-    'ardoise': {
-        backgroundColor: '#2f3542',
-        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(255,255,255,0.15) 31px, rgba(255,255,255,0.15) 32px)',
-        backgroundSize: 'auto 32px',
-    },
-};
-
-function applyBackground(value) {
-    if (!value || value === 'none') {
-        board.style.backgroundImage = '';
-        board.style.backgroundSize  = '';
-        board.style.backgroundColor = '#eef2f5';
-    } else if (PRESET_BACKGROUNDS[value]) {
-        const p = PRESET_BACKGROUNDS[value];
-        board.style.backgroundImage    = p.backgroundImage;
-        board.style.backgroundSize     = p.backgroundSize || 'auto';
-        board.style.backgroundRepeat   = 'repeat';
-        board.style.backgroundPosition = 'top left';
-        board.style.backgroundColor    = p.backgroundColor || '';
-    } else if (value.startsWith('#') || value.startsWith('rgb')) {
-        board.style.backgroundImage = '';
-        board.style.backgroundSize  = '';
-        board.style.backgroundColor = value;
-    } else {
-        board.style.backgroundImage = '';
-        board.style.backgroundSize  = '';
-        board.style.background      = value;
-    }
-}
-function saveBg(value) { snapshotNow(); localStorage.setItem('boardBackground', value); }
-function handleBgUpload(input) {
-    const file = input.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => { const v = `url(${e.target.result})`; applyBackground(v); saveBg(v); };
-    reader.readAsDataURL(file);
-}
-function toggleSubMenu(event) { /* bg-submenu intégré dans le menu Affichage */ }
 
 // =========================================================================
 // MENU
@@ -3094,6 +2954,7 @@ function _updateEraserBtnInPanel() {
 }
 
 </script>
+<script src="background.js"></script>
 <script src="media.js"></script>
 <script src="help-modal.js"></script>
 <script src="save-load.js"></script>
