@@ -1156,22 +1156,30 @@
 
 	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
 	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
-		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+		<div style="display:flex;align-items:center;gap:14px;">
+			<!-- Colonne 1 : formes -->
 			<div class="shape-grid" id="shape-grid" style="display:flex;gap:6px;flex-wrap:nowrap;"></div>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<span style="color:#ccc;font-size:11px;">Contour</span>
-			<div class="cpick-wrap" id="cpick-shape-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;" onclick="cpickOpen('shape-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-stroke-color"></div></div>
-			<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:60px;cursor:pointer;">
-			<span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:18px;">4</span>
-			<span style="color:#ccc;font-size:11px;">Fond</span>
-			<div class="cpick-wrap" id="cpick-shape-fill-color"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-fill-color"></div></div>
-			<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:60px;cursor:pointer;">
-			<span id="shape-opacity-val" style="color:#fff;font-size:11px;min-width:18px;">60%</span>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<!-- Gomme -->
-			<span style="color:#ccc;font-size:11px;">🧽</span>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 2 : contour + fond -->
+			<div style="display:flex;flex-direction:column;gap:6px;">
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="color:#ccc;font-size:11px;min-width:44px;">Contour</span>
+					<div class="cpick-wrap" id="cpick-shape-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;" onclick="cpickOpen('shape-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-stroke-color"></div></div>
+					<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:60px;cursor:pointer;">
+					<span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:18px;">4</span>
+				</div>
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="color:#ccc;font-size:11px;min-width:44px;">Fond</span>
+					<div class="cpick-wrap" id="cpick-shape-fill-color"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-fill-color"></div></div>
+					<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:60px;cursor:pointer;">
+					<span id="shape-opacity-val" style="color:#fff;font-size:11px;min-width:18px;">60%</span>
+				</div>
+			</div>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 3 : gomme -->
 			<button id="eraser-btn-shapes" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
-			<div style="width:1px;height:24px;background:#333;"></div>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 4 : fermer -->
 			<button onclick="stopShapeToolbar()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
 		</div>
 	</div>
