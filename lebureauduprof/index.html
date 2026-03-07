@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Bureau du Prof</title>
+<style>
+        :root {
+            --bg-color: #eef2f5;
+            --widget-bg: #ffffff;
+            --primary-color: #4a90e2;
+            --text-color: #333;
+            --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --border-radius: 18px;
+        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; overflow-y: auto; }
+        body.presentation-mode { overflow: hidden; }
+        /* Scrollbar discrète en mode normal */
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.55); }
+        /* Ligne repère limite basse du mode présentation */
+        #pres-limit-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 0;
+            border-top: 2px dashed rgba(255, 80, 80, 0.6);
+            z-index: 99990;
+            pointer-events: none;
+        }
+        #pres-limit-line::after {
+            content: '← limite basse présentation →';
+            position: absolute;
+            right: 16px;
+            top: -18px;
+            font-size: 11px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: rgba(255, 100, 100, 0.75);
+            background: rgba(0,0,0,0.25);
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        body.presentation-mode #pres-limit-line { display: none; }
+
+        /* --- WIDGETS --- */
+        .widget { position: absolute; background: var(--widget-bg); border-radius: var(--border-radius); box-shadow: var(--shadow); display: flex; flex-direction: column; z-index: 1; border: 2px solid transparent; height: auto; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
+        .widget:focus-within { border-color: var(--primary-color); box-shadow: 0 12px 30px rgba(74, 144, 226, 0.3); }
+        .widget[data-type="homework"]:focus-within { border-color: #ff4757; }
+        .widget[data-type="iframe"]:focus-within { border-color: #2bcbba; }
+        .widget[data-transparent="true"] { border: none !important; box-shadow: none !important; background: transparent !important; }
+        .widget[data-transparent="true"]:hover, .widget[data-transparent="true"]:focus-within { background: rgba(74, 144, 226, 0.05) !important; }
+        .widget[data-transparent="true"] .editor-container, .widget[data-transparent="true"] .editor-content { border: none !important; background: transparent !important; }
+
+        /* --- CONTRÔLES NATIFS DES WIDGETS --- */
+        .widget-header { display: none !important; }
+        .drag-handle, .widget-close-handle, .widget-pin-handle, .widget-rotate-handle, .widget-menu-handle, .widget-back-handle {
+            position: absolute; width: 26px; height: 26px; background: #f8f9fa; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; z-index: 100;
+            opacity: 0; transition: opacity 0.2s; border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); pointer-events: none;
+        }
+        /* Dans la barre d'action, les boutons sont positionnés en flex (pas absolute) */
+        .widget-action-bar .widget-close-handle,
+        .widget-action-bar .widget-pin-handle,
+        .widget-action-bar .widget-back-handle,
+        .widget-action-bar .widget-menu-handle {
+            position: static;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .drag-handle          { left: -13px; top: 50%; transform: translateY(-50%); cursor: move; font-size: 14px; color: #666; }
+        .widget-rotate-handle { right: -13px; top: 50%; transform: translateY(-50%); cursor: grab; font-size: 14px; color: #8E51FF; }
+        .widget-rotate-handle:active { cursor: grabbing; }
+        #rotation-indicator {
+            position: fixed; background: rgba(30,30,30,0.82); color: #fff;
+            font-size: 12px; font-family: 'Courier New', monospace; font-weight: 700;
+            padding: 3px 9px; border-radius: 6px; pointer-events: none;
+            z-index: 99999; display: none; white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transform: translate(14px, -50%);
+        }
+        #rotation-indicator .rot-reset-hint {
+            font-size: 10px; color: #aaa; margin-left: 6px;
+        }
+        /* Barre de boutons groupée sous (ou au-dessus) du widget */
+        .widget-close-handle,
+        .widget-pin-handle,
+        .widget-back-handle,
+        .widget-menu-handle {
+            top: auto !important;
+            right: auto !important;
+            transform: none !important;
+            cursor: pointer;
+        }
+        .widget-close-handle  { font-size: 14px; color: #ff5f56; order: 4; }
+        .widget-pin-handle    { font-size: 13px; color: #f39c12; order: 2; }
+        .widget-back-handle   { font-size: 13px; color: #888;    order: 3; }
+        .widget-menu-handle   { font-size: 13px; color: #555;    order: 1; }
+
+        /* Conteneur de la barre d'action */
+        .widget-action-bar {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -42px;
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+            align-items: center;
+            z-index: 102;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .widget-action-bar.above {
+            bottom: auto;
+            top: -42px;
+        }
+        /* Dans la barre d'action, les boutons sont positionnés en flex (pas absolute) */
+        .widget-action-bar .widget-close-handle,
+        .widget-action-bar .widget-pin-handle,
+        .widget-action-bar .widget-back-handle,
+        .widget-action-bar .widget-menu-handle {
+            position: static;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* Afficher la barre dans les mêmes conditions que les autres handles */
+        .widget:focus-within .widget-action-bar,
+        .widget:focus .widget-action-bar,
+        .shape-widget:focus-within .widget-action-bar,
+        .shape-widget:focus .widget-action-bar,
+        #board.single-select .widget.selected .widget-action-bar,
+        #board.single-select .shape-widget.selected .widget-action-bar { opacity: 1; pointer-events: auto; }
+        /* Masquer en multi-sélection */
+        #board.multi-select .widget.selected .widget-action-bar,
+        #board.multi-select .shape-widget.selected .widget-action-bar { opacity: 0 !important; pointer-events: none !important; }
+        /* Masquer en présentation */
+        body.presentation-mode .widget-action-bar,
+        body.presentation-mode .shape-widget .widget-action-bar { opacity: 0 !important; pointer-events: none !important; }
+        .widget:focus-within .drag-handle,
+        .widget:focus .drag-handle,
+        .widget:focus-within .widget-close-handle,
+        .widget:focus-within .widget-pin-handle,
+        .widget:focus-within .widget-back-handle,
+        .widget:focus-within .widget-rotate-handle,
+        .widget:focus .widget-rotate-handle,
+        .widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
+        .shape-widget:focus-within .drag-handle,
+        .shape-widget:focus .drag-handle,
+        .shape-widget:focus-within .widget-close-handle,
+        .shape-widget:focus-within .widget-pin-handle,
+        .shape-widget:focus-within .widget-back-handle,
+        .shape-widget:focus-within .widget-rotate-handle,
+        .shape-widget:focus .widget-rotate-handle,
+        .shape-widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
+        /* En multi-sélection, forcer le masquage des poignées malgré focus-within */
+        #board.multi-select .widget.selected .drag-handle,
+        #board.multi-select .widget.selected .widget-close-handle,
+        #board.multi-select .widget.selected .widget-pin-handle,
+        #board.multi-select .widget.selected .widget-back-handle,
+        #board.multi-select .widget.selected .widget-rotate-handle,
+        #board.multi-select .widget.selected .widget-menu-handle,
+        #board.multi-select .widget.selected:focus-within .drag-handle,
+        #board.multi-select .widget.selected:focus-within .widget-close-handle,
+        #board.multi-select .widget.selected:focus-within .widget-pin-handle,
+        #board.multi-select .widget.selected:focus-within .widget-back-handle,
+        #board.multi-select .widget.selected:focus-within .widget-rotate-handle,
+        #board.multi-select .widget.selected:focus-within .widget-menu-handle,
+        #board.multi-select .shape-widget.selected .drag-handle,
+        #board.multi-select .shape-widget.selected .widget-close-handle,
+        #board.multi-select .shape-widget.selected .widget-pin-handle,
+        #board.multi-select .shape-widget.selected .widget-back-handle,
+        #board.multi-select .shape-widget.selected .widget-rotate-handle,
+        #board.multi-select .shape-widget.selected .widget-menu-handle,
+        #board.multi-select .shape-widget.selected:focus-within .drag-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-close-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-pin-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-back-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-rotate-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-menu-handle { opacity: 0 !important; pointer-events: none !important; }
+        .widget-close-handle:hover  { color: #ff5f56; background: white; }
+        .drag-handle:hover          { color: var(--primary-color); background: white; }
+        .widget-pin-handle:hover    { background: white; }
+        .widget-back-handle:hover   { background: white; }
+        .widget-rotate-handle:hover { color: #5a1fb8; background: white; }
+        .widget-menu-handle:hover   { background: white; }
+        .widget.pinned .widget-pin-handle { background: #FFD230; }
+        .widget.pinned { border: 2px solid transparent !important; }
+        .shape-widget.pinned .widget-pin-handle { background: #FFD230; }
+
+        /* --- MENU CONTEXTUEL --- */
+        .widget-ctx-menu {
+            position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); top: auto;
+            background: #1F1F21; border: 1px solid #444; border-radius: 10px; padding: 5px 0;
+            min-width: 170px; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            display: none; flex-direction: column;
+        }
+        .widget-ctx-menu.open { display: flex; }
+        .widget-ctx-menu button {
+            background: none; border: none; color: #eee; padding: 7px 14px;
+            text-align: left; cursor: pointer; font-size: 13px; display: flex;
+            align-items: center; gap: 8px; white-space: nowrap; transition: background 0.12s;
+        }
+        .widget-ctx-menu button:hover { background: #333; }
+        .widget-ctx-menu hr { border: none; border-top: 1px solid #444; margin: 4px 0; }
+
+        /* Curseur crayon pour le mode insertion de texte */
+        .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
+        #board.is-drawing { cursor: crosshair !important; }
+        #board.is-drawing * { cursor: crosshair !important; }
+        #board.is-erasing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        /* Curseur gomme */
+        #draw-canvas.eraser-mode { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+
+        /* --- FORMES --- */
+        .shape-widget {
+            position: absolute; z-index: 1; outline: none;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            display: flex; flex-direction: column;
+        }
+        .shape-widget .drag-handle, .shape-widget .widget-close-handle,
+        .shape-widget .widget-pin-handle, .shape-widget .widget-back-handle,
+        .shape-widget .widget-rotate-handle, .shape-widget .widget-menu-handle { opacity: 0; pointer-events: none; }
+        .shape-svg-wrap { display: flex; align-items: center; justify-content: center; padding: 16px; min-width: 80px; min-height: 80px; cursor: default; }
+        .shape-svg-wrap svg { overflow: visible; display: block; pointer-events: none; }
+        .shape-resize-handle {
+            position: absolute; right: 0; bottom: 0; width: 18px; height: 18px;
+            cursor: se-resize; opacity: 0; transition: opacity 0.2s;
+            background: linear-gradient(135deg, transparent 50%, #4a90e2 50%);
+            border-radius: 0 0 4px 0;
+        }
+        .shape-widget:focus-within .shape-resize-handle { opacity: 1; }
+        .shape-widget[data-group-id]:focus-within .shape-resize-handle { opacity: 0 !important; pointer-events: none !important; }
+        /* Bouton verrou proportions sur forme individuelle */
+        .resize-lock-btn {
+            position: absolute; right: 20px; bottom: 0;
+            width: 20px; height: 18px; background: white; border: 1px solid #ccc;
+            border-radius: 4px 0 0 0; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+            display: flex; align-items: center; justify-content: center; font-size: 11px;
+            z-index: 101; user-select: none; pointer-events: none;
+            box-shadow: -1px 0 3px rgba(0,0,0,0.1);
+        }
+        .shape-widget:focus-within .resize-lock-btn { opacity: 1; pointer-events: auto; }
+        .shape-widget[data-group-id]:focus-within .resize-lock-btn { opacity: 0 !important; pointer-events: none !important; }
+        .resize-lock-btn.locked { background: #4a90e2; color: white; border-color: #357abd; }
+        /* Boutons symétrie sur forme individuelle */
+        .flip-h-btn, .flip-v-btn {
+            position: absolute; width: 20px; height: 18px; background: white; border: 1px solid #ccc;
+            cursor: pointer; opacity: 0; transition: opacity 0.2s;
+            display: flex; align-items: center; justify-content: center; font-size: 11px;
+            z-index: 101; user-select: none; pointer-events: none;
+            box-shadow: -1px 0 3px rgba(0,0,0,0.1);
+        }
+        .flip-h-btn { right: 60px; bottom: 0; border-radius: 4px 0 0 0; }
+        .flip-v-btn { right: 40px; bottom: 0; border-radius: 0; }
+        .shape-widget:focus-within .flip-h-btn,
+        .shape-widget:focus-within .flip-v-btn { opacity: 1; pointer-events: auto; }
+        .shape-widget[data-group-id]:focus-within .flip-h-btn,
+        .shape-widget[data-group-id]:focus-within .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
+        .flip-h-btn:hover, .flip-v-btn:hover, .resize-lock-btn:hover { background: #eef2f5; }
+        /* Boutons symétrie dans l'overlay groupe */
+        #sc-flip-h-btn, #sc-flip-v-btn {
+            width: 24px; height: 24px; background: white; border: 1px solid #ccc;
+            border-radius: 5px; cursor: pointer; pointer-events: auto;
+            display: none; align-items: center; justify-content: center; font-size: 13px;
+            z-index: 9992; user-select: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        #sc-flip-h-btn:hover, #sc-flip-v-btn:hover, #sc-lock-btn:hover { background: #eef2f5; }
+        /* Bouton verrou pour l'overlay groupe */
+        #sc-lock-btn {
+            width: 24px; height: 24px; background: white; border: 1px solid #ccc;
+            border-radius: 5px; cursor: pointer; pointer-events: auto;
+            display: none; align-items: center; justify-content: center; font-size: 13px;
+            z-index: 9992; user-select: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        #sc-lock-btn.locked { background: #4a90e2; color: white; border-color: #357abd; }
+
+        /* --- SÉLECTION --- */
+        .widget.selected, .widget.selected:focus-within {
+            outline: 3px solid #4a90e2 !important;
+            outline-offset: 6px;
+            box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important;
+        }
+        .shape-widget.selected, .shape-widget.selected:focus-within {
+            outline: 3px solid #4a90e2 !important;
+            outline-offset: 6px;
+            box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important;
+        }
+        /* Poignées visibles quand sélection UNIQUE uniquement */
+		#board.single-select .widget.selected .drag-handle,
+		#board.single-select .widget.selected .widget-close-handle,
+		#board.single-select .widget.selected .widget-pin-handle,
+		#board.single-select .widget.selected .widget-back-handle,
+		#board.single-select .widget.selected .widget-rotate-handle,
+		#board.single-select .widget.selected .widget-menu-handle,
+		#board.single-select .shape-widget.selected .drag-handle,
+		#board.single-select .shape-widget.selected .widget-close-handle,
+		#board.single-select .shape-widget.selected .widget-pin-handle,
+		#board.single-select .shape-widget.selected .widget-back-handle,
+		#board.single-select .shape-widget.selected .widget-rotate-handle,
+		#board.single-select .shape-widget.selected .widget-menu-handle { opacity: 1; pointer-events: auto; }
+
+        /* Poignée resize + boutons symétrie/verrou visibles dès la sélection simple */
+        .shape-widget.selected .shape-resize-handle { opacity: 1; }
+        .shape-widget.selected .resize-lock-btn { opacity: 1; pointer-events: auto; }
+        .shape-widget.selected .flip-h-btn      { opacity: 1; pointer-events: auto; }
+        .shape-widget.selected .flip-v-btn      { opacity: 1; pointer-events: auto; }
+
+        /* Masquer ces boutons en multi-sélection */
+        #board.multi-select .shape-widget.selected .shape-resize-handle,
+        #board.multi-select .shape-widget.selected .resize-lock-btn,
+        #board.multi-select .shape-widget.selected .flip-h-btn,
+        #board.multi-select .shape-widget.selected .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
+
+        /* Masquer aussi pour les formes membres d'un groupe */
+        .shape-widget[data-group-id].selected .shape-resize-handle,
+        .shape-widget[data-group-id].selected .resize-lock-btn,
+        .shape-widget[data-group-id].selected .flip-h-btn,
+        .shape-widget[data-group-id].selected .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
+
+        /* --- Grille de formes (dans mm-panel) --- */
+
+        .shape-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-bottom: 14px; }
+        .shape-choice {
+            width: 62px; height: 62px; background: #28282f; border: 1px solid #2e2e38;
+            border-radius: 10px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: 0.15s; flex-direction: column; gap: 3px;
+        }
+        .shape-choice:hover { border-color: #4a90e2; background: #1a3550; }
+        .shape-choice.active { border-color: #4a90e2; background: #1a3550; box-shadow: 0 0 0 2px rgba(74,144,226,0.3); }
+        .shape-choice svg { pointer-events: none; }
+        .shape-choice-label { color: #666; font-size: 9px; pointer-events: none; text-align: center; line-height: 1; }
+        .shape-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid #2e2e2e; padding-top: 12px; }
+        .shape-controls label { color: #666; font-size: 11px; white-space: nowrap; }
+        .shape-opacity-row { display: flex; align-items: center; gap: 8px; width: 100%; flex-wrap: wrap; margin-top: 8px; }
+        .shape-opacity-row label { color: #666; font-size: 11px; }
+        #shape-opacity-slider { flex: 1; min-width: 80px; cursor: pointer; }
+        #shape-opacity-val { color: #aaa; font-size: 11px; min-width: 28px; }
+        .shape-add-btn {
+            margin-top: 12px; width: 100%; padding: 9px; background: #28282f;
+            color: #aaa; border: 1px dashed #3a3a4a; border-radius: 10px; cursor: pointer;
+            font-weight: 700; font-size: 12px; transition: background 0.15s;
+        }
+        .shape-add-btn:hover { background: #35353f; color: #e8e8f0; border-style: solid; border-color: #4a90e2; }
+
+        /* --- OVERLAY DE SÉLECTION --- */
+        #selection-controls {
+            position: absolute; pointer-events: none; z-index: 9990; display: none;
+            border: 2px dashed rgba(74,144,226,0.8); border-radius: 4px;
+            box-shadow: 0 0 0 1px rgba(74,144,226,0.15);
+        }
+        #selection-controls .sc-btn {
+            position: absolute; width: 32px; height: 32px; background: #f8f9fa; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; pointer-events: auto;
+            font-size: 15px; user-select: none; z-index: 9991;
+        }
+        #selection-controls .sc-move   { left: -16px; top: 50%; transform: translateY(-50%); color: #666; cursor: move; }
+        #selection-controls .sc-rotate { right: -16px; top: 50%; transform: translateY(-50%); color: #8E51FF; cursor: grab; }
+        #selection-controls .sc-rotate:active { cursor: grabbing; }
+        #selection-controls .sc-resize { right: -8px; bottom: -8px; width: 18px; height: 18px; cursor: se-resize; font-size: 11px; color: #f39c12; background: white; border-color: #f39c12; border-radius: 3px; }
+        /* Boutons flip/lock groupés près du resize (coin bas-droit) */
+        #sc-lock-btn  { position: absolute; right: 14px; bottom: -8px; }
+        #sc-flip-h-btn { position: absolute; right: 44px; bottom: -8px; }
+        #sc-flip-v-btn { position: absolute; right: 74px; bottom: -8px; }
+        /* Barre d'action de selection-controls */
+        #sc-action-bar {
+            position: absolute;
+            left: 50%; transform: translateX(-50%);
+            bottom: -48px;
+            display: flex; flex-direction: row; gap: 4px; align-items: center;
+            pointer-events: auto; white-space: nowrap; z-index: 9992;
+        }
+        #sc-action-bar.above { bottom: auto; top: -48px; }
+        #sc-action-bar .sc-btn { position: static; }
+        #selection-controls .sc-merge   { bottom: -18px; left: 50%; transform: translateX(-50%); color: #2bcbba; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; transform: none; }
+        #selection-controls .sc-fuse    { color: #a78bfa; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; }
+        #selection-controls .sc-ungroup { bottom: -18px; left: 50%; transform: translateX(-50%); color: #f39c12; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; transform: none; }
+        #selection-controls .sc-delete { color: #ff5f56; }
+        #selection-controls .sc-menu   { color: #555; }
+        #selection-controls .sc-pin    { color: #f39c12; font-size: 13px; }
+        #selection-controls .sc-back   { color: #888; font-size: 13px; }
+        #sc-pin-btn.pinned { background: #FFD230; }
+        #selection-controls .sc-btn:hover { background: white; }
+        #selection-controls .sc-move:hover   { transform: translateY(-50%) scale(1.1); }
+        #selection-controls .sc-rotate:hover { transform: translateY(-50%) scale(1.1); }
+        #selection-controls .sc-merge:hover   { background: #e0faf8; transform: scale(1.05); }
+        #selection-controls .sc-fuse:hover    { background: #f0eaff; transform: scale(1.05); }
+        #selection-controls .sc-ungroup:hover { background: #fff8e6; transform: scale(1.05); }
+        /* Membres d'un groupe : pas de bordure spéciale au repos */
+        .widget[data-group-id]              { border-color: transparent !important; box-shadow: none !important; }
+        .widget[data-group-id]:focus-within { border-color: transparent !important; box-shadow: none !important; }
+        /* Membres sélectionnés (groupe actif) : bordure bleue nette */
+        .widget.selected[data-group-id]        { outline: 3px solid #4a90e2 !important; outline-offset: 6px; box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important; }
+        .shape-widget.selected[data-group-id]  { outline: 3px solid #4a90e2 !important; outline-offset: 6px; box-shadow: 0 0 0 6px rgba(74,144,226,0.25) !important; }
+        #sc-ctx-menu {
+            position: fixed; background: #1F1F21;
+            border: 1px solid #444; border-radius: 10px; padding: 5px 0;
+            min-width: 175px; z-index: 99990; box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            display: none; flex-direction: column; pointer-events: auto;
+        }
+        #sc-ctx-menu.open { display: flex; }
+        #sc-ctx-menu button {
+            background: none; border: none; color: #eee; padding: 7px 14px;
+            text-align: left; cursor: pointer; font-size: 13px; display: flex;
+            align-items: center; gap: 8px; white-space: nowrap;
+        }
+        #sc-ctx-menu button:hover { background: #333; }
+        #sc-ctx-menu hr { border: none; border-top: 1px solid #444; margin: 4px 0; }
+
+        /* --- CONTENU --- */
+		.widget[data-type="text"] .editor-container, .widget[data-type="homework"] .editor-container { border: none; }
+		/* date/time widget CSS → widgets-datetime.js */
+		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
+		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
+		.widget[data-type="iframe"] .editor-toolbar,
+		.widget[data-type="youtube"] .editor-toolbar,
+		.widget[data-type="pdf"] .editor-toolbar,
+		.widget[data-type="deficalme"] .editor-toolbar,
+		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }
+		.widget-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+		.editor-container { display: flex; flex-direction: column; border: 1px solid #eee; border-radius: 8px; background: white; flex-grow: 1; overflow: hidden; resize: none; min-width: 180px; min-height: 70px; }
+		.widget:hover .editor-container { resize: both; }
+		.editor-container::-webkit-resizer { background-color: transparent; }
+		.widget:hover .editor-container::-webkit-resizer { background-color: #ccc; background-image: linear-gradient(135deg, transparent 50%, #333 50%, #333 60%, transparent 60%, transparent 70%, #333 70%, #333 80%, transparent 80%); }
+		.editor-toolbar button, .editor-toolbar select, .editor-toolbar input { padding: 2px 4px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 11px; height: 26px; box-sizing: border-box; }
+		@font-face { font-family: 'KGPerfectPenmanship'; src: url('polices/KGPerfectPenmanship.ttf') format('truetype'); }
+		@font-face { font-family: 'Andika'; src: url('polices/Andika.ttf') format('truetype'); }
+		@font-face { font-family: 'OpenDyslexicLocal'; src: url('polices/OpenDyslexic-Regular.otf') format('opentype'); }
+		@font-face { font-family: 'BelleAllureGS'; src: url('polices/BelleAllureGS-Gros.otf') format('opentype'); }
+		.editor-content { padding: 10px; outline: none; overflow: auto; text-align: left; flex-grow: 1; }
+
+		/* --- ANIMATIONS MODALES --- */
+		@keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
+		@keyframes slideUpModal  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+		/* Météo → widgets-meteo.js */
+		/* ── NOUVEAU MENU FLOTTANT ────────────────────────────── */
+		#fab-btn {
+			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
+			width: 50px; height: 50px; border-radius: 50%;
+			background: #1F1F21; border: 1.5px solid #4a4a5a;
+			color: #e8e8f0; font-size: 35px; cursor: pointer;
+            line-height: 1; padding-bottom: 5px;
+			display: flex; align-items: center; justify-content: center;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+			transition: background .15s, transform .15s;
+		}
+		#fab-btn:hover { background: #2e2e3a; transform: scale(1.1); }
+		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(45deg); }
+
+		/* Menu vertical principal */
+		#main-menu {
+			position: fixed; bottom: 82px; left: 20px; z-index: 14000;
+			display: flex; flex-direction: column; gap: 2px;
+			pointer-events: none; opacity: 0;
+			transition: opacity .2s ease;
+		}
+		#main-menu.open {
+			pointer-events: auto; opacity: 1;
+		}
+
+		/* Item du menu */
+		.mm-item {
+			display: flex; align-items: center; gap: 10px;
+			background: #1F1F21; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 5px 10px;
+			color: #d0d0e0; font-size: 13px; font-weight: 600;
+			cursor: pointer; white-space: nowrap;
+			transition: background .15s, border-color .15s, transform .12s;
+			min-width: 120px;
+		}
+		.mm-item:hover { background: #2a2a36; border-color: #555; transform: translateX(3px); }
+		.mm-item.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		.mm-item .mm-ico { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+		.mm-item .mm-arrow { margin-left: auto; font-size: 10px; color: #666; }
+
+		/* Séparateur */
+		.mm-sep { height: 1px; background: #2e2e3a; margin: 2px 4px; }
+
+		/* Sous-menu flyout à droite au survol */
+		.mm-has-sub { position: relative; }
+		.mm-sub {
+			position: absolute; left: 100%; top: 0;
+			padding-left: 10px; /* pont invisible élargi — zone de passage souris */
+			min-width: 120px;
+			display: flex; flex-direction: column; gap: 3px;
+			opacity: 0; pointer-events: none;
+			/* Pas de transform/translate : évite tout gap pendant la transition */
+			transition: opacity .12s ease;
+			z-index: 1;
+		}
+		.mm-sub-inner {
+			display: flex; flex-direction: column; gap: 3px;
+			background: #1a1a22; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 3px;
+			box-shadow: 4px 4px 20px rgba(0,0,0,0.5);
+			width: 100%;
+		}
+		.mm-has-sub:hover > .mm-sub {
+			opacity: 1; pointer-events: auto;
+		}
+		.mm-sub-item {
+			display: flex; align-items: center; gap: 8px;
+			padding: 5px 10px; border-radius: 8px;
+			color: #ccc; font-size: 12px; font-weight: 600;
+			cursor: pointer; transition: background .12s;
+			white-space: nowrap;
+		}
+		.mm-sub-item:hover { background: #2a2a36; color: #e8e8f0; }
+		.mm-sub-item .mm-ico { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+
+		/* mm-panel remplacé par draw-toolbar et shape-toolbar horizontaux */
+
+		/* bg-submenu désormais intégré dans le sous-menu Affichage */
+
+		/* ── Rubriques du menu ──────────────────────────────────── */
+		.mm-section {
+			border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 3px;
+		}
+		.mm-section-label {
+			font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+			padding: 2px 6px 4px; color: #666;
+		}
+		/* A — Système : teinte froide sombre */
+		.mm-section-a { background: #14161f; }
+		.mm-section-a .mm-section-label { color: #4a6a8a; }
+		.mm-section-a .mm-item { background: transparent; }
+		.mm-section-a .mm-item:hover { background: #1e2535; }
+		/* B — Annotation : teinte chaude/violette */
+		.mm-section-b { background: #1a1428; }
+		.mm-section-b .mm-section-label { color: #7a5aaa; }
+		.mm-section-b .mm-item { background: transparent; }
+		.mm-section-b .mm-item:hover { background: #251d38; }
+		/* C — Contenu : teinte verte/teal sombre */
+		.mm-section-c { background: #111d1a; }
+		.mm-section-c .mm-section-label { color: #3a7a60; }
+		.mm-section-c .mm-item { background: transparent; }
+		.mm-section-c .mm-item:hover { background: #182820; }
+		/* Ajustement : items actifs gardent la couleur bleue */
+		.mm-section .mm-item.active { background: #1a3550 !important; border-color: #4a90e2; color: #7ab8f5; }
+
+		/* ── Mini color picker custom ──────────────────────────── */
+		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
+		.cpick-swatch {
+			width: 30px; height: 26px; border-radius: 6px; border: 2px solid #555;
+			cursor: pointer; flex-shrink: 0; transition: border-color .15s;
+		}
+		.cpick-swatch:hover { border-color: #7ab8f5; }
+		.cpick-popup {
+			display: none; position: fixed;
+			background: #1a1a22; border: 1px solid #3a3a4a;
+			border-radius: 12px; padding: 10px; z-index: 99000;
+			box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+			width: 188px; box-sizing: border-box; overflow: hidden;
+		}
+		.cpick-popup.open { display: block; }
+		.cpick-grid {
+			display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px;
+		}
+		.cpick-color {
+			aspect-ratio: 1; border-radius: 4px; cursor: pointer;
+			border: none; outline: 2px solid transparent; outline-offset: -1px;
+			transition: outline-color .1s, filter .1s;
+		}
+		.cpick-color:hover { filter: brightness(1.25); outline-color: #fff; }
+		.cpick-color.selected { outline-color: #7ab8f5; filter: brightness(1.1); }
+		.cpick-hex-row {
+			display: flex; gap: 6px; align-items: center; border-top: 1px solid #2e2e3a; padding-top: 8px;
+		}
+		.cpick-hex {
+			flex: 1; min-width: 0; background: #28282f; border: 1px solid #3a3a4a; border-radius: 6px;
+			color: #e8e8f0; font-size: 12px; font-family: monospace; padding: 4px 8px;
+			outline: none; box-sizing: border-box;
+		}
+		.cpick-hex:focus { border-color: #4a90e2; }
+		.cpick-native {
+			width: 26px; height: 26px; border: none; border-radius: 5px;
+			cursor: pointer; padding: 0; background: none; flex-shrink: 0;
+		}
+
+		/* --- Anciens boutons (gardés pour undo/redo) --- */
+		.tool-btn {
+			background: #1F1F21; color: #ccc; border: 1px solid #3a3a4a;
+			padding: 8px 10px; border-radius: 10px; cursor: pointer;
+			font-size: 18px; display: flex; align-items: center; justify-content: center;
+			transition: background .15s; box-sizing: border-box; white-space: nowrap; flex-shrink: 0;
+		}
+		.tool-btn:hover { background: #2e2e3a; color: #e8e8f0; }
+		.tool-btn.active-tool { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		.undo-btn, .redo-btn {
+			background: #1F1F21; color: #a1a1a1; border: 1px solid #2e2e38;
+			padding: 4px 5px; border-radius: 10px; cursor: not-allowed;
+			font-size: 18px; display: flex; align-items: center; justify-content: center;
+			box-sizing: border-box; flex-shrink: 0; transition: background .15s;
+		}
+		.undo-btn.enabled, .redo-btn.enabled { color: #ccc; cursor: pointer; }
+		.undo-btn.enabled:hover, .redo-btn.enabled:hover { background: #2e2e3a; color: #e8e8f0; }
+		.menu-btn { display: none; }
+		.widget-btn { background: #28282f; color: #ddd; border: none; padding: 14px 8px 10px; border-radius: 12px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; transition: background .15s; line-height: 1.2; text-align: center; white-space: nowrap; }
+		.widget-btn:hover { background: #35353f; }
+		.widget-btn .ico { font-size: 26px; line-height: 1; }
+
+		.exit-fs-btn { display: none; position: absolute; top: 10px; right: 10px; z-index: 99999; background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+		.editor-container:fullscreen .exit-fs-btn { display: block; }
+		/* Styles .bg-thumb* déplacés dans background.js (lien CSS à ajouter si besoin) */
+
+		#font-size-input::-webkit-outer-spin-button,
+		#font-size-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+		#font-size-input { -moz-appearance: textfield; appearance: textfield; }
+
+        /* --- CANVAS --- */
+        #draw-canvas { position: absolute; top: 0; left: 0; z-index: 50; pointer-events: none !important; touch-action: none; }
+        #draw-canvas.inactive { /* canvas toujours visible, les dessins restent affichés */ }
+        #selection-rect { position: absolute; border: 2px dashed #4a90e2; background: rgba(74,144,226,0.08); pointer-events: none; z-index: 600; display: none; }
+
+        /* Calendrier & horloge → widgets-datetime.js */
+        /* --- AGENDA --- */
+        .agenda-container { display: flex; flex-direction: column; background: #fff; border-radius: 8px; border: 1px solid #eee; overflow: hidden; min-height: 200px; }
+        .agenda-header-title { background: #2b7fff; color: white; padding: 5px 10px; font-weight: bold; display: flex; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.6em; }
+        .agenda-current-time { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
+        .agenda-list { padding: 1px; flex-grow: 1; }
+        .agenda-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #eee; position: relative; }
+        .agenda-item:last-child { border-bottom: none; }
+        .agenda-item.dragging { opacity: 0.5; background: #f0f7ff; border: 1px dashed var(--primary-color); }
+        .agenda-time { font-weight: bold; color: #4a90e2; font-size: 1.6em; min-width: 45px; outline: none; cursor: text; }
+        .agenda-text { outline: none; flex-grow: 1; font-size: 1.6em; color: #333; }
+        .agenda-add-btn { background: #f8f9fa; border: none; border-top: 1px solid #eee; padding: 5px; cursor: pointer; color: #4a90e2; font-weight: bold; font-size: 1.2em; transition: background 0.2s; }
+        .agenda-add-btn:hover { background: #eef2f5; color: #2c3e50; }
+        .agenda-row-handle { cursor: grab; color: #ccc; padding: 0 5px; font-size: 0.75em; user-select: none; }
+        .agenda-row-handle:active { cursor: grabbing; }
+        .agenda-delete-row { cursor: pointer; color: #e74c3c; font-weight: bold; font-size: 1.2em; padding: 0 5px; opacity: 0; transition: opacity 0.2s; }
+        .agenda-item:hover .agenda-delete-row { opacity: 1; }
+
+        /* --- PANNEAU ÉDITION FORME --- */
+        #shape-edit-panel { display:none; position:fixed; background:#1F1F21; border-radius:14px; padding:14px 16px; box-shadow:0 -4px 30px rgba(0,0,0,0.4); z-index:10000; border:1px solid #3a3a3f; min-width:300px; }
+
+        /* --- MODALES --- */
+        #modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:20000; justify-content:center; align-items:center; }
+        .modal-content { background:white; padding:30px; border-radius:var(--border-radius); box-shadow:var(--shadow); text-align:center; max-width:400px; width:90%; }
+        .modal-content button { padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .modal-content .btn-cancel { border: 1px solid #ddd; background: #f8f9fa; color: var(--text-color); }
+        .modal-content .btn-confirm { border: none; background: #ff4757; color: white; }
+
+
+		/* --- MODE PRÉSENTATION --- */
+		#presentation-btn {
+			position:fixed;top:10px;right:24px;
+			z-index:100000;background:#1a1a2e;color:white;
+			border:1px solid rgba(255,255,255,0.25);
+			font-size:25px;padding:5px 5px;border-radius:30px;
+			cursor:pointer;font-weight:600;display:flex;
+			align-items:center;gap:8px;
+			box-shadow:0 4px 16px rgba(0,0,0,0.5);
+			line-height: 1; padding-bottom: 10px;
+		}
+			
+		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); }
+		
+		body.presentation-mode #board {
+			position: fixed !important;
+			top: 0 !important; left: 0 !important;
+			width: 100vw !important; height: 100vh !important;
+			z-index: 1 !important;
+		}
+		body.presentation-mode #draw-canvas {
+			position: fixed !important;
+			top: 0 !important; left: 0 !important;
+		}
+		/* En mode présentation : masquer toolbar d'édition et ctx-menu */
+		body.presentation-mode .widget .editor-toolbar,
+		body.presentation-mode .widget .widget-ctx-menu { opacity: 0 !important; pointer-events: none !important; }
+		/* Masquer le bouton fermer en présentation (évite suppressions accidentelles) */
+		body.presentation-mode .widget .widget-close-handle,
+		body.presentation-mode .shape-widget .widget-close-handle { opacity: 0 !important; pointer-events: none !important; }
+		/* Les widgets restent interactifs en présentation */
+		body.presentation-mode .widget,
+		body.presentation-mode .shape-widget {
+			pointer-events: auto !important;
+			cursor: default !important;
+		}
+		/* Bordure subtile au survol en présentation */
+		body.presentation-mode .widget:hover,
+		body.presentation-mode .shape-widget:hover {
+			border-color: rgba(74,144,226,0.35) !important;
+		}
+		body.presentation-mode .widget:focus-within,
+		body.presentation-mode .shape-widget:focus-within {
+			border-color: rgba(74,144,226,0.4) !important;
+			box-shadow: var(--shadow) !important;
+			outline: none !important;
+		}
+		/* POIGNÉES VISIBLES AU SURVOL en mode présentation
+		   (utiliser :hover car les iframes/widgets captent le focus et bloquent :focus-within) */
+		body.presentation-mode .widget:hover .drag-handle,
+		body.presentation-mode .widget:hover .widget-pin-handle,
+		body.presentation-mode .widget:hover .widget-back-handle,
+		body.presentation-mode .widget:hover .widget-rotate-handle,
+		body.presentation-mode .widget:hover .widget-menu-handle,
+		body.presentation-mode .widget:focus-within .drag-handle,
+		body.presentation-mode .widget:focus-within .widget-pin-handle,
+		body.presentation-mode .widget:focus-within .widget-back-handle,
+		body.presentation-mode .widget:focus-within .widget-rotate-handle,
+		body.presentation-mode .widget:focus-within .widget-menu-handle { opacity: 1 !important; pointer-events: auto !important; }
+		/* Formes (shape-widget) */
+		body.presentation-mode .shape-widget:hover .drag-handle,
+		body.presentation-mode .shape-widget:hover .widget-pin-handle,
+		body.presentation-mode .shape-widget:hover .widget-back-handle,
+		body.presentation-mode .shape-widget:hover .widget-rotate-handle,
+		body.presentation-mode .shape-widget:hover .widget-menu-handle,
+		body.presentation-mode .shape-widget:hover .shape-resize-handle,
+		body.presentation-mode .shape-widget:hover .resize-lock-btn,
+		body.presentation-mode .shape-widget:focus-within .drag-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-pin-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-back-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-rotate-handle,
+		body.presentation-mode .shape-widget:focus-within .widget-menu-handle,
+		body.presentation-mode .shape-widget:focus-within .shape-resize-handle,
+		body.presentation-mode .shape-widget:focus-within .resize-lock-btn { opacity: 1 !important; pointer-events: auto !important; }
+		body.presentation-mode #selection-controls { display: none !important; }
+		/* Bouton présentation en mode présentation : style "Quitter" discret */
+		body.presentation-mode #presentation-btn {
+			background: rgba(20,20,20,0.75) !important;
+			border-color: rgba(255,255,255,0.2) !important;
+			font-size: 12px !important;
+			padding: 10px 5px !important;
+			border-radius: 12px !important;
+			opacity: 0.3 !important;
+		}
+		body.presentation-mode #presentation-btn:hover {
+			background: rgba(50,50,50,0.95) !important;
+			opacity: 1 !important;
+		}
+
+		/* POINTEUR LASER */
+		#laser-pointer {
+			position: fixed; pointer-events: none; z-index: 99999;
+			width: 24px; height: 24px; border-radius: 50%;
+			background: radial-gradient(circle, #fff 0%, #ff0000 35%, rgba(255,0,0,0.4) 65%, transparent 100%);
+			box-shadow: 0 0 8px 4px rgba(255,0,0,0.5);
+			transform: translate(-50%, -50%);
+			display: none;
+			transition: none;
+		}
+		#laser-pointer.active { display: block; }
+
+		/* ═══ SCÈNES ═══ */
+		#scenes-bar {
+			display: flex; align-items: center; gap: 4px;
+			pointer-events: auto; flex-wrap: nowrap; overflow-x: auto;
+			max-width: 55vw; scrollbar-width: none;
+		}
+		#scenes-bar::-webkit-scrollbar { display: none; }
+		.scene-tab {
+			display: flex; align-items: center; gap: 5px;
+			background: #cccccc; color: #333; border: 2px solid rgba(0,0,0,0.2);
+			border-radius: 20px; padding: 5px 12px; font-size: 13px; font-weight: 600;
+			cursor: pointer; white-space: nowrap; user-select: none;
+			box-sizing: border-box; transition: background 0.15s, color 0.15s;
+			max-width: 160px;
+		}
+		.scene-tab:hover { background: #bbbbbb; }
+		.scene-tab.active {
+			background: #2B7FFF; color: white;
+			border-color: rgba(0,0,255,0.2);
+		}
+		.scene-tab-name {
+			outline: none; cursor: pointer;
+			max-width: 100px; overflow: hidden;
+			text-overflow: ellipsis; white-space: nowrap;
+		}
+		.scene-tab-name:focus {
+			border-bottom: 1px solid rgba(255,255,255,0.6);
+			cursor: text;
+		}
+		.scene-tab-close {
+			font-size: 14px; line-height: 1; opacity: 0.6;
+			transition: opacity 0.15s; flex-shrink: 0;
+		}
+		.scene-tab-close:hover { opacity: 1; }
+		.scene-tab.active .scene-tab-close { color: white; }
+		#scene-add-btn {
+			background: #eeeeee; color: #555; border: 2px solid rgba(0,0,0,0.3);
+			border-radius: 20px; width: 34px; height: 34px;
+			font-size: 20px; font-weight: 700; cursor: pointer;
+			display: flex; align-items: center; justify-content: center;
+			flex-shrink: 0; transition: background 0.15s;
+			box-sizing: border-box; line-height: 1;
+		}
+		#scene-add-btn:hover { background: #ddd; }
+		#scene-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+		/* === PANNEAU STICKERS === */
+		#sticker-panel {
+			display: none; position: fixed; bottom: 80px; left: 30px;
+			background: #1F1F21; border-radius: 16px; padding: 14px 14px 10px;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.5); z-index: 9998;
+			border: 1px solid #3a3a3f; width: 400px;
+		}
+		#sticker-panel.active { display: block; }
+		.sp-title { color: #888; font-size: 10px; font-weight: 700; text-transform: uppercase;
+			letter-spacing: 1.2px; margin-bottom: 10px; padding-bottom: 8px;
+			border-bottom: 1px solid #2e2e2e; display: flex; justify-content: space-between; align-items: center; }
+		.sp-close { background: none; border: none; color: #555; cursor: pointer;
+			font-size: 15px; line-height: 1; padding: 2px 5px; border-radius: 4px; }
+		.sp-close:hover { color: #aaa; }
+		.sp-tabs { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
+		.sp-tab { background: #28282f; color: #aaa; border: 1px solid #3a3a3f;
+			border-radius: 8px; padding: 4px 9px; font-size: 11px; cursor: pointer;
+			transition: background 0.15s; white-space: nowrap; }
+		.sp-tab:hover { background: #35353f; }
+		.sp-tab.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		.sp-search { width: 100%; box-sizing: border-box; background: #28282f;
+			border: 1px solid #3a3a3f; border-radius: 8px; color: #eee;
+			padding: 6px 10px; font-size: 12px; margin-bottom: 9px; outline: none; }
+		.sp-search:focus { border-color: #4a90e2; }
+		.sp-empty { color: #555; font-size: 12px; text-align: center; padding: 20px 0; }
+		/* Grille émojis animés Noto */
+		.sp-grid-anim { display: grid; grid-template-columns: repeat(7, 1fr);
+			gap: 4px; max-height: 270px; overflow-y: auto; padding-right: 2px; }
+		.sp-grid-anim::-webkit-scrollbar { width: 4px; }
+		.sp-grid-anim::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+		.sp-anim-btn { background: #28282f; border: 1px solid #2e2e38;
+			border-radius: 8px; cursor: pointer; padding: 2px;
+			display: flex; align-items: center; justify-content: center;
+			transition: all 0.12s; aspect-ratio: 1; }
+		.sp-anim-btn:hover { background: #1a3550; border-color: #4a90e2; transform: scale(1.12); }
+		.sp-anim-btn img { width: 42px; height: 42px; object-fit: contain; pointer-events: none; }
+		/* Stickers : height fixe pour que le resize fonctionne */
+		.widget[data-type="sticker"] { height: var(--sticker-h, 100px) !important; }
+
+		/* Boutons bascule Animés/Classiques */
+		.sp-mode-btn { background:#28282f; color:#aaa; border:1px solid #3a3a3f;
+			border-radius:8px; padding:5px 11px; font-size:12px; cursor:pointer;
+			transition:background .15s; white-space:nowrap; flex-shrink:0; }
+		.sp-mode-btn:hover  { background:#35353f; color:#eee; }
+		.sp-mode-btn.active { background:#1a3550; border-color:#4a90e2; color:#7ab8f5; }
+
+</style>
+</head>
+<body>
+
+<div id="board">
+<div id="pres-limit-line"></div>
+    <div id="selection-controls">
+        <div class="sc-btn sc-move"   id="sc-move-btn"   title="Déplacer">✥</div>
+        <div class="sc-btn sc-rotate" id="sc-rotate-btn" title="Faire pivoter">↻</div>
+        <div class="sc-btn sc-resize" id="sc-resize-btn" title="Redimensionner le groupe">↘</div>
+        <div id="sc-lock-btn"   title="Verrouiller les proportions (ou Shift)">🔓</div>
+        <div id="sc-flip-h-btn" title="Symétrie horizontale">↔</div>
+        <div id="sc-flip-v-btn" title="Symétrie verticale">↕</div>
+        <div id="sc-action-bar">
+            <div class="sc-btn sc-menu"    id="sc-menu-btn"    title="Menu">☰</div>
+            <div class="sc-btn sc-pin"     id="sc-pin-btn"     title="Épingler">📌</div>
+            <div class="sc-btn sc-back"    id="sc-back-btn"    title="Envoyer derrière">🔽</div>
+            <div class="sc-btn sc-merge"   id="sc-merge-btn"   title="Grouper les widgets sélectionnés">⊞ Grouper</div>
+            <div class="sc-btn sc-fuse"    id="sc-fuse-btn"    title="Fusionner en une seule image">🖼️ Fusionner</div>
+            <div class="sc-btn sc-ungroup" id="sc-ungroup-btn" title="Dissocier le groupe">⛓️ Dissocier</div>
+            <div class="sc-btn sc-delete"  id="sc-delete-btn"  title="Supprimer">×</div>
+        </div>
+    </div>
+</div>
+
+<div id="sc-ctx-menu"></div>
+
+<div id="toolbar-container">
+<!-- scenes-menu intégré dans sub-affichage -->
+    <!-- Panneau d'édition d'une forme existante -->
+    <div id="shape-edit-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="color:#aaa;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Modifier la forme</span>
+            <button onclick="closeShapeEditPanel()" style="background:none;border:none;color:#666;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;">✖</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid #333;padding-top:10px;">
+            <label style="color:#aaa;font-size:11px;">Contour :</label>
+            <div class="cpick-wrap" id="cpick-edit-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;width:26px;height:26px;border-radius:5px;border:2px solid #eee;cursor:pointer;" onclick="cpickOpen('edit-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-edit-stroke-color"></div></div>
+            <label style="color:#aaa;font-size:11px;">Épaisseur :</label>
+            <input type="range" id="edit-stroke-width" min="0" max="20" value="4" style="width:70px;cursor:pointer;" oninput="document.getElementById('edit-stroke-width-val').textContent=this.value+'px';applyShapeEdit()">
+            <span id="edit-stroke-width-val" style="color:#fff;font-size:11px;min-width:28px;">4px</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;">
+            <label style="color:#aaa;font-size:11px;">Remplissage :</label>
+            <div class="cpick-wrap" id="cpick-edit-fill-color"><div class="cpick-swatch" style="background:#4a90e2;width:26px;height:26px;border-radius:5px;border:2px solid #eee;cursor:pointer;" onclick="cpickOpen('edit-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-edit-fill-color"></div></div>
+            <label style="color:#aaa;font-size:11px;">Opacité :</label>
+            <input type="range" id="edit-fill-opacity" min="0" max="100" value="60" style="width:70px;cursor:pointer;" oninput="document.getElementById('edit-fill-opacity-val').textContent=this.value+'%';applyShapeEdit()">
+            <span id="edit-fill-opacity-val" style="color:#fff;font-size:11px;min-width:28px;">60%</span>
+        </div>
+    </div>
+
+
+    <div id="global-toolbar" style="position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;display:none;padding:10px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
+		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+			<span style="background:#eee; color: #111; border-radius:12px; border:2px solid rgba(255,255,255,0.5);box-sizing:border-box;font-size:18px; font-weight: bold; ">&nbsp; Outils texte 🖊️ &nbsp;</span>
+			<div style="width:1px;height:20px;background:#444;"></div>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 6px;" title="Aligner à gauche">⬅</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 6px;" title="Centrer">↔</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 6px;" title="Aligner à droite">➡</button>
+			<div style="width:1px;height:20px;background:#444;"></div>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('bold')" style="cursor:pointer;" title="Gras"><b>G</b></button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('italic')" style="cursor:pointer;" title="Italique"><i>I</i></button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('underline')" style="cursor:pointer;" title="Souligné"><u>S</u></button>
+			<span style="font-size:10px;color:#ccc;">Texte :</span>
+			<div class="cpick-wrap" id="cpick-text-color"><div class="cpick-swatch" style="background:#000000;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('text-color',this)"></div><div class="cpick-popup" id="cpick-pop-text-color"></div></div>
+			<span style="font-size:10px;color:#ccc;">Surligner :</span>
+			<div class="cpick-wrap" id="cpick-highlight-color"><div class="cpick-swatch" style="background:#ffff00;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('highlight-color',this)"></div><div class="cpick-popup" id="cpick-pop-highlight-color"></div></div>
+			<span style="font-size:10px;color:#ccc;">Fond widget :</span>
+			<div class="cpick-wrap" id="cpick-widget-bg"><div class="cpick-swatch" style="background:#ffffff;border:1px solid #888;" onclick="cpickOpen('widget-bg',this)"></div><div class="cpick-popup" id="cpick-pop-widget-bg"></div></div>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="toggleTransparencyGlobal()" style="cursor:pointer;" title="Fond transparent"><span class="icon-transparency"></span></button>
+				<span style="font-size:10px;color:#ccc;">Opacité fond :</span>
+				<input type="range" id="widget-bg-opacity" min="0" max="100" value="100"
+					onmousedown="savedSelection=saveCurrentSelection()"
+					oninput="applyWidgetBgOpacity(this.value)"
+					style="width:70px;cursor:pointer;">
+				<span id="widget-bg-opacity-val" style="color:#fff;font-size:11px;min-width:28px;">100%</span>
+			<select onmousedown="savedSelection=saveCurrentSelection()" onchange="formatFontFamilyGlobal(this.value)" style="width:140px; cursor:pointer;" ">
+				<option value="Arial, sans-serif">Arial</option>
+				<option value="'Segoe UI', sans-serif">Segoe UI</option>
+				<option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+				<option value="Verdana, sans-serif">Verdana</option>
+				<option value="'KGPerfectPenmanship', sans-serif">KGPerfectPenmanship</option>
+				<option value="'Andika', sans-serif">Andika</option>
+				<option value="'OpenDyslexicLocal', sans-serif">🧩 OpenDyslexic</option>
+				<option value="'BelleAllureGS', cursive">📏 Belle Allure GS</option>
+			</select>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
+			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;" ">✖</button>
+		</div>
+	</div>
+
+    <!-- Bouton flottant principal -->
+	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal">＋</button>
+
+	<!-- Menu vertical -->
+	<div id="main-menu">
+
+		<!-- ══ RUBRIQUE C : Contenu ══ -->
+		<div class="mm-section mm-section-c">
+			<div class="mm-section-label">Contenu</div>
+
+			<!-- Médias -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🎞️</span>Médias<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-medias"><div class="mm-sub-inner">
+					<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
+					<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
+					<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
+				</div></div>
+			</div>
+
+			<!-- Outils -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🛠️</span>Outils<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
+				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
+				<div class="mm-sub-item" onclick="createWidget('deficalme');closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
+				</div></div>
+			</div>
+
+			<!-- Widgets -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">📦</span>Widgets<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
+				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>Date</div>
+				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>Heure</div>
+				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>Météo</div>
+				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>Devoirs</div>
+				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>Planning</div>
+				</div></div>
+			</div>
+
+			<!-- Texte -->
+			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
+				<span class="mm-ico">🖊️</span>Texte
+			</div>
+		</div>
+
+		<!-- ══ RUBRIQUE B : Annotation ══ -->
+		<div class="mm-section mm-section-b">
+			<div class="mm-section-label">Annotation</div>
+
+			<!-- Stickers -->
+			<div class="mm-item" id="sticker-btn" onclick="toggleStickerPanel()">
+				<span class="mm-ico">😀</span>Stickers
+			</div>
+
+			<!-- Formes -->
+			<div class="mm-item" id="mm-shapes-btn" onclick="openMmPanel('shapes')">
+				<span class="mm-ico">🔲</span>Formes
+			</div>
+
+			<!-- Dessin -->
+			<div class="mm-item" id="mm-draw-btn" onclick="openMmPanel('draw')">
+				<span class="mm-ico">✏️</span>Dessin
+			</div>
+		</div>
+
+		<!-- ══ RUBRIQUE A : Système ══ -->
+		<div class="mm-section mm-section-a">
+			<div class="mm-section-label">Système</div>
+
+			<!-- Affichage (flyout) -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🖥️</span>Affichage<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-affichage"><div class="mm-sub-inner">
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🗂️</span>Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
+							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène</button>
+						</div></div>
+					</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🖼️</span>Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');closeMainMenu()" title="Blanc"></div>
+								<div class="bg-thumb" style="background-color:#2f3542;" onclick="applyBackground('#2f3542');saveBg('#2f3542');closeMainMenu()" title="Ardoise"></div>
+								<div class="bg-thumb" style="background-color:#6e6e6e;" onclick="applyBackground('#6e6e6e');saveBg('#6e6e6e');closeMainMenu()" title="Gris clair"></div>
+								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
+								<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');closeMainMenu()" title="Beige"></div>
+								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Nude"></div>
+								<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');closeMainMenu()" title="Noir"></div>
+								<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');closeMainMenu()" title="Vert Tableau"></div>
+								<div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');closeMainMenu()" title="Bleu nuit"></div>
+
+							</div>
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');closeMainMenu()" title="Séyès (jaune paille)"></div>
+								<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');closeMainMenu()" title="Séyès (blanc)"></div>
+								<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');closeMainMenu()" title="Lignes simples"></div>
+								<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');closeMainMenu()" title="Grands carreaux"></div>
+								<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');closeMainMenu()" title="Petits carreaux"></div>
+								<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');closeMainMenu()" title="Ardoise lignes"></div>
+							</div>
+							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
+						</div></div>
+					</div>
+					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>Pointeur laser</div>
+				</div></div>
+			</div>
+
+			<!-- Fichier (flyout) -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🗄️</span>Fichier<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>Sauvegarder</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>Charger</div>
+					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
+					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>Effacer tout</div>
+				</div></div>
+			</div>
+
+			<!-- Undo / Redo / Aide -->
+			<div style="display:flex;gap:6px;padding:2px 0;">
+				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler" style="flex:1;border-radius:10px;">↩</button>
+				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire" style="flex:1;border-radius:10px;">↪</button>
+				<button class="tool-btn" onclick="openHelpModal()" title="Aide" style="font-size:14px;padding:8px 10px;">❓</button>
+			</div>
+		</div>
+
+	</div><!-- #main-menu -->
+
+	<!-- Barre outils DESSIN (horizontale, bas-gauche) -->
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+			<!-- Modes -->
+			<button id="draw-mode-free-btn" onclick="setDrawMode('free')" style="padding:6px 10px;border-radius:8px;border:2px solid #4a90e2;background:#1a3550;color:#fff;cursor:pointer;font-size:12px;font-weight:600;">✏️ Libre</button>
+			<button id="draw-mode-shape-btn" onclick="setDrawMode('shape')" style="padding:6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;">🔵 Formes</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Couleur & taille -->
+			<span style="color:#ccc;font-size:11px;">Couleur</span>
+			<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
+			<span style="color:#ccc;font-size:11px;">Taille</span>
+			<input type="range" id="draw-size" min="1" max="40" value="4" style="width:90px;cursor:pointer;">
+			<span id="draw-size-label" style="color:#fff;font-size:12px;min-width:18px;">4</span>
+			<!-- Options reconnaissance -->
+			<div id="shape-recog-options" style="display:none;align-items:center;gap:8px;">
+				<span style="color:#aaa;font-size:11px;">Remplissage</span>
+				<div class="cpick-wrap" id="cpick-shape-recog-fill"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-recog-fill',this)"></div><div class="cpick-popup" id="cpick-pop-shape-recog-fill"></div></div>
+				<span style="color:#aaa;font-size:11px;">Opacité</span>
+				<input type="range" id="shape-recog-opacity" min="0" max="100" value="30" style="width:70px;cursor:pointer;">
+				<span id="shape-recog-opacity-val" style="color:#fff;font-size:11px;min-width:24px;">30%</span>
+			</div>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Gomme -->
+			<span style="color:#ccc;font-size:11px;">🧽</span>
+			<input type="range" id="eraser-size" min="5" max="80" value="20" style="width:70px;cursor:pointer;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
+			<span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:18px;">20</span>
+			<button id="eraser-btn" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<!-- Actions -->
+			<button onclick="clearCanvas()" style="background:#3d1515;color:#ff6b6b;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️ Effacer</button>
+			<button onclick="stopDrawing()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+		</div>
+		<div id="shape-recog-hint" style="display:none;margin-top:8px;padding:5px 8px;background:#1a2e1a;border-radius:6px;border:1px solid #2d5a2d;">
+			<span style="color:#7dba7d;font-size:11px;">💡 Dessinez un cercle, carré, rectangle ou triangle — la forme sera reconnue</span>
+		</div>
+	</div>
+
+	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
+	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+		<div style="display:flex;align-items:center;gap:14px;">
+			<!-- Colonne 1 : formes -->
+			<div class="shape-grid" id="shape-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 2 : contour + fond -->
+			<div style="display:flex;flex-direction:column;gap:6px;">
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="color:#ccc;font-size:11px;min-width:44px;">Contour</span>
+					<div class="cpick-wrap" id="cpick-shape-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;" onclick="cpickOpen('shape-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-stroke-color"></div></div>
+					<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:60px;cursor:pointer;">
+					<span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:18px;">4</span>
+				</div>
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="color:#ccc;font-size:11px;min-width:44px;">Fond</span>
+					<div class="cpick-wrap" id="cpick-shape-fill-color"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-fill-color"></div></div>
+					<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:60px;cursor:pointer;">
+					<span id="shape-opacity-val" style="color:#fff;font-size:11px;min-width:18px;">60%</span>
+				</div>
+			</div>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 3 : gomme -->
+			<button id="eraser-btn-shapes" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
+			<div style="width:1px;height:48px;background:#333;"></div>
+			<!-- Colonne 4 : fermer -->
+			<button onclick="stopShapeToolbar()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+		</div>
+	</div>
+
+
+	<!-- Ancien bottom-bar réduit à néant (undo/redo maintenant dans le menu) -->
+	<div id="bottom-bar" style="position:fixed;bottom:16px;left:0;right:0;z-index:13000;pointer-events:none;display:flex;flex-direction:column;gap:8px;padding:0 16px;">
+	</div>
+
+	<!-- bg-submenu intégré dans sous-menu Affichage -->
+</div><!-- fin #toolbar-container -->
+
+<!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
+<div id="sticker-panel">
+	<div class="sp-title">
+		<span>✨ Stickers Animés</span>
+		<button class="sp-close" onclick="toggleStickerPanel()" title="Fermer">✖</button>
+	</div>
+	<!-- Bascule Animés / Classiques -->
+	<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+		<button id="sp-mode-animated" class="sp-mode-btn active" onclick="setStickerMode('animated')" title="Émojis animés Noto — connexion internet requise">🌐 Animés</button>
+		<button id="sp-mode-classic" class="sp-mode-btn" onclick="setStickerMode('classic')" title="Émojis classiques — fonctionne hors-ligne">📴 Classiques</button>
+		<span id="sp-offline-badge" style="display:none;background:#ff4757;color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;">HORS-LIGNE</span>
+	</div>
+	<!-- Section émojis animés Noto -->
+	<div id="sp-animated-section">
+		<div class="sp-tabs" id="sp-tabs">
+			<button class="sp-tab active" data-tab="😊 Visages & émotions">😊 Visages</button>
+			<button class="sp-tab" data-tab="🐾 Animaux & nature">🐾 Animaux</button>
+			<button class="sp-tab" data-tab="🍕 Nourriture">🍕 Nourriture</button>
+			<button class="sp-tab" data-tab="🚀 Voyages">🚀 Voyages</button>
+			<button class="sp-tab" data-tab="🎉 Activités">🎉 Activités</button>
+			<button class="sp-tab" data-tab="💡 Objets">💡 Objets</button>
+			<button class="sp-tab" data-tab="🔣 Symboles">🔣 Symboles</button>
+			<button class="sp-tab" data-tab="🏳️ Drapeaux">🏳️ Drapeaux</button>
+			<button class="sp-tab" data-tab="👥 Personnes">👥 Personnes</button>
+		</div>
+	</div>
+	<!-- Section émojis classiques (hors-ligne) -->
+	<div id="sp-classic-section" style="display:none;">
+		<div class="sp-tabs" id="sp-classic-tabs">
+			<button class="sp-tab active" data-ctab="😊 Visages">😊 Visages</button>
+			<button class="sp-tab" data-ctab="🐾 Animaux">🐾 Animaux</button>
+			<button class="sp-tab" data-ctab="🍕 Nourriture">🍕 Nourrit.</button>
+			<button class="sp-tab" data-ctab="🎉 Fêtes">🎉 Fêtes</button>
+			<button class="sp-tab" data-ctab="🏫 École">🏫 École</button>
+			<button class="sp-tab" data-ctab="💡 Objets">💡 Objets</button>
+			<button class="sp-tab" data-ctab="🔣 Symboles">🔣 Symb.</button>
+			<button class="sp-tab" data-ctab="🌍 Nature">🌍 Nature</button>
+			<button class="sp-tab" data-ctab="👤 Personnes">👤 Pers.</button>
+		</div>
+	</div>
+	<input type="text" class="sp-search" id="sp-search" placeholder="🔍 Rechercher dans tous les émojis…" oninput="renderStickerPanel()">
+	<div id="sp-content"></div>
+</div>
+
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h3 style="margin-top:0;color:#ff4757;">⚠️ Tout effacer ?</h3>
+        <p style="color:#666;">Cette action videra votre bureau. C'est irréversible.</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+            <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+            <button class="btn-confirm" onclick="confirmClearBoard()">Oui, vider tout</button>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- TEMPLATES -->
+<template id="template-text">
+    <div class="editor-container">
+        <div class="editor-content" contenteditable="true" oninput="saveBoard()" style="font-size:40px;"></div>
+    </div>
+</template>
+<template id="template-homework">
+    <div class="editor-container">
+        <div class="editor-content" contenteditable="true" oninput="saveBoard()">
+            <span style="color:#D4C9C7;font-size:25px;font-weight:bold;">✍🏻 Devoirs à noter </span><br>
+            <p><span style="color:red;background-color:#F7E02A;font-size:38px;font-weight:bold;">Pour</span></p>
+            <p><span style="color:#f7639f;font-size:35px;font-weight:bold;">&nbsp;&nbsp;👉🏻 CE2 =</span></p>
+            <p><span style="color:#12a2e0;font-size:35px;font-weight:bold;">&nbsp;&nbsp;👉🏽 CM2 =</span></p>
+            <p><span style="color:#D9C93B;font-size:35px;font-weight:bold;">&nbsp;&nbsp;👉 TOUS =</span></p>
+        </div>
+    </div>
+</template>
+<!-- template-date → widgets-datetime.js -->
+<!-- template-time → widgets-datetime.js -->
+<template id="template-iframe">
+    <div class="editor-container" style="height:400px;width:550px;">
+        <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
+        <div class="editor-toolbar">
+            <input type="text" placeholder="Collez l'URL ici..." style="flex-grow:1;" onchange="loadIframe(this)">
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
+        </div>
+        <iframe src="" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
+    </div>
+</template>
+<template id="template-outilsprofs">
+    <div class="editor-container" style="height:500px;width:800px;">
+        <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
+        <div class="editor-toolbar" style="display:flex;justify-content:flex-end;">
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶ Plein écran</button>
+        </div>
+        <iframe src="https://outilsprofs.fr" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
+    </div>
+</template>
+<template id="template-youtube">
+    <div class="editor-container" style="height:350px;width:600px;">
+        <div class="editor-toolbar">
+            <input type="text" placeholder="Collez le lien YouTube ici..." style="flex-grow:1;" onchange="loadYoutube(this)">
+            <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔇 Son seul</button>
+            <button onclick="toggleYoutubeView(this,'block')" title="Mode Vidéo">📺 Vidéo</button>
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
+            <button onclick="toggleTransparency(this)" title="Fond transparent"><span class="icon-transparency"></span></button>
+        </div>
+        <iframe src="" style="flex-grow:1;border:none;background:#000;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe>
+    </div>
+</template>
+<template id="template-agenda">
+    <div class="editor-container">
+        <div class="agenda-container" style="font-size:16px;">
+            <div class="agenda-header-title">
+                <span class="agenda-current-date"></span>
+            </div>
+            <div class="agenda-list">
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">08:30</span><div class="agenda-text" contenteditable="true">Accueil / Appel / Rituels</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">09:15</span><div class="agenda-text" contenteditable="true">Français</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">10:20</span><div class="agenda-text" contenteditable="true">Récréation</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">10:45</div><div class="agenda-text" contenteditable="true">Mathématiques</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">11:45</div><div class="agenda-text" contenteditable="true">Fin de la matinée</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">--:--</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">13:45</div><div class="agenda-text" contenteditable="true">Rituel / Quart d'heure lecture</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">14:00</div><div class="agenda-text" contenteditable="true">Matière</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">15:20</div><div class="agenda-text" contenteditable="true">Récréation</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">15:45</div><div class="agenda-text" contenteditable="true">Matière</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">16:30</div><div class="agenda-text" contenteditable="true">Fin de la journée</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+            </div>
+            <button class="agenda-add-btn" onclick="addAgendaLine(this)" title="Ajouter une ligne">+</button>
+        </div>
+    </div>
+</template>
+<template id="template-deficalme">
+    <div class="editor-container" style="height:500px;width:800px;">
+        <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
+        <div class="editor-toolbar" style="display:flex;justify-content:flex-end;">
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶ Plein écran</button>
+        </div>
+        <iframe src="https://outilsprofs.fr/lebureauduprof/deficalme.html" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
+    </div>
+</template>
+<!-- template-meteo → widgets-meteo.js -->
+<template id="template-pdf">
+    <div class="editor-container" style="height:500px;width:600px;">
+        <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
+
+        <!-- BARRE PRINCIPALE -->
+        <div class="editor-toolbar" style="gap:6px;flex-wrap:wrap;min-height:34px;">
+            <label style="cursor:pointer;background:#4a90e2;color:white;padding:3px 8px;border-radius:5px;font-size:11px;white-space:nowrap;">
+                📄 Ouvrir PDF
+                <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
+            </label>
+            <span class="pdf-filename" style="font-size:11px;color:#666;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;" title=""></span>
+
+            <!-- Navigation pages -->
+            <div class="pdf-nav" style="display:none;align-items:center;gap:3px;font-size:12px;">
+                <button class="pdf-prev" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page précédente">◀</button>
+                <span class="pdf-page-info" style="color:#555;white-space:nowrap;">1 / 1</span>
+                <button class="pdf-next" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page suivante">▶</button>
+            </div>
+
+            <!-- Zoom -->
+            <div class="pdf-zoom-bar" style="display:none;align-items:center;gap:3px;font-size:12px;">
+                <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
+                <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
+                <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
+                <button class="pdf-zoom-fit" style="padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:10px;" title="Adapter à la largeur">⊡</button>
+            </div>
+
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;">⛶</button>
+        </div>
+
+        <!-- BARRE ANNOTATIONS -->
+        <div class="pdf-annot-bar" style="display:none;align-items:center;gap:4px;padding:4px 8px;background:#f8f9fa;border-bottom:1px solid #eee;flex-wrap:wrap;">
+            <!-- Outils -->
+            <button class="pdf-tool-btn" data-tool="pen"         title="Stylo"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">✏️</button>
+            <button class="pdf-tool-btn" data-tool="highlighter" title="Surligneur" style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">🖍️</button>
+            <button class="pdf-tool-btn" data-tool="text"        title="Texte"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">T</button>
+            <button class="pdf-tool-btn" data-tool="eraser"      title="Gomme"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:13px;">⬜</button>
+
+            <div style="width:1px;height:18px;background:#ddd;margin:0 2px;"></div>
+
+            <!-- Couleur -->
+            <input type="color" class="pdf-annot-color" value="#e74c3c" title="Couleur" style="width:24px;height:24px;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:1px;">
+
+            <!-- Épaisseur -->
+            <select class="pdf-annot-size" title="Épaisseur" style="padding:1px 3px;border:1px solid #ccc;border-radius:4px;font-size:11px;cursor:pointer;">
+                <option value="2">Fin</option>
+                <option value="4" selected>Moyen</option>
+                <option value="8">Épais</option>
+            </select>
+
+            <div style="width:1px;height:18px;background:#ddd;margin:0 2px;"></div>
+
+            <!-- Effacer tout / annuler -->
+            <button class="pdf-annot-undo"  title="Annuler (Ctrl+Z)" style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:12px;">↩</button>
+            <button class="pdf-annot-clear" title="Tout effacer"      style="padding:2px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;font-size:12px;color:#c0392b;">🗑️</button>
+        </div>
+
+        <!-- PLACEHOLDER -->
+        <div class="pdf-placeholder" style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#aaa;font-size:13px;">
+            <span style="font-size:40px;">📄</span>
+            <span>Aucun PDF ouvert</span>
+            <label style="cursor:pointer;background:#f0f4fa;border:1px dashed #4a90e2;color:#4a90e2;padding:6px 14px;border-radius:8px;font-size:12px;">
+                Cliquez pour ouvrir un PDF
+                <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
+            </label>
+        </div>
+
+        <!-- ZONE DE RENDU : canvas PDF + canvas annotations superposés -->
+        <div class="pdf-canvas-wrap" style="flex-grow:1;overflow:auto;display:none;background:#525659;position:relative;">
+            <div class="pdf-canvas-stack" style="position:relative;display:inline-block;margin:8px auto;display:flex;justify-content:center;">
+                <canvas class="pdf-canvas"  style="display:block;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></canvas>
+                <canvas class="pdf-annot-canvas" style="position:absolute;top:0;left:0;cursor:crosshair;touch-action:none;"></canvas>
+            </div>
+        </div>
+    </div>
+</template>
+
+<div id="rotation-indicator"><span id="rot-deg">0°</span><span class="rot-reset-hint">double-clic → 0°</span></div>
+<input type="file" id="bg-upload" style="display:none" accept="image/*" onchange="handleBgUpload(this)">
+
+<script>
+// =========================================================================
+// VARIABLES GLOBALES
+// =========================================================================
+var board = document.getElementById('board');
+var undoStack = [], redoStack = [];
+var MAX_UNDO = 60;
+let isInitialLoading = true;
+let isRestoringState = false;
+let _pendingSnapshotTimer = null;
+let savedSelection = null;
+let currentActiveWidget = null;
+const RATIO = 16 / 9;
+let _lastW = window.innerWidth;
+
+// =========================================================================
+// INIT
+// =========================================================================
+window.onload = () => {
+    const savedBg = localStorage.getItem('boardBackground');
+    if (savedBg && typeof applyBackground === 'function') applyBackground(savedBg);
+    applyBoardRatio(window.innerWidth);
+    if (typeof loadBoard        === 'function') loadBoard();
+    if (typeof initShapeToolbar === 'function') initShapeToolbar();
+    setTimeout(() => {
+        isInitialLoading = false;
+        _lastW = window.innerWidth;
+        if (typeof initSelectionControls === 'function') initSelectionControls();
+        if (typeof initBoardSelection    === 'function') initBoardSelection();
+        const fontSizeInput = document.getElementById('font-size-input');
+        if (fontSizeInput) {
+            fontSizeInput.addEventListener('focus', () => {
+                if (!currentActiveWidget) return;
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) savedSelection = sel.getRangeAt(0).cloneRange();
+            });
+        }
+        const cur = buildBoardJSON();
+        if (cur) undoStack.push(cur);
+        updateUndoRedoBtns();
+        if (typeof scenesInit === 'function') scenesInit(); // ← ajout
+    }, 1000);
+    setInterval(updateClock, 1000);
+    window.addEventListener('resize', handleWindowResize);
+};
+
+document.addEventListener('keydown', (e) => {
+    // Supprimer les widgets sélectionnés avec Suppr ou Backspace
+    // (sauf si on est en train de taper dans un champ de texte)
+    if ((e.key === 'Delete' || e.key === 'Backspace') &&
+        !e.target.closest('[contenteditable]') &&
+        !e.target.closest('input') &&
+        !e.target.closest('textarea') &&
+        (selectedWidgets.length > 0 || selectedStrokes.length > 0)) {
+        e.preventDefault();
+        snapshotNow();
+        selectedWidgets.forEach(w => { w.classList.remove('selected'); w.remove(); });
+        selectedWidgets = [];
+        strokes = strokes.filter(s => !selectedStrokes.includes(s));
+        selectedStrokes = [];
+        if (drawCtx) redrawStrokes();
+        document.getElementById('selection-controls').style.display = 'none';
+        saveBoard();
+    }
+});
+
+
+// =========================================================================
+// RATIO 16:9
+// =========================================================================
+function virtualH(w) { return w / RATIO; }
+
+function applyBoardRatio(newW) {
+    const vh = virtualH(newW);
+    board.style.width    = newW + 'px';
+    board.style.height   = vh + 'px';
+    board.style.position = 'absolute';
+    board.style.top      = Math.max(0, (window.innerHeight - vh) / 2) + 'px';
+    board.style.left     = '0';
+    updatePresLimitLine();
+}
+
+function updatePresLimitLine() {
+    const line = document.getElementById('pres-limit-line');
+    if (!line) return;
+    // La limite basse présentation = 100vh de la fenêtre, mesurée depuis le haut du board
+    const boardTop = parseFloat(board.style.top) || 0;
+    const limitY = window.innerHeight - boardTop;
+    const boardH = parseFloat(board.style.height) || virtualH(window.innerWidth);
+    // N'afficher la ligne que si la limite est à l'intérieur du board (pas tout en bas ou hors board)
+    if (limitY > 20 && limitY < boardH - 10) {
+        line.style.top = limitY + 'px';
+        line.style.display = 'block';
+    } else {
+        line.style.display = 'none';
+    }
+}
+
+function scaleFontSizesBy(el, factor) {
+    if (Math.abs(factor - 1) < 0.001) return;
+    el.querySelectorAll('*').forEach(child => {
+        if (!child.style?.fontSize) return;
+        const m = child.style.fontSize.match(/^([\d.]+)px$/);
+        if (m) child.style.fontSize = (parseFloat(m[1]) * factor) + 'px';
+    });
+    if (el.style?.fontSize) {
+        const m = el.style.fontSize.match(/^([\d.]+)px$/);
+        if (m) el.style.fontSize = (parseFloat(m[1]) * factor) + 'px';
+    }
+}
+
+function scaleFontSizesFromRef(el, refW) { scaleFontSizesBy(el, window.innerWidth / refW); }
+
+function getToolbarHeight(container) {
+    const tb = container?.querySelector('.editor-toolbar');
+    return tb ? tb.offsetHeight : 0;
+}
+
+function handleWindowResize() {
+    const newW = window.innerWidth;
+    const factor = newW / _lastW;
+    applyBoardRatio(newW);
+    const newVH = virtualH(newW);
+    document.querySelectorAll('.widget').forEach(w => {
+        const c = w.querySelector('.editor-container');
+        if (c) {
+            if (parseFloat(w.dataset.widthPercent) > 0)
+                c.style.width = (parseFloat(w.dataset.widthPercent) / 100) * newW + 'px';
+            if (parseFloat(w.dataset.contentHPercent) > 0)
+                c.style.height = ((parseFloat(w.dataset.contentHPercent) / 100) * newVH) + getToolbarHeight(c) + 'px';
+        }
+        if (parseFloat(w.dataset.leftPercent) > 0) w.style.left = (parseFloat(w.dataset.leftPercent) / 100) * newW + 'px';
+        if (parseFloat(w.dataset.topPercent)  > 0) w.style.top  = (parseFloat(w.dataset.topPercent)  / 100) * newVH + 'px';
+        scaleFontSizesBy(w, factor);
+    });
+    document.querySelectorAll('.shape-widget').forEach(w => {
+        const curW = newW, curVH = virtualH(curW);
+        if (parseFloat(w.dataset.leftPercent) > 0) w.style.left = (parseFloat(w.dataset.leftPercent) / 100) * curW + 'px';
+        if (parseFloat(w.dataset.topPercent)  > 0) w.style.top  = (parseFloat(w.dataset.topPercent)  / 100) * curVH + 'px';
+        const svg = w.querySelector('svg');
+        if (svg && parseFloat(w.dataset.wPercent) > 0) {
+            const sw = (parseFloat(w.dataset.wPercent) / 100) * curW;
+            const sh = (parseFloat(w.dataset.hPercent) / 100) * curVH;
+            svg.setAttribute('width', sw);
+            svg.setAttribute('height', sh);
+        }
+    });
+    _lastW = newW;
+    resizeCanvas();
+}
+
+// =========================================================================
+// UNDO / REDO
+// =========================================================================
+function snapshotNow() {
+    if (isInitialLoading || isRestoringState) return;
+    clearTimeout(_pendingSnapshotTimer);
+    const cur = buildBoardJSON();
+    if (!cur) return;
+    if (undoStack.length > 0 && undoStack[undoStack.length - 1] === cur) return;
+    undoStack.push(cur);
+    if (undoStack.length > MAX_UNDO) undoStack.shift();
+    redoStack = [];
+    updateUndoRedoBtns();
+}
+
+function scheduleSaveSnapshot() {
+    clearTimeout(_pendingSnapshotTimer);
+    _pendingSnapshotTimer = setTimeout(() => {
+        const cur = buildBoardJSON();
+        if (!cur) return;
+        if (undoStack.length > 0 && undoStack[undoStack.length - 1] === cur) return;
+        undoStack.push(cur);
+        if (undoStack.length > MAX_UNDO) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoBtns();
+    }, 800);
+}
+
+function undoAction() {
+    if (undoStack.length <= 1) return;
+    isRestoringState = true;
+    clearTimeout(_pendingSnapshotTimer);
+    redoStack.push(undoStack.pop());
+    const snap = undoStack[undoStack.length - 1];
+    document.querySelectorAll('.widget').forEach(w => w.remove());
+    document.querySelectorAll('.shape-widget').forEach(w => w.remove());
+    try {
+        const p = JSON.parse(snap);
+        strokes = p.strokes || [];
+        if (p.background) { localStorage.setItem('boardBackground', p.background); applyBackground(p.background); }
+    } catch(e) { strokes = []; }
+    localStorage.setItem('profBoardConfig', snap);
+    _lastW = window.innerWidth;
+    restoreBoardFromJSON(snap);
+    // isRestoringState est remis à false dans le setTimeout de restoreBoardFromJSON
+    updateUndoRedoBtns();
+}
+
+function redoAction() {
+    if (redoStack.length === 0) return;
+    isRestoringState = true;
+    clearTimeout(_pendingSnapshotTimer);
+    const snap = redoStack.pop();
+    undoStack.push(snap);
+    document.querySelectorAll('.widget').forEach(w => w.remove());
+    document.querySelectorAll('.shape-widget').forEach(w => w.remove());
+    try {
+        const p = JSON.parse(snap);
+        strokes = p.strokes || [];
+        if (p.background) { localStorage.setItem('boardBackground', p.background); applyBackground(p.background); }
+    } catch(e) { strokes = []; }
+    localStorage.setItem('profBoardConfig', snap);
+    _lastW = window.innerWidth;
+    restoreBoardFromJSON(snap);
+    // isRestoringState est remis à false dans le setTimeout de restoreBoardFromJSON
+    updateUndoRedoBtns();
+}
+
+function updateUndoRedoBtns() {
+    const ub = document.getElementById('undo-btn'), rb = document.getElementById('redo-btn');
+    const canU = undoStack.length > 1, canR = redoStack.length > 0;
+    if (ub) { ub.classList.toggle('enabled', canU); }
+    if (rb) { rb.classList.toggle('enabled', canR); }
+}
+
+// → widgets.js (createWidget, makeDraggable, bringToFront, menu contextuel…)
+
+
+// → toolbar-text.js
+
+	// =========================================================================
+	// POINTEUR LASER
+	// =========================================================================
+	let isLaserMode = false;
+	const laserDot = document.getElementById('laser-pointer') || (() => {
+		const d = document.createElement('div');
+		d.id = 'laser-pointer';
+		document.body.appendChild(d);
+		return d;
+	})();
+
+	function toggleLaser() {
+		isLaserMode = !isLaserMode;
+		const btn = document.getElementById('laser-btn');
+		if (isLaserMode) {
+			btn.classList.add('active-tool');
+			document.body.style.cursor = 'none';
+			laserDot.classList.add('active');
+			// Couvrir les iframes avec un overlay pour que le laser reste visible dessus
+			document.querySelectorAll('.widget iframe, .widget embed').forEach(el => {
+				const overlay = document.createElement('div');
+				overlay.className = 'laser-iframe-overlay';
+				overlay.style.cssText = 'position:absolute;inset:0;z-index:9999;cursor:none;background:transparent;';
+				// Double-clic sur l'overlay : désactiver le laser et entrer dans le widget
+				overlay.addEventListener('dblclick', (e) => {
+					toggleLaser();
+				});
+				// Afficher une petite info-bulle au survol
+				overlay.title = 'Double-clic pour entrer dans ce widget';
+				el.parentElement.style.position = 'relative';
+				el.parentElement.appendChild(overlay);
+			});
+		} else {
+			btn.classList.remove('active-tool');
+			document.body.style.cursor = '';
+			laserDot.classList.remove('active');
+			document.querySelectorAll('.laser-iframe-overlay').forEach(el => el.remove());
+		}
+	}
+
+	document.addEventListener('mousemove', (e) => {
+		if (!isLaserMode) return;
+		laserDot.style.left = e.clientX + 'px';
+		laserDot.style.top  = e.clientY + 'px';
+	});
+
+	// Désactiver avec Échap
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && isLaserMode) toggleLaser();
+	});
+
+// ── Repositionnement des sous-menus hors écran ──────────────────────────────
+// Déclenché au mouseenter sur chaque mm-has-sub (mesure fiable car le sous-menu est visible)
+document.addEventListener('mouseenter', function(e) {
+    const parent = e.target.closest('.mm-has-sub');
+    if (!parent) return;
+    const sub = parent.querySelector(':scope > .mm-sub');
+    if (!sub) return;
+    // Réinitialiser avant mesure
+    sub.style.top = '0';
+    requestAnimationFrame(() => {
+        const rect = sub.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight - 8) {
+            const shift = rect.bottom - (window.innerHeight - 8);
+            sub.style.top = Math.max(-(rect.height - 40), -shift) + 'px';
+        }
+    });
+}, true);
+
+// → color-picker.js
+
+
+// =========================================================================
+// NOUVEAU MENU FLOTTANT
+// =========================================================================
+function toggleMainMenu() {
+    const menu = document.getElementById('main-menu');
+    const fab  = document.getElementById('fab-btn');
+    const isOpen = menu.classList.contains('open');
+    if (isOpen) {
+        closeMainMenu();
+    } else {
+        menu.classList.add('open');
+        fab.classList.add('menu-open');
+        setTimeout(_fixSubmenuOverflow, 0);
+    }
+}
+
+function closeMainMenu() {
+    document.getElementById('main-menu').classList.remove('open');
+    document.getElementById('fab-btn').classList.remove('menu-open');
+}
+
+function _closeAllToolbars() {
+    if (typeof stopDrawing      === 'function') stopDrawing();
+    if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+    if (typeof stopEraserMode   === 'function') stopEraserMode();
+}
+
+function openMmPanel(type) {
+    closeMainMenu();
+    if (type === 'draw') {
+        if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar();
+    } else if (type === 'shapes') {
+        if (typeof toggleShapeToolbar === 'function') toggleShapeToolbar();
+    }
+}
+
+function closeMmPanel() {
+    if (typeof stopDrawing    === 'function') stopDrawing();
+    if (typeof stopEraserMode === 'function') stopEraserMode();
+    if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+}
+
+// Fermer le menu au clic extérieur
+document.addEventListener('mousedown', function(e) {
+    const menu = document.getElementById('main-menu');
+    const fab  = document.getElementById('fab-btn');
+    if (!fab.contains(e.target) && !menu.contains(e.target)) {
+        if (menu.classList.contains('open')) closeMainMenu();
+    }
+    // Fermer les color pickers si clic en dehors
+    if (!e.target.closest('.cpick-wrap') && !e.target.closest('.cpick-popup')) {
+        document.querySelectorAll('.cpick-popup.open').forEach(p => p.classList.remove('open'));
+    }
+});
+
+// Fermer les barres d'outils quand on clique sur un item du menu
+// (sauf les items Dessin et Formes qui les ouvrent)
+document.addEventListener('click', function(e) {
+    const item = e.target.closest('.mm-item, .mm-sub-item');
+    if (!item) return;
+    const triggersToolbar = item.id === 'mm-draw-btn' || item.id === 'mm-shapes-btn'
+        || item.closest('#mm-panel-draw') || item.closest('#mm-panel-shapes');
+    if (!triggersToolbar) {
+        _closeAllToolbars();
+    }
+});
+
+// =========================================================================
+// BARRE D'ACTION — positionnement dessous/dessus selon l'espace disponible
+// =========================================================================
+function positionActionBar(widget) {
+    const bar = widget.querySelector('.widget-action-bar');
+    if (!bar) return;
+    const boardH = board.offsetHeight;
+    const wBottom = widget.offsetTop + widget.offsetHeight;
+    if (boardH - wBottom < 50) bar.classList.add('above');
+    else                       bar.classList.remove('above');
+}
+
+document.addEventListener('focusin', (e) => {
+    const widget = e.target.closest('.widget, .shape-widget');
+    if (widget) positionActionBar(widget);
+});
+
+// =========================================================================
+// MODE PRÉSENTATION
+// =========================================================================
+function togglePresentationMode() {
+    const isOn = !document.body.classList.contains('presentation-mode');
+    const btn  = document.getElementById('presentation-btn');
+    if (isOn) {
+        document.body.classList.add('presentation-mode');
+        btn.innerHTML = '📽️ Quitter';
+        closeMainMenu();
+        if (typeof stopDrawing      === 'function') stopDrawing();
+        if (typeof stopEraserMode   === 'function') stopEraserMode();
+        if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+        clearSelection();
+        const el = document.documentElement;
+        if (el.requestFullscreen)            el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+        if (typeof resizeCanvas === 'function') setTimeout(resizeCanvas, 150);
+    } else {
+        document.body.classList.remove('presentation-mode');
+        btn.innerHTML = '📽️';
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            if (document.exitFullscreen)            document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+        if (typeof resizeCanvas === 'function') setTimeout(resizeCanvas, 150);
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.body.classList.contains('presentation-mode')) {
+        document.body.classList.remove('presentation-mode');
+        document.getElementById('presentation-btn').innerHTML = '📽️';
+        if (typeof resizeCanvas === 'function') setTimeout(resizeCanvas, 150);
+    }
+});
+document.addEventListener('webkitfullscreenchange', () => {
+    if (!document.webkitFullscreenElement && document.body.classList.contains('presentation-mode')) {
+        document.body.classList.remove('presentation-mode');
+        document.getElementById('presentation-btn').innerHTML = '📽️';
+        if (typeof resizeCanvas === 'function') setTimeout(resizeCanvas, 150);
+    }
+});
+
+function _fixSubmenuOverflow() {
+    document.querySelectorAll('.mm-sub').forEach(sub => {
+        sub.style.left  = '';
+        sub.style.right = '';
+        const r = sub.getBoundingClientRect();
+        if (r.right > window.innerWidth - 8) {
+            sub.style.left  = 'auto';
+            sub.style.right = '100%';
+        }
+    });
+}
+
+// Mise à jour du bouton gomme dans le panneau dessin
+function _updateEraserBtnInPanel() {
+    const btn1 = document.getElementById('eraser-btn');
+    const btn2 = document.getElementById('eraser-btn-shapes');
+    const label = isEraserMode ? '🧽 Gomme active — cliquer pour désactiver' : '🧽 Activer la gomme';
+    const bg    = isEraserMode ? '#1a3550' : '#2a2a36';
+    const bc    = isEraserMode ? '#4a90e2' : '#444';
+    if (btn1) { btn1.textContent = label; btn1.style.background = bg; btn1.style.borderColor = bc; }
+    if (btn2) { btn2.textContent = label; btn2.style.background = bg; btn2.style.borderColor = bc; }
+}
+
+</script>
+<script src="background.js"></script>
+<script src="media.js"></script>
+<script src="help-modal.js"></script>
+<script src="save-load.js"></script>
+<script src="groups.js"></script>
+<script src="widgets-datetime.js"></script>
+<script src="widgets-meteo.js"></script>
+<script src="scenes.js"></script>
+<script src="shapes.js"></script>
+<script src="draw.js"></script>
+<script src="stickers.js"></script>
+<script src="paste-image.js"></script>
+<div id="laser-pointer"></div>
+<button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
+<script src="widgets.js"></script>
+<script src="color-picker.js"></script>
+<script src="toolbar-text.js"></script>
+</body>
+</html>
