@@ -50,6 +50,230 @@ function ungroupWidgets() {
     saveBoard();
 }
 
+// =========================================================================
+// FUSION : convertir la sélection en une seule image PNG aplatie
+// =========================================================================
+async function fuseWidgets() {
+    const totalItems = selectedWidgets.length + selectedStrokes.length;
+    if (totalItems < 2) return;
+
+    // 1. Calculer la bounding box de tout ce qui est sélectionné
+    const br = board.getBoundingClientRect();
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    selectedWidgets.forEach(w => {
+        const r = w.getBoundingClientRect();
+        minX = Math.min(minX, r.left - br.left);
+        minY = Math.min(minY, r.top  - br.top);
+        maxX = Math.max(maxX, r.right  - br.left);
+        maxY = Math.max(maxY, r.bottom - br.top);
+    });
+    selectedStrokes.forEach(s => {
+        const pad = (s.size || 4) / 2 + 2;
+        s.points.forEach(p => {
+            minX = Math.min(minX, p.x - pad); minY = Math.min(minY, p.y - pad);
+            maxX = Math.max(maxX, p.x + pad); maxY = Math.max(maxY, p.y + pad);
+        });
+    });
+
+    const PAD = 8;
+    minX = Math.max(0, minX - PAD); minY = Math.max(0, minY - PAD);
+    maxX = Math.min(board.offsetWidth,  maxX + PAD);
+    maxY = Math.min(board.offsetHeight, maxY + PAD);
+
+    const w = Math.ceil(maxX - minX);
+    const h = Math.ceil(maxY - minY);
+    if (w < 4 || h < 4) return;
+
+    // 2. Créer un canvas de fusion
+    const fuseCanvas = document.createElement('canvas');
+    fuseCanvas.width  = w;
+    fuseCanvas.height = h;
+    const ctx = fuseCanvas.getContext('2d');
+
+    // 3. Dessiner les widgets via html2canvas (si dispo) ou fallback
+    const widgetsToDraw = [...selectedWidgets].sort((a, b) =>
+        (parseInt(a.style.zIndex) || 0) - (parseInt(b.style.zIndex) || 0)
+    );
+
+    async function _ensureHtml2canvas() {
+        if (window.html2canvas) return true;
+        return new Promise(resolve => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            s.onload  = () => resolve(true);
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    }
+
+    const h2cAvail = await _ensureHtml2canvas();
+
+    // Injecter une feuille de style temporaire qui écrase TOUS les états visuels d'UI
+    const tmpStyle = document.createElement('style');
+    tmpStyle.textContent = `
+        .drag-handle, .widget-rotate-handle, .widget-action-bar,
+        .widget-close-handle, .widget-pin-handle, .widget-back-handle,
+        .widget-menu-handle, .shape-resize-handle, .resize-lock-btn,
+        .flip-h-btn, .flip-v-btn, .widget-ctx-menu,
+        #selection-controls, #sc-ctx-menu
+            { opacity: 0 !important; visibility: hidden !important; display: none !important; }
+        .widget, .widget:focus, .widget:focus-within,
+        .widget.selected, .shape-widget, .shape-widget:focus,
+        .shape-widget:focus-within, .shape-widget.selected
+            { outline: none !important; border-color: transparent !important; box-shadow: none !important; }
+    `;
+    document.head.appendChild(tmpStyle);
+
+    // Blur le focus actif pour effacer les pseudo-états :focus-within
+    if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+    }
+
+    // Forcer aussi inline sur les widgets sélectionnés (au cas où html2canvas lit le style inline)
+    const hiddenEls = [];
+    selectedWidgets.forEach(wEl => {
+        hiddenEls.push({ el: wEl, outline: wEl.style.outline, boxShadow: wEl.style.boxShadow, border: wEl.style.border });
+        wEl.style.outline   = 'none';
+        wEl.style.boxShadow = 'none';
+        wEl.style.border    = 'none';
+    });
+
+    if (h2cAvail) {
+        for (const wEl of widgetsToDraw) {
+            try {
+                const rect = wEl.getBoundingClientRect();
+                const wX = rect.left - br.left - minX;
+                const wY = rect.top  - br.top  - minY;
+                const wCanvas = await html2canvas(wEl, {
+                    backgroundColor: null,
+                    useCORS: true,
+                    scale: 1,
+                    logging: false,
+                    ignoreElements: (el) => {
+                        // Ignorer explicitement tous les éléments d'UI
+                        return el.classList.contains('drag-handle')
+                            || el.classList.contains('widget-rotate-handle')
+                            || el.classList.contains('widget-action-bar')
+                            || el.classList.contains('widget-close-handle')
+                            || el.classList.contains('widget-pin-handle')
+                            || el.classList.contains('widget-back-handle')
+                            || el.classList.contains('widget-menu-handle')
+                            || el.classList.contains('shape-resize-handle')
+                            || el.classList.contains('resize-lock-btn')
+                            || el.classList.contains('flip-h-btn')
+                            || el.classList.contains('flip-v-btn')
+                            || el.classList.contains('widget-ctx-menu')
+                            || el.id === 'selection-controls'
+                            || el.id === 'sc-ctx-menu';
+                    }
+                });
+                ctx.drawImage(wCanvas, wX, wY);
+            } catch(err) {
+                console.warn('fuseWidgets html2canvas error:', err);
+            }
+        }
+    } else {
+        // Fallback : rectangle coloré avec le nom du type
+        widgetsToDraw.forEach(wEl => {
+            const rect = wEl.getBoundingClientRect();
+            const wX = rect.left - br.left - minX;
+            const wY = rect.top  - br.top  - minY;
+            const wW = rect.width, wH = rect.height;
+            ctx.fillStyle = 'rgba(200,220,255,0.7)';
+            ctx.fillRect(wX, wY, wW, wH);
+            ctx.strokeStyle = '#4a90e2';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(wX, wY, wW, wH);
+        });
+    }
+
+    // 4. Dessiner les traits sélectionnés par-dessus
+    selectedStrokes.forEach(s => {
+        if (!s.points || s.points.length < 2) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineCap   = 'round';
+        ctx.lineJoin  = 'round';
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth   = s.size;
+        ctx.moveTo(s.points[0].x - minX, s.points[0].y - minY);
+        s.points.forEach(p => ctx.lineTo(p.x - minX, p.y - minY));
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    // Retirer la feuille de style temporaire et restaurer les styles inline
+    tmpStyle.remove();
+    hiddenEls.forEach(({ el, outline, boxShadow, border }) => {
+        el.style.outline   = outline   || '';
+        el.style.boxShadow = boxShadow || '';
+        el.style.border    = border    || '';
+    });
+
+    // 5. Obtenir le data URL
+    const dataUrl = fuseCanvas.toDataURL('image/png');
+
+    // 6. Snapshot undo avant de modifier
+    snapshotNow();
+
+    // 7. Supprimer les éléments originaux
+    selectedWidgets.forEach(wEl => wEl.remove());
+    strokes = strokes.filter(s => !selectedStrokes.includes(s));
+    selectedStrokes = [];
+    selectedWidgets = [];
+    if (drawCtx) redrawStrokes();
+    document.getElementById('selection-controls').style.display = 'none';
+
+    // 8. Créer un widget sticker (image) à la même position
+    const fusedWidget = document.createElement('div');
+    fusedWidget.className = 'widget';
+    fusedWidget.dataset.type = 'sticker';
+    fusedWidget.dataset.transparent = 'true';
+    fusedWidget.style.cssText = `left:${minX}px; top:${minY}px; width:${w}px; height:${h}px; overflow:visible; flex-direction:row;`;
+    fusedWidget.style.setProperty('--sticker-h', h + 'px');
+    fusedWidget.tabIndex = 0;
+
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = 'Fusion';
+    img.draggable = false;
+    img.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;pointer-events:none;';
+
+    fusedWidget.innerHTML = `
+        <div class="drag-handle" title="Déplacer">✥</div>
+        <div class="widget-rotate-handle" title="Faire pivoter">↻</div>
+        <div class="widget-action-bar">
+            <div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
+            <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
+            <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
+            <div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
+        </div>
+        <div class="widget-ctx-menu"></div>
+    `;
+    fusedWidget.appendChild(img);
+
+    fusedWidget.addEventListener('mousedown', () => {
+        bringToFront(fusedWidget);
+        fusedWidget.focus();
+        if (typeof positionActionBar === 'function') positionActionBar(fusedWidget);
+    });
+
+    board.appendChild(fusedWidget);
+    bringToFront(fusedWidget);
+    makeDraggable(fusedWidget);
+    makeDraggableRotate(fusedWidget);
+    if (typeof _addStickerResizeHandle === 'function') _addStickerResizeHandle(fusedWidget, 40);
+
+    // Mettre à jour les % pour la sauvegarde
+    const curW = window.innerWidth, curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+    fusedWidget.dataset.leftPercent = (minX / curW) * 100;
+    fusedWidget.dataset.topPercent  = (minY / curVH) * 100;
+    fusedWidget.dataset.stickerUrl  = dataUrl;
+
+    saveBoard();
+}
+
 function initSelectionControls() {
     document.getElementById('sc-move-btn').onmousedown = (e) => {
 		e.preventDefault(); e.stopPropagation();
@@ -168,12 +392,55 @@ function initSelectionControls() {
         document.getElementById('selection-controls').style.display = 'none';
         saveBoard();
     };
+    document.getElementById('sc-pin-btn').onclick = (e) => {
+        e.stopPropagation();
+        snapshotNow();
+        selectedWidgets.forEach(w => togglePin(w));
+        // Pour les strokes : toggler le flag pinned et redessiner sur le bon canvas
+        if (typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0) {
+            const allPinned = selectedStrokes.every(s => s.pinned);
+            selectedStrokes.forEach(s => { s.pinned = !allPinned; });
+            if (typeof redrawStrokes === 'function') redrawStrokes();
+        }
+        // Mettre à jour l'apparence du bouton (fond jaune si épinglé)
+        const pinBtn = document.getElementById('sc-pin-btn');
+        const strokesPinned = typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0 && selectedStrokes.every(s => s.pinned);
+        const widgetsPinned = selectedWidgets.length > 0 && selectedWidgets.every(w => w.dataset.pinned === 'true');
+        pinBtn.classList.toggle('pinned', strokesPinned || widgetsPinned);
+        saveBoard();
+    };
+    document.getElementById('sc-back-btn').onclick = (e) => {
+        e.stopPropagation();
+        snapshotNow();
+        selectedWidgets.forEach(w => sendToBack(w));
+        // Pour les strokes : retirer le flag pinned et redessiner sur le canvas normal
+        if (typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0) {
+            selectedStrokes.forEach(s => { s.pinned = false; });
+            if (typeof redrawStrokes === 'function') redrawStrokes();
+        }
+        document.getElementById('sc-pin-btn').classList.remove('pinned');
+        saveBoard();
+    };
     document.getElementById('sc-menu-btn').onclick = (e) => {
         e.stopPropagation();
         const menu = document.getElementById('sc-ctx-menu');
         const isOpen = menu.classList.contains('open');
-        menu.classList.toggle('open', !isOpen);
-        if (!isOpen) buildScCtxMenu(menu);
+        if (isOpen) { menu.classList.remove('open'); return; }
+        buildScCtxMenu(menu);
+        menu.classList.add('open');
+        // Positionner au-dessus du bouton
+        const r = document.getElementById('sc-menu-btn').getBoundingClientRect();
+        menu.style.top  = '0px'; // temporaire pour mesurer
+        menu.style.left = r.left + 'px';
+        requestAnimationFrame(() => {
+            const mh = menu.offsetHeight;
+            menu.style.top = (r.top - mh - 6) + 'px';
+            const mr = menu.getBoundingClientRect();
+            if (mr.right > window.innerWidth - 8)
+                menu.style.left = (window.innerWidth - mr.width - 8) + 'px';
+            if (mr.top < 8)
+                menu.style.top = (r.bottom + 6) + 'px'; // fallback en dessous si pas de place
+        });
     };
     // Bouton verrou de l'overlay groupe
     const scLockBtn = document.getElementById('sc-lock-btn');
@@ -300,6 +567,13 @@ function initSelectionControls() {
         e.stopPropagation();
         mergeWidgets();
     };
+    const fusionBtn = document.getElementById('sc-fuse-btn');
+    if (fusionBtn) {
+        fusionBtn.onclick = (e) => {
+            e.stopPropagation();
+            fuseWidgets();
+        };
+    }
     document.getElementById('sc-ungroup-btn').onclick = (e) => {
         e.stopPropagation();
         const groupIds = new Set([
@@ -330,25 +604,28 @@ function buildScCtxMenu(menu) {
     };
     const addSep = () => menu.appendChild(document.createElement('hr'));
 
-    addBtn('⬆️ Premier plan', () => {
-        snapshotNow();
-        selectedWidgets.forEach(w => { pinnedZCounter++; w.style.zIndex = pinnedZCounter; });
-        saveBoard();
-    });
-    addBtn('⬇️ Envoyer derrière', () => {
-        snapshotNow();
-        selectedWidgets.forEach(w => { w.style.zIndex = 1; w.dataset.background = "true"; w.dataset.pinned = "false"; w.classList.remove('pinned'); });
-        saveBoard();
-    });
-    addSep();
     addBtn('⧉ Dupliquer', () => {
         snapshotNow();
         const toClone = [...selectedWidgets];
+        // Dupliquer aussi les tracés sélectionnés
+        const strokesToDup = typeof selectedStrokes !== 'undefined' ? [...selectedStrokes] : [];
         clearSelection();
         toClone.forEach(w => {
             if (w.classList.contains('shape-widget')) cloneShapeWidget(w);
             else cloneWidget(w);
         });
+        // Dupliquer les strokes : copie décalée de 20px
+        if (strokesToDup.length > 0 && typeof strokes !== 'undefined') {
+            strokesToDup.forEach(s => {
+                const copy = {
+                    ...s,
+                    points: s.points.map(p => ({ x: p.x + 20, y: p.y + 20 }))
+                };
+                strokes.push(copy);
+            });
+            if (typeof redrawStrokes === 'function') redrawStrokes();
+            saveBoard();
+        }
     });
     const hasGroup = selectedWidgets.some(w => w.dataset.groupId);
     if (hasGroup) {
@@ -463,6 +740,7 @@ function updateSelectionOverlay() {
     if (scFlipVO)    scFlipVO.style.display    = 'flex';
 
     if (mergeBtn && ungroupBtn) {
+        const fuseBtn    = document.getElementById('sc-fuse-btn');
         const totalSel  = selectedWidgets.length + selectedStrokes.length;
         const multi     = totalSel >= 2;
         const allGroupIds = [
@@ -475,12 +753,15 @@ function updateSelectionOverlay() {
         if (allSameGroup) {
             mergeBtn.style.display   = 'none';
             ungroupBtn.style.display = 'flex';
+            if (fuseBtn) fuseBtn.style.display = 'none';
         } else if (multi) {
             mergeBtn.style.display   = 'flex';
             ungroupBtn.style.display = 'none';
+            if (fuseBtn) fuseBtn.style.display = 'flex';
         } else {
             mergeBtn.style.display   = 'none';
             ungroupBtn.style.display = 'none';
+            if (fuseBtn) fuseBtn.style.display = 'none';
         }
     }
 }

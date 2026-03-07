@@ -240,21 +240,28 @@ function _addStickerResizeHandle(w, minSize) {
 		const startX = e.clientX, startY = e.clientY;
 		const startW = w.offsetWidth,  startH = w.offsetHeight;
 
-		// Maintenir les proportions carrées (Shift ou par défaut pour stickers)
+		// Maintenir les proportions d'origine (ratio largeur/hauteur du widget)
+		const aspectRatio = startW / startH;
+		// Longueur diagonale de départ — sert de référence unique et stable
+		const startDiag = Math.sqrt(startW * startW + startH * startH);
 		const onMove = (ev) => {
 			const dx = ev.clientX - startX;
 			const dy = ev.clientY - startY;
-			const delta = Math.max(dx, dy);
-			const newSize = Math.max(minSize, startW + delta);
-			w.style.width  = newSize + 'px';
-			w.style.height = newSize + 'px';
-			w.style.setProperty('--sticker-h', newSize + 'px');
+			// Projection du déplacement sur la diagonale (vecteur unitaire)
+			// → donne un delta lisse, sans changement d'axe de référence
+			const proj = (dx * startW + dy * startH) / startDiag;
+			const scale = Math.max(minSize / startW, (startDiag + proj) / startDiag);
+			const newW = Math.round(startW * scale);
+			const newH = Math.round(startH * scale);
+			w.style.width  = newW + 'px';
+			w.style.height = newH + 'px';
+			w.style.setProperty('--sticker-h', newH + 'px');
 			// Pour les émojis : mettre à jour font-size ET dimensions du content
 			const content = w.querySelector('[data-sticker-type="emoji"]');
 			if (content) {
-				content.style.width    = newSize + 'px';
-				content.style.height   = newSize + 'px';
-				content.style.fontSize = Math.round(newSize * 0.62) + 'px';
+				content.style.width    = newW + 'px';
+				content.style.height   = newH + 'px';
+				content.style.fontSize = Math.round(newW * 0.62) + 'px';
 			}
 		};
 		const onUp = () => {

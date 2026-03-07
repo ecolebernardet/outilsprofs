@@ -2,6 +2,7 @@
 // DESSIN LIBRE
 // =========================================================================
 var drawCanvas = null, drawCtx = null, isPainting = false, isDrawMode = false;
+var drawCanvasTop = null, drawCtxTop = null; // canvas de premier plan pour strokes épinglés
 var strokes = [], currentStroke = null;
 
 function initCanvas() {
@@ -13,6 +14,15 @@ function initCanvas() {
     resizeCanvas();
     board.appendChild(drawCanvas);
     drawCtx = drawCanvas.getContext('2d');
+
+    // Canvas de premier plan pour les strokes épinglés (au-dessus de tout)
+    drawCanvasTop = document.createElement('canvas');
+    drawCanvasTop.id = 'draw-canvas-top';
+    drawCanvasTop.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:11000;';
+    drawCanvasTop.width  = drawCanvas.width;
+    drawCanvasTop.height = drawCanvas.height;
+    board.appendChild(drawCanvasTop);
+    drawCtxTop = drawCanvasTop.getContext('2d');
     // Les événements sont captés sur le board (pas le canvas)
     // pour que les éléments position:fixed restent toujours cliquables
     board.addEventListener('mousedown',  _boardDrawMouseDown);
@@ -34,6 +44,7 @@ function initCanvas() {
 function resizeCanvas() {
     if (!drawCanvas) return;
     drawCanvas.width = board.offsetWidth; drawCanvas.height = board.offsetHeight;
+    if (drawCanvasTop) { drawCanvasTop.width = drawCanvas.width; drawCanvasTop.height = drawCanvas.height; }
     redrawStrokes();
 }
 
@@ -380,27 +391,35 @@ function discardHandwriting() {
 function redrawStrokes(extra = null) {
     if (!drawCtx) return;
     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-    strokes.forEach(s => drawStroke(s));
-    if (extra) drawStroke(extra);
-    selectedStrokes.forEach(s => drawStroke(s, true));
+    if (drawCtxTop) drawCtxTop.clearRect(0, 0, drawCanvasTop.width, drawCanvasTop.height);
+
+    strokes.forEach(s => {
+        const ctx = (s.pinned && drawCtxTop) ? drawCtxTop : drawCtx;
+        drawStroke(s, false, ctx);
+    });
+    if (extra) drawStroke(extra, false, drawCtx);
+    selectedStrokes.forEach(s => {
+        const ctx = (s.pinned && drawCtxTop) ? drawCtxTop : drawCtx;
+        drawStroke(s, true, ctx);
+    });
 }
 
-function drawStroke(stroke, highlight = false) {
+function drawStroke(stroke, highlight = false, ctx = drawCtx) {
     if (!stroke.points || stroke.points.length < 2) return;
-    drawCtx.save();
-    drawCtx.beginPath(); drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
-    drawCtx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
-    drawCtx.lineWidth   = highlight ? stroke.size + 6 : stroke.size;
-    if (highlight) drawCtx.globalAlpha = 0.5;
-    drawCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.forEach(p => drawCtx.lineTo(p.x, p.y));
-    drawCtx.stroke(); drawCtx.restore();
+    ctx.save();
+    ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
+    ctx.lineWidth   = highlight ? stroke.size + 6 : stroke.size;
+    if (highlight) ctx.globalAlpha = 0.5;
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    stroke.points.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.stroke(); ctx.restore();
     if (highlight) {
-        drawCtx.save(); drawCtx.beginPath(); drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
-        drawCtx.strokeStyle = stroke.color; drawCtx.lineWidth = stroke.size;
-        drawCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-        stroke.points.forEach(p => drawCtx.lineTo(p.x, p.y));
-        drawCtx.stroke(); drawCtx.restore();
+        ctx.save(); ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.strokeStyle = stroke.color; ctx.lineWidth = stroke.size;
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        stroke.points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.stroke(); ctx.restore();
     }
 }
 

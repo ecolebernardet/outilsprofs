@@ -10,6 +10,40 @@ var SHAPES = [
     { id: 'line',          label: 'Ligne',           svg: (w,h,sw,f,o) => `<line x1="${sw}" y1="${h/2}" x2="${w-sw}" y2="${h/2}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>` },
     { id: 'arrow',         label: 'Flèche',          svg: (w,h,sw,f,o) => `<polygon points="${sw},${h*0.35} ${w*0.6},${h*0.35} ${w*0.6},${sw} ${w-sw},${h/2} ${w*0.6},${h-sw} ${w*0.6},${h*0.65} ${sw},${h*0.65}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'triangle',      label: 'Triangle',        svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'right-triangle',label: 'Tr. rectangle',   svg: (w,h,sw,f,o) => `<polygon points="${sw},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'heart',         label: 'Cœur',            svg: (w,h,sw,f,o) => {
+        const p = sw * 0.5;
+        const W = w - p*2, H = h - p*2;
+        const X = v => (p + v/10 * W).toFixed(2);
+        const Y = v => (p + v/10 * H).toFixed(2);
+        const d = [
+            'M ' + X(5)    + ',' + Y(10),
+            'C ' + X(4.5)  + ',' + Y(9.8)  + ' ' + X(-0.5) + ',' + Y(7.0)  + ' ' + X(0)   + ',' + Y(3.5),
+            'C ' + X(0.5)  + ',' + Y(0.5)  + ' ' + X(4.0)  + ',' + Y(0.0)  + ' ' + X(5.0) + ',' + Y(2.0),
+            'C ' + X(6.0)  + ',' + Y(0.0)  + ' ' + X(9.5)  + ',' + Y(0.5)  + ' ' + X(10)  + ',' + Y(3.5),
+            'C ' + X(10.5) + ',' + Y(7.0)  + ' ' + X(5.5)  + ',' + Y(9.8)  + ' ' + X(5)   + ',' + Y(10),
+            'Z'
+        ].join(' ');
+        return `<path d="${d}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
+    { id: 'star',          label: 'Étoile',          svg: (w,h,sw,f,o) => {
+        const cx = w/2, cy = h/2;
+        const rox = w/2 - sw/2, roy = h/2 - sw/2;
+        const rix = rox * 0.42,  riy = roy * 0.42;
+        let pts = '';
+        for (let i = 0; i < 10; i++) {
+            const angle = (Math.PI / 5) * i - Math.PI / 2;
+            const rx = i % 2 === 0 ? rox : rix;
+            const ry = i % 2 === 0 ? roy : riy;
+            pts += `${cx + rx * Math.cos(angle)},${cy + ry * Math.sin(angle)} `;
+        }
+        return `<polygon points="${pts.trim()}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
+    { id: 'speech-bubble', label: 'Bulle BD',        svg: (w,h,sw,f,o) => {
+        const p = sw/2, r = Math.min(w,h)*0.12;
+        const bw = w*0.28, bh = h*0.22, tailX = w*0.22, tailY = h - p;
+        return `<path d="M ${p+r},${p} H ${w-p-r} Q ${w-p},${p} ${w-p},${p+r} V ${h*0.72-r} Q ${w-p},${h*0.72} ${w-p-r},${h*0.72} H ${tailX+bw} L ${tailX+bw*0.5},${tailY} L ${tailX},${h*0.72} H ${p+r} Q ${p},${h*0.72} ${p},${h*0.72-r} V ${p+r} Q ${p},${p} ${p+r},${p} Z" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
 ];
 
 var selectedShapeId = 'circle';
@@ -57,8 +91,20 @@ var editingShapeWidget = null;
 function openShapeEditPanel(widget) {
     editingShapeWidget = widget;
     const panel = document.getElementById('shape-edit-panel');
-    document.getElementById('edit-stroke-color').value = widget.dataset.strokeColor || '#2c3e50';
-    document.getElementById('edit-fill-color').value   = widget.dataset.fillColor   || '#4a90e2';
+    const strokeColor = widget.dataset.strokeColor || '#2c3e50';
+    const fillColor   = widget.dataset.fillColor   || '#4a90e2';
+
+    // Sync cpick swatches du panel d'édition
+    const strokeSwatch = document.querySelector('#cpick-edit-stroke-color .cpick-swatch');
+    if (strokeSwatch) strokeSwatch.style.background = strokeColor;
+    const fillSwatch = document.querySelector('#cpick-edit-fill-color .cpick-swatch');
+    if (fillSwatch) fillSwatch.style.background = fillColor;
+    // Init cpick state pour les pickers du panel
+    if (typeof cpickInit === 'function') {
+        cpickInit('edit-stroke-color', strokeColor);
+        cpickInit('edit-fill-color',   fillColor);
+    }
+
     const opPct = Math.round(parseFloat(widget.dataset.fillOpacity || 0.6) * 100);
     document.getElementById('edit-fill-opacity').value = opPct;
     document.getElementById('edit-fill-opacity-val').textContent = opPct + '%';
@@ -79,8 +125,8 @@ function closeShapeEditPanel() {
 
 function applyShapeEdit() {
     if (!editingShapeWidget) return;
-    const sc = document.getElementById('edit-stroke-color').value;
-    const fc = document.getElementById('edit-fill-color').value;
+    const sc = (typeof cpickGetValue === 'function' ? cpickGetValue('edit-stroke-color') : null) || '#2c3e50';
+    const fc = (typeof cpickGetValue === 'function' ? cpickGetValue('edit-fill-color')   : null) || '#4a90e2';
     const fo = parseFloat(document.getElementById('edit-fill-opacity').value) / 100;
     const sw = parseInt(document.getElementById('edit-stroke-width').value);
     const svg = editingShapeWidget.querySelector('svg');
