@@ -96,11 +96,11 @@
             z-index: 10;
         }
         
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 1rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
         
         .money-item { display: inline-flex; align-items: center; justify-content: center; margin: 4px; font-weight: 900; color: #111827; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .billet { width: 65px; height: 35px; border-radius: 4px; font-size: 11px; }
-        .piece { width: 35px; height: 35px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); font-size: 10px; }
+        .billet { width: 100px; height: 54px; border-radius: 6px; font-size: 20px; }
+        .piece { width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); font-size: 20px; }
         
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
@@ -109,7 +109,7 @@
         .modal-content { background: var(--card-bg); width: 100%; max-width: 400px; border-radius: 1.5rem; border: 1px solid var(--column-border); padding: 25px; position: relative; }
         
         /* Ajustement correction pour tenir sur deux lignes si besoin */
-        .money-input:disabled { font-size: 0.75rem; line-height: 1.2; }
+        .money-input:disabled { font-size: 1rem; line-height: 1.2; }
     </style>
 </head>
 <body>
@@ -178,7 +178,7 @@
     const mapCouleurs = { 'red': '#ef4444', 'orange': '#f97316', 'amber': '#f59e0b', 'yellow': '#eab308', 'lime': '#84cc16', 'green': '#22c55e', 'emerald': '#10b981', 'teal': '#14b8a6', 'cyan': '#06b6d4', 'sky': '#0ea5e9', 'blue': '#3b82f6', 'indigo': '#6366f1', 'violet': '#8b5cf6', 'purple': '#a855f7', 'fuchsia': '#d946ef', 'pink': '#ec4899', 'rose': '#f43f5e', 'gray': '#6b7280' };
     
     const COULEURS_MONNAIE = { 
-        200: '#fde68a', 100: '#dcfce7', 50: '#f9a8d4', 20: '#93c5fd', 10: '#fca5a5', 5: '#86efac', 
+        200: '#e8e54a', 100: '#74d47f', 50: '#f29c4B', 20: '#93c5fd', 10: '#fca5a5', 5: '#abc7c7', 
         2: '#e5e7eb', 1: '#fef08a',
         0.50: '#fbbf94', 0.20: '#fbbf54', 0.10: '#fbbf34',
         0.05: '#f97316', 0.02: '#f97336', 0.01: '#f97356'
@@ -279,10 +279,11 @@
                 el.className = "money-item billet"; el.style.backgroundColor = color; el.textContent = val + " €";
             } else {
                 el.className = "money-item piece"; const ratio = taillesEcran[val] || 1;
-                el.style.width = (35 * ratio) + "px"; el.style.height = (35 * ratio) + "px";
-                el.style.fontSize = (10 * ratio) + "px"; el.style.backgroundColor = color;
-                if (val === 2) { el.style.border = "3px solid #fbbf24"; el.style.backgroundColor = "#e5e7eb"; }
-                else if (val === 1) { el.style.border = "3px solid #e5e7eb"; el.style.backgroundColor = "#fef08a"; }
+                el.style.width = (54 * ratio) + "px"; el.style.height = (54 * ratio) + "px";
+                el.style.fontSize = (20 * ratio) + "px"; el.style.backgroundColor = color;
+                if (val === 2) { el.style.background = "radial-gradient(circle, #fbbf24 60%, #e5e7eb 60%)"; el.style.border = "3px solid #e5e7eb"; }
+                else if (val === 1) { el.style.background = "radial-gradient(circle, #e5e7eb 60%, #fbbf24 60%)"; el.style.border = "3px solid #fbbf24"; }
+                else if (val === 1) { el.style.background = "radial-gradient(circle, #e5e7eb 60%, #fbbf24 60%)"; el.style.border = "3px solid #fbbf24"; }
                 el.textContent = val >= 1 ? val + "€" : (val*100).toFixed(0) + "c";
             }
             moneyContainer.appendChild(el);
