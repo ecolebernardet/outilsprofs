@@ -448,16 +448,16 @@
 		#fab-btn {
 			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
 			width: 50px; height: 50px; border-radius: 50%;
-			background: #1F1F21; border: 1.5px solid #4a4a5a;
+			background: #1F1F21; border: 2px solid #6f6f74;
 			color: #e8e8f0; font-size: 35px; cursor: pointer;
-            line-height: 1; padding-bottom: 5px;
+            line-height: 1; padding-bottom: 5px; padding-left: 5px;
 			display: flex; align-items: center; justify-content: center;
 			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 			transition: background .15s, transform .15s;
 		}
-		#fab-btn:hover { background: #2e2e3a; transform: scale(1.1); }
-		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(45deg); }
-
+		#fab-btn:hover { background: #2e2e3a; transform: scale(1.2); }
+		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; }
+		
 		/* Menu vertical principal */
 		#main-menu {
 			position: fixed; bottom: 82px; left: 20px; z-index: 14000;
@@ -491,7 +491,7 @@
 		.mm-has-sub { position: relative; }
 		.mm-sub {
 			position: absolute; left: 100%; top: 0;
-			padding-left: 10px; /* pont invisible élargi — zone de passage souris */
+			padding-left: 7px; /* pont invisible élargi — zone de passage souris */
 			min-width: 120px;
 			display: flex; flex-direction: column; gap: 3px;
 			opacity: 0; pointer-events: none;
@@ -536,13 +536,13 @@
 		.mm-section-a .mm-section-label { color: #4a6a8a; }
 		.mm-section-a .mm-item { background: transparent; }
 		.mm-section-a .mm-item:hover { background: #1e2535; }
-		/* B — Annotation : teinte chaude/violette */
-		.mm-section-b { background: #1a1428; }
-		.mm-section-b .mm-section-label { color: #7a5aaa; }
+		/* B — Annotation : teinte chaude/bleu */
+		.mm-section-b { background: #041720; }
+		.mm-section-b .mm-section-label { color: #256896; }
 		.mm-section-b .mm-item { background: transparent; }
-		.mm-section-b .mm-item:hover { background: #251d38; }
+		.mm-section-b .mm-item:hover { background: #0c2833; }
 		/* C — Contenu : teinte verte/teal sombre */
-		.mm-section-c { background: #111d1a; }
+		.mm-section-c { background: #111d16; }
 		.mm-section-c .mm-section-label { color: #3a7a60; }
 		.mm-section-c .mm-item { background: transparent; }
 		.mm-section-c .mm-item:hover { background: #182820; }
