@@ -1,0 +1,782 @@
+// =========================================================================
+// WIDGET CALCUL MENTAL — Le Bureau du Prof
+// Fichier autonome : injecte son propre <template> dans le DOM
+// et initialise les widgets de type 'calcul'.
+//
+// 📌 Intégration dans index.html :
+//   1. Ajouter avant </body> (après widgets.js) :
+//      <script src="widget-calcul.js"></script>
+//
+//   2. Ajouter dans le menu (sous-menu Widgets) :
+//      <div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()">
+//          <span class="mm-ico">🧮</span>Calcul Mental
+//      </div>
+// =========================================================================
+
+(function () {
+
+    // ── CSS injecté une seule fois ────────────────────────────────────────
+    const STYLE = `
+    /* ── Wrapper externe : poignée resize native ── */
+    .widget[data-type="calcul"] .calc-outer {
+        position: relative;
+        width: 420px;
+        height: 480px;
+        min-width: 300px;
+        min-height: 320px;
+        overflow: hidden;
+        resize: both;
+        box-sizing: border-box;
+        border-radius: 16px;
+    }
+    .widget[data-type="calcul"]:hover .calc-outer,
+    .widget[data-type="calcul"]:focus-within .calc-outer {
+        outline: 2px dashed rgba(6,182,212,0.4);
+    }
+    .widget[data-type="calcul"] .calc-outer::-webkit-resizer {
+        background-color: transparent;
+        background-image: linear-gradient(135deg,
+            transparent 50%, #06b6d4 50%, #06b6d4 60%,
+            transparent 60%, transparent 70%,
+            #06b6d4 70%, #06b6d4 80%, transparent 80%);
+    }
+
+    /* ── Widget intérieur — layout natif sans scale ── */
+    .calc-widget {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        box-sizing: border-box;
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* ── Header ── */
+    .calc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px 9px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        flex-shrink: 0;
+    }
+    .calc-title {
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #06b6d4;
+    }
+    /* ── Corps ── */
+    .calc-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 0;
+    }
+    .calc-body::-webkit-scrollbar { width: 4px; }
+    .calc-body::-webkit-scrollbar-track { background: transparent; }
+    .calc-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+    /* ── Section label ── */
+    .calc-section-label {
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        color: #94a3b8;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
+    /* ── Sélecteurs opérations — largeur fixe ── */
+    .calc-ops-grid {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+    .calc-op-label { cursor: pointer; }
+    .calc-op-label input[type="checkbox"] { display: none; }
+    .calc-op-frame {
+        border: 2px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        font-weight: 900;
+        color: #94a3b8;
+        transition: all 0.18s;
+        user-select: none;
+    }
+    .calc-op-label input:checked + .calc-op-frame {
+        border-color: #06b6d4;
+        background: #06b6d4;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(6,182,212,0.3);
+    }
+
+    /* ── Tables ── */
+    .calc-tables-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+    }
+    .calc-table-label { cursor: pointer; }
+    .calc-table-label input[type="checkbox"] { display: none; }
+    .calc-table-frame {
+        width: 33px;
+        height: 33px;
+        border: 2px solid #e2e8f0;
+        border-radius: 7px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 900;
+        color: #94a3b8;
+        transition: all 0.18s;
+        user-select: none;
+    }
+    .calc-table-all-frame {
+        padding: 0 8px;
+        width: auto;
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .calc-table-label input:checked + .calc-table-frame {
+        border-color: #06b6d4;
+        background: #06b6d4;
+        color: #fff;
+    }
+
+    /* ── Inputs paramètres — largeur fixe, centrés ── */
+    .calc-params-wrap {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    .calc-field-group { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+    .calc-field-input {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 7px;
+        padding: 7px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        outline: none;
+        text-align: center;
+        width: 90px;
+        box-sizing: border-box;
+        transition: border-color 0.15s;
+    }
+    .calc-field-input:focus { border-color: #06b6d4; }
+
+    /* ── Timer row config — largeur fixe, centré ── */
+    .calc-timer-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        padding: 7px 14px;
+    }
+    .calc-timer-wrap {
+        display: flex;
+        justify-content: center;
+    }
+    .calc-timer-row > span {
+        font-size: 11px;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+    .calc-timer-input {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        padding: 3px 5px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        outline: none;
+        width: 40px;
+        text-align: center;
+    }
+    .calc-timer-sep { color: #94a3b8; font-weight: 900; font-size: 15px; }
+
+    /* ── Bouton démarrer ── */
+    .calc-start-btn {
+        display: block;
+        margin: 10px auto 0;
+        padding: 20px 28px;
+        border-radius: 50px;
+        font-weight: 900;
+        font-size: 11px;
+        text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        background: #06b6d4;
+        color: #fff;
+        letter-spacing: 0.06em;
+        transition: transform 0.1s, box-shadow 0.15s;
+        box-shadow: 0 3px 12px rgba(6,182,212,0.3);
+    }
+    .calc-start-btn:hover  { box-shadow: 0 5px 18px rgba(6,182,212,0.45); }
+    .calc-start-btn:active { transform: scale(0.97); }
+
+    /* ══ ZONE DE JEU ══ */
+    .calc-game-zone { display: none; flex-direction: column; gap: 8px; height: 100%; }
+    .calc-game-zone.active { display: flex; }
+
+    /* ── Timer affiché ── */
+    .calc-timer-display {
+        display: none;
+        text-align: center;
+        padding: 6px 10px;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 9px;
+        flex-shrink: 0;
+    }
+    .calc-timer-display.visible { display: block; }
+    .calc-timer-value {
+        font-size: 20px;
+        font-weight: 900;
+        color: #d97706;
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+    }
+    .calc-timer-value.urgent { color: #dc2626; animation: calc-blink 0.6s infinite alternate; }
+    @keyframes calc-blink { from { opacity:1; } to { opacity:0.3; } }
+
+    /* ── Grille de questions ── */
+    .calc-questions-grid {
+        display: grid;
+        gap: 20px;
+        flex: 1;
+        align-content: start;
+        grid-template-columns: repeat(2, 1fr); /* valeur par défaut, overridée par JS */
+    }
+    .calc-q-card {
+        background: #e6e8eb;
+        border: 1.5px solid #abaeb3;
+        border-radius: 10px;
+        padding: 10px 10px 10px 22px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 80px;
+        position: relative;
+        transition: border-color 0.2s, background 0.2s;
+    }
+    .calc-q-num {
+        position: absolute;
+        top: 4px;
+        left: 7px;
+        font-size: 11px;
+        font-weight: 900;
+        color: #abaeb3;
+    }
+    .calc-q-text {
+        font-size: 28px;
+        font-weight: 900;
+        color: #1e293b;
+        white-space: nowrap;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .calc-res-text {
+        display: none;
+        color: #047954;
+        font-weight: 900;
+        font-size: 28px;
+        white-space: nowrap;
+        line-height: 1.1;
+    }
+    .calc-res-text.visible { display: inline; }
+
+    /* ── Boutons action jeu ── */
+    .calc-action-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 5px;
+        flex-shrink: 0;
+        max-width: 2000px;
+    }
+    .calc-action-btn {
+        padding: 9px 6px;
+        border: none;
+        border-radius: 50px;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        cursor: pointer;
+        color: #fff;
+        letter-spacing: 0.04em;
+        transition: opacity 0.15s, transform 0.1s;
+    }
+    .calc-action-btn:hover  { opacity: 0.85; }
+    .calc-action-btn:active { transform: scale(0.96); }
+    .calc-btn-back    { background: #6b7280; }
+    .calc-btn-correct { background: #10b981; }
+    .calc-btn-new     { background: #f59e0b; }
+
+    /* ── Modale fin de temps ── */
+    .calc-modal-overlay {
+        display: none;
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(4px);
+        border-radius: 16px;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .calc-modal-overlay.visible { display: flex; }
+    .calc-modal-content {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        width: 100%;
+        max-width: 260px;
+    }
+    .calc-modal-icon  { font-size: 38px; margin-bottom: 8px; }
+    .calc-modal-title { font-size: 15px; font-weight: 900; text-transform: uppercase; color: #1e293b; margin-bottom: 5px; }
+    .calc-modal-sub   { font-size: 11px; color: #64748b; margin-bottom: 14px; }
+    .calc-modal-btn {
+        width: 100%;
+        padding: 11px;
+        border-radius: 50px;
+        background: #06b6d4;
+        color: #fff;
+        border: none;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: opacity 0.15s;
+    }
+    .calc-modal-btn:hover { opacity: 0.85; }
+    `;
+
+    if (!document.getElementById('calc-widget-style')) {
+        const s = document.createElement('style');
+        s.id = 'calc-widget-style';
+        s.textContent = STYLE;
+        document.head.appendChild(s);
+    }
+
+    // ── Template ─────────────────────────────────────────────────────────
+    if (!document.getElementById('template-calcul')) {
+        const tpl = document.createElement('template');
+        tpl.id = 'template-calcul';
+        tpl.innerHTML = `
+<div class="calc-outer">
+  <div class="calc-widget">
+
+    <!-- HEADER -->
+    <div class="calc-header">
+      <span class="calc-title">🧮 Calcul Mental</span>
+    </div>
+
+    <div class="calc-body">
+
+      <!-- ── ZONE CONFIG ── -->
+      <div class="calc-setup-zone" data-role="setup-zone">
+
+        <!-- Opérations -->
+        <div>
+          <div class="calc-section-label">Opérations</div>
+          <div class="calc-ops-grid">
+            <label class="calc-op-label">
+              <input type="checkbox" class="calc-op-cb" value="+" checked>
+              <div class="calc-op-frame">+</div>
+            </label>
+            <label class="calc-op-label">
+              <input type="checkbox" class="calc-op-cb" value="-">
+              <div class="calc-op-frame">−</div>
+            </label>
+            <label class="calc-op-label">
+              <input type="checkbox" class="calc-op-cb" value="x">
+              <div class="calc-op-frame">×</div>
+            </label>
+            <label class="calc-op-label">
+              <input type="checkbox" class="calc-op-cb" value=":">
+              <div class="calc-op-frame">÷</div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div>
+          <div class="calc-section-label">Tables (× et ÷)</div>
+          <div class="calc-tables-wrap" data-role="tables-wrap"></div>
+        </div>
+
+        <!-- Timer -->
+        <div style="text-align: center;">
+		  <div class="calc-section-label" style="margin-top:10px">Temps imparti</div>
+		  <div class="calc-timer-wrap">
+			<div class="calc-timer-row" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px;">
+			  <span>⏱</span>
+			  <input type="number" class="calc-timer-input" data-role="timer-min" value="0" min="0" max="59" placeholder="mm">
+			  <span class="calc-timer-sep">:</span>
+			  <input type="number" class="calc-timer-input" data-role="timer-sec" value="0" min="0" max="59" placeholder="ss">
+			  
+			  <div style="flex-basis: 100%; font-size: 10px; color: #94a3b8; margin-top: 4px;">
+				min : sec &nbsp;(0:0 = sans limite)
+			  </div>
+			</div>
+		  </div>
+		</div>
+
+        <!-- Paramètres -->
+        <div>
+          <div class="calc-section-label" style="margin-top:10px">Paramètres</div>
+          <div class="calc-params-wrap">
+            <div class="calc-field-group">
+              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre min</div>
+              <input type="number" class="calc-field-input" data-role="min-val" value="1" min="0" max="999">
+            </div>
+            <div class="calc-field-group">
+              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre max</div>
+              <input type="number" class="calc-field-input" data-role="max-val" value="50" min="1" max="999">
+            </div>
+            <div class="calc-field-group">
+              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre de calculs (max 50)</div>
+              <input type="number" class="calc-field-input" data-role="nb-val" value="10" min="1" max="50">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton démarrer -->
+        <button class="calc-start-btn" data-role="start-btn">▶ Démarrer</button>
+      </div>
+
+      <!-- ── ZONE JEU ── -->
+      <div class="calc-game-zone" data-role="game-zone">
+
+        <!-- Timer affiché -->
+        <div class="calc-timer-display" data-role="timer-display">
+          <div class="calc-timer-value" data-role="timer-value">0:00</div>
+        </div>
+
+        <!-- Grille de questions -->
+        <div class="calc-questions-grid" data-role="questions-grid"></div>
+
+        <!-- Boutons action -->
+        <div class="calc-action-btns">
+            <button class="calc-action-btn calc-btn-back"    data-role="back-btn"><span style="font-size: 13px">⚙️</span> Réglages</button>
+            <button class="calc-action-btn calc-btn-correct" data-role="correct-btn">Correction</button>
+            <button class="calc-action-btn calc-btn-new"     data-role="new-btn"><span style="font-size: 13px">🔄</span> Nouveau</button>
+        </div>
+      </div>
+
+    </div><!-- /calc-body -->
+
+    <!-- Modale fin de temps -->
+    <div class="calc-modal-overlay" data-role="modal-fin">
+      <div class="calc-modal-content">
+        <div class="calc-modal-icon">⏰</div>
+        <div class="calc-modal-title">Temps écoulé !</div>
+        <div class="calc-modal-sub">Le chrono est terminé. Prêt à voir les résultats ?</div>
+        <button class="calc-modal-btn" data-role="modal-validate-btn">Afficher la correction</button>
+      </div>
+    </div>
+
+  </div><!-- /calc-widget -->
+</div><!-- /calc-outer -->`;
+        document.body.appendChild(tpl);
+    }
+
+    // =========================================================================
+    // INITIALISATION
+    // =========================================================================
+    window.initCalculWidget = function (widget) {
+
+        const outer     = widget.querySelector('.calc-outer');
+        const questGrid = widget.querySelector('[data-role="questions-grid"]');
+
+        // ── Bloquer remontée mousedown ────────────────────────────────────────
+        outer.addEventListener('mousedown', function (e) {
+            e.stopPropagation();
+        });
+
+        // ── Constantes ───────────────────────────────────────────────────────
+        const MAX_CALCULS       = 50;
+        const MAX_ATTEMPTS_MULT = 100;
+        const TABLES_DEFAULT    = [1,2,3,4,5,6,7,8,9,10];
+
+        // ── Références DOM ───────────────────────────────────────────────────
+        const setupZone    = widget.querySelector('[data-role="setup-zone"]');
+        const gameZone     = widget.querySelector('[data-role="game-zone"]');
+        const tablesWrap   = widget.querySelector('[data-role="tables-wrap"]');
+        const timerMin     = widget.querySelector('[data-role="timer-min"]');
+        const timerSec     = widget.querySelector('[data-role="timer-sec"]');
+        const minVal       = widget.querySelector('[data-role="min-val"]');
+        const maxVal       = widget.querySelector('[data-role="max-val"]');
+        const nbVal        = widget.querySelector('[data-role="nb-val"]');
+        const startBtn     = widget.querySelector('[data-role="start-btn"]');
+        const timerDisplay = widget.querySelector('[data-role="timer-display"]');
+        const timerValue   = widget.querySelector('[data-role="timer-value"]');
+        const backBtn      = widget.querySelector('[data-role="back-btn"]');
+        const correctBtn   = widget.querySelector('[data-role="correct-btn"]');
+        const newBtn       = widget.querySelector('[data-role="new-btn"]');
+        const modalFin     = widget.querySelector('[data-role="modal-fin"]');
+        const modalValBtn  = widget.querySelector('[data-role="modal-validate-btn"]');
+
+        // ── État ─────────────────────────────────────────────────────────────
+        let currentCalculs  = [];
+        let countdown       = null;
+        let correctionShown = false;
+
+        // ── Grille responsive : colonnes selon la largeur réelle du widget ────
+        function getColCount() {
+            const w = outer.offsetWidth || 420;
+            if (w >= 680) return 4;
+            if (w >= 490) return 3;
+            return 2;
+        }
+
+        function getFontSize(cols) {
+            if (cols >= 4) return '28px';
+            if (cols === 3) return '30px';
+            return '32px';
+        }
+
+        function updateGridLayout() {
+            const cols = getColCount();
+            const fs   = getFontSize(cols);
+            questGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            widget.querySelectorAll('.calc-q-text, .calc-res-text').forEach(el => {
+                el.style.fontSize = fs;
+            });
+        }
+
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(updateGridLayout);
+            ro.observe(outer);
+            const guard = new MutationObserver(() => {
+                if (!document.contains(widget)) { ro.disconnect(); guard.disconnect(); }
+            });
+            guard.observe(document.body, { childList: true, subtree: true });
+        }
+
+        // ── Initialisation tables ─────────────────────────────────────────────
+        (function initTables() {
+            let html = '';
+            for (let i = 2; i <= 10; i++) {
+                html += `<label class="calc-table-label">
+                    <input type="checkbox" class="calc-table-cb" value="${i}">
+                    <div class="calc-table-frame">${i}</div>
+                </label>`;
+            }
+            html += `<label class="calc-table-label">
+                <input type="checkbox" class="calc-all-tables-cb">
+                <div class="calc-table-frame calc-table-all-frame">Toutes</div>
+            </label>`;
+            tablesWrap.innerHTML = html;
+            tablesWrap.querySelector('.calc-all-tables-cb').addEventListener('change', function () {
+                widget.querySelectorAll('.calc-table-cb').forEach(cb => cb.checked = this.checked);
+            });
+        })();
+
+        // ── Sons ─────────────────────────────────────────────────────────────
+        function playBeep() {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                [[880,0,0.18],[880,0.22,0.18],[1318,0.44,0.4]].forEach(function (p) {
+                    var osc = ctx.createOscillator(), gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = p[0]; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime + p[1]);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + p[1] + p[2]);
+                    osc.start(ctx.currentTime + p[1]);
+                    osc.stop(ctx.currentTime + p[1] + p[2] + 0.05);
+                });
+            } catch (e) {}
+        }
+
+        // ── Timer ─────────────────────────────────────────────────────────────
+        function startTimer() {
+            clearInterval(countdown);
+            countdown = null;
+            const mins = parseInt(timerMin.value) || 0;
+            const secs = parseInt(timerSec.value) || 0;
+            let timeLeft = mins * 60 + secs;
+            if (timeLeft <= 0) { timerDisplay.classList.remove('visible'); return; }
+            timerDisplay.classList.add('visible');
+            function updateDisplay() {
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                timerValue.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+                timerValue.classList.toggle('urgent', timeLeft <= 10);
+                if (timeLeft <= 0) {
+                    clearInterval(countdown); countdown = null;
+                    playBeep();
+                    modalFin.classList.add('visible');
+                }
+                timeLeft--;
+            }
+            updateDisplay();
+            countdown = setInterval(updateDisplay, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(countdown);
+            countdown = null;
+        }
+
+        // ── Génération d'un calcul ────────────────────────────────────────────
+        function generateCalcul(op, selectedTables, min, max) {
+            let a, b, res, q;
+            if (op === 'x' || op === ':') {
+                const tables = selectedTables.length > 0 ? selectedTables : TABLES_DEFAULT;
+                b = tables[Math.floor(Math.random() * tables.length)];
+                const f = Math.floor(Math.random() * 10) + 1;
+                if (op === 'x') { a = f; res = a * b; q = `${a} × ${b}`; }
+                else { a = f * b; res = f; q = `${a} ÷ ${b}`; }
+            } else {
+                a = Math.floor(Math.random() * (max - min + 1)) + min;
+                b = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (op === '+') { res = a + b; q = `${a} + ${b}`; }
+                else { if (a < b) [a, b] = [b, a]; res = a - b; q = `${a} − ${b}`; }
+            }
+            return { q, r: res };
+        }
+
+        // ── Génération de la série ────────────────────────────────────────────
+        function generateSeries() {
+            const selectedOps    = Array.from(widget.querySelectorAll('.calc-op-cb:checked')).map(el => el.value);
+            const selectedTables = Array.from(widget.querySelectorAll('.calc-table-cb:checked')).map(el => parseInt(el.value));
+            const min            = parseInt(minVal.value) || 1;
+            const max            = parseInt(maxVal.value) || 50;
+            const nb             = Math.min(parseInt(nbVal.value) || 10, MAX_CALCULS);
+
+            if (selectedOps.length === 0) return;
+
+            currentCalculs  = [];
+            correctionShown = false;
+            let attempts = 0;
+            while (currentCalculs.length < nb && attempts < nb * MAX_ATTEMPTS_MULT) {
+                attempts++;
+                const op = selectedOps[Math.floor(Math.random() * selectedOps.length)];
+                const calcul = generateCalcul(op, selectedTables, min, max);
+                if (!currentCalculs.some(c => c.q === calcul.q)) currentCalculs.push(calcul);
+            }
+
+            renderQuestions();
+            correctBtn.textContent = '👁 Afficher la Correction';
+            setupZone.style.display = 'none';
+            gameZone.classList.add('active');
+            startTimer();
+        }
+
+        // ── Rendu des questions (mode VPI) ────────────────────────────────────
+        function renderQuestions() {
+            questGrid.innerHTML = '';
+            const cols = getColCount();
+            const fs   = getFontSize(cols);
+            questGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            currentCalculs.forEach(function (calc, i) {
+                const card = document.createElement('div');
+                card.className = 'calc-q-card';
+                card.innerHTML = `
+                    <span class="calc-q-num">${i + 1})</span>
+                    <span class="calc-q-text" style="font-size:${fs}">${calc.q} =</span>
+                    <span class="calc-res-text" style="font-size:${fs}">${calc.r}</span>
+                `;
+                questGrid.appendChild(card);
+            });
+        }
+
+        // ── Correction ────────────────────────────────────────────────────────
+        function showCorrection() {
+            if (correctionShown) {
+                widget.querySelectorAll('.calc-res-text').forEach(el => el.classList.remove('visible'));
+                correctionShown = false;
+                correctBtn.textContent = 'Afficher la correction';
+            } else {
+                stopTimer();
+                widget.querySelectorAll('.calc-res-text').forEach(el => el.classList.add('visible'));
+                correctionShown = true;
+                correctBtn.textContent = 'Masquer la correction';
+            }
+        }
+
+        // ── Retour config ─────────────────────────────────────────────────────
+        function retourConfig() {
+            stopTimer();
+            timerDisplay.classList.remove('visible');
+            modalFin.classList.remove('visible');
+            correctionShown = false;
+            gameZone.classList.remove('active');
+            setupZone.style.display = '';
+        }
+
+        // ── Événements ───────────────────────────────────────────────────────
+        startBtn.addEventListener('click',    generateSeries);
+        backBtn.addEventListener('click',     retourConfig);
+        correctBtn.addEventListener('click',  showCorrection);
+        newBtn.addEventListener('click',      generateSeries);
+        modalValBtn.addEventListener('click', function () {
+            modalFin.classList.remove('visible');
+            showCorrection();
+        });
+
+        // Nettoyage si le widget est retiré du DOM
+        const obs = new MutationObserver(function () {
+            if (!document.contains(widget)) { stopTimer(); obs.disconnect(); }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+    };
+
+    // =========================================================================
+    // HOOK dans createWidget
+    // =========================================================================
+    var _orig = window.createWidget;
+    if (typeof _orig === 'function') {
+        window.createWidget = function (type) {
+            var widget = _orig.apply(this, arguments);
+            if (type === 'calcul') initCalculWidget(widget);
+            return widget;
+        };
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            var orig = window.createWidget;
+            if (typeof orig === 'function') {
+                window.createWidget = function (type) {
+                    var widget = orig.apply(this, arguments);
+                    if (type === 'calcul') initCalculWidget(widget);
+                    return widget;
+                };
+            }
+        });
+    }
+
+})();

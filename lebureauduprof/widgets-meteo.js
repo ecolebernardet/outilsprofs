@@ -88,6 +88,34 @@ function initMeteoWidget(widget) {
     const humEl      = widget.querySelector('.meteo-humidity');
     const updEl      = widget.querySelector('.meteo-updated');
 
+    // --- MODALE AUTONOME (ne dépend pas de widgets.js) ---
+    function askCity(currentCity) {
+        return new Promise(resolve => {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+            overlay.innerHTML = `
+                <div style="background:white;padding:28px 32px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.25);text-align:center;min-width:300px;max-width:400px;">
+                    <div style="font-size:32px;margin-bottom:8px;">⛅</div>
+                    <div style="font-size:16px;font-weight:700;margin-bottom:4px;color:#222;">Widget Météo</div>
+                    <div style="font-size:13px;color:#666;margin-bottom:16px;">Entrez la ville de votre école</div>
+                    <input id="meteo-city-input" type="text" value="${currentCity || ''}" placeholder="Ex : Paris, Lyon, Grenoble..."
+                        style="width:100%;box-sizing:border-box;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;margin-bottom:16px;">
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button id="meteo-cancel" style="padding:9px 20px;border:1px solid #ddd;background:#f8f9fa;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#555;">Annuler</button>
+                        <button id="meteo-confirm" style="padding:9px 20px;border:none;background:#1a6fa8;color:white;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Valider</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            const input = overlay.querySelector('#meteo-city-input');
+            input.focus(); input.select();
+            const close = (val) => { overlay.remove(); resolve(val); };
+            overlay.querySelector('#meteo-confirm').onclick = () => close(input.value.trim());
+            overlay.querySelector('#meteo-cancel').onclick  = () => close(null);
+            overlay.addEventListener('click', e => { if (e.target === overlay) close(null); });
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') close(input.value.trim()); if (e.key === 'Escape') close(null); });
+        });
+    }
+
     // --- POIGNÉE DE REDIMENSIONNEMENT ---
     const resizeHandle = document.createElement('div');
     resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,0.4) 50%);border-radius:0 0 14px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
@@ -109,7 +137,6 @@ function initMeteoWidget(widget) {
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
 
-    // Adapter les tailles de police au conteneur
     function adaptMeteoFontSizes(c, w, h) {
         const scale = Math.min(w / 280, h / 200);
         iconEl.style.fontSize     = Math.round(52 * scale) + 'px';
@@ -120,14 +147,12 @@ function initMeteoWidget(widget) {
         updEl.style.fontSize      = Math.round(9  * scale) + 'px';
     }
 
-    // Observer les changements de taille
     new ResizeObserver(() => {
         adaptMeteoFontSizes(container, container.offsetWidth, container.offsetHeight);
     }).observe(container);
 
-    // --- MODALE PERSONNALISÉE ---
-
-    let city = widget.dataset.meteoCity || '';
+    // --- VILLE : localStorage en priorité, sinon dataset ---
+    let city = localStorage.getItem('meteo-city') || widget.dataset.meteoCity || '';
 
     function applyMeteo(data) {
         const code = data.code;
@@ -149,8 +174,9 @@ function initMeteoWidget(widget) {
         try {
             const data = await fetchMeteo(c);
             widget.dataset.meteoCity = c;
+            localStorage.setItem('meteo-city', c);
             applyMeteo(data);
-            saveBoard();
+            if (typeof saveBoard === 'function') saveBoard();
         } catch(e) {
             cityNameEl.textContent = 'Ville introuvable';
             iconEl.textContent = '❓'; tempEl.textContent = ''; descEl.textContent = '';
@@ -158,13 +184,14 @@ function initMeteoWidget(widget) {
     }
 
     widget.querySelector('.meteo-city').addEventListener('click', () => {
-        showPromptModal('⛅', 'Widget Météo', 'Entrez la ville de votre école', widget.dataset.meteoCity || '', 'Ex : Paris, Lyon, Grenoble...')
+        askCity(widget.dataset.meteoCity || localStorage.getItem('meteo-city') || '')
             .then(newCity => { if (newCity) loadCity(newCity); });
     });
 
     function scheduleRefresh() {
         setTimeout(() => {
-            if (widget.isConnected && widget.dataset.meteoCity) loadCity(widget.dataset.meteoCity).then(scheduleRefresh);
+            const c = widget.dataset.meteoCity || localStorage.getItem('meteo-city');
+            if (widget.isConnected && c) loadCity(c).then(scheduleRefresh);
         }, 10 * 60 * 1000);
     }
 
@@ -172,8 +199,7 @@ function initMeteoWidget(widget) {
         loadCity(city).then(scheduleRefresh);
     } else {
         setTimeout(() => {
-            showPromptModal('⛅', 'Widget Météo', 'Entrez la ville de votre école', '', 'Ex : Paris, Lyon, Grenoble...')
-                .then(newCity => { if (newCity) loadCity(newCity).then(scheduleRefresh); });
+            askCity('').then(newCity => { if (newCity) loadCity(newCity).then(scheduleRefresh); });
         }, 200);
     }
 }
