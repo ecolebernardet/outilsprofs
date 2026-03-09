@@ -16,7 +16,7 @@
             display: none;
             position: fixed;
             top: 0; right: 0;
-            width: 320px; height: 100vh;
+            width: 400px; height: 100vh;
             background: #1e1e28;
             border-left: 1px solid #2e2e3a;
             z-index: 9200;
@@ -48,7 +48,7 @@
             font-size: 20px;
             cursor: pointer;
             line-height: 1;
-            padding: 0 4px;
+            padding: 0 0px;
             transition: color .15s;
         }
         #image-panel-close:hover { color: #fff; }
@@ -77,7 +77,7 @@
             overflow-y: auto;
             padding: 10px;
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             align-content: start;
         }
@@ -92,7 +92,7 @@
             overflow: hidden;
             cursor: pointer;
             transition: border-color .15s, transform .15s;
-            aspect-ratio: 4/3;
+            aspect-ratio: 4/4;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -185,6 +185,9 @@ if (!window.IMAGE_LIBRARY) {
 		{ src: 'images/monnaie-piece-050.png',   label: 'Pièce de 50 centimes' },
 		{ src: 'images/monnaie-piece-1.png',   label: 'Pièce de 1 euros' },
 		{ src: 'images/monnaie-piece-2.png',   label: 'Pièce de 2 euros' },
+		{ src: 'images/carte-france01.png',   label: 'Carte de France' },
+		{ src: 'images/carte-monde01.png',   label: 'Carte du monde' },
+		{ src: 'images/carte-monde-pays01.png',   label: 'Carte des pays du monde' },
     ];
 }
 
