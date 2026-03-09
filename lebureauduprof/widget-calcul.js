@@ -47,7 +47,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        font-family: 'MDI', 'Inter', 'Segoe UI', system-ui, sans-serif;
         box-sizing: border-box;
         background: #ffffff;
         border-radius: 16px;
@@ -90,14 +90,24 @@
 
     /* ── Section label ── */
     .calc-section-label {
-        font-size: 8px;
+        font-size: 15px;
         font-weight: 900;
         letter-spacing: 0.12em;
-        color: #94a3b8;
+        color: #333333;
         margin-bottom: 5px;
         text-align: center;
     }
 
+	.calc-section-nbre {
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        color: #555555;
+        margin-bottom: 0px;
+        text-align: center;
+		padding: 10px 20px
+    }
+	
     /* ── Sélecteurs opérations — largeur fixe ── */
     .calc-ops-grid {
         display: flex;
@@ -107,24 +117,24 @@
     .calc-op-label { cursor: pointer; }
     .calc-op-label input[type="checkbox"] { display: none; }
     .calc-op-frame {
-        border: 2px solid #e2e8f0;
-        border-radius: 9px;
+        border: 2px solid #999999;
+        border-radius: 20px;
         background: #f8fafc;
-        width: 50px;
-        height: 50px;
+        width: 80px;
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 25px;
+        font-size: 40px;
         font-weight: 900;
-        color: #94a3b8;
+        color: #555555;
         transition: all 0.18s;
         user-select: none;
     }
     .calc-op-label input:checked + .calc-op-frame {
         border-color: #06b6d4;
         background: #06b6d4;
-        color: #fff;
+        color: #4;
         box-shadow: 0 2px 8px rgba(6,182,212,0.3);
     }
 
@@ -138,17 +148,17 @@
     .calc-table-label { cursor: pointer; }
     .calc-table-label input[type="checkbox"] { display: none; }
     .calc-table-frame {
-        width: 33px;
-        height: 33px;
-        border: 2px solid #e2e8f0;
-        border-radius: 7px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #999999;
+        border-radius: 20px;
         background: #f8fafc;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 900;
-        color: #94a3b8;
+        color: #555555;
         transition: all 0.18s;
         user-select: none;
     }
@@ -177,7 +187,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 7px;
         padding: 7px;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 700;
         color: #1e293b;
         outline: none;
@@ -189,37 +199,69 @@
     .calc-field-input:focus { border-color: #06b6d4; }
 
     /* ── Timer row config — largeur fixe, centré ── */
-    .calc-timer-row {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        padding: 7px 14px;
-    }
     .calc-timer-wrap {
         display: flex;
         justify-content: center;
     }
-    .calc-timer-row > span {
-        font-size: 11px;
-        color: #94a3b8;
-        flex-shrink: 0;
+    .calc-timer-sep { color: #94a3b8; font-weight: 900; font-size: 22px; margin: 0 4px; line-height: 1; }
+    /* Spinner maison min/sec */
+    .calc-spinner {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
     }
-    .calc-timer-input {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 5px;
-        padding: 3px 5px;
-        font-size: 13px;
+    .calc-spinner-label {
+        font-size: 9px;
         font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .calc-spinner-inner {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .calc-spinner-btn {
+        width: 32px;
+        height: 44px;
+        border: none;
+        background: transparent;
+        font-size: 20px;
+        font-weight: 700;
+        color: #06b6d4;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.12s;
+        flex-shrink: 0;
+        user-select: none;
+    }
+    .calc-spinner-btn:hover  { background: #e0f7fa; }
+    .calc-spinner-btn:active { background: #b2ebf2; }
+    .calc-spinner-val {
+        width: 44px;
+        height: 44px;
+        text-align: center;
+        border: none;
+        border-left: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+        background: #fff;
+        font-size: 22px;
+        font-weight: 800;
         color: #1e293b;
         outline: none;
-        width: 40px;
-        text-align: center;
+        padding: 0;
+        -moz-appearance: textfield;
     }
-    .calc-timer-sep { color: #94a3b8; font-weight: 900; font-size: 15px; }
+    .calc-spinner-val::-webkit-inner-spin-button,
+    .calc-spinner-val::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
     /* ── Bouton démarrer ── */
     .calc-start-btn {
@@ -395,7 +437,7 @@
         const tpl = document.createElement('template');
         tpl.id = 'template-calcul';
         tpl.innerHTML = `
-<div class="calc-outer">
+<div class="calc-outer editor-container">
   <div class="calc-widget">
 
     <!-- HEADER -->
@@ -410,7 +452,7 @@
 
         <!-- Opérations -->
         <div>
-          <div class="calc-section-label">Opérations</div>
+          <div class="calc-section-label" style="marging-top:20px">Opérations</div>
           <div class="calc-ops-grid">
             <label class="calc-op-label">
               <input type="checkbox" class="calc-op-cb" value="+" checked>
@@ -433,41 +475,48 @@
 
         <!-- Tables -->
         <div>
-          <div class="calc-section-label">Tables (× et ÷)</div>
+          <div class="calc-section-label" style="margin-top:20px">Tables (× et ÷)</div>
           <div class="calc-tables-wrap" data-role="tables-wrap"></div>
         </div>
 
         <!-- Timer -->
         <div style="text-align: center;">
-		  <div class="calc-section-label" style="margin-top:10px">Temps imparti</div>
-		  <div class="calc-timer-wrap">
-			<div class="calc-timer-row" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px;">
-			  <span>⏱</span>
-			  <input type="number" class="calc-timer-input" data-role="timer-min" value="0" min="0" max="59" placeholder="mm">
-			  <span class="calc-timer-sep">:</span>
-			  <input type="number" class="calc-timer-input" data-role="timer-sec" value="0" min="0" max="59" placeholder="ss">
-			  
-			  <div style="flex-basis: 100%; font-size: 10px; color: #94a3b8; margin-top: 4px;">
-				min : sec &nbsp;(0:0 = sans limite)
-			  </div>
-			</div>
-		  </div>
-		</div>
+          <div class="calc-section-label" style="margin-top:20px">⏱ Temps imparti &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;">(0:00 = sans limite)</span></div>
+          <div class="calc-timer-wrap" style="gap:8px;display:flex;align-items:center;justify-content:center;">
+            <div class="calc-spinner">
+              <div class="calc-spinner-label">min</div>
+              <div class="calc-spinner-inner">
+                <button class="calc-spinner-btn" data-role="timer-min-minus">−</button>
+                <input type="number" class="calc-spinner-val" data-role="timer-min" value="0" min="0" max="59">
+                <button class="calc-spinner-btn" data-role="timer-min-plus">+</button>
+              </div>
+            </div>
+            <span class="calc-timer-sep" style="margin-top:18px;">:</span>
+            <div class="calc-spinner">
+              <div class="calc-spinner-label">sec</div>
+              <div class="calc-spinner-inner">
+                <button class="calc-spinner-btn" data-role="timer-sec-minus">−</button>
+                <input type="number" class="calc-spinner-val" data-role="timer-sec" value="0" min="0" max="59">
+                <button class="calc-spinner-btn" data-role="timer-sec-plus">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Paramètres -->
         <div>
-          <div class="calc-section-label" style="margin-top:10px">Paramètres</div>
+          <div class="calc-section-label" style="margin-top:20px">Paramètres</div>
           <div class="calc-params-wrap">
             <div class="calc-field-group">
-              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre min</div>
+              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre min<br> dans les calculs</div>
               <input type="number" class="calc-field-input" data-role="min-val" value="1" min="0" max="999">
             </div>
             <div class="calc-field-group">
-              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre max</div>
+              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre max<br> dans les calculs</div>
               <input type="number" class="calc-field-input" data-role="max-val" value="50" min="1" max="999">
             </div>
             <div class="calc-field-group">
-              <div class="calc-section-label" style="margin-top:5px; margin-bottom:2px">Nbre de calculs (max 50)</div>
+              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre de calculs<br> au total (max 50)</div>
               <input type="number" class="calc-field-input" data-role="nb-val" value="10" min="1" max="50">
             </div>
           </div>
@@ -549,6 +598,47 @@
         const modalFin     = widget.querySelector('[data-role="modal-fin"]');
         const modalValBtn  = widget.querySelector('[data-role="modal-validate-btn"]');
 
+        // ── Spinners timer +/− ───────────────────────────────────────────────
+        function _bindSpinner(inputEl, minusRole, plusRole, min, max) {
+            const minusBtn = widget.querySelector(`[data-role="${minusRole}"]`);
+            const plusBtn  = widget.querySelector(`[data-role="${plusRole}"]`);
+            if (!minusBtn || !plusBtn || !inputEl) return;
+            let _holdInterval = null;
+            let _holdTimeout  = null;
+
+            function _step(delta) {
+                const v = parseInt(inputEl.value) || 0;
+                inputEl.value = Math.min(max, Math.max(min, v + delta));
+            }
+            function _startHold(delta) {
+                _step(delta); // premier clic immédiat
+                _holdTimeout = setTimeout(() => {
+                    _holdInterval = setInterval(() => _step(delta), 80);
+                }, 400); // délai avant répétition
+            }
+            function _stopHold() {
+                clearTimeout(_holdTimeout);
+                clearInterval(_holdInterval);
+                _holdTimeout = null;
+                _holdInterval = null;
+            }
+
+            minusBtn.addEventListener('mousedown', e => { e.stopPropagation(); _startHold(-1); });
+            plusBtn.addEventListener('mousedown',  e => { e.stopPropagation(); _startHold(+1); });
+            // Arrêt sur relâchement ou sortie
+            [minusBtn, plusBtn].forEach(btn => {
+                btn.addEventListener('mouseup',    _stopHold);
+                btn.addEventListener('mouseleave', _stopHold);
+            });
+            // Support tactile
+            minusBtn.addEventListener('touchstart', e => { e.preventDefault(); _startHold(-1); });
+            plusBtn.addEventListener('touchstart',  e => { e.preventDefault(); _startHold(+1); });
+            minusBtn.addEventListener('touchend',   _stopHold);
+            plusBtn.addEventListener('touchend',    _stopHold);
+        }
+        _bindSpinner(timerMin, 'timer-min-minus', 'timer-min-plus', 0, 59);
+        _bindSpinner(timerSec, 'timer-sec-minus', 'timer-sec-plus', 0, 59);
+
         // ── État ─────────────────────────────────────────────────────────────
         let currentCalculs  = [];
         let countdown       = null;
@@ -578,7 +668,12 @@
         }
 
         if (window.ResizeObserver) {
-            const ro = new ResizeObserver(updateGridLayout);
+            const ro = new ResizeObserver(() => {
+                updateGridLayout();
+                // Sauvegarder la taille dans dataset pour la restauration
+                if (outer.offsetWidth > 0)  widget.dataset.calcW = outer.offsetWidth;
+                if (outer.offsetHeight > 0) widget.dataset.calcH = outer.offsetHeight;
+            });
             ro.observe(outer);
             const guard = new MutationObserver(() => {
                 if (!document.contains(widget)) { ro.disconnect(); guard.disconnect(); }
@@ -755,6 +850,76 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
     };
+
+    // =========================================================================
+    // HOOK dans restoreBoardFromJSON — restaurer la taille de calc-outer
+    // =========================================================================
+    (function patchRestoreCalcSize() {
+        const _origRestore = window.restoreBoardFromJSON;
+        if (typeof _origRestore !== 'function') {
+            // Pas encore chargé — on patche après DOMContentLoaded
+            document.addEventListener('DOMContentLoaded', patchRestoreCalcSize);
+            return;
+        }
+        window.restoreBoardFromJSON = function(json) {
+            // Pré-parser pour récupérer calcW/calcH avant la restauration
+            let calcSizes = {};
+            try {
+                const parsed = JSON.parse(json);
+                const widgets = Array.isArray(parsed) ? parsed : (parsed.widgets || []);
+                widgets.forEach(w => {
+                    if (w.type === 'calcul' && (w.calcW || w.calcH)) {
+                        // Clé par position pour retrouver le bon widget après restauration
+                        const key = (w.leftPercent||0).toFixed(1) + '_' + (w.topPercent||0).toFixed(1);
+                        calcSizes[key] = { w: w.calcW, h: w.calcH };
+                    }
+                });
+            } catch(e) {}
+
+            _origRestore.apply(this, arguments);
+
+            // Après restauration, appliquer les tailles sur .calc-outer
+            setTimeout(() => {
+                document.querySelectorAll('.widget[data-type="calcul"]').forEach(widget => {
+                    const outer = widget.querySelector('.calc-outer');
+                    if (!outer) return;
+                    // Priorité 1 : valeurs depuis le JSON (calcW/calcH)
+                    const key = (parseFloat(widget.dataset.leftPercent)||0).toFixed(1) + '_' + (parseFloat(widget.dataset.topPercent)||0).toFixed(1);
+                    const fromJson = calcSizes[key];
+                    const w = fromJson?.w || parseFloat(widget.dataset.calcW);
+                    const h = fromJson?.h || parseFloat(widget.dataset.calcH);
+                    if (w > 0) outer.style.width  = w + 'px';
+                    if (h > 0) outer.style.height = h + 'px';
+                });
+            }, 150);
+        };
+    })();
+
+    // =========================================================================
+    // HOOK dans buildBoardState — inclure calcW/calcH dans le JSON
+    // =========================================================================
+    (function patchBuildBoardState() {
+        const _origBuild = window.buildBoardState;
+        if (typeof _origBuild !== 'function') return;
+        window.buildBoardState = function() {
+            const state = _origBuild.apply(this, arguments);
+            // Enrichir les widgets calcul avec leurs dimensions réelles
+            document.querySelectorAll('.widget[data-type="calcul"]').forEach((widget, i) => {
+                const outer = widget.querySelector('.calc-outer');
+                if (!outer) return;
+                const match = state.widgets.find((w, j) => w.type === 'calcul' &&
+                    Math.abs(parseFloat(w.leftPercent) - parseFloat(widget.dataset.leftPercent)) < 0.1);
+                if (match) {
+                    match.calcW = outer.offsetWidth;
+                    match.calcH = outer.offsetHeight;
+                    // Mettre à jour aussi le dataset pour la prochaine lecture
+                    widget.dataset.calcW = outer.offsetWidth;
+                    widget.dataset.calcH = outer.offsetHeight;
+                }
+            });
+            return state;
+        };
+    })();
 
     // =========================================================================
     // HOOK dans createWidget

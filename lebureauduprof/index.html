@@ -15,6 +15,23 @@
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; overflow-y: auto; }
         body.presentation-mode { overflow: hidden; }
+
+        /* Titre du projet courant */
+        #current-project-name {
+            position: fixed;
+            bottom: 18px;
+            left: 72px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            pointer-events: none;
+            z-index: 9000;
+            white-space: nowrap;
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        body.presentation-mode #current-project-name { display: none; }
         /* Scrollbar discrète en mode normal */
         body::-webkit-scrollbar { width: 8px; }
         body::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
@@ -437,6 +454,8 @@
 		@font-face { font-family: 'Andika'; src: url('polices/Andika.ttf') format('truetype'); }
 		@font-face { font-family: 'OpenDyslexicLocal'; src: url('polices/OpenDyslexic-Regular.otf') format('opentype'); }
 		@font-face { font-family: 'BelleAllureGS'; src: url('polices/BelleAllureGS-Gros.otf') format('opentype'); }
+		@font-face { font-family: 'Baloo'; src: url('polices/Baloo-Regular.ttf') format('opentype'); }
+		@font-face { font-family: 'MDI'; src: url('polices/MDIecole-Regular.otf') format('opentype'); }
 		.editor-content { padding: 10px; outline: none; overflow: auto; text-align: left; flex-grow: 1; }
 
 		/* --- ANIMATIONS MODALES --- */
@@ -928,8 +947,10 @@
 				<option value="Verdana, sans-serif">Verdana</option>
 				<option value="'KGPerfectPenmanship', sans-serif">KGPerfectPenmanship</option>
 				<option value="'Andika', sans-serif">Andika</option>
-				<option value="'OpenDyslexicLocal', sans-serif">🧩 OpenDyslexic</option>
-				<option value="'BelleAllureGS', cursive">📏 Belle Allure GS</option>
+				<option value="'OpenDyslexicLocal', sans-serif">OpenDyslexic</option>
+				<option value="'BelleAllureGS', cursive">Belle Allure GS</option>
+				<option value="'Baloo', cursive">Baloo Regular</option>
+				<option value="'MDI', cursive">MDI école</option>
 			</select>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
@@ -939,6 +960,7 @@
 
     <!-- Bouton flottant principal -->
 	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal">＋</button>
+	<div id="current-project-name"></div>
 
 	<!-- Menu vertical -->
 	<div id="main-menu">
@@ -1058,9 +1080,12 @@
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">🗄️</span>Fichier<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
-					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>Sauvegarder</div>
-					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>Charger</div>
+					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>Mes projets</div>
+					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>Exporter JSON</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>Importer JSON</div>
 					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
+					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
 					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>Effacer tout</div>
 				</div></div>
 			</div>
@@ -1410,7 +1435,8 @@ window.onload = () => {
         const cur = buildBoardJSON();
         if (cur) undoStack.push(cur);
         updateUndoRedoBtns();
-        if (typeof scenesInit === 'function') scenesInit(); // ← ajout
+        if (typeof scenesInit === 'function') scenesInit();
+		initCurrentProjectName(); // ← ajout
     }, 1000);
     setInterval(updateClock, 1000);
     window.addEventListener('resize', handleWindowResize);
@@ -1834,6 +1860,7 @@ function _updateEraserBtnInPanel() {
 <script src="widgets-datetime.js"></script>
 <script src="widgets-meteo.js"></script>
 <script src="scenes.js"></script>
+<script src="projects.js"></script>
 <script src="shapes.js"></script>
 <script src="draw.js"></script>
 <script src="stickers.js"></script>
