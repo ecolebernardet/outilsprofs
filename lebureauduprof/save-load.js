@@ -231,7 +231,9 @@ function restoreBoardFromJSON(json) {
             _addStickerResizeHandle(sw, 40);
             return; // widget sticker traité, on passe au suivant
         }
-        const widget = createWidget(w.type, '100px', '100px', false);
+        const widget = w.type === 'deficalme'
+            ? createDeficalmeWidget()
+            : createWidget(w.type, '100px', '100px', false);
         const c = widget.querySelector('.editor-container');
         const hP = w.contentHPercent !== undefined ? w.contentHPercent : w.heightPercent;
         Object.assign(widget.dataset, { widthPercent: w.widthPercent || 0, contentHPercent: hP || 0, leftPercent: w.leftPercent ?? 0, topPercent: w.topPercent ?? 0 });

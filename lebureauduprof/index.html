@@ -976,6 +976,7 @@
 					<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
 					<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
 					<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
+					<div class="mm-sub-item" onclick="toggleImagePanel();closeMainMenu()"><span class="mm-ico">🖼️</span>Image</div>
 				</div></div>
 			</div>
 
@@ -984,9 +985,9 @@
 				<span class="mm-ico">🛠️</span>Outils<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
-				<div class="mm-sub-item" onclick="createWidget('deficalme');closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
-				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>Monnaie</div>
+				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
 				</div></div>
 			</div>
 
@@ -1868,6 +1869,7 @@ function _updateEraserBtnInPanel() {
 <script src="paste-image.js"></script>
 <script src="widgets-image.js"></script>
 <script src="widget-monnaie.js"></script>
+<script src="widget-deficalme.js"></script>
 <div id="laser-pointer"></div>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
