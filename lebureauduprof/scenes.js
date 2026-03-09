@@ -96,10 +96,10 @@ var currentScene  = 0;    // index de la scène active
 		}, 100);
 	}
 
-	async function deleteScene(index, e) {
+	function deleteScene(index, e) {
 		e.stopPropagation();
 		if (scenes.length <= 1) return;
-		const ok = await showConfirm('🗂️', 'Supprimer la scène', `Voulez-vous vraiment supprimer "${scenes[index].name}" ?`, 'Supprimer', true);
+		const ok = confirm(`Voulez-vous vraiment supprimer "${scenes[index].name}" ?`);
 		if (!ok) return;
 		scenes.splice(index, 1);
 		if (currentScene >= scenes.length) currentScene = scenes.length - 1;
@@ -203,9 +203,9 @@ var _sceneDragOverIdx = null;
 			editBtn.style.cssText = 'background:#28282f;color:#aaa;border:1px solid #2e2e38;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s;';
 			editBtn.onmouseover = () => editBtn.style.background = '#35353f';
 			editBtn.onmouseout  = () => editBtn.style.background = '#28282f';
-			editBtn.addEventListener('click', async (e) => {
+			editBtn.addEventListener('click', (e) => {
 				e.stopPropagation();
-				const newName = await showPromptModal('✏️', 'Renommer la scène', null, scene.name, 'Nom de la scène...');
+				const newName = prompt('Renommer la scène :', scene.name);
 				if (newName !== null) { renameScene(i, newName); renderScenesBar(); }
 			});
 			row.appendChild(editBtn);
