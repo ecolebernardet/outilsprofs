@@ -463,19 +463,20 @@
 		@keyframes slideUpModal  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
 		/* Météo → widgets-meteo.js */
+		
 		/* ── NOUVEAU MENU FLOTTANT ────────────────────────────── */
 		#fab-btn {
 			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
 			width: 50px; height: 50px; border-radius: 50%;
-			background: #1F1F21; border: 2px solid #6f6f74;
-			color: #e8e8f0; font-size: 35px; cursor: pointer;
+			background: #000; border: 2px solid #333;
+			color: #fff; font-size: 35px; cursor: pointer;
             line-height: 1; padding-bottom: 5px; padding-left: 5px;
 			display: flex; align-items: center; justify-content: center;
 			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 			transition: background .15s, transform .15s;
 		}
-		#fab-btn:hover { background: #2e2e3a; transform: scale(1.2); }
-		#fab-btn.menu-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; }
+		#fab-btn:hover { background: #000; transform: scale(1.2); }
+		#fab-btn.menu-open { background: #555; border-color: #111; color: #fff; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; }
 		
 		/* Menu vertical principal */
 		#main-menu {
@@ -491,8 +492,8 @@
 		/* Item du menu */
 		.mm-item {
 			display: flex; align-items: center; gap: 10px;
-			background: #1F1F21; border: 1px solid #3a3a4a;
-			border-radius: 12px; padding: 5px 10px;
+			background: #000; border: 0px solid #3a3a4a;
+			border-radius: 20px; padding: 5px 10px;
 			color: #d0d0e0; font-size: 13px; font-weight: 600;
 			cursor: pointer; white-space: nowrap;
 			transition: background .15s, border-color .15s, transform .12s;
@@ -500,7 +501,7 @@
 		}
 		.mm-item:hover { background: #2a2a36; border-color: #555; transform: translateX(3px); }
 		.mm-item.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
-		.mm-item .mm-ico { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+		.mm-item .mm-ico { font-size: 25px; width: 26px; text-align: center; flex-shrink: 0; }
 		.mm-item .mm-arrow { margin-left: auto; font-size: 10px; color: #666; }
 
 		/* Séparateur */
@@ -520,7 +521,7 @@
 		}
 		.mm-sub-inner {
 			display: flex; flex-direction: column; gap: 3px;
-			background: #1a1a22; border: 1px solid #3a3a4a;
+			background: #000; border: 0px solid #3a3a4a;
 			border-radius: 12px; padding: 3px;
 			box-shadow: 4px 4px 20px rgba(0,0,0,0.5);
 			width: 100%;
@@ -530,13 +531,13 @@
 		}
 		.mm-sub-item {
 			display: flex; align-items: center; gap: 8px;
-			padding: 5px 10px; border-radius: 8px;
+			padding: 10px 10px; border-radius: 20px;
 			color: #ccc; font-size: 12px; font-weight: 600;
 			cursor: pointer; transition: background .12s;
 			white-space: nowrap;
 		}
-		.mm-sub-item:hover { background: #2a2a36; color: #e8e8f0; }
-		.mm-sub-item .mm-ico { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+		.mm-sub-item:hover { background: #333; color: #e8e8f0; }
+		.mm-sub-item .mm-ico { font-size: 20px; width: 22px; text-align: center; flex-shrink: 0; }
 
 		/* mm-panel remplacé par draw-toolbar et shape-toolbar horizontaux */
 
@@ -544,56 +545,56 @@
 
 		/* ── Rubriques du menu ──────────────────────────────────── */
 		.mm-section {
-			border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 3px;
+			border-radius: 20px; padding: 6px; display: flex; flex-direction: column; gap: 3px;
 		}
 		.mm-section-label {
 			font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
 			padding: 2px 6px 4px; color: #666;
 		}
 		/* A — Système : teinte froide sombre */
-		.mm-section-a { background: #14161f; }
-		.mm-section-a .mm-section-label { color: #4a6a8a; }
-		.mm-section-a .mm-item { background: transparent; }
-		.mm-section-a .mm-item:hover { background: #1e2535; }
+		.mm-section-a { background: #222; }
+		.mm-section-a .mm-section-label { color: #ddd; }
+		.mm-section-a .mm-item { background: #000; }
+		.mm-section-a .mm-item:hover { background: #000; }
 		/* B — Annotation : teinte chaude/bleu */
-		.mm-section-b { background: #041720; }
-		.mm-section-b .mm-section-label { color: #256896; }
-		.mm-section-b .mm-item { background: transparent; }
-		.mm-section-b .mm-item:hover { background: #0c2833; }
+		.mm-section-b { background: #222; }
+		.mm-section-b .mm-section-label { color: #ddd; }
+		.mm-section-b .mm-item { background: #000; }
+		.mm-section-b .mm-item:hover { background: #000; }
 		/* C — Contenu : teinte verte/teal sombre */
-		.mm-section-c { background: #111d16; }
-		.mm-section-c .mm-section-label { color: #3a7a60; }
-		.mm-section-c .mm-item { background: transparent; }
-		.mm-section-c .mm-item:hover { background: #182820; }
+		.mm-section-c { background: #222; }
+		.mm-section-c .mm-section-label { color: #ddd; }
+		.mm-section-c .mm-item { background: #000; }
+		.mm-section-c .mm-item:hover { background: #000; }
 		/* Ajustement : items actifs gardent la couleur bleue */
 		.mm-section .mm-item.active { background: #1a3550 !important; border-color: #4a90e2; color: #7ab8f5; }
 
 		/* ── Mode clair du menu ─────────────────────────────────── */
 		body.menu-light #main-menu { background: transparent; }
-		body.menu-light #fab-btn { background: #e8e8f0; border-color: #bbb; color: #333; }
-		body.menu-light #fab-btn:hover { background: #d0d0e0; }
-		body.menu-light #fab-btn.menu-open { background: #c8dff5; border-color: #4a90e2; color: #1a5a9a; }
-		body.menu-light .mm-item { background: #f0f4f8; border-color: #ccc; color: #222; }
-		body.menu-light .mm-item:hover { background: #dce8f5; border-color: #4a90e2; }
+		body.menu-light #fab-btn { background: #fff; border-color: #555; color: #333; }
+		body.menu-light #fab-btn:hover { background: #fff; }
+		body.menu-light #fab-btn.menu-open { background: #aaa; border-color: #fff; color: #000; }
+		body.menu-light .mm-item { background: #111; border-width: 0px; border-color: #EAD2CD; color: #222; }
+		body.menu-light .mm-item:hover { background: #fff; border-color: #EAD2CD; }
 		body.menu-light .mm-item .mm-arrow { color: #999; }
 		body.menu-light .mm-sep { background: #ccc; }
-		body.menu-light .mm-section-a { background: #e8edf5; }
-		body.menu-light .mm-section-a .mm-section-label { color: #6a8aaa; }
-		body.menu-light .mm-section-a .mm-item { background: transparent; }
-		body.menu-light .mm-section-a .mm-item:hover { background: #d0ddef; }
-		body.menu-light .mm-section-b { background: #e0eff8; }
-		body.menu-light .mm-section-b .mm-section-label { color: #3a88b6; }
-		body.menu-light .mm-section-b .mm-item { background: transparent; }
-		body.menu-light .mm-section-b .mm-item:hover { background: #c8e0f0; }
-		body.menu-light .mm-section-c { background: #e4f0e8; }
-		body.menu-light .mm-section-c .mm-section-label { color: #3a8a60; }
-		body.menu-light .mm-section-c .mm-item { background: transparent; }
-		body.menu-light .mm-section-c .mm-item:hover { background: #c8e4d0; }
-		body.menu-light .mm-sub-inner { background: #f5f8fc; border-color: #ccc; }
+		body.menu-light .mm-section-a { background: #ddd; }
+		body.menu-light .mm-section-a .mm-section-label { color: #111111; }
+		body.menu-light .mm-section-a .mm-item { background: #fff; }
+		body.menu-light .mm-section-a .mm-item:hover { background: #fff; }
+		body.menu-light .mm-section-b { background: #ddd; }
+		body.menu-light .mm-section-b .mm-section-label { color: #111111; }
+		body.menu-light .mm-section-b .mm-item { background: #fff; }
+		body.menu-light .mm-section-b .mm-item:hover { background: #fff; }
+		body.menu-light .mm-section-c { background: #ddd; }
+		body.menu-light .mm-section-c .mm-section-label { color: #111111; }
+		body.menu-light .mm-section-c .mm-item { background: #fff; }
+		body.menu-light .mm-section-c .mm-item:hover { background: #fff; }
+		body.menu-light .mm-sub-inner { background: #fff; border-color: #EAD2CD; }
 		body.menu-light .mm-sub-item { color: #333; }
-		body.menu-light .mm-sub-item:hover { background: #dce8f5; color: #111; }
-		body.menu-light .undo-btn, body.menu-light .redo-btn, body.menu-light .tool-btn { background: #e0e8f4; border-color: #bbb; color: #333; }
-		body.menu-light .undo-btn:hover, body.menu-light .redo-btn:hover, body.menu-light .tool-btn:hover { background: #c8d8ee; }
+		body.menu-light .mm-sub-item:hover { background: #ddd; color: #111; }
+		body.menu-light .undo-btn, body.menu-light .redo-btn, body.menu-light .tool-btn { background: #fff; border-color: #fff; color: #333; }
+		body.menu-light .undo-btn:hover, body.menu-light .redo-btn:hover, body.menu-light .tool-btn:hover { background: #ffffff; }
 
 		/* ── Mini color picker custom ──────────────────────────── */
 		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
@@ -636,16 +637,16 @@
 
 		/* --- Anciens boutons (gardés pour undo/redo) --- */
 		.tool-btn {
-			background: #1F1F21; color: #ccc; border: 1px solid #3a3a4a;
-			padding: 8px 10px; border-radius: 10px; cursor: pointer;
+			background: #000; color: #ccc; border: 0px solid #3a3a4a;
+			padding: 8px 10px; border-radius: 20px; cursor: pointer;
 			font-size: 18px; display: flex; align-items: center; justify-content: center;
 			transition: background .15s; box-sizing: border-box; white-space: nowrap; flex-shrink: 0;
 		}
 		.tool-btn:hover { background: #2e2e3a; color: #e8e8f0; }
 		.tool-btn.active-tool { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
 		.undo-btn, .redo-btn {
-			background: #1F1F21; color: #a1a1a1; border: 1px solid #2e2e38;
-			padding: 4px 5px; border-radius: 10px; cursor: not-allowed;
+			background: #000; color: #a1a1a1; border: 0px solid #2e2e38;
+			padding: 4px 5px; border-radius: 20px; cursor: not-allowed;
 			font-size: 18px; display: flex; align-items: center; justify-content: center;
 			box-sizing: border-box; flex-shrink: 0; transition: background .15s;
 		}
@@ -996,16 +997,6 @@
 		<div class="mm-section mm-section-c">
 			<div class="mm-section-label">Contenu</div>
 
-			<!-- Médias -->
-			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🎞️</span>Médias<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-medias"><div class="mm-sub-inner">
-					<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
-					<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
-					<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
-				</div></div>
-			</div>
-
 			<!-- Activités -->
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">🎯</span>Activités<span class="mm-arrow">›</span>
@@ -1022,6 +1013,7 @@
 				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
 				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
 				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎡</span>Tirage au Sort</div>
+				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>Minuteur & Chrono</div>
 				</div></div>
 			</div>
 
@@ -1029,7 +1021,9 @@
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">📦</span>Widgets<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>Minuteur & Chrono</div>
+				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
+				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
+				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
 				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>Date</div>
 				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>Heure</div>
 				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>Météo</div>
