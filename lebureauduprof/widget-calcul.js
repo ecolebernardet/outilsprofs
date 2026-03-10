@@ -20,8 +20,8 @@
     /* ── Wrapper externe : poignée resize native ── */
     .widget[data-type="calcul"] .calc-outer {
         position: relative;
-        width: 420px;
-        height: 480px;
+        width: 600px;
+        height: 600px;
         min-width: 300px;
         min-height: 320px;
         overflow: hidden;

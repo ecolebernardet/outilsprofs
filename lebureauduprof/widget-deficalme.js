@@ -128,7 +128,7 @@
         .dc-prog-bar-wrap {
             position: absolute;
             top: 0; right: 0; bottom: 0;
-            width: 8px;
+            width: 10px;
             background: rgba(255,255,255,0.08);
             z-index: 8;
             display: flex;
@@ -144,12 +144,12 @@
             position: absolute;
             top: 6px;
             right: 14px;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 900;
             color: #fff;
-            opacity: 0.7;
+            opacity: 0.9;
             z-index: 9;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 0 1px 3px rgba(0,0,0,1);
         }
 
         /* ── Panneau contrôles (compact, sous l'image) ── */
@@ -502,35 +502,33 @@ function createDeficalmeWidget() {
     urlInput.type = 'text';
     urlInput.placeholder = 'URL de l\'image ou picsum.photos/…';
 
-    const urlBtn = document.createElement('button');
-    urlBtn.className = 'dc-url-btn';
-    urlBtn.textContent = '✓ Appliquer';
-
     const randBtn = document.createElement('button');
     randBtn.className = 'dc-url-btn';
     randBtn.style.background = '#6366f1';
     randBtn.textContent = '🎲';
     randBtn.title = 'Image aléatoire';
 
+    const btnTransp = document.createElement('button');
+    btnTransp.className = 'dc-url-btn';
+    btnTransp.style.background = '#374151';
+    btnTransp.title = 'Masquer/afficher le panneau de contrôle';
+    btnTransp.textContent = '⬜';
+
+    const btnApercu = document.createElement('button');
+    btnApercu.className = 'dc-url-btn';
+    btnApercu.style.background = '#6366f1';
+    btnApercu.textContent = '👁';
+    btnApercu.title = 'Aperçu';
+
     row3.appendChild(imgLabel);
     row3.appendChild(urlInput);
-    row3.appendChild(urlBtn);
     row3.appendChild(randBtn);
+    row3.appendChild(btnApercu);
+    row3.appendChild(btnTransp);
 
     // Ligne 4 : Boutons action
     const btnRow = document.createElement('div');
     btnRow.className = 'dc-btn-row';
-
-    const btnApercu = document.createElement('button');
-    btnApercu.className = 'dc-action-btn';
-    btnApercu.style.background = '#6366f1';
-    btnApercu.textContent = '👁 Aperçu';
-
-    const btnTransp = document.createElement('button');
-    btnTransp.className = 'dc-action-btn';
-    btnTransp.style.background = '#374151';
-    btnTransp.title = 'Masquer/afficher le panneau de contrôle';
-    btnTransp.textContent = '⬜ Fond transparent';
 
     const btnStart = document.createElement('button');
     btnStart.className = 'dc-action-btn';
@@ -544,7 +542,6 @@ function createDeficalmeWidget() {
     btnReset.className = 'dc-action-btn dc-new dc-hidden';
     btnReset.textContent = '🔄 Nouveau défi';
 
-    btnRow.appendChild(btnApercu);
     btnRow.appendChild(btnStart);
     btnRow.appendChild(btnStop);
     btnRow.appendChild(btnReset);
@@ -554,17 +551,11 @@ function createDeficalmeWidget() {
     controls.appendChild(row3);
     controls.appendChild(btnRow);
 
-    // Barre du bas avec uniquement le bouton transparent (toujours visible)
-    const bottomBar = document.createElement('div');
-    bottomBar.style.cssText = 'display:flex; justify-content:center; padding:4px 12px 6px; background:#111;';
-    bottomBar.appendChild(btnTransp);
-
     // Poignée resize
     const resizeHandle = document.createElement('div');
     resizeHandle.className = 'dc-resize-handle';
 
     container.appendChild(controls);
-    container.appendChild(bottomBar);
     container.appendChild(resizeHandle);
     widget.appendChild(container);
 
@@ -757,7 +748,8 @@ function createDeficalmeWidget() {
         if (apercuActive) {
             apercuActive = false;
             pixelGrid.style.opacity = '1';
-            btnApercu.textContent = '👁 Aperçu';
+            btnApercu.textContent = '👁';
+            btnApercu.title = 'Aperçu';
             btnApercu.style.background = '#6366f1';
         }
         btnStart.disabled = false;
@@ -809,11 +801,13 @@ function createDeficalmeWidget() {
             imgEl.style.filter = 'none';
             imgEl.style.transform = 'scale(1)';
             pixelGrid.style.opacity = '0';
-            btnApercu.textContent = '🙈 Cacher';
+            btnApercu.textContent = '🙈';
+            btnApercu.title = 'Cacher l\'aperçu';
             btnApercu.style.background = '#ef4444';
         } else {
             pixelGrid.style.opacity = '1';
-            btnApercu.textContent = '👁 Aperçu';
+            btnApercu.textContent = '👁';
+            btnApercu.title = 'Aperçu';
             btnApercu.style.background = '#6366f1';
             updateUI(); // remet le bon état visuel
         }
@@ -826,14 +820,14 @@ function createDeficalmeWidget() {
     btnTransp.addEventListener('click', () => {
         isTransparent = !isTransparent;
         controls.style.display  = isTransparent ? 'none' : 'flex';
-        bottomBar.style.display = isTransparent ? 'none' : 'flex';
         container.style.borderColor = isTransparent ? 'transparent' : '';
         container.style.background  = isTransparent ? 'transparent' : '';
         container.style.boxShadow   = isTransparent ? 'none' : '';
         widget.dataset.transparent  = isTransparent ? 'true' : 'false';
         // En mode transparent, un petit bouton flottant sur l'image permet de revenir
         floatBtn.style.display = isTransparent ? 'flex' : 'none';
-        btnTransp.textContent  = isTransparent ? '🔲 Afficher contrôles' : '⬜ Fond transparent';
+        btnTransp.textContent  = isTransparent ? '🔲' : '⬜';
+        btnTransp.title        = isTransparent ? 'Afficher les contrôles' : 'Fond transparent';
         btnTransp.style.background = isTransparent ? '#ef4444' : '#374151';
         saveBoard();
     });
@@ -843,7 +837,7 @@ function createDeficalmeWidget() {
     floatBtn.style.cssText = `
         display: none; position: absolute; bottom: 8px; left: 8px; z-index: 15;
         background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.2);
-        color: #fff; font-size: 10px; font-weight: 800; padding: 4px 8px;
+        color: rgba(255, 255, 255, 0.25); font-size: 8px; font-weight: 800; padding: 4px 8px;
         border-radius: 6px; cursor: pointer; backdrop-filter: blur(4px);
         text-transform: uppercase; letter-spacing: 0.05em;
     `;
@@ -886,7 +880,6 @@ function createDeficalmeWidget() {
         e.stopPropagation();
         if (e.key === 'Enter') applyImage(urlInput.value);
     });
-    urlBtn.addEventListener('click', () => applyImage(urlInput.value));
     randBtn.addEventListener('click', () => {
         const url = 'https://picsum.photos/900/500?random=' + Math.floor(Math.random() * 9999);
         urlInput.value = url;

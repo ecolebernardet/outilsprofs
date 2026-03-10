@@ -568,6 +568,33 @@
 		/* Ajustement : items actifs gardent la couleur bleue */
 		.mm-section .mm-item.active { background: #1a3550 !important; border-color: #4a90e2; color: #7ab8f5; }
 
+		/* ── Mode clair du menu ─────────────────────────────────── */
+		body.menu-light #main-menu { background: transparent; }
+		body.menu-light #fab-btn { background: #e8e8f0; border-color: #bbb; color: #333; }
+		body.menu-light #fab-btn:hover { background: #d0d0e0; }
+		body.menu-light #fab-btn.menu-open { background: #c8dff5; border-color: #4a90e2; color: #1a5a9a; }
+		body.menu-light .mm-item { background: #f0f4f8; border-color: #ccc; color: #222; }
+		body.menu-light .mm-item:hover { background: #dce8f5; border-color: #4a90e2; }
+		body.menu-light .mm-item .mm-arrow { color: #999; }
+		body.menu-light .mm-sep { background: #ccc; }
+		body.menu-light .mm-section-a { background: #e8edf5; }
+		body.menu-light .mm-section-a .mm-section-label { color: #6a8aaa; }
+		body.menu-light .mm-section-a .mm-item { background: transparent; }
+		body.menu-light .mm-section-a .mm-item:hover { background: #d0ddef; }
+		body.menu-light .mm-section-b { background: #e0eff8; }
+		body.menu-light .mm-section-b .mm-section-label { color: #3a88b6; }
+		body.menu-light .mm-section-b .mm-item { background: transparent; }
+		body.menu-light .mm-section-b .mm-item:hover { background: #c8e0f0; }
+		body.menu-light .mm-section-c { background: #e4f0e8; }
+		body.menu-light .mm-section-c .mm-section-label { color: #3a8a60; }
+		body.menu-light .mm-section-c .mm-item { background: transparent; }
+		body.menu-light .mm-section-c .mm-item:hover { background: #c8e4d0; }
+		body.menu-light .mm-sub-inner { background: #f5f8fc; border-color: #ccc; }
+		body.menu-light .mm-sub-item { color: #333; }
+		body.menu-light .mm-sub-item:hover { background: #dce8f5; color: #111; }
+		body.menu-light .undo-btn, body.menu-light .redo-btn, body.menu-light .tool-btn { background: #e0e8f4; border-color: #bbb; color: #333; }
+		body.menu-light .undo-btn:hover, body.menu-light .redo-btn:hover, body.menu-light .tool-btn:hover { background: #c8d8ee; }
+
 		/* ── Mini color picker custom ──────────────────────────── */
 		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
 		.cpick-swatch {
@@ -976,7 +1003,15 @@
 					<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
 					<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
 					<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
-					<div class="mm-sub-item" onclick="toggleImagePanel();closeMainMenu()"><span class="mm-ico">🖼️</span>Image</div>
+				</div></div>
+			</div>
+
+			<!-- Activités -->
+			<div class="mm-item mm-has-sub">
+				<span class="mm-ico">🎯</span>Activités<span class="mm-arrow">›</span>
+				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
+				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>Monnaie</div>
+				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
 				</div></div>
 			</div>
 
@@ -986,8 +1021,7 @@
 				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
 				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
-				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>Monnaie</div>
-				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎡</span>Tirage au Sort</div>
 				</div></div>
 			</div>
 
@@ -1004,15 +1038,21 @@
 				</div></div>
 			</div>
 
-			<!-- Texte -->
-			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
-				<span class="mm-ico">🖊️</span>Texte
-			</div>
 		</div>
 
 		<!-- ══ RUBRIQUE B : Annotation ══ -->
 		<div class="mm-section mm-section-b">
 			<div class="mm-section-label">Annotation</div>
+
+			<!-- Texte -->
+			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
+				<span class="mm-ico">🖊️</span>Texte
+			</div>
+
+			<!-- Image -->
+			<div class="mm-item" onclick="toggleImagePanel();closeMainMenu()">
+				<span class="mm-ico">🖼️</span>Image
+			</div>
 
 			<!-- Stickers -->
 			<div class="mm-item" id="sticker-btn" onclick="toggleStickerPanel()">
@@ -1038,14 +1078,6 @@
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">🖥️</span>Affichage<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-affichage"><div class="mm-sub-inner">
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🗂️</span>Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
-							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
-							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène</button>
-						</div></div>
-					</div>
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">🖼️</span>Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
@@ -1075,6 +1107,7 @@
 						</div></div>
 					</div>
 					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>Pointeur laser</div>
+					<div class="mm-sub-item" id="menu-theme-btn" onclick="toggleMenuTheme()"><span class="mm-ico">☀️</span>Mode clair</div>
 				</div></div>
 			</div>
 
@@ -1082,6 +1115,15 @@
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">🗄️</span>Fichier<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🗂️</span>Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
+							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène</button>
+						</div></div>
+					</div>
+					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
 					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>Mes projets</div>
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>Exporter JSON</div>
@@ -1416,6 +1458,12 @@ let _lastW = window.innerWidth;
 // INIT
 // =========================================================================
 window.onload = () => {
+    // Restaurer le thème du menu
+    if (localStorage.getItem('menuTheme') === 'light') {
+        document.body.classList.add('menu-light');
+        const btn = document.getElementById('menu-theme-btn');
+        if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span>Mode sombre';
+    }
     const savedBg = localStorage.getItem('boardBackground');
     if (savedBg && typeof applyBackground === 'function') applyBackground(savedBg);
     applyBoardRatio(window.innerWidth);
@@ -1434,13 +1482,15 @@ window.onload = () => {
                 if (sel.rangeCount > 0) savedSelection = sel.getRangeAt(0).cloneRange();
             });
         }
-        const cur = buildBoardJSON();
-        if (cur) undoStack.push(cur);
+        if (typeof buildBoardJSON === 'function') {
+            const cur = buildBoardJSON();
+            if (cur) undoStack.push(cur);
+        }
         updateUndoRedoBtns();
         if (typeof scenesInit === 'function') scenesInit();
-		initCurrentProjectName(); // ← ajout
+		if (typeof initCurrentProjectName === 'function') initCurrentProjectName(); // ← ajout
     }, 1000);
-    setInterval(updateClock, 1000);
+    if (typeof updateClock === 'function') setInterval(updateClock, 1000);
     window.addEventListener('resize', handleWindowResize);
 };
 
@@ -1546,7 +1596,7 @@ function handleWindowResize() {
         }
     });
     _lastW = newW;
-    resizeCanvas();
+    if (typeof resizeCanvas === 'function') resizeCanvas();
 }
 
 // =========================================================================
@@ -1704,6 +1754,17 @@ document.addEventListener('mouseenter', function(e) {
 // =========================================================================
 // NOUVEAU MENU FLOTTANT
 // =========================================================================
+function toggleMenuTheme() {
+    const isLight = document.body.classList.toggle('menu-light');
+    const btn = document.getElementById('menu-theme-btn');
+    if (btn) {
+        btn.innerHTML = isLight
+            ? '<span class="mm-ico">🌙</span>Mode sombre'
+            : '<span class="mm-ico">☀️</span>Mode clair';
+    }
+    localStorage.setItem('menuTheme', isLight ? 'light' : 'dark');
+}
+
 function toggleMainMenu() {
     const menu = document.getElementById('main-menu');
     const fab  = document.getElementById('fab-btn');
@@ -1874,6 +1935,7 @@ function _updateEraserBtnInPanel() {
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
 <script src="widgets_minuteur_chrono.js"></script>
+<script src="widget-tirage.js"></script>
 <script src="widget-calcul.js"></script>
 <script src="color-picker.js"></script>
 <script src="toolbar-text.js"></script>
