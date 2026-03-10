@@ -63,6 +63,17 @@ function buildBoardState() {
             if (sEmoji) stickerEmoji = sEmoji.textContent;
             stickerSize = { w: w.offsetWidth, h: w.offsetHeight };
         }
+        // Données propres au widget monnaie
+        let monnaieData = null;
+        if (w.dataset.type === 'monnaie') {
+            const mc = w.querySelector('.monnaie-container');
+            const mz = w.querySelector('.monnaie-items');
+            monnaieData = {
+                containerW: mc ? mc.offsetWidth  : null,
+                itemsH:     mz ? mz.offsetHeight : null,
+                level:      w.dataset.monnaieLevel || 'facile'
+            };
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -77,7 +88,8 @@ function buildBoardState() {
 			stickerUrl, stickerEmoji, stickerSize,
 			transform: w.style.transform || null,
 			pdfId: w.dataset.pdfId || null,
-			pdfName: w.dataset.pdfName || null
+			pdfName: w.dataset.pdfName || null,
+			monnaieData
 		});
     });
     const shapes = [];
@@ -231,9 +243,23 @@ function restoreBoardFromJSON(json) {
             _addStickerResizeHandle(sw, 40);
             return; // widget sticker traité, on passe au suivant
         }
-        const widget = w.type === 'deficalme'
-            ? createDeficalmeWidget()
-            : createWidget(w.type, '100px', '100px', false);
+        let widget;
+        if (w.type === 'deficalme') {
+            widget = createDeficalmeWidget();
+        } else if (w.type === 'monnaie') {
+            widget = createMonnaieWidget();
+            // Restaurer les dimensions sauvegardées
+            if (w.monnaieData) {
+                const mc = widget.querySelector('.monnaie-container');
+                const mz = widget.querySelector('.monnaie-items');
+                if (mc && w.monnaieData.containerW) mc.style.width   = w.monnaieData.containerW + 'px';
+                if (mz && w.monnaieData.itemsH)     mz.style.height  = w.monnaieData.itemsH     + 'px';
+                // Restaurer le niveau
+                if (w.monnaieData.level && widget._setLevel) widget._setLevel(w.monnaieData.level);
+            }
+        } else {
+            widget = createWidget(w.type, '100px', '100px', false);
+        }
         const c = widget.querySelector('.editor-container');
         const hP = w.contentHPercent !== undefined ? w.contentHPercent : w.heightPercent;
         Object.assign(widget.dataset, { widthPercent: w.widthPercent || 0, contentHPercent: hP || 0, leftPercent: w.leftPercent ?? 0, topPercent: w.topPercent ?? 0 });
