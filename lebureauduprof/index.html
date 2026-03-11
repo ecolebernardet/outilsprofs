@@ -495,7 +495,7 @@
 		/* Item du menu */
 		.mm-item {
 			display: flex; align-items: center; gap: 10px;
-			background: #000; border: 0px solid #3a3a4a;
+			background: #000; border: 1px solid #000;
 			border-radius: 20px; padding: 5px 10px;
 			color: #d0d0e0; font-size: 13px; font-weight: 600;
 			cursor: pointer; white-space: nowrap;
@@ -530,6 +530,10 @@
 			width: 100%;
 		}
 		.mm-has-sub:hover > .mm-sub {
+			opacity: 1; pointer-events: auto;
+		}
+		.mm-has-sub.cpick-active > .mm-sub,
+		.mm-item.cpick-active > .mm-sub {
 			opacity: 1; pointer-events: auto;
 		}
 		.mm-sub-item {
@@ -577,22 +581,22 @@
 		body.menu-light #fab-btn { background: #fff; border-color: #555; color: #333; }
 		body.menu-light #fab-btn:hover { background: #fff; }
 		body.menu-light #fab-btn.menu-open { background: #aaa; border-color: #fff; color: #000; }
-		body.menu-light .mm-item { background: #111; border-width: 0px; border-color: #EAD2CD; color: #222; }
+		body.menu-light .mm-item { background: #111; border-width: 1px; border-color: #fff; color: #222; }
 		body.menu-light .mm-item:hover { background: #fff; border-color: #EAD2CD; }
 		body.menu-light .mm-item .mm-arrow { color: #999; }
 		body.menu-light .mm-sep { background: #ccc; }
 		body.menu-light .mm-section-a { background: #ddd; }
 		body.menu-light .mm-section-a .mm-section-label { color: #111111; }
 		body.menu-light .mm-section-a .mm-item { background: #fff; }
-		body.menu-light .mm-section-a .mm-item:hover { background: #fff; }
+		body.menu-light .mm-section-a .mm-item:hover { background: #fff; border: 1px solid #3a3a4a;}
 		body.menu-light .mm-section-b { background: #ddd; }
 		body.menu-light .mm-section-b .mm-section-label { color: #111111; }
 		body.menu-light .mm-section-b .mm-item { background: #fff; }
-		body.menu-light .mm-section-b .mm-item:hover { background: #fff; }
+		body.menu-light .mm-section-b .mm-item:hover { background: #fff; border: 1px solid #3a3a4a;}
 		body.menu-light .mm-section-c { background: #ddd; }
 		body.menu-light .mm-section-c .mm-section-label { color: #111111; }
 		body.menu-light .mm-section-c .mm-item { background: #fff; }
-		body.menu-light .mm-section-c .mm-item:hover { background: #fff; }
+		body.menu-light .mm-section-c .mm-item:hover { background: #fff; border: 1px solid #3a3a4a;}
 		body.menu-light .mm-sub-inner { background: #fff; border-color: #EAD2CD; }
 		body.menu-light .mm-sub-item { color: #333; }
 		body.menu-light .mm-sub-item:hover { background: #ddd; color: #111; }
@@ -1002,70 +1006,64 @@
 
 			<!-- Activités -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🎯</span>Activités<span class="mm-arrow">›</span>
+				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>Monnaie</div>
-				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
-				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>Ordre Alphabétique</div>
+				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
+				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				</div></div>
 			</div>
 
 			<!-- Outils -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🛠️</span>Outils<span class="mm-arrow">›</span>
+				<span class="mm-ico">🛠️</span>&nbsp;&nbsp;Outils<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>OutilsProfs</div>
-				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>Défi Calme</div>
-				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎡</span>Tirage au Sort</div>
-				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>Minuteur & Chrono</div>
+				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>&nbsp;&nbsp;OutilsProfs</div>
+				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>&nbsp;&nbsp;Défi Calme</div>
+				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎡</span>&nbsp;&nbsp;Tirage au Sort</div>
+				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
 				</div></div>
 			</div>
 
 			<!-- Widgets -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">📦</span>Widgets<span class="mm-arrow">›</span>
+				<span class="mm-ico">📦</span>&nbsp;&nbsp;Widgets<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>PDF</div>
-				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>Fenêtre Web</div>
-				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>YouTube</div>
-				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>Date</div>
-				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>Heure</div>
-				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>Météo</div>
-				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>Devoirs</div>
-				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>Planning</div>
+				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;PDF</div>
+				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>&nbsp;&nbsp;Fenêtre Web</div>
+				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>&nbsp;&nbsp;YouTube</div>
+				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date</div>
+				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>&nbsp;&nbsp;Heure</div>
+				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>&nbsp;&nbsp;Météo</div>
+				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Devoirs</div>
+				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>&nbsp;&nbsp;Planning</div>
 				</div></div>
 			</div>
 
 		</div>
 
 		<!-- ══ RUBRIQUE B : Annotation ══ -->
-		<div class="mm-section mm-section-b">
-			<div class="mm-section-label">Annotation</div>
+		<div class="mm-section mm-section-b"><div class="mm-section-label">Annotation</div>
 
 			<!-- Texte -->
 			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
-				<span class="mm-ico">🖊️</span>Texte
-			</div>
+				<span class="mm-ico">️✍️</span>&nbsp;&nbsp;Texte</div>
 
 			<!-- Image -->
 			<div class="mm-item" onclick="toggleImagePanel();closeMainMenu()">
-				<span class="mm-ico">🖼️</span>Image
-			</div>
+				<span class="mm-ico">🖼️</span>&nbsp;&nbsp;Image</div>
 
 			<!-- Stickers -->
 			<div class="mm-item" id="sticker-btn" onclick="toggleStickerPanel()">
-				<span class="mm-ico">😀</span>Stickers
-			</div>
+				<span class="mm-ico">🤓</span>&nbsp;&nbsp;Stickers</div>
 
 			<!-- Formes -->
 			<div class="mm-item" id="mm-shapes-btn" onclick="openMmPanel('shapes')">
-				<span class="mm-ico">🔲</span>Formes
-			</div>
+				<span class="mm-ico">🔲</span>&nbsp;&nbsp;Formes</div>
 
 			<!-- Dessin -->
 			<div class="mm-item" id="mm-draw-btn" onclick="openMmPanel('draw')">
-				<span class="mm-ico">✏️</span>Dessin
-			</div>
+				<span class="mm-ico">✏️</span>&nbsp;&nbsp;Dessin</div>
 		</div>
 
 		<!-- ══ RUBRIQUE A : Système ══ -->
@@ -1074,23 +1072,30 @@
 
 			<!-- Affichage (flyout) -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🖥️</span>Affichage<span class="mm-arrow">›</span>
+				<span class="mm-ico">🖥️</span>&nbsp;&nbsp;Affichage<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-affichage"><div class="mm-sub-inner">
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🖼️</span>Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<span class="mm-ico">🖼️</span>&nbsp;&nbsp;Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb" style="background-color:#eef2f5;" onclick="applyBackground('none');saveBg('none');closeMainMenu()" title="Blanc"></div>
-								<div class="bg-thumb" style="background-color:#2f3542;" onclick="applyBackground('#2f3542');saveBg('#2f3542');closeMainMenu()" title="Ardoise"></div>
-								<div class="bg-thumb" style="background-color:#6e6e6e;" onclick="applyBackground('#6e6e6e');saveBg('#6e6e6e');closeMainMenu()" title="Gris clair"></div>
 								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
-								<div class="bg-thumb" style="background-color:#EDD9D5;" onclick="applyBackground('#EDD9D5');saveBg('#EDD9D5');closeMainMenu()" title="Beige"></div>
-								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Nude"></div>
-								<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');closeMainMenu()" title="Noir"></div>
-								<div class="bg-thumb" style="background-color:#104626;" onclick="applyBackground('#104626');saveBg('#104626');closeMainMenu()" title="Vert Tableau"></div>
+								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Beige"></div>
 								<div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');closeMainMenu()" title="Bleu nuit"></div>
 
+							</div>
+							<div style="padding:4px 4px 8px;border-top:1px solid #2e2e3a;margin-top:2px;">
+								<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 6px;">🎨 Couleur personnalisée</div>
+								<div id="board-bg-cpick-inline" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;"></div>
+								<div style="display:flex;gap:6px;align-items:center;">
+									<input type="text" id="board-bg-hex" maxlength="7" placeholder="#rrggbb"
+										style="flex:1;background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:12px;font-family:monospace;padding:4px 8px;outline:none;box-sizing:border-box;"
+										oninput="(function(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){applyBackground(v);saveBg(v);document.getElementById('board-bg-native').value=v;boardBgClearSelected();}})(this.value)">
+									<input type="color" id="board-bg-native" value="#eef2f5" style="display:none;"
+										oninput="(function(v){applyBackground(v);saveBg(v);document.getElementById('board-bg-hex').value=v;boardBgClearSelected();})(this.value)">
+									<button onclick="document.getElementById('board-bg-native').click()"
+										style="background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:11px;padding:4px 8px;cursor:pointer;white-space:nowrap;">Autre…</button>
+								</div>
 							</div>
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
@@ -1104,17 +1109,17 @@
 							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
 						</div></div>
 					</div>
-					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>Pointeur laser</div>
-					<div class="mm-sub-item" id="menu-theme-btn" onclick="toggleMenuTheme()"><span class="mm-ico">☀️</span>Mode clair</div>
+					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>&nbsp;&nbsp;Pointeur laser</div>
+					<div class="mm-sub-item" id="menu-theme-btn" onclick="toggleMenuTheme()"><span class="mm-ico">☀️</span>&nbsp;&nbsp;Mode clair</div>
 				</div></div>
 			</div>
 
 			<!-- Fichier (flyout) -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🗄️</span>Fichier<span class="mm-arrow">›</span>
+				<span class="mm-ico">🗄️</span>&nbsp;&nbsp;Fichier<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🗂️</span>Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<span class="mm-ico">🗂️</span>&nbsp;&nbsp;Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
 							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
@@ -1122,13 +1127,13 @@
 						</div></div>
 					</div>
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>Mes projets</div>
+					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes projets</div>
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>Exporter JSON</div>
-					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>Importer JSON</div>
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>&nbsp;&nbsp;Exporter JSON</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>&nbsp;&nbsp;Importer JSON</div>
 					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>Effacer tout</div>
+					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>&nbsp;&nbsp;Effacer tout</div>
 				</div></div>
 			</div>
 
@@ -1460,10 +1465,54 @@ window.onload = () => {
     if (localStorage.getItem('menuTheme') === 'light') {
         document.body.classList.add('menu-light');
         const btn = document.getElementById('menu-theme-btn');
-        if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span>Mode sombre';
+        if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span>&nbsp;&nbsp;Mode sombre';
     }
     const savedBg = localStorage.getItem('boardBackground');
-    if (savedBg && typeof applyBackground === 'function') applyBackground(savedBg);
+    if (savedBg && typeof applyBackground === 'function') {
+        applyBackground(savedBg);
+        if (savedBg.startsWith('#') && savedBg.length === 7) {
+            const hexEl = document.getElementById('board-bg-hex');
+            if (hexEl) hexEl.value = savedBg;
+            const natEl = document.getElementById('board-bg-native');
+            if (natEl) natEl.value = savedBg;
+            const sw = document.getElementById('cpick-swatch-board-bg-inline');
+            if (sw) sw.style.background = savedBg;
+        }
+    }
+    // Construire la grille de couleurs inline du picker fond d'écran
+    (function() {
+        const grid = document.getElementById('board-bg-cpick-inline');
+        if (!grid) return;
+        const COLORS = [
+            '#000000','#4a0000','#4a1a00','#4a4000','#003a00','#00204a','#2d004a',
+            '#333333','#7f0000','#7a3300','#6b6000','#005200','#003580','#4b0082',
+            '#666666','#c0392b','#c0590a','#c09000','#1a7a1a','#1a56b0','#6a1aad',
+            '#999999','#e74c3c','#e67e22','#e6c000','#27ae60','#2980b9','#8e44ad',
+            '#bbbbbb','#f08080','#f0a060','#f0d060','#6abf6a','#6aaee8','#b06ad4',
+            '#ffffff','#ffd5d5','#ffe5cc','#fff5cc','#ccffcc','#cce5ff','#eeccff',
+        ];
+        COLORS.forEach(function(c) {
+            const cell = document.createElement('div');
+            cell.style.cssText = 'aspect-ratio:1;border-radius:3px;cursor:pointer;background:'+c+';border:2px solid transparent;box-sizing:border-box;transition:border-color .1s;';
+            cell.title = c;
+            cell.dataset.bgColor = c;
+            cell.onclick = function() {
+                applyBackground(c); saveBg(c);
+                document.getElementById('board-bg-hex').value = c;
+                document.getElementById('board-bg-native').value = c;
+                boardBgClearSelected();
+                cell.style.borderColor = '#7ab8f5';
+            };
+            grid.appendChild(cell);
+        });
+    })();
+
+    window.boardBgClearSelected = function() {
+        const grid = document.getElementById('board-bg-cpick-inline');
+        if (grid) grid.querySelectorAll('[data-bg-color]').forEach(function(el) {
+            el.style.borderColor = 'transparent';
+        });
+    };
     applyBoardRatio(window.innerWidth);
     if (typeof loadBoard        === 'function') loadBoard();
     if (typeof initShapeToolbar === 'function') initShapeToolbar();
@@ -1806,12 +1855,16 @@ function closeMmPanel() {
 document.addEventListener('mousedown', function(e) {
     const menu = document.getElementById('main-menu');
     const fab  = document.getElementById('fab-btn');
-    if (!fab.contains(e.target) && !menu.contains(e.target)) {
+    // Ne pas fermer le menu si on clique sur le cpick board-bg ou son popup
+    const boardBgPop = document.getElementById('cpick-pop-board-bg');
+    const isBoardBgClick = e.target.closest('#cpick-board-bg') || (boardBgPop && boardBgPop.contains(e.target));
+    if (!isBoardBgClick && !fab.contains(e.target) && !menu.contains(e.target)) {
         if (menu.classList.contains('open')) closeMainMenu();
     }
     // Fermer les color pickers si clic en dehors
     if (!e.target.closest('.cpick-wrap') && !e.target.closest('.cpick-popup')) {
         document.querySelectorAll('.cpick-popup.open').forEach(p => p.classList.remove('open'));
+        document.querySelectorAll('.cpick-active').forEach(p => p.classList.remove('cpick-active'));
     }
 });
 
