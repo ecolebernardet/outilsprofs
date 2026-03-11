@@ -502,6 +502,18 @@ function createDeficalmeWidget() {
     urlInput.type = 'text';
     urlInput.placeholder = 'URL de l\'image ou picsum.photos/…';
 
+    // Bouton import image locale
+    const importFileInput = document.createElement('input');
+    importFileInput.type = 'file';
+    importFileInput.accept = 'image/*';
+    importFileInput.style.display = 'none';
+
+    const btnImport = document.createElement('button');
+    btnImport.className = 'dc-url-btn';
+    btnImport.style.background = '#059669';
+    btnImport.textContent = '📁';
+    btnImport.title = 'Importer une image depuis votre appareil';
+
     const randBtn = document.createElement('button');
     randBtn.className = 'dc-url-btn';
     randBtn.style.background = '#6366f1';
@@ -521,6 +533,8 @@ function createDeficalmeWidget() {
     btnApercu.title = 'Aperçu';
 
     row3.appendChild(imgLabel);
+    row3.appendChild(btnImport);
+    row3.appendChild(importFileInput);
     row3.appendChild(urlInput);
     row3.appendChild(randBtn);
     row3.appendChild(btnApercu);
@@ -902,6 +916,22 @@ function createDeficalmeWidget() {
         urlInput.value = url;
         applyImage(url);
         resetDefi();
+    });
+
+    btnImport.addEventListener('click', (e) => {
+        e.stopPropagation();
+        importFileInput.click();
+    });
+    importFileInput.addEventListener('change', () => {
+        const file = importFileInput.files[0];
+        if (!file) return;
+        const objectUrl = URL.createObjectURL(file);
+        urlInput.value = file.name;
+        imgEl.src = objectUrl;
+        imgEl.crossOrigin = null;
+        if (currentMode === 'pixels') generateGrid();
+        resetDefi();
+        importFileInput.value = '';
     });
 
     // Ne pas voler le focus sur input/button
