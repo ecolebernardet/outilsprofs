@@ -150,21 +150,10 @@ async function fuseWidgets() {
                 const wX = rect.left - br.left - minX;
                 const wY = rect.top  - br.top  - minY;
 
-                // Pour les stickers/images : utiliser createImageBitmap sur l'img déjà chargée (sans CORS)
+                // Pour les stickers/images : dessiner l'img directement (src est une data URL)
                 const imgEl = wEl.querySelector('img');
                 if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
-                    try {
-                        const bitmap = await createImageBitmap(imgEl);
-                        ctx.drawImage(bitmap, wX, wY, rect.width, rect.height);
-                        bitmap.close();
-                    } catch(e) {
-                        // Fallback html2canvas si createImageBitmap échoue
-                        const wCanvas = await html2canvas(wEl, {
-                            backgroundColor: null, useCORS: true, scale: 1, logging: false,
-                            ignoreElements: (el) => el.classList.contains('drag-handle') || el.classList.contains('widget-rotate-handle') || el.classList.contains('widget-action-bar') || el.classList.contains('widget-close-handle') || el.classList.contains('widget-pin-handle') || el.classList.contains('widget-back-handle') || el.classList.contains('widget-menu-handle') || el.classList.contains('shape-resize-handle') || el.classList.contains('resize-lock-btn') || el.classList.contains('flip-h-btn') || el.classList.contains('flip-v-btn') || el.classList.contains('widget-ctx-menu') || el.id === 'selection-controls' || el.id === 'sc-ctx-menu'
-                        });
-                        ctx.drawImage(wCanvas, wX, wY);
-                    }
+                    ctx.drawImage(imgEl, wX, wY, rect.width, rect.height);
                 } else {
                     const wCanvas = await html2canvas(wEl, {
                         backgroundColor: null,
@@ -711,6 +700,18 @@ function updateSelectionOverlay() {
         board.classList.remove('multi-select');
         return;
     }
+
+    // Si un seul widget sélectionné avec groupId → étendre la sélection à tout le groupe
+    if (selectedWidgets.length === 1 && selectedStrokes.length === 0 && selectedWidgets[0].dataset.groupId) {
+        const gid = selectedWidgets[0].dataset.groupId;
+        const allMembers = Array.from(document.querySelectorAll(`.widget[data-group-id="${gid}"], .shape-widget[data-group-id="${gid}"]`));
+        if (allMembers.length > 1) {
+            document.querySelectorAll('.widget.selected, .shape-widget.selected').forEach(w => w.classList.remove('selected'));
+            selectedWidgets = allMembers;
+            allMembers.forEach(w => w.classList.add('selected'));
+        }
+    }
+
     // Widget seul SANS groupe → poignées natives bleues, pas d'overlay
     if (selectedWidgets.length === 1 && selectedStrokes.length === 0 && !selectedWidgets[0].dataset.groupId) {
         board.classList.add('single-select');
