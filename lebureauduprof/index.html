@@ -551,17 +551,17 @@
 			font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
 			padding: 2px 6px 4px; color: #666;
 		}
-		/* A — Système : teinte froide sombre */
+		/* A  */
 		.mm-section-a { background: #222; }
 		.mm-section-a .mm-section-label { color: #ddd; }
 		.mm-section-a .mm-item { background: #000; }
 		.mm-section-a .mm-item:hover { background: #000; }
-		/* B — Annotation : teinte chaude/bleu */
+		/* B  */
 		.mm-section-b { background: #222; }
 		.mm-section-b .mm-section-label { color: #ddd; }
 		.mm-section-b .mm-item { background: #000; }
 		.mm-section-b .mm-item:hover { background: #000; }
-		/* C — Contenu : teinte verte/teal sombre */
+		/* C  */
 		.mm-section-c { background: #222; }
 		.mm-section-c .mm-section-label { color: #ddd; }
 		.mm-section-c .mm-item { background: #000; }
@@ -1003,6 +1003,7 @@
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>Monnaie</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>Ordre Alphabétique</div>
 				</div></div>
 			</div>
 
@@ -1928,6 +1929,7 @@ function _updateEraserBtnInPanel() {
 <div id="laser-pointer"></div>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
+<script src="widget-mots-alpha.js"></script>
 <script src="widgets_minuteur_chrono.js"></script>
 <script src="widget-tirage.js"></script>
 <script src="widget-calcul.js"></script>

@@ -257,8 +257,13 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
     board.appendChild(widget);
     bringToFront(widget);
 
-    // Clic droit = suppression rapide
-    widget.addEventListener('contextmenu', (e) => {
+    // Touche Suppr/Delete = suppression du widget (quand il a le focus)
+    widget.addEventListener('keydown', (e) => {
+        if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+        // Ne pas supprimer si le focus est dans un champ texte éditable
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (document.activeElement?.isContentEditable) return;
         e.preventDefault();
         e.stopPropagation();
         snapshotNow();

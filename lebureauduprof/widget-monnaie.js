@@ -824,6 +824,8 @@ function createMonnaieWidget() {
         answerInput.focus();
     });
 
+
+
     // ── Init ──────────────────────────────────────────────────────────────
     widget.addEventListener('mousedown', (e) => {
         // Ne pas voler le focus si on clique sur un input ou bouton

@@ -1,0 +1,741 @@
+// =========================================================================
+// WIDGET MOTS ALPHABÉTIQUES — Le Bureau du Prof
+// Fichier autonome : injecte son propre <template> dans le DOM
+// et initialise les widgets de type 'mots-alpha'.
+//
+// 📌 Intégration dans index.html :
+//   1. Ajouter avant </body> (après widgets.js) :
+//      <script src="widget-mots-alpha.js"></script>
+//
+//   2. Ajouter dans le menu (sous-menu Widgets) :
+//      <div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()">
+//          <span class="mm-ico">🔤</span>Ordre Alphabétique
+//      </div>
+// =========================================================================
+
+(function () {
+
+    // ── CSS injecté une seule fois ────────────────────────────────────────
+    if (!document.getElementById('widget-mots-alpha-style')) {
+        const s = document.createElement('style');
+        s.id = 'widget-mots-alpha-style';
+        s.textContent = `
+        /* ── Widget transparent comme monnaie ── */
+        .widget[data-type="mots-alpha"] {
+            min-width: unset;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* ── Conteneur principal ── */
+        .alpha-container {
+            background: #fffdf4;
+            border: 2px solid #e8d89a;
+            border-radius: 16px;
+            padding: 14px 16px 12px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+            width: 800px;
+            /* height libre, fixée par JS via resize */
+        }
+
+        /* Les deux zones s'étirent verticalement si le container est agrandi */
+        .alpha-pool-zone, .alpha-drop-zone {
+            flex: 1;
+            min-height: 46px;
+        }
+
+        /* ── En-tête ── */
+        .alpha-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .alpha-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #7a5c00;
+            letter-spacing: 0.3px;
+        }
+        .alpha-level-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .alpha-level-badge.facile    { background: #d4edda; color: #1a7a3a; }
+        .alpha-level-badge.moyen     { background: #fff3cd; color: #8a5c00; }
+        .alpha-level-badge.difficile { background: #f8d7da; color: #842029; }
+
+        /* ── Contrôles ── */
+        .alpha-controls {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .alpha-btn {
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+        }
+        .alpha-btn:active { transform: scale(0.96); }
+        .alpha-btn-new   { background: #4a90e2; color: white; }
+        .alpha-btn-new:hover   { background: #357abd; }
+        .alpha-btn-check { background: #4a90e2; color: white; }
+        .alpha-btn-check:hover { background: #357abd; }
+        .alpha-btn-show  { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
+        .alpha-btn-show:hover  { background: #e0e0e0; }
+        .alpha-btn-show.revealed { background: #28a745; color: white; border-color: #28a745; }
+
+        /* ── Boutons niveau ── */
+        .alpha-level-btns { display: flex; gap: 4px; margin-left: auto; }
+        .alpha-lvl-btn {
+            padding: 4px 9px; border-radius: 6px; border: 1px solid #ddd;
+            background: #f5f5f5; font-size: 10px; font-weight: 700;
+            cursor: pointer; color: #666; transition: background .15s;
+        }
+        .alpha-lvl-btn:hover { background: #e0e0e0; }
+        .alpha-lvl-btn.active-facile    { background: #d4edda; color: #1a7a3a; border-color: #a3d4b0; }
+        .alpha-lvl-btn.active-moyen     { background: #fff3cd; color: #8a5c00; border-color: #ffd97a; }
+        .alpha-lvl-btn.active-difficile { background: #f8d7da; color: #842029; border-color: #f5a8ae; }
+
+        /* ── Zone des mots mélangés ── */
+        .alpha-pool-zone {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 10px;
+            background: #fff9e6;
+            border: 1px solid #e8d89a;
+            border-radius: 10px;
+            justify-content: center;
+            align-content: center;
+            transition: background .15s, border-color .15s;
+        }
+        .alpha-pool-zone.drag-over { background: #fef9c3; border-color: #facc15; }
+
+        /* ── Zone réponse : grille fixe 6 colonnes, 1 seule ligne ── */
+        .alpha-drop-zone {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            padding: 8px;
+            background: #f0f7ff;
+            border: 1.5px dashed #93c5fd;
+            border-radius: 10px;
+            transition: background .15s, border-color .15s;
+        }
+        .alpha-drop-zone.drag-over { background: #dbeafe; border-color: #3b82f6; border-style: solid; }
+
+        /* ── Slot individuel ── */
+        .alpha-answer-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 4px 4px 6px;
+            border-radius: 8px;
+            background: white;
+            border: 1.5px dashed #bfdbfe;
+            transition: background .15s, border-color .15s;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .alpha-answer-slot.drag-over-slot {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            border-style: solid;
+        }
+        .alpha-slot-num {
+            font-size: 9px;
+            font-weight: 800;
+            color: #93c5fd;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        /* ── Étiquette mot — taille fixée par JS via --alpha-fs ── */
+        .alpha-word-card {
+            padding: 0.35em 0.8em;
+            border-radius: 6px;
+            font-size: var(--alpha-fs, 13px);
+            font-weight: 700;
+            cursor: grab;
+            user-select: none;
+            background: white;
+            border: 1.5px solid #e8d89a;
+            color: #7a5c00;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+            white-space: nowrap;
+            transition: box-shadow .12s, border-color .12s;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .alpha-word-card:hover { border-color: #f59e0b; box-shadow: 0 3px 8px rgba(245,158,11,0.2); }
+        .alpha-word-card.is-dragging { opacity: 0.3; }
+        .alpha-word-card.correct { border-color: #28a745; background: #f0fff4; color: #1a7a3a; cursor: default; }
+        .alpha-word-card.wrong   { border-color: #dc3545; background: #fff5f5; color: #9c1c28; animation: alpha-shake 0.35s ease; }
+
+        /* ── Fantôme drag ── */
+        .alpha-drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            padding: 0.35em 0.8em;
+            border-radius: 6px;
+            font-weight: 700;
+            background: #f59e0b;
+            color: white;
+            border: 1.5px solid #d97706;
+            box-shadow: 0 6px 18px rgba(245,158,11,0.45);
+            transform: translate(-50%, -50%) rotate(2deg);
+            white-space: nowrap;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* ── Zone résultat ── */
+        .alpha-result-zone {
+            display: flex; align-items: center; gap: 8px;
+            min-height: 28px; flex-wrap: wrap;
+        }
+        .alpha-result-text {
+            font-size: 22px; font-weight: 800; color: #28a745;
+            opacity: 0; transition: opacity .3s;
+        }
+        .alpha-result-text.show { opacity: 1; }
+        .alpha-correction-text {
+            font-size: 11px; color: #7a5c00;
+            background: #fffbe6; border: 1px solid #e8d89a;
+            border-radius: 7px; padding: 4px 10px;
+            display: none; flex: 1; line-height: 1.5;
+        }
+        .alpha-correction-text.show { display: block; }
+
+        /* ── Bouton aide ── */
+        .alpha-help-btn {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 1px solid #bbb; background: #f5f5f5;
+            color: #666; font-size: 12px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; flex-shrink: 0;
+            transition: background .15s; margin-left: auto;
+        }
+        .alpha-help-btn:hover { background: #e0e0e0; color: #333; }
+
+        /* ── Popup aide ── */
+        .alpha-help-popup {
+            display: none; position: absolute;
+            bottom: 42px; right: 10px;
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            padding: 12px 14px; width: 260px;
+            font-size: 11px; color: #444; z-index: 10; line-height: 1.5;
+        }
+        .alpha-help-popup.show { display: block; }
+        .alpha-help-popup h4 { margin: 0 0 8px; font-size: 12px; color: #7a5c00; }
+        .alpha-help-popup .help-level {
+            margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee;
+        }
+        .alpha-help-popup .help-level:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .alpha-help-badge {
+            display: inline-block; font-size: 9px; font-weight: 700;
+            padding: 1px 6px; border-radius: 10px; text-transform: uppercase;
+            margin-right: 4px; vertical-align: middle;
+        }
+        .alpha-help-badge.facile    { background: #d4edda; color: #1a7a3a; }
+        .alpha-help-badge.moyen     { background: #fff3cd; color: #8a5c00; }
+        .alpha-help-badge.difficile { background: #f8d7da; color: #842029; }
+
+        /* ── Consigne ── */
+        .alpha-consigne { font-size: 11px; color: #888; font-style: italic; }
+
+        /* ── Poignée resize ── */
+        .alpha-resize-handle {
+            position: absolute; right: 0; bottom: 0;
+            width: 18px; height: 18px; cursor: se-resize;
+            background: linear-gradient(135deg, transparent 50%, #aaa 50%);
+            border-radius: 0 0 14px 0; opacity: 0; transition: opacity .2s; z-index: 5;
+        }
+        .alpha-container:hover .alpha-resize-handle { opacity: 1; }
+
+        @keyframes alpha-shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-4px); }
+            75%      { transform: translateX(4px); }
+        }
+        `;
+        document.head.appendChild(s);
+    }
+
+    // ── Template HTML ──────────────────────────────────────────────────────
+    const TEMPLATE_ID = 'template-mots-alpha';
+    if (!document.getElementById(TEMPLATE_ID)) {
+        const tpl = document.createElement('template');
+        tpl.id = TEMPLATE_ID;
+        tpl.innerHTML = `
+<div class="alpha-container">
+
+  <!-- En-tête -->
+  <div class="alpha-header">
+    <span class="alpha-title">🔤 L'ordre alphabétique</span>
+    <span class="alpha-level-badge facile">😊 Facile</span>
+  </div>
+
+  <!-- Contrôles -->
+  <div class="alpha-controls">
+    <button class="alpha-btn alpha-btn-new">🔄 Nouveau</button>
+    <button class="alpha-btn alpha-btn-show">👁 Voir la correction</button>
+    <div class="alpha-level-btns">
+      <button class="alpha-lvl-btn active-facile" data-level="1">😊 Facile</button>
+      <button class="alpha-lvl-btn"               data-level="2">😐 Moyen</button>
+      <button class="alpha-lvl-btn"               data-level="3">😤 Difficile</button>
+    </div>
+  </div>
+
+  <!-- Mots à classer -->
+  <div class="alpha-consigne">Glisse les mots dans les cases pour les classer par ordre alphabétique :</div>
+  <div class="alpha-pool-zone"></div>
+
+  <!-- Cases de réponse -->
+  <div class="alpha-drop-zone"></div>
+
+  <!-- Résultat + vérification -->
+  <div class="alpha-result-zone">
+    <button class="alpha-btn alpha-btn-check">✔ Vérifier</button>
+    <span class="alpha-result-text"></span>
+    <div class="alpha-correction-text"></div>
+    <button class="alpha-help-btn" title="Aide sur les niveaux">?</button>
+  </div>
+
+  <!-- Popup aide -->
+  <div class="alpha-help-popup">
+    <h4>💡 Les niveaux de jeu</h4>
+    <div class="help-level">
+      <span class="alpha-help-badge facile">😊 Facile</span><br>
+      Les 6 mots commencent par des lettres différentes.<br>
+      Il suffit de regarder la 1ère lettre.
+    </div>
+    <div class="help-level">
+      <span class="alpha-help-badge moyen">😐 Moyen</span><br>
+      Les 6 mots partagent la même initiale.<br>
+      Il faut regarder la 2e ou 3e lettre.
+    </div>
+    <div class="help-level">
+      <span class="alpha-help-badge difficile">😤 Difficile</span><br>
+      Les mots partagent les 3 premières lettres.<br>
+      La différence est à la 4e ou 5e lettre.
+    </div>
+  </div>
+
+  <!-- Poignée resize -->
+  <div class="alpha-resize-handle"></div>
+
+</div>`;
+        document.body.appendChild(tpl);
+    }
+
+    // =========================================================================
+    // BANQUES DE MOTS PAR NIVEAU
+    // =========================================================================
+
+    const WORDS_LVL1 = [
+        'banane','cerise','datte','étoile','forêt','girafe','hibou','igloo','jonquille','kimono',
+        'lavande','mammouth','nuage','orange','papillon','quasar','rivière','savane','tulipe',
+        'univers','vague','wagon','xylophone','yacht','zèbre','avion','bison','citron','dune',
+        'escargot','fusée','grenade','hyène','île','jungle','koala','lune','mouton','neige',
+        'ourson','puma','quiche','ravin','soleil','tigre','usine','volcan','wombat','zéphyr',
+        'armoire','bougie','canard','dessin','éléphant','feuille','guépard','herbe','iris',
+        'jardin','képi','lièvre','marmotte','noisette','orage','plume','queue','ruche','sable',
+        'trompette','urne','vinaigre','wapiti','xénon','yourte','zircon'
+    ];
+
+    const WORDS_LVL2_GROUPS = [
+        ['balcon','bateau','bison','bleu','bonbon','brevet'],
+        ['cabane','cactus','canard','castor','cerise','coton'],
+        ['daim','datte','décor','dessin','dîner','domino'],
+        ['fable','facile','famille','faucon','feuille','forêt'],
+        ['galère','garçon','gâteau','genou','girafe','gorille'],
+        ['jardin','jasmin','jeton','joli','jouet','jungle'],
+        ['labyrinthe','lacet','lagon','lampe','lapin','larme'],
+        ['machine','madame','maison','maman','manche','marché'],
+        ['nappe','natation','navire','neige','nénuphar','nœud'],
+        ['palais','panda','papier','paquet','pardon','pastel'],
+        ['radis','ragot','raison','rampe','rapide','rasoir'],
+        ['sabot','sable','safari','salade','sanglier','sapin'],
+        ['tabac','tablier','tacite','taille','talon','tambour'],
+        ['valeur','valise','vampire','vapeur','varié','vase'],
+        ['wagon','walrus','wapiti','warcraft','wasabi','wombat'],
+    ];
+
+    const WORDS_LVL3_GROUPS = [
+        ['abricot','abrité','abreuver','abrupt','abréviation','abricotier'],
+        ['charmant','charnière','charbon','charpente','charrue','chartreuse'],
+        ['complet','complice','compliment','complot','composer','comprendre'],
+        ['courber','courbure','coureur','courir','couronne','courroie'],
+        ['drapeau','draper','drastique','dragon','dragée','dragueur'],
+        ['escalier','escargot','escorte','esclave','escroc','espace'],
+        ['fabricant','fabriquer','fabuleux','fabriquer','fable','fabrication'],
+        ['flambeau','flamber','flamme','flambant','flamboyant','flambée'],
+        ['glorieux','gloire','global','glissement','glouton','gloussement'],
+        ['marché','mardi','marée','marginal','marina','marionnette'],
+        ['partir','partout','partage','partenaire','parterre','participe'],
+        ['planche','planète','planifier','planton','plantation','planquer'],
+        ['premier','prendre','prénom','présent','presque','prêter'],
+        ['serveur','service','servile','servant','servante','serviette'],
+        ['trancher','tranche','transit','transporter','transaction','transparent'],
+    ];
+
+    // =========================================================================
+    // UTILITAIRES
+    // =========================================================================
+
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function pickWords(level) {
+        if (level === 1) {
+            const shuffled = shuffle(WORDS_LVL1);
+            const picked = [], initials = new Set();
+            for (const w of shuffled) {
+                const ini = w[0].toLowerCase();
+                if (!initials.has(ini)) { initials.add(ini); picked.push(w); }
+                if (picked.length === 6) break;
+            }
+            return picked;
+        } else if (level === 2) {
+            const group = WORDS_LVL2_GROUPS[Math.floor(Math.random() * WORDS_LVL2_GROUPS.length)];
+            return shuffle(group).slice(0, 6);
+        } else {
+            const group = WORDS_LVL3_GROUPS[Math.floor(Math.random() * WORDS_LVL3_GROUPS.length)];
+            return shuffle(group).slice(0, 6);
+        }
+    }
+
+    function sortAlpha(words) {
+        return words.slice().sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+    }
+
+    const LEVEL_INFO = {
+        1: { key: 'facile',    label: '😊 Facile',    badgeClass: 'facile'    },
+        2: { key: 'moyen',     label: '😐 Moyen',     badgeClass: 'moyen'     },
+        3: { key: 'difficile', label: '😤 Difficile', badgeClass: 'difficile' },
+    };
+
+    // =========================================================================
+    // INITIALISATION DU WIDGET
+    // =========================================================================
+    window.initMotsAlphaWidget = function (widget) {
+
+        const container    = widget.querySelector('.alpha-container');
+        const badge        = widget.querySelector('.alpha-level-badge');
+        const newBtn       = widget.querySelector('.alpha-btn-new');
+        const showBtn      = widget.querySelector('.alpha-btn-show');
+        const checkBtn     = widget.querySelector('.alpha-btn-check');
+        const lvlBtns      = widget.querySelectorAll('.alpha-lvl-btn');
+        const wordsPool    = widget.querySelector('.alpha-pool-zone');
+        const dropZone     = widget.querySelector('.alpha-drop-zone');
+        const resultText   = widget.querySelector('.alpha-result-text');
+        const corrText     = widget.querySelector('.alpha-correction-text');
+        const helpBtn      = widget.querySelector('.alpha-help-btn');
+        const helpPopup    = widget.querySelector('.alpha-help-popup');
+        const resizeHandle = widget.querySelector('.alpha-resize-handle');
+
+        let currentLevel    = 1;
+        let currentWords    = [];
+        let solutionOrder   = [];
+        let correctionShown = false;
+
+        // ── Taille de police de référence (à 540px de large) ─────────────
+        const BASE_W   = 540;
+        const BASE_FS  = 13;   // px à BASE_W
+        const MIN_FS   = 9;
+        const MAX_FS   = 28;
+
+        // ── Recalcule la font-size des étiquettes selon la largeur ────────
+        function applyCardScale() {
+            const w  = container.offsetWidth || BASE_W;
+            // Scale proportionnel à la largeur uniquement
+            const fs = Math.max(MIN_FS, Math.min(MAX_FS, Math.round(BASE_FS * w / BASE_W)));
+            container.style.setProperty('--alpha-fs', fs + 'px');
+            container.style.setProperty('--alpha-ghost-fs', fs + 'px');
+        }
+
+        // ── Changement de niveau ─────────────────────────────────────────
+        function setLevel(level) {
+            currentLevel = level;
+            const info = LEVEL_INFO[level];
+            badge.className = 'alpha-level-badge ' + info.badgeClass;
+            badge.textContent = info.label;
+            lvlBtns.forEach(b => {
+                b.className = 'alpha-lvl-btn';
+                if (parseInt(b.dataset.level) === level) b.classList.add('active-' + info.key);
+            });
+            newGame();
+        }
+
+        lvlBtns.forEach(btn => {
+            btn.addEventListener('click', () => setLevel(parseInt(btn.dataset.level)));
+        });
+
+        // ── Nouvelle partie ──────────────────────────────────────────────
+        function newGame() {
+            correctionShown = false;
+            showBtn.textContent = '👁 Voir la correction';
+            showBtn.classList.remove('revealed');
+            resultText.textContent = '';
+            resultText.classList.remove('show');
+            corrText.textContent = '';
+            corrText.classList.remove('show');
+
+            currentWords  = pickWords(currentLevel);
+            solutionOrder = sortAlpha(currentWords);
+            renderPool(shuffle(currentWords));
+            renderDropZone();
+        }
+
+        // ── Rendu pool ───────────────────────────────────────────────────
+        function renderPool(words) {
+            wordsPool.innerHTML = '';
+            words.forEach(w => wordsPool.appendChild(makeCard(w)));
+        }
+
+        // ── Rendu drop-zone (6 slots, 1 ligne garantie par grid CSS) ─────
+        function renderDropZone() {
+            dropZone.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'alpha-answer-slot';
+                slot.dataset.slotIndex = i;
+                const num = document.createElement('span');
+                num.className = 'alpha-slot-num';
+                num.textContent = i + 1;
+                slot.appendChild(num);
+                dropZone.appendChild(slot);
+            }
+        }
+
+        // ── Créer une étiquette ──────────────────────────────────────────
+        function makeCard(word) {
+            const card = document.createElement('div');
+            card.className = 'alpha-word-card';
+            card.textContent = word;
+            card.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                startDrag(card, e.clientX, e.clientY);
+            });
+            return card;
+        }
+
+        // ── Drag souris maison ───────────────────────────────────────────
+        function startDrag(card, startX, startY) {
+            const originSlot = card.closest('.alpha-answer-slot') || null;
+
+            const ghost = document.createElement('div');
+            ghost.className = 'alpha-drag-ghost';
+            ghost.textContent = card.textContent;
+            // Le fantôme hérite de la même taille que les cartes
+            const fs = getComputedStyle(container).getPropertyValue('--alpha-fs').trim() || '13px';
+            ghost.style.fontSize = fs;
+            ghost.style.left = startX + 'px';
+            ghost.style.top  = startY + 'px';
+            document.body.appendChild(ghost);
+
+            card.classList.add('is-dragging');
+            dropZone.classList.add('drag-over');
+            wordsPool.classList.add('drag-over');
+
+            function onMove(e) {
+                ghost.style.left = e.clientX + 'px';
+                ghost.style.top  = e.clientY + 'px';
+                dropZone.querySelectorAll('.alpha-answer-slot').forEach(s => s.classList.remove('drag-over-slot'));
+                const el   = document.elementFromPoint(e.clientX, e.clientY);
+                const slot = el && el.closest('.alpha-answer-slot');
+                if (slot) slot.classList.add('drag-over-slot');
+            }
+
+            function onUp(e) {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup',   onUp);
+                ghost.remove();
+                card.classList.remove('is-dragging');
+                dropZone.classList.remove('drag-over');
+                wordsPool.classList.remove('drag-over');
+                dropZone.querySelectorAll('.alpha-answer-slot').forEach(s => s.classList.remove('drag-over-slot'));
+
+                const el         = document.elementFromPoint(e.clientX, e.clientY);
+                const targetSlot = el && el.closest('.alpha-answer-slot');
+                const targetPool = el && el.closest('.alpha-pool-zone');
+
+                if (targetSlot) {
+                    const existing = targetSlot.querySelector('.alpha-word-card');
+                    if (originSlot) {
+                        if (existing) originSlot.appendChild(existing);
+                    } else {
+                        if (existing) wordsPool.appendChild(existing);
+                    }
+                    targetSlot.appendChild(card);
+                } else if (targetPool) {
+                    if (originSlot) wordsPool.appendChild(card);
+                } else {
+                    if (originSlot) originSlot.appendChild(card);
+                }
+            }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup',   onUp);
+        }
+
+        // ── Vérifier ─────────────────────────────────────────────────────
+        function checkAnswer() {
+            const slots = dropZone.querySelectorAll('.alpha-answer-slot');
+            const playerOrder = [];
+            slots.forEach(slot => {
+                const card = slot.querySelector('.alpha-word-card');
+                if (card) playerOrder.push(card.textContent);
+            });
+
+            if (playerOrder.length < 6 || wordsPool.querySelector('.alpha-word-card')) {
+                resultText.textContent = '⚠️ Place tous les mots !';
+                resultText.style.color = '#e67e22';
+                resultText.classList.add('show');
+                corrText.classList.remove('show');
+                return;
+            }
+
+            const isCorrect = playerOrder.every((w, i) =>
+                w.toLowerCase() === solutionOrder[i].toLowerCase()
+            );
+
+            corrText.classList.remove('show');
+            if (isCorrect) {
+                resultText.textContent = '✅ Bravo !';
+                resultText.style.color = '#28a745';
+                resultText.classList.add('show');
+                slots.forEach(slot => {
+                    const card = slot.querySelector('.alpha-word-card');
+                    if (card) { card.classList.remove('wrong'); card.classList.add('correct'); }
+                });
+            } else {
+                resultText.textContent = '❌ Essaie encore !';
+                resultText.style.color = '#dc3545';
+                resultText.classList.add('show');
+                corrText.textContent = '📋 Ordre : ' + solutionOrder.join(' → ');
+                corrText.classList.add('show');
+                slots.forEach((slot, i) => {
+                    const card = slot.querySelector('.alpha-word-card');
+                    if (card) {
+                        card.classList.remove('correct', 'wrong');
+                        card.classList.add(
+                            card.textContent.toLowerCase() === solutionOrder[i]?.toLowerCase()
+                                ? 'correct' : 'wrong'
+                        );
+                    }
+                });
+            }
+        }
+
+        // ── Voir / cacher la correction ───────────────────────────────────
+        function toggleCorrection() {
+            if (!correctionShown) {
+                correctionShown = true;
+                corrText.textContent = '📋 Ordre : ' + solutionOrder.join(' → ');
+                corrText.classList.add('show');
+                showBtn.textContent = '🙈 Cacher';
+                showBtn.classList.add('revealed');
+            } else {
+                correctionShown = false;
+                corrText.classList.remove('show');
+                showBtn.textContent = '👁 Voir la correction';
+                showBtn.classList.remove('revealed');
+            }
+        }
+
+        // ── Aide ─────────────────────────────────────────────────────────
+        helpBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            helpPopup.classList.toggle('show');
+        });
+        document.addEventListener('click', () => helpPopup.classList.remove('show'));
+
+        // ── Events boutons ────────────────────────────────────────────────
+        newBtn.addEventListener('click',   newGame);
+        showBtn.addEventListener('click',  toggleCorrection);
+        checkBtn.addEventListener('click', checkAnswer);
+
+        // ── Resize 2D ────────────────────────────────────────────────────
+        resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const startX = e.clientX, startY = e.clientY;
+            const startW = container.offsetWidth;
+            const startH = container.offsetHeight;
+
+            document.onmousemove = (ev) => {
+                const newW = Math.max(320, startW + ev.clientX - startX);
+                const newH = Math.max(200, startH + ev.clientY - startY);
+                container.style.width  = newW + 'px';
+                container.style.height = newH + 'px';
+                applyCardScale();
+            };
+            document.onmouseup = () => {
+                document.onmousemove = null;
+                if (typeof saveBoard === 'function') saveBoard();
+            };
+        });
+
+        // ── Init ──────────────────────────────────────────────────────────
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            setLevel(1);
+            applyCardScale();
+        }));
+    };
+
+    // =========================================================================
+    // HOOK dans createWidget
+    // =========================================================================
+    var _orig = window.createWidget;
+    if (typeof _orig === 'function') {
+        window.createWidget = function (type) {
+            var widget = _orig.apply(this, arguments);
+            if (type === 'mots-alpha') initMotsAlphaWidget(widget);
+            return widget;
+        };
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            var orig = window.createWidget;
+            if (typeof orig === 'function') {
+                window.createWidget = function (type) {
+                    var widget = orig.apply(this, arguments);
+                    if (type === 'mots-alpha') initMotsAlphaWidget(widget);
+                    return widget;
+                };
+            }
+        });
+    }
+
+})();
