@@ -48,10 +48,17 @@ function togglePin(widget) {
 
 function sendToBack(widget) {
     snapshotNow();
-    widget.style.zIndex = 1;
-    widget.dataset.pinned = "false";
-    widget.classList.remove('pinned');
-    widget.dataset.background = "true";
+    if (widget.dataset.background === "true") {
+        // Déjà en arrière-plan → on annule
+        widget.dataset.background = "false";
+        widgetZCounter++;
+        widget.style.zIndex = widgetZCounter;
+    } else {
+        widget.style.zIndex = 1;
+        widget.dataset.pinned = "false";
+        widget.classList.remove('pinned');
+        widget.dataset.background = "true";
+    }
     saveBoard();
 }
 
@@ -468,8 +475,22 @@ function makeDraggable(elmnt) {
 
 function startWidgetDrag(e, elmnt) {
     e.preventDefault();
-    elmnt.dataset.background = "false";
-    bringToFront(elmnt);
+
+    // Si le widget appartient à un groupe, déplacer tous les membres du groupe
+    const groupId = elmnt.dataset.groupId;
+    const groupMembers = groupId
+        ? Array.from(document.querySelectorAll(`.widget[data-group-id="${groupId}"], .shape-widget[data-group-id="${groupId}"]`))
+        : [elmnt];
+
+    // Sélectionner tout le groupe dans selectedWidgets pour que le cadre et le resize suivent
+    if (groupId && typeof selectedWidgets !== 'undefined') {
+        document.querySelectorAll('.widget.selected, .shape-widget.selected').forEach(w => w.classList.remove('selected'));
+        selectedWidgets = groupMembers;
+        groupMembers.forEach(w => w.classList.add('selected'));
+        if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
+    }
+
+    groupMembers.forEach(w => { if (w.dataset.background !== "true") bringToFront(w); });
     snapshotNow();
 
     // Overlay transparent sur les iframes pour capturer les événements souris
@@ -484,16 +505,24 @@ function startWidgetDrag(e, elmnt) {
 
     let px = e.clientX, py = e.clientY;
     document.onmousemove = (ev) => {
-        elmnt.style.top  = (elmnt.offsetTop  + ev.clientY - py) + "px";
-        elmnt.style.left = (elmnt.offsetLeft + ev.clientX - px) + "px";
+        const dx = ev.clientX - px;
+        const dy = ev.clientY - py;
+        groupMembers.forEach(w => {
+            w.style.top  = (w.offsetTop  + dy) + "px";
+            w.style.left = (w.offsetLeft + dx) + "px";
+        });
         px = ev.clientX; py = ev.clientY;
+        if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
     };
     document.onmouseup = () => {
         document.onmousemove = null;
         overlays.forEach(o => o.remove());
         const curW = window.innerWidth, curVH = virtualH(curW);
-        elmnt.dataset.leftPercent = (elmnt.offsetLeft / curW) * 100;
-        elmnt.dataset.topPercent  = (elmnt.offsetTop  / curVH) * 100;
+        groupMembers.forEach(w => {
+            w.dataset.leftPercent = (w.offsetLeft / curW) * 100;
+            w.dataset.topPercent  = (w.offsetTop  / curVH) * 100;
+        });
+        if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
         saveBoard();
     };
 }
