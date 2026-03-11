@@ -19,11 +19,11 @@
 
         .dc-container {
             background: #121212;
-            border: 2px solid rgba(255,255,255,0.12);
-            border-radius: 18px;
+            border: 0px solid rgba(255,255,255,0.12);
+			border-radius: 5px;
             display: flex;
             flex-direction: column;
-            width: 520px;
+            width: 600px;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -143,8 +143,8 @@
         .dc-percent-badge {
             position: absolute;
             top: 6px;
-            right: 14px;
-            font-size: 13px;
+            right: 15px;
+            font-size: 14px;
             font-weight: 900;
             color: #fff;
             opacity: 0.9;
@@ -834,13 +834,30 @@ function createDeficalmeWidget() {
 
     // Bouton flottant pour sortir du mode transparent (visible sur l'image en bas à gauche)
     const floatBtn = document.createElement('button');
-    floatBtn.style.cssText = `
-        display: none; position: absolute; bottom: 8px; left: 8px; z-index: 15;
-        background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.2);
-        color: rgba(255, 255, 255, 0.25); font-size: 8px; font-weight: 800; padding: 4px 8px;
-        border-radius: 6px; cursor: pointer; backdrop-filter: blur(4px);
-        text-transform: uppercase; letter-spacing: 0.05em;
-    `;
+    // État normal (au départ ou quand la souris sort)
+	const styleNormal = `
+		display: block; position: absolute; bottom: 8px; right: 15px; z-index: 15;
+		background: rgba(0,0,0,0.0); border: 1px solid rgba(255,255,255,0.1);
+		color: rgba(255, 255, 255, 0.5); font-size: 8px; font-weight: 800; padding: 4px 8px;
+		border-radius: 6px; cursor: pointer; 
+		text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;
+	`;
+
+	// État au survol (moins opaque / plus visible)
+	const styleHover = `
+		display: block; position: absolute; bottom: 8px; right: 15px; z-index: 15;
+		background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.8);
+		color: rgba(255, 255, 255, 0.8); font-size: 8px; font-weight: 800; padding: 4px 8px;
+		border-radius: 6px; cursor: pointer; 
+		text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s;
+	`;
+
+	floatBtn.style.cssText = styleNormal;
+
+	// Gestion du survol
+	floatBtn.onmouseover = () => { floatBtn.style.cssText = styleHover; };
+	floatBtn.onmouseout = () => { floatBtn.style.cssText = styleNormal; };
+	
     floatBtn.textContent = '🔲 Contrôles';
     floatBtn.addEventListener('click', () => btnTransp.click());
     imageZone.appendChild(floatBtn);
