@@ -334,6 +334,21 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/animaux-zebre.png',       label: 'Le zèbre' },
             ]
         },
+		{
+            id: 'saisons',
+            label: 'Saisons',
+            icon: '🌼',
+            images: [
+                { src: 'images/saisons-printemps01.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps02.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps03.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps04.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps05.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps06.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps07.png',    label: 'Printemps' },
+				{ src: 'images/saisons-printemps08.png',    label: 'Printemps' },
+            ]
+        },
     ];
 }
 
