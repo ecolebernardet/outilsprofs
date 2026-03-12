@@ -17,15 +17,44 @@
 
     // ── CSS injecté une seule fois ────────────────────────────────────────
     const STYLE = `
-    /* ── Wrapper externe : poignée resize native ── */
+    /* Le widget parent devient invisible, sono-outer porte tout le visuel */
+    .widget[data-type="sonometre"],
+    .widget[data-type="sonometre"]:focus-within {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+    .widget[data-type="sonometre"] .widget-content {
+        padding: 0 !important;
+        background: transparent !important;
+        overflow: visible !important;
+    }
+
+    /* ── Wrapper externe ── */
+    /* Le widget parent devient invisible, sono-outer porte tout le visuel */
+    .widget[data-type="sonometre"],
+    .widget[data-type="sonometre"]:focus-within {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+    .widget[data-type="sonometre"] .widget-content {
+        padding: 0 !important;
+        background: transparent !important;
+        overflow: visible !important;
+    }
     .widget[data-type="sonometre"] .sono-outer {
         position: relative;
         width:  300px;
-        height: 340px;
+        height: 480px;
         min-width:  220px;
-        min-height: 260px;
+        min-height: 352px;
         overflow: hidden;
-        resize: both;
+        resize: none;
         box-sizing: border-box;
         border-radius: 16px;
     }
@@ -33,12 +62,26 @@
     .widget[data-type="sonometre"]:focus-within .sono-outer {
         outline: 2px dashed rgba(74,144,226,0.35);
     }
-    .widget[data-type="sonometre"] .sono-outer::-webkit-resizer {
-        background-color: transparent;
+    /* Poignée de resize proportionnel custom */
+    .sono-resize-handle {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 18px;
+        height: 18px;
+        cursor: nwse-resize;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s;
         background-image: linear-gradient(135deg,
             transparent 50%, #4a90e2 50%, #4a90e2 60%,
             transparent 60%, transparent 70%,
             #4a90e2 70%, #4a90e2 80%, transparent 80%);
+        border-bottom-right-radius: 16px;
+    }
+    .widget[data-type="sonometre"]:hover .sono-resize-handle,
+    .widget[data-type="sonometre"]:focus-within .sono-resize-handle {
+        opacity: 1;
     }
 
     /* ── Contenu mis à l'échelle ── */
@@ -95,7 +138,7 @@
         margin-top: -4px;
     }
     .sono-db-value {
-        font-size: 52px;
+        font-size: 40px;
         font-weight: 800;
         line-height: 1;
         font-variant-numeric: tabular-nums;
@@ -210,12 +253,55 @@
     /* ── Message alerte ── */
     .sono-alert {
         display: none;
+        position: absolute;
+        top: 10px;
+        right: 14px;
         font-size: 22px;
         animation: sono-pulse 0.6s infinite alternate;
+        pointer-events: none;
+        z-index: 5;
     }
     @keyframes sono-pulse {
         from { opacity: 0.5; transform: scale(0.9); }
         to   { opacity: 1;   transform: scale(1.1); }
+    }
+
+    /* ── Bouton toggle contrôles ── */
+    .sono-toggle-controls {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        background: rgba(255,255,255,0.08);
+        border: none;
+        border-radius: 6px;
+        color: rgba(255,255,255,0.5);
+        font-size: 11px;
+        padding: 3px 8px;
+        cursor: pointer;
+        transition: background 0.18s, color 0.18s;
+        z-index: 5;
+    }
+    .sono-toggle-controls:hover {
+        background: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* ── Zone contrôles (boutons + seuils) ── */
+    .sono-controls {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        max-height: 200px;
+        opacity: 1;
+    }
+    .sono-controls.hidden {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* ── Micro refusé ── */
@@ -228,96 +314,7 @@
     }
     `;
 
-    // ── Template HTML ──────────────────────────────────────────────────────
-    const TPL_HTML = `
-    <div class="sono-outer">
-      <div class="sono-scale-wrap">
-        <div class="sono-widget">
-          <div class="sono-title">🎙️ Sonomètre</div>
-
-          <!-- Jauge semi-circulaire SVG -->
-          <div class="sono-gauge-wrap">
-            <svg viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%"   stop-color="#2ecc71"/>
-                  <stop offset="50%"  stop-color="#f39c12"/>
-                  <stop offset="100%" stop-color="#e74c3c"/>
-                </linearGradient>
-              </defs>
-              <!-- Arc de fond -->
-              <path class="sono-arc-bg"
-                d="M 20 110 A 90 90 0 0 1 200 110"
-                fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="16" stroke-linecap="round"/>
-              <!-- Arc coloré (valeur) -->
-              <path class="sono-arc-val"
-                d="M 20 110 A 90 90 0 0 1 200 110"
-                fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round"
-                stroke-dasharray="283" stroke-dashoffset="283"
-                style="transition: stroke-dashoffset 0.15s ease-out;"/>
-              <!-- Aiguille -->
-              <line class="sono-needle"
-                x1="110" y1="110" x2="110" y2="30"
-                stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round"
-                style="transform-origin: 110px 110px; transform: rotate(-90deg); transition: transform 0.15s ease-out;"/>
-              <circle cx="110" cy="110" r="6" fill="rgba(255,255,255,0.9)"/>
-              <!-- Graduations texte -->
-              <text x="16"  y="128" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">0</text>
-              <text x="55"  y="60"  fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">30</text>
-              <text x="110" y="28"  fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">60</text>
-              <text x="165" y="60"  fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">90</text>
-              <text x="204" y="128" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">120</text>
-            </svg>
-          </div>
-
-          <!-- Valeur numérique -->
-          <div class="sono-db-display">
-            <div class="sono-db-value">--</div>
-            <div class="sono-db-unit">dB</div>
-          </div>
-
-          <!-- Label état -->
-          <div class="sono-label">Microphone inactif</div>
-
-          <!-- Alerte emoji -->
-          <div class="sono-alert">🔇</div>
-
-          <!-- Visualiseur barres -->
-          <div class="sono-bars">
-            ${Array.from({length: 16}, () => '<div class="sono-bar" style="height:2px;background:rgba(255,255,255,0.2)"></div>').join('')}
-          </div>
-
-          <!-- Boutons -->
-          <div class="sono-btns">
-            <button class="sono-btn sono-btn-start">▶ Démarrer</button>
-            <button class="sono-btn sono-btn-reset">Réinitialiser</button>
-          </div>
-
-          <!-- Seuils personnalisables -->
-          <div class="sono-thresholds">
-            <div class="sono-thresh-row">
-              <div class="sono-thresh-dot" style="background:#2ecc71"></div>
-              <span class="sono-thresh-label">Calme (en-dessous de)</span>
-              <input class="sono-thresh-input" type="number" min="10" max="100" value="45" title="Seuil calme (dB)"> dB
-            </div>
-            <div class="sono-thresh-row">
-              <div class="sono-thresh-dot" style="background:#f39c12"></div>
-              <span class="sono-thresh-label">Agité (en-dessous de)</span>
-              <input class="sono-thresh-input" type="number" min="10" max="120" value="65" title="Seuil agité (dB)"> dB
-            </div>
-            <div class="sono-thresh-row">
-              <div class="sono-thresh-dot" style="background:#e74c3c"></div>
-              <span class="sono-thresh-label">Trop bruyant (au-dessus)</span>
-            </div>
-          </div>
-
-          <div class="sono-no-mic">⚠️ Accès au microphone refusé ou indisponible</div>
-        </div>
-      </div>
-    </div>
-    `;
-
-    // ── Injection CSS + Template ───────────────────────────────────────────
+    // ── Injection CSS ─────────────────────────────────────────────────────
     if (!document.getElementById('sono-style')) {
         const st = document.createElement('style');
         st.id = 'sono-style';
@@ -325,16 +322,52 @@
         document.head.appendChild(st);
     }
 
-    if (!document.getElementById('template-sonometre')) {
-        const tpl = document.createElement('template');
-        tpl.id = 'template-sonometre';
-        tpl.innerHTML = TPL_HTML;
-        document.body.appendChild(tpl);
-    }
-
     // ── Initialisation d'une instance de widget ────────────────────────────
     window.initSonometreWidget = function (widget) {
         (function () {
+
+            // Injection HTML directe (sans passer par le système de template)
+            var bars = '';
+            for (var b = 0; b < 16; b++) {
+                bars += '<div class="sono-bar" style="height:2px;background:rgba(255,255,255,0.2)"></div>';
+            }
+            var contentZone = widget.querySelector('.widget-content');
+            contentZone.innerHTML = ''
+                + '<div class="sono-outer"><div class="sono-resize-handle"></div><div class="sono-scale-wrap"><div class="sono-widget">'
+                + '<div class="sono-title">\uD83C\uDF99\uFE0F Sonom\u00E8tre</div>'
+                + '<div class="sono-gauge-wrap"><svg viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg">'
+                + '<defs><linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">'
+                + '<stop offset="0%" stop-color="#2ecc71"/><stop offset="50%" stop-color="#f39c12"/><stop offset="100%" stop-color="#e74c3c"/>'
+                + '</linearGradient></defs>'
+                + '<path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="16" stroke-linecap="round"/>'
+                + '<path class="sono-arc-val" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" style="transition:stroke-dashoffset 0.15s ease-out;"/>'
+                + '<line class="sono-needle" x1="110" y1="110" x2="110" y2="30" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" style="transform-origin:110px 110px;transform:rotate(-90deg);transition:transform 0.15s ease-out;"/>'
+                + '<circle cx="110" cy="110" r="6" fill="rgba(255,255,255,0.9)"/>'
+                + '<text x="16" y="128" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">0</text>'
+                + '<text x="55" y="60" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">30</text>'
+                + '<text x="110" y="28" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">60</text>'
+                + '<text x="165" y="60" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">90</text>'
+                + '<text x="204" y="128" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">120</text>'
+                + '</svg></div>'
+                + '<div class="sono-db-display"><div class="sono-db-value">--</div><div class="sono-db-unit">dB</div></div>'
+                + '<div class="sono-label">Microphone inactif</div>'
+                + '<div class="sono-alert" style="display:none;">&#x1F507;</div>'
+                + '<div class="sono-bars">' + bars + '</div>'
+                + '<button class="sono-toggle-controls" title="Afficher/masquer les contrôles">⚙️</button>'
+                + '<div class="sono-controls">'
+                + '<div class="sono-btns">'
+                + '<button class="sono-btn sono-btn-start">&#9654; Démarrer</button>'
+                + '<button class="sono-btn sono-btn-reset">Réinitialiser</button>'
+                + '</div>'
+                + '<div class="sono-thresholds">'
+                + '<div class="sono-thresh-row"><div class="sono-thresh-dot" style="background:#2ecc71"></div><span class="sono-thresh-label">Calme (en-dessous de)</span><input class="sono-thresh-input" type="number" min="10" max="100" value="40"> dB</div>'
+                + '<div class="sono-thresh-row"><div class="sono-thresh-dot" style="background:#f39c12"></div><span class="sono-thresh-label">Agité (en-dessous de)</span><input class="sono-thresh-input" type="number" min="10" max="120" value="60"> dB</div>'
+                + '<div class="sono-thresh-row"><div class="sono-thresh-dot" style="background:#e74c3c"></div><span class="sono-thresh-label">Trop bruyant (au-dessus)</span></div>'
+                + '</div>'
+                + '</div>'
+                + '<div class="sono-no-mic" style="display:none;">&#x26A0;&#xFE0F; Acc\u00E8s au microphone refus\u00E9</div>'
+                + '</div></div></div>';
+
             // ── Éléments DOM ──
             const outer     = widget.querySelector('.sono-outer');
             const scaleWrap = widget.querySelector('.sono-scale-wrap');
@@ -365,21 +398,42 @@
                 return { calm: vals[0] || 45, agitated: vals[1] || 65 };
             }
 
-            // ── Mise à l'échelle (comme minuteur) ─────────────────────────
+            // ── Mise à l'échelle ──────────────────────────────────────────
+            const REF_W = 300, REF_H = 480;
+            const RATIO = REF_H / REF_W;
+
             function rescale() {
-                const refW = 300, refH = 340;
-                const ow = outer.offsetWidth  || refW;
-                const oh = outer.offsetHeight || refH;
-                const sx = ow / refW;
-                const sy = oh / refH;
-                const s  = Math.min(sx, sy);
-                scaleWrap.style.width     = refW + 'px';
-                scaleWrap.style.height    = refH + 'px';
-                scaleWrap.style.transform = `scale(${s})`;
+                var ow = outer.offsetWidth || REF_W;
+                var s  = ow / REF_W;
+                outer.style.height        = Math.round(ow * RATIO) + 'px';
+                scaleWrap.style.width     = REF_W + 'px';
+                scaleWrap.style.height    = REF_H + 'px';
+                scaleWrap.style.transform = 'scale(' + s + ')';
             }
 
-            const ro = new ResizeObserver(rescale);
-            ro.observe(outer);
+            // ── Resize proportionnel custom ───────────────────────────────
+            var resizeHandle = outer.querySelector('.sono-resize-handle');
+            resizeHandle.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var startX  = e.clientX;
+                var startW  = outer.offsetWidth;
+
+                document.addEventListener('mousemove', onResizeMove);
+                document.addEventListener('mouseup',   onResizeUp);
+
+                function onResizeMove(ev) {
+                    var newW = Math.max(220, startW + (ev.clientX - startX));
+                    outer.style.width = newW + 'px';
+                    rescale();
+                }
+                function onResizeUp() {
+                    document.removeEventListener('mousemove', onResizeMove);
+                    document.removeEventListener('mouseup',   onResizeUp);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
+            });
+
             rescale();
 
             // ── Conversion niveau audio → dB estimé ───────────────────────
@@ -522,13 +576,34 @@
                 smoothDb = 0;
             }
 
-            // ── Bouton start / stop ────────────────────────────────────────
+            // ── Bouton toggle contrôles ───────────────────────────────────
+            var toggleBtn  = widget.querySelector('.sono-toggle-controls');
+            var controlsEl = widget.querySelector('.sono-controls');
+            var controlsVisible = true;
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                controlsVisible = !controlsVisible;
+                controlsEl.classList.toggle('hidden', !controlsVisible);
+                toggleBtn.textContent = controlsVisible ? '⚙️' : '⚙️';
+                toggleBtn.style.color = controlsVisible ? 'rgba(255,255,255,0.5)' : '#4a90e2';
+            });
+
+            // Bloquer stopPropagation uniquement sur les elements interactifs
+            // Le reste du widget reste draggable normalement
+            var interactiveSelectors = 'button, input, .sono-resize-handle, .sono-toggle-controls';
+            outer.addEventListener('mousedown', function(e) {
+                if (e.target.closest(interactiveSelectors)) {
+                    e.stopPropagation();
+                }
+            });
+
+            // Bouton start / stop
             btnStart.addEventListener('click', function () {
                 if (!running) startMic();
                 else stopMic();
             });
 
-            // ── Bouton reset max ───────────────────────────────────────────
+            // Bouton reset
             btnReset.addEventListener('click', function () {
                 maxDb = 0;
                 smoothDb = 0;
