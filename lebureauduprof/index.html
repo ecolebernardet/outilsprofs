@@ -438,7 +438,8 @@
         #sc-ctx-menu hr { border: none; border-top: 1px solid #444; margin: 4px 0; }
 
         /* --- CONTENU --- */
-		.widget[data-type="text"] .editor-container, .widget[data-type="homework"] .editor-container { border: none; }
+		.widget[data-type="text"] .editor-container, .widget[data-type="homework"] .editor-container { border: none; background: transparent; border-radius: 0; }
+		.widget[data-type="text"] .widget-content, .widget[data-type="homework"] .widget-content { padding: 0; overflow: hidden; border-radius: var(--border-radius); }
 		/* date/time widget CSS → widgets-datetime.js */
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
@@ -626,6 +627,8 @@
 
 		/* ── Mini color picker custom ──────────────────────────── */
 		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
+		.cpick-label-btn { cursor: pointer; background: #3a3a4a; color: #eee; border: 1px solid #555; border-radius: 5px; padding: 2px 6px; font-size: 10px; line-height: 1.4; text-align: center; white-space: nowrap; }
+		.cpick-label-btn:hover { background: #4a4a5a; border-color: #7ab8f5; }
 		.cpick-swatch {
 			width: 30px; height: 26px; border-radius: 6px; border: 2px solid #555;
 			cursor: pointer; flex-shrink: 0; transition: border-color .15s;
@@ -972,36 +975,48 @@
     </div>
 
 
-    <div id="global-toolbar" style="position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;display:none;padding:10px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
+    <div id="global-toolbar" style="position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;display:none;padding:7px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
 		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-			<span style="background:#eee; color: #111; border-radius:12px; border:2px solid rgba(255,255,255,0.5);box-sizing:border-box;font-size:18px; font-weight: bold; ">&nbsp; Outils texte 🖊️ &nbsp;</span>
-			<div style="width:1px;height:20px;background:#444;"></div>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 6px;" title="Aligner à gauche">⬅</button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 6px;" title="Centrer">↔</button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 6px;" title="Aligner à droite">➡</button>
-			<div style="width:1px;height:20px;background:#444;"></div>
+			<span style="background:#1F1F21; color: #6aaee8; border-radius:12px; border:0px solid rgba(255,255,255,0.5);box-sizing:border-box;font-size:14px; font-weight: bold; text-align:center; display:inline-block;line-height:1;">Outils<br>texte</span>
+			<div style="width:1px;height:30px;background:#444;"></div>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 4px;" title="Aligner à gauche"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="1" y="14" width="9" height="2" rx="1"/></svg></button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 4px;" title="Centrer"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="3.5" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="3.5" y="14" width="9" height="2" rx="1"/></svg></button>
+			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 4px;" title="Aligner à droite"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="6" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="6" y="14" width="9" height="2" rx="1"/></svg></button>
+			<div style="width:1px;height:30px;background:#444;"></div>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('bold')" style="cursor:pointer;" title="Gras"><b>G</b></button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('italic')" style="cursor:pointer;" title="Italique"><i>I</i></button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('underline')" style="cursor:pointer;" title="Souligné"><u>S</u></button>
-			<span style="font-size:10px;color:#ccc;">Texte :</span>
-			<div class="cpick-wrap" id="cpick-text-color"><div class="cpick-swatch" style="background:#000000;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('text-color',this)"></div><div class="cpick-popup" id="cpick-pop-text-color"></div></div>
-			<span style="font-size:10px;color:#ccc;">Surligner :</span>
-			<div class="cpick-wrap" id="cpick-highlight-color"><div class="cpick-swatch" style="background:#ffff00;" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('highlight-color',this)"></div><div class="cpick-popup" id="cpick-pop-highlight-color"></div></div>
-			<span style="font-size:10px;color:#ccc;">Fond widget :</span>
-			<div class="cpick-wrap" id="cpick-widget-bg"><div class="cpick-swatch" style="background:#ffffff;border:1px solid #888;" onclick="cpickOpen('widget-bg',this)"></div><div class="cpick-popup" id="cpick-pop-widget-bg"></div></div>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="toggleTransparencyGlobal()" style="cursor:pointer;" title="Fond transparent"><span class="icon-transparency"></span></button>
-				<span style="font-size:10px;color:#ccc;">Opacité fond :</span>
-				<input type="range" id="widget-bg-opacity" min="0" max="100" value="100"
-					onmousedown="savedSelection=saveCurrentSelection()"
-					oninput="applyWidgetBgOpacity(this.value)"
-					style="width:70px;cursor:pointer;">
-				<span id="widget-bg-opacity-val" style="color:#fff;font-size:11px;min-width:28px;">100%</span>
-			<select onmousedown="savedSelection=saveCurrentSelection()" onchange="formatFontFamilyGlobal(this.value)" style="width:140px; cursor:pointer;" ">
+			<div style="width:1px;height:30px;background:#444;"></div>
+			<div class="cpick-wrap" id="cpick-text-color">
+				<button class="cpick-label-btn" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('text-color',this)" title="Couleur du texte">Couleur<br>texte</button>
+				<div class="cpick-popup" id="cpick-pop-text-color"></div>
+			</div>
+			<div class="cpick-wrap" id="cpick-highlight-color">
+				<button class="cpick-label-btn" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('highlight-color',this)" title="Couleur de surlignage">Couleur<br>surlignage</button>
+				<div class="cpick-popup" id="cpick-pop-highlight-color"></div>
+			</div>
+			<div class="cpick-wrap" id="cpick-widget-bg">
+				<button class="cpick-label-btn" onclick="cpickOpen('widget-bg',this)" title="Couleur du fond">Couleur<br>fond</button>
+				<div class="cpick-popup" id="cpick-pop-widget-bg"></div>
+			</div>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+				<span style="font-size:10px;color:#ccc;white-space:nowrap;">Opacité fond</span>
+				<div style="display:flex;align-items:center;gap:4px;">
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="toggleBgOpacityGlobal()" style="cursor:pointer;" title="Fond transparent / opaque"><span class="icon-transparency"></span></button>
+					<input type="range" id="widget-bg-opacity" min="0" max="100" value="100"
+						onmousedown="savedSelection=saveCurrentSelection()"
+						oninput="applyWidgetBgOpacity(this.value)"
+						style="width:70px;cursor:pointer;">
+					<span id="widget-bg-opacity-val" style="color:#fff;font-size:10px;min-width:28px;">100%</span>
+				</div>
+			</div>
+			<div style="width:1px;height:30px;background:#444;"></div>
+			<select onmousedown="savedSelection=saveCurrentSelection()" onchange="formatFontFamilyGlobal(this.value)" style="width:100px; cursor:pointer;" ">
 				<option value="Arial, sans-serif">Arial</option>
 				<option value="'Segoe UI', sans-serif">Segoe UI</option>
 				<option value="'Comic Sans MS', cursive">Comic Sans MS</option>
 				<option value="Verdana, sans-serif">Verdana</option>
-				<option value="'KGPerfectPenmanship', sans-serif">KGPerfectPenmanship</option>
+				<option value="'KGPerfectPenmanship', sans-serif">KG Perfect Penmanship</option>
 				<option value="'Andika', sans-serif">Andika</option>
 				<option value="'OpenDyslexicLocal', sans-serif">OpenDyslexic</option>
 				<option value="'BelleAllureGS', cursive">Belle Allure GS</option>
@@ -1010,6 +1025,7 @@
 			</select>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
+			<div style="width:1px;height:30px;background:#444;"></div>
 			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;" ">✖</button>
 		</div>
 	</div>
@@ -1043,6 +1059,7 @@
 				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>&nbsp;&nbsp;Défi Calme</div>
 				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎡</span>&nbsp;&nbsp;Tirage au Sort</div>
 				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
+				<div class="mm-sub-item" onclick="createWidget('sonometre');closeMainMenu()"><span class="mm-ico">🔊</span>&nbsp;&nbsp;Sonomètre</div>
 				</div></div>
 			</div>
 
@@ -2006,6 +2023,7 @@ function _updateEraserBtnInPanel() {
 <div id="laser-pointer"></div>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
+<script src="widget-sonometre.js"></script>
 <script src="widget-mots-alpha.js"></script>
 <script src="widgets_minuteur_chrono.js"></script>
 <script src="widget-tirage.js"></script>
