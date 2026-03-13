@@ -41,6 +41,21 @@ function openTextToolbar(widget) {
     const label  = document.getElementById('widget-bg-opacity-val');
     if (slider) { slider.value = Math.round(opacity * 100); }
     if (label)  { label.textContent = Math.round(opacity * 100) + '%'; }
+    // Synchroniser le swatch fond widget sans déclencher l'action métier
+    const bgColor = widget.dataset.bgColor || '#ffffff';
+    if (typeof _cpickValues !== 'undefined') {
+        _cpickValues['widget-bg'] = bgColor;
+        const swatchBg = document.querySelector('#cpick-widget-bg .cpick-swatch');
+        if (swatchBg) swatchBg.style.background = bgColor;
+    }
+    // Synchroniser le bouton animation
+    const currentAnim = widget.dataset.animation || 'none';
+    const animBtn = document.getElementById('anim-picker-btn');
+    if (animBtn) {
+        animBtn.innerHTML = (typeof ANIM_LABELS !== 'undefined' ? ANIM_LABELS[currentAnim] : null) || '✨<br>Anim';
+        animBtn.style.color = currentAnim !== 'none' ? '#6aaee8' : '';
+        animBtn.style.borderColor = currentAnim !== 'none' ? '#6aaee8' : '';
+    }
 }
 
 // =========================================================================
@@ -224,18 +239,26 @@ function formatFontFamilyGlobal(font) {
     saveBoard();
 }
 
-function changeWidgetBgGlobal(input, color) {
+function toggleBgOpacityGlobal() {
     if (!currentActiveWidget) return;
-    const c = currentActiveWidget.querySelector('.editor-container'); if (!c) return;
     snapshotNow();
-    applyTransparency(currentActiveWidget, false); c.style.background=color; currentActiveWidget.dataset.bgColor=color; saveBoard();
+    const current = parseFloat(currentActiveWidget.dataset.bgOpacity ?? 1);
+    const newOpacity = current > 0 ? 0 : 1;
+    currentActiveWidget.dataset.bgOpacity = newOpacity;
+    applyWidgetBgOpacity(Math.round(newOpacity * 100));
 }
 
-function toggleTransparencyGlobal() {
+function changeWidgetBgGlobal(input, color) {
     if (!currentActiveWidget) return;
     snapshotNow();
-    applyTransparency(currentActiveWidget, currentActiveWidget.dataset.transparent!=="true"); saveBoard();
+    currentActiveWidget.dataset.bgColor = color;
+    applyTransparency(currentActiveWidget, false);
+    // Garder _cpickValues en sync pour que le swatch reste à jour
+    if (typeof _cpickValues !== 'undefined') _cpickValues['widget-bg'] = color;
+    saveBoard();
 }
+
+
 
 function applyTextColor(color) {
     if (!currentActiveWidget) return;
@@ -275,4 +298,436 @@ document.addEventListener('dblclick', (e) => {
     const widget = e.target.closest('.widget');
     const isTextOrHomework = widget && (widget.dataset.type==='text' || widget.dataset.type==='homework');
     if (isTextOrHomework) { currentActiveWidget=widget; document.getElementById('global-toolbar').style.display='flex'; syncFontSizeGlobal(); }
+});
+
+// =========================================================================
+// ANIMATIONS WIDGET TEXTE
+// =========================================================================
+const ANIM_CLASSES = ['anim-blink','anim-bounce','anim-swing','anim-pendulum','anim-fade','anim-shimmer','anim-zoompulse'];
+
+// ── Timers JS pour les animations qui nécessitent de forcer les styles inline ──
+const _animTimers = new WeakMap();
+
+function _animStopJS(widget) {
+    const id = _animTimers.get(widget);
+    if (id) clearTimeout(id);
+    _animTimers.delete(widget);
+    // Nettoyer les styles forcés
+    const editor = widget.querySelector('.editor-content');
+    if (editor) {
+        editor.style.removeProperty('color');
+        editor.querySelectorAll('*').forEach(el => el.style.removeProperty('color'));
+        // Nettoyer les spans de vague/scintillement
+        if (editor.dataset.waveWrapped || editor.dataset.twinkleWrapped) {
+            editor.innerHTML = editor.dataset.originalHtml || editor.innerHTML;
+            delete editor.dataset.waveWrapped;
+            delete editor.dataset.twinkleWrapped;
+            delete editor.dataset.originalHtml;
+        }
+    }
+}
+
+// ── Arc-en-ciel ──
+const RAINBOW_COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#3498db','#9b59b6'];
+function _rainbowStart(widget) {
+    if (_animTimers.has(widget)) return;
+    let step = 0;
+    const editor = widget.querySelector('.editor-content');
+    if (!editor) return;
+    function tick() {
+        const color = RAINBOW_COLORS[step % RAINBOW_COLORS.length];
+        editor.style.setProperty('color', color, 'important');
+        editor.querySelectorAll('*').forEach(el => el.style.setProperty('color', color, 'important'));
+        step++;
+        _animTimers.set(widget, setTimeout(tick, 220));
+    }
+    tick();
+}
+
+// ── Chaud/Froid ──
+const HEATCOLD_COLORS = ['#e74c3c','#e67e22','#e8a020','#3498db','#2980b9','#1a6aa8'];
+function _heatcoldStart(widget) {
+    if (_animTimers.has(widget)) return;
+    let step = 0;
+    const editor = widget.querySelector('.editor-content');
+    if (!editor) return;
+    function tick() {
+        const color = HEATCOLD_COLORS[step % HEATCOLD_COLORS.length];
+        editor.style.setProperty('color', color, 'important');
+        editor.querySelectorAll('*').forEach(el => el.style.setProperty('color', color, 'important'));
+        step++;
+        _animTimers.set(widget, setTimeout(tick, 400));
+    }
+    tick();
+}
+
+// ── Vague (wave) : chaque lettre animée en décalé ──
+function _waveStart(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (!editor || editor.dataset.waveWrapped) return;
+    editor.dataset.originalHtml = editor.innerHTML;
+    editor.dataset.waveWrapped = '1';
+    // Découper en spans lettre par lettre
+    const text = editor.innerText;
+    const style = document.createElement('style');
+    style.id = 'wave-style-' + widget.dataset.id;
+    let css = '';
+    editor.innerHTML = '';
+    [...text].forEach((ch, i) => {
+        const span = document.createElement('span');
+        span.className = 'wave-letter';
+        span.style.cssText = `display:inline-block;animation:anim-wave 1s ease-in-out ${(i * 0.08).toFixed(2)}s infinite`;
+        span.textContent = ch === ' ' ? '\u00a0' : ch;
+        editor.appendChild(span);
+        css += `@keyframes anim-wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}`;
+    });
+    if (!document.getElementById('wave-style-' + widget.dataset.id)) {
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+    _animTimers.set(widget, 1); // marquer comme actif
+}
+
+function _waveStop(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (editor && editor.dataset.waveWrapped) {
+        editor.innerHTML = editor.dataset.originalHtml || '';
+        delete editor.dataset.waveWrapped;
+        delete editor.dataset.originalHtml;
+    }
+    const styleEl = document.getElementById('wave-style-' + widget.dataset.id);
+    if (styleEl) styleEl.remove();
+    _animTimers.delete(widget);
+}
+
+// ── Scintillement : lettres aléatoires changent d'opacité ──
+function _twinkleStart(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (!editor || editor.dataset.twinkleWrapped) return;
+    editor.dataset.originalHtml = editor.innerHTML;
+    editor.dataset.twinkleWrapped = '1';
+    const text = editor.innerText;
+    editor.innerHTML = '';
+    [...text].forEach(ch => {
+        const span = document.createElement('span');
+        span.className = 'twinkle-letter';
+        span.style.display = 'inline-block';
+        span.textContent = ch === ' ' ? '\u00a0' : ch;
+        editor.appendChild(span);
+    });
+    function flicker() {
+        editor.querySelectorAll('.twinkle-letter').forEach(s => {
+            s.style.opacity = (Math.random() > 0.15) ? '1' : (Math.random() * 0.3).toFixed(2);
+        });
+        _animTimers.set(widget, setTimeout(flicker, 150));
+    }
+    flicker();
+}
+
+function _twinkleStop(widget) {
+    const id = _animTimers.get(widget);
+    if (id && id !== 1) clearTimeout(id);
+    _animTimers.delete(widget);
+    const editor = widget.querySelector('.editor-content');
+    if (editor && editor.dataset.twinkleWrapped) {
+        editor.innerHTML = editor.dataset.originalHtml || '';
+        delete editor.dataset.twinkleWrapped;
+        delete editor.dataset.originalHtml;
+    }
+}
+
+// ── Feu : dégradé rouge/orange/jaune animé sur le texte ──
+function _fireStart(widget) {
+    if (_animTimers.has(widget)) return;
+    const FIRE = [
+        ['#ff0000','#ff4400','#ff8800'],
+        ['#ff2200','#ff6600','#ffaa00'],
+        ['#ff4400','#ff8800','#ffcc00'],
+        ['#ff6600','#ffaa00','#ffee00'],
+        ['#ff4400','#ff7700','#ffbb00'],
+        ['#ff1100','#ff5500','#ff9900'],
+    ];
+    let step = 0;
+    const editor = widget.querySelector('.editor-content');
+    if (!editor) return;
+    function tick() {
+        const [c1, c2, c3] = FIRE[step % FIRE.length];
+        const grad = `linear-gradient(to top, ${c1} 0%, ${c2} 50%, ${c3} 100%)`;
+        editor.style.setProperty('background', grad, 'important');
+        editor.style.setProperty('-webkit-background-clip', 'text', 'important');
+        editor.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+        editor.style.setProperty('background-clip', 'text', 'important');
+        editor.querySelectorAll('*').forEach(el => {
+            el.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+            el.style.setProperty('color', 'transparent', 'important');
+        });
+        step++;
+        _animTimers.set(widget, setTimeout(tick, 120));
+    }
+    tick();
+}
+
+function _fireStop(widget) {
+    const id = _animTimers.get(widget);
+    if (id) clearTimeout(id);
+    _animTimers.delete(widget);
+    const editor = widget.querySelector('.editor-content');
+    if (editor) {
+        editor.style.removeProperty('background');
+        editor.style.removeProperty('-webkit-background-clip');
+        editor.style.removeProperty('-webkit-text-fill-color');
+        editor.style.removeProperty('background-clip');
+        editor.querySelectorAll('*').forEach(el => {
+            el.style.removeProperty('-webkit-text-fill-color');
+            el.style.removeProperty('color');
+        });
+    }
+}
+
+// ── Machine à sous : chaque lettre défile verticalement avant stabilisation ──
+function _slotsStart(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (!editor || editor.dataset.slotsWrapped) return;
+    editor.dataset.originalHtml = editor.innerHTML;
+    editor.dataset.slotsWrapped = '1';
+    const text = editor.innerText;
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?*#@';
+
+    editor.innerHTML = '';
+    const spans = [];
+    [...text].forEach(ch => {
+        const span = document.createElement('span');
+        span.style.cssText = 'display:inline-block;overflow:hidden;vertical-align:middle;';
+        span.dataset.target = ch;
+        editor.appendChild(span);
+        spans.push(span);
+    });
+
+    function runSlot(span, delay) {
+        const target = span.dataset.target;
+        if (target === ' ' || target === '\u00a0') { span.textContent = '\u00a0'; return; }
+        let count = 0;
+        const maxSteps = 10 + Math.floor(Math.random() * 8);
+        function step() {
+            if (count < maxSteps) {
+                span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+                count++;
+                setTimeout(step, 60);
+            } else {
+                span.textContent = target;
+            }
+        }
+        setTimeout(step, delay);
+    }
+
+    function runCycle() {
+        spans.forEach((span, i) => runSlot(span, i * 80));
+        const totalDelay = spans.length * 80 + 18 * 60 + 800;
+        _animTimers.set(widget, setTimeout(runCycle, totalDelay));
+    }
+    runCycle();
+}
+
+function _slotsStop(widget) {
+    const id = _animTimers.get(widget);
+    if (id && id !== 1) clearTimeout(id);
+    _animTimers.delete(widget);
+    const editor = widget.querySelector('.editor-content');
+    if (editor && editor.dataset.slotsWrapped) {
+        editor.innerHTML = editor.dataset.originalHtml || '';
+        delete editor.dataset.slotsWrapped;
+        delete editor.dataset.originalHtml;
+    }
+}
+
+// ── Pluie : les lettres tombent depuis le haut une par une en boucle ──
+function _rainStart(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (!editor || editor.dataset.rainWrapped) return;
+    editor.dataset.originalHtml = editor.innerHTML;
+    editor.dataset.rainWrapped = '1';
+    const text = editor.innerText;
+
+    editor.innerHTML = '';
+    const spans = [];
+    [...text].forEach(ch => {
+        const span = document.createElement('span');
+        span.style.cssText = 'display:inline-block;opacity:0;transform:translateY(-20px);transition:none;';
+        span.textContent = ch === ' ' ? '\u00a0' : ch;
+        editor.appendChild(span);
+        spans.push(span);
+    });
+
+    function runRain() {
+        // Reset toutes les lettres
+        spans.forEach(s => { s.style.opacity = '0'; s.style.transform = 'translateY(-20px)'; s.style.transition = 'none'; });
+        // Faire tomber une par une
+        spans.forEach((span, i) => {
+            setTimeout(() => {
+                span.style.transition = 'opacity 0.2s ease, transform 0.3s ease';
+                span.style.opacity = '1';
+                span.style.transform = 'translateY(0)';
+            }, i * 80);
+        });
+        const totalDelay = spans.length * 80 + 400 + 800;
+        _animTimers.set(widget, setTimeout(runRain, totalDelay));
+    }
+    runRain();
+}
+
+function _rainStop(widget) {
+    const id = _animTimers.get(widget);
+    if (id && id !== 1) clearTimeout(id);
+    _animTimers.delete(widget);
+    const editor = widget.querySelector('.editor-content');
+    if (editor && editor.dataset.rainWrapped) {
+        editor.innerHTML = editor.dataset.originalHtml || '';
+        delete editor.dataset.rainWrapped;
+        delete editor.dataset.originalHtml;
+    }
+}
+
+// ── Typewriter : le texte s'efface puis se retape lettre par lettre en boucle ──
+function _typewriterStart(widget) {
+    const editor = widget.querySelector('.editor-content');
+    if (!editor || editor.dataset.twWrapped) return;
+    editor.dataset.originalHtml = editor.innerHTML;
+    editor.dataset.twWrapped = '1';
+    const fullText = editor.innerText;
+    editor.textContent = '';
+
+    function typePhase(i, cb) {
+        if (i > fullText.length) { setTimeout(cb, 1000); return; }
+        editor.textContent = fullText.slice(0, i);
+        _animTimers.set(widget, setTimeout(() => typePhase(i + 1, cb), 80));
+    }
+    function erasePhase(i, cb) {
+        if (i < 0) { setTimeout(cb, 400); return; }
+        editor.textContent = fullText.slice(0, i);
+        _animTimers.set(widget, setTimeout(() => erasePhase(i - 1, cb), 50));
+    }
+    function cycle() {
+        typePhase(0, () => erasePhase(fullText.length, cycle));
+    }
+    cycle();
+}
+
+function _typewriterStop(widget) {
+    const id = _animTimers.get(widget);
+    if (id && id !== 1) clearTimeout(id);
+    _animTimers.delete(widget);
+    const editor = widget.querySelector('.editor-content');
+    if (editor && editor.dataset.twWrapped) {
+        editor.innerHTML = editor.dataset.originalHtml || '';
+        delete editor.dataset.twWrapped;
+        delete editor.dataset.originalHtml;
+    }
+}
+
+// ── Stop toutes animations JS ──
+function _stopAllAnimJS(widget) {
+    const anim = widget.dataset.animation;
+    if (anim === 'rainbow') {
+        const id = _animTimers.get(widget);
+        if (id) clearTimeout(id);
+        _animTimers.delete(widget);
+        const editor = widget.querySelector('.editor-content');
+        if (editor) {
+            editor.style.removeProperty('color');
+            editor.querySelectorAll('*').forEach(el => el.style.removeProperty('color'));
+        }
+    } else if (anim === 'fire')       { _fireStop(widget); }
+    else if (anim === 'wave')         { _waveStop(widget); }
+    else if (anim === 'twinkle')      { _twinkleStop(widget); }
+    else if (anim === 'rain')         { _rainStop(widget); }
+    else if (anim === 'typewriter')   { _typewriterStop(widget); }
+}
+
+// ── Labels pour le bouton toolbar ──
+const ANIM_LABELS = {
+    none:'✨<br>Anim', blink:'💡<br>Anim', bounce:'🏀<br>Anim',
+    swing:'🎵<br>Anim', pendulum:'🎪<br>Anim', fade:'🌫️<br>Anim',
+    shimmer:'🔦<br>Anim', twinkle:'✨<br>Anim', wave:'🌊<br>Anim', zoompulse:'🎯<br>Anim',
+    rainbow:'🌈<br>Anim', fire:'🔥<br>Anim',
+    rain:'🌧️<br>Anim', typewriter:'🎭<br>Anim'
+};
+
+function toggleAnimPicker(btn) {
+    const pop = document.getElementById('anim-picker-pop');
+    if (!pop) return;
+    const isOpen = pop.classList.contains('open');
+    document.querySelectorAll('.cpick-popup.open').forEach(p => p.classList.remove('open'));
+    if (isOpen) { pop.classList.remove('open'); return; }
+
+    pop.classList.add('open');
+    requestAnimationFrame(() => {
+        const rect = btn.getBoundingClientRect();
+        let top = rect.top - pop.offsetHeight - 8;
+        let left = rect.left;
+        if (top < 8) top = rect.bottom + 8;
+        if (left + pop.offsetWidth > window.innerWidth - 8) left = window.innerWidth - pop.offsetWidth - 8;
+        pop.style.top  = top + 'px';
+        pop.style.left = left + 'px';
+    });
+
+    const current = currentActiveWidget ? (currentActiveWidget.dataset.animation || 'none') : 'none';
+    pop.querySelectorAll('button').forEach(b => {
+        const animName = b.onclick?.toString().match(/'([^']+)'/)?.[1];
+        b.classList.toggle('active-anim', animName === current);
+    });
+}
+
+function applyWidgetAnimation(name) {
+    if (!currentActiveWidget) return;
+    snapshotNow();
+
+    // Stopper toutes les animations JS en cours
+    _stopAllAnimJS(currentActiveWidget);
+
+    // Retirer toutes les classes CSS d'animation
+    ANIM_CLASSES.forEach(c => currentActiveWidget.classList.remove(c));
+
+    if (name && name !== 'none') {
+        currentActiveWidget.dataset.animation = name;
+        // Animations CSS pures
+        if (['blink','bounce','swing','pendulum','fade','shimmer','zoompulse'].includes(name)) {
+            currentActiveWidget.classList.add('anim-' + name);
+        }
+        // Animations JS
+        else if (name === 'rainbow')    _rainbowStart(currentActiveWidget);
+        else if (name === 'fire')       _fireStart(currentActiveWidget);
+        else if (name === 'wave')       _waveStart(currentActiveWidget);
+        else if (name === 'twinkle')    _twinkleStart(currentActiveWidget);
+        else if (name === 'rain')       _rainStart(currentActiveWidget);
+        else if (name === 'typewriter') _typewriterStart(currentActiveWidget);
+    } else {
+        delete currentActiveWidget.dataset.animation;
+    }
+
+    // Mettre à jour le picker
+    const pop = document.getElementById('anim-picker-pop');
+    if (pop) pop.querySelectorAll('button').forEach(b => {
+        const animName = b.onclick?.toString().match(/'([^']+)'/)?.[1];
+        b.classList.toggle('active-anim', animName === (name || 'none'));
+    });
+
+    // Mettre à jour le bouton toolbar
+    const animBtn = document.getElementById('anim-picker-btn');
+    if (animBtn) {
+        animBtn.innerHTML = ANIM_LABELS[name] || '✨<br>Anim';
+        animBtn.style.color = (name && name !== 'none') ? '#6aaee8' : '';
+        animBtn.style.borderColor = (name && name !== 'none') ? '#6aaee8' : '';
+    }
+
+    saveBoard();
+}
+
+// Fermer le picker anim si on clique en dehors
+document.addEventListener('mousedown', (e) => {
+    const pop = document.getElementById('anim-picker-pop');
+    if (pop && pop.classList.contains('open') &&
+        !e.target.closest('#anim-picker-pop') &&
+        !e.target.closest('#anim-picker-btn')) {
+        pop.classList.remove('open');
+    }
 });

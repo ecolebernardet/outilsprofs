@@ -10,7 +10,7 @@
             --widget-bg: #ffffff;
             --primary-color: #4a90e2;
             --text-color: #333;
-            --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --shadow: none;
             --border-radius: 18px;
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; overflow-y: auto; }
@@ -629,6 +629,41 @@
 		.cpick-wrap { position: relative; display: inline-flex; align-items: center; }
 		.cpick-label-btn { cursor: pointer; background: #3a3a4a; color: #eee; border: 1px solid #555; border-radius: 5px; padding: 2px 6px; font-size: 10px; line-height: 1.4; text-align: center; white-space: nowrap; }
 		.cpick-label-btn:hover { background: #4a4a5a; border-color: #7ab8f5; }
+
+		/* ── Animations widget texte ── */
+		@keyframes anim-blink    { 0%,100%{opacity:1} 50%{opacity:0} }
+		@keyframes anim-pulse    { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+		@keyframes anim-bounce   { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-10px)} 70%{transform:translateY(-5px)} }
+		@keyframes anim-swing    { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(3deg)} 75%{transform:rotate(-3deg)} }
+		@keyframes anim-shake    { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+		@keyframes anim-pendulum { 0%,100%{transform:rotate(-12deg)} 50%{transform:rotate(12deg)} }
+		@keyframes anim-fade     { 0%,100%{opacity:1} 50%{opacity:0.2} }
+		@keyframes anim-shimmer  { 0%{background-position:-200% center} 100%{background-position:200% center} }
+		@keyframes anim-zoompulse { 0%,100%{transform:scale(1)} 10%{transform:scale(1.18)} 20%{transform:scale(1)} 30%{transform:scale(1.12)} 45%{transform:scale(1)} }
+		.anim-blink    { animation: anim-blink    1s step-start infinite; }
+		.anim-pulse    { animation: anim-pulse    1.2s ease-in-out infinite; }
+		.anim-bounce   { animation: anim-bounce   1s ease infinite; }
+		.anim-swing    { animation: anim-swing    1.5s ease-in-out infinite; transform-origin: top center; }
+		.anim-shake    { animation: anim-shake    0.5s ease-in-out infinite; }
+		.anim-pendulum { animation: anim-pendulum 2s ease-in-out infinite; transform-origin: top center; }
+		.anim-fade     { animation: anim-fade     2s ease-in-out infinite; }
+		.anim-zoompulse { animation: anim-zoompulse 2.5s ease-in-out infinite; }
+		.anim-shimmer .editor-content {
+			background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%) no-repeat;
+			background-size: 200% auto;
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			animation: anim-shimmer 2s linear infinite;
+		}
+
+		/* Bouton anim dans toolbar */
+		#anim-picker-pop { display:none; position:fixed; background:#1F1F21; border:1px solid #555; border-radius:10px; padding:8px; z-index:14000; box-shadow:0 4px 16px rgba(0,0,0,0.5); min-width:140px; }
+		#anim-picker-pop.open { display:block; }
+		#anim-picker-pop button { display:block; width:100%; text-align:left; background:none; border:none; color:#eee; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:12px; white-space:nowrap; }
+		#anim-picker-pop button:hover { background:#333; }
+		#anim-picker-pop button.active-anim { background:#2a4a6a; color:#6aaee8; font-weight:bold; }
+		#anim-picker-pop .anim-sep { height:1px; background:#444; margin:4px 0; }
 		.cpick-swatch {
 			width: 30px; height: 26px; border-radius: 6px; border: 2px solid #555;
 			cursor: pointer; flex-shrink: 0; transition: border-color .15s;
@@ -1025,6 +1060,32 @@
 			</select>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
 			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
+			<div style="width:1px;height:30px;background:#444;"></div>
+			<button id="anim-picker-btn" onclick="toggleAnimPicker(this)" class="cpick-label-btn" title="Animation du widget">✨<br>Anim</button>
+			<div id="anim-picker-pop">
+				<button onclick="applyWidgetAnimation('none')">⛔ Aucune</button>
+				<div class="anim-sep"></div>
+				<div style="color:#888;font-size:10px;padding:2px 8px;">Mouvement</div>
+				<button onclick="applyWidgetAnimation('bounce')">🏀 Rebond</button>
+				<button onclick="applyWidgetAnimation('swing')">🎵 Oscillation</button>
+				<button onclick="applyWidgetAnimation('pendulum')">🎪 Balancier</button>
+				<button onclick="applyWidgetAnimation('wave')">🌊 Vague</button>
+				<button onclick="applyWidgetAnimation('zoompulse')">🎯 Zoom pulse</button>
+				<div class="anim-sep"></div>
+				<div style="color:#888;font-size:10px;padding:2px 8px;">Visibilité</div>
+				<button onclick="applyWidgetAnimation('blink')">💡 Clignotement</button>
+				<button onclick="applyWidgetAnimation('fade')">🌫️ Fondu</button>
+				<button onclick="applyWidgetAnimation('shimmer')">🔦 Surbrillance</button>
+				<button onclick="applyWidgetAnimation('twinkle')">✨ Scintillement</button>
+				<div class="anim-sep"></div>
+				<div style="color:#888;font-size:10px;padding:2px 8px;">Couleur</div>
+				<button onclick="applyWidgetAnimation('rainbow')">🌈 Arc-en-ciel</button>
+				<button onclick="applyWidgetAnimation('fire')">🔥 Feu</button>
+				<div class="anim-sep"></div>
+				<div style="color:#888;font-size:10px;padding:2px 8px;">Lettre par lettre</div>
+				<button onclick="applyWidgetAnimation('rain')">🌧️ Pluie</button>
+				<button onclick="applyWidgetAnimation('typewriter')">🎭 Typewriter</button>
+			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
 			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;" ">✖</button>
 		</div>

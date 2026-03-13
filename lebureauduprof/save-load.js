@@ -89,6 +89,7 @@ function buildBoardState() {
 			transform: w.style.transform || null,
 			pdfId: w.dataset.pdfId || null,
 			pdfName: w.dataset.pdfName || null,
+			animation: w.dataset.animation || null,
 			monnaieData
 		});
     });
@@ -280,16 +281,22 @@ function restoreBoardFromJSON(json) {
                 if (rgb) {
                     const newBg = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${w.bgOpacity})`;
                     widget.style.background = newBg;
+                    const wc = widget.querySelector('.widget-content');
+                    if (wc) wc.style.background = newBg;
                     const c2 = widget.querySelector('.editor-container');
                     if (c2) c2.style.background = newBg;
                     widget.dataset.bgOpacity = w.bgOpacity;
                 } else {
                     widget.style.background = w.bgColor;
+                    const wc = widget.querySelector('.widget-content');
+                    if (wc) wc.style.background = w.bgColor;
                     const c2 = widget.querySelector('.editor-container');
                     if (c2) c2.style.background = w.bgColor;
                 }
             } else {
                 widget.style.background = w.bgColor;
+                const wc = widget.querySelector('.widget-content');
+                if (wc) wc.style.background = w.bgColor;
                 const c2 = widget.querySelector('.editor-container');
                 if (c2) c2.style.background = w.bgColor;
                 widget.dataset.bgOpacity = 1;
@@ -298,6 +305,24 @@ function restoreBoardFromJSON(json) {
         if (w.background) { widget.style.zIndex = 1; widget.dataset.background = "true"; }
         else if (w.pinned) bringToFront(widget, true);
         if (w.groupId) widget.dataset.groupId = w.groupId;
+        // Restaurer l'animation si elle existe
+        if (w.animation) {
+            widget.dataset.animation = w.animation;
+            const cssAnims = ['blink','bounce','swing','pendulum','fade','shimmer','zoompulse'];
+            cssAnims.forEach(a => widget.classList.remove('anim-' + a));
+            if (cssAnims.includes(w.animation)) {
+                widget.classList.add('anim-' + w.animation);
+            } else {
+                setTimeout(() => {
+                    if (w.animation === 'rainbow'    && typeof _rainbowStart    === 'function') _rainbowStart(widget);
+                    if (w.animation === 'fire'       && typeof _fireStart       === 'function') _fireStart(widget);
+                    if (w.animation === 'wave'       && typeof _waveStart       === 'function') _waveStart(widget);
+                    if (w.animation === 'twinkle'    && typeof _twinkleStart    === 'function') _twinkleStart(widget);
+                    if (w.animation === 'rain'       && typeof _rainStart       === 'function') _rainStart(widget);
+                    if (w.animation === 'typewriter' && typeof _typewriterStart === 'function') _typewriterStart(widget);
+                }, 150);
+            }
+        }
 
         // Widgets texte/devoirs : démarrer en mode non-éditable (drag par défaut)
         if (w.type === 'text' || w.type === 'homework') {
