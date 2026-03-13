@@ -412,24 +412,35 @@ function initSelectionControls() {
             selectedStrokes.forEach(s => { s.pinned = !allPinned; });
             if (typeof redrawStrokes === 'function') redrawStrokes();
         }
-        // Mettre à jour l'apparence du bouton (fond jaune si épinglé)
+        // Retirer background des strokes quand on épingle
+        if (typeof selectedStrokes !== 'undefined') {
+            selectedStrokes.forEach(s => { s.background = false; });
+        }
+        // Mettre à jour l'apparence des boutons
         const pinBtn = document.getElementById('sc-pin-btn');
         const strokesPinned = typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0 && selectedStrokes.every(s => s.pinned);
         const widgetsPinned = selectedWidgets.length > 0 && selectedWidgets.every(w => w.dataset.pinned === 'true');
         pinBtn.classList.toggle('pinned', strokesPinned || widgetsPinned);
+        document.getElementById('sc-back-btn').classList.remove('background');
         saveBoard();
     };
     document.getElementById('sc-back-btn').onclick = (e) => {
         e.stopPropagation();
         selectedWidgets.forEach(w => sendToBack(w));
-        // Pour les strokes : retirer le flag pinned et redessiner sur le canvas normal
+        // Pour les strokes : toggler le flag background (et retirer pinned)
         if (typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0) {
-            selectedStrokes.forEach(s => { s.pinned = false; });
+            const allBackground = selectedStrokes.every(s => s.background);
+            selectedStrokes.forEach(s => {
+                s.background = !allBackground;
+                s.pinned = false;
+            });
             if (typeof redrawStrokes === 'function') redrawStrokes();
         }
         const widgetsBackground = selectedWidgets.length > 0 && selectedWidgets.every(w => w.dataset.background === 'true');
+        const strokesBackground = typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0 && selectedStrokes.every(s => s.background);
         document.getElementById('sc-pin-btn').classList.remove('pinned');
-        document.getElementById('sc-back-btn').classList.toggle('background', widgetsBackground);
+        document.getElementById('sc-back-btn').classList.toggle('background', widgetsBackground || strokesBackground);
+        saveBoard();
     };
     document.getElementById('sc-menu-btn').onclick = (e) => {
         e.stopPropagation();
@@ -771,7 +782,8 @@ function updateSelectionOverlay() {
     }
     if (backBtn) {
         const widgetsBackground = selectedWidgets.length > 0 && selectedWidgets.every(w => w.dataset.background === 'true');
-        backBtn.classList.toggle('background', widgetsBackground);
+        const strokesBackground = typeof selectedStrokes !== 'undefined' && selectedStrokes.length > 0 && selectedStrokes.every(s => s.background);
+        backBtn.classList.toggle('background', widgetsBackground || strokesBackground);
     }
 
     if (mergeBtn && ungroupBtn) {

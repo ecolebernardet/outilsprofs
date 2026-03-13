@@ -97,24 +97,30 @@ function applyTransparency(widget, isT) {
         if (label)  label.textContent = '0%';
     } else {
         const bg = widget.dataset.bgColor || '#ffffff';
-        widget.style.background = '';
+        const opacity = parseFloat(widget.dataset.bgOpacity ?? 1);
+        let finalBg = bg;
+        if (opacity < 1) {
+            const rgb = hexToRgb(bg);
+            if (rgb) finalBg = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+        }
+        widget.style.background = finalBg;
         widget.style.boxShadow  = '';
         widget.style.border     = '';
-        if (c) c.style.background = bg;
-        widget.dataset.bgOpacity = 1;
+        const wc = widget.querySelector('.widget-content');
+        if (wc) wc.style.background = finalBg;
+        if (c) c.style.background = finalBg;
         const slider = document.getElementById('widget-bg-opacity');
         const label  = document.getElementById('widget-bg-opacity-val');
-        if (slider) slider.value = 100;
-        if (label)  label.textContent = '100%';
+        if (slider) slider.value = Math.round(opacity * 100);
+        if (label)  label.textContent = Math.round(opacity * 100) + '%';
     }
 }
 
 function changeWidgetBg(input, color) {
     const widget = input.closest('.widget');
     snapshotNow();
-    applyTransparency(widget, false);
-    widget.style.background = color;
     widget.dataset.bgColor = color;
+    applyTransparency(widget, false);
     saveBoard();
 }
 
@@ -130,12 +136,16 @@ function applyWidgetBgOpacity(value) {
     const c = currentActiveWidget.querySelector('.editor-container');
     if (!c) return;
     const opacity = parseInt(value) / 100;
+    const slider = document.getElementById('widget-bg-opacity');
+    if (slider) slider.value = value;
     document.getElementById('widget-bg-opacity-val').textContent = value + '%';
     const currentBg = currentActiveWidget.dataset.bgColor || '#ffffff';
     const rgb = hexToRgb(currentBg);
     if (!rgb) return;
     const newBg = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
     currentActiveWidget.style.background = newBg;
+    const wc = currentActiveWidget.querySelector('.widget-content');
+    if (wc) wc.style.background = newBg;
     c.style.background = newBg;
     currentActiveWidget.dataset.bgOpacity = opacity;
     saveBoard();

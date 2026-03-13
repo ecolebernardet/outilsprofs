@@ -104,25 +104,21 @@ function cpickOpen(id, swatchEl) {
         } catch(e) {}
     }
 
-    // Positionner au-dessus du swatch
+    // Afficher d'abord pour avoir les vraies dimensions
     pop.classList.add('open');
-    const rect = swatchEl.getBoundingClientRect();
-    let top  = rect.top - pop.offsetHeight - 8;
-    let left = rect.left;
 
-    // Ajuster si sort de l'écran
-    if (top < 8) top = rect.bottom + 8;
-    if (left + 198 > window.innerWidth - 8) left = window.innerWidth - 206;
-    if (left < 8) left = 8;
-
-    pop.style.top  = top + 'px';
-    pop.style.left = left + 'px';
-
-    // Repositionner après rendu (hauteur réelle)
+    // Positionner après rendu (hauteur réelle disponible)
     requestAnimationFrame(() => {
-        let t = rect.top - pop.offsetHeight - 8;
-        if (t < 8) t = rect.bottom + 8;
-        pop.style.top = t + 'px';
+        const rect = swatchEl.getBoundingClientRect();
+        let top  = rect.top - pop.offsetHeight - 8;
+        let left = rect.left;
+
+        if (top < 8) top = rect.bottom + 8;
+        if (left + 198 > window.innerWidth - 8) left = window.innerWidth - 206;
+        if (left < 8) left = 8;
+
+        pop.style.top  = top + 'px';
+        pop.style.left = left + 'px';
     });
 
     // Mettre à jour la sélection courante dans la grille
@@ -162,6 +158,9 @@ function cpickSet(id, color, closeAfter = true) {
 
     if (closeAfter && id !== 'text-color' && id !== 'highlight-color') {
         if (pop) pop.classList.remove('open');
+        if (id === 'board-bg') {
+            document.querySelectorAll('.cpick-active').forEach(p => p.classList.remove('cpick-active'));
+        }
     }
 }
 
@@ -197,6 +196,9 @@ function cpickDispatch(id, color) {
         applyHighlightColor(color);
     } else if (id === 'widget-bg') {
         if (currentActiveWidget) changeWidgetBgGlobal(null, color);
+    } else if (id === 'board-bg') {
+        applyBackground(color);
+        saveBg(color);
     }
 }
 
