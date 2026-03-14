@@ -1660,7 +1660,8 @@ window.onload = () => {
         }
         updateUndoRedoBtns();
         if (typeof scenesInit === 'function') scenesInit();
-		if (typeof initCurrentProjectName === 'function') initCurrentProjectName(); // ← ajout
+		if (typeof initCurrentProjectName === 'function') initCurrentProjectName();
+
     }, 1000);
     if (typeof updateClock === 'function') setInterval(updateClock, 1000);
     window.addEventListener('resize', handleWindowResize);
