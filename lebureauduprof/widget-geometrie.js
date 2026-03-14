@@ -197,6 +197,9 @@ window.closeGeoToolbar = function () {
     }
 };
 
+// Alias utilisé par draw.js pour fermer ce sous-menu
+window.closeGeoSubmenu = window.closeGeoToolbar;
+
 // Appelé depuis le bouton dans la barre dessin
 window.toggleGeoFromDrawBar = function () {
     const btn = document.getElementById('geo-draw-btn');
@@ -205,6 +208,17 @@ window.toggleGeoFromDrawBar = function () {
         bar.classList.remove('open');
         if (btn) { btn.style.background = '#2a2a36'; btn.style.borderColor = '#555'; }
     } else {
+        // Fermer le sous-menu figures géométriques avant d'ouvrir celui-ci
+        const figSub = document.getElementById('figures-submenu');
+        if (figSub) figSub.classList.remove('open');
+        const figBtn = document.getElementById('draw-figures-btn');
+        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+        // Désactiver le bouton sélection
+        const selBtn = document.getElementById('draw-select-btn');
+        if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+        // Désactiver le bouton dessin libre
+        const freeBtn = document.getElementById('draw-free-btn');
+        if (freeBtn) { freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa'; }
         bar.classList.add('open');
         if (btn) { btn.style.background = '#1a2a4a'; btn.style.borderColor = '#a78bfa'; }
     }
@@ -535,13 +549,13 @@ function spawnEquerre(board, cx, cy) {
 
     // Angles
     const ang1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ang1.setAttribute('x', OX + CAT - 20); ang1.setAttribute('y', OY - 12);
+    ang1.setAttribute('x', OX + CAT - 52); ang1.setAttribute('y', OY - 10);
     ang1.setAttribute('font-size', '11'); ang1.setAttribute('fill', '#1a6eab');
     ang1.setAttribute('font-weight', 'bold');
     ang1.textContent = '45°'; svg.appendChild(ang1);
 
     const ang2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ang2.setAttribute('x', OX + 8); ang2.setAttribute('y', OY - CAT + 20);
+    ang2.setAttribute('x', OX + 12); ang2.setAttribute('y', OY - CAT + 46);
     ang2.setAttribute('font-size', '11'); ang2.setAttribute('fill', '#1a6eab');
     ang2.setAttribute('font-weight', 'bold');
     ang2.textContent = '45°'; svg.appendChild(ang2);
@@ -557,6 +571,13 @@ function spawnEquerre(board, cx, cy) {
     rotH.className = 'geo-rot-handle';
     rotH.textContent = '↻';
     rotH.style.cssText = `bottom: 0px; right: 0px; cursor:pointer !important;`;
+
+    // Bouton fermer — à gauche du bouton rotation
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'geo-close-tool';
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = 'position:absolute; bottom:0px; right:28px; cursor:pointer !important;';
+    closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
 
     // Boutons tracer
     const traceWrap = document.createElement('div');
@@ -603,16 +624,10 @@ function spawnEquerre(board, cx, cy) {
     }));
 
     // Fermer
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = 'top:-8px; right:-8px; cursor:pointer !important;';
-    closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
-
     overlay.appendChild(svg);
     overlay.appendChild(rotH);
-    overlay.appendChild(traceWrap);
     overlay.appendChild(closeBtn);
+    overlay.appendChild(traceWrap);
     board.appendChild(overlay);
 
     makeDraggableGeo(overlay);

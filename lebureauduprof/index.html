@@ -232,6 +232,10 @@
         .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
         #board.is-drawing { cursor: crosshair !important; }
         #board.is-drawing * { cursor: crosshair !important; }
+        #board.is-segment-mode { cursor: crosshair !important; }
+        #board.is-segment-mode * { cursor: crosshair !important; }
+        #figures-submenu { display: none; }
+        #figures-submenu.open { display: flex; }
         #board.is-erasing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         /* Curseur gomme */
@@ -1058,8 +1062,23 @@
 				<option value="'Baloo', cursive">Baloo Regular</option>
 				<option value="'MDI', cursive">MDI école</option>
 			</select>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 8px;font-size:16px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+				<span style="font-size:10px;color:#ccc;white-space:nowrap;">Taille police</span>
+				<div style="display:flex;align-items:center;gap:4px;">
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(-2)" style="padding:2px 7px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Réduire la taille">−</button>
+					<span id="font-size-label" style="color:#fff;font-size:11px;min-width:32px;text-align:center;">40</span>
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="adjustFontSize(+2)" style="padding:2px 7px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Augmenter la taille">+</button>
+				</div>
+			</div>
+			<div style="width:1px;height:30px;background:#444;"></div>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+				<span style="font-size:10px;color:#ccc;white-space:nowrap;">Interligne</span>
+				<div style="display:flex;align-items:center;gap:4px;">
+					<button onmousedown="startLHRepeat(-0.01)" onmouseup="stopLHRepeat()" onmouseleave="stopLHRepeat()" style="padding:2px 7px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Resserrer les lignes">−</button>
+					<span id="line-height-label" style="color:#fff;font-size:11px;min-width:36px;text-align:center;">1.20</span>
+					<button onmousedown="startLHRepeat(+0.01)" onmouseup="stopLHRepeat()" onmouseleave="stopLHRepeat()" style="padding:2px 7px;font-size:14px;font-weight:bold;border:1px solid #555;background:#333;color:white;border-radius:4px;cursor:pointer;" title="Écarter les lignes">+</button>
+				</div>
+			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
 			<button id="anim-picker-btn" onclick="toggleAnimPicker(this)" class="cpick-label-btn" title="Animation du widget">✨<br>Anim</button>
 			<div id="anim-picker-pop">
@@ -1163,7 +1182,7 @@
 
 			<!-- Dessin -->
 			<div class="mm-item" id="mm-draw-btn" onclick="openMmPanel('draw')">
-				<span class="mm-ico">✏️</span>&nbsp;&nbsp;Dessin</div>
+				<span class="mm-ico">🎨</span>&nbsp;&nbsp;Dessin &amp; Figures</div>
 		</div>
 
 		<!-- ══ RUBRIQUE A : Système ══ -->
@@ -1201,6 +1220,7 @@
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
 								<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');closeMainMenu()" title="Séyès (jaune paille)"></div>
 								<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');closeMainMenu()" title="Séyès (blanc)"></div>
+								<div class="bg-thumb bg-thumb-seyes-marge" onclick="applyBackground('seyes-marge');saveBg('seyes-marge');closeMainMenu()" title="Séyès clair avec marge"></div>
 								<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');closeMainMenu()" title="Lignes simples"></div>
 								<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');closeMainMenu()" title="Grands carreaux"></div>
 								<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');closeMainMenu()" title="Petits carreaux"></div>
@@ -1227,6 +1247,15 @@
 						</div></div>
 					</div>
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">📋</span>&nbsp;&nbsp;Tableaux enregistrés<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-presets"><div class="mm-sub-inner" style="min-width:200px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📋 Modèles prêts à l'emploi</div>
+							<div class="mm-sub-item" onclick="loadPresetBoard('tableau-vierge');closeMainMenu()"><span class="mm-ico">🌑</span>&nbsp;&nbsp;Tableau vierge</div>
+							<div class="mm-sub-item" onclick="loadPresetBoard('seyes-cursif');closeMainMenu()"><span class="mm-ico">✍️</span>&nbsp;&nbsp;Séyès cursif</div>
+						</div></div>
+					</div>
+					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
 					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes projets</div>
 					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>&nbsp;&nbsp;Exporter JSON</div>
@@ -1247,11 +1276,28 @@
 
 	</div><!-- #main-menu -->
 
+	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
+	<div id="figures-submenu" style="position:fixed;bottom:80px;left:84px;background:#1F1F21;border-radius:12px;padding:8px 12px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13001;border:1px solid #4a90e2;align-items:center;gap:8px;flex-wrap:wrap;">
+		<span style="color:#7ab8f5;font-size:11px;font-weight:700;white-space:nowrap;">📏 Figures géométriques</span>
+		<div style="width:1px;height:24px;background:#333;"></div>
+		<button id="draw-mode-segment-btn"   onclick="setDrawMode('segment');toggleFiguresSubmenu()"   style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">— Segment</button>
+		<button id="draw-mode-carre-btn"     onclick="setDrawMode('carre');toggleFiguresSubmenu()"     style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">□ Carré</button>
+		<button id="draw-mode-rectangle-btn" onclick="setDrawMode('rectangle');toggleFiguresSubmenu()" style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">▭ Rectangle</button>
+		<button id="draw-mode-cercle-btn"    onclick="setDrawMode('cercle');toggleFiguresSubmenu()"    style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">○ Cercle</button>
+		<button id="draw-mode-parallelo-btn" onclick="setDrawMode('parallelo');toggleFiguresSubmenu()" style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">▱ Parallélogramme</button>
+		<button id="draw-mode-losange-btn"   onclick="setDrawMode('losange');toggleFiguresSubmenu()"   style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">◇ Losange</button>
+	</div>
+
 	<!-- Barre outils DESSIN (horizontale, bas-gauche) -->
 	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
 		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+			<!-- Mode sélection -->
+			<button id="draw-select-btn" onclick="toggleSelectMode()" style="padding:6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;" title="Repasser en mode sélection">↖ Sélection</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Modes -->
-			<button id="geo-draw-btn" onclick="toggleGeoFromDrawBar()" style="padding:6px 10px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:12px;font-weight:600;">📐 Géométrie</button>
+			<button id="draw-free-btn" onclick="setDrawMode('free')" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Dessin libre">✏️ Dessin<br>libre</button>
+			<button id="geo-draw-btn" onclick="toggleGeoFromDrawBar()" style="padding:4px 10px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Outils géométriques">📐 Outils<br>géom.</button>
+			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Figures géométriques">📏 Figures<br>géom.</button>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Couleur & taille -->
 			<span style="color:#ccc;font-size:11px;">Couleur</span>
@@ -2083,5 +2129,6 @@ function _updateEraserBtnInPanel() {
 <script src="widget-calcul.js"></script>
 <script src="color-picker.js"></script>
 <script src="toolbar-text.js"></script>
+<script src="preset-boards.js"></script>
 </body>
 </html>

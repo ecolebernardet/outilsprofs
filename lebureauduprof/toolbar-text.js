@@ -36,6 +36,7 @@ function openTextToolbar(widget) {
     const tb = document.getElementById('global-toolbar');
     tb.style.display = 'flex';
     syncFontSizeGlobal();
+    syncLineHeightGlobal();
     const opacity = parseFloat(widget.dataset.bgOpacity ?? 1);
     const slider = document.getElementById('widget-bg-opacity');
     const label  = document.getElementById('widget-bg-opacity-val');
@@ -224,6 +225,8 @@ function adjustFontSize(delta) {
     }
     const newSize = Math.max(8, Math.min(200, currentSize + delta));
     formatFontSizeGlobal(newSize);
+    const label = document.getElementById('font-size-label');
+    if (label) label.textContent = newSize + 'px';
 }
 
 function saveCurrentSelection() {
@@ -273,7 +276,61 @@ function applyHighlightColor(color) {
 }
 
 function syncFontSizeGlobal() {
-    // Plus d'input à synchroniser — boutons +/- seulement
+    if (!currentActiveWidget) return;
+    const editor = currentActiveWidget.querySelector('.editor-content');
+    if (!editor) return;
+    const el = editor.querySelector('[style*="font-size"]') || editor.firstElementChild || editor;
+    const size = parseInt(window.getComputedStyle(el).fontSize) || 40;
+    const label = document.getElementById('font-size-label');
+    if (label) label.textContent = size + 'px';
+}
+
+function syncLineHeightGlobal() {
+    if (!currentActiveWidget) return;
+    const editor = currentActiveWidget.querySelector('.editor-content');
+    if (!editor) return;
+    const lh = parseFloat(editor.style.lineHeight) || 1.2;
+    // Mémoriser la valeur de base si pas encore fait (premier réglage)
+    if (!editor.dataset.lineHeightBase) {
+        editor.dataset.lineHeightBase = lh;
+    }
+    const label = document.getElementById('line-height-label');
+    if (label) label.textContent = lh.toFixed(2);
+}
+
+function adjustLineHeight(delta) {
+    if (!currentActiveWidget) return;
+    const editor = currentActiveWidget.querySelector('.editor-content');
+    if (!editor) return;
+    const current = parseFloat(editor.style.lineHeight) || 1.2;
+    const next = Math.max(0.5, Math.min(5.0, Math.round((current + delta) * 100) / 100));
+    editor.style.lineHeight = next;
+    // Compenser le déplacement de la 1ère ligne
+    const fontSize = parseFloat(window.getComputedStyle(editor).fontSize) || 40;
+    const baseLineHeight = parseFloat(editor.dataset.lineHeightBase) || 1.0;
+    const compensation = -((next - baseLineHeight) * fontSize) / 2;
+    editor.style.marginTop = compensation.toFixed(2) + 'px';
+    const label = document.getElementById('line-height-label');
+    if (label) label.textContent = next.toFixed(2);
+    saveBoard();
+}
+
+// Clic long sur les boutons interligne
+var _lhRepeatTimer = null;
+var _lhRepeatInterval = null;
+
+function startLHRepeat(delta) {
+    adjustLineHeight(delta);
+    _lhRepeatTimer = setTimeout(() => {
+        _lhRepeatInterval = setInterval(() => adjustLineHeight(delta), 80);
+    }, 400);
+}
+
+function stopLHRepeat() {
+    clearTimeout(_lhRepeatTimer);
+    clearInterval(_lhRepeatInterval);
+    _lhRepeatTimer = null;
+    _lhRepeatInterval = null;
 }
 
 function applyFontSizeOnBlur(input) {
@@ -297,7 +354,7 @@ document.addEventListener('dblclick', (e) => {
     // Double-clic sur widget texte : ouvrir la toolbar
     const widget = e.target.closest('.widget');
     const isTextOrHomework = widget && (widget.dataset.type==='text' || widget.dataset.type==='homework');
-    if (isTextOrHomework) { currentActiveWidget=widget; document.getElementById('global-toolbar').style.display='flex'; syncFontSizeGlobal(); }
+    if (isTextOrHomework) { currentActiveWidget=widget; document.getElementById('global-toolbar').style.display='flex'; syncFontSizeGlobal(); syncLineHeightGlobal(); }
 });
 
 // =========================================================================
@@ -730,4 +787,33 @@ document.addEventListener('mousedown', (e) => {
         !e.target.closest('#anim-picker-btn')) {
         pop.classList.remove('open');
     }
+});
+
+// =========================================================================
+// TOUCHE ENTRÉE → <br> simple (pas de nouveau paragraphe)
+// =========================================================================
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const editor = e.target.closest('.editor-content');
+    if (!editor) return;
+    e.preventDefault();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const br = document.createElement('br');
+    range.insertNode(br);
+    // Si le <br> est en fin de contenu, ajouter un second <br> pour que
+    // le curseur puisse se positionner sur la ligne suivante
+    if (!br.nextSibling || (br.nextSibling.nodeType === 3 && br.nextSibling.textContent === '')) {
+        const br2 = document.createElement('br');
+        br.parentNode.insertBefore(br2, br.nextSibling);
+    }
+    // Placer le curseur après le premier <br>
+    const after = document.createRange();
+    after.setStartAfter(br);
+    after.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(after);
+    saveBoard();
 });

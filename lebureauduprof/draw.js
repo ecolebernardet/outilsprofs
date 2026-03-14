@@ -64,8 +64,20 @@ function _boardDrawMouseMove(e)  {
     if (isDrawMode)   { paint(e);            return; }
     if (isEraserMode) { onEraserMouseMove(e); return; }
 }
-function _boardDrawMouseUp()    { if (isDrawMode) endPaint(); else if (isEraserMode) endErase(); }
-function _boardDrawMouseLeave() { if (isDrawMode) endPaint(); else if (isEraserMode) { endErase(); redrawStrokes(); } }
+function _boardDrawMouseUp(e)    {
+    if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) {
+        // Le listener global document mouseup dans startPaint gère tout pour les modes figure
+        return;
+    }
+    if (isDrawMode) endPaint(); else if (isEraserMode) endErase();
+}
+function _boardDrawMouseLeave(e) {
+    if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) {
+        // Ne pas terminer la figure si la souris sort du board — on attend le mouseup
+        return;
+    }
+    if (isDrawMode) endPaint(); else if (isEraserMode) { endErase(); redrawStrokes(); }
+}
 function _boardDrawTouchStart(e) {
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
@@ -78,21 +90,47 @@ function _boardDrawTouchMove(e) {
     if (isEraserMode) { if (isErasing) eraseAt(getPos(e.touches[0])); }
     else paint(e.touches[0]);
 }
-function _boardDrawTouchEnd() { if (isEraserMode) endErase(); else endPaint(); }
+function _boardDrawTouchEnd(e) {
+    if (isDrawMode && FIGURE_MODES.includes(currentDrawMode) && e.changedTouches && e.changedTouches[0]) {
+        _figureEnd = getPos(e.changedTouches[0]);
+        _segmentEnd = _figureEnd;
+    }
+    if (isEraserMode) endErase(); else endPaint();
+}
 
 function startPaint(e) {
     if (!isDrawMode || isEraserMode) return;
     isPainting = true;
     currentStroke = { points:[getPos(e)], color:(cpickGetValue('draw-color') || document.getElementById('cpick-native-draw-color')?.value || '#e84393'), size:parseInt(document.getElementById('draw-size').value) };
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
-    if (currentDrawMode === 'text') {
-        // Annuler le timer de reconnaissance en cours
-        clearTimeout(_hwRecogTimer);
+    if (FIGURE_MODES.includes(currentDrawMode)) {
+        _figureStart = getPos(e); _figureEnd = null;
+        _segmentStart = _figureStart; // compat
+        const onDocUp = (ev) => {
+            document.removeEventListener('mouseup', onDocUp);
+            _figureEnd = getPos(ev); _segmentEnd = _figureEnd;
+            endPaint();
+        };
+        document.addEventListener('mouseup', onDocUp);
     }
+    if (currentDrawMode === 'text') clearTimeout(_hwRecogTimer);
 }
 
 function paint(e) {
     if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
+    if (FIGURE_MODES.includes(currentDrawMode)) {
+        if (!_figureStart) return;
+        const cur = getPos(e);
+        const pts = _buildFigurePoints(currentDrawMode, _figureStart, cur);
+        if (currentDrawMode === 'cercle' && pts) {
+            // Afficher le cercle + la croix centrale en preview
+            const crossPts = _buildCrossPoints(_figureStart, currentStroke.size);
+            redrawStrokes({ ...currentStroke, points: pts }, { ...currentStroke, points: crossPts });
+        } else if (pts) {
+            redrawStrokes({ ...currentStroke, points: pts });
+        }
+        return;
+    }
     currentStroke.points.push(getPos(e));
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
     redrawStrokes(currentStroke);
@@ -101,6 +139,29 @@ function paint(e) {
 function endPaint() {
     if (!isPainting || !currentStroke) return;
     isPainting = false;
+    if (FIGURE_MODES.includes(currentDrawMode) && _figureStart) {
+        const endPt = _figureEnd || _figureStart;
+        const pts   = _buildFigurePoints(currentDrawMode, _figureStart, endPt);
+        const center = { ..._figureStart };
+        const strokeSize = currentStroke.size;
+        _figureStart = null; _figureEnd = null; _segmentStart = null; _segmentEnd = null;
+        if (pts && pts.length >= 2) {
+            if (currentDrawMode === 'cercle') {
+                // Sauvegarder cercle + croix centrale groupés
+                const gid = 'cercle-' + Date.now();
+                const crossPts = _buildCrossPoints(center, strokeSize);
+                strokes.push({ ...currentStroke, points: pts,      groupId: gid });
+                strokes.push({ ...currentStroke, points: crossPts, groupId: gid });
+            } else {
+                strokes.push({ ...currentStroke, points: pts });
+            }
+            const cur = buildBoardJSON();
+            if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack = []; updateUndoRedoBtns(); }
+            saveBoard();
+        }
+        currentStroke = null; redrawStrokes();
+        return;
+    }
     if (currentStroke.points.length > 1) {
         if (currentDrawMode === 'shape') {
             currentStroke = null;
@@ -123,6 +184,96 @@ function endPaint() {
 }
 
 var _lastStrokePoints = null;
+var _segmentStart = null;  // conservé pour compat (alias _figureStart pour mode segment)
+var _segmentEnd   = null;  // conservé pour compat
+var _figureStart  = null;  // point de départ pour tous les modes figure
+var _figureEnd    = null;  // point de relâchement
+
+const FIGURE_MODES = ['segment','carre','rectangle','cercle','parallelo','losange'];
+
+// Construit les points d'une petite croix centrée sur un point (pour le centre du cercle)
+function _buildCrossPoints(center, strokeSize) {
+    const arm = Math.max(6, strokeSize * 2.5);
+    return [
+        { x: center.x - arm, y: center.y },
+        { x: center.x + arm, y: center.y },
+        { x: center.x,       y: center.y }, // retour au centre
+        { x: center.x,       y: center.y - arm },
+        { x: center.x,       y: center.y + arm }
+    ];
+}
+
+// Construit les points d'une figure géométrique entre deux points (drag)
+function _buildFigurePoints(mode, A, B) {
+    const dx = B.x - A.x, dy = B.y - A.y;
+    if (Math.hypot(dx, dy) < 3) return null;
+
+    if (mode === 'segment') {
+        return [A, B];
+    }
+
+    if (mode === 'rectangle') {
+        // A = sommet haut-gauche, B = sommet bas-droit
+        return [
+            { x: A.x, y: A.y }, { x: B.x, y: A.y },
+            { x: B.x, y: B.y }, { x: A.x, y: B.y },
+            { x: A.x, y: A.y }
+        ];
+    }
+
+    if (mode === 'carre') {
+        // Côté = min(|dx|, |dy|), conserve le signe du drag
+        const side = Math.min(Math.abs(dx), Math.abs(dy));
+        const sx = Math.sign(dx) * side, sy = Math.sign(dy) * side;
+        return [
+            { x: A.x,      y: A.y      },
+            { x: A.x + sx, y: A.y      },
+            { x: A.x + sx, y: A.y + sy },
+            { x: A.x,      y: A.y + sy },
+            { x: A.x,      y: A.y      }
+        ];
+    }
+
+    if (mode === 'cercle') {
+        // A = centre, rayon = distance A→B
+        const r = Math.hypot(dx, dy);
+        const steps = Math.max(60, Math.round(2 * Math.PI * r / 3));
+        const pts = [];
+        for (let i = 0; i <= steps; i++) {
+            const a = (i / steps) * 2 * Math.PI;
+            pts.push({ x: A.x + Math.cos(a) * r, y: A.y + Math.sin(a) * r });
+        }
+        return pts;
+    }
+
+    if (mode === 'parallelo') {
+        // A = sommet bas-gauche, B = sommet bas-droit
+        // Le décalage horizontal du côté haut = moitié de la largeur
+        const w = dx, h = dy;
+        const shear = w * 0.3; // décalage horizontal du côté supérieur
+        return [
+            { x: A.x,          y: A.y     },
+            { x: A.x + w,      y: A.y     },
+            { x: A.x + w + shear, y: A.y + h },
+            { x: A.x + shear,  y: A.y + h },
+            { x: A.x,          y: A.y     }
+        ];
+    }
+
+    if (mode === 'losange') {
+        // Centre = milieu de A→B, demi-diagonales = dx/2 et dy/2
+        const cx = (A.x + B.x) / 2, cy = (A.y + B.y) / 2;
+        return [
+            { x: cx,      y: A.y  },  // sommet haut
+            { x: B.x,     y: cy   },  // sommet droite
+            { x: cx,      y: B.y  },  // sommet bas
+            { x: A.x,     y: cy   },  // sommet gauche
+            { x: cx,      y: A.y  }   // fermeture
+        ];
+    }
+
+    return null;
+}
 
 // =========================================================================
 // RECONNAISSANCE D'ÉCRITURE MANUSCRITE
@@ -388,7 +539,7 @@ function discardHandwriting() {
     // Garder les traits tels quels
 }
 
-function redrawStrokes(extra = null) {
+function redrawStrokes(extra = null, extra2 = null) {
     if (!drawCtx) return;
     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     if (drawCtxTop) drawCtxTop.clearRect(0, 0, drawCanvasTop.width, drawCanvasTop.height);
@@ -398,6 +549,7 @@ function redrawStrokes(extra = null) {
         drawStroke(s, false, ctx);
     });
     if (extra) drawStroke(extra, false, drawCtx);
+    if (extra2) drawStroke(extra2, false, drawCtx);
     selectedStrokes.forEach(s => {
         const ctx = (s.pinned && drawCtxTop) ? drawCtxTop : drawCtx;
         drawStroke(s, true, ctx);
@@ -429,8 +581,27 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
 var currentDrawMode = 'free'; // 'free' | 'shape' | 'text'
 
 function setDrawMode(mode) {
+    // Recliqué sur le mode déjà actif → retour en dessin libre
+    if (mode === currentDrawMode && mode !== 'free') mode = 'free';
     currentDrawMode = mode;
-    ['free','shape'].forEach(m => {
+    // Bouton dessin libre
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) {
+        if (mode === 'free') {
+            freeBtn.style.borderColor = '#4a90e2'; freeBtn.style.background = '#1a3550'; freeBtn.style.color = '#fff';
+        } else {
+            freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa';
+        }
+    }
+    // Fermer le sous-menu figures si on choisit un mode non-figure (sauf si on choisit une figure)
+    if (!FIGURE_MODES.includes(mode)) {
+        const figSub = document.getElementById('figures-submenu');
+        if (figSub) figSub.classList.remove('open');
+        const figBtn = document.getElementById('draw-figures-btn');
+        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+    }
+    // Boutons de modes figure
+    FIGURE_MODES.forEach(m => {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
         if (!btn) return;
         if (m === mode) {
@@ -448,6 +619,40 @@ function setDrawMode(mode) {
         if (shapeOpts) shapeOpts.style.display = 'none';
         if (shapeHint) shapeHint.style.display = 'none';
     }
+    // Curseur crosshair en mode figure
+    if (board) {
+        if (FIGURE_MODES.includes(mode)) board.classList.add('is-segment-mode');
+        else board.classList.remove('is-segment-mode');
+    }
+    // Si on choisit un mode figure alors qu'on était en mode sélection, réactiver le dessin
+    if (FIGURE_MODES.includes(mode) && !isDrawMode) {
+        isDrawMode = true;
+        isPainting = false;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    }
+    // Idem pour le mode dessin libre
+    if (mode === 'free' && !isDrawMode) {
+        isDrawMode = true;
+        isPainting = false;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    }
+    // Fermer la toolbar géométrie (shapes.js) si un mode figure dessin est activé
+    if (FIGURE_MODES.includes(mode)) {
+        if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+    }
+    // Désactiver le bouton sélection
+    const selBtn = document.getElementById('draw-select-btn');
+    if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+    // Si mode libre, fermer les deux sous-menus
+    if (mode === 'free') {
+        const figSub = document.getElementById('figures-submenu');
+        if (figSub) figSub.classList.remove('open');
+        const figBtn = document.getElementById('draw-figures-btn');
+        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+        if (typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
+    }
 }
 
 function toggleDrawToolbar() {
@@ -464,11 +669,71 @@ function enableDrawing() {
     if (drawCanvas) drawCanvas.classList.remove('inactive');
     board.classList.add('is-drawing');
     clearSelection();
+    // Mettre à jour l'apparence du bouton sélection
+    const selBtn = document.getElementById('draw-select-btn');
+    if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+    // Réinitialiser le bouton figures
+    const figBtn = document.getElementById('draw-figures-btn');
+    if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+}
+
+function toggleFiguresSubmenu() {
+    const sub = document.getElementById('figures-submenu');
+    const btn = document.getElementById('draw-figures-btn');
+    if (!sub) return;
+    const isOpen = sub.classList.contains('open');
+    // Fermer le sous-menu géométrie (règle/équerre/compas) si on ouvre celui-ci
+    if (!isOpen && typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
+    sub.classList.toggle('open');
+    if (btn) {
+        // Le bouton reste actif (surbrillance) si le sous-menu est ouvert OU si un mode figure est actif
+        const figureActive = FIGURE_MODES.includes(currentDrawMode);
+        if (!isOpen || figureActive) {
+            btn.style.borderColor = '#4a90e2'; btn.style.background = '#1a2a4a'; btn.style.color = '#7ab8f5';
+        } else {
+            btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa';
+        }
+    }
+}
+
+function toggleSelectMode() {
+    if (!isDrawMode) {
+        // Déjà en mode sélection → repasser en dessin libre
+        initCanvas(); enableDrawing();
+        setDrawMode('free');
+        return;
+    }
+    // Passer en mode sélection : désactiver le dessin mais garder la toolbar
+    isDrawMode = false;
+    isPainting = false;
+    if (drawCanvas) drawCanvas.classList.add('inactive');
+    board.classList.remove('is-drawing');
+    board.classList.remove('is-segment-mode');
+    stopEraserMode();
+    // Fermer le sous-menu figures
+    const figSub = document.getElementById('figures-submenu');
+    if (figSub) figSub.classList.remove('open');
+    // Fermer le sous-menu géométrie (règle/équerre/compas)
+    if (typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
+    // Mettre à jour tous les boutons de mode
+    FIGURE_MODES.forEach(m => {
+        const btn = document.getElementById('draw-mode-'+m+'-btn');
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+    });
+    const figBtn = document.getElementById('draw-figures-btn');
+    if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) { freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa'; }
+    const selBtn = document.getElementById('draw-select-btn');
+    if (selBtn) { selBtn.style.borderColor = '#4a90e2'; selBtn.style.background = '#1a3550'; selBtn.style.color = '#fff'; }
 }
 function stopDrawing() {
     isDrawMode = false;
     if (drawCanvas) drawCanvas.classList.add('inactive');
     board.classList.remove('is-drawing');
+    board.classList.remove('is-segment-mode');
+    const figSub = document.getElementById('figures-submenu');
+    if (figSub) figSub.classList.remove('open');
     const tb = document.getElementById('draw-toolbar');
     if (tb) tb.style.display = 'none';
     cancelHandwritingRecognition();

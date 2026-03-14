@@ -28,7 +28,9 @@ function getEditorStyleNormalized(widget, refWidth = 1920) {
     return {
         fontFamily: cs.fontFamily || '',
         fontSizePx: Number.isFinite(fontSizePx) ? +(fontSizePx * factor).toFixed(2) : null,
-        color: cs.color || ''
+        color:      cs.color || '',
+        lineHeight: editor.style.lineHeight ? parseFloat(editor.style.lineHeight) : null,
+        marginTop:  editor.style.marginTop  || null
     };
 }
 
@@ -39,6 +41,11 @@ function applyEditorStyleFromConfig(widget, style) {
     if (style.fontFamily) editor.style.fontFamily = style.fontFamily;
     if (style.color) editor.style.color = style.color;
     if (style.fontSizePx) editor.style.fontSize = style.fontSizePx + 'px';
+    if (style.lineHeight) {
+        editor.style.lineHeight = style.lineHeight;
+        editor.dataset.lineHeightBase = style.lineHeight;
+    }
+    if (style.marginTop) editor.style.marginTop = style.marginTop;
 }
 
 function buildBoardState() {
