@@ -19,7 +19,7 @@ var currentScene  = 0;    // index de la scène active
 		if (scenes.length === 0) {
 			const existing = localStorage.getItem('profBoardConfig');
 			const bg       = localStorage.getItem('boardBackground') || 'none';
-			scenes.push({ id: Date.now(), name: 'Scène 1', config: existing || null, background: bg });
+			scenes.push({ id: Date.now(), name: 'Tableau 1', config: existing || null, background: bg });
 			currentScene = 0;
 			saveScenesMeta();
 		}
@@ -77,7 +77,7 @@ var currentScene  = 0;    // index de la scène active
 	function addScene() {
 		if (scenes.length >= MAX_SCENES) return;
 		saveCurrentSceneData();
-		const newName   = 'Scène ' + (scenes.length + 1);
+		const newName   = 'Tableau ' + (scenes.length + 1);
 		// Copie de la scène actuelle
 		const newConfig = scenes[currentScene]?.config || null;
 		const newBg     = scenes[currentScene]?.background || 'none';
@@ -111,7 +111,7 @@ var currentScene  = 0;    // index de la scène active
 	}
 
 	function renameScene(index, newName) {
-		const name = newName.trim() || ('Scène ' + (index + 1));
+		const name = newName.trim() || ('Tableau ' + (index + 1));
 		scenes[index].name = name;
 		saveScenesMeta();
 	}
@@ -206,7 +206,7 @@ var _sceneDragOverIdx = null;
 			editBtn.onmouseout  = () => editBtn.style.background = '#28282f';
 			editBtn.addEventListener('click', (e) => {
 				e.stopPropagation();
-				const newName = prompt('Renommer la scène :', scene.name);
+				const newName = prompt('Renommer le tableau :', scene.name);
 				if (newName !== null) { renameScene(i, newName); renderScenesBar(); }
 			});
 			row.appendChild(editBtn);

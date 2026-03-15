@@ -121,7 +121,7 @@ async function newProject(name) {
 
     // Réinitialiser
     setCurrentProjectId(null);
-    scenes = [{ id: Date.now(), name: 'Scène 1', config: null, background: 'none' }];
+    scenes = [{ id: Date.now(), name: 'Tableau 1', config: null, background: 'none' }];
     currentScene = 0;
     saveScenesMeta();
     loadScene(0);
@@ -252,7 +252,7 @@ async function _renderProjectsList() {
             <div style="font-size:13px;font-weight:700;color:${isCurrent ? '#7ab8f5' : '#ddd'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${isCurrent ? '▶ ' : ''}${_escHtml(p.name)}
             </div>
-            <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} scène${sceneCount > 1 ? 's' : ''} · ${date}</div>
+            <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} tableau${sceneCount > 1 ? 'x' : ''} · ${date}</div>
         `;
 
         // Boutons actions
@@ -278,7 +278,7 @@ async function _renderProjectsList() {
         accordion.style.cssText = `display:none;border-top:1px solid ${isCurrent ? '#2a4a6a' : '#2e2e38'};background:${isCurrent ? '#122538' : '#222229'};padding:6px 8px;border-radius:0 0 10px 10px;`;
 
         if (sceneList.length === 0) {
-            accordion.innerHTML = `<div style="font-size:11px;color:#555;padding:6px 8px;">Aucune scène</div>`;
+            accordion.innerHTML = `<div style="font-size:11px;color:#555;padding:6px 8px;">Aucun tableau</div>`;
         } else {
             sceneList.forEach((sc, idx) => {
                 const isCurrentSceneOfCurrentProj = isCurrent && idx === p.currentScene;
@@ -295,7 +295,7 @@ async function _renderProjectsList() {
                 icon.style.cssText = `font-size:8px;flex-shrink:0;color:${isCurrentSceneOfCurrentProj ? '#4a90e2' : '#444'};transition:color .15s;`;
 
                 const label = document.createElement('span');
-                label.textContent = sc.name || `Scène ${idx + 1}`;
+                label.textContent = sc.name || `Tableau ${idx + 1}`;
                 label.style.cssText = `flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
 
                 if (!isCurrentSceneOfCurrentProj) {
@@ -337,7 +337,7 @@ async function _renderProjectsList() {
 
         // Double-clic sur le header = charger le projet (si pas courant)
         if (!isCurrent) {
-            row.title = 'Cliquer pour voir les scènes · Double-cliquer pour ouvrir';
+            row.title = 'Cliquer pour voir les tableaux · Double-cliquer pour ouvrir';
             row.addEventListener('dblclick', (e) => {
                 if (e.target === btnRename || e.target === btnDelete) return;
                 _projLoad(p.id);
