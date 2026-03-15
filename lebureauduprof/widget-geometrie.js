@@ -407,9 +407,10 @@ function rotatePoint(px, py, cx, cy, angle) {
 
 // ── RÈGLE ─────────────────────────────────────────────────────────────────
 function spawnRegle(board, cx, cy) {
-    const W = 780, H = 60; // 20 cm à 26px/cm
-    const CM = 26, MM = CM / 10;
-    const BTN_H = 28; // hauteur de la barre de boutons au-dessus
+    const W = 800, H = 60; // 20 unités à 40px/unité
+    const UNIT = 40;       // 1 unité = 40 px
+    const HALF = UNIT / 2; // demi-unité = 20 px
+    const BTN_H = 28;      // hauteur de la barre de boutons au-dessus
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
@@ -472,27 +473,28 @@ function spawnRegle(board, cx, cy) {
     rect.setAttribute('stroke', '#b8860b'); rect.setAttribute('stroke-width', '1.5');
     svg.appendChild(rect);
 
-    // Graduations — nombre de mm calculé depuis W et CM
-    const totalMm = Math.floor(W / MM);
-    for (let mm = 0; mm <= totalMm; mm++) {
-        const x = mm * MM;
-        const isCm = mm % 10 === 0;
-        const isMm5 = mm % 5 === 0;
-        const tickH = isCm ? 22 : (isMm5 ? 15 : 10);
+    // Graduations — 0 à 20 unités, 1 unité = 40px, demi à 20px, dixièmes à 4px
+    const TENTH = UNIT / 10; // = 4px
+    const totalTenths = W / TENTH; // = 200
+    for (let t10 = 0; t10 <= totalTenths; t10++) {
+        const x = t10 * TENTH;
+        const isUnit  = t10 % 10 === 0;
+        const isHalf  = t10 % 5  === 0 && !isUnit;
+        const tickH   = isUnit ? 22 : (isHalf ? 13 : 7);
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', x); line.setAttribute('y1', 0);
         line.setAttribute('x2', x); line.setAttribute('y2', tickH);
         line.setAttribute('stroke', '#7a5c00');
-        line.setAttribute('stroke-width', isCm ? '1.5' : '0.8');
+        line.setAttribute('stroke-width', isUnit ? '1.5' : '0.6');
         svg.appendChild(line);
-        if (isCm && mm > 0 && mm < totalMm) {
+        if (isUnit && x >= 0 && x < W) {
             const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             txt.setAttribute('x', x); txt.setAttribute('y', 36);
             txt.setAttribute('text-anchor', 'middle');
             txt.setAttribute('font-size', '10');
             txt.setAttribute('fill', '#7a5c00');
             txt.setAttribute('font-family', 'monospace');
-            txt.textContent = mm / 10;
+            txt.textContent = t10 / 10;
             svg.appendChild(txt);
         }
     }
@@ -636,21 +638,21 @@ function spawnEquerre(board, cx, cy) {
 
 // ── COMPAS ────────────────────────────────────────────────────────────────
 function spawnCompas(board, cx, cy) {
-    const MAX_R = 250, MIN_R = 20;
-    let radius = 80;
+    const MAX_R = 400, MIN_R = 20;
+    let radius = 100;
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - 120}px; top:${cy - 120}px; width:280px; height:350px;`;
+    overlay.style.cssText = `left:${cx - 190}px; top:${cy - 190}px; width:420px; height:500px;`;
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '280');
-    svg.setAttribute('height', '250');
+    svg.setAttribute('width', '420');
+    svg.setAttribute('height', '390');
     svg.style.cssText = 'display:block; pointer-events:none;';
 
     // Centre pivot (en haut au milieu)
-    const PIV_X = 140, PIV_Y = 20;
+    const PIV_X = 210, PIV_Y = 20;
 
     // Bras gauche (fixe, avec la pointe)
     const armLeft  = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -663,7 +665,7 @@ function spawnCompas(board, cx, cy) {
     // Crayon
     const crayon   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 
-    const ARM_LEN = 200;
+    const ARM_LEN = 350;
 
     function updateSvg() {
         // Angle d'ouverture : on calcule l'angle tel que la distance entre
@@ -742,7 +744,7 @@ function spawnCompas(board, cx, cy) {
     // Contrôle rayon
     const radiusWrap = document.createElement('div');
     radiusWrap.className = 'geo-compass-radius-wrap';
-    radiusWrap.style.cssText = 'position:absolute; top:230px; left:50%; transform:translateX(-50%);';
+    radiusWrap.style.cssText = 'position:absolute; top:400px; left:50%; transform:translateX(-50%);';
     radiusWrap.innerHTML = `
         <span>Rayon</span>
         <input type="range" min="${MIN_R}" max="${MAX_R}" value="${radius}" step="2">
@@ -778,7 +780,7 @@ function spawnCompas(board, cx, cy) {
     const traceBtn = document.createElement('button');
     traceBtn.className = 'geo-trace-btn';
     traceBtn.textContent = '⭕ Tracer le cercle';
-    traceBtn.style.cssText = 'position:absolute; top:270px; left:50%; transform:translateX(-50%); cursor:pointer !important;';
+    traceBtn.style.cssText = 'position:absolute; top:440px; left:50%; transform:translateX(-50%); cursor:pointer !important;';
     traceBtn.onclick = function (e) {
         e.stopPropagation();
         const t    = getOverlayTransform(overlay);
