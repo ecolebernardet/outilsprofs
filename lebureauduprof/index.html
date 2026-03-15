@@ -473,6 +473,20 @@
 		/* Météo → widgets-meteo.js */
 		
 		/* ── NOUVEAU MENU FLOTTANT ────────────────────────────── */
+		@keyframes fab-pulse-shadow {
+			0% {
+				/* Ombre fixe + Ombre de pulse à 0px d'étalement */
+				box-shadow: 0 0 10px rgba(120, 120, 120, 0.4), 0 0 0 0 rgba(120, 120, 120, 0.7);
+			}
+			70% {
+				/* L'ombre de pulse s'élargit à 20px tout en restant visible */
+				box-shadow: 0 0 10px rgba(120, 120, 120, 0.4), 0 0 0 20px rgba(120, 120, 120, 0);
+			}
+			100% {
+				/* On finit par tout dissiper pour boucler l'animation */
+				box-shadow: 0 0 10px rgba(120, 120, 120, 0.4), 0 0 0 0 rgba(120, 120, 120, 0);
+			}
+		}
 		#fab-btn {
 			position: fixed; bottom: 20px; left: 20px; z-index: 14000;
 			width: 50px; height: 50px; border-radius: 50%;
@@ -482,9 +496,10 @@
 			display: flex; align-items: center; justify-content: center;
 			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 			transition: background .15s, transform .15s;
+			animation: fab-pulse-shadow 2.8s ease-in-out infinite;
 		}
-		#fab-btn:hover { background: #000; transform: scale(1.2); }
-		#fab-btn.menu-open { background: #555; border-color: #111; color: #fff; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; }
+		#fab-btn:hover { background: #000; transform: scale(1.2); animation: none; box-shadow: 0 0px 10px rgba(120, 120,120,1); }
+		#fab-btn.menu-open { background: #555; border-color: #111; color: #fff; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; animation: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 		
 		/* Menu vertical principal */
 		#main-menu {
@@ -534,7 +549,7 @@
 			box-shadow: 4px 4px 20px rgba(0,0,0,0.5);
 			width: 100%;
 		}
-		.mm-has-sub:hover > .mm-sub {
+		.mm-has-sub > .mm-sub.open {
 			opacity: 1; pointer-events: auto;
 		}
 		.mm-has-sub.cpick-active > .mm-sub,
@@ -2081,6 +2096,84 @@ function _fixSubmenuOverflow() {
 }
 
 // Mise à jour du bouton gomme dans le panneau dessin
+// =========================================================================
+// SOUS-MENUS COLLANTS — restent ouverts jusqu'à changement ou clic bureau
+// =========================================================================
+(function () {
+
+    // Ouvre le sous-menu direct d'un item et ferme tous les autres non-ancêtres
+    function openSub(item) {
+        const sub = item.querySelector(':scope > .mm-sub');
+        if (!sub) return;
+        // Fermer tous les sous-menus ouverts qui ne contiennent pas cet item
+        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+            if (s !== sub && !s.contains(item)) s.classList.remove('open');
+        });
+        sub.classList.add('open');
+    }
+
+    // Ferme tous les sous-menus ouverts
+    function closeAllSubs() {
+        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+            s.classList.remove('open');
+        });
+    }
+
+    // Ferme les sous-menus frères d'un item
+    // Remonte jusqu'à mm-section ou #main-menu pour couvrir tous les niveaux
+    function closeSiblings(item) {
+        // Chercher le conteneur de plus haut niveau (mm-section ou #main-menu)
+        let container = item.parentElement;
+        while (container && container.id !== 'main-menu' && !container.classList.contains('mm-section') && !container.classList.contains('mm-sub-inner')) {
+            container = container.parentElement;
+        }
+        if (!container) return;
+        container.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+            s.classList.remove('open');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Délégation sur tout le menu : mouseenter avec capture pour attraper tous les niveaux
+        document.getElementById('main-menu').addEventListener('mouseenter', function (e) {
+            // Trouver l'item englobant le plus proche (mm-item ou mm-sub-item)
+            let node = e.target;
+            while (node && node !== this) {
+                if (node.classList && (node.classList.contains('mm-item') || node.classList.contains('mm-sub-item'))) {
+                    if (node.classList.contains('mm-has-sub')) {
+                        // Item avec sous-menu : l'ouvrir et fermer les frères
+                        openSub(node);
+                    } else {
+                        // Item sans sous-menu : fermer uniquement les sous-menus
+                        // qui ne contiennent pas cet item (ne pas fermer le parent ouvert)
+                        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+                            if (!s.contains(node)) s.classList.remove('open');
+                        });
+                    }
+                    return;
+                }
+                node = node.parentElement;
+            }
+        }, true);
+
+        // Clic hors du menu → ferme tous les sous-menus
+        document.addEventListener('mousedown', function (e) {
+            if (!e.target.closest('#main-menu')) {
+                closeAllSubs();
+            }
+        });
+
+        // Fermeture du menu principal → ferme les sous-menus
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu) {
+            new MutationObserver(function () {
+                if (!mainMenu.classList.contains('open')) closeAllSubs();
+            }).observe(mainMenu, { attributes: true, attributeFilter: ['class'] });
+        }
+    });
+})();
+
 function _updateEraserBtnInPanel() {
     const btn1 = document.getElementById('eraser-btn');
     const btn2 = document.getElementById('eraser-btn-shapes');
