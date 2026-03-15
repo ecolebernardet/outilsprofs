@@ -402,46 +402,121 @@ function restoreBoardFromJSON(json) {
     }
 }
 
-function exportConfig() {
+async function exportConfig() {
+    // Sauvegarder l'état courant d'abord
+    const curId = getCurrentProjectId();
+    let projectName = 'projet';
+    if (curId) {
+        try {
+            const cur = await dbGet(curId);
+            if (cur) {
+                projectName = cur.name || 'projet';
+                await saveProjectToDB(cur.name);
+                // Relire après sauvegarde pour avoir l'état le plus récent
+                const updated = await dbGet(curId);
+                const exportData = {
+                    _type:    'prof-bureau-single-project',
+                    _version: 1,
+                    exportedAt: Date.now(),
+                    project:  updated
+                };
+                const safeName = projectName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_\-]/g, '');
+                const date = new Date().toISOString().split('T')[0];
+                const a = document.createElement('a');
+                a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
+                a.download = `lebureauduprof_${safeName}_${date}.json`;
+                document.body.appendChild(a); a.click(); a.remove();
+                return;
+            }
+        } catch(e) {}
+    }
+    // Fallback : pas de projet en cours, exporter les scènes courantes
     saveCurrentSceneData();
     const exportData = {
-        scenes:       scenes,
-        currentScene: currentScene,
-        // Compatibilité avec l'ancien format (scène active)
-        ...JSON.parse(scenes[currentScene].config || '{}')
+        _type:    'prof-bureau-single-project',
+        _version: 1,
+        exportedAt: Date.now(),
+        project: { id: null, name: 'projet', scenes, currentScene, updatedAt: Date.now() }
     };
     const a = document.createElement('a');
-    a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData));
-    a.download = `lebureauduprof_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
+    a.download = `lebureauduprof_projet_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a); a.click(); a.remove();
 }
 
 function importConfig(event) {
     const file = event.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         try {
             const data = JSON.parse(e.target.result);
-            // Format multi-scènes
+
+            // ── Nouveau format : projet unique ────────────────────────────
+            if (data._type === 'prof-bureau-single-project' && data.project) {
+                const p = data.project;
+
+                // Chercher un projet existant avec le même nom
+                const allProjects = await dbGetAll();
+                const existing = allProjects.find(proj => proj.name === p.name);
+
+                let targetId;
+                if (existing) {
+                    const choice = confirm(
+                        `Un projet nommé "${p.name}" existe déjà.\n\n` +
+                        `OK → Remplacer le projet existant\n` +
+                        `Annuler → Importer comme nouveau projet (copie)`
+                    );
+                    if (choice) {
+                        targetId = existing.id; // Écraser en conservant l'ID
+                    } else {
+                        targetId = 'proj_' + Date.now();
+                        p.name = p.name + ' (copie)';
+                    }
+                } else {
+                    targetId = 'proj_' + Date.now();
+                }
+
+                // Sauvegarder le projet courant silencieusement
+                const curId = getCurrentProjectId();
+                if (curId) {
+                    try { const cur = await dbGet(curId); await saveProjectToDB(cur?.name || 'Sans titre'); } catch(err) {}
+                }
+
+                const imported = { ...p, id: targetId, updatedAt: Date.now() };
+                await dbPut(imported);
+                const project = await loadProjectFromDB(targetId);
+                if (project) _updateProjectTitle(project.name);
+                event.target.value = '';
+                return;
+            }
+
+            // ── Format "tout exporter" reçu par erreur ────────────────────
+            if (data._type === 'prof-bureau-all-projects') {
+                alert('Ce fichier contient tous vos projets.\n\nUtilisez "Tout importer" dans "Mes projets" pour le restaurer.');
+                event.target.value = ''; return;
+            }
+
+            // ── Ancien format multi-scènes (compatibilité) ────────────────
             if (data.scenes && Array.isArray(data.scenes)) {
                 scenes       = data.scenes;
                 currentScene = data.currentScene || 0;
                 saveScenesMeta();
                 loadScene(currentScene);
                 renderScenesBar();
-            } else {
-                // Format ancienne version (mono-scène)
-                snapshotNow();
-                document.querySelectorAll('.widget').forEach(w => w.remove());
-                document.querySelectorAll('.shape-widget').forEach(w => w.remove());
-                applyBackground(data.background || 'none');
-                saveBg(data.background || 'none');
-                const json = JSON.stringify(data);
-                localStorage.setItem('profBoardConfig', json);
-                scenes[currentScene].config = json;
-                saveScenesMeta();
-                restoreBoardFromJSON(json);
+                event.target.value = ''; return;
             }
+
+            // ── Très ancien format mono-scène ─────────────────────────────
+            snapshotNow();
+            document.querySelectorAll('.widget').forEach(w => w.remove());
+            document.querySelectorAll('.shape-widget').forEach(w => w.remove());
+            applyBackground(data.background || 'none');
+            saveBg(data.background || 'none');
+            const json = JSON.stringify(data);
+            localStorage.setItem('profBoardConfig', json);
+            scenes[currentScene].config = json;
+            saveScenesMeta();
+            restoreBoardFromJSON(json);
             event.target.value = '';
         } catch(err) { showAlert('⚠️', 'Erreur d\'importation', err.message); }
     };

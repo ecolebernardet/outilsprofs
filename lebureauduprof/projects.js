@@ -75,7 +75,7 @@ function setCurrentProjectId(id) {
 async function saveProjectToDB(name) {
     saveCurrentSceneData();
     let id = getCurrentProjectId();
-    if (!id) { id = 'proj_' + Date.now(); setCurrentProjectId(id); }
+    if (!id) return null; // Pas de projet courant → ne pas créer silencieusement
     const project = {
         id,
         name:      name || 'Sans titre',
@@ -138,6 +138,8 @@ async function newProject(name) {
 function _updateProjectTitle(name) {
     const el = document.getElementById('current-project-name');
     if (el) el.textContent = name ? '📁 ' + name : '';
+    const label = document.getElementById('scenes-menu-project-label');
+    if (label) label.textContent = name ? `Tableaux du projet "${name}"` : 'Tableaux du projet en cours';
 }
 
 // ── Charger le nom du projet courant au démarrage ────────────────────────

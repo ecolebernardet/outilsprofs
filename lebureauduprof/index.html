@@ -992,6 +992,7 @@
         <div id="sc-flip-v-btn" title="Symétrie verticale">↕</div>
         <div id="sc-action-bar">
             <div class="sc-btn sc-menu"    id="sc-menu-btn"    title="Menu">☰</div>
+            <div class="sc-btn sc-copy"    id="sc-copy-btn"    title="Copier (Ctrl+C)" onclick="copySelectedWidgets()">📋</div>
             <div class="sc-btn sc-pin"     id="sc-pin-btn"     title="Épingler">📌</div>
             <div class="sc-btn sc-back"    id="sc-back-btn"    title="Envoyer derrière">🔽</div>
             <div class="sc-btn sc-merge"   id="sc-merge-btn"   title="Grouper les widgets sélectionnés">⊞ Grouper</div>
@@ -1253,32 +1254,49 @@
 			<div class="mm-item mm-has-sub">
 				<span class="mm-ico">🗄️</span>&nbsp;&nbsp;Fichier<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
+
+					
+
+					<!-- TABLEAUX -->
+					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">🗂️ Tableaux</div>
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🗂️</span>&nbsp;&nbsp;Scènes<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes scènes</div>
-							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
-							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouvelle scène</button>
-						</div></div>
-					</div>
-					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">📋</span>&nbsp;&nbsp;Tableaux enregistrés<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<span class="mm-ico">📋</span>&nbsp;&nbsp;Modèles de tableau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-presets"><div class="mm-sub-inner" style="min-width:200px;">
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📋 Modèles prêts à l'emploi</div>
 							<div class="mm-sub-item" onclick="loadPresetBoard('tableau-vierge');closeMainMenu()"><span class="mm-ico">🌑</span>&nbsp;&nbsp;Tableau vierge</div>
 							<div class="mm-sub-item" onclick="loadPresetBoard('seyes-cursif');closeMainMenu()"><span class="mm-ico">✍️</span>&nbsp;&nbsp;Séyès cursif</div>
 						</div></div>
 					</div>
-					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">🗂️</span>&nbsp;&nbsp;<span id="scenes-menu-project-label">Tableaux du projet en cours</span><span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes tableaux</div>
+							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
+							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouveau tableau</button>
+						</div></div>
+					</div>
+					
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+					
+					<!-- PROJETS -->
+					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
 					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes projets</div>
-					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>&nbsp;&nbsp;Exporter JSON</div>
-					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>&nbsp;&nbsp;Importer JSON</div>
+					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
+
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+					
+					<!-- SAUVEGARDE -->
+					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">💾 Sauvegarde</div>
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>&nbsp;&nbsp;Exporter ce projet (JSON)</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>&nbsp;&nbsp;Importer un projet (JSON)</div>
 					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
-					<div style="height:1px;background:#2e2e38;margin:4px 0;"></div>
-					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>&nbsp;&nbsp;Effacer tout</div>
+
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+
+					<!-- DANGER -->
+					<div style="color:#7a2a2a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">⚠️ Zone de danger</div>
+					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>&nbsp;&nbsp;Effacer le tableau</div>
+
 				</div></div>
 			</div>
 
@@ -1701,12 +1719,121 @@ document.addEventListener('keydown', (e) => {
         document.getElementById('selection-controls').style.display = 'none';
         saveBoard();
     }
+
+    // Ctrl+C — copier les widgets sélectionnés
+    if (e.key === 'c' && (e.ctrlKey || e.metaKey) &&
+        !e.target.closest('[contenteditable]') &&
+        !e.target.closest('input') &&
+        !e.target.closest('textarea') &&
+        selectedWidgets.length > 0) {
+        copySelectedWidgets();
+    }
+
+    // Ctrl+V — coller les widgets copiés
+    if (e.key === 'v' && (e.ctrlKey || e.metaKey) &&
+        !e.target.closest('[contenteditable]') &&
+        !e.target.closest('input') &&
+        !e.target.closest('textarea')) {
+        pasteWidgets();
+    }
 });
 
 
 // =========================================================================
-// RATIO 16:9
+// COPIER / COLLER WIDGETS ENTRE SCÈNES
 // =========================================================================
+function copySelectedWidgets() {
+    if (!selectedWidgets || selectedWidgets.length === 0) return;
+    const curW = window.innerWidth, curVH = virtualH(curW);
+    const copied = [];
+    selectedWidgets.forEach(w => {
+        const iframe   = w.querySelector('iframe');
+        const c        = w.querySelector('.editor-container');
+        const html     = getInnerHTMLNormalized(w);
+        const isTextLike = w.dataset.type === 'text' || w.dataset.type === 'homework';
+        let wP = 0, hP = 0;
+        if (c) { wP = (c.offsetWidth / curW) * 100; hP = ((c.offsetHeight - getToolbarHeight(c)) / curVH) * 100; }
+        const lP = (w.offsetLeft / curW) * 100;
+        const tP = (w.offsetTop  / curVH) * 100;
+        let stickerUrl = null, stickerEmoji = null, stickerSize = null;
+        if (w.dataset.type === 'sticker') {
+            const sImg = w.querySelector('img');
+            const sEmoji = w.querySelector('[data-sticker-type="emoji"]');
+            if (sImg) stickerUrl = sImg.src;
+            if (sEmoji) stickerEmoji = sEmoji.textContent;
+            stickerSize = { w: w.offsetWidth, h: w.offsetHeight };
+        }
+        let monnaieData = null;
+        if (w.dataset.type === 'monnaie') {
+            const mc = w.querySelector('.monnaie-container');
+            const mz = w.querySelector('.monnaie-items');
+            monnaieData = {
+                containerW: mc ? mc.offsetWidth  : null,
+                itemsH:     mz ? mz.offsetHeight : null,
+                level:      w.dataset.monnaieLevel || 'facile'
+            };
+        }
+        copied.push({
+            type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
+            html, content: html, iframeSrc: iframe?.src || null,
+            transparent: w.dataset.transparent === 'true',
+            bgColor: w.dataset.bgColor || '#ffffff',
+            bgOpacity: parseFloat(w.dataset.bgOpacity ?? 1),
+            editorStyle: isTextLike ? getEditorStyleNormalized(w, 1920) : null,
+            pinned: false,
+            background: w.dataset.background === 'true',
+            groupId: null,
+            meteoCity: w.dataset.meteoCity || null,
+            stickerUrl, stickerEmoji, stickerSize,
+            transform: w.style.transform || null,
+            pdfId: w.dataset.pdfId || null,
+            pdfName: w.dataset.pdfName || null,
+            animation: w.dataset.animation || null,
+            monnaieData
+        });
+    });
+    localStorage.setItem('clipboardWidgets', JSON.stringify({ refWidth: 1920, widgets: copied }));
+    // Feedback visuel
+    _showCopyFeedback(selectedWidgets.length);
+}
+
+function pasteWidgets() {
+    const raw = localStorage.getItem('clipboardWidgets');
+    if (!raw) return;
+    try {
+        const data = JSON.parse(raw);
+        // Décaler légèrement pour signaler le collage
+        const offset = 2; // en % de la largeur/hauteur
+        const shifted = {
+            ...data,
+            widgets: data.widgets.map(w => ({
+                ...w,
+                leftPercent: Math.min(w.leftPercent + offset, 90),
+                topPercent:  Math.min(w.topPercent  + offset, 90),
+                groupId: null
+            }))
+        };
+        snapshotNow();
+        restoreBoardFromJSON(JSON.stringify(shifted));
+        setTimeout(() => saveBoard(), 300);
+    } catch(e) { console.error('Erreur collage widget:', e); }
+}
+
+function _showCopyFeedback(count) {
+    let toast = document.getElementById('copy-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'copy-toast';
+        toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a3550;color:#7ab8f5;border:1px solid #4a90e2;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;z-index:99999;pointer-events:none;transition:opacity .3s;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = `📋 ${count} widget${count > 1 ? 's' : ''} copié${count > 1 ? 's' : ''} — Ctrl+V pour coller`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.style.opacity = '0', 2500);
+}
+
+
 function virtualH(w) { return w / RATIO; }
 
 function applyBoardRatio(newW) {
