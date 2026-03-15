@@ -1256,17 +1256,24 @@
 				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
 
 					
+					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
 
+
+					
+					<!-- PROJETS -->
+					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
+					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
+					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
+					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
+					
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+					
+					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Tous mes projets</div>
+					
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+										
 					<!-- TABLEAUX -->
 					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">🗂️ Tableaux</div>
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">📋</span>&nbsp;&nbsp;Modèles de tableau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-presets"><div class="mm-sub-inner" style="min-width:200px;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📋 Modèles prêts à l'emploi</div>
-							<div class="mm-sub-item" onclick="loadPresetBoard('tableau-vierge');closeMainMenu()"><span class="mm-ico">🌑</span>&nbsp;&nbsp;Tableau vierge</div>
-							<div class="mm-sub-item" onclick="loadPresetBoard('seyes-cursif');closeMainMenu()"><span class="mm-ico">✍️</span>&nbsp;&nbsp;Séyès cursif</div>
-						</div></div>
-					</div>
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">🗂️</span>&nbsp;&nbsp;<span id="scenes-menu-project-label">Tableaux du projet en cours</span><span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
@@ -1275,26 +1282,18 @@
 							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouveau tableau</button>
 						</div></div>
 					</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">📋</span>&nbsp;&nbsp;Modèles de tableau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-presets"><div class="mm-sub-inner" style="min-width:200px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📋 Modèles prêts à l'emploi</div>
+							<div class="mm-sub-item" onclick="loadPresetBoard('tableau-vierge');closeMainMenu()"><span class="mm-ico">🌑</span>&nbsp;&nbsp;Tableau vierge</div>
+							<div class="mm-sub-item" onclick="loadPresetBoard('seyes-cursif');closeMainMenu()"><span class="mm-ico">✍️</span>&nbsp;&nbsp;Séyès cursif</div>
+						</div></div>
+					</div>
 					
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					
-					<!-- PROJETS -->
-					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
-					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes projets</div>
-					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
-
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-					
-					<!-- SAUVEGARDE -->
-					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">💾 Sauvegarde</div>
-					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">⬇️</span>&nbsp;&nbsp;Exporter ce projet (JSON)</div>
-					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">⬆️</span>&nbsp;&nbsp;Importer un projet (JSON)</div>
-					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
-
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-
 					<!-- DANGER -->
-					<div style="color:#7a2a2a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">⚠️ Zone de danger</div>
 					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>&nbsp;&nbsp;Effacer le tableau</div>
 
 				</div></div>

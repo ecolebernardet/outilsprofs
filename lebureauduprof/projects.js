@@ -202,8 +202,8 @@ function _buildLibraryHTML() {
 
         <!-- Boutons sauvegarde globale -->
         <div style="display:flex;gap:8px;">
-            <button id="proj-export-all-btn" onclick="exportAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;" title="Exporter tous vos projets en un seul fichier de sauvegarde">🗂️ Tout exporter</button>
-            <button onclick="importAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;" title="Restaurer tous vos projets depuis une sauvegarde complète">📥 Tout importer</button>
+            <button id="proj-export-all-btn" onclick="exportAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Exporter tous les projets en un seul fichier de sauvegarde"><span style=font-size:18px;>📤</span>Tout exporter<br><span style=font-size:9px;>Exporter tous les projets en un seul fichier de sauvegarde</span></button>
+            <button onclick="importAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Restaurer tous les projets depuis une sauvegarde complète"><span style=font-size:18px;>📥</span>Tout importer<br><span style=font-size:9px;>Restaurer tous les projets depuis une sauvegarde complète</span></button>
         </div>
 
         <!-- Liste des projets -->
@@ -252,7 +252,7 @@ async function _renderProjectsList() {
         info.style.cssText = `flex:1;min-width:0;`;
         info.innerHTML = `
             <div style="font-size:13px;font-weight:700;color:${isCurrent ? '#7ab8f5' : '#ddd'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                ${isCurrent ? '▶ ' : ''}${_escHtml(p.name)}
+                ${_escHtml(p.name)}
             </div>
             <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} tableau${sceneCount > 1 ? 'x' : ''} · ${date}</div>
         `;
@@ -272,6 +272,19 @@ async function _renderProjectsList() {
 
         row.appendChild(arrow);
         row.appendChild(info);
+
+        // Bouton "Ouvrir ce projet" dans le header (si pas courant)
+        if (!isCurrent) {
+            const btnOpen = document.createElement('button');
+            btnOpen.textContent = '📂';
+            btnOpen.title = 'Ouvrir ce projet';
+            btnOpen.style.cssText = 'background:#1a3550;color:#7ab8f5;border:1px solid #2a4a6a;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;flex-shrink:0;';
+            btnOpen.onmouseover = () => btnOpen.style.background = '#1e3d5e';
+            btnOpen.onmouseout  = () => btnOpen.style.background = '#1a3550';
+            btnOpen.addEventListener('click', (e) => { e.stopPropagation(); _projLoad(p.id); });
+            row.appendChild(btnOpen);
+        }
+
         row.appendChild(btnRename);
         row.appendChild(btnDelete);
 
@@ -352,17 +365,6 @@ async function _renderProjectsList() {
             accordion.style.display = 'block';
             arrow.style.transform = 'rotate(90deg)';
             arrow.style.color = '#4a90e2';
-        }
-
-        // Bouton "Ouvrir ce projet" en bas de l'accordion (si pas courant)
-        if (!isCurrent) {
-            const openBtn = document.createElement('button');
-            openBtn.textContent = '📂 Ouvrir ce projet';
-            openBtn.style.cssText = `display:block;width:100%;margin-top:6px;padding:6px;background:#1a3550;color:#7ab8f5;border:1px solid #2a4a6a;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;text-align:center;`;
-            openBtn.onmouseover = () => openBtn.style.background = '#1e3d5e';
-            openBtn.onmouseout  = () => openBtn.style.background = '#1a3550';
-            openBtn.addEventListener('click', () => _projLoad(p.id));
-            accordion.appendChild(openBtn);
         }
 
         wrapper.appendChild(row);
