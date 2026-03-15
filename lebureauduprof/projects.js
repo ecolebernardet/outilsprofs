@@ -88,13 +88,18 @@ async function saveProjectToDB(name) {
 }
 
 // ── Charger un projet depuis la DB ───────────────────────────────────────
-async function loadProjectFromDB(id) {
+async function loadProjectFromDB(id, sceneIndex) {
     const project = await dbGet(id);
     if (!project) return false;
     setCurrentProjectId(project.id);
     scenes       = project.scenes       || [];
-    currentScene = project.currentScene || 0;
-    if (currentScene >= scenes.length) currentScene = 0;
+    // Si un index de scène est demandé, l'utiliser directement
+    if (sceneIndex !== undefined && sceneIndex >= 0 && sceneIndex < scenes.length) {
+        currentScene = sceneIndex;
+    } else {
+        currentScene = project.currentScene || 0;
+        if (currentScene >= scenes.length) currentScene = 0;
+    }
     saveScenesMeta();
     loadScene(currentScene);
     renderScenesBar();
@@ -103,9 +108,16 @@ async function loadProjectFromDB(id) {
 
 // ── Nouveau projet vierge ────────────────────────────────────────────────
 async function newProject(name) {
-    // Sauvegarder l'état actuel si un projet est ouvert
+    // Sauvegarder l'état actuel si un projet est ouvert, en conservant son nom existant
     const curId = getCurrentProjectId();
-    if (curId) await saveProjectToDB(null); // sauvegarde silencieuse
+    if (curId) {
+        try {
+            const cur = await dbGet(curId);
+            await saveProjectToDB(cur?.name || 'Sans titre');
+        } catch(e) {
+            await saveProjectToDB('Sans titre');
+        }
+    }
 
     // Réinitialiser
     setCurrentProjectId(null);
@@ -141,7 +153,16 @@ async function initCurrentProjectName() {
 // =========================================================================
 // MODALE BIBLIOTHÈQUE DE PROJETS
 // =========================================================================
-function openProjectsLibrary() {
+async function openProjectsLibrary() {
+    // Sauvegarder silencieusement pour que currentScene soit à jour dans la liste
+    const curId = getCurrentProjectId();
+    if (curId) {
+        try {
+            const cur = await dbGet(curId);
+            await saveProjectToDB(cur?.name || 'Sans titre');
+        } catch(e) {}
+    }
+
     // Créer la modale si elle n'existe pas
     let overlay = document.getElementById('projects-overlay');
     if (!overlay) {
@@ -169,30 +190,12 @@ function closeProjectsLibrary() {
 
 function _buildLibraryHTML() {
     return `
-    <div style="background:#1e1e26;border-radius:18px;padding:28px 32px;width:580px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #2e2e3e;">
+    <div style="background:#1e1e26;border-radius:18px;padding:28px 32px;width:580px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #2e2e3e;">
 
         <!-- En-tête -->
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <div style="font-size:18px;font-weight:800;color:#fff;">📁 Mes projets</div>
             <button onclick="closeProjectsLibrary()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" title="Fermer">×</button>
-        </div>
-
-        <!-- Projet courant + actions rapides -->
-        <div style="background:#28282f;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;border:1px solid #3a3a4a;">
-            <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Projet en cours</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <input id="proj-current-name" type="text" placeholder="Nom du projet..."
-                    style="flex:1;background:#1e1e26;border:1px solid #444;border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;"
-                    onkeydown="if(event.key==='Enter') saveCurrentProject()">
-                <button onclick="saveCurrentProject()" style="background:#4a90e2;color:white;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
-            </div>
-        </div>
-
-        <!-- Boutons actions projet courant -->
-        <div style="display:flex;gap:8px;">
-            <button onclick="_projNewProject()" style="flex:1;background:#28282f;color:#aaa;border:1px solid #3a3a4a;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">✨ Nouveau projet</button>
-            <button onclick="exportCurrentProject()" style="flex:1;background:#28282f;color:#aaa;border:1px solid #3a3a4a;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">⬇️ Exporter ce projet</button>
-            <button onclick="document.getElementById('import-input').click()" style="flex:1;background:#28282f;color:#aaa;border:1px solid #3a3a4a;border-radius:10px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">⬆️ Importer JSON</button>
         </div>
 
         <!-- Boutons sauvegarde globale -->
@@ -203,7 +206,7 @@ function _buildLibraryHTML() {
 
         <!-- Liste des projets -->
         <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;">Projets sauvegardés</div>
-        <div id="projects-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;min-height:80px;max-height:340px;padding-right:4px;">
+        <div id="projects-list" style="flex:1;overflow-y:scroll;display:flex;flex-direction:column;gap:6px;min-height:80px;max-height:45vh;padding-right:4px;">
             <div style="color:#555;font-size:13px;text-align:center;padding:20px;">Chargement...</div>
         </div>
     </div>`;
@@ -212,16 +215,6 @@ function _buildLibraryHTML() {
 async function _renderProjectsList() {
     const list = document.getElementById('projects-list');
     if (!list) return;
-
-    // Pré-remplir le champ nom avec le projet courant
-    const curId = getCurrentProjectId();
-    if (curId) {
-        try {
-            const cur = await dbGet(curId);
-            const input = document.getElementById('proj-current-name');
-            if (input && cur) input.value = cur.name;
-        } catch(e) {}
-    }
 
     let projects;
     try { projects = await dbGetAll(); }
@@ -234,33 +227,145 @@ async function _renderProjectsList() {
 
     list.innerHTML = '';
     projects.forEach(p => {
-        const isCurrent = p.id === curId;
+        const isCurrent = p.id === getCurrentProjectId();
         const date = new Date(p.updatedAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        const sceneCount = (p.scenes || []).length;
+        const sceneList = p.scenes || [];
+        const sceneCount = sceneList.length;
 
+        // Conteneur global du projet (header + accordion)
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = `border-radius:10px;border:1px solid ${isCurrent ? '#4a90e2' : '#2e2e38'};background:${isCurrent ? '#1a3550' : '#28282f'};transition:border-color .15s;`;
+
+        // ── Header du projet ──
         const row = document.createElement('div');
-        row.style.cssText = `display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid ${isCurrent ? '#4a90e2' : '#2e2e38'};background:${isCurrent ? '#1a3550' : '#28282f'};cursor:pointer;transition:background .15s;`;
+        row.style.cssText = `display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;`;
 
-        row.innerHTML = `
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:700;color:${isCurrent ? '#7ab8f5' : '#ddd'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                    ${isCurrent ? '▶ ' : ''}${_escHtml(p.name)}
-                </div>
-                <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} scène${sceneCount > 1 ? 's' : ''} · ${date}</div>
+        // Flèche accordion
+        const arrow = document.createElement('span');
+        arrow.textContent = '▶';
+        arrow.style.cssText = `font-size:9px;color:#555;transition:transform .2s;flex-shrink:0;user-select:none;`;
+
+        // Infos projet
+        const info = document.createElement('div');
+        info.style.cssText = `flex:1;min-width:0;`;
+        info.innerHTML = `
+            <div style="font-size:13px;font-weight:700;color:${isCurrent ? '#7ab8f5' : '#ddd'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${isCurrent ? '▶ ' : ''}${_escHtml(p.name)}
             </div>
-            <button onclick="event.stopPropagation();_projRename('${p.id}','${_escHtml(p.name)}')" title="Renommer"
-                style="background:#35353f;color:#aaa;border:1px solid #444;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;">✏️</button>
-            <button onclick="event.stopPropagation();_projDelete('${p.id}')" title="Supprimer"
-                style="background:#2a1a1a;color:#ff6b6b;border:1px solid #3d2020;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;">×</button>
+            <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} scène${sceneCount > 1 ? 's' : ''} · ${date}</div>
         `;
 
-        if (!isCurrent) {
-            row.addEventListener('click', () => _projLoad(p.id));
-            row.onmouseover = () => row.style.background = '#32323c';
-            row.onmouseout  = () => row.style.background = '#28282f';
+        // Boutons actions
+        const btnRename = document.createElement('button');
+        btnRename.textContent = '✏️';
+        btnRename.title = 'Renommer';
+        btnRename.style.cssText = 'background:#35353f;color:#aaa;border:1px solid #444;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;';
+        btnRename.addEventListener('click', (e) => { e.stopPropagation(); _projRename(p.id, p.name); });
+
+        const btnDelete = document.createElement('button');
+        btnDelete.textContent = '×';
+        btnDelete.title = 'Supprimer';
+        btnDelete.style.cssText = 'background:#2a1a1a;color:#ff6b6b;border:1px solid #3d2020;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;';
+        btnDelete.addEventListener('click', (e) => { e.stopPropagation(); _projDelete(p.id); });
+
+        row.appendChild(arrow);
+        row.appendChild(info);
+        row.appendChild(btnRename);
+        row.appendChild(btnDelete);
+
+        // ── Panneau accordion des scènes ──
+        const accordion = document.createElement('div');
+        accordion.style.cssText = `display:none;border-top:1px solid ${isCurrent ? '#2a4a6a' : '#2e2e38'};background:${isCurrent ? '#122538' : '#222229'};padding:6px 8px;border-radius:0 0 10px 10px;`;
+
+        if (sceneList.length === 0) {
+            accordion.innerHTML = `<div style="font-size:11px;color:#555;padding:6px 8px;">Aucune scène</div>`;
+        } else {
+            sceneList.forEach((sc, idx) => {
+                const isCurrentSceneOfCurrentProj = isCurrent && idx === p.currentScene;
+                const scRow = document.createElement('div');
+                scRow.style.cssText = `display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;font-size:11px;
+                    color:${isCurrentSceneOfCurrentProj ? '#7ab8f5' : '#aaa'};
+                    background:${isCurrentSceneOfCurrentProj ? '#1a3550' : 'transparent'};
+                    font-weight:${isCurrentSceneOfCurrentProj ? '700' : '400'};
+                    cursor:${isCurrentSceneOfCurrentProj ? 'default' : 'pointer'};
+                    transition:background .15s,color .15s;`;
+
+                const icon = document.createElement('span');
+                icon.textContent = isCurrentSceneOfCurrentProj ? '▶' : '○';
+                icon.style.cssText = `font-size:8px;flex-shrink:0;color:${isCurrentSceneOfCurrentProj ? '#4a90e2' : '#444'};transition:color .15s;`;
+
+                const label = document.createElement('span');
+                label.textContent = sc.name || `Scène ${idx + 1}`;
+                label.style.cssText = `flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
+
+                if (!isCurrentSceneOfCurrentProj) {
+                    scRow.addEventListener('mouseenter', () => {
+                        scRow.style.background = isCurrent ? '#1a3550' : '#2e2e3e';
+                        scRow.style.color = '#fff';
+                        icon.style.color = '#4a90e2';
+                        icon.textContent = '▶';
+                    });
+                    scRow.addEventListener('mouseleave', () => {
+                        scRow.style.background = 'transparent';
+                        scRow.style.color = '#aaa';
+                        icon.style.color = '#444';
+                        icon.textContent = '○';
+                    });
+                    scRow.addEventListener('click', () => _projLoadAtScene(p.id, idx));
+                }
+
+                scRow.appendChild(icon);
+                scRow.appendChild(label);
+                accordion.appendChild(scRow);
+            });
         }
 
-        list.appendChild(row);
+        // ── Toggle accordion ──
+        let open = false;
+        const toggleAccordion = () => {
+            open = !open;
+            accordion.style.display = open ? 'block' : 'none';
+            arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+            arrow.style.color = open ? '#4a90e2' : '#555';
+        };
+
+        row.addEventListener('click', (e) => {
+            // Clic sur les boutons → pas de toggle
+            if (e.target === btnRename || e.target === btnDelete) return;
+            toggleAccordion();
+        });
+
+        // Double-clic sur le header = charger le projet (si pas courant)
+        if (!isCurrent) {
+            row.title = 'Cliquer pour voir les scènes · Double-cliquer pour ouvrir';
+            row.addEventListener('dblclick', (e) => {
+                if (e.target === btnRename || e.target === btnDelete) return;
+                _projLoad(p.id);
+            });
+            row.onmouseover = () => wrapper.style.borderColor = '#4a90e2';
+            row.onmouseout  = () => { if (!open) wrapper.style.borderColor = '#2e2e38'; };
+        } else {
+            // Projet courant : ouvrir l'accordion par défaut
+            open = true;
+            accordion.style.display = 'block';
+            arrow.style.transform = 'rotate(90deg)';
+            arrow.style.color = '#4a90e2';
+        }
+
+        // Bouton "Ouvrir ce projet" en bas de l'accordion (si pas courant)
+        if (!isCurrent) {
+            const openBtn = document.createElement('button');
+            openBtn.textContent = '📂 Ouvrir ce projet';
+            openBtn.style.cssText = `display:block;width:100%;margin-top:6px;padding:6px;background:#1a3550;color:#7ab8f5;border:1px solid #2a4a6a;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;text-align:center;`;
+            openBtn.onmouseover = () => openBtn.style.background = '#1e3d5e';
+            openBtn.onmouseout  = () => openBtn.style.background = '#1a3550';
+            openBtn.addEventListener('click', () => _projLoad(p.id));
+            accordion.appendChild(openBtn);
+        }
+
+        wrapper.appendChild(row);
+        wrapper.appendChild(accordion);
+        list.appendChild(wrapper);
     });
 }
 
@@ -296,6 +401,23 @@ async function _projLoad(id) {
         closeProjectsLibrary();
     }
 }
+
+async function _projLoadAtScene(id, sceneIndex) {
+    // Sauvegarder silencieusement le projet courant
+    const curId = getCurrentProjectId();
+    if (curId) {
+        try {
+            const cur = await dbGet(curId);
+            await saveProjectToDB(cur?.name || 'Sans titre');
+        } catch(e) {}
+    }
+    const project = await loadProjectFromDB(id, sceneIndex);
+    if (project) {
+        _updateProjectTitle(project.name);
+        closeProjectsLibrary();
+    }
+}
+
 
 async function _projNewProject() {
     const name = prompt('Nom du nouveau projet :', 'Nouveau projet');

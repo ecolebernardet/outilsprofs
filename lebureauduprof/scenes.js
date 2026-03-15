@@ -32,6 +32,7 @@ var currentScene  = 0;    // index de la scène active
 
 	function saveCurrentSceneData() {
 		if (scenes.length === 0) return;
+		if (typeof isRestoringState !== 'undefined' && isRestoringState) return;
 		scenes[currentScene].config     = buildBoardJSON();
 		scenes[currentScene].background = localStorage.getItem('boardBackground') || 'none';
 		saveScenesMeta();
@@ -67,7 +68,7 @@ var currentScene  = 0;    // index de la scène active
 			setTimeout(() => {
 				const cur = buildBoardJSON();
 				if (cur) { undoStack = [cur]; updateUndoRedoBtns(); }
-			}, 600);
+			}, 1200);
 		} else {
 			localStorage.removeItem('profBoardConfig');
 		}
