@@ -62,11 +62,17 @@ function dbGetAll() {
     }));
 }
 
+// ── Mode brouillon (aucune persistance jusqu'à sauvegarde explicite) ──────
+let _isDraft = false;
+function isDraftMode() { return _isDraft; }
+
 // ── ID du projet courant (stocké en localStorage) ────────────────────────
 function getCurrentProjectId() {
+    if (_isDraft) return null;
     return localStorage.getItem('currentProjectId') || null;
 }
 function setCurrentProjectId(id) {
+    if (_isDraft) return; // En mode brouillon, on ne touche pas au localStorage
     if (id) localStorage.setItem('currentProjectId', id);
     else    localStorage.removeItem('currentProjectId');
 }
@@ -74,6 +80,7 @@ function setCurrentProjectId(id) {
 // ── Sauvegarder le projet courant en DB ──────────────────────────────────
 async function saveProjectToDB(name) {
     saveCurrentSceneData();
+    if (_isDraft) return null; // Mode brouillon : aucune persistance
     let id = getCurrentProjectId();
     if (!id) return null; // Pas de projet courant → ne pas créer silencieusement
     const project = {
@@ -119,6 +126,7 @@ async function newProject(name) {
         }
     }
 
+    _isDraft = false; // On sort du mode brouillon si on y était
     // Réinitialiser
     setCurrentProjectId(null);
     scenes = [{ id: Date.now(), name: 'Tableau 1', config: null, background: 'none' }];
@@ -132,6 +140,29 @@ async function newProject(name) {
     setCurrentProjectId(newId);
     await dbPut({ id: newId, name: name || 'Nouveau projet', scenes, currentScene, updatedAt: Date.now() });
     _updateProjectTitle(name || 'Nouveau projet');
+}
+
+// ── Nouveau projet brouillon (aucune persistance) ─────────────────────────
+async function newDraftProject() {
+    // Sauvegarder silencieusement le projet courant s'il existe
+    if (!_isDraft) {
+        const curId = getCurrentProjectId();
+        if (curId) {
+            try {
+                const cur = await dbGet(curId);
+                await saveProjectToDB(cur?.name || 'Sans titre');
+            } catch(e) {}
+        }
+    }
+
+    _isDraft = true;
+    localStorage.removeItem('currentProjectId');
+    scenes = [{ id: Date.now(), name: 'Tableau 1', config: null, background: '#BAA09B' }];
+    currentScene = 0;
+    // Ne pas appeler saveScenesMeta → pas de localStorage
+    loadScene(0);
+    renderScenesBar();
+    _updateProjectTitle(''); // Pas de nom affiché
 }
 
 // ── Afficher/masquer le titre du projet courant ──────────────────────────
@@ -156,13 +187,15 @@ async function initCurrentProjectName() {
 // MODALE BIBLIOTHÈQUE DE PROJETS
 // =========================================================================
 async function openProjectsLibrary() {
-    // Sauvegarder silencieusement pour que currentScene soit à jour dans la liste
-    const curId = getCurrentProjectId();
-    if (curId) {
-        try {
-            const cur = await dbGet(curId);
-            await saveProjectToDB(cur?.name || 'Sans titre');
-        } catch(e) {}
+    // Sauvegarder silencieusement pour que currentScene soit à jour dans la liste (sauf brouillon)
+    if (!_isDraft) {
+        const curId = getCurrentProjectId();
+        if (curId) {
+            try {
+                const cur = await dbGet(curId);
+                await saveProjectToDB(cur?.name || 'Sans titre');
+            } catch(e) {}
+        }
     }
 
     // Créer la modale si elle n'existe pas
@@ -191,6 +224,16 @@ function closeProjectsLibrary() {
 }
 
 function _buildLibraryHTML() {
+    const draftBanner = _isDraft ? `
+        <div style="background:#2a2a1a;border:1px solid #5a5020;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;">📝</span>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:700;color:#f0c040;">Brouillon en cours</div>
+                <div style="font-size:11px;color:#888;margin-top:2px;">Non sauvegardé · Sera perdu si vous ouvrez un autre projet</div>
+            </div>
+            <button onclick="_projSaveDraft()" style="background:#4a3a00;color:#f0c040;border:1px solid #6a5a10;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
+        </div>` : '';
+
     return `
     <div style="background:#1e1e26;border-radius:18px;padding:28px 32px;width:580px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #2e2e3e;">
 
@@ -199,6 +242,8 @@ function _buildLibraryHTML() {
             <div style="font-size:18px;font-weight:800;color:#fff;">📁 Mes projets</div>
             <button onclick="closeProjectsLibrary()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" title="Fermer">×</button>
         </div>
+
+        ${draftBanner}
 
         <!-- Boutons sauvegarde globale -->
         <div style="display:flex;gap:8px;">
@@ -380,6 +425,11 @@ function _escHtml(str) {
 // ── Actions de la bibliothèque ────────────────────────────────────────────
 
 async function saveCurrentProject() {
+    // Si brouillon, demander un nom avant de persister
+    if (_isDraft) {
+        await _projSaveDraft();
+        return;
+    }
     const input = document.getElementById('proj-current-name');
     const name  = (input?.value || '').trim() || 'Sans titre';
     await saveProjectToDB(name);
@@ -390,15 +440,39 @@ async function saveCurrentProject() {
     if (btn) { const orig = btn.textContent; btn.textContent = '✅ Enregistré !'; setTimeout(() => btn.textContent = orig, 1500); }
 }
 
-async function _projLoad(id) {
-    // Sauvegarder silencieusement le projet courant
-    const curId = getCurrentProjectId();
-    if (curId) {
-        try {
-            const cur = await dbGet(curId);
-            await saveProjectToDB(cur?.name || 'Sans titre');
-        } catch(e) {}
+// ── Enregistrer un brouillon pour la première fois ────────────────────────
+async function _projSaveDraft() {
+    const name = prompt('Donner un nom à ce projet :', 'Nouveau projet');
+    if (name === null) return;
+    const finalName = name.trim() || 'Nouveau projet';
+    // Maintenant on sort du mode brouillon et on crée l'entrée DB
+    _isDraft = false;
+    const newId = 'proj_' + Date.now();
+    localStorage.setItem('currentProjectId', newId);
+    saveCurrentSceneData(); // maintenant saveScenesMeta va écrire en localStorage
+    await dbPut({ id: newId, name: finalName, scenes, currentScene, updatedAt: Date.now() });
+    _updateProjectTitle(finalName);
+    // Rafraîchir la modale si ouverte
+    const overlay = document.getElementById('projects-overlay');
+    if (overlay && overlay.style.display !== 'none') {
+        overlay.innerHTML = _buildLibraryHTML();
+        _renderProjectsList();
+        document.addEventListener('keydown', overlay._escHandler);
     }
+}
+
+async function _projLoad(id) {
+    // Sauvegarder silencieusement le projet courant (sauf si brouillon)
+    if (!_isDraft) {
+        const curId = getCurrentProjectId();
+        if (curId) {
+            try {
+                const cur = await dbGet(curId);
+                await saveProjectToDB(cur?.name || 'Sans titre');
+            } catch(e) {}
+        }
+    }
+    _isDraft = false; // On quitte le brouillon
     const project = await loadProjectFromDB(id);
     if (project) {
         _updateProjectTitle(project.name);
@@ -407,14 +481,17 @@ async function _projLoad(id) {
 }
 
 async function _projLoadAtScene(id, sceneIndex) {
-    // Sauvegarder silencieusement le projet courant
-    const curId = getCurrentProjectId();
-    if (curId) {
-        try {
-            const cur = await dbGet(curId);
-            await saveProjectToDB(cur?.name || 'Sans titre');
-        } catch(e) {}
+    // Sauvegarder silencieusement le projet courant (sauf si brouillon)
+    if (!_isDraft) {
+        const curId = getCurrentProjectId();
+        if (curId) {
+            try {
+                const cur = await dbGet(curId);
+                await saveProjectToDB(cur?.name || 'Sans titre');
+            } catch(e) {}
+        }
     }
+    _isDraft = false; // On quitte le brouillon
     const project = await loadProjectFromDB(id, sceneIndex);
     if (project) {
         _updateProjectTitle(project.name);
