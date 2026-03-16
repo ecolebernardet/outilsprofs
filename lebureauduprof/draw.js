@@ -1065,15 +1065,33 @@ function initSelectionRect() {
 function initBoardSelection() {
     initSelectionRect();
     board.addEventListener('mousedown', onBoardMouseDown);
+    board.addEventListener('touchstart', (e) => {
+        if (isDrawMode || isEraserMode) return; // géré par _boardDrawTouchStart
+        if (e.touches.length !== 1) return;     // ignorer le multi-touch
+        const t = e.touches[0];
+        const target = t.target;
+        // Laisser les overlays géométriques gérer leur propre touch
+        if (target.closest('.geo-tool-overlay')) return;
+        // Construire un événement synthétique compatible avec onBoardMouseDown
+        const synth = {
+            clientX: t.clientX,
+            clientY: t.clientY,
+            target:  target,
+            ctrlKey: false,
+            metaKey: false,
+        };
+        onBoardMouseDown(synth);
+    }, { passive: false });
 }
 
 function onBoardMouseDown(e) {
     if (document.body.classList.contains('presentation-mode')) return;
     if (isDrawMode || isEraserMode) return;
-    if (e.target.closest('#selection-controls')) return;
-    if (e.target.closest('#toolbar-container')) return;
-    if (e.target.closest('.widget-ctx-menu')) return;
-    if (e.target.closest('#shape-edit-panel')) return;
+    const target = e.target || e.srcElement;
+    if (target.closest('#selection-controls')) return;
+    if (target.closest('#toolbar-container')) return;
+    if (target.closest('.widget-ctx-menu')) return;
+    if (target.closest('#shape-edit-panel')) return;
 
     // Fermer le menu widgets si ouvert
     document.getElementById('tools-menu')?.classList.remove('active');
@@ -1081,7 +1099,7 @@ function onBoardMouseDown(e) {
     mouseDownClientX = e.clientX;
     mouseDownClientY = e.clientY;
 
-    const widget = e.target.closest('.widget, .shape-widget');
+    const widget = target.closest('.widget, .shape-widget');
 
     if (widget) {
         const gid = widget.dataset.groupId;
