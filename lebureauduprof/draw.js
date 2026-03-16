@@ -32,6 +32,7 @@ function initCanvas() {
     board.addEventListener('touchstart', _boardDrawTouchStart, { passive:false });
     board.addEventListener('touchmove',  _boardDrawTouchMove,  { passive:false });
     board.addEventListener('touchend',   _boardDrawTouchEnd);
+    board.addEventListener('contextmenu', _boardDrawContextMenu);
     document.getElementById('draw-size').addEventListener('input', function() {
         document.getElementById('draw-size-label').textContent = this.value;
     });
@@ -56,7 +57,21 @@ function getPos(e) {
 }
 
 // Proxy board → dessin/gomme (le canvas a pointer-events:none)
+function _boardDrawContextMenu(e) {
+    if (!isDrawMode && !isEraserMode) return;
+    e.preventDefault();
+    if (isEraserMode) {
+        // Retour au mode dessin (pas sélection)
+        stopEraserMode();
+        isDrawMode = true;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    } else {
+        toggleEraserMode();
+    }
+}
 function _boardDrawMouseDown(e)  {
+    if (e.button === 2) return;
     if (isDrawMode)   { startPaint(e); return; }
     if (isEraserMode) { startErase(e); return; }
 }
@@ -161,6 +176,11 @@ function endPaint() {
         }
         currentStroke = null; redrawStrokes();
         return;
+    }
+    // Tap stylet = 1 seul point → enregistrer comme dot (cercle plein)
+    if (currentStroke.points.length === 1) {
+        currentStroke.dot = true;
+        currentStroke.points.push({ ...currentStroke.points[0] }); // besoin d'au moins 2 pts pour le stockage
     }
     if (currentStroke.points.length > 1) {
         if (currentDrawMode === 'shape') {
@@ -571,6 +591,18 @@ function redrawStrokes(extra = null, extra2 = null) {
 
 function drawStroke(stroke, highlight = false, ctx = drawCtx) {
     if (!stroke.points || stroke.points.length < 2) return;
+    // Tap unique → cercle plein
+    if (stroke.dot) {
+        const p = stroke.points[0];
+        const r = stroke.size / 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = highlight ? '#4a90e2' : stroke.color;
+        ctx.fill();
+        ctx.restore();
+        return;
+    }
     ctx.save();
     ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
@@ -896,11 +928,13 @@ function stopEraserMode() {
     if (!isEraserMode) return;
     isEraserMode = false; isErasing = false;
     if (drawCanvas) {
-        drawCanvas.classList.add('inactive');
+        drawCanvas.classList.remove('inactive');
         drawCanvas.classList.remove('eraser-mode');
         board.classList.remove('is-erasing');
+        board.classList.add('is-drawing');
         redrawStrokes();
     }
+    isDrawMode = true;
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
 }
 
@@ -971,19 +1005,42 @@ async function removeFullyErasedShapes() {
 function eraseAt(pos) {
     const r = parseInt(document.getElementById('eraser-size').value);
     const NS = 'http://www.w3.org/2000/svg';
+
+    // Densifie un stroke en interpolant des points tous les `step` px sur chaque segment
+    // Nécessaire pour les figures géométriques qui n'ont que quelques points extrêmes
+    function densify(pts, step) {
+        if (pts.length < 2) return pts;
+        const out = [pts[0]];
+        for (let i = 0; i < pts.length - 1; i++) {
+            const A = pts[i], B = pts[i + 1];
+            const dist = Math.hypot(B.x - A.x, B.y - A.y);
+            const n = Math.floor(dist / step);
+            for (let j = 1; j <= n; j++) {
+                const t = j / (n + 1);
+                out.push({ x: A.x + t * (B.x - A.x), y: A.y + t * (B.y - A.y) });
+            }
+            out.push(B);
+        }
+        return out;
+    }
+
     const newStrokes = [];
     strokes.forEach(stroke => {
-        const pts = stroke.points;
+        // Densifier à un pas de 4px pour que la gomme puisse couper n'importe où
+        const pts = densify(stroke.points, 4);
         let current = [];
         for (let i = 0; i < pts.length; i++) {
             if (Math.hypot(pts[i].x - pos.x, pts[i].y - pos.y) <= r) {
                 if (current.length >= 2) newStrokes.push({ ...stroke, points: current });
                 current = [];
-            } else { current.push(pts[i]); }
+            } else {
+                current.push(pts[i]);
+            }
         }
         if (current.length >= 2) newStrokes.push({ ...stroke, points: current });
     });
     strokes = newStrokes;
+
     let shapesModified = false;
     document.querySelectorAll('.shape-widget').forEach(widget => {
         const svg = widget.querySelector('svg');

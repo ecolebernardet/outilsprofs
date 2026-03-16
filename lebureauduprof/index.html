@@ -19,17 +19,19 @@
         /* Titre du projet courant */
         #current-project-name {
             position: fixed;
-            bottom: 18px;
-            left: 72px;
+            bottom: 4px;
+            left: 20px;
             font-size: 11px;
             font-weight: 600;
             color: rgba(255,255,255,0.35);
             pointer-events: none;
             z-index: 9000;
             white-space: nowrap;
-            max-width: 260px;
+            max-width: 90px;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: center;
+            width: 90px;
         }
         body.presentation-mode #current-project-name { display: none; }
         /* Scrollbar discrète en mode normal */
@@ -230,8 +232,8 @@
 
         /* Curseur crayon pour le mode insertion de texte */
         .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
-        #board.is-drawing { cursor: crosshair !important; }
-        #board.is-drawing * { cursor: crosshair !important; }
+        #board.is-drawing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
+        #board.is-drawing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
         #board.is-segment-mode { cursor: crosshair !important; }
         #board.is-segment-mode * { cursor: crosshair !important; }
         #figures-submenu { display: none; }
@@ -501,6 +503,19 @@
 		#fab-btn:hover { background: #000; transform: scale(1.2); animation: none; box-shadow: 0 0px 10px rgba(120, 120,120,1); }
 		#fab-btn.menu-open { background: #555; border-color: #111; color: #fff; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; animation: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 		
+		#draw-fab-btn {
+			position: fixed; bottom: 20px; left: 78px; z-index: 14000;
+			width: 50px; height: 50px; border-radius: 50%;
+			background: #1a1a2e; border: 2px solid #333;
+			color: #fff; font-size: 22px; cursor: pointer;
+			display: flex; align-items: center; justify-content: center;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+			transition: background .15s, transform .15s;
+		}
+		#draw-fab-btn:hover { background: #2a2a4a; transform: scale(1.1); }
+		#draw-fab-btn.draw-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		body.presentation-mode #draw-fab-btn { display: none; }
+
 		/* Menu vertical principal */
 		#main-menu {
 			position: fixed; bottom: 82px; left: 20px; z-index: 14000;
@@ -1128,6 +1143,7 @@
 
     <!-- Bouton flottant principal -->
 	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal">＋</button>
+	<button id="draw-fab-btn" onclick="openMmPanel('draw')" title="Dessin &amp; Figures">✏️</button>
 	<div id="current-project-name"></div>
 
 	<!-- Menu vertical -->
@@ -1323,7 +1339,7 @@
 	</div>
 
 	<!-- Barre outils DESSIN (horizontale, bas-gauche) -->
-	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
 		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
 			<!-- Mode sélection -->
 			<button id="draw-select-btn" onclick="toggleSelectMode()" style="padding:6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;" title="Repasser en mode sélection">↖ Sélection</button>
@@ -1334,17 +1350,30 @@
 			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Figures géométriques">📏 Figures<br>géom.</button>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Couleur & taille -->
-			<span style="color:#ccc;font-size:11px;">Couleur</span>
-			<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
-			<span style="color:#ccc;font-size:11px;">Taille</span>
-			<input type="range" id="draw-size" min="1" max="40" value="4" style="width:90px;cursor:pointer;">
-			<span id="draw-size-label" style="color:#fff;font-size:12px;min-width:18px;">4</span>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+				<span style="color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Couleur</span>
+				<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
+			</div>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+				<span style="color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Taille</span>
+				<div style="display:flex;align-items:center;gap:4px;">
+				<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
+				<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
+				<span id="draw-size-label" style="color:#fff;font-size:12px;min-width:20px;text-align:center;">4</span>
+				<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
+				</div>
+			</div>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Gomme -->
-			<span style="color:#ccc;font-size:11px;">🧽</span>
-			<input type="range" id="eraser-size" min="5" max="80" value="20" style="width:70px;cursor:pointer;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
-			<span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:18px;">20</span>
-			<button id="eraser-btn" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+				<button id="eraser-btn" onclick="toggleEraserMode()" title="Gomme (clic droit pour basculer)" style="background:#2a2a2e;color:#888;border:2px solid #444;width:36px;height:22px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;flex-shrink:0;">🧽</button>
+				<div style="display:flex;align-items:center;gap:4px;">
+					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.max(5,+i.value-5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
+					<input type="range" id="eraser-size" min="5" max="80" value="20" style="display:none;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
+					<span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:20px;text-align:center;">20</span>
+					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.min(80,+i.value+5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
+				</div>
+			</div>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Actions -->
 			<button onclick="clearCanvas()" style="background:#3d1515;color:#ff6b6b;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️ Effacer</button>
@@ -2113,12 +2142,22 @@ function openMmPanel(type) {
     } else if (type === 'shapes') {
         if (typeof toggleShapeToolbar === 'function') toggleShapeToolbar();
     }
+    _updateDrawFabBtn();
 }
 
 function closeMmPanel() {
     if (typeof stopDrawing    === 'function') stopDrawing();
     if (typeof stopEraserMode === 'function') stopEraserMode();
     if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+    _updateDrawFabBtn();
+}
+
+function _updateDrawFabBtn() {
+    const btn = document.getElementById('draw-fab-btn');
+    if (!btn) return;
+    const tb = document.getElementById('draw-toolbar');
+    const isOpen = tb && tb.style.display !== 'none';
+    btn.classList.toggle('draw-open', isOpen);
 }
 
 // Fermer le menu au clic extérieur
@@ -2307,10 +2346,11 @@ function _updateEraserBtnInPanel() {
     const btn1 = document.getElementById('eraser-btn');
     const btn2 = document.getElementById('eraser-btn-shapes');
     const label = isEraserMode ? '🧽 Gomme active — cliquer pour désactiver' : '🧽 Activer la gomme';
-    const bg    = isEraserMode ? '#1a3550' : '#2a2a36';
+    const bg    = isEraserMode ? '#1a3550' : '#2a2a2e';
     const bc    = isEraserMode ? '#4a90e2' : '#444';
-    if (btn1) { btn1.textContent = label; btn1.style.background = bg; btn1.style.borderColor = bc; }
-    if (btn2) { btn2.textContent = label; btn2.style.background = bg; btn2.style.borderColor = bc; }
+    const color = isEraserMode ? '#7ab8f5' : '#888';
+    if (btn1) { btn1.style.background = bg; btn1.style.borderColor = bc; btn1.style.color = color; btn1.style.boxShadow = isEraserMode ? '0 0 8px rgba(74,144,226,0.5)' : 'none'; }
+    if (btn2) { btn2.textContent = label; btn2.style.background = isEraserMode ? '#1a3550' : '#2a2a36'; btn2.style.borderColor = bc; }
 }
 
 </script>
