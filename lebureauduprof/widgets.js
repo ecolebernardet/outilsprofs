@@ -396,11 +396,18 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
 // =========================================================================
 function makeDraggable(elmnt) {
     const handle = elmnt.querySelector('.drag-handle');
-    if (handle) handle.onmousedown = (e) => {
-        e.stopPropagation();
-        elmnt.focus();
-        startWidgetDrag(e, elmnt);
-    };
+    if (handle) {
+        handle.onmousedown = (e) => {
+            e.stopPropagation();
+            elmnt.focus();
+            startWidgetDrag(e, elmnt);
+        };
+        handle.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            elmnt.focus();
+            startWidgetDrag(e.touches[0], elmnt);
+        }, { passive: false });
+    }
 
     const isTextLike = elmnt.dataset.type === 'text' || elmnt.dataset.type === 'homework';
 
@@ -465,6 +472,36 @@ function makeDraggable(elmnt) {
 
         elmnt.addEventListener('mouseup', () => { elmnt._dragPending = null; });
 
+        // Support tactile pour les widgets texte
+        elmnt.addEventListener('touchstart', (e) => {
+            if (isDrawMode || isEraserMode) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar')) return;
+            const editor = elmnt.querySelector('.editor-content');
+            if (editor && editor.contentEditable === 'true') return;
+            const t = e.touches[0];
+            elmnt._dragPending = { x: t.clientX, y: t.clientY, e: t };
+        }, { passive: true });
+
+        elmnt.addEventListener('touchmove', (e) => {
+            if (!elmnt._dragPending) return;
+            const editor = elmnt.querySelector('.editor-content');
+            if (editor && editor.contentEditable === 'true') { elmnt._dragPending = null; return; }
+            const t = e.touches[0];
+            const dx = Math.abs(t.clientX - elmnt._dragPending.x);
+            const dy = Math.abs(t.clientY - elmnt._dragPending.y);
+            if (dx > 4 || dy > 4) {
+                if (editor) {
+                    editor.contentEditable = 'false';
+                    editor.style.cursor = 'grab';
+                    editor.style.userSelect = 'none';
+                }
+                startWidgetDrag(elmnt._dragPending.e, elmnt);
+                elmnt._dragPending = null;
+            }
+        }, { passive: false });
+
+        elmnt.addEventListener('touchend', () => { elmnt._dragPending = null; });
+
     } else {
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
@@ -480,11 +517,20 @@ function makeDraggable(elmnt) {
             elmnt.focus();
             startWidgetDrag(e, elmnt);
         });
+
+        elmnt.addEventListener('touchstart', (e) => {
+            if (isDrawMode || isEraserMode) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
+            if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
+            elmnt.focus();
+            startWidgetDrag(e.touches[0], elmnt);
+        }, { passive: false });
     }
 }
 
 function startWidgetDrag(e, elmnt) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
 
     // Si le widget appartient à un groupe, déplacer tous les membres du groupe
     const groupId = elmnt.dataset.groupId;
@@ -514,17 +560,24 @@ function startWidgetDrag(e, elmnt) {
     });
 
     let px = e.clientX, py = e.clientY;
-    document.onmousemove = (ev) => {
-        const dx = ev.clientX - px;
-        const dy = ev.clientY - py;
+
+    function onMove(ev) {
+        const point = ev.touches ? ev.touches[0] : ev;
+        const dx = point.clientX - px;
+        const dy = point.clientY - py;
         groupMembers.forEach(w => {
             w.style.top  = (w.offsetTop  + dy) + "px";
             w.style.left = (w.offsetLeft + dx) + "px";
         });
-        px = ev.clientX; py = ev.clientY;
+        px = point.clientX; py = point.clientY;
         if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
-    };
-    document.onmouseup = () => {
+    }
+
+    function onEnd() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup',   onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend',  onEnd);
         document.onmousemove = null;
         overlays.forEach(o => o.remove());
         const curW = window.innerWidth, curVH = virtualH(curW);
@@ -534,7 +587,12 @@ function startWidgetDrag(e, elmnt) {
         });
         if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
         saveBoard();
-    };
+    }
+
+    document.onmousemove = onMove;
+    document.onmouseup   = onEnd;
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend',  onEnd);
 }
 
 
@@ -553,34 +611,56 @@ function makeDraggableRotate(elmnt) {
         saveBoard();
     };
 
-    handle.onmousedown = (e) => {
-        e.preventDefault(); e.stopPropagation();
+    function startRotate(clientX, clientY) {
         bringToFront(elmnt);
         snapshotNow();
         const rect = elmnt.getBoundingClientRect();
         const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-        const startAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+        const startAngle = Math.atan2(clientY - cy, clientX - cx);
         const startRot   = getCurrentRotation(elmnt);
         const indicator  = document.getElementById('rotation-indicator');
-        document.onmousemove = (ev) => {
-            const newRot = startRot + (Math.atan2(ev.clientY - cy, ev.clientX - cx) - startAngle) * 180 / Math.PI;
+
+        function onMove(ev) {
+            const point = ev.touches ? ev.touches[0] : ev;
+            const newRot = startRot + (Math.atan2(point.clientY - cy, point.clientX - cx) - startAngle) * 180 / Math.PI;
             const snapped = snapRotation(newRot);
             elmnt.style.transform = `rotate(${snapped}deg)`;
             if (indicator) {
                 const deg = Math.round(((snapped % 360) + 360) % 360);
                 document.getElementById('rot-deg').textContent = deg + '°';
                 indicator.style.display = 'block';
-                indicator.style.left = ev.clientX + 'px';
-                indicator.style.top  = ev.clientY + 'px';
+                indicator.style.left = point.clientX + 'px';
+                indicator.style.top  = point.clientY + 'px';
                 indicator.querySelector('.rot-reset-hint').style.display = (deg === 0) ? 'none' : 'inline';
             }
-        };
-        document.onmouseup = () => {
+        }
+
+        function onEnd() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
             document.onmousemove = null;
+            document.onmouseup   = null;
             hideRotationIndicator();
             saveBoard();
-        };
+        }
+
+        document.onmousemove = onMove;
+        document.onmouseup   = onEnd;
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }
+
+    handle.onmousedown = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        startRotate(e.clientX, e.clientY);
     };
+
+    handle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        startRotate(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 }
 
 function getCurrentRotation(widget) {
