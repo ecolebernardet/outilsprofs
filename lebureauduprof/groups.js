@@ -498,7 +498,7 @@ function initSelectionControls() {
     const scFlipV = document.getElementById('sc-flip-v-btn');
     if (scLockBtn) {
         scLockBtn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        scLockBtn.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        scLockBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
         scLockBtn.addEventListener('click', e => {
             e.stopPropagation();
             const locked = scLockBtn.classList.toggle('locked');
@@ -507,7 +507,7 @@ function initSelectionControls() {
     }
     if (scFlipH) {
         scFlipH.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        scFlipH.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        scFlipH.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
         scFlipH.addEventListener('click', e => {
             e.stopPropagation(); snapshotNow();
             selectedWidgets.forEach(w => flipWidget(w, 'h'));
@@ -517,7 +517,7 @@ function initSelectionControls() {
     }
     if (scFlipV) {
         scFlipV.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        scFlipV.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        scFlipV.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
         scFlipV.addEventListener('click', e => {
             e.stopPropagation(); snapshotNow();
             selectedWidgets.forEach(w => flipWidget(w, 'v'));

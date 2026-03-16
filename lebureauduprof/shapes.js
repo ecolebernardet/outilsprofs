@@ -259,7 +259,7 @@ function makeShapeResizable(widget) {
 
     if (lockBtn) {
         lockBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
-        lockBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        lockBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: true });
         lockBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const locked = lockBtn.classList.toggle('locked');
@@ -268,12 +268,12 @@ function makeShapeResizable(widget) {
     }
     if (flipH) {
         flipH.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        flipH.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        flipH.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
         flipH.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'h'); });
     }
     if (flipV) {
         flipV.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
-        flipV.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        flipV.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
         flipV.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'v'); });
     }
 
