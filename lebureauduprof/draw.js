@@ -785,8 +785,23 @@ function stopDrawing() {
     stopEraserMode();
 }
 function clearCanvas() {
-    snapshotNow();
+    // Forcer le snapshot sans la garde de déduplication pour s'assurer que
+    // TOUS les strokes actuels sont bien sauvegardés avant l'effacement.
+    // snapshotNow() peut ignorer le snapshot si le JSON est identique au
+    // dernier, ce qui peut arriver si des strokes ont été ajoutés sans
+    // déclencher de snapshot intermédiaire.
+    if (!isInitialLoading && !isRestoringState) {
+        clearTimeout(_pendingSnapshotTimer);
+        const cur = buildBoardJSON();
+        if (cur) {
+            undoStack.push(cur);
+            if (undoStack.length > MAX_UNDO) undoStack.shift();
+            redoStack = [];
+            updateUndoRedoBtns();
+        }
+    }
     strokes = []; selectedStrokes = []; redrawStrokes();
+    saveBoard();
 }
 
 // =========================================================================

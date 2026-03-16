@@ -233,7 +233,9 @@
         /* Curseur crayon pour le mode insertion de texte */
         .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
         #board.is-drawing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
-        #board.is-drawing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
+        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *) { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
+        .geo-tool-overlay, .geo-tool-overlay * { cursor: move !important; }
+        .geo-tool-overlay button, .geo-tool-overlay .geo-rot-handle, .geo-tool-overlay .geo-trace-btn, .geo-tool-overlay .geo-close-tool { cursor: pointer !important; }
         #board.is-segment-mode { cursor: crosshair !important; }
         #board.is-segment-mode * { cursor: crosshair !important; }
         #figures-submenu { display: none; }
@@ -1213,8 +1215,7 @@
 				<span class="mm-ico">🔲</span>&nbsp;&nbsp;Formes</div>
 
 			<!-- Dessin -->
-			<div class="mm-item" id="mm-draw-btn" onclick="openMmPanel('draw')">
-				<span class="mm-ico">🎨</span>&nbsp;&nbsp;Dessin &amp; Figures</div>
+
 		</div>
 
 		<!-- ══ RUBRIQUE A : Système ══ -->
@@ -1327,7 +1328,7 @@
 	</div><!-- #main-menu -->
 
 	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
-	<div id="figures-submenu" style="position:fixed;bottom:80px;left:84px;background:#1F1F21;border-radius:12px;padding:8px 12px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13001;border:1px solid #4a90e2;align-items:center;gap:8px;flex-wrap:wrap;">
+	<div id="figures-submenu" style="position:fixed;bottom:80px;left:140px;background:#1F1F21;border-radius:12px;padding:8px 12px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13001;border:1px solid #4a90e2;align-items:center;gap:8px;flex-wrap:wrap;">
 		<span style="color:#7ab8f5;font-size:11px;font-weight:700;white-space:nowrap;">📏 Figures géométriques</span>
 		<div style="width:1px;height:24px;background:#333;"></div>
 		<button id="draw-mode-segment-btn"   onclick="setDrawMode('segment');toggleFiguresSubmenu()"   style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">— Segment</button>
@@ -1342,12 +1343,12 @@
 	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
 		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
 			<!-- Mode sélection -->
-			<button id="draw-select-btn" onclick="toggleSelectMode()" style="padding:6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;" title="Repasser en mode sélection">↖ Sélection</button>
+			<button id="draw-select-btn" onclick="toggleSelectMode()" style="padding:6px 6px 6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;" title="Repasser en mode sélection"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:0px;"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Modes -->
-			<button id="draw-free-btn" onclick="setDrawMode('free')" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Dessin libre">✏️ Dessin<br>libre</button>
-			<button id="geo-draw-btn" onclick="toggleGeoFromDrawBar()" style="padding:4px 10px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Outils géométriques">📐 Outils<br>géom.</button>
-			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Figures géométriques">📏 Figures<br>géom.</button>
+			<button id="draw-free-btn" onclick="setDrawMode('free')" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Dessin libre">✏️<br>Dessin</button>
+			<button id="geo-draw-btn" onclick="toggleGeoFromDrawBar()" style="padding:4px 10px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Outils géométriques">📐<br>Outils</button>
+			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Figures géométriques">📏<br>Figures</button>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Couleur & taille -->
 			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -1376,14 +1377,17 @@
 			</div>
 			<div style="width:1px;height:24px;background:#333;"></div>
 			<!-- Actions -->
-			<button onclick="clearCanvas()" style="background:#3d1515;color:#ff6b6b;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️ Effacer</button>
+			<button onclick="undoAction()" title="Annuler" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">↩</button>
+			<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
 			<div style="width:1px;height:24px;background:#333;"></div>
-			<button onclick="stopDrawing()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+			<button onclick="clearCanvas()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:none;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
+			<div style="width:1px;height:24px;background:#333;"></div>
+			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
 		</div>
 	</div>
 
 	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
-	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
 		<div style="display:flex;align-items:center;gap:14px;">
 			<!-- Colonne 1 : formes -->
 			<div class="shape-grid" id="shape-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>

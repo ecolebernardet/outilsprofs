@@ -21,7 +21,7 @@ const STYLE = `
 #geo-toolbar {
     position: fixed;
     bottom: 80px;
-    left: 84px;
+    left: 140px;
     background: #1F1F21;
     border-radius: 12px;
     display: none;
@@ -79,11 +79,11 @@ const STYLE = `
 .geo-tool-overlay {
     position: absolute;
     z-index: 9500;
-    cursor: grab;
+    cursor: move !important;
     user-select: none;
     touch-action: none;
 }
-.geo-tool-overlay:active { cursor: grabbing; }
+.geo-tool-overlay:active { cursor: grabbing !important; }
 .geo-tool-overlay.geo-selected { filter: drop-shadow(0 0 6px rgba(106,174,232,0.8)); }
 .geo-tool-overlay button { cursor: pointer !important; }
 .geo-rot-handle { cursor: pointer !important; }
@@ -313,7 +313,7 @@ function makeDraggableGeo(overlay) {
             overlay.style.top  = (cy - bRect.top  - startY) + 'px';
         }
         function onEnd() {
-            overlay.style.cursor = 'grab';
+            overlay.style.cursor = 'move';
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup',   onEnd);
             document.removeEventListener('touchmove', onMove);
@@ -455,6 +455,7 @@ function spawnRegle(board, cx, cy) {
     closeBtn.style.position = 'relative';
     closeBtn.style.cursor = 'pointer';
     closeBtn.style.setProperty('cursor', 'pointer', 'important');
+    closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
 
     btnBar.appendChild(closeBtn);
@@ -606,6 +607,7 @@ function spawnEquerre(board, cx, cy) {
     closeBtn.className = 'geo-close-tool';
     closeBtn.textContent = '×';
     closeBtn.style.cssText = 'position:absolute; bottom:0px; right:28px; cursor:pointer !important;';
+    closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
 
     // Boutons tracer
@@ -801,6 +803,7 @@ function spawnCompas(board, cx, cy) {
     closeBtn.className = 'geo-close-tool';
     closeBtn.textContent = '×';
     closeBtn.style.cssText = 'position:absolute; top:-8px; left:-8px; cursor:pointer !important;';
+    closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
 
     // Bouton tracer — centré en bas du SVG
