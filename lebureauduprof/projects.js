@@ -187,7 +187,9 @@ function _updateProjectTitle(name) {
     const el = document.getElementById('current-project-name');
     if (el) el.textContent = name ? '📁 ' + name : '';
     const label = document.getElementById('scenes-menu-project-label');
-    if (label) label.textContent = name ? `Tableaux du projet "${name}"` : 'Tableaux du projet en cours';
+    if (label) label.textContent = 'Tableaux de ce projet';
+    const rubriquelabel = document.getElementById('sub-fichier-tableaux-label');
+    if (rubriquelabel) rubriquelabel.textContent = name ? `🗂️ Projet "${name}"` : '🗂️ Projet';
 }
 
 // ── Charger le nom du projet courant au démarrage ────────────────────────
