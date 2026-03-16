@@ -239,16 +239,11 @@ function _addStickerResizeHandle(w, minSize) {
 		snapshotNow();
 		const startX = e.clientX, startY = e.clientY;
 		const startW = w.offsetWidth,  startH = w.offsetHeight;
-
-		// Maintenir les proportions d'origine (ratio largeur/hauteur du widget)
 		const aspectRatio = startW / startH;
-		// Longueur diagonale de départ — sert de référence unique et stable
 		const startDiag = Math.sqrt(startW * startW + startH * startH);
 		const onMove = (ev) => {
 			const dx = ev.clientX - startX;
 			const dy = ev.clientY - startY;
-			// Projection du déplacement sur la diagonale (vecteur unitaire)
-			// → donne un delta lisse, sans changement d'axe de référence
 			const proj = (dx * startW + dy * startH) / startDiag;
 			const scale = Math.max(minSize / startW, (startDiag + proj) / startDiag);
 			const newW = Math.round(startW * scale);
@@ -256,7 +251,6 @@ function _addStickerResizeHandle(w, minSize) {
 			w.style.width  = newW + 'px';
 			w.style.height = newH + 'px';
 			w.style.setProperty('--sticker-h', newH + 'px');
-			// Pour les émojis : mettre à jour font-size ET dimensions du content
 			const content = w.querySelector('[data-sticker-type="emoji"]');
 			if (content) {
 				content.style.width    = newW + 'px';
@@ -272,6 +266,40 @@ function _addStickerResizeHandle(w, minSize) {
 		document.addEventListener('mousemove', onMove);
 		document.addEventListener('mouseup', onUp);
 	});
+	handle.addEventListener('touchstart', (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		snapshotNow();
+		const t0 = e.touches[0];
+		const startX = t0.clientX, startY = t0.clientY;
+		const startW = w.offsetWidth, startH = w.offsetHeight;
+		const startDiag = Math.sqrt(startW * startW + startH * startH);
+		function onMove(ev) {
+			const t = ev.touches[0];
+			const dx = t.clientX - startX;
+			const dy = t.clientY - startY;
+			const proj = (dx * startW + dy * startH) / startDiag;
+			const scale = Math.max(minSize / startW, (startDiag + proj) / startDiag);
+			const newW = Math.round(startW * scale);
+			const newH = Math.round(startH * scale);
+			w.style.width  = newW + 'px';
+			w.style.height = newH + 'px';
+			w.style.setProperty('--sticker-h', newH + 'px');
+			const content = w.querySelector('[data-sticker-type="emoji"]');
+			if (content) {
+				content.style.width    = newW + 'px';
+				content.style.height   = newH + 'px';
+				content.style.fontSize = Math.round(newW * 0.62) + 'px';
+			}
+		}
+		function onEnd() {
+			document.removeEventListener('touchmove', onMove);
+			document.removeEventListener('touchend',  onEnd);
+			saveBoard();
+		}
+		document.addEventListener('touchmove', onMove, { passive: false });
+		document.addEventListener('touchend',  onEnd);
+	}, { passive: false });
 }
 
 function insertStickerEmoji(emoji) {

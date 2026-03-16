@@ -285,39 +285,51 @@ async function fuseWidgets() {
 }
 
 function initSelectionControls() {
+    function _startScMove(clientX, clientY) {
+        snapshotNow();
+        const pos = getBoardPos({ clientX, clientY });
+        moveStartX = pos.x; moveStartY = pos.y;
+        widgetMoveOrigins = selectedWidgets.map(w => ({ widget: w, origLeft: w.offsetLeft, origTop: w.offsetTop }));
+        strokeMoveOrigins = selectedStrokes.map(s => ({ stroke: s, origPoints: s.points.map(p => ({...p})) }));
+
+        const overlays = [];
+        document.querySelectorAll('.widget iframe, .widget embed').forEach(el => {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:absolute;inset:0;z-index:9999;background:transparent;';
+            el.parentElement.style.position = 'relative';
+            el.parentElement.appendChild(overlay);
+            overlays.push(overlay);
+        });
+
+        const onMoveEnd_patched = () => {
+            document.removeEventListener('mousemove', onMoveMove);
+            document.removeEventListener('mouseup', onMoveEnd_patched);
+            document.removeEventListener('touchmove', onMoveMoveTouch);
+            document.removeEventListener('touchend', onMoveEnd_patched);
+            overlays.forEach(o => o.remove());
+            const curW = window.innerWidth, curVH = virtualH(curW);
+            selectedWidgets.forEach(w => {
+                w.dataset.leftPercent = (w.offsetLeft / curW) * 100;
+                w.dataset.topPercent  = (w.offsetTop  / curVH) * 100;
+            });
+            saveBoard(); updateSelectionOverlay();
+        };
+        function onMoveMoveTouch(ev) { onMoveMove({ clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY }); }
+
+        document.addEventListener('mousemove', onMoveMove);
+        document.addEventListener('mouseup', onMoveEnd_patched);
+        document.addEventListener('touchmove', onMoveMoveTouch, { passive: false });
+        document.addEventListener('touchend', onMoveEnd_patched);
+    }
+
     document.getElementById('sc-move-btn').onmousedown = (e) => {
-		e.preventDefault(); e.stopPropagation();
-		snapshotNow();
-		const pos = getBoardPos(e);
-		moveStartX = pos.x; moveStartY = pos.y;
-		widgetMoveOrigins = selectedWidgets.map(w => ({ widget: w, origLeft: w.offsetLeft, origTop: w.offsetTop }));
-		strokeMoveOrigins = selectedStrokes.map(s => ({ stroke: s, origPoints: s.points.map(p => ({...p})) }));
-
-		// Bloquer les iframes pendant le drag
-		const overlays = [];
-		document.querySelectorAll('.widget iframe, .widget embed').forEach(el => {
-			const overlay = document.createElement('div');
-			overlay.style.cssText = 'position:absolute;inset:0;z-index:9999;background:transparent;';
-			el.parentElement.style.position = 'relative';
-			el.parentElement.appendChild(overlay);
-			overlays.push(overlay);
-		});
-
-		const onMoveEnd_patched = () => {
-			document.removeEventListener('mousemove', onMoveMove);
-			document.removeEventListener('mouseup', onMoveEnd_patched);
-			overlays.forEach(o => o.remove());
-			const curW = window.innerWidth, curVH = virtualH(curW);
-			selectedWidgets.forEach(w => {
-				w.dataset.leftPercent = (w.offsetLeft / curW) * 100;
-				w.dataset.topPercent  = (w.offsetTop  / curVH) * 100;
-			});
-			saveBoard(); updateSelectionOverlay();
-		};
-
-		document.addEventListener('mousemove', onMoveMove);
-		document.addEventListener('mouseup', onMoveEnd_patched);
-	};
+        e.preventDefault(); e.stopPropagation();
+        _startScMove(e.clientX, e.clientY);
+    };
+    document.getElementById('sc-move-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        _startScMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
     document.getElementById('sc-rotate-btn').ondblclick = (e) => {
         e.preventDefault(); e.stopPropagation();
         snapshotNow();
@@ -336,8 +348,8 @@ function initSelectionControls() {
         hideRotationIndicator();
         saveBoard(); updateSelectionOverlay();
     };
-    document.getElementById('sc-rotate-btn').onmousedown = (e) => {
-        e.preventDefault(); e.stopPropagation();
+
+    function _startScRotate(clientX, clientY) {
         snapshotNow();
         selectedWidgets.forEach(w => {
             if (w.dataset.preRotLeft === undefined) {
@@ -349,13 +361,14 @@ function initSelectionControls() {
         const center = getSelectionCenter();
         rotateCenterX = center.x; rotateCenterY = center.y;
         const br = board.getBoundingClientRect();
-        rotateStartAngle = Math.atan2(e.clientY - br.top - rotateCenterY, e.clientX - br.left - rotateCenterX);
+        rotateStartAngle = Math.atan2(clientY - br.top - rotateCenterY, clientX - br.left - rotateCenterX);
         rotateOrigWidgetTransforms = selectedWidgets.map(w => ({ widget: w, origLeft: w.offsetLeft, origTop: w.offsetTop, origRot: getCurrentRotation(w) }));
         rotateOrigStrokePoints = selectedStrokes.map(s => ({ stroke: s, origPoints: s.points.map(p => ({...p})) }));
         const indicator = document.getElementById('rotation-indicator');
-        const onMove = (ev) => {
+
+        function onMove(cx, cy) {
             const br2 = board.getBoundingClientRect();
-            const angle = Math.atan2(ev.clientY - br2.top - rotateCenterY, ev.clientX - br2.left - rotateCenterX);
+            const angle = Math.atan2(cy - br2.top - rotateCenterY, cx - br2.left - rotateCenterX);
             const delta = (angle - rotateStartAngle) * 180 / Math.PI;
             rotateOrigWidgetTransforms.forEach(({ widget, origLeft, origTop, origRot }) => {
                 const cx2 = origLeft + widget.offsetWidth/2  - rotateCenterX;
@@ -376,21 +389,36 @@ function initSelectionControls() {
                 const deg = Math.round(((snapRotation(rotateOrigWidgetTransforms[0].origRot + delta) % 360) + 360) % 360);
                 document.getElementById('rot-deg').textContent = deg + '°';
                 indicator.style.display = 'block';
-                indicator.style.left = ev.clientX + 'px';
-                indicator.style.top  = ev.clientY + 'px';
+                indicator.style.left = cx + 'px';
+                indicator.style.top  = cy + 'px';
                 indicator.querySelector('.rot-reset-hint').style.display = deg === 0 ? 'none' : 'inline';
             }
             if (drawCtx) redrawStrokes(); updateSelectionOverlay();
-        };
+        }
+        function onMouseMove(ev) { onMove(ev.clientX, ev.clientY); }
+        function onTouchMove(ev) { onMove(ev.touches[0].clientX, ev.touches[0].clientY); }
         const onUp = () => {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup',   onUp);
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend',  onUp);
             hideRotationIndicator();
             saveBoard(); updateSelectionOverlay();
         };
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup',   onUp);
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend',  onUp);
+    }
+
+    document.getElementById('sc-rotate-btn').onmousedown = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        _startScRotate(e.clientX, e.clientY);
     };
+    document.getElementById('sc-rotate-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        _startScRotate(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
     document.getElementById('sc-delete-btn').onclick = (e) => {
         e.stopPropagation();
         snapshotNow();
@@ -465,19 +493,21 @@ function initSelectionControls() {
     };
     // Bouton verrou de l'overlay groupe
     const scLockBtn = document.getElementById('sc-lock-btn');
+    // Boutons symétrie de l'overlay groupe
+    const scFlipH = document.getElementById('sc-flip-h-btn');
+    const scFlipV = document.getElementById('sc-flip-v-btn');
     if (scLockBtn) {
         scLockBtn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+        scLockBtn.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         scLockBtn.addEventListener('click', e => {
             e.stopPropagation();
             const locked = scLockBtn.classList.toggle('locked');
             scLockBtn.textContent = locked ? '🔒' : '🔓';
         });
     }
-    // Boutons symétrie de l'overlay groupe
-    const scFlipH = document.getElementById('sc-flip-h-btn');
-    const scFlipV = document.getElementById('sc-flip-v-btn');
     if (scFlipH) {
         scFlipH.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+        scFlipH.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         scFlipH.addEventListener('click', e => {
             e.stopPropagation(); snapshotNow();
             selectedWidgets.forEach(w => flipWidget(w, 'h'));
@@ -487,6 +517,7 @@ function initSelectionControls() {
     }
     if (scFlipV) {
         scFlipV.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+        scFlipV.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         scFlipV.addEventListener('click', e => {
             e.stopPropagation(); snapshotNow();
             selectedWidgets.forEach(w => flipWidget(w, 'v'));
@@ -495,8 +526,7 @@ function initSelectionControls() {
         });
     }
 
-    document.getElementById('sc-resize-btn').onmousedown = (e) => {
-        e.preventDefault(); e.stopPropagation();
+    function _startScResize(clientX, clientY) {
         const totalSel = selectedWidgets.length + selectedStrokes.length;
         if (totalSel < 1) return;
         snapshotNow();
@@ -516,7 +546,7 @@ function initSelectionControls() {
         const origBoxW = bMaxX - bMinX, origBoxH = bMaxY - bMinY;
         if (origBoxW < 1 || origBoxH < 1) return;
         const boxRatio = origBoxH / origBoxW;
-        const startClientX = e.clientX, startClientY = e.clientY;
+        const startClientX = clientX, startClientY = clientY;
         const widgetOrigins = selectedWidgets.map(w => {
             const r = w.getBoundingClientRect();
             const wL = r.left  - br.left, wT = r.top    - br.top;
@@ -538,11 +568,11 @@ function initSelectionControls() {
             stroke: s,
             origPoints: s.points.map(p => ({ x: p.x, y: p.y }))
         }));
-        const onMove = (ev) => {
-            const proportional = ev.shiftKey || (scLockBtn && scLockBtn.classList.contains('locked'));
-            const newBoxW = Math.max(20, origBoxW + ev.clientX - startClientX);
+        function applyResize(cx, cy, isProportional) {
+            const proportional = isProportional || (scLockBtn && scLockBtn.classList.contains('locked'));
+            const newBoxW = Math.max(20, origBoxW + cx - startClientX);
             const newBoxH = proportional ? Math.max(20, newBoxW * boxRatio)
-                                         : Math.max(20, origBoxH + ev.clientY - startClientY);
+                                         : Math.max(20, origBoxH + cy - startClientY);
             const scaleX = newBoxW / origBoxW, scaleY = newBoxH / origBoxH;
             widgetOrigins.forEach(({ widget, relL, relT, container, origCW, origCH, svg, origSW, origSH }) => {
                 widget.style.left = (bMinX + relL * newBoxW) + 'px';
@@ -565,10 +595,14 @@ function initSelectionControls() {
             });
             if (drawCtx) redrawStrokes();
             updateSelectionOverlay();
-        };
+        }
+        function onMouseMove(ev) { applyResize(ev.clientX, ev.clientY, ev.shiftKey); }
+        function onTouchMove(ev) { applyResize(ev.touches[0].clientX, ev.touches[0].clientY, false); }
         const onUp = () => {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup',   onUp);
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend',  onUp);
             const curW = window.innerWidth, curVH = virtualH(curW);
             selectedWidgets.forEach(w => {
                 w.dataset.leftPercent = (w.offsetLeft / curW) * 100;
@@ -581,9 +615,20 @@ function initSelectionControls() {
             });
             saveBoard();
         };
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup',   onUp);
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend',  onUp);
+    }
+
+    document.getElementById('sc-resize-btn').onmousedown = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        _startScResize(e.clientX, e.clientY);
     };
+    document.getElementById('sc-resize-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        _startScResize(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
     document.getElementById('sc-merge-btn').onclick = (e) => {
         e.stopPropagation();
         mergeWidgets();

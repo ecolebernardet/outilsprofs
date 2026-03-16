@@ -476,21 +476,34 @@ function showHandwritingPreview(text, loading, bx, by, bw, bh) {
     if (!preview._dragInited) {
         preview._dragInited = true;
         const header = document.getElementById('handwriting-preview-header');
+        function startPanelDrag(clientX, clientY) {
+            let ox = clientX - preview.offsetLeft;
+            let oy = clientY - preview.offsetTop;
+            function onMove(ev) {
+                const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+                const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
+                preview.style.left = Math.max(0, cx - ox) + 'px';
+                preview.style.top  = Math.max(0, cy - oy) + 'px';
+            }
+            function onEnd() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup',   onEnd);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend',  onEnd);
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup',   onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend',  onEnd);
+        }
         header.addEventListener('mousedown', (e) => {
             e.preventDefault();
-            let ox = e.clientX - preview.offsetLeft;
-            let oy = e.clientY - preview.offsetTop;
-            const onMove = (ev) => {
-                preview.style.left = Math.max(0, ev.clientX - ox) + 'px';
-                preview.style.top  = Math.max(0, ev.clientY - oy) + 'px';
-            };
-            const onUp = () => {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            };
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            startPanelDrag(e.clientX, e.clientY);
         });
+        header.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startPanelDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
     }
 }
 
@@ -1153,7 +1166,7 @@ function onBoardMouseDown(e) {
 		let hasMoved = false;
 
 		const onStrokeDragMove = (ev) => {
-			const p = getBoardPos(ev);
+			const p = getBoardPos(ev.touches ? { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY } : ev);
 			const dx = p.x - dragStart.x, dy = p.y - dragStart.y;
 			if (!hasMoved && Math.hypot(dx, dy) < 4) return;
 			hasMoved = true;
@@ -1172,6 +1185,8 @@ function onBoardMouseDown(e) {
 		const onStrokeDragEnd = () => {
 			document.removeEventListener('mousemove', onStrokeDragMove);
 			document.removeEventListener('mouseup', onStrokeDragEnd);
+			document.removeEventListener('touchmove', onStrokeDragMove);
+			document.removeEventListener('touchend', onStrokeDragEnd);
 			if (drawCanvas) drawCanvas.style.zIndex = '';
 			if (hasMoved) {
 				const curW = window.innerWidth, curVH = virtualH(curW);
@@ -1186,6 +1201,8 @@ function onBoardMouseDown(e) {
 
 		document.addEventListener('mousemove', onStrokeDragMove);
 		document.addEventListener('mouseup', onStrokeDragEnd);
+		document.addEventListener('touchmove', onStrokeDragMove, { passive: false });
+		document.addEventListener('touchend', onStrokeDragEnd);
 		return;
 	}
 
@@ -1197,7 +1214,7 @@ function onBoardMouseDown(e) {
 
     const onMove = (ev) => {
         if (!isSelectingRect) return;
-        const p = getBoardPos(ev);
+        const p = getBoardPos(ev.touches ? { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY } : ev);
         const x = Math.min(p.x, selectStartX), y = Math.min(p.y, selectStartY);
         Object.assign(selectionRect.style, {
             left: x+'px', top: y+'px',
@@ -1208,19 +1225,22 @@ function onBoardMouseDown(e) {
 
     const onUp = (ev) => {
         document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('mouseup',   onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend',  onUp);
         if (!isSelectingRect) return;
         isSelectingRect = false;
 
-        const dx = Math.abs(ev.clientX - mouseDownClientX);
-        const dy = Math.abs(ev.clientY - mouseDownClientY);
+        const src = ev.changedTouches ? ev.changedTouches[0] : ev;
+        const dx = Math.abs(src.clientX - mouseDownClientX);
+        const dy = Math.abs(src.clientY - mouseDownClientY);
 
         if (dx < 5 && dy < 5) {
             clearSelection();
             return;
         }
 
-        const pos2 = getBoardPos(ev);
+        const pos2 = getBoardPos({ clientX: src.clientX, clientY: src.clientY });
         const rx = Math.min(pos2.x, selectStartX), ry = Math.min(pos2.y, selectStartY);
         const rw = Math.abs(pos2.x - selectStartX), rh = Math.abs(pos2.y - selectStartY);
         const br = board.getBoundingClientRect();
@@ -1247,7 +1267,9 @@ function onBoardMouseDown(e) {
     };
 
     document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('mouseup',   onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend',  onUp);
 }
 
 function clearSelection() {

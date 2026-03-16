@@ -259,6 +259,7 @@ function makeShapeResizable(widget) {
 
     if (lockBtn) {
         lockBtn.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+        lockBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         lockBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const locked = lockBtn.classList.toggle('locked');
@@ -267,10 +268,12 @@ function makeShapeResizable(widget) {
     }
     if (flipH) {
         flipH.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+        flipH.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         flipH.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'h'); });
     }
     if (flipV) {
         flipV.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+        flipV.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
         flipV.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'v'); });
     }
 
@@ -305,6 +308,40 @@ function makeShapeResizable(widget) {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    handle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        snapshotNow();
+        const svg = widget.querySelector('svg');
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = parseFloat(svg.getAttribute('width'));
+        const startH = parseFloat(svg.getAttribute('height'));
+        const ratio = startH / startW;
+        const shapeId = widget.dataset.shapeType;
+        const sc = widget.dataset.strokeColor, fc = widget.dataset.fillColor;
+        const fo = widget.dataset.fillOpacity, sw = widget.dataset.strokeWidth != null ? parseInt(widget.dataset.strokeWidth) : 4;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            const proportional = lockBtn && lockBtn.classList.contains('locked');
+            const rawW = Math.max(40, startW + t.clientX - startX);
+            const rawH = Math.max(40, startH + t.clientY - startY);
+            let newW = rawW, newH = rawH;
+            if (proportional) newH = Math.max(40, newW * ratio);
+            svg.setAttribute('width', newW); svg.setAttribute('height', newH);
+            svg.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+            svg.innerHTML = buildShapeSVG(shapeId, newW, newH, sc, fc, fo, sw);
+            const curW = window.innerWidth, curVH = virtualH(curW);
+            widget.dataset.wPercent = (newW / curW) * 100;
+            widget.dataset.hPercent = (newH / curVH) * 100;
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 }
 
 // Applique une symétrie à un widget forme ou texte
