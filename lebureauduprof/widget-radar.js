@@ -459,6 +459,24 @@
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
             });
+            resizeHandle.addEventListener('touchstart', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var startX = e.touches[0].clientX;
+                var startW = outer.offsetWidth;
+                function onMove(ev) {
+                    var newW = Math.max(220, startW + (ev.touches[0].clientX - startX));
+                    outer.style.width = newW + 'px';
+                    rescale();
+                }
+                function onEnd() {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend',  onEnd);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend',  onEnd);
+            }, { passive: false });
 
             rescale();
 
@@ -625,6 +643,11 @@
                     e.stopPropagation();
                 }
             });
+            outer.addEventListener('touchstart', function (e) {
+                if (e.target.closest('button, input, .radar-resize-handle')) {
+                    e.stopPropagation();
+                }
+            }, { passive: true });
 
             // ── Nettoyage à la suppression ──
             var obs = new MutationObserver(function () {

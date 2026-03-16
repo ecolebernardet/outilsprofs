@@ -814,6 +814,28 @@ function createMonnaieWidget() {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = container.offsetWidth;
+        const startItemsH = itemsZone.offsetHeight;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            const newW = Math.max(300, startW + t.clientX - startX);
+            const newItemsH = Math.max(80, startItemsH + t.clientY - startY);
+            container.style.width = newW + 'px';
+            itemsZone.style.height = newItemsH + 'px';
+            applyScaleToImages();
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     // Empêcher le widget de voler le focus quand on clique sur l'input
     answerInput.addEventListener('mousedown', (e) => {

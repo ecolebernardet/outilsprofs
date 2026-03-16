@@ -804,6 +804,21 @@ function createDeficalmeWidget() {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const startX = e.touches[0].clientX;
+        const startW = container.offsetWidth;
+        function onMove(ev) {
+            container.style.width = Math.max(320, startW + ev.touches[0].clientX - startX) + 'px';
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     // ── Event listeners ───────────────────────────────────────────────────
     // ── Aperçu ────────────────────────────────────────────────────────────
@@ -895,6 +910,13 @@ function createDeficalmeWidget() {
         const stop = () => clearInterval(iv);
         window.addEventListener('mouseup', stop, { once: true });
     });
+    timeMinus.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        adjustTime(-1);
+        const iv = setInterval(() => adjustTime(-1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('touchend', stop, { once: true });
+    }, { passive: true });
     timePlus.addEventListener('mousedown', (e) => {
         e.stopPropagation();
         adjustTime(1);
@@ -902,6 +924,13 @@ function createDeficalmeWidget() {
         const stop = () => clearInterval(iv);
         window.addEventListener('mouseup', stop, { once: true });
     });
+    timePlus.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        adjustTime(1);
+        const iv = setInterval(() => adjustTime(1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('touchend', stop, { once: true });
+    }, { passive: true });
 
     sensSlider.addEventListener('input', () => { sensVal.textContent = sensSlider.value; });
     sensSlider.addEventListener('mousedown', (e) => e.stopPropagation());

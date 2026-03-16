@@ -298,81 +298,108 @@ window.geoSpawnTool = function (type) {
 
 // ── Helpers drag + rotate ────────────────────────────────────────────────
 function makeDraggableGeo(overlay) {
+    function startGeoDrag(clientX, clientY) {
+        const board   = overlay.parentElement;
+        const bRect   = board.getBoundingClientRect();
+        const startX  = clientX - bRect.left - parseFloat(overlay.style.left || 0);
+        const startY  = clientY - bRect.top  - parseFloat(overlay.style.top  || 0);
+        overlay.classList.add('geo-selected');
+        overlay.style.cursor = 'grabbing';
+
+        function onMove(ev) {
+            const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+            const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            overlay.style.left = (cx - bRect.left - startX) + 'px';
+            overlay.style.top  = (cy - bRect.top  - startY) + 'px';
+        }
+        function onEnd() {
+            overlay.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }
+
     overlay.addEventListener('mousedown', function (e) {
         if (e.target.classList.contains('geo-rot-handle') ||
             e.target.classList.contains('geo-trace-btn')  ||
             e.target.classList.contains('geo-close-tool') ||
             e.target.tagName === 'INPUT') return;
-        e.preventDefault();
-        e.stopPropagation();
-        const board   = overlay.parentElement;
-        const bRect   = board.getBoundingClientRect();
-        const startX  = e.clientX - bRect.left - parseFloat(overlay.style.left || 0);
-        const startY  = e.clientY - bRect.top  - parseFloat(overlay.style.top  || 0);
-        overlay.classList.add('geo-selected');
-        overlay.style.cursor = 'grabbing';
-
-        function onMove(ev) {
-            overlay.style.left = (ev.clientX - bRect.left - startX) + 'px';
-            overlay.style.top  = (ev.clientY - bRect.top  - startY) + 'px';
-        }
-        function onUp() {
-            overlay.style.cursor = 'grab';
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup',   onUp);
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup',   onUp);
+        e.preventDefault(); e.stopPropagation();
+        startGeoDrag(e.clientX, e.clientY);
     });
+    overlay.addEventListener('touchstart', function (e) {
+        if (e.target.classList.contains('geo-rot-handle') ||
+            e.target.classList.contains('geo-trace-btn')  ||
+            e.target.classList.contains('geo-close-tool') ||
+            e.target.tagName === 'INPUT') return;
+        e.preventDefault(); e.stopPropagation();
+        startGeoDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 }
 
 function makeRotatableGeo(overlay, rotHandle) {
-    // Double-clic : reset à 0°
     rotHandle.ondblclick = function (e) {
         e.preventDefault(); e.stopPropagation();
         overlay.style.transform = '';
         overlay.dataset.angle = '0';
     };
 
-    rotHandle.onmousedown = function (e) {
-        e.preventDefault(); e.stopPropagation();
-
-        // Centre visuel réel de l'overlay (après rotation éventuelle)
+    function startGeoRotate(clientX, clientY) {
         const rect = overlay.getBoundingClientRect();
         const cx = rect.left + rect.width  / 2;
         const cy = rect.top  + rect.height / 2;
-
-        const startAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+        const startAngle = Math.atan2(clientY - cy, clientX - cx);
         const startRot   = parseFloat(overlay.dataset.angle || 0);
+        const indicator  = document.getElementById('rotation-indicator');
 
-        // Indicateur de rotation du système existant
-        const indicator = document.getElementById('rotation-indicator');
-
-        document.onmousemove = function (ev) {
-            const newRot = startRot + (Math.atan2(ev.clientY - cy, ev.clientX - cx) - startAngle) * 180 / Math.PI;
+        function onMove(ev) {
+            const px = ev.touches ? ev.touches[0].clientX : ev.clientX;
+            const py = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            const newRot = startRot + (Math.atan2(py - cy, px - cx) - startAngle) * 180 / Math.PI;
             const snapped = geoSnapRotation(newRot);
             overlay.style.transform = `rotate(${snapped}deg)`;
             overlay.dataset.angle = snapped;
-
             if (indicator) {
                 const deg = Math.round(((snapped % 360) + 360) % 360);
                 const rotDeg = document.getElementById('rot-deg');
                 if (rotDeg) rotDeg.textContent = deg + '°';
                 indicator.style.display = 'block';
-                indicator.style.left = ev.clientX + 16 + 'px';
-                indicator.style.top  = ev.clientY + 'px';
+                indicator.style.left = px + 16 + 'px';
+                indicator.style.top  = py + 'px';
                 const hint = indicator.querySelector('.rot-reset-hint');
                 if (hint) hint.style.display = (deg === 0) ? 'none' : 'inline';
             }
-        };
-
-        document.onmouseup = function () {
+        }
+        function onEnd() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
             document.onmousemove = null;
             document.onmouseup   = null;
             const ind = document.getElementById('rotation-indicator');
             if (ind) ind.style.display = 'none';
-        };
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }
+
+    rotHandle.onmousedown = function (e) {
+        e.preventDefault(); e.stopPropagation();
+        startGeoRotate(e.clientX, e.clientY);
     };
+    rotHandle.addEventListener('touchstart', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        startGeoRotate(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 }
 
 function geoSnapRotation(deg) {

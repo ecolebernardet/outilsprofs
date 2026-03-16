@@ -433,6 +433,24 @@
                     if (typeof saveBoard === 'function') saveBoard();
                 }
             });
+            resizeHandle.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var startX = e.touches[0].clientX;
+                var startW = outer.offsetWidth;
+                function onMove(ev) {
+                    var newW = Math.max(220, startW + (ev.touches[0].clientX - startX));
+                    outer.style.width = newW + 'px';
+                    rescale();
+                }
+                function onEnd() {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend',  onEnd);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend',  onEnd);
+            }, { passive: false });
 
             rescale();
 
@@ -596,6 +614,11 @@
                     e.stopPropagation();
                 }
             });
+            outer.addEventListener('touchstart', function(e) {
+                if (e.target.closest(interactiveSelectors)) {
+                    e.stopPropagation();
+                }
+            }, { passive: true });
 
             // Bouton start / stop
             btnStart.addEventListener('click', function () {

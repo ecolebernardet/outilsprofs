@@ -278,6 +278,9 @@
         outer.addEventListener('mousedown', function(e) {
             e.stopPropagation();
         });
+        outer.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        }, { passive: true });
 
         // ── Onglets ──────────────────────────────────────────────────────────
         const tabs   = widget.querySelectorAll('.mc-tab');

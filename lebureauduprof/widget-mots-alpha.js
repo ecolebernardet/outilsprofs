@@ -549,6 +549,11 @@
                 e.preventDefault();
                 startDrag(card, e.clientX, e.clientY);
             });
+            card.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                startDrag(card, e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: false });
             return card;
         }
 
@@ -559,7 +564,6 @@
             const ghost = document.createElement('div');
             ghost.className = 'alpha-drag-ghost';
             ghost.textContent = card.textContent;
-            // Le fantôme hérite de la même taille que les cartes
             const fs = getComputedStyle(container).getPropertyValue('--alpha-fs').trim() || '13px';
             ghost.style.fontSize = fs;
             ghost.style.left = startX + 'px';
@@ -571,10 +575,12 @@
             wordsPool.classList.add('drag-over');
 
             function onMove(e) {
-                ghost.style.left = e.clientX + 'px';
-                ghost.style.top  = e.clientY + 'px';
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                ghost.style.left = cx + 'px';
+                ghost.style.top  = cy + 'px';
                 dropZone.querySelectorAll('.alpha-answer-slot').forEach(s => s.classList.remove('drag-over-slot'));
-                const el   = document.elementFromPoint(e.clientX, e.clientY);
+                const el   = document.elementFromPoint(cx, cy);
                 const slot = el && el.closest('.alpha-answer-slot');
                 if (slot) slot.classList.add('drag-over-slot');
             }
@@ -582,13 +588,17 @@
             function onUp(e) {
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup',   onUp);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend',  onUp);
                 ghost.remove();
                 card.classList.remove('is-dragging');
                 dropZone.classList.remove('drag-over');
                 wordsPool.classList.remove('drag-over');
                 dropZone.querySelectorAll('.alpha-answer-slot').forEach(s => s.classList.remove('drag-over-slot'));
 
-                const el         = document.elementFromPoint(e.clientX, e.clientY);
+                const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+                const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                const el         = document.elementFromPoint(cx, cy);
                 const targetSlot = el && el.closest('.alpha-answer-slot');
                 const targetPool = el && el.closest('.alpha-pool-zone');
 
@@ -609,6 +619,8 @@
 
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup',   onUp);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend',  onUp);
         }
 
         // ── Vérifier ─────────────────────────────────────────────────────
@@ -707,6 +719,28 @@
                 if (typeof saveBoard === 'function') saveBoard();
             };
         });
+        resizeHandle.addEventListener('touchstart', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const t0 = e.touches[0];
+            const startX = t0.clientX, startY = t0.clientY;
+            const startW = container.offsetWidth;
+            const startH = container.offsetHeight;
+            function onMove(ev) {
+                const t = ev.touches[0];
+                const newW = Math.max(320, startW + t.clientX - startX);
+                const newH = Math.max(200, startH + t.clientY - startY);
+                container.style.width  = newW + 'px';
+                container.style.height = newH + 'px';
+                applyCardScale();
+            }
+            function onEnd() {
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend',  onEnd);
+                if (typeof saveBoard === 'function') saveBoard();
+            }
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend',  onEnd);
+        }, { passive: false });
 
         // ── Init ──────────────────────────────────────────────────────────
         requestAnimationFrame(() => requestAnimationFrame(() => {

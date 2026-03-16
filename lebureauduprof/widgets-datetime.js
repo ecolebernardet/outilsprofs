@@ -112,6 +112,24 @@ function initTimeWidget(widget) {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = container.offsetWidth, startH = container.offsetHeight;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            container.style.width  = Math.max(100, startW + t.clientX - startX) + 'px';
+            container.style.height = Math.max(60,  startH + t.clientY - startY) + 'px';
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     // Bouton transparence
     const transpBtn = document.createElement('button');
@@ -204,6 +222,24 @@ function initDateWidget(widget) {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = container.offsetWidth, startH = container.offsetHeight;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            container.style.width  = Math.max(150, startW + t.clientX - startX) + 'px';
+            container.style.height = Math.max(180, startH + t.clientY - startY) + 'px';
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     // Bouton transparence
     const transpBtn = document.createElement('button');

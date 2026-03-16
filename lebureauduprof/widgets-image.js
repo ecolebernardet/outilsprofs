@@ -714,6 +714,31 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', e => {
+        e.preventDefault(); e.stopPropagation();
+        snapshotNow();
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = widget.offsetWidth, startH = widget.offsetHeight;
+        const ratio  = startH / startW;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            const proportional = lockBtn.classList.contains('locked');
+            let newW = Math.max(40, startW + t.clientX - startX);
+            let newH = Math.max(40, startH + t.clientY - startY);
+            if (proportional) newH = Math.round(newW * ratio);
+            widget.style.width  = newW + 'px';
+            widget.style.height = newH + 'px';
+            widget.style.setProperty('--sticker-h', newH + 'px');
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     widget.addEventListener('mousedown', () => {
         bringToFront(widget);

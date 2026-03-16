@@ -136,6 +136,27 @@ function initMeteoWidget(widget) {
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
+    resizeHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const t0 = e.touches[0];
+        const startX = t0.clientX, startY = t0.clientY;
+        const startW = container.offsetWidth, startH = container.offsetHeight;
+        function onMove(ev) {
+            const t = ev.touches[0];
+            const newW = Math.max(180, startW + t.clientX - startX);
+            const newH = Math.max(140, startH + t.clientY - startY);
+            container.style.width  = newW + 'px';
+            container.style.height = newH + 'px';
+            adaptMeteoFontSizes(container, newW, newH);
+        }
+        function onEnd() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            saveBoard();
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }, { passive: false });
 
     function adaptMeteoFontSizes(c, w, h) {
         const scale = Math.min(w / 280, h / 200);
