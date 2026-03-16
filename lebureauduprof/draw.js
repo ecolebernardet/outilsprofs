@@ -1072,6 +1072,8 @@ function initBoardSelection() {
         const target = t.target;
         // Laisser les overlays géométriques gérer leur propre touch
         if (target.closest('.geo-tool-overlay')) return;
+        // Ne pas bloquer les clics sur les boutons interactifs (barre d'action, menus...)
+        if (target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, #selection-controls, #toolbar-container, #shape-edit-panel')) return;
         // Empêcher scroll/zoom du navigateur pendant la sélection ou le drag
         e.preventDefault();
         // Construire un événement synthétique compatible avec onBoardMouseDown
