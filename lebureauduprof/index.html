@@ -1270,6 +1270,13 @@
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					
 					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Tous mes projets</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">⭐</span>&nbsp;&nbsp;Projets favoris<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-favorites"><div class="mm-sub-inner" style="min-width:200px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">⭐ Projets favoris</div>
+							<div id="sub-favorites-list"><div style="color:#555;font-size:12px;padding:6px 12px;font-style:italic;">Aucun favori</div></div>
+						</div></div>
+					</div>
 					
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 										
@@ -1283,14 +1290,7 @@
 							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouveau tableau</button>
 						</div></div>
 					</div>
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">📋</span>&nbsp;&nbsp;Modèles de tableau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-presets"><div class="mm-sub-inner" style="min-width:200px;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📋 Modèles prêts à l'emploi</div>
-							<div class="mm-sub-item" onclick="loadPresetBoard('tableau-vierge');closeMainMenu()"><span class="mm-ico">🌑</span>&nbsp;&nbsp;Tableau vierge</div>
-							<div class="mm-sub-item" onclick="loadPresetBoard('seyes-cursif');closeMainMenu()"><span class="mm-ico">✍️</span>&nbsp;&nbsp;Séyès cursif</div>
-						</div></div>
-					</div>
+					
 					
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					
@@ -1695,6 +1695,7 @@ window.onload = () => {
         updateUndoRedoBtns();
         if (typeof scenesInit === 'function') scenesInit();
 		if (typeof initCurrentProjectName === 'function') initCurrentProjectName();
+		if (typeof refreshFavoritesMenu === 'function') refreshFavoritesMenu();
 
     }, 1000);
     if (typeof updateClock === 'function') setInterval(updateClock, 1000);
@@ -2342,6 +2343,6 @@ function _updateEraserBtnInPanel() {
 <script src="color-picker.js"></script>
 <script src="toolbar-text.js"></script>
 <script src="widget-devoirs.js"></script>
-<script src="preset-boards.js"></script>
+<!-- preset-boards.js conservé mais non chargé -->
 </body>
 </html>

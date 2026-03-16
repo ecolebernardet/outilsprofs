@@ -66,6 +66,23 @@ function dbGetAll() {
 let _isDraft = false;
 function isDraftMode() { return _isDraft; }
 
+// ── Favoris (stockés en localStorage) ────────────────────────────────────
+function _getFavoriteIds() {
+    try { return JSON.parse(localStorage.getItem('profFavoriteProjects') || '[]'); }
+    catch(e) { return []; }
+}
+function _saveFavoriteIds(ids) {
+    localStorage.setItem('profFavoriteProjects', JSON.stringify(ids));
+}
+function _isFavorite(id) { return _getFavoriteIds().includes(id); }
+function _toggleFavorite(id) {
+    const ids = _getFavoriteIds();
+    const idx = ids.indexOf(id);
+    if (idx === -1) ids.push(id);
+    else ids.splice(idx, 1);
+    _saveFavoriteIds(ids);
+}
+
 // ── ID du projet courant (stocké en localStorage) ────────────────────────
 function getCurrentProjectId() {
     if (_isDraft) return null;
@@ -210,6 +227,7 @@ async function openProjectsLibrary() {
     overlay.innerHTML = _buildLibraryHTML();
     overlay.style.display = 'flex';
     _renderProjectsList();
+    refreshFavoritesMenu();
 
     // Fermeture avec Echap
     overlay._escHandler = (e) => { if (e.key === 'Escape') closeProjectsLibrary(); };
@@ -273,7 +291,29 @@ async function _renderProjectsList() {
     }
 
     list.innerHTML = '';
-    projects.forEach(p => {
+
+    // ── Section favoris ──
+    const favIds = _getFavoriteIds();
+    const favProjects = favIds.map(id => projects.find(p => p.id === id)).filter(Boolean);
+    if (favProjects.length) {
+        const favLabel = document.createElement('div');
+        favLabel.style.cssText = 'font-size:11px;color:#f0c040;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;';
+        favLabel.textContent = '⭐ Favoris';
+        list.appendChild(favLabel);
+        favProjects.forEach(p => _buildProjectRow(p, list, projects));
+        const sep = document.createElement('div');
+        sep.style.cssText = 'height:1px;background:#2e2e38;margin:6px 0;';
+        list.appendChild(sep);
+        const allLabel = document.createElement('div');
+        allLabel.style.cssText = 'font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;';
+        allLabel.textContent = '📁 Tous les projets';
+        list.appendChild(allLabel);
+    }
+
+    projects.forEach(p => _buildProjectRow(p, list, projects));
+}
+
+function _buildProjectRow(p, list, allProjects) {
         const isCurrent = p.id === getCurrentProjectId();
         const date = new Date(p.updatedAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
         const sceneList = p.scenes || [];
@@ -315,6 +355,19 @@ async function _renderProjectsList() {
         btnDelete.style.cssText = 'background:#2a1a1a;color:#ff6b6b;border:1px solid #3d2020;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;';
         btnDelete.addEventListener('click', (e) => { e.stopPropagation(); _projDelete(p.id); });
 
+        // Bouton favori ⭐
+        const isFav = _isFavorite(p.id);
+        const btnFav = document.createElement('button');
+        btnFav.textContent = isFav ? '⭐' : '☆';
+        btnFav.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+        btnFav.style.cssText = `background:${isFav ? '#2a2a10' : '#28282f'};color:${isFav ? '#f0c040' : '#555'};border:1px solid ${isFav ? '#5a5020' : '#3a3a4a'};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .15s;`;
+        btnFav.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _toggleFavorite(p.id);
+            _renderProjectsList();
+            refreshFavoritesMenu();
+        });
+
         row.appendChild(arrow);
         row.appendChild(info);
 
@@ -332,6 +385,7 @@ async function _renderProjectsList() {
 
         row.appendChild(btnRename);
         row.appendChild(btnDelete);
+        row.appendChild(btnFav);
 
         // ── Panneau accordion des scènes ──
         const accordion = document.createElement('div');
@@ -390,12 +444,10 @@ async function _renderProjectsList() {
         };
 
         row.addEventListener('click', (e) => {
-            // Clic sur les boutons → pas de toggle
             if (e.target === btnRename || e.target === btnDelete) return;
             toggleAccordion();
         });
 
-        // Double-clic sur le header = charger le projet (si pas courant)
         if (!isCurrent) {
             row.title = 'Cliquer pour voir les tableaux · Double-cliquer pour ouvrir';
             row.addEventListener('dblclick', (e) => {
@@ -405,7 +457,6 @@ async function _renderProjectsList() {
             row.onmouseover = () => wrapper.style.borderColor = '#4a90e2';
             row.onmouseout  = () => { if (!open) wrapper.style.borderColor = '#2e2e38'; };
         } else {
-            // Projet courant : ouvrir l'accordion par défaut
             open = true;
             accordion.style.display = 'block';
             arrow.style.transform = 'rotate(90deg)';
@@ -415,11 +466,33 @@ async function _renderProjectsList() {
         wrapper.appendChild(row);
         wrapper.appendChild(accordion);
         list.appendChild(wrapper);
-    });
 }
 
 function _escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Rafraîchir le sous-menu Favoris dans le menu principal ────────────────
+async function refreshFavoritesMenu() {
+    const container = document.getElementById('sub-favorites-list');
+    if (!container) return;
+    const favIds = _getFavoriteIds();
+    if (!favIds.length) {
+        container.innerHTML = '<div style="color:#555;font-size:12px;padding:6px 12px;font-style:italic;">Aucun favori</div>';
+        return;
+    }
+    let projects;
+    try { projects = await dbGetAll(); } catch(e) { return; }
+    container.innerHTML = '';
+    favIds.forEach(id => {
+        const p = projects.find(pr => pr.id === id);
+        if (!p) return;
+        const item = document.createElement('div');
+        item.className = 'mm-sub-item';
+        item.innerHTML = `<span class="mm-ico">⭐</span>&nbsp;&nbsp;${_escHtml(p.name)}`;
+        item.addEventListener('click', () => { _projLoad(p.id); closeMainMenu(); });
+        container.appendChild(item);
+    });
 }
 
 // ── Actions de la bibliothèque ────────────────────────────────────────────
