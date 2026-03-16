@@ -670,6 +670,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
     const lockBtn  = widget.querySelector('.resize-lock-btn');
 
     flipHBtn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+    flipHBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
     flipHBtn.addEventListener('click', e => {
         e.stopPropagation();
         snapshotNow();
@@ -679,6 +680,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
 
     // ── Flip vertical ──
     flipVBtn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+    flipVBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
     flipVBtn.addEventListener('click', e => {
         e.stopPropagation();
         snapshotNow();
@@ -688,6 +690,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
 
     // ── Verrouillage proportions ──
     lockBtn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+    lockBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
     lockBtn.addEventListener('click', e => {
         e.stopPropagation();
         const locked = lockBtn.classList.toggle('locked');
