@@ -241,7 +241,7 @@ function endPaint() {
             }
             const cur = buildBoardJSON();
             if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack = []; updateUndoRedoBtns(); }
-            saveBoard();
+            saveBoard(true);
         }
         currentStroke = null; redrawStrokes();
         return;
@@ -267,7 +267,7 @@ function endPaint() {
             redoStack = [];
             updateUndoRedoBtns();
         }
-        saveBoard();
+        saveBoard(true);
     }
     currentStroke = null; redrawStrokes();
 }

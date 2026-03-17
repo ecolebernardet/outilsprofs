@@ -177,10 +177,10 @@ function restoreBoardFromJSON(json) {
     const parsed = JSON.parse(json);
     const data = Array.isArray(parsed) ? parsed : (parsed.widgets || []);
     const refW = parsed.refWidth || 1920;
-    // Restaurer les traits canvas si présents dans le snapshot
-    if (parsed.strokes && parsed.strokes.length > 0) {
+    // Restaurer les traits canvas (y compris tableau vide pour effacer le canvas)
+    if (parsed.strokes !== undefined) {
         strokes = parsed.strokes;
-        if (!drawCanvas) {
+        if (strokes.length > 0 && !drawCanvas) {
             initCanvas();
             drawCanvas.classList.add('inactive');
         }
