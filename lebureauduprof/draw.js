@@ -933,11 +933,13 @@ function stopDrawing() {
     board.classList.remove('is-segment-mode');
     clearDrawCursor();
     const figSub = document.getElementById('figures-submenu');
-    if (figSub) figSub.classList.remove('open');
+    if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
+    if (typeof _closeGeoSubmenu === 'function') _closeGeoSubmenu();
     const tb = document.getElementById('draw-toolbar');
     if (tb) tb.style.display = 'none';
     cancelHandwritingRecognition();
     stopEraserMode();
+    if (typeof _updateDrawFabBtn === 'function') _updateDrawFabBtn();
 }
 function clearCanvas() {
     // Forcer le snapshot sans la garde de déduplication pour s'assurer que

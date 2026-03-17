@@ -505,6 +505,11 @@
 		#fab-btn:hover { background: #000; transform: scale(1.2); animation: none; box-shadow: 0 0px 10px rgba(120, 120,120,1); }
 		#fab-btn.menu-open { background: #555; border-color: #111; color: #fff; transform: rotate(135deg); padding-bottom: 10px; padding-left: 4px; animation: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 		
+		@keyframes draw-fab-pulse-shadow {
+			0%   { box-shadow: 0 0 10px rgba(74, 144, 226, 0.4), 0 0 0 0   rgba(74, 144, 226, 0.6); }
+			70%  { box-shadow: 0 0 10px rgba(74, 144, 226, 0.4), 0 0 0 18px rgba(74, 144, 226, 0); }
+			100% { box-shadow: 0 0 10px rgba(74, 144, 226, 0.4), 0 0 0 0   rgba(74, 144, 226, 0); }
+		}
 		#draw-fab-btn {
 			position: fixed; bottom: 20px; left: 78px; z-index: 14000;
 			width: 50px; height: 50px; border-radius: 50%;
@@ -513,10 +518,14 @@
 			display: flex; align-items: center; justify-content: center;
 			box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 			transition: background .15s, transform .15s;
+			animation: draw-fab-pulse-shadow 2.8s ease-in-out infinite;
 		}
-		#draw-fab-btn:hover { background: #2a2a4a; transform: scale(1.1); }
-		#draw-fab-btn.draw-open { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
+		#draw-fab-btn:hover { background: #2a2a4a; transform: scale(1.1); animation: none; box-shadow: 0 0 10px rgba(74,144,226,0.8); }
+		#draw-fab-btn.draw-open { background: #888; border-color: #666; color: #fff; animation: none; }
 		body.presentation-mode #draw-fab-btn { display: none; }
+		body.menu-light #draw-fab-btn { background: #fff; border-color: #4a90e2; color: #4a90e2; }
+		body.menu-light #draw-fab-btn:hover { background: #e8f0fb; }
+		body.menu-light #draw-fab-btn.draw-open { background: #888 !important; border-color: #666 !important; color: #fff !important; }
 
 		/* Menu vertical principal */
 		#main-menu {
@@ -721,6 +730,22 @@
 		body.menu-light #draw-toolbar button[title="Effacer tout"] { background: #fde8e8 !important; border-color: #e8a0a0 !important; color: #c0392b !important; }
 		body.menu-light #draw-toolbar button[title="Fermer"],
 		body.menu-light #shape-toolbar button[title="Fermer"] { background: #e8e8ea !important; border-color: #bbb !important; color: #666 !important; }
+		/* ── Thème figures-submenu + geo-submenu (suit menu-light) ── */
+		body.menu-light #figures-submenu,
+		body.menu-light #geo-submenu {
+			background: #f0f2f5 !important;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+		}
+		body.menu-light #figures-submenu { border-color: #4a90e2 !important; }
+		body.menu-light #geo-submenu { border-color: #a78bfa !important; }
+		body.menu-light #figures-submenu button,
+		body.menu-light #geo-submenu button {
+			background: #e4e6ea !important; border-color: #bbb !important; color: #333 !important;
+		}
+		body.menu-light #figures-submenu button:hover,
+		body.menu-light #geo-submenu button:hover { background: #d0d3d8 !important; border-color: #999 !important; }
+		body.menu-light #figures-submenu button svg *,
+		body.menu-light #geo-submenu button svg * { stroke: #444 !important; }
 
 		/* ── Menu compact sur petits écrans ────────────────────── */
 		@media (max-height: 650px) {
@@ -2695,7 +2720,6 @@ function _updateEraserBtnInPanel() {
         if (textBar && textHandle) makeTextDraggable(textBar, textHandle);
     });
 
-    // Text-toolbar : mémorise position dans localStorage
     function makeTextDraggable(bar, handle) {
         try {
             const saved = localStorage.getItem('textToolbarPos');
@@ -2705,7 +2729,6 @@ function _updateEraserBtnInPanel() {
                 bar.style.bottom = 'auto'; bar.style.right = 'auto';
             }
         } catch(e) {}
-
         handle.addEventListener('mousedown', function(e) {
             e.preventDefault();
             handle.style.cursor = 'grabbing';
