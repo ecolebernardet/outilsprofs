@@ -5,6 +5,25 @@ var drawCanvas = null, drawCtx = null, isPainting = false, isDrawMode = false;
 var drawCanvasTop = null, drawCtxTop = null; // canvas de premier plan pour strokes épinglés
 var strokes = [], currentStroke = null;
 
+// Génère et applique un curseur SVG : point de la couleur courante + cercle gris r=8
+function updateDrawCursor() {
+    if (!isDrawMode || !board) return;
+    const color = (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
+        || document.getElementById('cpick-native-draw-color')?.value
+        || '#e84393';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">`
+        + `<circle cx="10" cy="10" r="8" fill="none" stroke="#999" stroke-width="1.5"/>`
+        + `<circle cx="10" cy="10" r="2.5" fill="${color}"/>`
+        + `</svg>`;
+    const b64 = btoa(svg);
+    const cursorUrl = `url("data:image/svg+xml;base64,${b64}") 10 10, crosshair`;
+    board.style.cursor = cursorUrl;
+}
+
+function clearDrawCursor() {
+    if (board) board.style.cursor = '';
+}
+
 function initCanvas() {
     if (drawCanvas) return;
     drawCanvas = document.createElement('canvas');
@@ -76,7 +95,7 @@ function _boardDrawMouseDown(e)  {
     if (isEraserMode) { startErase(e); return; }
 }
 function _boardDrawMouseMove(e)  {
-    if (isDrawMode)   { paint(e);            return; }
+    if (isDrawMode)   { if (currentDrawMode === 'free') updateDrawCursor(); paint(e); return; }
     if (isEraserMode) { onEraserMouseMove(e); return; }
 }
 function _boardDrawMouseUp(e)    {
@@ -664,9 +683,9 @@ function setDrawMode(mode) {
         if (shapeOpts) shapeOpts.style.display = 'none';
         if (shapeHint) shapeHint.style.display = 'none';
     }
-    // Curseur crosshair en mode figure
+    // Curseur crosshair en mode figure, curseur point en mode libre
     if (board) {
-        if (FIGURE_MODES.includes(mode)) board.classList.add('is-segment-mode');
+        if (FIGURE_MODES.includes(mode)) { board.classList.add('is-segment-mode'); clearDrawCursor(); }
         else board.classList.remove('is-segment-mode');
     }
     // Si on choisit un mode figure alors qu'on était en mode sélection, réactiver le dessin
@@ -683,6 +702,8 @@ function setDrawMode(mode) {
         if (drawCanvas) drawCanvas.classList.remove('inactive');
         board.classList.add('is-drawing');
     }
+    // Appliquer le curseur point si on est en mode libre
+    if (mode === 'free') updateDrawCursor();
     // Fermer la toolbar géométrie (shapes.js) si un mode figure dessin est activé
     if (FIGURE_MODES.includes(mode)) {
         if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
@@ -713,6 +734,7 @@ function enableDrawing() {
     isDrawMode = true;
     if (drawCanvas) drawCanvas.classList.remove('inactive');
     board.classList.add('is-drawing');
+    updateDrawCursor();
     clearSelection();
     // Mettre à jour l'apparence du bouton sélection
     const selBtn = document.getElementById('draw-select-btn');
@@ -754,6 +776,7 @@ function toggleSelectMode() {
     if (drawCanvas) drawCanvas.classList.add('inactive');
     board.classList.remove('is-drawing');
     board.classList.remove('is-segment-mode');
+    clearDrawCursor();
     stopEraserMode();
     // Fermer le sous-menu figures
     const figSub = document.getElementById('figures-submenu');
@@ -777,6 +800,7 @@ function stopDrawing() {
     if (drawCanvas) drawCanvas.classList.add('inactive');
     board.classList.remove('is-drawing');
     board.classList.remove('is-segment-mode');
+    clearDrawCursor();
     const figSub = document.getElementById('figures-submenu');
     if (figSub) figSub.classList.remove('open');
     const tb = document.getElementById('draw-toolbar');

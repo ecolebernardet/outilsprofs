@@ -231,9 +231,9 @@
         .widget-ctx-menu hr { border: none; border-top: 1px solid #444; margin: 4px 0; }
 
         /* Curseur crayon pour le mode insertion de texte */
-        .cursor-pencil { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='fill:black'><text y='20' font-size='20'>✏️</text></svg>"), auto !important; }
-        #board.is-drawing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
-        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *) { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text y='28' font-size='28'>✏️</text></svg>") 5 31, crosshair !important; }
+        .cursor-pencil { cursor: crosshair; }
+        #board.is-drawing { cursor: crosshair; }
+        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *) { cursor: crosshair; }
         .geo-tool-overlay, .geo-tool-overlay * { cursor: move !important; }
         .geo-tool-overlay button, .geo-tool-overlay .geo-rot-handle, .geo-tool-overlay .geo-trace-btn, .geo-tool-overlay .geo-close-tool { cursor: pointer !important; }
         #board.is-segment-mode { cursor: crosshair !important; }
