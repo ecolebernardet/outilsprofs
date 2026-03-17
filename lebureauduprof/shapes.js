@@ -68,8 +68,8 @@ function initShapeToolbar() {
         btn.className = 'shape-choice' + (s.id === selectedShapeId ? ' active' : '');
         btn.dataset.id = s.id;
         btn.title = s.label;
-        const previewSVG = `<svg width="36" height="36" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">${buildShapeSVG(s.id, 40, 40, '#ffffff', '#ffffff', 0.5)}</svg>`;
-        btn.innerHTML = previewSVG + `<span class="shape-choice-label">${s.label}</span>`;
+        const previewSVG = `<svg width="24" height="24" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">${buildShapeSVG(s.id, 40, 40, '#ffffff', '#ffffff', 0.5)}</svg>`;
+        btn.innerHTML = previewSVG;
         btn.addEventListener('click', () => {
             document.querySelectorAll('.shape-choice').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');

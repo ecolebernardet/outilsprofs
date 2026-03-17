@@ -358,9 +358,9 @@
 
         .shape-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-bottom: 14px; }
         .shape-choice {
-            width: 62px; height: 62px; background: #28282f; border: 1px solid #2e2e38;
-            border-radius: 10px; cursor: pointer; display: flex; align-items: center;
-            justify-content: center; transition: 0.15s; flex-direction: column; gap: 3px;
+            width: 38px; height: 38px; background: #28282f; border: 1px solid #2e2e38;
+            border-radius: 7px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: 0.15s; flex-direction: column; gap: 2px;
         }
         .shape-choice:hover { border-color: #4a90e2; background: #1a3550; }
         .shape-choice.active { border-color: #4a90e2; background: #1a3550; box-shadow: 0 0 0 2px rgba(74,144,226,0.3); }
@@ -1462,36 +1462,43 @@
 	</div>
 
 	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
-	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:8px 16px 12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:10px;padding:5px 10px 8px 10px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
 		<!-- Handle de déplacement -->
-		<div id="shape-toolbar-drag-handle" style="display:flex;align-items:center;justify-content:center;width:100%;height:14px;cursor:grab;margin-bottom:6px;opacity:0.4;transition:opacity 0.2s;" title="Déplacer la barre d'outils" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
-			<svg width="36" height="8" viewBox="0 0 36 8" fill="none"><circle cx="6" cy="4" r="2" fill="#888"/><circle cx="12" cy="4" r="2" fill="#888"/><circle cx="18" cy="4" r="2" fill="#888"/><circle cx="24" cy="4" r="2" fill="#888"/><circle cx="30" cy="4" r="2" fill="#888"/></svg>
+		<div id="shape-toolbar-drag-handle" style="display:flex;align-items:center;justify-content:center;width:100%;height:10px;cursor:grab;margin-bottom:4px;opacity:0.4;transition:opacity 0.2s;" title="Déplacer la barre d'outils" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+			<svg width="28" height="6" viewBox="0 0 28 6" fill="none"><circle cx="4" cy="3" r="1.5" fill="#888"/><circle cx="9" cy="3" r="1.5" fill="#888"/><circle cx="14" cy="3" r="1.5" fill="#888"/><circle cx="19" cy="3" r="1.5" fill="#888"/><circle cx="24" cy="3" r="1.5" fill="#888"/></svg>
 		</div>
-		<div style="display:flex;align-items:center;gap:14px;">
+		<div style="display:flex;align-items:center;gap:8px;">
 			<!-- Colonne 1 : formes -->
-			<div class="shape-grid" id="shape-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
-			<div style="width:1px;height:48px;background:#333;"></div>
+			<div class="shape-grid" id="shape-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"></div>
+			<div style="width:1px;height:36px;background:#333;"></div>
 			<!-- Colonne 2 : contour + fond -->
-			<div style="display:flex;flex-direction:column;gap:6px;">
-				<div style="display:flex;align-items:center;gap:8px;">
-					<span style="color:#ccc;font-size:11px;min-width:44px;">Contour</span>
+			<div style="display:flex;flex-direction:column;gap:4px;">
+				<div style="display:flex;align-items:center;gap:5px;">
+					<span style="color:#ccc;font-size:10px;min-width:38px;">Contour</span>
 					<div class="cpick-wrap" id="cpick-shape-stroke-color"><div class="cpick-swatch" style="background:#2c3e50;" onclick="cpickOpen('shape-stroke-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-stroke-color"></div></div>
-					<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:60px;cursor:pointer;">
-					<span id="shape-stroke-width-val" style="color:#fff;font-size:11px;min-width:18px;">4</span>
+					<input type="range" id="shape-stroke-width" min="0" max="20" value="4" style="width:48px;cursor:pointer;">
+					<span id="shape-stroke-width-val" style="color:#fff;font-size:10px;min-width:14px;">4</span>
 				</div>
-				<div style="display:flex;align-items:center;gap:8px;">
-					<span style="color:#ccc;font-size:11px;min-width:44px;">Fond</span>
+				<div style="display:flex;align-items:center;gap:5px;">
+					<span style="color:#ccc;font-size:10px;min-width:38px;">Fond</span>
 					<div class="cpick-wrap" id="cpick-shape-fill-color"><div class="cpick-swatch" style="background:#4a90e2;" onclick="cpickOpen('shape-fill-color',this)"></div><div class="cpick-popup" id="cpick-pop-shape-fill-color"></div></div>
-					<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:60px;cursor:pointer;">
-					<span id="shape-opacity-val" style="color:#fff;font-size:11px;min-width:18px;">60%</span>
+					<input type="range" id="shape-opacity-slider" min="0" max="100" value="60" style="width:48px;cursor:pointer;">
+					<span id="shape-opacity-val" style="color:#fff;font-size:10px;min-width:18px;">60%</span>
 				</div>
 			</div>
-			<div style="width:1px;height:48px;background:#333;"></div>
-			<!-- Colonne 3 : gomme -->
-			<button id="eraser-btn-shapes" onclick="toggleEraserMode()" style="background:#2a2a36;color:#ccc;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">🧽 Gomme</button>
-			<div style="width:1px;height:48px;background:#333;"></div>
+			<div style="width:1px;height:36px;background:#333;"></div>
+			<!-- Colonne 3 : gomme toggle + taille -->
+			<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+				<button id="eraser-btn-shapes" onclick="toggleEraserMode()" title="Activer/désactiver la gomme" style="background:#2a2a36;color:#ccc;border:1px solid #444;width:34px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">🧽</button>
+				<div style="display:flex;align-items:center;gap:3px;">
+					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.max(5,+i.value-5);var lbl=document.getElementById('eraser-size-label');if(lbl)lbl.textContent=i.value;var slbl=document.getElementById('eraser-size-shapes-label');if(slbl)slbl.textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:18px;height:18px;border-radius:4px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:12px;line-height:1;padding:0;">−</button>
+					<span id="eraser-size-shapes-label" style="color:#aaa;font-size:10px;min-width:18px;text-align:center;">20</span>
+					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.min(80,+i.value+5);var lbl=document.getElementById('eraser-size-label');if(lbl)lbl.textContent=i.value;var slbl=document.getElementById('eraser-size-shapes-label');if(slbl)slbl.textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:18px;height:18px;border-radius:4px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:12px;line-height:1;padding:0;">+</button>
+				</div>
+			</div>
+			<div style="width:1px;height:36px;background:#333;"></div>
 			<!-- Colonne 4 : fermer -->
-			<button onclick="stopShapeToolbar()" style="background:#2a2a36;color:#aaa;border:1px solid #444;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✖ Fermer</button>
+			<button onclick="stopShapeToolbar()" title="Fermer" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
 		</div>
 	</div>
 
@@ -2428,12 +2435,21 @@ function _fixSubmenuOverflow() {
 function _updateEraserBtnInPanel() {
     const btn1 = document.getElementById('eraser-btn');
     const btn2 = document.getElementById('eraser-btn-shapes');
-    const label = isEraserMode ? '🧽 Gomme active — cliquer pour désactiver' : '🧽 Activer la gomme';
     const bg    = isEraserMode ? '#1a3550' : '#2a2a2e';
     const bc    = isEraserMode ? '#4a90e2' : '#444';
     const color = isEraserMode ? '#7ab8f5' : '#888';
     if (btn1) { btn1.style.background = bg; btn1.style.borderColor = bc; btn1.style.color = color; btn1.style.boxShadow = isEraserMode ? '0 0 8px rgba(74,144,226,0.5)' : 'none'; }
-    if (btn2) { btn2.textContent = label; btn2.style.background = isEraserMode ? '#1a3550' : '#2a2a36'; btn2.style.borderColor = bc; }
+    if (btn2) {
+        btn2.style.background   = isEraserMode ? '#1a3550' : '#2a2a36';
+        btn2.style.borderColor  = bc;
+        btn2.style.color        = isEraserMode ? '#7ab8f5' : '#ccc';
+        btn2.style.boxShadow    = isEraserMode ? '0 0 8px rgba(74,144,226,0.5)' : 'none';
+        btn2.title = isEraserMode ? 'Gomme active — cliquer pour désactiver' : 'Activer la gomme';
+    }
+    // Sync eraser-size label in shapes toolbar
+    const sizeEl = document.getElementById('eraser-size');
+    const shapesLabel = document.getElementById('eraser-size-shapes-label');
+    if (sizeEl && shapesLabel) shapesLabel.textContent = sizeEl.value;
 }
 
 </script>
