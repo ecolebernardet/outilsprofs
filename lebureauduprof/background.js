@@ -12,24 +12,24 @@
             background-color: #fffef5;
             background-image:
                 repeating-linear-gradient(to bottom,
-                    transparent 0%, transparent calc(25% - 1px), #a8c8f0 calc(25% - 1px), #a8c8f0 25%,
-                    transparent 25%, transparent calc(50% - 1px), #a8c8f0 calc(50% - 1px), #a8c8f0 50%,
-                    transparent 50%, transparent calc(75% - 1px), #a8c8f0 calc(75% - 1px), #a8c8f0 75%,
-                    transparent 75%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%
+                    transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%,
+                    transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%,
+                    transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%,
+                    transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%
                 ),
-                repeating-linear-gradient(to right, transparent 0%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%);
+                repeating-linear-gradient(to right, #9aadbe 0px, #9aadbe 1px, transparent 1px, transparent 100%);
             background-size: auto 32px, 32px auto;
         }
         .bg-thumb-seyes-white {
             background-color: #ffffff;
             background-image:
                 repeating-linear-gradient(to bottom,
-                    transparent 0%, transparent calc(25% - 1px), #b8d4f5 calc(25% - 1px), #b8d4f5 25%,
-                    transparent 25%, transparent calc(50% - 1px), #b8d4f5 calc(50% - 1px), #b8d4f5 50%,
-                    transparent 50%, transparent calc(75% - 1px), #b8d4f5 calc(75% - 1px), #b8d4f5 75%,
-                    transparent 75%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%
+                    transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%,
+                    transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%,
+                    transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%,
+                    transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%
                 ),
-                repeating-linear-gradient(to right, transparent 0%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%);
+                repeating-linear-gradient(to right, #9aadbe 0px, #9aadbe 1px, transparent 1px, transparent 100%);
             background-size: auto 32px, 32px auto;
         }
         .bg-thumb-lignes {
@@ -69,7 +69,7 @@
                     transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%
                 ),
                 linear-gradient(to right, #fffef5 0px, #fffef5 19px, transparent 19px),
-                repeating-linear-gradient(to right, transparent 0%, transparent calc(100% - 1px), #c8d8eb calc(100% - 1px), #c8d8eb 100%);
+                repeating-linear-gradient(to right, #c8d8eb 0px, #c8d8eb 1px, transparent 1px, transparent 100%);
             background-size: 100% 100%, auto 32px, 100% 100%, 32px auto;
             background-position: top left, top left, top left, 21px top;
         }
@@ -79,15 +79,26 @@
 
 // Fonds Séyès et carreaux — CSS gradient purs (fiables cross-browser, pas de data URI)
 
+/**
+ * Génère un SVG data URI pour une ligne verticale pixel-perfect.
+ * La ligne est à x=0.5 dans une tuile de `size`px de large.
+ * Évite les artefacts sub-pixel des repeating-linear-gradient.
+ */
+function _svgVertical(size, color) {
+    const s = Math.round(size);
+    const c = encodeURIComponent(color);
+    return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${s}' height='1'%3E%3Cline x1='0.5' y1='0' x2='0.5' y2='1' stroke='${c}' stroke-width='1'/%3E%3C/svg%3E")`;
+}
+
 const PRESET_BACKGROUNDS = {
     // Séyès jaune paille — stops en % : 3 interlignes (25/50/75%) + 1 grande ligne (100%)
     'seyes': {
         backgroundColor: '#fffef5',
         backgroundImage: [
-            'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #a8c8f0 calc(25% - 1px), #a8c8f0 25%, transparent 25%, transparent calc(50% - 1px), #a8c8f0 calc(50% - 1px), #a8c8f0 50%, transparent 50%, transparent calc(75% - 1px), #a8c8f0 calc(75% - 1px), #a8c8f0 75%, transparent 75%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%)',
-            'repeating-linear-gradient(to right,  transparent 0%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%)'
+            'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%, transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%, transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%, transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%)',
+            _svgVertical(64, '#9aadbe')
         ].join(', '),
-        backgroundSize: 'auto 64px, 64px auto',
+        backgroundSize: 'auto 64px, 64px 1px',
     },
     // Séyès clair avec marge
     'seyes-marge': {
@@ -96,19 +107,19 @@ const PRESET_BACKGROUNDS = {
             'linear-gradient(to right, transparent 0px, transparent 254px, #e05050 254px, #e05050 256px, transparent 256px)',
             'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%, transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%, transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%, transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%)',
             'linear-gradient(to right, #fffef5 0px, #fffef5 254px, transparent 254px)',
-            'repeating-linear-gradient(to right,  transparent 0%, transparent calc(100% - 1px), #c8d8eb calc(100% - 1px), #c8d8eb 100%)'
+            _svgVertical(64, '#c8d8eb')
         ].join(', '),
-        backgroundSize: '100% 100%, auto 64px, 100% 100%, 64px auto',
+        backgroundSize: '100% 100%, auto 64px, 100% 100%, 64px 1px',
         backgroundPosition: 'top left, top left, top left, 256px top',
     },
     // Séyès blanc
     'seyes-white': {
         backgroundColor: '#ffffff',
         backgroundImage: [
-            'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #a8c8f0 calc(25% - 1px), #a8c8f0 25%, transparent 25%, transparent calc(50% - 1px), #a8c8f0 calc(50% - 1px), #a8c8f0 50%, transparent 50%, transparent calc(75% - 1px), #a8c8f0 calc(75% - 1px), #a8c8f0 75%, transparent 75%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%)',
-            'repeating-linear-gradient(to right,  transparent 0%, transparent calc(100% - 1px), #93759c calc(100% - 1px), #93759c 100%)'
+            'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%, transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%, transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%, transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%)',
+            _svgVertical(64, '#9aadbe')
         ].join(', '),
-        backgroundSize: 'auto 64px, 64px auto',
+        backgroundSize: 'auto 64px, 64px 1px',
     },
     // Grands carreaux
     'grands-carreaux': {
@@ -222,16 +233,25 @@ function applyBgScale(factor) {
     if (_currentBgKey === 'seyes-marge') {
         // La marge rouge reste toujours à 255px du bord — seules les lignes scalent
         const m = 254; // position fixe
+        const sz = (64 * factor).toFixed(1);
         const layers = [
             `linear-gradient(to right, transparent 0px, transparent ${m}px, #e05050 ${m}px, #e05050 ${m+2}px, transparent ${m+2}px)`,
             'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(25% - 1px), #c8d8eb calc(25% - 1px), #c8d8eb 25%, transparent 25%, transparent calc(50% - 1px), #c8d8eb calc(50% - 1px), #c8d8eb 50%, transparent 50%, transparent calc(75% - 1px), #c8d8eb calc(75% - 1px), #c8d8eb 75%, transparent 75%, transparent calc(100% - 1px), #9aadbe calc(100% - 1px), #9aadbe 100%)',
             `linear-gradient(to right, #fffef5 0px, #fffef5 ${m}px, transparent ${m}px)`,
-            'repeating-linear-gradient(to right, transparent 0%, transparent calc(100% - 1px), #c8d8eb calc(100% - 1px), #c8d8eb 100%)'
+            _svgVertical(64 * factor, '#c8d8eb')
         ];
-        const sz = (64 * factor).toFixed(1);
         board.style.backgroundImage    = layers.join(', ');
-        board.style.backgroundSize     = `100% 100%, auto ${sz}px, 100% 100%, ${sz}px auto`;
+        board.style.backgroundSize     = `100% 100%, auto ${sz}px, 100% 100%, ${sz}px 1px`;
         board.style.backgroundPosition = `top left, top left, top left, ${m+2}px top`;
+    } else if (_currentBgKey === 'seyes' || _currentBgKey === 'seyes-white') {
+        // Pour seyes et seyes-white : regénérer le SVG vertical avec la bonne taille
+        const sz = (64 * factor).toFixed(1);
+        const color = _currentBgKey === 'seyes' ? '#9aadbe' : '#9aadbe';
+        board.style.backgroundImage = [
+            p.backgroundImage.split(', ').slice(0, -1).join(', '),
+            _svgVertical(64 * factor, color)
+        ].join(', ');
+        board.style.backgroundSize  = `auto ${sz}px, ${sz}px 1px`;
     } else {
         // Pour tous les autres presets : scaler uniquement les px dans backgroundSize
         const scaledSize = p.backgroundSize.replace(/([\d.]+)px/g, (_, n) =>
