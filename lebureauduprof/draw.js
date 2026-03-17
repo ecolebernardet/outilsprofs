@@ -76,9 +76,23 @@ function getPos(e) {
 }
 
 // Proxy board → dessin/gomme (le canvas a pointer-events:none)
+// Tolérance de déplacement pour le clic droit (utile avec stylet sur tablette)
+var _rightClickDownX = null, _rightClickDownY = null;
+var _rightClickHandledByMouseUp = false;
+var _RIGHT_CLICK_TOLERANCE = 12; // px
+
 function _boardDrawContextMenu(e) {
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
+    // Si mouseup a déjà géré le basculement (stylet avec mouvement toléré), ne pas re-basculer
+    if (_rightClickHandledByMouseUp) {
+        _rightClickHandledByMouseUp = false;
+        return;
+    }
+    _doToggleEraserDraw();
+    _rightClickDownX = null; _rightClickDownY = null;
+}
+function _doToggleEraserDraw() {
     if (isEraserMode) {
         // Retour au mode dessin (pas sélection)
         stopEraserMode();
@@ -90,20 +104,41 @@ function _boardDrawContextMenu(e) {
     }
 }
 function _boardDrawMouseDown(e)  {
-    if (e.button === 2) return;
+    if (e.button === 2) {
+        // Mémoriser la position pour tolérer un léger glissement stylet
+        _rightClickDownX = e.clientX;
+        _rightClickDownY = e.clientY;
+        return;
+    }
     if (isDrawMode)   { startPaint(e); return; }
     if (isEraserMode) { startErase(e); return; }
 }
-function _boardDrawMouseMove(e)  {
-    if (isDrawMode)   { if (currentDrawMode === 'free') updateDrawCursor(); paint(e); return; }
-    if (isEraserMode) { onEraserMouseMove(e); return; }
-}
-function _boardDrawMouseUp(e)    {
+function _boardDrawMouseUp(e) {
+    // Gestion du clic droit avec tolérance de déplacement (stylet)
+    if (e.button === 2) {
+        if ((isDrawMode || isEraserMode) && _rightClickDownX !== null) {
+            const dx = Math.abs(e.clientX - _rightClickDownX);
+            const dy = Math.abs(e.clientY - _rightClickDownY);
+            if (Math.hypot(dx, dy) <= _RIGHT_CLICK_TOLERANCE) {
+                // Le contextmenu va aussi se déclencher → on le laisse gérer
+                // Mais si contextmenu n'arrive pas (certains stylets), on bascule ici
+                // On pose un flag pour éviter le double-basculement
+                _rightClickHandledByMouseUp = true;
+                _doToggleEraserDraw();
+            }
+        }
+        _rightClickDownX = null; _rightClickDownY = null;
+        return;
+    }
     if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) {
         // Le listener global document mouseup dans startPaint gère tout pour les modes figure
         return;
     }
     if (isDrawMode) endPaint(); else if (isEraserMode) endErase();
+}
+function _boardDrawMouseMove(e)  {
+    if (isDrawMode)   { if (currentDrawMode === 'free') updateDrawCursor(); paint(e); return; }
+    if (isEraserMode) { onEraserMouseMove(e); return; }
 }
 function _boardDrawMouseLeave(e) {
     if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) {
