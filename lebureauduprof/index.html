@@ -683,6 +683,45 @@
 		body.menu-light .undo-btn, body.menu-light .redo-btn, body.menu-light .tool-btn { background: #fff; border-color: #fff; color: #333; }
 		body.menu-light .undo-btn:hover, body.menu-light .redo-btn:hover, body.menu-light .tool-btn:hover { background: #ffffff; }
 
+		/* ── Thème draw-toolbar + shape-toolbar + global-toolbar (suit menu-light) ── */
+		body.menu-light #draw-toolbar,
+		body.menu-light #shape-toolbar,
+		body.menu-light #global-toolbar {
+			background: #f0f2f5 !important;
+			border-color: #ccc !important;
+			box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important;
+		}
+		body.menu-light #draw-toolbar .dt-sep,
+		body.menu-light #shape-toolbar > div > div[style*="width:1px"],
+		body.menu-light #global-toolbar > div > div[style*="width:1px"] { background: #ccc !important; }
+		body.menu-light #draw-toolbar .dt-handle { background: rgba(0,0,0,0.06) !important; }
+		body.menu-light #draw-toolbar .dt-handle circle,
+		body.menu-light #shape-toolbar #shape-toolbar-drag-handle circle,
+		body.menu-light #global-toolbar #global-toolbar-drag-handle circle { fill: #666 !important; }
+		body.menu-light #global-toolbar #global-toolbar-drag-handle { background: rgba(0,0,0,0.06) !important; }
+		body.menu-light #draw-toolbar button,
+		body.menu-light #shape-toolbar button,
+		body.menu-light #global-toolbar button {
+			background: #e4e6ea !important; border-color: #bbb !important; color: #333 !important;
+		}
+		body.menu-light #draw-toolbar button:hover,
+		body.menu-light #shape-toolbar button:hover,
+		body.menu-light #global-toolbar button:hover { background: #d0d3d8 !important; border-color: #999 !important; }
+		body.menu-light #global-toolbar select { background: #e4e6ea !important; border-color: #bbb !important; color: #333 !important; }
+		body.menu-light #draw-toolbar #draw-size-label,
+		body.menu-light #draw-toolbar #eraser-size-label,
+		body.menu-light #shape-toolbar #eraser-size-shapes-label,
+		body.menu-light #shape-toolbar #shape-stroke-width-val,
+		body.menu-light #shape-toolbar #shape-opacity-val,
+		body.menu-light #global-toolbar #font-size-label,
+		body.menu-light #global-toolbar #line-height-label,
+		body.menu-light #global-toolbar #widget-bg-opacity-val { color: #333 !important; }
+		body.menu-light #shape-toolbar span[style*="color:#ccc"],
+		body.menu-light #global-toolbar span[style*="color:#ccc"] { color: #555 !important; }
+		body.menu-light #draw-toolbar button[title="Effacer tout"] { background: #fde8e8 !important; border-color: #e8a0a0 !important; color: #c0392b !important; }
+		body.menu-light #draw-toolbar button[title="Fermer"],
+		body.menu-light #shape-toolbar button[title="Fermer"] { background: #e8e8ea !important; border-color: #bbb !important; color: #666 !important; }
+
 		/* ── Menu compact sur petits écrans ────────────────────── */
 		@media (max-height: 650px) {
 			#main-menu { bottom: 76px; gap: 1px; }
@@ -1090,17 +1129,24 @@
     </div>
 
 
-    <div id="global-toolbar" style="position:fixed;bottom:20px;left:84px;background:#1F1F21;border-radius:12px;display:none;padding:7px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
+    <div id="global-toolbar" style="position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;display:none;padding:7px 15px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;">
 		<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-			<span style="background:#1F1F21; color: #6aaee8; border-radius:12px; border:0px solid rgba(255,255,255,0.5);box-sizing:border-box;font-size:14px; font-weight: bold; text-align:center; display:inline-block;line-height:1;">Outils<br>texte</span>
+			<div id="global-toolbar-drag-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;padding:4px 5px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+				<svg width="10" height="24" viewBox="0 0 10 24" fill="none"><circle cx="5" cy="4" r="2.5" fill="#999"/><circle cx="5" cy="12" r="2.5" fill="#999"/><circle cx="5" cy="20" r="2.5" fill="#999"/></svg>
+			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 4px;" title="Aligner à gauche"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="1" y="14" width="9" height="2" rx="1"/></svg></button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 4px;" title="Centrer"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="3.5" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="3.5" y="14" width="9" height="2" rx="1"/></svg></button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 4px;" title="Aligner à droite"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="6" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="6" y="14" width="9" height="2" rx="1"/></svg></button>
-			<div style="width:1px;height:30px;background:#444;"></div>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('bold')" style="cursor:pointer;" title="Gras"><b>G</b></button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('italic')" style="cursor:pointer;" title="Italique"><i>I</i></button>
-			<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('underline')" style="cursor:pointer;" title="Souligné"><u>S</u></button>
+			<div style="display:flex;flex-direction:column;gap:3px;">
+				<div style="display:flex;gap:3px;">
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyLeft')" style="cursor:pointer;padding:2px 4px;" title="Aligner à gauche"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="1" y="14" width="9" height="2" rx="1"/></svg></button>
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyCenter')" style="cursor:pointer;padding:2px 4px;" title="Centrer"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="3.5" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="3.5" y="14" width="9" height="2" rx="1"/></svg></button>
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('justifyRight')" style="cursor:pointer;padding:2px 4px;" title="Aligner à droite"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="6" y="6" width="9" height="2" rx="1"/><rect x="1" y="10" width="14" height="2" rx="1"/><rect x="6" y="14" width="9" height="2" rx="1"/></svg></button>
+				</div>
+				<div style="display:flex;gap:3px;">
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('bold')" style="cursor:pointer;" title="Gras"><b>G</b></button>
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('italic')" style="cursor:pointer;" title="Italique"><i>I</i></button>
+					<button onmousedown="savedSelection=saveCurrentSelection()" onclick="formatGlobal('underline')" style="cursor:pointer;" title="Souligné"><u>S</u></button>
+				</div>
+			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
 			<div class="cpick-wrap" id="cpick-text-color">
 				<button class="cpick-label-btn" onmousedown="savedSelection=saveCurrentSelection()" onclick="cpickOpen('text-color',this)" title="Couleur du texte">Couleur<br>texte</button>
@@ -2643,7 +2689,45 @@ function _updateEraserBtnInPanel() {
         const shapeBar    = document.getElementById('shape-toolbar');
         const shapeHandle = document.getElementById('shape-toolbar-drag-handle');
         if (shapeBar && shapeHandle) makeShapeDraggable(shapeBar, shapeHandle);
+
+        const textBar    = document.getElementById('global-toolbar');
+        const textHandle = document.getElementById('global-toolbar-drag-handle');
+        if (textBar && textHandle) makeTextDraggable(textBar, textHandle);
     });
+
+    // Text-toolbar : mémorise position dans localStorage
+    function makeTextDraggable(bar, handle) {
+        try {
+            const saved = localStorage.getItem('textToolbarPos');
+            if (saved) {
+                const { left, top } = JSON.parse(saved);
+                bar.style.left = left + 'px'; bar.style.top = top + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+        } catch(e) {}
+
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            handle.style.cursor = 'grabbing';
+            const rect = bar.getBoundingClientRect();
+            const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+            function onMove(ev) {
+                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+                let l = Math.max(0, Math.min(ev.clientX - offX, window.innerWidth - bar.offsetWidth - Math.max(scrollbarW, 12)));
+                let t = Math.max(0, Math.min(ev.clientY - offY, window.innerHeight - bar.offsetHeight));
+                bar.style.left = l + 'px'; bar.style.top = t + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+            function onUp() {
+                handle.style.cursor = 'grab';
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                try { localStorage.setItem('textToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
 })();
 
 // =========================================================================
