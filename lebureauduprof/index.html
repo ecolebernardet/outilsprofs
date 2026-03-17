@@ -1352,19 +1352,15 @@
 					</div>
 					
 					
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-					
-					<!-- DANGER -->
-					<div class="mm-sub-item" onclick="clearBoard()" style="color:#ff6b6b;"><span class="mm-ico">❌</span>&nbsp;&nbsp;Effacer le tableau</div>
-
-				</div></div>
+					</div></div>
 			</div>
 
-			<!-- Undo / Redo / Aide -->
+			<!-- Undo / Redo / Effacer / Aide -->
 			<div style="display:flex;gap:6px;padding:2px 0;">
-				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler" style="flex:1;border-radius:10px;">↩</button>
-				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire" style="flex:1;border-radius:10px;">↪</button>
-				<button class="tool-btn" onclick="openHelpModal()" title="Aide" style="font-size:14px;padding:8px 10px;">❓</button>
+				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler" style="flex:2;border-radius:10px;">↩</button>
+				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire" style="flex:2;border-radius:10px;">↪</button>
+				<button class="tool-btn" onclick="clearBoard()" title="Effacer le tableau" style="font-size:14px;padding:8px 10px;border:1.5px solid #ff6b6b;">🗑️</button>
+				<button class="tool-btn" onclick="openHelpModal()" title="Aide" style="font-size:11px;padding:6px 7px;">❓</button>
 			</div>
 		</div>
 
@@ -1372,12 +1368,21 @@
 
 	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
 	<div id="figures-submenu" style="position:fixed;display:none;flex-direction:column;align-items:center;gap:6px;background:#1F1F21;border-radius:12px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,0.45);z-index:13001;border:1px solid #4a90e2;">
-		<button id="draw-mode-segment-btn"   onclick="setDrawMode('segment');toggleFiguresSubmenu()"   title="Segment"        style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">—</button>
-		<button id="draw-mode-carre-btn"     onclick="setDrawMode('carre');toggleFiguresSubmenu()"     title="Carré"          style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">□</button>
-		<button id="draw-mode-rectangle-btn" onclick="setDrawMode('rectangle');toggleFiguresSubmenu()" title="Rectangle"      style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">▭</button>
-		<button id="draw-mode-losange-btn"   onclick="setDrawMode('losange');toggleFiguresSubmenu()"   title="Losange"        style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">◇</button>
-		<button id="draw-mode-parallelo-btn" onclick="setDrawMode('parallelo');toggleFiguresSubmenu()" title="Parallélogramme" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">▱</button>
-		<button id="draw-mode-cercle-btn"    onclick="setDrawMode('cercle');toggleFiguresSubmenu()"    title="Cercle"         style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">○</button>
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+			<button id="draw-mode-segment-btn"              onclick="setDrawMode('segment');toggleFiguresSubmenu()"              title="Segment"               style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">—</button>
+			<button id="draw-mode-cercle-btn"               onclick="setDrawMode('cercle');toggleFiguresSubmenu()"               title="Cercle"                style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="#aaa" stroke-width="1.8"/></svg></button>
+			<button id="draw-mode-carre-btn"                onclick="setDrawMode('carre');toggleFiguresSubmenu()"                title="Carré"                  style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="1" width="18" height="18" stroke="#aaa" stroke-width="1.8"/></svg></button>
+			<button id="draw-mode-rectangle-btn"            onclick="setDrawMode('rectangle');toggleFiguresSubmenu()"            title="Rectangle"             style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect x="1" y="1" width="20" height="14" stroke="#aaa" stroke-width="1.8"/></svg></button>
+			<button id="draw-mode-losange-btn"              onclick="setDrawMode('losange');toggleFiguresSubmenu()"              title="Losange"               style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="16" height="22" viewBox="0 0 16 22" fill="none"><polygon points="8,1 15,11 8,21 1,11" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-parallelo-btn"            onclick="setDrawMode('parallelo');toggleFiguresSubmenu()"            title="Parallélogramme"       style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="16" viewBox="0 0 22 16" fill="none"><polygon points="5,1 21,1 17,15 1,15" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-triangle-btn"             onclick="setDrawMode('triangle');toggleFiguresSubmenu()"             title="Triangle isocèle"      style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="22" viewBox="0 0 18 22" fill="none"><polygon points="9,1 17,21 1,21" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-equilateral-triangle-btn" onclick="setDrawMode('equilateral-triangle');toggleFiguresSubmenu()" title="Triangle équilatéral"  style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="20" height="18" viewBox="0 0 20 18" fill="none"><polygon points="10,1 19,17 1,17" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-right-triangle-btn"       onclick="setDrawMode('right-triangle');toggleFiguresSubmenu()"       title="Triangle rectangle"    style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="2,2 2,16 16,16" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-scalene-triangle-btn"     onclick="setDrawMode('scalene-triangle');toggleFiguresSubmenu()"     title="Triangle quelconque"   style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="2,16 12,2 17,16" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-pentagon-btn"             onclick="setDrawMode('pentagon');toggleFiguresSubmenu()"             title="Pentagone"             style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,1 17,7 14,16 4,16 1,7" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-hexagon-btn"              onclick="setDrawMode('hexagon');toggleFiguresSubmenu()"              title="Hexagone"              style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+			<button id="draw-mode-octagon-btn"              onclick="setDrawMode('octagon');toggleFiguresSubmenu()"              title="Octogone"              style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="6,1 12,1 17,6 17,12 12,17 6,17 1,12 1,6" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+		</div>
 	</div>
 
 	<!-- Sous-menu outils GÉO (même structure que figures-submenu) -->
@@ -1417,14 +1422,20 @@
 			<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
 
 			<!-- Formes -->
-			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques">📏</button>
+			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="2,17 9,3 16,17" fill="#7a9abf" fill-opacity="0.85" stroke="#4a6a8a" stroke-width="1.2" stroke-linejoin="round"/><circle cx="14" cy="13" r="6" fill="#c0635a" fill-opacity="0.85" stroke="#7a3530" stroke-width="1.2"/></svg></button>
 
 			<div class="dt-sep"></div>
 
 			<!-- Couleur trait -->
-			<div class="dt-color" style="display:flex;align-items:center;gap:3px;">
-				<span class="dt-color-label" style="color:#666;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Coul.</span>
+			<div class="dt-color" style="display:flex;align-items:center;gap:4px;">
 				<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
+				<!-- Couleurs prédéfinies 2x2 -->
+				<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+					<div onclick="_setDrawColor('#111111',this)" title="Noir"  style="width:14px;height:14px;border-radius:3px;background:#111111;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#1565c0',this)" title="Bleu"  style="width:14px;height:14px;border-radius:3px;background:#1565c0;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#c62828',this)" title="Rouge" style="width:14px;height:14px;border-radius:3px;background:#c62828;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#2e7d32',this)" title="Vert"  style="width:14px;height:14px;border-radius:3px;background:#2e7d32;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+				</div>
 			</div>
 
 			<!-- Taille trait -->
@@ -1840,13 +1851,13 @@ document.addEventListener('keydown', (e) => {
         saveBoard();
     }
 
-    // Ctrl+C — copier les widgets sélectionnés
+    // Ctrl+C — copier les widgets/strokes/shapes sélectionnés
     if (e.key === 'c' && (e.ctrlKey || e.metaKey) &&
         !e.target.closest('[contenteditable]') &&
         !e.target.closest('input') &&
-        !e.target.closest('textarea') &&
-        selectedWidgets.length > 0) {
-        copySelectedWidgets();
+        !e.target.closest('textarea')) {
+        if (selectedWidgets.length > 0 || selectedStrokes.length > 0 || document.querySelectorAll('.shape-widget.selected').length > 0)
+            copySelectedWidgets();
     }
 
     // Ctrl+V — coller les widgets copiés
@@ -1863,10 +1874,16 @@ document.addEventListener('keydown', (e) => {
 // COPIER / COLLER WIDGETS ENTRE SCÈNES
 // =========================================================================
 function copySelectedWidgets() {
-    if (!selectedWidgets || selectedWidgets.length === 0) return;
+    // Filtrer les widgets qui ne sont plus dans le DOM (fermés entre-temps)
+    selectedWidgets = selectedWidgets.filter(w => document.body.contains(w));
+    const selectedShapeWidgets = [...document.querySelectorAll('.shape-widget.selected')];
+    if (selectedWidgets.length === 0 && selectedStrokes.length === 0 && selectedShapeWidgets.length === 0) return;
+
     const curW = window.innerWidth, curVH = virtualH(curW);
+
+    // Copier les widgets DOM (en excluant les shape-widgets traités séparément)
     const copied = [];
-    selectedWidgets.forEach(w => {
+    selectedWidgets.filter(w => !w.classList.contains('shape-widget')).forEach(w => {
         const iframe   = w.querySelector('iframe');
         const c        = w.querySelector('.editor-container');
         const html     = getInnerHTMLNormalized(w);
@@ -1900,21 +1917,42 @@ function copySelectedWidgets() {
             bgColor: w.dataset.bgColor || '#ffffff',
             bgOpacity: parseFloat(w.dataset.bgOpacity ?? 1),
             editorStyle: isTextLike ? getEditorStyleNormalized(w, 1920) : null,
-            pinned: false,
-            background: w.dataset.background === 'true',
-            groupId: null,
+            pinned: false, background: w.dataset.background === 'true', groupId: null,
             meteoCity: w.dataset.meteoCity || null,
             stickerUrl, stickerEmoji, stickerSize,
             transform: w.style.transform || null,
-            pdfId: w.dataset.pdfId || null,
-            pdfName: w.dataset.pdfName || null,
-            animation: w.dataset.animation || null,
-            monnaieData
+            pdfId: w.dataset.pdfId || null, pdfName: w.dataset.pdfName || null,
+            animation: w.dataset.animation || null, monnaieData
         });
     });
-    localStorage.setItem('clipboardWidgets', JSON.stringify({ refWidth: 1920, widgets: copied }));
-    // Feedback visuel
-    _showCopyFeedback(selectedWidgets.length);
+
+    // Copier les shapes sélectionnées
+    const copiedShapes = selectedShapeWidgets.map(w => {
+        const svg = w.querySelector('svg');
+        const lP = (w.offsetLeft / curW) * 100;
+        const tP = (w.offsetTop  / curVH) * 100;
+        const wP = (parseFloat(svg?.getAttribute('width') || 150) / curW) * 100;
+        const hP = (parseFloat(svg?.getAttribute('height') || 150) / curVH) * 100;
+        return {
+            shapeType: w.dataset.shapeType, strokeColor: w.dataset.strokeColor,
+            fillColor: w.dataset.fillColor, fillOpacity: w.dataset.fillOpacity,
+            strokeWidth: parseInt(w.dataset.strokeWidth || 4),
+            leftPercent: lP, topPercent: tP, wPercent: wP, hPercent: hP,
+            transform: w.style.transform || '', pinned: false, background: false, groupId: null,
+            flipX: parseFloat(w.dataset.flipX || 1), flipY: parseFloat(w.dataset.flipY || 1)
+        };
+    });
+
+    // Copier les traits canvas sélectionnés
+    const copiedStrokes = selectedStrokes.map(s => JSON.parse(JSON.stringify(s)));
+
+    const total = copied.length + copiedShapes.length + copiedStrokes.length;
+    if (total === 0) return;
+
+    localStorage.setItem('clipboardWidgets', JSON.stringify({
+        refWidth: 1920, widgets: copied, shapes: copiedShapes, strokes: copiedStrokes
+    }));
+    _showCopyFeedback(total);
 }
 
 function pasteWidgets() {
@@ -1922,21 +1960,58 @@ function pasteWidgets() {
     if (!raw) return;
     try {
         const data = JSON.parse(raw);
-        // Décaler légèrement pour signaler le collage
-        const offset = 2; // en % de la largeur/hauteur
-        const shifted = {
-            ...data,
-            widgets: data.widgets.map(w => ({
-                ...w,
-                leftPercent: Math.min(w.leftPercent + offset, 90),
-                topPercent:  Math.min(w.topPercent  + offset, 90),
-                groupId: null
-            }))
-        };
+        const offset = 2; // décalage en % pour signaler le collage
+        const curW = window.innerWidth, curVH = virtualH(curW);
+        const offsetPx = { x: (offset / 100) * curW, y: (offset / 100) * curVH };
+
         snapshotNow();
-        restoreBoardFromJSON(JSON.stringify(shifted));
+
+        // Coller les widgets DOM
+        if (data.widgets && data.widgets.length > 0) {
+            const shifted = {
+                ...data,
+                widgets: data.widgets.map(w => ({
+                    ...w,
+                    leftPercent: Math.min(w.leftPercent + offset, 90),
+                    topPercent:  Math.min(w.topPercent  + offset, 90),
+                    groupId: null
+                })),
+                shapes: [], strokes: []
+            };
+            restoreBoardFromJSON(JSON.stringify(shifted));
+        }
+
+        // Coller les shapes
+        if (data.shapes && data.shapes.length > 0) {
+            data.shapes.forEach(s => {
+                const sw = (s.wPercent / 100) * curW, sh = (s.hPercent / 100) * curVH;
+                const lx = Math.min((s.leftPercent + offset) / 100, 0.9) * curW;
+                const ty = Math.min((s.topPercent  + offset) / 100, 0.9) * curVH;
+                const w2 = createShapeWidget(s.shapeType, s.strokeColor, s.fillColor, s.fillOpacity, sw, sh, lx + 'px', ty + 'px', false, s.strokeWidth || 4);
+                if (w2) {
+                    if (s.transform) w2.style.transform = s.transform;
+                    const fsx = parseFloat(s.flipX || 1), fsy = parseFloat(s.flipY || 1);
+                    if (fsx !== 1 || fsy !== 1) {
+                        const svg2 = w2.querySelector('svg');
+                        if (svg2) { svg2.style.transformBox = 'fill-box'; svg2.style.transformOrigin = 'center center'; svg2.style.transform = `scale(${fsx},${fsy})`; }
+                    }
+                }
+            });
+        }
+
+        // Coller les traits canvas
+        if (data.strokes && data.strokes.length > 0) {
+            data.strokes.forEach(s => {
+                const clone = JSON.parse(JSON.stringify(s));
+                clone.points = clone.points.map(p => ({ x: p.x + offsetPx.x, y: p.y + offsetPx.y }));
+                clone.groupId = null;
+                strokes.push(clone);
+            });
+            if (typeof redrawStrokes === 'function') redrawStrokes();
+        }
+
         setTimeout(() => saveBoard(), 300);
-    } catch(e) { console.error('Erreur collage widget:', e); }
+    } catch(e) { console.error('Erreur collage:', e); }
 }
 
 function _showCopyFeedback(count) {
@@ -2431,6 +2506,14 @@ function _fixSubmenuOverflow() {
         }
     });
 })();
+
+function _setDrawColor(hex) {
+    // S'assure que le picker est initialisé, puis applique la couleur
+    if (typeof cpickSet === 'function') {
+        cpickInit('draw-color', hex);
+        cpickSet('draw-color', hex, true);
+    }
+}
 
 function _updateEraserBtnInPanel() {
     const btn1 = document.getElementById('eraser-btn');

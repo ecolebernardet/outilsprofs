@@ -11,23 +11,58 @@
 //   bringToFront(), _addStickerResizeHandle(), snapshotNow(), saveBoard()
 // =========================================================================
 
-document.addEventListener('paste', (e) => {
-    // Ne pas interférer si l'utilisateur colle du texte dans un champ éditable
+// =========================================================================
+// COLLER UNE IMAGE DEPUIS LE PRESSE-PAPIER — Le Bureau du Prof
+//
+// Écoute Ctrl+V / ⌘+V via keydown (et non l'événement paste natif).
+// Cela permet de contrôler précisément quand on lit le presse-papier,
+// et d'éviter que le contenu résiduel du presse-papier Windows soit collé
+// lors d'un Ctrl+V destiné à coller un widget ou un dessin.
+//
+// Dépendances globales (définies dans stickers.js / widgets.js) :
+//   findFreePosition(), board, makeDraggable(), makeDraggableRotate(),
+//   bringToFront(), _addStickerResizeHandle(), snapshotNow(), saveBoard()
+// =========================================================================
+
+// =========================================================================
+// COLLER UNE IMAGE DEPUIS LE PRESSE-PAPIER — Le Bureau du Prof
+//
+// Écoute l'événement paste natif (Ctrl+V / ⌘+V).
+// Ne se déclenche que si le presse-papier contient une image ET aucun
+// contenu texte/HTML (pour ne pas interférer avec le collage de widgets
+// ou de dessins qui passent par pasteWidgets()).
+//
+// Dépendances globales (définies dans stickers.js / widgets.js) :
+//   findFreePosition(), board, makeDraggable(), makeDraggableRotate(),
+//   bringToFront(), _addStickerResizeHandle(), snapshotNow(), saveBoard()
+// =========================================================================
+
+// =========================================================================
+// COLLER UNE IMAGE DEPUIS LE PRESSE-PAPIER — Le Bureau du Prof
+// =========================================================================
+
+// Timestamp du dernier Ctrl+C sur le bureau (hors champ texte)
+window._lastBoardCopyTime = 0;
+
+document.addEventListener('copy', (e) => {
     const active = document.activeElement;
-    if (
-        active &&
-        (active.isContentEditable ||
-         active.tagName === 'INPUT' ||
-         active.tagName === 'TEXTAREA')
-    ) return;
+    if (active && (active.isContentEditable || active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+    window._lastBoardCopyTime = Date.now();
+});
+
+document.addEventListener('paste', (e) => {
+    const active = document.activeElement;
+    if (active && (active.isContentEditable || active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+
+    // Bloquer si un Ctrl+C sur le bureau a eu lieu il y a moins de 3 secondes
+    if (Date.now() - window._lastBoardCopyTime < 3000) return;
 
     const items = e.clipboardData && e.clipboardData.items;
     if (!items) return;
 
-    // Chercher un élément image dans le presse-papier
     let imageItem = null;
     for (const item of items) {
-        if (item.type.startsWith('image/')) { imageItem = item; break; }
+        if (item.type.startsWith('image/')) imageItem = item;
     }
     if (!imageItem) return;
 
@@ -39,20 +74,14 @@ document.addEventListener('paste', (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
         const dataUrl = ev.target.result;
-
-        // Charger l'image pour connaître ses dimensions réelles
         const tmpImg = new Image();
-        tmpImg.onload = () => {
-            _insertPastedImage(dataUrl, tmpImg.naturalWidth, tmpImg.naturalHeight);
-        };
-        tmpImg.onerror = () => {
-            // En cas d'erreur, fallback 300×300
-            _insertPastedImage(dataUrl, 300, 300);
-        };
+        tmpImg.onload = () => _insertPastedImage(dataUrl, tmpImg.naturalWidth, tmpImg.naturalHeight);
+        tmpImg.onerror = () => _insertPastedImage(dataUrl, 300, 300);
         tmpImg.src = dataUrl;
     };
     reader.readAsDataURL(file);
 });
+
 
 /**
  * Crée un widget sticker sur le board avec les dimensions proportionnelles

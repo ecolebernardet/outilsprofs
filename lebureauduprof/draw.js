@@ -278,7 +278,7 @@ var _segmentEnd   = null;  // conservé pour compat
 var _figureStart  = null;  // point de départ pour tous les modes figure
 var _figureEnd    = null;  // point de relâchement
 
-const FIGURE_MODES = ['segment','carre','rectangle','cercle','parallelo','losange'];
+const FIGURE_MODES = ['segment','carre','rectangle','cercle','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon'];
 
 // Construit les points d'une petite croix centrée sur un point (pour le centre du cercle)
 function _buildCrossPoints(center, strokeSize) {
@@ -359,6 +359,62 @@ function _buildFigurePoints(mode, A, B) {
             { x: A.x,     y: cy   },  // sommet gauche
             { x: cx,      y: A.y  }   // fermeture
         ];
+    }
+
+    if (mode === 'triangle') {
+        // Triangle isocèle : A = sommet haut-centre, B = coin bas-droit
+        const cx = (A.x + B.x) / 2;
+        return [
+            { x: cx,   y: A.y },
+            { x: B.x,  y: B.y },
+            { x: A.x,  y: B.y },
+            { x: cx,   y: A.y }
+        ];
+    }
+
+    if (mode === 'right-triangle') {
+        // Triangle rectangle : angle droit en A
+        return [
+            { x: A.x, y: A.y },
+            { x: B.x, y: B.y },
+            { x: A.x, y: B.y },
+            { x: A.x, y: A.y }
+        ];
+    }
+
+    if (mode === 'equilateral-triangle') {
+        // Triangle équilatéral : A = sommet haut-centre, largeur = |dx|
+        const side = Math.abs(dx);
+        const h3 = side * Math.sqrt(3) / 2 * Math.sign(dy || 1);
+        const cx = (A.x + B.x) / 2;
+        return [
+            { x: cx,            y: A.y      },
+            { x: cx + side / 2, y: A.y + h3 },
+            { x: cx - side / 2, y: A.y + h3 },
+            { x: cx,            y: A.y      }
+        ];
+    }
+
+    if (mode === 'scalene-triangle') {
+        // Triangle quelconque : 3 sommets à positions distinctes
+        return [
+            { x: A.x + dx * 0.15, y: B.y },
+            { x: A.x + dx * 0.72, y: A.y },
+            { x: B.x,             y: B.y },
+            { x: A.x + dx * 0.15, y: B.y }
+        ];
+    }
+
+    if (mode === 'pentagon' || mode === 'hexagon' || mode === 'octagon') {
+        const n = mode === 'pentagon' ? 5 : mode === 'hexagon' ? 6 : 8;
+        const cx = A.x, cy = A.y;
+        const rx = Math.abs(dx), ry = Math.abs(dy);
+        const pts = [];
+        for (let i = 0; i <= n; i++) {
+            const a = (2 * Math.PI / n) * i - Math.PI / 2;
+            pts.push({ x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) });
+        }
+        return pts;
     }
 
     return null;
@@ -1466,6 +1522,7 @@ function onBoardMouseDown(e) {
 }
 
 function clearSelection() {
+    selectedWidgets = selectedWidgets.filter(w => document.body.contains(w));
     selectedWidgets.forEach(w => w.classList.remove('selected'));
     selectedWidgets = []; selectedStrokes = [];
     if (drawCtx) redrawStrokes();

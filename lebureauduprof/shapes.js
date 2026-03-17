@@ -10,7 +10,33 @@ var SHAPES = [
     { id: 'line',          label: 'Ligne',           svg: (w,h,sw,f,o) => `<line x1="${sw}" y1="${h/2}" x2="${w-sw}" y2="${h/2}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>` },
     { id: 'arrow',         label: 'Flèche',          svg: (w,h,sw,f,o) => `<polygon points="${sw},${h*0.35} ${w*0.6},${h*0.35} ${w*0.6},${sw} ${w-sw},${h/2} ${w*0.6},${h-sw} ${w*0.6},${h*0.65} ${sw},${h*0.65}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'triangle',      label: 'Triangle',        svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
-    { id: 'right-triangle',label: 'Tr. rectangle',   svg: (w,h,sw,f,o) => `<polygon points="${sw},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'right-triangle',    label: 'Tr. rectangle',   svg: (w,h,sw,f,o) => `<polygon points="${sw},${sw} ${w-sw},${h-sw} ${sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'equilateral-triangle', label: 'Tr. équilatéral', svg: (w,h,sw,f,o) => {
+        const cx = w/2, h3 = Math.sqrt(3)/2;
+        const side = Math.min(w,h) - sw;
+        const th = side * h3;
+        const top = (h - th) / 2, bot = top + th, left = cx - side/2, right = cx + side/2;
+        return `<polygon points="${cx},${top} ${right},${bot} ${left},${bot}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
+    { id: 'scalene-triangle',    label: 'Tr. quelconque',  svg: (w,h,sw,f,o) => `<polygon points="${w*0.15},${h-sw} ${w*0.72},${sw} ${w-sw},${h-sw}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'pentagon',  label: 'Pentagone',  svg: (w,h,sw,f,o) => {
+        const cx = w/2, cy = h/2, rx = w/2-sw/2, ry = h/2-sw/2;
+        let pts = '';
+        for (let i = 0; i < 5; i++) { const a = (2*Math.PI/5)*i - Math.PI/2; pts += `${cx+rx*Math.cos(a)},${cy+ry*Math.sin(a)} `; }
+        return `<polygon points="${pts.trim()}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
+    { id: 'hexagon',   label: 'Hexagone',   svg: (w,h,sw,f,o) => {
+        const cx = w/2, cy = h/2, rx = w/2-sw/2, ry = h/2-sw/2;
+        let pts = '';
+        for (let i = 0; i < 6; i++) { const a = (2*Math.PI/6)*i - Math.PI/2; pts += `${cx+rx*Math.cos(a)},${cy+ry*Math.sin(a)} `; }
+        return `<polygon points="${pts.trim()}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
+    { id: 'octagon',   label: 'Octogone',   svg: (w,h,sw,f,o) => {
+        const cx = w/2, cy = h/2, rx = w/2-sw/2, ry = h/2-sw/2;
+        let pts = '';
+        for (let i = 0; i < 8; i++) { const a = (2*Math.PI/8)*i - Math.PI/2; pts += `${cx+rx*Math.cos(a)},${cy+ry*Math.sin(a)} `; }
+        return `<polygon points="${pts.trim()}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>`;
+    }},
     { id: 'heart',         label: 'Cœur',            svg: (w,h,sw,f,o) => {
         const p = sw * 0.5;
         const W = w - p*2, H = h - p*2;
