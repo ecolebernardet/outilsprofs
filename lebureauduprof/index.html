@@ -585,6 +585,49 @@
 
 		/* mm-panel remplacé par draw-toolbar et shape-toolbar horizontaux */
 
+		/* ── DRAW-TOOLBAR orientation verticale / horizontale ── */
+		#draw-toolbar { box-sizing: border-box; }
+		#draw-toolbar:not(.horizontal) { width: 56px; }
+		#draw-toolbar-inner { flex-direction: column-reverse; align-items: center; }
+
+		/* Séparateurs verticaux = ligne horizontale */
+		#draw-toolbar .dt-sep { width: 32px; height: 1px; background: #333; flex-shrink: 0; }
+
+		/* Groupes taille : +/valeur/− en colonne */
+		#draw-toolbar .dt-size-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+		#draw-toolbar .dt-size-group .dt-plus,
+		#draw-toolbar .dt-size-group .dt-minus { width: 32px; height: 22px; }
+
+		/* Handle vertical */
+		#draw-toolbar .dt-handle { width: 100%; min-height: 18px; padding: 4px 0; flex-shrink: 0; }
+		#draw-toolbar .dt-handle-svg-v { display: block; }
+		#draw-toolbar .dt-handle-svg-h { display: none; }
+
+		/* Label couleur visible en vertical */
+		#draw-toolbar .dt-color-label { display: block; }
+		#draw-toolbar .dt-color { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+
+		/* ── MODE HORIZONTAL ── */
+		#draw-toolbar.horizontal { width: auto; padding: 8px 10px; }
+		#draw-toolbar.horizontal #draw-toolbar-inner { flex-direction: row; align-items: center; gap: 6px; }
+
+		/* Séparateurs horizontaux = lignes verticales */
+		#draw-toolbar.horizontal .dt-sep { width: 1px; height: 30px; }
+
+		/* Groupes taille : +/valeur/− en ligne */
+		#draw-toolbar.horizontal .dt-size-group { flex-direction: row; gap: 3px; align-items: center; }
+		#draw-toolbar.horizontal .dt-size-group .dt-plus,
+		#draw-toolbar.horizontal .dt-size-group .dt-minus { width: 22px; height: 28px; }
+
+		/* Handle horizontal */
+		#draw-toolbar.horizontal .dt-handle { width: auto; min-width: 18px; height: 38px; padding: 0 4px; min-height: unset; }
+		#draw-toolbar.horizontal .dt-handle-svg-v { display: none; }
+		#draw-toolbar.horizontal .dt-handle-svg-h { display: block; }
+
+		/* Couleur en horizontal : pas de label */
+		#draw-toolbar.horizontal .dt-color-label { display: none; }
+		#draw-toolbar.horizontal .dt-color { flex-direction: row; gap: 0; }
+
 		/* bg-submenu désormais intégré dans le sous-menu Affichage */
 
 		/* ── Rubriques du menu ──────────────────────────────────── */
@@ -1328,66 +1371,102 @@
 	</div><!-- #main-menu -->
 
 	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
-	<div id="figures-submenu" style="position:fixed;bottom:80px;left:140px;background:#1F1F21;border-radius:12px;padding:8px 12px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13001;border:1px solid #4a90e2;align-items:center;gap:8px;flex-wrap:wrap;">
-		<span style="color:#7ab8f5;font-size:11px;font-weight:700;white-space:nowrap;">📏 Figures géométriques</span>
-		<div style="width:1px;height:24px;background:#333;"></div>
-		<button id="draw-mode-segment-btn"   onclick="setDrawMode('segment');toggleFiguresSubmenu()"   style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">— Segment</button>
-		<button id="draw-mode-carre-btn"     onclick="setDrawMode('carre');toggleFiguresSubmenu()"     style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">□ Carré</button>
-		<button id="draw-mode-rectangle-btn" onclick="setDrawMode('rectangle');toggleFiguresSubmenu()" style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">▭ Rectangle</button>
-		<button id="draw-mode-cercle-btn"    onclick="setDrawMode('cercle');toggleFiguresSubmenu()"    style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">○ Cercle</button>
-		<button id="draw-mode-parallelo-btn" onclick="setDrawMode('parallelo');toggleFiguresSubmenu()" style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">▱ Parallélogramme</button>
-		<button id="draw-mode-losange-btn"   onclick="setDrawMode('losange');toggleFiguresSubmenu()"   style="padding:5px 9px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;">◇ Losange</button>
+	<div id="figures-submenu" style="position:fixed;display:none;flex-direction:column;align-items:center;gap:6px;background:#1F1F21;border-radius:12px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,0.45);z-index:13001;border:1px solid #4a90e2;">
+		<button id="draw-mode-segment-btn"   onclick="setDrawMode('segment');toggleFiguresSubmenu()"   title="Segment"        style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">—</button>
+		<button id="draw-mode-carre-btn"     onclick="setDrawMode('carre');toggleFiguresSubmenu()"     title="Carré"          style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">□</button>
+		<button id="draw-mode-rectangle-btn" onclick="setDrawMode('rectangle');toggleFiguresSubmenu()" title="Rectangle"      style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">▭</button>
+		<button id="draw-mode-losange-btn"   onclick="setDrawMode('losange');toggleFiguresSubmenu()"   title="Losange"        style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">◇</button>
+		<button id="draw-mode-parallelo-btn" onclick="setDrawMode('parallelo');toggleFiguresSubmenu()" title="Parallélogramme" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">▱</button>
+		<button id="draw-mode-cercle-btn"    onclick="setDrawMode('cercle');toggleFiguresSubmenu()"    title="Cercle"         style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">○</button>
 	</div>
 
-	<!-- Barre outils DESSIN (horizontale, bas-gauche) -->
-	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
-		<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-			<!-- Mode sélection -->
-			<button id="draw-select-btn" onclick="toggleSelectMode()" style="padding:6px 6px 6px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:12px;font-weight:600;" title="Repasser en mode sélection"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:0px;"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<!-- Modes -->
-			<button id="draw-free-btn" onclick="setDrawMode('free')" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Dessin libre">✏️<br>Dessin</button>
-			<button id="geo-draw-btn" onclick="toggleGeoFromDrawBar()" style="padding:4px 10px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Outils géométriques">📐<br>Outils</button>
-			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="padding:4px 10px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:11px;font-weight:600;line-height:1.35;text-align:center;" title="Figures géométriques">📏<br>Figures</button>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<!-- Couleur & taille -->
-			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-				<span style="color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Couleur</span>
+	<!-- Sous-menu outils GÉO (même structure que figures-submenu) -->
+	<div id="geo-submenu" style="position:fixed;display:none;flex-direction:column;align-items:center;gap:6px;background:#1F1F21;border-radius:12px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,0.45);z-index:13001;border:1px solid #a78bfa;">
+		<button title="Règle"    onclick="geoSpawnTool('regle');  _closeGeoSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;padding:0;">📏</button>
+		<button title="Équerre"  onclick="geoSpawnTool('equerre');_closeGeoSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;padding:0;">📐</button>
+		<button title="Compas"   onclick="geoSpawnTool('compas'); _closeGeoSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;padding:0;">⭕</button>
+	</div>
+
+	<!-- Barre outils DESSIN -->
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:10px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border:1px solid #444;overflow:visible;box-sizing:border-box;">
+		<div id="draw-toolbar-inner" style="display:flex;align-items:center;gap:6px;">
+
+			<!-- Handle -->
+			<div id="draw-toolbar-drag-handle" class="dt-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+				<svg class="dt-handle-svg-v" width="24" height="10" viewBox="0 0 24 10" fill="none"><circle cx="4" cy="5" r="2.5" fill="#999"/><circle cx="12" cy="5" r="2.5" fill="#999"/><circle cx="20" cy="5" r="2.5" fill="#999"/></svg>
+				<svg class="dt-handle-svg-h" width="10" height="24" viewBox="0 0 10 24" fill="none"><circle cx="5" cy="4" r="2.5" fill="#999"/><circle cx="5" cy="12" r="2.5" fill="#999"/><circle cx="5" cy="20" r="2.5" fill="#999"/></svg>
+			</div>
+
+			<div class="dt-sep"></div>
+
+			<!-- Annuler + Refaire -->
+			<div class="dt-undoredo" style="display:flex;flex-direction:row;gap:4px;">
+				<button onclick="undoAction()" title="Annuler" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:17px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↩</button>
+				<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:17px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
+			</div>
+
+			<div class="dt-sep"></div>
+
+			<!-- Sélection -->
+			<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+
+			<!-- Dessin libre -->
+			<button id="draw-free-btn" onclick="setDrawMode('free')" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Dessin libre">✏️</button>
+
+			<!-- Outils géo -->
+			<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
+
+			<!-- Formes -->
+			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques">📏</button>
+
+			<div class="dt-sep"></div>
+
+			<!-- Couleur trait -->
+			<div class="dt-color" style="display:flex;align-items:center;gap:3px;">
+				<span class="dt-color-label" style="color:#666;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Coul.</span>
 				<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
 			</div>
-			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-				<span style="color:#888;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Taille</span>
-				<div style="display:flex;align-items:center;gap:4px;">
-				<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
+
+			<!-- Taille trait -->
+			<div class="dt-size-group" style="display:flex;align-items:center;gap:3px;">
+				<button class="dt-plus"  onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:32px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
 				<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
-				<span id="draw-size-label" style="color:#fff;font-size:12px;min-width:20px;text-align:center;">4</span>
-				<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
-				</div>
+				<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
+				<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:32px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
 			</div>
-			<div style="width:1px;height:24px;background:#333;"></div>
+
+			<div class="dt-sep"></div>
+
 			<!-- Gomme -->
-			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-				<button id="eraser-btn" onclick="toggleEraserMode()" title="Gomme (clic droit pour basculer)" style="background:#2a2a2e;color:#888;border:2px solid #444;width:36px;height:22px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;flex-shrink:0;">🧽</button>
-				<div style="display:flex;align-items:center;gap:4px;">
-					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.max(5,+i.value-5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
-					<input type="range" id="eraser-size" min="5" max="80" value="20" style="display:none;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
-					<span id="eraser-size-label" style="color:#fff;font-size:12px;min-width:20px;text-align:center;">20</span>
-					<button onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.min(80,+i.value+5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
-				</div>
+			<button id="eraser-btn" onclick="toggleEraserMode()" title="Gomme (clic droit pour basculer)" style="background:#2a2a2e;color:#888;border:2px solid #444;width:38px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">🧽</button>
+
+			<!-- Taille gomme -->
+			<div class="dt-size-group" style="display:flex;align-items:center;gap:3px;">
+				<button class="dt-plus"  onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.min(80,+i.value+5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:32px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">+</button>
+				<input type="range" id="eraser-size" min="5" max="80" value="20" style="display:none;" oninput="document.getElementById('eraser-size-label').textContent=this.value">
+				<span id="eraser-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">20</span>
+				<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('eraser-size');i.value=Math.max(5,+i.value-5);document.getElementById('eraser-size-label').textContent=i.value;i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:32px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;">−</button>
 			</div>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<!-- Actions -->
-			<button onclick="undoAction()" title="Annuler" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">↩</button>
-			<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<button onclick="clearCanvas()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:none;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
-			<div style="width:1px;height:24px;background:#333;"></div>
-			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
+
+			<div class="dt-sep"></div>
+
+			<!-- Effacer tout -->
+			<button onclick="clearCanvas()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:1px solid #5a2020;width:38px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
+
+			<div class="dt-sep"></div>
+
+			<!-- Fermer -->
+			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#555;border:1px solid #333;width:38px;height:26px;border-radius:8px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
+
 		</div>
 	</div>
 
 	<!-- Barre outils FORMES (horizontale, bas-gauche) -->
-	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+	<div id="shape-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:12px;padding:8px 16px 12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:13000;border:1px solid #444;overflow:visible;">
+		<!-- Handle de déplacement -->
+		<div id="shape-toolbar-drag-handle" style="display:flex;align-items:center;justify-content:center;width:100%;height:14px;cursor:grab;margin-bottom:6px;opacity:0.4;transition:opacity 0.2s;" title="Déplacer la barre d'outils" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+			<svg width="36" height="8" viewBox="0 0 36 8" fill="none"><circle cx="6" cy="4" r="2" fill="#888"/><circle cx="12" cy="4" r="2" fill="#888"/><circle cx="18" cy="4" r="2" fill="#888"/><circle cx="24" cy="4" r="2" fill="#888"/><circle cx="30" cy="4" r="2" fill="#888"/></svg>
+		</div>
 		<div style="display:flex;align-items:center;gap:14px;">
 			<!-- Colonne 1 : formes -->
 			<div class="shape-grid" id="shape-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
@@ -2375,6 +2454,222 @@ function _updateEraserBtnInPanel() {
 <script src="widget-monnaie.js"></script>
 <script src="widget-deficalme.js"></script>
 <div id="laser-pointer"></div>
+
+<script>
+// =========================================================================
+// TOOLBARS DÉPLAÇABLES
+// =========================================================================
+(function() {
+
+    // Shape-toolbar : mémorise position dans localStorage
+    function makeShapeDraggable(bar, handle) {
+        try {
+            const saved = localStorage.getItem('shapeToolbarPos');
+            if (saved) {
+                const { left, top } = JSON.parse(saved);
+                bar.style.left = left + 'px'; bar.style.top = top + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+        } catch(e) {}
+
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            handle.style.cursor = 'grabbing';
+            const rect = bar.getBoundingClientRect();
+            const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+            function onMove(ev) {
+                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+                let l = Math.max(0, Math.min(ev.clientX - offX, window.innerWidth - bar.offsetWidth - Math.max(scrollbarW, 12)));
+                let t = Math.max(0, Math.min(ev.clientY - offY, window.innerHeight - bar.offsetHeight));
+                bar.style.left = l + 'px'; bar.style.top = t + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+            function onUp() {
+                handle.style.cursor = 'grab';
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                try { localStorage.setItem('shapeToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    // Draw-toolbar : pas de localStorage, bascule horizontal/vertical selon bord
+    function makeDrawDraggable(bar, handle) {
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            handle.style.cursor = 'grabbing';
+            const rect = bar.getBoundingClientRect();
+            let offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+
+            function onMove(ev) {
+                const THRESH = 80;
+                const goH = ev.clientY < THRESH || ev.clientY > window.innerHeight - THRESH;
+
+                // Basculer orientation si nécessaire, recalculer les offsets
+                if (goH !== bar.classList.contains('horizontal')) {
+                    bar.classList.toggle('horizontal', goH);
+                    void bar.offsetHeight; // force reflow
+                    offY = bar.offsetHeight / 2;
+                    offX = Math.min(offX, bar.offsetWidth / 2);
+                }
+
+                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+                const marginRight = Math.max(scrollbarW, 12);
+                let l = ev.clientX - offX;
+                let t = ev.clientY - offY;
+                l = Math.max(0, Math.min(l, window.innerWidth  - bar.offsetWidth  - marginRight));
+                t = Math.max(0, Math.min(t, window.innerHeight - bar.offsetHeight));
+                bar.style.left = l + 'px'; bar.style.top = t + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+
+            function onUp() {
+                handle.style.cursor = 'grab';
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const drawBar    = document.getElementById('draw-toolbar');
+        const drawHandle = document.getElementById('draw-toolbar-drag-handle');
+        if (drawBar && drawHandle) makeDrawDraggable(drawBar, drawHandle);
+
+        const shapeBar    = document.getElementById('shape-toolbar');
+        const shapeHandle = document.getElementById('shape-toolbar-drag-handle');
+        if (shapeBar && shapeHandle) makeShapeDraggable(shapeBar, shapeHandle);
+    });
+})();
+
+// =========================================================================
+// POSITIONNEMENT DYNAMIQUE DES SOUS-MENUS À CÔTÉ DE LA DRAW-TOOLBAR
+// =========================================================================
+function _positionSubmenuNextToDrawbar(submenu) {
+    const bar = document.getElementById('draw-toolbar');
+    if (!bar || !submenu) return;
+    const isH = bar.classList.contains('horizontal');
+    const barRect = bar.getBoundingClientRect();
+    const gap = 8;
+    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+    const rightLimit = window.innerWidth - scrollbarW - 12;
+
+    if (isH) {
+        // Toolbar horizontale → sous-menu horizontal, au-dessus ou en dessous
+        submenu.style.flexDirection = 'row';
+        const subRect = submenu.getBoundingClientRect();
+        const subW = subRect.width  || submenu.offsetWidth  || 200;
+        const subH = subRect.height || submenu.offsetHeight || 50;
+
+        // Au-dessus si toolbar en bas, en dessous si toolbar en haut
+        let top;
+        if (barRect.top > window.innerHeight / 2) {
+            top = barRect.top - subH - gap;
+        } else {
+            top = barRect.bottom + gap;
+        }
+        // Horizontalement : centré sur la toolbar, recalé si déborde
+        let left = barRect.left + (barRect.width - subW) / 2;
+        left = Math.max(0, Math.min(left, rightLimit - subW));
+
+        submenu.style.left     = left + 'px';
+        submenu.style.top      = top  + 'px';
+    } else {
+        // Toolbar verticale → sous-menu vertical, à gauche ou à droite
+        submenu.style.flexDirection = 'column';
+        const subRect = submenu.getBoundingClientRect();
+        const subW = subRect.width  || submenu.offsetWidth  || 56;
+        const subH = subRect.height || submenu.offsetHeight || 200;
+
+        let left;
+        if (barRect.left + barRect.width / 2 < window.innerWidth / 2) {
+            left = barRect.right + gap;
+        } else {
+            left = barRect.left - subW - gap;
+        }
+        left = Math.max(0, Math.min(left, rightLimit - subW));
+
+        // Verticalement : centré sur la toolbar
+        let top = barRect.top + (barRect.height - subH) / 2;
+        top = Math.max(4, Math.min(top, window.innerHeight - subH - 4));
+
+        submenu.style.left = left + 'px';
+        submenu.style.top  = top  + 'px';
+    }
+
+    submenu.style.bottom   = 'auto';
+    submenu.style.right    = 'auto';
+    submenu.style.position = 'fixed';
+}
+
+// Surcharge de toggleFiguresSubmenu pour repositionner à chaque ouverture
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Patch : observer l'ouverture du figures-submenu pour le repositionner
+        const figSub = document.getElementById('figures-submenu');
+        if (!figSub) return;
+        const obs = new MutationObserver(function() {
+            if (figSub.style.display !== 'none' && figSub.classList.contains('open')) {
+                // Attendre le prochain frame pour avoir les dimensions réelles
+                requestAnimationFrame(function() {
+                    _positionSubmenuNextToDrawbar(figSub);
+                });
+            }
+        });
+        obs.observe(figSub, { attributes: true, attributeFilter: ['class', 'style'] });
+    });
+})();
+
+// Sous-menu outils géo — même logique que toggleFiguresSubmenu
+function _toggleGeoCompactSubmenu() {
+    const sub = document.getElementById('geo-submenu');
+    const btn = document.getElementById('geo-draw-btn');
+    if (!sub) return;
+    const isOpen = sub.style.display === 'flex';
+    // Fermer figures-submenu si ouvert
+    const figSub = document.getElementById('figures-submenu');
+    if (figSub) { figSub.style.display = 'none'; figSub.classList.remove('open'); }
+    if (isOpen) {
+        sub.style.display = 'none';
+        if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; }
+    } else {
+        sub.style.display = 'flex';
+        requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+        if (btn) { btn.style.borderColor = '#a78bfa'; btn.style.background = '#1a1030'; btn.style.color = '#c4b5fd'; }
+    }
+}
+function _closeGeoSubmenu() {
+    const sub = document.getElementById('geo-submenu');
+    const btn = document.getElementById('geo-draw-btn');
+    if (sub) sub.style.display = 'none';
+    if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; }
+}
+// Fermer le sous-menu géo quand on clique ailleurs
+document.addEventListener('mousedown', function(e) {
+    const sub = document.getElementById('geo-submenu');
+    if (!sub || sub.style.display === 'none') return;
+    if (!sub.contains(e.target) && !e.target.closest('#geo-draw-btn')) {
+        _closeGeoSubmenu();
+    }
+});
+// Patch closeGeoToolbar pour retirer aussi la classe from-drawtoolbar
+document.addEventListener('DOMContentLoaded', function() {
+    const origClose = window.closeGeoToolbar;
+    if (typeof origClose === 'function') {
+        window.closeGeoToolbar = function() {
+            origClose();
+            const geoBar = document.getElementById('geo-toolbar');
+            if (geoBar) geoBar.classList.remove('from-drawtoolbar');
+        };
+        window.closeGeoSubmenu = window.closeGeoToolbar;
+    }
+});
+</script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
 <script src="widget-mots-alpha.js"></script>

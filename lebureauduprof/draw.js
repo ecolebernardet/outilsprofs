@@ -695,6 +695,8 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
 var currentDrawMode = 'free'; // 'free' | 'shape' | 'text'
 
 function setDrawMode(mode) {
+    // Désactiver la gomme si elle est active
+    if (isEraserMode) stopEraserMode();
     // Recliqué sur le mode déjà actif → retour en dessin libre
     if (mode === currentDrawMode && mode !== 'free') mode = 'free';
     currentDrawMode = mode;
@@ -778,7 +780,19 @@ function toggleDrawToolbar() {
     if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
     initCanvas(); enableDrawing();
     setDrawMode('free');
-    if (tb) tb.style.display = 'block';
+    if (tb) {
+        tb.classList.remove('horizontal');
+        tb.style.width  = '';
+        tb.style.bottom = 'auto';
+        tb.style.right  = 'auto';
+        tb.style.display = 'block';
+        // Positionner à droite, centré verticalement
+        requestAnimationFrame(function() {
+            const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+            tb.style.left = (window.innerWidth - tb.offsetWidth - scrollbarW - 12) + 'px';
+            tb.style.top  = Math.max(10, (window.innerHeight - tb.offsetHeight) / 2) + 'px';
+        });
+    }
 }
 function enableDrawing() {
     isDrawMode = true;
@@ -795,13 +809,22 @@ function enableDrawing() {
 }
 
 function toggleFiguresSubmenu() {
+    // Désactiver la gomme si elle est active
+    if (isEraserMode) stopEraserMode();
     const sub = document.getElementById('figures-submenu');
     const btn = document.getElementById('draw-figures-btn');
     if (!sub) return;
     const isOpen = sub.classList.contains('open');
-    // Fermer le sous-menu géométrie (règle/équerre/compas) si on ouvre celui-ci
+    // Fermer le sous-menu géométrie compact si ouvert
+    const geoCompact = document.getElementById('geo-submenu-compact');
+    if (geoCompact) geoCompact.style.display = 'none';
     if (!isOpen && typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
     sub.classList.toggle('open');
+    sub.style.display = sub.classList.contains('open') ? 'flex' : 'none';
+    // Repositionner à côté de la draw-toolbar
+    if (sub.classList.contains('open') && typeof _positionSubmenuNextToDrawbar === 'function') {
+        requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+    }
     if (btn) {
         // Le bouton reste actif (surbrillance) si le sous-menu est ouvert OU si un mode figure est actif
         const figureActive = FIGURE_MODES.includes(currentDrawMode);
@@ -814,12 +837,15 @@ function toggleFiguresSubmenu() {
 }
 
 function toggleSelectMode() {
-    if (!isDrawMode) {
+    if (!isDrawMode && !isEraserMode) {
         // Déjà en mode sélection → repasser en dessin libre
         initCanvas(); enableDrawing();
         setDrawMode('free');
         return;
     }
+    // stopEraserMode remet isDrawMode=true et is-drawing → on appelle d'abord,
+    // puis on écrase ses effets pour finir proprement en mode sélection
+    stopEraserMode();
     // Passer en mode sélection : désactiver le dessin mais garder la toolbar
     isDrawMode = false;
     isPainting = false;
@@ -827,7 +853,6 @@ function toggleSelectMode() {
     board.classList.remove('is-drawing');
     board.classList.remove('is-segment-mode');
     clearDrawCursor();
-    stopEraserMode();
     // Fermer le sous-menu figures
     const figSub = document.getElementById('figures-submenu');
     if (figSub) figSub.classList.remove('open');
