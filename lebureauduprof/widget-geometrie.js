@@ -451,91 +451,14 @@ function rotatePoint(px, py, cx, cy, angle) {
 // ── RÈGLE ─────────────────────────────────────────────────────────────────
 function spawnRegle(board, cx, cy) {
     const W = 800, H = 60;
+    const BTN_H = 32; // hauteur de la bande de boutons sous la règle
+    const TOTAL_H = H + BTN_H;
     const UNIT = 40;
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - H/2}px; width:${W}px; height:${H}px;`;
-
-    // ── Barre de contrôle FIXE (body-level, toujours visible) ────────────
-    const BAR_W = 320;
-    const ctrlBar = document.createElement('div');
-    ctrlBar.style.cssText = `
-        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
-        display:flex; align-items:center; justify-content:center; gap:8px;
-        background:rgba(26,26,34,0.96); border-radius:10px;
-        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
-        pointer-events:auto; cursor:default;
-        box-shadow:0 4px 16px rgba(0,0,0,0.5);
-    `;
-
-    function repositionBar() {
-        const bRect  = board.getBoundingClientRect();
-        const ovLeft = parseFloat(overlay.style.left || 0);
-        const ovTop  = parseFloat(overlay.style.top  || 0);
-        const MARGIN = 8;
-        const centerX = bRect.left + ovLeft + W / 2;
-        let barLeft = centerX - BAR_W / 2;
-        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
-        const ovTopVP = bRect.top + ovTop;
-        // Par défaut : sous la règle
-        let barTop = ovTopVP + H + 8;
-        if (barTop + 44 > window.innerHeight - MARGIN) {
-            // Pas de place en bas : au-dessus
-            barTop = ovTopVP - 52;
-            if (barTop < MARGIN) barTop = MARGIN;
-        }
-        ctrlBar.style.left = barLeft + 'px';
-        ctrlBar.style.top  = barTop  + 'px';
-    }
-
-    // Bouton fermer
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = `position:relative; width:24px; height:24px; font-size:14px;
-        border-radius:50%; background:#e74c3c; color:#fff; border:none;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;`;
-    closeBtn.onmousedown = e => e.stopPropagation();
-    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
-    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
-
-    // Poignée rotation
-    const rotH = document.createElement('div');
-    rotH.className = 'geo-rot-handle';
-    rotH.textContent = '↻';
-    rotH.style.cssText = `position:relative; width:24px; height:24px; font-size:13px;
-        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-        box-shadow:0 2px 6px rgba(0,0,0,0.4);`;
-
-    // Bouton tracer
-    const traceBtn = document.createElement('button');
-    traceBtn.className = 'geo-trace-btn';
-    traceBtn.textContent = '✏️ Tracer la ligne';
-    traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
-    traceBtn.onclick = function (e) {
-        e.stopPropagation();
-        const t = getOverlayTransform(overlay);
-        const ox = parseFloat(overlay.style.left || 0);
-        const oy = parseFloat(overlay.style.top  || 0);
-        // Tracer le bord supérieur de la règle (y = oy)
-        const p1 = rotatePoint(ox,     oy, t.cx, t.cy, t.angle);
-        const p2 = rotatePoint(ox + W, oy, t.cx, t.cy, t.angle);
-        const pts = [];
-        const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
-        for (let i = 0; i <= steps; i++) {
-            pts.push({ x: p1.x + (p2.x - p1.x) * i / steps,
-                       y: p1.y + (p2.y - p1.y) * i / steps });
-        }
-        traceOnCanvas([pts]);
-    };
-    addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
-
-    ctrlBar.appendChild(closeBtn);
-    ctrlBar.appendChild(rotH);
-    ctrlBar.appendChild(traceBtn);
+    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - TOTAL_H/2}px; width:${W}px; height:${TOTAL_H}px;`;
 
     // ── SVG règle ──
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -576,12 +499,69 @@ function spawnRegle(board, cx, cy) {
         }
     }
 
-    overlay.appendChild(svg);
-    board.appendChild(overlay);
-    document.body.appendChild(ctrlBar);
+    // ── Bande de boutons intégrée SOUS la règle ───────────────────────────
+    const btnBar = document.createElement('div');
+    btnBar.style.cssText = `
+        position:absolute; top:${H}px; left:0; width:${W}px; height:${BTN_H}px;
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        background:rgba(26,26,34,0.82); border-radius:0 0 8px 8px;
+        border:1px solid #554466; border-top:none;
+        box-sizing:border-box; padding:0 8px;
+        pointer-events:auto;
+    `;
 
-    repositionBar();
-    makeDraggableGeo(overlay, repositionBar);
+    // Bouton fermer
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'geo-close-tool';
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = `position:relative; width:20px; height:20px; font-size:13px;
+        border-radius:50%; background:#e74c3c; color:#fff; border:none;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;`;
+    closeBtn.onmousedown = e => e.stopPropagation();
+    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); };
+    addTouchClick(closeBtn, () => { overlay.remove(); });
+
+    // Poignée rotation
+    const rotH = document.createElement('div');
+    rotH.className = 'geo-rot-handle';
+    rotH.textContent = '↻';
+    rotH.style.cssText = `position:relative; width:22px; height:22px; font-size:12px;
+        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);`;
+
+    // Bouton tracer
+    const traceBtn = document.createElement('button');
+    traceBtn.className = 'geo-trace-btn';
+    traceBtn.textContent = '✏️ Tracer la ligne';
+    traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0; font-size:11px; padding:3px 8px;';
+    traceBtn.onclick = function (e) {
+        e.stopPropagation();
+        const t = getOverlayTransform(overlay);
+        const ox = parseFloat(overlay.style.left || 0);
+        const oy = parseFloat(overlay.style.top  || 0);
+        // Tracer le bord supérieur de la règle (y = oy)
+        const p1 = rotatePoint(ox,     oy, t.cx, t.cy, t.angle);
+        const p2 = rotatePoint(ox + W, oy, t.cx, t.cy, t.angle);
+        const pts = [];
+        const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
+        for (let i = 0; i <= steps; i++) {
+            pts.push({ x: p1.x + (p2.x - p1.x) * i / steps,
+                       y: p1.y + (p2.y - p1.y) * i / steps });
+        }
+        traceOnCanvas([pts]);
+    };
+    addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
+
+    btnBar.appendChild(closeBtn);
+    btnBar.appendChild(rotH);
+    btnBar.appendChild(traceBtn);
+
+    overlay.appendChild(svg);
+    overlay.appendChild(btnBar);
+    board.appendChild(overlay);
+
+    makeDraggableGeo(overlay, null);
     makeRotatableGeo(overlay, rotH);
 }
 
@@ -596,104 +576,13 @@ function spawnEquerre(board, cx, cy) {
     overlay.dataset.angle = '0';
     overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - OVH/2}px; width:${OVW}px; height:${OVH}px;`;
 
-    // ── Barre de contrôle FIXE (body-level, toujours visible) ────────────
-    const BAR_W = 400;
-    const ctrlBar = document.createElement('div');
-    ctrlBar.style.cssText = `
-        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
-        display:flex; align-items:center; justify-content:center; gap:8px;
-        background:rgba(26,26,34,0.96); border-radius:10px;
-        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
-        pointer-events:auto; cursor:default;
-        box-shadow:0 4px 16px rgba(0,0,0,0.5);
-    `;
-
-    function repositionBar() {
-        const bRect  = board.getBoundingClientRect();
-        const ovLeft = parseFloat(overlay.style.left || 0);
-        const ovTop  = parseFloat(overlay.style.top  || 0);
-        const MARGIN = 8;
-        const centerX = bRect.left + ovLeft + OVW / 2;
-        let barLeft = centerX - BAR_W / 2;
-        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
-        const ovTopVP = bRect.top + ovTop;
-        let barTop = ovTopVP - 52;
-        if (barTop < MARGIN) {
-            barTop = ovTopVP + OVH + 8;
-            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
-        }
-        ctrlBar.style.left = barLeft + 'px';
-        ctrlBar.style.top  = barTop  + 'px';
-    }
-
-    // Bouton fermer
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = `position:relative; width:24px; height:24px; font-size:14px;
-        border-radius:50%; background:#e74c3c; color:#fff; border:none;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;`;
-    closeBtn.onmousedown = e => e.stopPropagation();
-    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
-    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
-
-    // Poignée rotation
-    const rotH = document.createElement('div');
-    rotH.className = 'geo-rot-handle';
-    rotH.textContent = '↻';
-    rotH.style.cssText = `position:relative; width:24px; height:24px; font-size:13px;
-        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-        box-shadow:0 2px 6px rgba(0,0,0,0.4);`;
-
-    // Boutons tracer
-    function makeTraceBtn(label, drawFn) {
-        const b = document.createElement('button');
-        b.className = 'geo-trace-btn';
-        b.textContent = label;
-        b.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
-        b.onclick = e => { e.stopPropagation(); drawFn(); };
-        addTouchClick(b, drawFn);
-        return b;
-    }
-
-    function makeLine(ax, ay, bx, by) {
-        const t = getOverlayTransform(overlay);
-        const p1 = rotatePoint(ax, ay, t.cx, t.cy, t.angle);
-        const p2 = rotatePoint(bx, by, t.cx, t.cy, t.angle);
-        const pts = [];
-        const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
-        for (let i = 0; i <= steps; i++) {
-            pts.push({ x: p1.x + (p2.x - p1.x) * i / steps,
-                       y: p1.y + (p2.y - p1.y) * i / steps });
-        }
-        return pts;
-    }
-
-    const OX = 15, OY = H + 5;
-    const ox = () => parseFloat(overlay.style.left || 0);
-    const oy = () => parseFloat(overlay.style.top  || 0);
-
-    ctrlBar.appendChild(closeBtn);
-    ctrlBar.appendChild(rotH);
-    ctrlBar.appendChild(makeTraceBtn('✏️ Base', () => {
-        traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY)]);
-    }));
-    ctrlBar.appendChild(makeTraceBtn('✏️ Côté', () => {
-        traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX, oy() + OY - CAT)]);
-    }));
-    ctrlBar.appendChild(makeTraceBtn('📐 Angle droit', () => {
-        traceOnCanvas([
-            makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY),
-            makeLine(ox() + OX, oy() + OY, ox() + OX,       oy() + OY - CAT)
-        ]);
-    }));
-
     // ── SVG équerre ──
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', OVW);
     svg.setAttribute('height', OVH);
     svg.style.cssText = 'display:block; position:absolute; top:0; left:0; pointer-events:none;';
+
+    const OX = 15, OY = H + 5;
 
     const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
     poly.setAttribute('points', `${OX},${OY} ${OX + CAT},${OY} ${OX},${OY - CAT}`);
@@ -719,12 +608,89 @@ function spawnEquerre(board, cx, cy) {
     addAngle(OX + 12,       OY - CAT + 46, '45°');
     addAngle(OX + 18,       OY - 18,       '90°');
 
-    overlay.appendChild(svg);
-    board.appendChild(overlay);
-    document.body.appendChild(ctrlBar);
+    // ── Boutons intégrés dans l'équerre ──────────────────────────────────────
+    // Fermer + Rotation : colonne verticale dans le coin haut gauche du triangle
+    //   sous le label 45° du haut (OX+12, OY-CAT+46) → on part de y≈OY-CAT+60
+    // Boutons tracer : ligne horizontale le long de la base, à l'intérieur
 
-    repositionBar();
-    makeDraggableGeo(overlay, repositionBar);
+    // Bouton fermer — dans le triangle, sous le 45° du haut
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'geo-close-tool';
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = `position:absolute; left:${OX + 20}px; top:${OY - CAT + 60}px;
+        width:22px; height:22px; font-size:13px;
+        border-radius:50%; background:#e74c3c; color:#fff; border:none;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 4px rgba(0,0,0,0.4); z-index:4;`;
+    closeBtn.onmousedown = e => e.stopPropagation();
+    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); };
+    addTouchClick(closeBtn, () => { overlay.remove(); });
+
+    // Poignée rotation — juste sous le bouton fermer
+    const rotH = document.createElement('div');
+    rotH.className = 'geo-rot-handle';
+    rotH.textContent = '↻';
+    rotH.style.cssText = `position:absolute; left:${OX + 18}px; top:${OY - CAT + 88}px;
+        width:26px; height:26px; font-size:13px;
+        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 6px rgba(0,0,0,0.5); z-index:4;`;
+
+    // Boutons tracer — ligne horizontale le long de la base, à l'intérieur
+    const traceBtnBar = document.createElement('div');
+    traceBtnBar.style.cssText = `
+        position:absolute; left:${OX + 30}px; top:${OY - 26}px;
+        display:flex; align-items:center; gap:6px;
+        pointer-events:auto; z-index:4;
+    `;
+
+    function makeTraceBtnInline(label, drawFn) {
+        const b = document.createElement('button');
+        b.className = 'geo-trace-btn';
+        b.textContent = label;
+        b.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0; font-size:10px; padding:3px 7px;';
+        b.onmousedown = e => e.stopPropagation();
+        b.onclick = e => { e.stopPropagation(); drawFn(); };
+        addTouchClick(b, drawFn);
+        return b;
+    }
+
+    function makeLine(ax, ay, bx, by) {
+        const t = getOverlayTransform(overlay);
+        const p1 = rotatePoint(ax, ay, t.cx, t.cy, t.angle);
+        const p2 = rotatePoint(bx, by, t.cx, t.cy, t.angle);
+        const pts = [];
+        const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
+        for (let i = 0; i <= steps; i++) {
+            pts.push({ x: p1.x + (p2.x - p1.x) * i / steps,
+                       y: p1.y + (p2.y - p1.y) * i / steps });
+        }
+        return pts;
+    }
+
+    const ox = () => parseFloat(overlay.style.left || 0);
+    const oy = () => parseFloat(overlay.style.top  || 0);
+
+    traceBtnBar.appendChild(makeTraceBtnInline('✏️ Base', () => {
+        traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY)]);
+    }));
+    traceBtnBar.appendChild(makeTraceBtnInline('✏️ Côté', () => {
+        traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX, oy() + OY - CAT)]);
+    }));
+    traceBtnBar.appendChild(makeTraceBtnInline('📐 Angle droit', () => {
+        traceOnCanvas([
+            makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY),
+            makeLine(ox() + OX, oy() + OY, ox() + OX,       oy() + OY - CAT)
+        ]);
+    }));
+
+    overlay.appendChild(svg);
+    overlay.appendChild(closeBtn);
+    overlay.appendChild(rotH);
+    overlay.appendChild(traceBtnBar);
+    board.appendChild(overlay);
+
+    makeDraggableGeo(overlay, null);
     makeRotatableGeo(overlay, rotH);
 }
 
