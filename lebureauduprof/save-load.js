@@ -14,6 +14,19 @@ function getInnerHTMLNormalized(widget) {
         if (m) clone.style.fontSize = (parseFloat(m[1]) * factor) + 'px';
     }
     const agendaList = clone.querySelector('.agenda-list');
+    if (agendaList) {
+        // Nettoyer les <hr> corrompus avant sauvegarde
+        agendaList.querySelectorAll('.agenda-time, .agenda-text').forEach(el => {
+            const hrs = el.querySelectorAll('hr');
+            if (hrs.length > 0) {
+                const isTime = el.classList.contains('agenda-time');
+                hrs.forEach(hr => hr.remove());
+                if (!el.textContent.trim()) {
+                    el.textContent = isTime ? '─────' : '───────────';
+                }
+            }
+        });
+    }
     const content    = clone.querySelector('.editor-content');
     return agendaList ? agendaList.innerHTML : (content ? content.innerHTML : null);
 }
@@ -347,7 +360,22 @@ function restoreBoardFromJSON(json) {
             const agenda = widget.querySelector('.agenda-list');
             const htmlContent = w.html ?? w.content ?? null;
             if (htmlContent) {
-                if (agenda) { agenda.innerHTML = htmlContent; agenda.querySelectorAll('.agenda-item').forEach(attachAgendaItemEvents); }
+                if (agenda) {
+                    agenda.innerHTML = htmlContent;
+                    // Nettoyer les <hr> injectés par le navigateur dans les contenteditable
+                    // (les tirets "-----" sont parfois parsés en <hr> lors de la sérialisation)
+                    agenda.querySelectorAll('.agenda-time, .agenda-text').forEach(el => {
+                        const hrs = el.querySelectorAll('hr');
+                        if (hrs.length > 0) {
+                            const isTime = el.classList.contains('agenda-time');
+                            hrs.forEach(hr => hr.remove());
+                            if (!el.textContent.trim()) {
+                                el.textContent = isTime ? '─────' : '───────────';
+                            }
+                        }
+                    });
+                    agenda.querySelectorAll('.agenda-item').forEach(attachAgendaItemEvents);
+                }
                 else if (editor) { editor.innerHTML = htmlContent; }
             }
             const iframe = widget.querySelector('iframe');
