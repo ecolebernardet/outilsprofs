@@ -189,11 +189,11 @@ window.toggleGeoToolbar = function () {
 };
 window.closeGeoToolbar = function () {
     bar.classList.remove('open');
-    // Réinitialiser le bouton dans la barre dessin
     const btn = document.getElementById('geo-draw-btn');
     if (btn) {
         btn.style.background = '#2a2a36';
         btn.style.borderColor = '#555';
+        btn.classList.remove('btn-mode-active');
     }
 };
 
@@ -206,21 +206,25 @@ window.toggleGeoFromDrawBar = function () {
     const isOpen = bar.classList.contains('open');
     if (isOpen) {
         bar.classList.remove('open');
-        if (btn) { btn.style.background = '#2a2a36'; btn.style.borderColor = '#555'; }
+        if (btn) { btn.style.background = '#2a2a36'; btn.style.borderColor = '#555'; btn.classList.remove('btn-mode-active'); }
     } else {
         // Fermer le sous-menu figures géométriques avant d'ouvrir celui-ci
         const figSub = document.getElementById('figures-submenu');
         if (figSub) figSub.classList.remove('open');
-        const figBtn = document.getElementById('draw-figures-btn');
-        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
-        // Désactiver le bouton sélection
-        const selBtn = document.getElementById('draw-select-btn');
-        if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
-        // Désactiver le bouton dessin libre
-        const freeBtn = document.getElementById('draw-free-btn');
-        if (freeBtn) { freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa'; }
+        if (typeof _setBtnActive === 'function') {
+            _setBtnActive('draw-figures-btn', false, 'figures');
+            _setBtnActive('draw-select-btn', false);
+            _setBtnActive('draw-free-btn', false);
+        } else {
+            const figBtn = document.getElementById('draw-figures-btn');
+            if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+            const selBtn = document.getElementById('draw-select-btn');
+            if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+            const freeBtn = document.getElementById('draw-free-btn');
+            if (freeBtn) { freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa'; }
+        }
         bar.classList.add('open');
-        if (btn) { btn.style.background = '#1a2a4a'; btn.style.borderColor = '#a78bfa'; }
+        if (btn) { btn.style.background = '#1a2a4a'; btn.style.borderColor = '#a78bfa'; btn.classList.add('btn-mode-active'); }
     }
 };
 
@@ -475,10 +479,12 @@ function spawnRegle(board, cx, cy) {
         let barLeft = centerX - BAR_W / 2;
         barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
         const ovTopVP = bRect.top + ovTop;
-        let barTop = ovTopVP - 52;
-        if (barTop < MARGIN) {
-            barTop = ovTopVP + H + 8;
-            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
+        // Par défaut : sous la règle
+        let barTop = ovTopVP + H + 8;
+        if (barTop + 44 > window.innerHeight - MARGIN) {
+            // Pas de place en bas : au-dessus
+            barTop = ovTopVP - 52;
+            if (barTop < MARGIN) barTop = MARGIN;
         }
         ctrlBar.style.left = barLeft + 'px';
         ctrlBar.style.top  = barTop  + 'px';

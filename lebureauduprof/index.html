@@ -730,6 +730,15 @@
 		body.menu-light #draw-toolbar button[title="Effacer tout"] { background: #fde8e8 !important; border-color: #e8a0a0 !important; color: #c0392b !important; }
 		body.menu-light #draw-toolbar button[title="Fermer"],
 		body.menu-light #shape-toolbar button[title="Fermer"] { background: #e8e8ea !important; border-color: #bbb !important; color: #666 !important; }
+		/* ── États actifs des boutons de mode en mode clair ── */
+		body.menu-light #draw-free-btn.btn-mode-active,
+		body.menu-light #draw-select-btn.btn-mode-active,
+		body.menu-light #draw-figures-btn.btn-mode-active {
+			background: #cce0f8 !important; border-color: #4a90e2 !important; color: #1a5a9a !important;
+		}
+		body.menu-light #geo-draw-btn.btn-mode-active {
+			background: #e8e0ff !important; border-color: #a78bfa !important; color: #5b21b6 !important;
+		}
 		/* ── Thème figures-submenu + geo-submenu (suit menu-light) ── */
 		body.menu-light #figures-submenu,
 		body.menu-light #geo-submenu {
@@ -2842,18 +2851,18 @@ function _toggleGeoCompactSubmenu() {
     if (figSub) { figSub.style.display = 'none'; figSub.classList.remove('open'); }
     if (isOpen) {
         sub.style.display = 'none';
-        if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; }
+        if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; btn.classList.remove('btn-mode-active'); }
     } else {
         sub.style.display = 'flex';
         requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
-        if (btn) { btn.style.borderColor = '#a78bfa'; btn.style.background = '#1a1030'; btn.style.color = '#c4b5fd'; }
+        if (btn) { btn.style.borderColor = '#a78bfa'; btn.style.background = '#1a1030'; btn.style.color = '#c4b5fd'; btn.classList.add('btn-mode-active'); }
     }
 }
 function _closeGeoSubmenu() {
     const sub = document.getElementById('geo-submenu');
     const btn = document.getElementById('geo-draw-btn');
     if (sub) sub.style.display = 'none';
-    if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; }
+    if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; btn.classList.remove('btn-mode-active'); }
 }
 // Fermer le sous-menu géo quand on clique ailleurs
 document.addEventListener('mousedown', function(e) {

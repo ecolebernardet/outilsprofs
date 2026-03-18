@@ -5,6 +5,24 @@ var drawCanvas = null, drawCtx = null, isPainting = false, isDrawMode = false;
 var drawCanvasTop = null, drawCtxTop = null; // canvas de premier plan pour strokes épinglés
 var strokes = [], currentStroke = null;
 
+// ── Helper : active/désactive un bouton de mode (styles inline + classe CSS pour le thème clair) ──
+function _setBtnActive(id, active, colorScheme) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    if (colorScheme === 'figures') {
+        // Bouton figures : bleu doux
+        btn.style.borderColor = active ? '#4a90e2' : '#444';
+        btn.style.background  = active ? '#1a2a4a' : '#2a2a2e';
+        btn.style.color       = active ? '#7ab8f5' : '#aaa';
+    } else {
+        // Bouton standard (dessin libre, sélection)
+        btn.style.borderColor = active ? '#4a90e2' : '#444';
+        btn.style.background  = active ? '#1a3550' : '#2a2a2e';
+        btn.style.color       = active ? '#fff'    : '#aaa';
+    }
+    btn.classList.toggle('btn-mode-active', active);
+}
+
 // Génère et applique un curseur SVG : point de la couleur courante + cercle gris r=8
 function updateDrawCursor() {
     if (!isDrawMode || !board) return;
@@ -760,17 +778,16 @@ function setDrawMode(mode) {
     const freeBtn = document.getElementById('draw-free-btn');
     if (freeBtn) {
         if (mode === 'free') {
-            freeBtn.style.borderColor = '#4a90e2'; freeBtn.style.background = '#1a3550'; freeBtn.style.color = '#fff';
+            _setBtnActive('draw-free-btn', true);
         } else {
-            freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa';
+            _setBtnActive('draw-free-btn', false);
         }
     }
     // Fermer le sous-menu figures si on choisit un mode non-figure (sauf si on choisit une figure)
     if (!FIGURE_MODES.includes(mode)) {
         const figSub = document.getElementById('figures-submenu');
         if (figSub) figSub.classList.remove('open');
-        const figBtn = document.getElementById('draw-figures-btn');
-        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+        _setBtnActive('draw-figures-btn', false, 'figures');
     }
     // Boutons de modes figure
     FIGURE_MODES.forEach(m => {
@@ -817,14 +834,12 @@ function setDrawMode(mode) {
         if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
     }
     // Désactiver le bouton sélection
-    const selBtn = document.getElementById('draw-select-btn');
-    if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+    _setBtnActive('draw-select-btn', false);
     // Si mode libre, fermer les deux sous-menus
     if (mode === 'free') {
         const figSub = document.getElementById('figures-submenu');
         if (figSub) figSub.classList.remove('open');
-        const figBtn = document.getElementById('draw-figures-btn');
-        if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+        _setBtnActive('draw-figures-btn', false, 'figures');
         if (typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
     }
 }
@@ -857,11 +872,9 @@ function enableDrawing() {
     updateDrawCursor();
     clearSelection();
     // Mettre à jour l'apparence du bouton sélection
-    const selBtn = document.getElementById('draw-select-btn');
-    if (selBtn) { selBtn.style.borderColor = '#444'; selBtn.style.background = '#2a2a2e'; selBtn.style.color = '#aaa'; }
+    _setBtnActive('draw-select-btn', false);
     // Réinitialiser le bouton figures
-    const figBtn = document.getElementById('draw-figures-btn');
-    if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
+    _setBtnActive('draw-figures-btn', false, 'figures');
 }
 
 function toggleFiguresSubmenu() {
@@ -884,11 +897,7 @@ function toggleFiguresSubmenu() {
     if (btn) {
         // Le bouton reste actif (surbrillance) si le sous-menu est ouvert OU si un mode figure est actif
         const figureActive = FIGURE_MODES.includes(currentDrawMode);
-        if (!isOpen || figureActive) {
-            btn.style.borderColor = '#4a90e2'; btn.style.background = '#1a2a4a'; btn.style.color = '#7ab8f5';
-        } else {
-            btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa';
-        }
+        _setBtnActive('draw-figures-btn', !isOpen || figureActive, 'figures');
     }
 }
 
@@ -919,12 +928,9 @@ function toggleSelectMode() {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
         if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
     });
-    const figBtn = document.getElementById('draw-figures-btn');
-    if (figBtn) { figBtn.style.borderColor = '#444'; figBtn.style.background = '#2a2a2e'; figBtn.style.color = '#aaa'; }
-    const freeBtn = document.getElementById('draw-free-btn');
-    if (freeBtn) { freeBtn.style.borderColor = '#444'; freeBtn.style.background = '#2a2a2e'; freeBtn.style.color = '#aaa'; }
-    const selBtn = document.getElementById('draw-select-btn');
-    if (selBtn) { selBtn.style.borderColor = '#4a90e2'; selBtn.style.background = '#1a3550'; selBtn.style.color = '#fff'; }
+    _setBtnActive('draw-figures-btn', false, 'figures');
+    _setBtnActive('draw-free-btn', false);
+    _setBtnActive('draw-select-btn', true);
 }
 function stopDrawing() {
     isDrawMode = false;
