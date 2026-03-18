@@ -297,7 +297,7 @@ window.geoSpawnTool = function (type) {
 };
 
 // ── Helpers drag + rotate ────────────────────────────────────────────────
-function makeDraggableGeo(overlay) {
+function makeDraggableGeo(overlay, onDragEnd) {
     function startGeoDrag(clientX, clientY) {
         const board   = overlay.parentElement;
         const bRect   = board.getBoundingClientRect();
@@ -311,6 +311,7 @@ function makeDraggableGeo(overlay) {
             const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
             overlay.style.left = (cx - bRect.left - startX) + 'px';
             overlay.style.top  = (cy - bRect.top  - startY) + 'px';
+            if (onDragEnd) onDragEnd(); // repositionne la barre en temps réel
         }
         function onEnd() {
             overlay.style.cursor = 'move';
@@ -318,6 +319,7 @@ function makeDraggableGeo(overlay) {
             document.removeEventListener('mouseup',   onEnd);
             document.removeEventListener('touchmove', onMove);
             document.removeEventListener('touchend',  onEnd);
+            if (onDragEnd) onDragEnd();
         }
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup',   onEnd);
@@ -444,46 +446,77 @@ function rotatePoint(px, py, cx, cy, angle) {
 
 // ── RÈGLE ─────────────────────────────────────────────────────────────────
 function spawnRegle(board, cx, cy) {
-    const W = 800, H = 60; // 20 unités à 40px/unité
-    const UNIT = 40;       // 1 unité = 40 px
-    const HALF = UNIT / 2; // demi-unité = 20 px
-    const BTN_H = 28;      // hauteur de la barre de boutons au-dessus
+    const W = 800, H = 60;
+    const UNIT = 40;
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - H/2}px; width:${W}px; height:${BTN_H + H + 34}px;`;
+    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - H/2}px; width:${W}px; height:${H}px;`;
 
-    // ── Barre du haut : uniquement le bouton fermer ──
-    const btnBar = document.createElement('div');
-    btnBar.style.cssText = `position:absolute; top:0; left:0; width:100%; height:${BTN_H}px;
-        display:flex; align-items:center; justify-content:flex-end; padding-right:4px; box-sizing:border-box; pointer-events:auto; cursor:default;`;
+    // ── Barre de contrôle FIXE (body-level, toujours visible) ────────────
+    const BAR_W = 320;
+    const ctrlBar = document.createElement('div');
+    ctrlBar.style.cssText = `
+        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        background:rgba(26,26,34,0.96); border-radius:10px;
+        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
+        pointer-events:auto; cursor:default;
+        box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    `;
 
+    function repositionBar() {
+        const bRect  = board.getBoundingClientRect();
+        const ovLeft = parseFloat(overlay.style.left || 0);
+        const ovTop  = parseFloat(overlay.style.top  || 0);
+        const MARGIN = 8;
+        const centerX = bRect.left + ovLeft + W / 2;
+        let barLeft = centerX - BAR_W / 2;
+        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
+        const ovTopVP = bRect.top + ovTop;
+        let barTop = ovTopVP - 52;
+        if (barTop < MARGIN) {
+            barTop = ovTopVP + H + 8;
+            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
+        }
+        ctrlBar.style.left = barLeft + 'px';
+        ctrlBar.style.top  = barTop  + 'px';
+    }
+
+    // Bouton fermer
     const closeBtn = document.createElement('button');
     closeBtn.className = 'geo-close-tool';
     closeBtn.textContent = '×';
-    closeBtn.style.position = 'relative';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.setProperty('cursor', 'pointer', 'important');
-    closeBtn.onmousedown = e => { e.stopPropagation(); };
-    closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
-    addTouchClick(closeBtn, () => overlay.remove());
+    closeBtn.style.cssText = `position:relative; width:24px; height:24px; font-size:14px;
+        border-radius:50%; background:#e74c3c; color:#fff; border:none;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;`;
+    closeBtn.onmousedown = e => e.stopPropagation();
+    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
+    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
 
-    btnBar.appendChild(closeBtn);
+    // Poignée rotation
+    const rotH = document.createElement('div');
+    rotH.className = 'geo-rot-handle';
+    rotH.textContent = '↻';
+    rotH.style.cssText = `position:relative; width:24px; height:24px; font-size:13px;
+        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);`;
 
-    // ── Bouton tracer SOUS la règle ──
+    // Bouton tracer
     const traceBtn = document.createElement('button');
     traceBtn.className = 'geo-trace-btn';
-    traceBtn.textContent = '✏️ Tracer';
-    traceBtn.style.cssText = `position:absolute; top:${BTN_H + H + 6}px; left:50%; transform:translateX(-50%); cursor:pointer !important;`;
+    traceBtn.textContent = '✏️ Tracer la ligne';
+    traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
     traceBtn.onclick = function (e) {
         e.stopPropagation();
         const t = getOverlayTransform(overlay);
         const ox = parseFloat(overlay.style.left || 0);
         const oy = parseFloat(overlay.style.top  || 0);
-        const svgTop = oy + BTN_H;
-        const p1 = rotatePoint(ox,     svgTop, t.cx, t.cy, t.angle);
-        const p2 = rotatePoint(ox + W, svgTop, t.cx, t.cy, t.angle);
+        // Tracer le bord supérieur de la règle (y = oy)
+        const p1 = rotatePoint(ox,     oy, t.cx, t.cy, t.angle);
+        const p2 = rotatePoint(ox + W, oy, t.cx, t.cy, t.angle);
         const pts = [];
         const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
         for (let i = 0; i <= steps; i++) {
@@ -494,17 +527,16 @@ function spawnRegle(board, cx, cy) {
     };
     addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
-    // ── SVG règle (en dessous de la barre) ──
-    const svgWrap = document.createElement('div');
-    svgWrap.style.cssText = `position:absolute; top:${BTN_H}px; left:0;`;
+    ctrlBar.appendChild(closeBtn);
+    ctrlBar.appendChild(rotH);
+    ctrlBar.appendChild(traceBtn);
 
+    // ── SVG règle ──
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', W);
     svg.setAttribute('height', H);
-    svg.style.display = 'block';
-    svg.style.pointerEvents = 'none';
+    svg.style.cssText = 'display:block; position:absolute; top:0; left:0; pointer-events:none;';
 
-    // Corps
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('x', 0); rect.setAttribute('y', 0);
     rect.setAttribute('width', W); rect.setAttribute('height', H);
@@ -513,14 +545,13 @@ function spawnRegle(board, cx, cy) {
     rect.setAttribute('stroke', '#b8860b'); rect.setAttribute('stroke-width', '1.5');
     svg.appendChild(rect);
 
-    // Graduations — 0 à 20 unités, 1 unité = 40px, demi à 20px, dixièmes à 4px
-    const TENTH = UNIT / 10; // = 4px
-    const totalTenths = W / TENTH; // = 200
+    const TENTH = UNIT / 10;
+    const totalTenths = W / TENTH;
     for (let t10 = 0; t10 <= totalTenths; t10++) {
         const x = t10 * TENTH;
-        const isUnit  = t10 % 10 === 0;
-        const isHalf  = t10 % 5  === 0 && !isUnit;
-        const tickH   = isUnit ? 22 : (isHalf ? 13 : 7);
+        const isUnit = t10 % 10 === 0;
+        const isHalf = t10 % 5  === 0 && !isUnit;
+        const tickH  = isUnit ? 22 : (isHalf ? 13 : 7);
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', x); line.setAttribute('y1', 0);
         line.setAttribute('x2', x); line.setAttribute('y2', tickH);
@@ -538,100 +569,83 @@ function spawnRegle(board, cx, cy) {
             svg.appendChild(txt);
         }
     }
-    svgWrap.appendChild(svg);
 
-    // ── Poignée rotation sur le bord DROIT de la règle ──
-    const rotH = document.createElement('div');
-    rotH.className = 'geo-rot-handle';
-    rotH.textContent = '↻';
-    rotH.style.cssText = `position:absolute; top:${BTN_H + H/2 - 10}px; right:-10px; cursor:pointer !important;`;
-
-    overlay.appendChild(btnBar);
-    overlay.appendChild(svgWrap);
-    overlay.appendChild(traceBtn);
-    overlay.appendChild(rotH);
+    overlay.appendChild(svg);
     board.appendChild(overlay);
+    document.body.appendChild(ctrlBar);
 
-    makeDraggableGeo(overlay);
+    repositionBar();
+    makeDraggableGeo(overlay, repositionBar);
     makeRotatableGeo(overlay, rotH);
 }
 
 // ── ÉQUERRE ───────────────────────────────────────────────────────────────
 function spawnEquerre(board, cx, cy) {
-    // Équerre 45/45/90 — cathètes de 200px chacune
     const CAT = 300;
     const W = CAT + 20, H = CAT + 20;
+    const OVW = W + 40, OVH = H + 40;
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - H/2}px; width:${W + 40}px; height:${H + 40}px;`;
+    overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - OVH/2}px; width:${OVW}px; height:${OVH}px;`;
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', W + 40);
-    svg.setAttribute('height', H + 40);
-    svg.style.cssText = 'display:block; pointer-events:none;';
+    // ── Barre de contrôle FIXE (body-level, toujours visible) ────────────
+    const BAR_W = 400;
+    const ctrlBar = document.createElement('div');
+    ctrlBar.style.cssText = `
+        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        background:rgba(26,26,34,0.96); border-radius:10px;
+        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
+        pointer-events:auto; cursor:default;
+        box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    `;
 
-    const OX = 15, OY = H + 5; // origine (angle droit) en bas à gauche
+    function repositionBar() {
+        const bRect  = board.getBoundingClientRect();
+        const ovLeft = parseFloat(overlay.style.left || 0);
+        const ovTop  = parseFloat(overlay.style.top  || 0);
+        const MARGIN = 8;
+        const centerX = bRect.left + ovLeft + OVW / 2;
+        let barLeft = centerX - BAR_W / 2;
+        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
+        const ovTopVP = bRect.top + ovTop;
+        let barTop = ovTopVP - 52;
+        if (barTop < MARGIN) {
+            barTop = ovTopVP + OVH + 8;
+            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
+        }
+        ctrlBar.style.left = barLeft + 'px';
+        ctrlBar.style.top  = barTop  + 'px';
+    }
 
-    // Corps de l'équerre (triangle)
-    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-    poly.setAttribute('points', `${OX},${OY} ${OX + CAT},${OY} ${OX},${OY - CAT}`);
-    poly.setAttribute('fill', 'rgba(180,230,255,0.88)');
-    poly.setAttribute('stroke', '#1a6eab'); poly.setAttribute('stroke-width', '2');
-    poly.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(poly);
-
-    // Symbole angle droit
-    const sq = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    sq.setAttribute('points', `${OX + 14},${OY} ${OX + 14},${OY - 14} ${OX},${OY - 14}`);
-    sq.setAttribute('fill', 'none');
-    sq.setAttribute('stroke', '#1a6eab'); sq.setAttribute('stroke-width', '1.5');
-    svg.appendChild(sq);
-
-    // Angles
-    const ang1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ang1.setAttribute('x', OX + CAT - 52); ang1.setAttribute('y', OY - 10);
-    ang1.setAttribute('font-size', '11'); ang1.setAttribute('fill', '#1a6eab');
-    ang1.setAttribute('font-weight', 'bold');
-    ang1.textContent = '45°'; svg.appendChild(ang1);
-
-    const ang2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ang2.setAttribute('x', OX + 12); ang2.setAttribute('y', OY - CAT + 46);
-    ang2.setAttribute('font-size', '11'); ang2.setAttribute('fill', '#1a6eab');
-    ang2.setAttribute('font-weight', 'bold');
-    ang2.textContent = '45°'; svg.appendChild(ang2);
-
-    const ang3 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ang3.setAttribute('x', OX + 18); ang3.setAttribute('y', OY - 18);
-    ang3.setAttribute('font-size', '11'); ang3.setAttribute('fill', '#1a6eab');
-    ang3.setAttribute('font-weight', 'bold');
-    ang3.textContent = '90°'; svg.appendChild(ang3);
+    // Bouton fermer
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'geo-close-tool';
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = `position:relative; width:24px; height:24px; font-size:14px;
+        border-radius:50%; background:#e74c3c; color:#fff; border:none;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;`;
+    closeBtn.onmousedown = e => e.stopPropagation();
+    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
+    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
 
     // Poignée rotation
     const rotH = document.createElement('div');
     rotH.className = 'geo-rot-handle';
     rotH.textContent = '↻';
-    rotH.style.cssText = `bottom: 0px; right: 0px; cursor:pointer !important;`;
-
-    // Bouton fermer — à gauche du bouton rotation
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = 'position:absolute; bottom:0px; right:28px; cursor:pointer !important;';
-    closeBtn.onmousedown = e => { e.stopPropagation(); };
-    closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
-    addTouchClick(closeBtn, () => overlay.remove());
+    rotH.style.cssText = `position:relative; width:24px; height:24px; font-size:13px;
+        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);`;
 
     // Boutons tracer
-    const traceWrap = document.createElement('div');
-    traceWrap.style.cssText = 'position:absolute; bottom:-30px; left:0; display:flex; gap:6px; cursor:default;';
-
     function makeTraceBtn(label, drawFn) {
         const b = document.createElement('button');
         b.className = 'geo-trace-btn';
         b.textContent = label;
-        b.style.setProperty('cursor', 'pointer', 'important');
+        b.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
         b.onclick = e => { e.stopPropagation(); drawFn(); };
         addTouchClick(b, drawFn);
         return b;
@@ -650,32 +664,61 @@ function spawnEquerre(board, cx, cy) {
         return pts;
     }
 
+    const OX = 15, OY = H + 5;
     const ox = () => parseFloat(overlay.style.left || 0);
     const oy = () => parseFloat(overlay.style.top  || 0);
 
-    traceWrap.appendChild(makeTraceBtn('✏️ Base', () => {
+    ctrlBar.appendChild(closeBtn);
+    ctrlBar.appendChild(rotH);
+    ctrlBar.appendChild(makeTraceBtn('✏️ Base', () => {
         traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY)]);
     }));
-
-    traceWrap.appendChild(makeTraceBtn('✏️ Côté', () => {
+    ctrlBar.appendChild(makeTraceBtn('✏️ Côté', () => {
         traceOnCanvas([makeLine(ox() + OX, oy() + OY, ox() + OX, oy() + OY - CAT)]);
     }));
-
-    traceWrap.appendChild(makeTraceBtn('📐 Angle droit', () => {
+    ctrlBar.appendChild(makeTraceBtn('📐 Angle droit', () => {
         traceOnCanvas([
             makeLine(ox() + OX, oy() + OY, ox() + OX + CAT, oy() + OY),
             makeLine(ox() + OX, oy() + OY, ox() + OX,       oy() + OY - CAT)
         ]);
     }));
 
-    // Fermer
-    overlay.appendChild(svg);
-    overlay.appendChild(rotH);
-    overlay.appendChild(closeBtn);
-    overlay.appendChild(traceWrap);
-    board.appendChild(overlay);
+    // ── SVG équerre ──
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', OVW);
+    svg.setAttribute('height', OVH);
+    svg.style.cssText = 'display:block; position:absolute; top:0; left:0; pointer-events:none;';
 
-    makeDraggableGeo(overlay);
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', `${OX},${OY} ${OX + CAT},${OY} ${OX},${OY - CAT}`);
+    poly.setAttribute('fill', 'rgba(180,230,255,0.88)');
+    poly.setAttribute('stroke', '#1a6eab'); poly.setAttribute('stroke-width', '2');
+    poly.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(poly);
+
+    const sq = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    sq.setAttribute('points', `${OX + 14},${OY} ${OX + 14},${OY - 14} ${OX},${OY - 14}`);
+    sq.setAttribute('fill', 'none');
+    sq.setAttribute('stroke', '#1a6eab'); sq.setAttribute('stroke-width', '1.5');
+    svg.appendChild(sq);
+
+    function addAngle(x, y, txt) {
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        el.setAttribute('x', x); el.setAttribute('y', y);
+        el.setAttribute('font-size', '11'); el.setAttribute('fill', '#1a6eab');
+        el.setAttribute('font-weight', 'bold');
+        el.textContent = txt; svg.appendChild(el);
+    }
+    addAngle(OX + CAT - 52, OY - 10,      '45°');
+    addAngle(OX + 12,       OY - CAT + 46, '45°');
+    addAngle(OX + 18,       OY - 18,       '90°');
+
+    overlay.appendChild(svg);
+    board.appendChild(overlay);
+    document.body.appendChild(ctrlBar);
+
+    repositionBar();
+    makeDraggableGeo(overlay, repositionBar);
     makeRotatableGeo(overlay, rotH);
 }
 
@@ -684,148 +727,277 @@ function spawnCompas(board, cx, cy) {
     const MAX_R = 400, MIN_R = 20;
     let radius = 100;
 
+    // Dimensions de l'overlay (SVG seul, sans barre intégrée)
+    const OVW = 460, OVH = 436;
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - 190}px; top:${cy - 190}px; width:420px; height:500px;`;
+    overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - 60}px; width:${OVW}px; height:${OVH}px;`;
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '420');
-    svg.setAttribute('height', '390');
-    svg.style.cssText = 'display:block; pointer-events:none;';
+    // ── Barre de contrôle FIXE (body-level, toujours visible) ───────────
+    const BAR_W = 400;
+    const ctrlBar = document.createElement('div');
+    ctrlBar.style.cssText = `
+        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        background:rgba(26,26,34,0.96); border-radius:10px;
+        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
+        pointer-events:auto; cursor:default;
+        box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    `;
 
-    // Centre pivot (en haut au milieu)
-    const PIV_X = 210, PIV_Y = 20;
+    // Positionne la barre en fixed en fonction de la position de l'overlay
+    function repositionBar() {
+        const bRect  = board.getBoundingClientRect();
+        const ovLeft = parseFloat(overlay.style.left || 0);
+        const ovTop  = parseFloat(overlay.style.top  || 0);
+        const MARGIN = 8;
 
-    // Bras gauche (fixe, avec la pointe)
-    const armLeft  = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    // Bras droit (avec le crayon), son angle change selon le rayon
-    const armRight = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    // Cercle fantôme (preview)
-    const circle   = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    // Pointe
-    const pointe   = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    // Crayon
-    const crayon   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        // Centre X de l'overlay en coordonnées viewport
+        const centerX = bRect.left + ovLeft + OVW / 2;
+        let barLeft = centerX - BAR_W / 2;
+        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
 
-    const ARM_LEN = 350;
-
-    function updateSvg() {
-        // Angle d'ouverture : on calcule l'angle tel que la distance entre
-        // la pointe et le crayon = radius
-        // Les deux bras font ARM_LEN, angle entre eux = 2*asin(radius/2/ARM_LEN)
-        const halfAngle = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
-        const aLeft  = Math.PI / 2 + halfAngle;  // bras gauche vers bas-gauche
-        const aRight = Math.PI / 2 - halfAngle;  // bras droit vers bas-droite
-
-        const lx = PIV_X + Math.cos(Math.PI - aLeft) * ARM_LEN;
-        const ly = PIV_Y + Math.sin(aLeft) * ARM_LEN;
-        const rx = PIV_X + Math.cos(aRight) * ARM_LEN;
-        const ry = PIV_Y + Math.sin(Math.PI - aRight) * ARM_LEN + ARM_LEN;
-
-        // Recalcul propre
-        const lx2 = PIV_X - Math.sin(halfAngle) * ARM_LEN;
-        const ly2 = PIV_Y + Math.cos(halfAngle) * ARM_LEN;
-        const rx2 = PIV_X + Math.sin(halfAngle) * ARM_LEN;
-        const ry2 = PIV_Y + Math.cos(halfAngle) * ARM_LEN;
-
-        armLeft.setAttribute('x1', PIV_X); armLeft.setAttribute('y1', PIV_Y);
-        armLeft.setAttribute('x2', lx2);   armLeft.setAttribute('y2', ly2);
-        armLeft.setAttribute('stroke', '#555'); armLeft.setAttribute('stroke-width', '4');
-        armLeft.setAttribute('stroke-linecap', 'round');
-
-        armRight.setAttribute('x1', PIV_X); armRight.setAttribute('y1', PIV_Y);
-        armRight.setAttribute('x2', rx2);   armRight.setAttribute('y2', ry2);
-        armRight.setAttribute('stroke', '#555'); armRight.setAttribute('stroke-width', '4');
-        armRight.setAttribute('stroke-linecap', 'round');
-
-        // Pivot
-        const pivCirc = svg.querySelector('.compas-pivot');
-        if (pivCirc) {
-            pivCirc.setAttribute('cx', PIV_X); pivCirc.setAttribute('cy', PIV_Y);
+        // Y : juste au-dessus de l'overlay si possible, sinon juste en-dessous
+        const ovTopVP = bRect.top + ovTop;
+        let barTop = ovTopVP - 52;
+        if (barTop < MARGIN) {
+            barTop = ovTopVP + OVH + 8;
+            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
         }
 
-        // Cercle preview centré sur la pointe
-        circle.setAttribute('cx', lx2); circle.setAttribute('cy', ly2);
-        circle.setAttribute('r', radius);
-        circle.setAttribute('fill', 'none');
-        circle.setAttribute('stroke', 'rgba(167,139,250,0.4)');
-        circle.setAttribute('stroke-width', '1.5');
-        circle.setAttribute('stroke-dasharray', '6 4');
-
-        // Pointe (triangle)
-        pointe.setAttribute('cx', lx2); pointe.setAttribute('cy', ly2);
-        pointe.setAttribute('r', 5);
-        pointe.setAttribute('fill', '#e74c3c');
-
-        // Crayon
-        const cpx = rx2, cpy = ry2;
-        crayon.setAttribute('points',
-            `${cpx-4},${cpy-4} ${cpx+4},${cpy-4} ${cpx},${cpy+10}`);
-        crayon.setAttribute('fill', '#f39c12');
-
-        // Stocker les coords pour le tracé
-        overlay.dataset.pivX  = lx2;
-        overlay.dataset.pivY  = ly2;
-        overlay.dataset.radius = radius;
+        ctrlBar.style.left = barLeft + 'px';
+        ctrlBar.style.top  = barTop  + 'px';
     }
 
-    // Pivot visuel
-    const pivCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    pivCirc.className.baseVal = 'compas-pivot';
-    pivCirc.setAttribute('r', '8');
-    pivCirc.setAttribute('fill', '#888');
-    pivCirc.setAttribute('stroke', '#333'); pivCirc.setAttribute('stroke-width', '2');
-
-    svg.appendChild(armLeft);
-    svg.appendChild(armRight);
-    svg.appendChild(circle);
-    svg.appendChild(pointe);
-    svg.appendChild(crayon);
-    svg.appendChild(pivCirc);
-
-    // Contrôle rayon
-    const radiusWrap = document.createElement('div');
-    radiusWrap.className = 'geo-compass-radius-wrap';
-    radiusWrap.style.cssText = 'position:absolute; top:400px; left:50%; transform:translateX(-50%);';
-    radiusWrap.innerHTML = `
-        <span>Rayon</span>
-        <input type="range" min="${MIN_R}" max="${MAX_R}" value="${radius}" step="2">
-        <span class="geo-r-val">${radius}px</span>
+    // Bouton fermer — tout à gauche de la barre
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'geo-close-tool';
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = `
+        position:relative; width:24px; height:24px; font-size:14px;
+        border-radius:50%; background:#e74c3c; color:#fff; border:none;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
     `;
-    const slider = radiusWrap.querySelector('input');
-    slider.style.setProperty('cursor', 'pointer', 'important');
-    // Bloquer la propagation pour éviter que draw.js dessine pendant le glissement
+    closeBtn.onmousedown = e => e.stopPropagation();
+    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
+    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
+
+    // Poignée rotation — juste à droite du bouton fermer
+    const rotH = document.createElement('div');
+    rotH.className = 'geo-rot-handle';
+    rotH.textContent = '↻';
+    rotH.style.cssText = `
+        position:relative; width:24px; height:24px; font-size:13px;
+        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
+        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);
+    `;
+
+    // Slider rayon
+    const sliderLabel = document.createElement('span');
+    sliderLabel.textContent = 'Rayon';
+    sliderLabel.style.cssText = 'color:#ccc; font-size:11px; white-space:nowrap; flex-shrink:0;';
+
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = MIN_R; slider.max = MAX_R;
+    slider.value = radius; slider.step = '2';
+    slider.style.cssText = 'width:90px; accent-color:#a78bfa; cursor:pointer; flex-shrink:0;';
     slider.addEventListener('mousedown', e => e.stopPropagation());
-    slider.addEventListener('mousemove', e => e.stopPropagation());
-    slider.addEventListener('mouseup',   e => e.stopPropagation());
-    const rVal   = radiusWrap.querySelector('.geo-r-val');
+    slider.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+
+    const rVal = document.createElement('span');
+    rVal.textContent = radius + 'px';
+    rVal.style.cssText = 'color:#a78bfa; font-size:11px; font-weight:700; min-width:36px; flex-shrink:0;';
+
     slider.addEventListener('input', function () {
         radius = parseInt(this.value);
         rVal.textContent = radius + 'px';
         updateSvg();
     });
 
-    // Poignée rotation — coin haut-droit
-    const rotH = document.createElement('div');
-    rotH.className = 'geo-rot-handle';
-    rotH.textContent = '↻';
-    rotH.style.cssText = 'position:absolute; top:-10px; right:-10px; cursor:pointer !important;';
-
-    // Fermer — coin haut-gauche
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = 'position:absolute; top:-8px; left:-8px; cursor:pointer !important;';
-    closeBtn.onmousedown = e => { e.stopPropagation(); };
-    closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
-    addTouchClick(closeBtn, () => overlay.remove());
-
-    // Bouton tracer — centré en bas du SVG
+    // Bouton tracer
     const traceBtn = document.createElement('button');
     traceBtn.className = 'geo-trace-btn';
-    traceBtn.textContent = '⭕ Tracer le cercle';
-    traceBtn.style.cssText = 'position:absolute; top:440px; left:50%; transform:translateX(-50%); cursor:pointer !important;';
+    traceBtn.textContent = '⭕ Tracer';
+    traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
+
+    ctrlBar.appendChild(closeBtn);
+    ctrlBar.appendChild(rotH);
+    ctrlBar.appendChild(sliderLabel);
+    ctrlBar.appendChild(slider);
+    ctrlBar.appendChild(rVal);
+    ctrlBar.appendChild(traceBtn);
+
+    // ── SVG compas (occupe tout l'overlay) ───────────────────────────────
+    const SVG_W = OVW, SVG_H = OVH;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width',  SVG_W);
+    svg.setAttribute('height', SVG_H);
+    svg.style.cssText = `display:block; position:absolute; top:0; left:0; pointer-events:none;`;
+
+    // Defs : dégradés pour les bras
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    function makeArmGrad(id, col1, col2) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        g.setAttribute('id', id);
+        g.setAttribute('x1', '0%'); g.setAttribute('y1', '0%');
+        g.setAttribute('x2', '100%'); g.setAttribute('y2', '0%');
+        const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        s1.setAttribute('offset', '0%');   s1.setAttribute('stop-color', col1);
+        const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', col2);
+        g.appendChild(s1); g.appendChild(s2);
+        return g;
+    }
+    defs.appendChild(makeArmGrad('grad-arm-left',  '#8a8a9a', '#4a4a5a'));
+    defs.appendChild(makeArmGrad('grad-arm-right', '#7a9ab8', '#3a5a78'));
+    svg.appendChild(defs);
+
+    // Pivot (centre géométrique, en haut au milieu du SVG)
+    const PIV_X = SVG_W / 2, PIV_Y = 30;
+    const ARM_LEN = 200; // bras plus courts
+
+    // Éléments SVG (créés vides, positionnés par updateSvg)
+    // Cercle preview
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+    // Bras gauche (pointe) — polygon pour avoir de l'épaisseur variable
+    const armLeftPoly  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    // Bras droit (mine) — polygon
+    const armRightPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+
+    // Pointe métallique : triangle allongé argenté
+    const pointeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const pointeBody  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // corps argenté
+    const pointeTip   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // extrémité sombre
+
+    // Mine (crayon) : corps coloré + mine graphite + ligne de couleur
+    const mineGroup  = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const mineBody   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // corps bois clair
+    const minePaint  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // capuchon coloré
+    const mineGraphite = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // mine grise
+    const mineTip    = document.createElementNS('http://www.w3.org/2000/svg', 'circle');   // pointe mine
+
+    // Pivot visuel (par-dessus tout)
+    const pivCircOuter = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const pivCircInner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+    pointeGroup.appendChild(pointeBody);
+    pointeGroup.appendChild(pointeTip);
+    mineGroup.appendChild(mineBody);
+    mineGroup.appendChild(minePaint);
+    mineGroup.appendChild(mineGraphite);
+    mineGroup.appendChild(mineTip);
+
+    svg.appendChild(circle);
+    svg.appendChild(armLeftPoly);
+    svg.appendChild(armRightPoly);
+    svg.appendChild(pointeGroup);
+    svg.appendChild(mineGroup);
+    svg.appendChild(pivCircOuter);
+    svg.appendChild(pivCircInner);
+
+    // Helper : calcule le polygon d'un bras épais (trapèze)
+    // de (x1,y1) vers (x2,y2), largeur w1 à la base, w2 à l'extrémité
+    function armPolygon(x1, y1, x2, y2, w1, w2) {
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len, ny = dx / len; // normale
+        return [
+            x1 + nx * w1, y1 + ny * w1,
+            x1 - nx * w1, y1 - ny * w1,
+            x2 - nx * w2, y2 - ny * w2,
+            x2 + nx * w2, y2 + ny * w2
+        ].join(' ');
+    }
+
+    // Helper : triangle orienté vers (tx,ty) depuis (bx,by), largeur w, longueur l
+    function tipPolygon(bx, by, tx, ty, w, l) {
+        const dx = tx - bx, dy = ty - by;
+        const len = Math.hypot(dx, dy) || 1;
+        const ux = dx / len, uy = dy / len;
+        const nx = -uy, ny = ux;
+        // base à distance (len-l) depuis bx,by, pointe à (tx,ty)
+        const mbx = bx + ux * (len - l), mby = by + uy * (len - l);
+        return [
+            mbx + nx * w, mby + ny * w,
+            mbx - nx * w, mby - ny * w,
+            tx, ty
+        ].join(' ');
+    }
+
+    function updateSvg() {
+        const halfAngle = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+
+        // Extrémités des bras
+        const lx = PIV_X - Math.sin(halfAngle) * ARM_LEN;
+        const ly = PIV_Y + Math.cos(halfAngle) * ARM_LEN;
+        const rx = PIV_X + Math.sin(halfAngle) * ARM_LEN;
+        const ry = PIV_Y + Math.cos(halfAngle) * ARM_LEN;
+
+        // ── Bras gauche (pointe) : acier, épais en haut, fin en bas
+        armLeftPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, lx, ly, 7, 3));
+        armLeftPoly.setAttribute('fill', 'url(#grad-arm-left)');
+        armLeftPoly.setAttribute('stroke', '#333'); armLeftPoly.setAttribute('stroke-width', '0.5');
+
+        // ── Bras droit (mine) : bleu acier, idem
+        armRightPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, rx, ry, 7, 3));
+        armRightPoly.setAttribute('fill', 'url(#grad-arm-right)');
+        armRightPoly.setAttribute('stroke', '#333'); armRightPoly.setAttribute('stroke-width', '0.5');
+
+        // ── Pointe métallique (bras gauche) ──
+        // Corps argenté : 20px depuis l'extrémité
+        pointeBody.setAttribute('points', tipPolygon(PIV_X, PIV_Y, lx, ly, 4, 22));
+        pointeBody.setAttribute('fill', '#c0c0c0');
+        pointeBody.setAttribute('stroke', '#888'); pointeBody.setAttribute('stroke-width', '0.5');
+        // Extrémité acérée plus sombre (8px)
+        pointeTip.setAttribute('points', tipPolygon(PIV_X, PIV_Y, lx, ly, 1.5, 8));
+        pointeTip.setAttribute('fill', '#555');
+
+        // ── Mine / Crayon (bras droit) ──
+        // Corps du crayon (bois clair) : 28px depuis l'extrémité, largeur 5
+        mineBody.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 5, 30));
+        mineBody.setAttribute('fill', '#f0c040');
+        mineBody.setAttribute('stroke', '#b88800'); mineBody.setAttribute('stroke-width', '0.5');
+        // Capuchon coloré (haut du crayon) : 6px tout en haut de la partie bois
+        minePaint.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 5, 8));
+        minePaint.setAttribute('fill', '#e05050');
+        // Graphite (mine grise pointue) : 10px depuis l'extrémité, plus étroite
+        mineGraphite.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 2.5, 12));
+        mineGraphite.setAttribute('fill', '#444');
+        // Pointe de la mine (petit cercle rouge-violet à l'extrémité exacte)
+        mineTip.setAttribute('cx', rx); mineTip.setAttribute('cy', ry);
+        mineTip.setAttribute('r', '3');
+        mineTip.setAttribute('fill', '#a78bfa');
+        mineTip.setAttribute('stroke', '#fff'); mineTip.setAttribute('stroke-width', '1');
+
+        // ── Cercle preview centré sur la pointe ──
+        circle.setAttribute('cx', lx); circle.setAttribute('cy', ly);
+        circle.setAttribute('r', radius);
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', 'rgba(167,139,250,0.45)');
+        circle.setAttribute('stroke-width', '1.5');
+        circle.setAttribute('stroke-dasharray', '7 4');
+
+        // ── Pivot visuel ──
+        pivCircOuter.setAttribute('cx', PIV_X); pivCircOuter.setAttribute('cy', PIV_Y);
+        pivCircOuter.setAttribute('r', '11');
+        pivCircOuter.setAttribute('fill', '#6a6a7a');
+        pivCircOuter.setAttribute('stroke', '#222'); pivCircOuter.setAttribute('stroke-width', '1.5');
+        pivCircInner.setAttribute('cx', PIV_X); pivCircInner.setAttribute('cy', PIV_Y);
+        pivCircInner.setAttribute('r', '5');
+        pivCircInner.setAttribute('fill', '#bbb');
+        pivCircInner.setAttribute('stroke', '#444'); pivCircInner.setAttribute('stroke-width', '1');
+
+        // Stocker les coords pour le tracé (dans le repère de l'overlay)
+        overlay.dataset.pivX   = lx;
+        overlay.dataset.pivY   = ly;
+        overlay.dataset.radius = radius;
+    }
+
+    // ── Bouton tracer (logique inchangée) ───────────────────────────────
     traceBtn.onclick = function (e) {
         e.stopPropagation();
         const t    = getOverlayTransform(overlay);
@@ -836,7 +1008,6 @@ function spawnCompas(board, cx, cy) {
         const oy   = parseFloat(overlay.style.top  || 0);
         const worldPiv = rotatePoint(ox + pivX, oy + pivY, t.cx, t.cy, t.angle);
 
-        // 3 strokes avec le même groupId pour former un objet unique
         const C = 6;
         const cx_ = worldPiv.x, cy_ = worldPiv.y;
         const steps = Math.max(60, Math.round(2 * Math.PI * r / 3));
@@ -862,14 +1033,14 @@ function spawnCompas(board, cx, cy) {
     addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
     overlay.appendChild(svg);
-    overlay.appendChild(radiusWrap);
-    overlay.appendChild(rotH);
-    overlay.appendChild(traceBtn);
-    overlay.appendChild(closeBtn);
     board.appendChild(overlay);
+    document.body.appendChild(ctrlBar);
 
     updateSvg();
-    makeDraggableGeo(overlay);
+    repositionBar();
+
+    // Rebrancher repositionBar après chaque drag
+    makeDraggableGeo(overlay, repositionBar);
     makeRotatableGeo(overlay, rotH);
 }
 
