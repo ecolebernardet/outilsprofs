@@ -914,9 +914,12 @@ function setDrawMode(mode) {
 
 function activatePencil() {
     // En mode annotation PDF, repasser l'outil à 'pen' sans fermer le mode
-    if (typeof _pdfAnnotTool !== 'undefined') _pdfAnnotTool = 'pen';
-    if (typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
-    // Désactiver le mode figure
+    if (typeof _pdfAnnotTool !== 'undefined') {
+        if (isEraserMode) stopEraserMode();
+        _pdfAnnotTool = 'pen';
+        if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', 'crosshair', 'important');
+        if (typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
+    }    // Désactiver le mode figure
     currentDrawMode = 'free';
     _setBtnActive('draw-figures-btn', false, 'figures');
     const figSubA = document.getElementById('figures-submenu');
@@ -952,7 +955,11 @@ function activatePencil() {
 
 function activateHighlighter() {
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
-        setPdfAnnotTool('highlighter');
+        if (isEraserMode) stopEraserMode();
+        // Forcer directement l'outil surligneur sans passer par la bascule
+        _pdfAnnotTool = 'highlighter';
+        if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', 'crosshair', 'important');
+        _updatePdfToolBtns();
         // Désactiver le bouton crayon
         const freeBtn = document.getElementById('draw-free-btn');
         if (freeBtn) {
@@ -1258,6 +1265,13 @@ function toggleEraserMode() {
     board.classList.add('is-erasing');
     clearSelection();
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    // Désactiver visuellement crayon et surligneur quand la gomme s'active
+    const hlBtnE = document.getElementById('draw-highlight-btn');
+    if (hlBtnE) { hlBtnE.style.borderColor='#444'; hlBtnE.style.background='#2a2a2e'; hlBtnE.style.color='#aaa'; hlBtnE.classList.remove('btn-mode-active'); }
+    const frBtnE = document.getElementById('draw-free-btn');
+    if (frBtnE) { frBtnE.style.borderColor='#444'; frBtnE.style.background='#2a2a2e'; frBtnE.style.color='#aaa'; frBtnE.classList.remove('btn-mode-active'); }
+    // En mode PDF : désactiver visuellement crayon et surligneur
+    if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
 }
 
 function stopEraserMode() {
@@ -1272,6 +1286,8 @@ function stopEraserMode() {
     }
     isDrawMode = true;
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    // En mode PDF : réactiver visuellement le bon outil
+    if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
 }
 
 function eTouchStart(e) { e.preventDefault(); snapshotNow(); isErasing = true; eraseAt(getPos(e.touches[0])); }
@@ -1707,14 +1723,15 @@ var _pdfAnnotMode     = false;  // mode actif ?
 var _pdfAnnotWidget   = null;   // widget PDF cible
 var _pdfAnnotCanvas   = null;   // canvas d'annotations (référence, pour les events)
 var _pdfAnnotEvTarget = null;   // élément sur lequel les events draw.js sont attachés
-var _pdfAnnotTool     = 'pen';  // 'pen' | 'highlighter' | 'text' | 'eraser'
+var _pdfAnnotTool     = 'pen';  // 'pen' | 'highlighter' | 'text' | 'eraser' | 'pan'
 var _pdfAnnotPainting = false;
+var _pdfPrevTool      = 'pen';  // outil mémorisé avant de passer en pan
 
 // ── Outils boutons PDF extras dans la toolbar ──────────────────────────────
 
 // Boutons supplémentaires (surligneur, texte, annuler, effacer) affichés
 // uniquement quand le mode est actif.
-var _PDF_EXTRA_BTNS = ['pdf-text-btn','pdf-annot-undo-btn'];
+var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn','pdf-annot-undo-btn'];
 
 function _dtClearAction() {
     if (_pdfAnnotMode) {
@@ -1739,6 +1756,49 @@ function _showPdfExtraBtns(show) {
 
 // Met à jour l'aspect visuel des boutons outil PDF
 function _updatePdfToolBtns() {
+    // En mode pan : désactiver crayon et surligneur
+    const isPan = _pdfAnnotTool === 'pan';
+    const isEraser = isEraserMode;
+
+    // Bouton main (pan)
+    const panBtn = document.getElementById('pdf-pan-btn');
+    if (panBtn) {
+        if (isPan) {
+            panBtn.style.cssText = panBtn.style.cssText.replace(/background:[^;]+;?/g, '');
+            panBtn.style.setProperty('background', '#e6c000', 'important');
+            panBtn.style.setProperty('border-color', '#c8a000', 'important');
+            panBtn.style.setProperty('color', '#1a1400', 'important');
+            panBtn.style.setProperty('box-shadow', '0 0 8px rgba(230,192,0,0.6)', 'important');
+            // Forcer le curseur main sur le widget PDF (écrase #board.is-drawing *)
+            if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', 'grab', 'important');
+        } else {
+            panBtn.style.removeProperty('background');
+            panBtn.style.removeProperty('border-color');
+            panBtn.style.removeProperty('color');
+            panBtn.style.removeProperty('box-shadow');
+            panBtn.style.background  = '#2a2a2e';
+            panBtn.style.borderColor = '#444';
+            panBtn.style.color       = '#aaa';
+            panBtn.style.boxShadow   = 'none';
+            if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.removeProperty('cursor');
+            if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', 'crosshair', 'important');
+        }
+    }
+    // Bouton crayon — désactivé si pan ou gomme actif
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) {
+        if (!isPan && !isEraser && _pdfAnnotTool === 'pen') {
+            freeBtn.style.borderColor = '#4a90e2';
+            freeBtn.style.background  = '#1a3550';
+            freeBtn.style.color       = '#fff';
+            freeBtn.classList.add('btn-mode-active');
+        } else {
+            freeBtn.style.borderColor = '#444';
+            freeBtn.style.background  = '#2a2a2e';
+            freeBtn.style.color       = '#aaa';
+            freeBtn.classList.remove('btn-mode-active');
+        }
+    }
     // Bouton texte PDF
     const textBtn = document.getElementById('pdf-text-btn');
     if (textBtn) {
@@ -1756,10 +1816,10 @@ function _updatePdfToolBtns() {
             textBtn.style.fontSize     = '13px';
         }
     }
-    // Bouton surligneur draw-toolbar (partagé)
+    // Bouton surligneur draw-toolbar (partagé) — désactivé si pan ou gomme actif
     const hlBtn = document.getElementById('draw-highlight-btn');
     if (hlBtn) {
-        if (_pdfAnnotTool === 'highlighter') {
+        if (!isPan && !isEraser && _pdfAnnotTool === 'highlighter') {
             hlBtn.style.borderColor = '#f5c518';
             hlBtn.style.background  = '#2a2200';
             hlBtn.style.color       = '#f5c518';
@@ -1908,9 +1968,16 @@ function _stopPdfAnnotMode() {
     const btn = document.getElementById('pdf-annot-mode-btn');
     if (btn) btn.classList.remove('pdf-annot-active');
 
-    // Réinitialiser le bouton surligneur partagé
-    const hlBtn = document.getElementById('draw-highlight-btn');
-    if (hlBtn) {
+    // Réinitialiser le bouton main (pan)
+    const panBtn = document.getElementById('pdf-pan-btn');
+    if (panBtn) {
+        panBtn.style.borderColor = '#444';
+        panBtn.style.background  = '#2a2a2e';
+        panBtn.style.color       = '#aaa';
+        panBtn.style.boxShadow   = 'none';
+    }
+    _pdfPanLastX = null; _pdfPanLastY = null;    // Réinitialiser le bouton surligneur partagé
+    const hlBtn = document.getElementById('draw-highlight-btn');    if (hlBtn) {
         hlBtn.style.borderColor = '#444';
         hlBtn.style.background  = '#2a2a2e';
         hlBtn.style.color       = '#aaa';
@@ -1947,12 +2014,30 @@ function stopDrawing_keepToolbar() {
 
 function setPdfAnnotTool(tool) {
     if (!_pdfAnnotMode) return;
-    // Bascule : recliqué sur le même outil → retour stylo
-    _pdfAnnotTool = (_pdfAnnotTool === tool) ? 'pen' : tool;
+    if (tool === 'pan') {
+        if (_pdfAnnotTool === 'pan') {
+            // Désactiver le pan → restaurer l'outil précédent
+            _pdfAnnotTool = _pdfPrevTool;
+        } else {
+            // Activer le pan → mémoriser l'outil courant
+            _pdfPrevTool = _pdfAnnotTool;
+            _pdfAnnotTool = 'pan';
+        }
+    } else {
+        // Bascule sur autre outil : recliqué sur le même → retour stylo
+        _pdfAnnotTool = (_pdfAnnotTool === tool) ? 'pen' : tool;
+    }
 
     // Curseur adapté
+    if (_pdfAnnotEvTarget) {
+        _pdfAnnotEvTarget.style.cursor =
+            _pdfAnnotTool === 'text' ? 'text' :
+            _pdfAnnotTool === 'pan'  ? 'grab' : 'crosshair';
+    }
     if (_pdfAnnotCanvas) {
-        _pdfAnnotCanvas.style.cursor = (_pdfAnnotTool === 'text') ? 'text' : 'crosshair';
+        _pdfAnnotCanvas.style.cursor =
+            _pdfAnnotTool === 'text' ? 'text' :
+            _pdfAnnotTool === 'pan'  ? 'grab' : 'crosshair';
     }
     _updatePdfToolBtns();
 }
@@ -2006,6 +2091,7 @@ function _pdfAnnotGetColor() {
 }
 
 function _pdfAnnotGetSize() {
+    if (isEraserMode) return parseInt(document.getElementById('eraser-size').value) || 20;
     return parseInt(document.getElementById('draw-size').value) || 4;
 }
 
@@ -2035,6 +2121,9 @@ function _getPdfAnnotPos(e) {
     };
 }
 
+var _pdfPanLastY = null;
+var _pdfPanLastX = null;
+
 // ── Dessin — tout passe par l'API de media.js ─────────────────────────────
 
 var _pdfFigureStart = null; // point de départ pour les figures PDF
@@ -2042,6 +2131,17 @@ var _pdfFigureStart = null; // point de départ pour les figures PDF
 function _pdfAnnotStartStroke(e) {
     const tool = _pdfAnnotEffectiveTool();
     if (tool === 'text') { _pdfAnnotInsertText(e); return; }
+
+    // Mode pan : enregistrer le point de départ
+    if (tool === 'pan') {
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        _pdfPanLastX = clientX;
+        _pdfPanLastY = clientY;
+        _pdfAnnotPainting = true;
+        if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.cursor = 'grabbing';
+        return;
+    }
 
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api) return;
@@ -2064,6 +2164,24 @@ function _pdfAnnotContinueStroke(e) {
     const tool = _pdfAnnotEffectiveTool();
     if (tool === 'text') return;
 
+    // Mode pan : scroller le conteneur PDF
+    if (tool === 'pan') {
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        if (_pdfPanLastX !== null && _pdfAnnotWidget) {
+            const dx = clientX - _pdfPanLastX;
+            const dy = clientY - _pdfPanLastY;
+            const wrap = _pdfAnnotWidget.querySelector('.pdf-canvas-wrap');
+            if (wrap) {
+                wrap.scrollLeft -= dx;
+                wrap.scrollTop  -= dy;
+            }
+        }
+        _pdfPanLastX = clientX;
+        _pdfPanLastY = clientY;
+        return;
+    }
+
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api) return;
 
@@ -2082,6 +2200,15 @@ function _pdfAnnotContinueStroke(e) {
 function _pdfAnnotEndStroke(e) {
     if (!_pdfAnnotPainting) return;
     _pdfAnnotPainting = false;
+
+    // Mode pan : remettre le curseur grab
+    if (_pdfAnnotTool === 'pan') {
+        _pdfPanLastX = null;
+        _pdfPanLastY = null;
+        if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.cursor = 'grab';
+        return;
+    }
+
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api) return;
 
@@ -2136,9 +2263,27 @@ function _pdfAnnotMouseDown(e)  {
     if (e.target.closest && e.target.closest('button')) return;
     _pdfAnnotStartStroke(e);
 }
-function _pdfAnnotMouseMove(e)  { _pdfAnnotContinueStroke(e); }
+function _pdfAnnotMouseMove(e)  {
+    _pdfAnnotContinueStroke(e);
+    // Prévisualisation du cercle gomme — toujours après le dessin/effacement
+    if (_pdfAnnotMode && isEraserMode) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api) {
+            const pos = _getPdfAnnotPos(e);
+            const r = parseInt(document.getElementById('eraser-size').value) || 20;
+            api.previewEraser(pos.x, pos.y, r);
+        }
+    }
+}
 function _pdfAnnotMouseUp(e)    { _pdfAnnotEndStroke(e); }
-function _pdfAnnotMouseLeave(e) { _pdfAnnotEndStroke(e); }
+function _pdfAnnotMouseLeave(e) {
+    // Effacer le cercle gomme preview en redessinant les annotations
+    if (_pdfAnnotMode && isEraserMode) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.redrawAnnotations) api.redrawAnnotations();
+    }
+    _pdfAnnotEndStroke(e);
+}
 
 function _pdfAnnotTouchStart(e) {
     e.preventDefault();

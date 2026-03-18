@@ -146,6 +146,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             function redrawAnnotations(pageNum) {
                 actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
                 const layer = getLayer(pageNum);
+                // Restaurer le snapshot s'il existe (après effacement)
+                if (layer._snapshot) {
+                    actx.putImageData(layer._snapshot, 0, 0);
+                }
                 for (const stroke of layer.strokes) {
                     drawStroke(actx, stroke);
                 }
@@ -186,7 +190,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     ctx.lineWidth = sizeScaled * 5;
                 } else if (stroke.tool === 'eraser') {
                     ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = sizeScaled * 6;
+                    ctx.lineWidth = sizeScaled * 2; // size = rayon → diameter
                 } else {
                     ctx.lineWidth = sizeScaled;
                 }
@@ -297,7 +301,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     actx.lineWidth = sizeScaled * 5;
                 } else if (currentStrokeAnnot.tool === 'eraser') {
                     actx.globalCompositeOperation = 'destination-out';
-                    actx.lineWidth = sizeScaled * 6;
+                    actx.lineWidth = sizeScaled * 2;
                 } else {
                     actx.lineWidth = sizeScaled;
                 }
@@ -451,7 +455,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             actx.lineWidth = sizeScaled * 5;
                         } else if (tool === 'eraser') {
                             actx.globalCompositeOperation = 'destination-out';
-                            actx.lineWidth = sizeScaled * 6;
+                            actx.lineWidth = sizeScaled * 2;
                         } else {
                             actx.lineWidth = sizeScaled;
                         }
@@ -469,19 +473,37 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!isDrawing || !currentStrokeAnnot) return;
                         isDrawing = false;
                         if (currentStrokeAnnot.pts.length > 0) {
-                            getLayer(currentPage).strokes.push(currentStrokeAnnot);
-                            redrawAnnotations(currentPage);
+                            const layer = getLayer(currentPage);
+                            if (!layer.history) layer.history = [];
+                            layer.history.push([...layer.strokes]);
+                            if (layer.history.length > 30) layer.history.shift(); // max 30 niveaux
+                            layer.strokes.push(currentStrokeAnnot);
                         }
                         currentStrokeAnnot = null;
+                        redrawAnnotations(currentPage); // toujours redessiner pour effacer le cercle preview
                     },
                     // Annuler le dernier stroke
                     undo() {
                         const layer = getLayer(currentPage);
-                        if (layer.strokes.length > 0) { layer.strokes.pop(); redrawAnnotations(currentPage); }
+                        if (!layer.history) layer.history = [];
+                        if (layer.history.length > 0) {
+                            // Restaurer le dernier état sauvegardé
+                            layer.strokes = layer.history.pop();
+                            redrawAnnotations(currentPage);
+                        } else if (layer.strokes.length > 0) {
+                            layer.strokes.pop();
+                            redrawAnnotations(currentPage);
+                        }
                     },
                     // Effacer toutes les annotations de la page courante
                     clear() {
-                        getLayer(currentPage).strokes = [];
+                        const layer = getLayer(currentPage);
+                        if (!layer.history) layer.history = [];
+                        // Sauvegarder l'état avant effacement pour undo
+                        if (layer.strokes.length > 0) {
+                            layer.history.push([...layer.strokes]);
+                        }
+                        layer.strokes = [];
                         redrawAnnotations(currentPage);
                     },
                     // Accès au canvas pour récupérer les coordonnées
@@ -490,7 +512,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     addTextStroke(text, color, size, px, py) {
                         const norm = toNorm(px, py);
                         const stroke = { tool: 'text', color, size, text: text, nx: norm.x, ny: norm.y };
-                        getLayer(currentPage).strokes.push(stroke);
+                        const layer = getLayer(currentPage);
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                        layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
                     },
                     // Preview d'une figure en cours de tracé (sans sauvegarder)
@@ -517,8 +543,75 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     addFigureStroke(color, size, pts) {
                         const normPts = pts.map(p => toNorm(p.x, p.y));
                         const stroke = { tool: 'figure', color, size, pts: normPts };
-                        getLayer(currentPage).strokes.push(stroke);
+                        const layer = getLayer(currentPage);
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                        layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
+                    },
+                    // Prévisualisation du cercle gomme
+                    previewEraser(px, py, r) {
+                        // Toujours redessiner les annotations proprement
+                        redrawAnnotations(currentPage);
+                        // Si effacement en cours, redessiner le trait d'effacement accumulé
+                        if (isDrawing && currentStrokeAnnot && currentStrokeAnnot.tool === 'eraser' && currentStrokeAnnot.pts.length > 1) {
+                            const canvasW2 = annotCanvas.width;
+                            actx.save();
+                            actx.globalCompositeOperation = 'destination-out';
+                            actx.lineWidth = currentStrokeAnnot.size * canvasW2 / 600 * 2;
+                            actx.lineCap = 'round';
+                            actx.lineJoin = 'round';
+                            actx.beginPath();
+                            const p0 = fromNorm(currentStrokeAnnot.pts[0].x, currentStrokeAnnot.pts[0].y);
+                            actx.moveTo(p0.x, p0.y);
+                            for (let i = 1; i < currentStrokeAnnot.pts.length; i++) {
+                                const p = fromNorm(currentStrokeAnnot.pts[i].x, currentStrokeAnnot.pts[i].y);
+                                actx.lineTo(p.x, p.y);
+                            }
+                            actx.stroke();
+                            actx.restore();
+                        }
+                        // Dessiner le cercle preview
+                        const canvasW = annotCanvas.width;
+                        const rScaled = r * canvasW / 600;
+                        actx.save();
+                        actx.globalCompositeOperation = 'source-over';
+                        actx.beginPath();
+                        actx.arc(px, py, rScaled, 0, Math.PI * 2);
+                        actx.strokeStyle = 'rgba(80,80,80,0.9)';
+                        actx.lineWidth = 1.5;
+                        actx.setLineDash([4, 3]);
+                        actx.stroke();
+                        actx.beginPath();
+                        actx.arc(px, py, 2, 0, Math.PI * 2);
+                        actx.fillStyle = 'rgba(80,80,80,0.7)';
+                        actx.fill();
+                        actx.restore();
+                    },
+                    // Redessiner les annotations (efface les previews)
+                    redrawAnnotations() {
+                        redrawAnnotations(currentPage);
+                    },
+                    // Effacement direct pixel par pixel (en temps réel)
+                    eraseAt(px, py, r) {
+                        const canvasW = annotCanvas.width;
+                        const rScaled = r * canvasW / 600;
+                        actx.save();
+                        actx.globalCompositeOperation = 'destination-out';
+                        actx.beginPath();
+                        actx.arc(px, py, rScaled, 0, Math.PI * 2);
+                        actx.fill();
+                        actx.restore();
+                    },
+                    // Sauvegarder l'état après effacement (snapshot du canvas → annotLayers)
+                    saveEraserSnapshot() {
+                        // Stocker le canvas entier comme stroke spécial 'snapshot'
+                        const layer = getLayer(currentPage);
+                        const imgData = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+                        layer._snapshot = imgData;
+                        // Nettoyer les strokes normaux car le snapshot les inclut
+                        layer.strokes = [];
                     }
                 };
             }
