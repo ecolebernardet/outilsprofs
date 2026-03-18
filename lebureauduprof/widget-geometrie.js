@@ -411,6 +411,16 @@ function geoSnapRotation(deg) {
     return deg;
 }
 
+// ── Helper : rend un bouton cliquable au toucher même quand le parent
+//    appelle preventDefault() sur touchstart ────────────────────────────────
+function addTouchClick(btn, handler) {
+    btn.addEventListener('touchend', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        handler(e);
+    }, { passive: false });
+}
+
 // ── Obtenir la transformation monde d'un overlay ─────────────────────────
 function getOverlayTransform(overlay) {
     const x = parseFloat(overlay.style.left || 0);
@@ -457,6 +467,7 @@ function spawnRegle(board, cx, cy) {
     closeBtn.style.setProperty('cursor', 'pointer', 'important');
     closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
+    addTouchClick(closeBtn, () => overlay.remove());
 
     btnBar.appendChild(closeBtn);
 
@@ -481,6 +492,7 @@ function spawnRegle(board, cx, cy) {
         }
         traceOnCanvas([pts]);
     };
+    addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
     // ── SVG règle (en dessous de la barre) ──
     const svgWrap = document.createElement('div');
@@ -609,6 +621,7 @@ function spawnEquerre(board, cx, cy) {
     closeBtn.style.cssText = 'position:absolute; bottom:0px; right:28px; cursor:pointer !important;';
     closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
+    addTouchClick(closeBtn, () => overlay.remove());
 
     // Boutons tracer
     const traceWrap = document.createElement('div');
@@ -620,6 +633,7 @@ function spawnEquerre(board, cx, cy) {
         b.textContent = label;
         b.style.setProperty('cursor', 'pointer', 'important');
         b.onclick = e => { e.stopPropagation(); drawFn(); };
+        addTouchClick(b, drawFn);
         return b;
     }
 
@@ -805,6 +819,7 @@ function spawnCompas(board, cx, cy) {
     closeBtn.style.cssText = 'position:absolute; top:-8px; left:-8px; cursor:pointer !important;';
     closeBtn.onmousedown = e => { e.stopPropagation(); };
     closeBtn.onclick = e => { e.stopPropagation(); overlay.remove(); };
+    addTouchClick(closeBtn, () => overlay.remove());
 
     // Bouton tracer — centré en bas du SVG
     const traceBtn = document.createElement('button');
@@ -844,6 +859,7 @@ function spawnCompas(board, cx, cy) {
             if (typeof saveBoard === 'function') saveBoard();
         }
     };
+    addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
     overlay.appendChild(svg);
     overlay.appendChild(radiusWrap);
