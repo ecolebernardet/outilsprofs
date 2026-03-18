@@ -1716,7 +1716,8 @@
             <button class="yt-tab-btn" onclick="ytSwitchTab(this,'search')" title="Rechercher une vidéo">🔍 Recherche</button>
             <!-- Barre URL -->
             <div class="yt-url-bar" style="display:flex;flex:1;gap:4px;min-width:0;">
-                <input type="text" class="yt-url-input" placeholder="Collez le lien YouTube ici…" style="flex-grow:1;" onchange="loadYoutube(this)">
+                <input type="text" class="yt-url-input" placeholder="Collez le lien YouTube ici…" style="flex-grow:1;" onchange="loadYoutube(this)" onkeydown="if(event.key==='Enter')loadYoutube(this)">
+                <button onmousedown="event.stopPropagation()" onclick="loadYoutube(this.previousElementSibling)" title="Lancer la vidéo">▶</button>
             </div>
             <!-- Barre Recherche -->
             <div class="yt-search-bar" style="display:none;flex:1;gap:4px;min-width:0;">
@@ -1726,7 +1727,7 @@
             <!-- Boutons droite -->
             <button class="yt-fav-btn" onclick="ytToggleFav(this)" title="Ajouter à la bibliothèque">♥</button>
             <button onclick="ytToggleLibrary(this)" title="Ma bibliothèque">📚</button>
-            <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔇</button>
+            <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔊</button>
             <button onclick="toggleYoutubeView(this,'flex')" title="Mode Vidéo">📺</button>
             <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
             <button onclick="toggleTransparency(this)" title="Fond transparent"><span class="icon-transparency"></span></button>
