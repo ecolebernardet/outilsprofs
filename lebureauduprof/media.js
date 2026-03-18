@@ -413,6 +413,18 @@ function toggleFullScreen(el) {
         document.exitFullscreen();
     }
 }
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && _fsEl) {
+        _fsEl.style.width  = _fsW;
+        _fsEl.style.height = _fsH;
+        const widget = _fsEl.closest('.widget');
+        if (widget) {
+            widget.style.width  = _fsWidgetW;
+            widget.style.height = _fsWidgetH;
+        }
+        _fsEl = null;
+    }
+});
 function loadIframe(input) {
     const iframe = input.closest('.editor-container').querySelector('iframe');
     let url = input.value.trim();
