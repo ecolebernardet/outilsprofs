@@ -542,7 +542,7 @@
 			animation: draw-fab-pulse-shadow 2.8s ease-in-out infinite;
 		}
 		#draw-fab-btn:hover { background: #2a2a4a; transform: scale(1.1); animation: none; box-shadow: 0 0 10px rgba(74,144,226,0.8); }
-		#draw-fab-btn.draw-open { background: #888; border-color: #666; color: #fff; animation: none; }
+		#draw-fab-btn.draw-open { background: #888; border-color: #666; color: #fff; animation: none; transform: rotate(180deg); }
 		body.presentation-mode #draw-fab-btn { display: none; }
 		body.menu-light #draw-fab-btn { background: #fff; border-color: #4a90e2; color: #4a90e2; }
 		body.menu-light #draw-fab-btn:hover { background: #e8f0fb; }
@@ -2431,6 +2431,10 @@ function openMmPanel(type) {
     closeMainMenu();
     if (type === 'draw') {
         if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar();
+        // Vérifier l'orientation après affichage (la toolbar vient d'être rendue visible)
+        requestAnimationFrame(function() {
+            if (typeof autoOrientDrawToolbar === 'function') autoOrientDrawToolbar();
+        });
     } else if (type === 'shapes') {
         if (typeof toggleShapeToolbar === 'function') toggleShapeToolbar();
     }
@@ -2762,10 +2766,40 @@ function _updateEraserBtnInPanel() {
         });
     }
 
+    // Bascule automatique en horizontal si la toolbar est trop haute pour l'écran
+    function autoOrientDrawToolbar() {
+        const bar = document.getElementById('draw-toolbar');
+        if (!bar || bar.style.display === 'none') return;
+        // Mesurer la hauteur en mode vertical
+        const wasHorizontal = bar.classList.contains('horizontal');
+        bar.classList.remove('horizontal');
+        void bar.offsetHeight; // force reflow
+        const toolbarH = bar.scrollHeight;
+        const availH = window.innerHeight - 40; // marge de 40px
+        if (toolbarH > availH) {
+            bar.classList.add('horizontal');
+            // Positionner juste à droite des boutons FAB
+            const drawFab = document.getElementById('draw-fab-btn');
+            if (drawFab) {
+                const fabRect = drawFab.getBoundingClientRect();
+                bar.style.left   = (fabRect.right + 10) + 'px';
+                bar.style.bottom = '20px';
+                bar.style.top    = 'auto';
+            }
+        } else if (wasHorizontal) {
+            // Conserver horizontal si l'utilisateur l'avait mis ainsi manuellement
+            bar.classList.add('horizontal');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const drawBar    = document.getElementById('draw-toolbar');
         const drawHandle = document.getElementById('draw-toolbar-drag-handle');
         if (drawBar && drawHandle) makeDrawDraggable(drawBar, drawHandle);
+
+        // Vérification initiale et à chaque redimensionnement
+        autoOrientDrawToolbar();
+        window.addEventListener('resize', autoOrientDrawToolbar);
 
         const shapeBar    = document.getElementById('shape-toolbar');
         const shapeHandle = document.getElementById('shape-toolbar-drag-handle');
