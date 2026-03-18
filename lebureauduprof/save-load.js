@@ -149,7 +149,7 @@ function loadBoard() {
         restoreBoardFromJSON(raw);
     } else {
         // localStorage vide = première visite → on charge le modèle distant
-        fetch('https://outilsprofs.fr/lebureauduprof/sauvegardes/lebureauduprof_bienvenue.json')
+        fetch('https://ecolebernardet.github.io/outilsprofs/lebureauduprof/lebureauduprof_TABLEAU-VIDE.json')
             .then(r => r.json())
             .then(data => {
                 const json = JSON.stringify(data);
