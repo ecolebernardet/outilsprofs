@@ -404,10 +404,14 @@ let _fsEl = null, _fsW = '', _fsH = '', _fsWidgetW = '', _fsWidgetH = '';
 function toggleFullScreen(el) {
     if (!document.fullscreenElement) {
         _fsEl = el;
-        _fsW  = el.style.width;
-        _fsH  = el.style.height;
+        // Sauvegarder la taille inline si définie, sinon la taille réelle calculée
+        _fsW  = el.style.width  || el.offsetWidth  + 'px';
+        _fsH  = el.style.height || el.offsetHeight + 'px';
         const widget = el.closest('.widget');
-        if (widget) { _fsWidgetW = widget.style.width; _fsWidgetH = widget.style.height; }
+        if (widget) {
+            _fsWidgetW = widget.style.width  || '';
+            _fsWidgetH = widget.style.height || '';
+        }
         el.requestFullscreen().catch(err => console.log(err));
     } else {
         document.exitFullscreen();
@@ -415,12 +419,19 @@ function toggleFullScreen(el) {
 }
 document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && _fsEl) {
+        // Restaurer la taille de l'editor-container
         _fsEl.style.width  = _fsW;
         _fsEl.style.height = _fsH;
         const widget = _fsEl.closest('.widget');
         if (widget) {
+            // Supprimer toute dimension parasite laissée par le navigateur en plein écran
             widget.style.width  = _fsWidgetW;
             widget.style.height = _fsWidgetH;
+            // Forcer le recalcul du layout pour effacer les styles résiduels du fullscreen
+            widget.style.maxWidth  = '';
+            widget.style.maxHeight = '';
+            widget.style.minWidth  = '';
+            widget.style.minHeight = '';
         }
         _fsEl = null;
     }
