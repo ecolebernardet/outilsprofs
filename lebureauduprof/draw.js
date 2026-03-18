@@ -26,8 +26,9 @@ function _setBtnActive(id, active, colorScheme) {
 // Génère et applique un curseur SVG : point de la couleur courante + cercle gris r=8
 function updateDrawCursor() {
     if (!isDrawMode || !board) return;
-    const color = (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
-        || document.getElementById('cpick-native-draw-color')?.value
+    const color = window._drawColor
+        || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
+        || document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background
         || '#e84393';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">`
         + `<circle cx="10" cy="10" r="8" fill="none" stroke="#999" stroke-width="1.5"/>`
@@ -76,6 +77,11 @@ function initCanvas() {
     document.getElementById('draw-size').addEventListener('input', function() {
         document.getElementById('draw-size-label').textContent = this.value;
     });
+    // Initialiser window._drawColor depuis la couleur de la swatch si pas encore défini
+    if (!window._drawColor) {
+        const swatch = document.querySelector('#cpick-draw-color .cpick-swatch');
+        if (swatch && swatch.style.background) window._drawColor = swatch.style.background;
+    }
     const opSlider = document.getElementById('shape-recog-opacity');
     if (opSlider) opSlider.addEventListener('input', function() {
         document.getElementById('shape-recog-opacity-val').textContent = this.value + '%';
@@ -158,19 +164,20 @@ function _boardDrawContextMenu(e) {
 }
 
 function _boardDrawMouseDown(e)  {
-    if (e.button === 2) return; // géré par pointerdown
+    if (e.button === 2) return;
+    if (_pdfAnnotMode) return;
     if (isDrawMode)   { startPaint(e); return; }
     if (isEraserMode) { startErase(e); return; }
 }
 function _boardDrawMouseUp(e) {
-    if (e.button === 2) return; // géré par pointerup
-    if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) {
-        return;
-    }
+    if (e.button === 2) return;
+    if (_pdfAnnotMode) return;
+    if (isDrawMode && FIGURE_MODES.includes(currentDrawMode)) return;
     if (isDrawMode) endPaint(); else if (isEraserMode) endErase();
 }
 function _boardDrawMouseMove(e)  {
-    if (isDrawMode)   { if (currentDrawMode === 'free') updateDrawCursor(); paint(e); return; }
+    if (_pdfAnnotMode) return;
+    if (isDrawMode)   { if (currentDrawMode === 'free' || currentDrawMode === 'highlight') updateDrawCursor(); paint(e); return; }
     if (isEraserMode) { onEraserMouseMove(e); return; }
 }
 function _boardDrawMouseLeave(e) {
@@ -201,9 +208,14 @@ function _boardDrawTouchEnd(e) {
 }
 
 function startPaint(e) {
-    if (!isDrawMode || isEraserMode) return;
-    isPainting = true;
-    currentStroke = { points:[getPos(e)], color:(cpickGetValue('draw-color') || document.getElementById('cpick-native-draw-color')?.value || '#e84393'), size:parseInt(document.getElementById('draw-size').value) };
+    if (!isDrawMode || isEraserMode) return;    isPainting = true;
+    const _isHighlight = (currentDrawMode === 'highlight');
+    currentStroke = {
+        points: [getPos(e)],
+        color: (window._drawColor || cpickGetValue('draw-color') || document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background || '#e84393'),
+        size: parseInt(document.getElementById('draw-size').value)
+    };
+    if (_isHighlight) currentStroke.highlight = true;
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
     if (FIGURE_MODES.includes(currentDrawMode)) {
         _figureStart = getPos(e); _figureEnd = null;
@@ -296,7 +308,7 @@ var _segmentEnd   = null;  // conservé pour compat
 var _figureStart  = null;  // point de départ pour tous les modes figure
 var _figureEnd    = null;  // point de relâchement
 
-const FIGURE_MODES = ['segment','carre','rectangle','cercle','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon'];
+const FIGURE_MODES = ['segment','carre','rectangle','cercle','ovale','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon'];
 
 // Construit les points d'une petite croix centrée sur un point (pour le centre du cercle)
 function _buildCrossPoints(center, strokeSize) {
@@ -349,6 +361,19 @@ function _buildFigurePoints(mode, A, B) {
         for (let i = 0; i <= steps; i++) {
             const a = (i / steps) * 2 * Math.PI;
             pts.push({ x: A.x + Math.cos(a) * r, y: A.y + Math.sin(a) * r });
+        }
+        return pts;
+    }
+
+    if (mode === 'ovale') {
+        // A = coin haut-gauche, B = coin bas-droit → ellipse inscrite
+        const cx = (A.x + B.x) / 2, cy = (A.y + B.y) / 2;
+        const rx = Math.abs(dx) / 2, ry = Math.abs(dy) / 2;
+        const steps = Math.max(60, Math.round(2 * Math.PI * Math.max(rx, ry) / 3));
+        const pts = [];
+        for (let i = 0; i <= steps; i++) {
+            const a = (i / steps) * 2 * Math.PI;
+            pts.push({ x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry });
         }
         return pts;
     }
@@ -742,7 +767,24 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = highlight ? '#4a90e2' : stroke.color;
+        if (stroke.highlight) { ctx.globalAlpha = 0.4; ctx.globalCompositeOperation = 'multiply'; }
         ctx.fill();
+        ctx.restore();
+        return;
+    }
+    // Mode surligneur : trait très large, semi-transparent, effet fluo
+    if (stroke.highlight) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineCap = 'square';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = Math.max(stroke.size * 6, 24);
+        ctx.globalAlpha = 0.4;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        stroke.points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.stroke();
         ctx.restore();
         return;
     }
@@ -766,24 +808,50 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
 // =========================================================================
 // MODES DESSIN
 // =========================================================================
-var currentDrawMode = 'free'; // 'free' | 'shape' | 'text'
+var currentDrawMode = 'free'; // 'free' | 'highlight' | 'shape' | 'text'
 
 function setDrawMode(mode) {
+    // Si on est en mode annotation PDF et qu'on clique sur le surligneur,
+    // on bascule l'outil PDF highlighter au lieu de changer le mode dessin
+    if (mode === 'highlight' && typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
+        setPdfAnnotTool('highlighter');
+        return;
+    }
     // Désactiver la gomme si elle est active
     if (isEraserMode) stopEraserMode();
     // Recliqué sur le mode déjà actif → retour en dessin libre
     if (mode === currentDrawMode && mode !== 'free') mode = 'free';
     currentDrawMode = mode;
-    // Bouton dessin libre
+    // Bouton dessin libre — styles inline directs pour cohérence
     const freeBtn = document.getElementById('draw-free-btn');
     if (freeBtn) {
         if (mode === 'free') {
-            _setBtnActive('draw-free-btn', true);
+            freeBtn.style.borderColor = '#4a90e2';
+            freeBtn.style.background  = '#1a3550';
+            freeBtn.style.color       = '#fff';
+            freeBtn.classList.add('btn-mode-active');
         } else {
-            _setBtnActive('draw-free-btn', false);
+            freeBtn.style.borderColor = '#444';
+            freeBtn.style.background  = '#2a2a2e';
+            freeBtn.style.color       = '#aaa';
+            freeBtn.classList.remove('btn-mode-active');
         }
     }
-    // Fermer le sous-menu figures si on choisit un mode non-figure (sauf si on choisit une figure)
+    // Bouton surligneur — styles inline directs pour cohérence
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        if (mode === 'highlight') {
+            hlBtn.style.borderColor = '#f5c518';
+            hlBtn.style.background  = '#2a2200';
+            hlBtn.style.color       = '#f5c518';
+            hlBtn.classList.add('btn-mode-active');
+        } else {
+            hlBtn.style.borderColor = '#444';
+            hlBtn.style.background  = '#2a2a2e';
+            hlBtn.style.color       = '#aaa';
+            hlBtn.classList.remove('btn-mode-active');
+        }
+    }    // Fermer le sous-menu figures si on choisit un mode non-figure (sauf si on choisit une figure)
     if (!FIGURE_MODES.includes(mode)) {
         const figSub = document.getElementById('figures-submenu');
         if (figSub) figSub.classList.remove('open');
@@ -821,27 +889,117 @@ function setDrawMode(mode) {
         board.classList.add('is-drawing');
     }
     // Idem pour le mode dessin libre
-    if (mode === 'free' && !isDrawMode) {
+    if ((mode === 'free' || mode === 'highlight') && !isDrawMode) {
         isDrawMode = true;
         isPainting = false;
         if (drawCanvas) drawCanvas.classList.remove('inactive');
         board.classList.add('is-drawing');
     }
-    // Appliquer le curseur point si on est en mode libre
-    if (mode === 'free') updateDrawCursor();
+    // Appliquer le curseur point si on est en mode libre ou surligneur
+    if (mode === 'free' || mode === 'highlight') updateDrawCursor();
     // Fermer la toolbar géométrie (shapes.js) si un mode figure dessin est activé
     if (FIGURE_MODES.includes(mode)) {
         if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
     }
     // Désactiver le bouton sélection
     _setBtnActive('draw-select-btn', false);
-    // Si mode libre, fermer les deux sous-menus
-    if (mode === 'free') {
+    // Si mode libre ou surligneur, fermer les deux sous-menus
+    if (mode === 'free' || mode === 'highlight') {
         const figSub = document.getElementById('figures-submenu');
         if (figSub) figSub.classList.remove('open');
         _setBtnActive('draw-figures-btn', false, 'figures');
         if (typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
     }
+}
+
+function activatePencil() {
+    // En mode annotation PDF, repasser l'outil à 'pen' sans fermer le mode
+    if (typeof _pdfAnnotTool !== 'undefined') _pdfAnnotTool = 'pen';
+    if (typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
+    // Désactiver le mode figure
+    currentDrawMode = 'free';
+    _setBtnActive('draw-figures-btn', false, 'figures');
+    const figSubA = document.getElementById('figures-submenu');
+    if (figSubA) { figSubA.classList.remove('open'); figSubA.style.display = 'none'; }
+    FIGURE_MODES.forEach(m => {
+        const btn = document.getElementById('draw-mode-'+m+'-btn');
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+    });
+    // Bouton crayon actif
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) {
+        freeBtn.style.borderColor = '#4a90e2';
+        freeBtn.style.background  = '#1a3550';
+        freeBtn.style.color       = '#fff';
+        freeBtn.classList.add('btn-mode-active');
+    }
+    // Bouton surligneur inactif
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        hlBtn.style.borderColor = '#444';
+        hlBtn.style.background  = '#2a2a2e';
+        hlBtn.style.color       = '#aaa';
+        hlBtn.classList.remove('btn-mode-active');
+    }
+    if (isEraserMode) stopEraserMode();
+    if (!isDrawMode) {
+        isDrawMode = true;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    }
+    updateDrawCursor();
+}
+
+function activateHighlighter() {
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
+        setPdfAnnotTool('highlighter');
+        // Désactiver le bouton crayon
+        const freeBtn = document.getElementById('draw-free-btn');
+        if (freeBtn) {
+            freeBtn.style.borderColor = '#444';
+            freeBtn.style.background  = '#2a2a2e';
+            freeBtn.style.color       = '#aaa';
+            freeBtn.classList.remove('btn-mode-active');
+        }
+        // Désactiver le mode figure
+        currentDrawMode = 'free';
+        _setBtnActive('draw-figures-btn', false, 'figures');
+        const figSub = document.getElementById('figures-submenu');
+        if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
+        FIGURE_MODES.forEach(m => {
+            const btn = document.getElementById('draw-mode-'+m+'-btn');
+            if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+        });
+        return;
+    }
+    currentDrawMode = 'highlight';
+    // Bouton surligneur actif
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        hlBtn.style.borderColor = '#f5c518';
+        hlBtn.style.background  = '#2a2200';
+        hlBtn.style.color       = '#f5c518';
+        hlBtn.classList.add('btn-mode-active');
+    }
+    // Bouton crayon inactif
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) {
+        freeBtn.style.borderColor = '#444';
+        freeBtn.style.background  = '#2a2a2e';
+        freeBtn.style.color       = '#aaa';
+        freeBtn.classList.remove('btn-mode-active');
+    }
+    // Bouton figures inactif
+    _setBtnActive('draw-figures-btn', false, 'figures');
+    const figSub = document.getElementById('figures-submenu');
+    if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
+    if (isEraserMode) stopEraserMode();
+    if (!isDrawMode) {
+        isDrawMode = true;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    }
+    updateDrawCursor();
 }
 
 function toggleDrawToolbar() {
@@ -1538,5 +1696,485 @@ function clearSelection() {
     if (selectionRect) selectionRect.style.display = 'none';
     board.classList.remove('single-select');
     board.classList.remove('multi-select');
+}
+
+
+// =========================================================================
+// MODE ANNOTATION PDF
+// =========================================================================
+// État global
+var _pdfAnnotMode     = false;  // mode actif ?
+var _pdfAnnotWidget   = null;   // widget PDF cible
+var _pdfAnnotCanvas   = null;   // canvas d'annotations (référence, pour les events)
+var _pdfAnnotEvTarget = null;   // élément sur lequel les events draw.js sont attachés
+var _pdfAnnotTool     = 'pen';  // 'pen' | 'highlighter' | 'text' | 'eraser'
+var _pdfAnnotPainting = false;
+
+// ── Outils boutons PDF extras dans la toolbar ──────────────────────────────
+
+// Boutons supplémentaires (surligneur, texte, annuler, effacer) affichés
+// uniquement quand le mode est actif.
+var _PDF_EXTRA_BTNS = ['pdf-text-btn','pdf-annot-undo-btn'];
+
+function _dtClearAction() {
+    if (_pdfAnnotMode) {
+        pdfAnnotClear();
+    } else {
+        clearCanvas();
+    }
+}
+
+function _showPdfExtraBtns(show) {
+    _PDF_EXTRA_BTNS.forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.style.display = show ? 'flex' : 'none';
+    });
+    // Adapter le titre du bouton effacer selon le contexte
+    const clearBtn = document.getElementById('dt-clear-btn');
+    if (clearBtn) {
+        clearBtn.title = show ? 'Effacer toutes les annotations PDF' : 'Effacer tout le dessin';
+    }
+}
+
+// Met à jour l'aspect visuel des boutons outil PDF
+function _updatePdfToolBtns() {
+    // Bouton texte PDF
+    const textBtn = document.getElementById('pdf-text-btn');
+    if (textBtn) {
+        if (_pdfAnnotTool === 'text') {
+            textBtn.style.borderColor  = '#f5c518';
+            textBtn.style.background   = '#2a2200';
+            textBtn.style.color        = '#f5c518';
+            textBtn.style.boxShadow    = '0 0 8px rgba(245,197,24,0.6)';
+            textBtn.style.fontSize     = '16px';
+        } else {
+            textBtn.style.borderColor  = '#444';
+            textBtn.style.background   = '#2a2a2e';
+            textBtn.style.color        = '#aaa';
+            textBtn.style.boxShadow    = 'none';
+            textBtn.style.fontSize     = '13px';
+        }
+    }
+    // Bouton surligneur draw-toolbar (partagé)
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        if (_pdfAnnotTool === 'highlighter') {
+            hlBtn.style.borderColor = '#f5c518';
+            hlBtn.style.background  = '#2a2200';
+            hlBtn.style.color       = '#f5c518';
+            hlBtn.classList.add('btn-mode-active');
+        } else {
+            hlBtn.style.borderColor = '#444';
+            hlBtn.style.background  = '#2a2a2e';
+            hlBtn.style.color       = '#aaa';
+            hlBtn.classList.remove('btn-mode-active');
+        }
+    }
+}
+
+// ── Sélection du widget PDF cible ─────────────────────────────────────────
+
+// Cherche le premier widget PDF ayant un canvas d'annotations visible.
+// Si plusieurs PDF sont ouverts, on prend celui ayant le z-index le plus haut
+// (le dernier au premier plan).
+function _findActivePdfWidget() {
+    const pdfs = [...document.querySelectorAll('.widget[data-type="pdf"]')];
+    if (pdfs.length === 0) return null;
+    // Filtrer ceux qui ont un canvas d'annotations (PDF chargé)
+    const loaded = pdfs.filter(w => {
+        const wrap = w.querySelector('.pdf-canvas-wrap');
+        return wrap && wrap.style.display !== 'none';
+    });
+    if (loaded.length === 0) return null;
+    // Prendre celui au z-index le plus élevé
+    return loaded.reduce((best, w) => {
+        return parseInt(w.style.zIndex || 0) >= parseInt(best.style.zIndex || 0) ? w : best;
+    });
+}
+
+// ── Activer / désactiver le mode ──────────────────────────────────────────
+
+function togglePdfAnnotMode() {
+    if (_pdfAnnotMode) {
+        _stopPdfAnnotMode();
+    } else {
+        _startPdfAnnotMode();
+    }
+}
+
+function _startPdfAnnotMode() {
+    const target = _findActivePdfWidget();
+    if (!target) {
+        _showPdfAnnotToast('⚠️ Ouvrez d\'abord un PDF dans un widget');
+        return;
+    }
+    const annotCanvas = target.querySelector('.pdf-annot-canvas');
+    if (!annotCanvas) {
+        _showPdfAnnotToast('⚠️ Canvas d\'annotation introuvable');
+        return;
+    }
+
+    // Désactiver le dessin sur le board pendant le mode annotation PDF
+    if (isEraserMode) stopEraserMode();
+    if (isDrawMode) stopDrawing_keepToolbar();
+
+    _pdfAnnotMode   = true;
+    _pdfAnnotWidget = target;
+    _pdfAnnotCanvas = annotCanvas;
+    _pdfAnnotTool   = 'pen'; // outil par défaut : stylo
+
+    // Marquer le widget cible
+    target.classList.add('pdf-annot-target');
+
+    // Désactiver les pointer-events du canvas d'annotation pour que les listeners
+    // natifs de media.js ne se déclenchent plus (ils utilisent #e74c3c par défaut).
+    // draw.js écoute sur le board qui capture les événements à la place.
+    annotCanvas.style.pointerEvents = 'none';
+
+    // Désactiver aussi les listeners natifs via l'API si disponible
+    const api0 = target._pdfAnnotAPI;
+    if (api0 && api0.detachNativeEvents) api0.detachNativeEvents();
+
+    // Mettre à jour le bouton
+    const btn = document.getElementById('pdf-annot-mode-btn');
+    if (btn) btn.classList.add('pdf-annot-active');
+
+    // Afficher les boutons extras
+    _showPdfExtraBtns(true);
+    _updatePdfToolBtns();
+
+    // Mettre pointerEvents:none sur le canvas pour bloquer les handlers natifs de media.js.
+    // Les événements de draw.js sont attachés sur le widget parent qui les reçoit à la place.
+    _pdfAnnotCanvas.style.pointerEvents = 'none';
+    _pdfAnnotCanvas.style.cursor = 'crosshair';
+
+    // Attacher les événements sur le widget parent
+    _pdfAnnotEvTarget = target;
+    _pdfAnnotEvTarget.addEventListener('mousedown',  _pdfAnnotMouseDown);
+    _pdfAnnotEvTarget.addEventListener('mousemove',  _pdfAnnotMouseMove);
+    _pdfAnnotEvTarget.addEventListener('mouseup',    _pdfAnnotMouseUp);
+    _pdfAnnotEvTarget.addEventListener('mouseleave', _pdfAnnotMouseLeave);
+    _pdfAnnotEvTarget.addEventListener('touchstart', _pdfAnnotTouchStart, { passive: false });
+    _pdfAnnotEvTarget.addEventListener('touchmove',  _pdfAnnotTouchMove,  { passive: false });
+    _pdfAnnotEvTarget.addEventListener('touchend',   _pdfAnnotTouchEnd);
+    _pdfAnnotEvTarget.style.cursor = 'crosshair';
+
+    _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
+}
+
+function _stopPdfAnnotMode() {
+    if (!_pdfAnnotMode) return;
+
+    // Détacher les événements du widget parent
+    if (_pdfAnnotEvTarget) {
+        _pdfAnnotEvTarget.removeEventListener('mousedown',  _pdfAnnotMouseDown);
+        _pdfAnnotEvTarget.removeEventListener('mousemove',  _pdfAnnotMouseMove);
+        _pdfAnnotEvTarget.removeEventListener('mouseup',    _pdfAnnotMouseUp);
+        _pdfAnnotEvTarget.removeEventListener('mouseleave', _pdfAnnotMouseLeave);
+        _pdfAnnotEvTarget.removeEventListener('touchstart', _pdfAnnotTouchStart);
+        _pdfAnnotEvTarget.removeEventListener('touchmove',  _pdfAnnotTouchMove);
+        _pdfAnnotEvTarget.removeEventListener('touchend',   _pdfAnnotTouchEnd);
+        _pdfAnnotEvTarget.style.cursor = '';
+        _pdfAnnotEvTarget = null;
+    }
+
+    // Remettre le canvas cliquable pour zoom/scroll natif
+    if (_pdfAnnotCanvas) {
+        _pdfAnnotCanvas.style.pointerEvents = 'auto';
+        _pdfAnnotCanvas.style.cursor = 'crosshair';
+        // Réactiver les listeners natifs via l'API
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.reattachNativeEvents) api.reattachNativeEvents();
+    }
+
+    // Nettoyer le widget cible
+    if (_pdfAnnotWidget) _pdfAnnotWidget.classList.remove('pdf-annot-target');
+
+    _pdfAnnotMode     = false;
+    _pdfAnnotWidget   = null;
+    _pdfAnnotCanvas   = null;
+    _pdfAnnotEvTarget = null;
+    _pdfAnnotPainting = false;
+
+    // Réactiver le dessin sur le board
+    if (!isDrawMode) {
+        isDrawMode = true;
+        if (drawCanvas) drawCanvas.classList.remove('inactive');
+        board.classList.add('is-drawing');
+    }
+
+    // Bouton
+    const btn = document.getElementById('pdf-annot-mode-btn');
+    if (btn) btn.classList.remove('pdf-annot-active');
+
+    // Réinitialiser le bouton surligneur partagé
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        hlBtn.style.borderColor = '#444';
+        hlBtn.style.background  = '#2a2a2e';
+        hlBtn.style.color       = '#aaa';
+        hlBtn.classList.remove('btn-mode-active');
+    }
+    // Réinitialiser le bouton texte
+    const textBtn = document.getElementById('pdf-text-btn');
+    if (textBtn) {
+        textBtn.style.borderColor = '#444';
+        textBtn.style.background  = '#2a2a2e';
+        textBtn.style.color       = '#aaa';
+        textBtn.style.boxShadow   = 'none';
+        textBtn.style.fontSize    = '13px';
+    }
+
+    // Cacher boutons extras
+    _showPdfExtraBtns(false);
+}
+
+// Variante de stopDrawing qui ne cache pas la toolbar (pour basculer depuis draw mode)
+function stopDrawing_keepToolbar() {
+    isDrawMode = false;
+    if (drawCanvas) drawCanvas.classList.add('inactive');
+    board.classList.remove('is-drawing');
+    board.classList.remove('is-segment-mode');
+    clearDrawCursor();
+    cancelHandwritingRecognition();
+    const figSub = document.getElementById('figures-submenu');
+    if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
+    if (typeof _closeGeoSubmenu === 'function') _closeGeoSubmenu();
+}
+
+// ── Changement d'outil ────────────────────────────────────────────────────
+
+function setPdfAnnotTool(tool) {
+    if (!_pdfAnnotMode) return;
+    // Bascule : recliqué sur le même outil → retour stylo
+    _pdfAnnotTool = (_pdfAnnotTool === tool) ? 'pen' : tool;
+
+    // Curseur adapté
+    if (_pdfAnnotCanvas) {
+        _pdfAnnotCanvas.style.cursor = (_pdfAnnotTool === 'text') ? 'text' : 'crosshair';
+    }
+    _updatePdfToolBtns();
+}
+
+// ── Coordonnées relatives au canvas d'annotations ─────────────────────────
+
+function _getPdfAnnotPos(e) {
+    const rect = _pdfAnnotCanvas.getBoundingClientRect();
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    // Tenir compte du ratio canvas CSS vs canvas interne (zoom PDF)
+    const scaleX = _pdfAnnotCanvas.width  / rect.width;
+    const scaleY = _pdfAnnotCanvas.height / rect.height;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top)  * scaleY
+    };
+}
+
+// ── Undo / Clear — délèguent à l'API de media.js ──────────────────────────
+
+function pdfAnnotUndo() {
+    if (!_pdfAnnotMode) return;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (api) api.undo();
+}
+
+function pdfAnnotClear() {
+    if (!_pdfAnnotMode) return;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (api) api.clear();
+}
+
+// ── Helpers : couleur + taille depuis la draw-toolbar ─────────────────────
+
+function _pdfAnnotGetColor() {
+    // window._drawColor est mis à jour par cpickDispatch à chaque changement de couleur
+    if (window._drawColor) return window._drawColor;
+    // Fallback : lire via cpickGetValue
+    if (typeof cpickGetValue === 'function') {
+        const c = cpickGetValue('draw-color');
+        if (c) return c;
+    }
+    // Fallback : couleur de fond de la swatch (mise à jour par _setDrawColor et cpickSet)
+    const swatch = document.querySelector('#cpick-draw-color .cpick-swatch');
+    if (swatch) {
+        const bg = swatch.style.background || swatch.style.backgroundColor;
+        if (bg && bg !== '') return bg;
+    }
+    return '#111111';
+}
+
+function _pdfAnnotGetSize() {
+    return parseInt(document.getElementById('draw-size').value) || 4;
+}
+
+// Récupère l'outil effectif : 'pen' | 'highlighter' | 'eraser' | 'text'
+// (la gomme PDF utilise eraser-size mais reste 'eraser' côté tool)
+function _pdfAnnotEffectiveTool() {
+    // Si le mode gomme global est actif, on l'utilise comme gomme PDF
+    if (isEraserMode) return 'eraser';
+    return _pdfAnnotTool;
+}
+
+// ── Coordonnées en pixels canvas (tient compte du CSS scaling) ────────────
+// Délègue au canvas exposé par l'API de media.js
+
+function _getPdfAnnotPos(e) {
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    const canvas = api ? api.getAnnotCanvas() : _pdfAnnotCanvas;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    const scaleX = canvas.width  / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top)  * scaleY
+    };
+}
+
+// ── Dessin — tout passe par l'API de media.js ─────────────────────────────
+
+var _pdfFigureStart = null; // point de départ pour les figures PDF
+
+function _pdfAnnotStartStroke(e) {
+    const tool = _pdfAnnotEffectiveTool();
+    if (tool === 'text') { _pdfAnnotInsertText(e); return; }
+
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+
+    const pos = _getPdfAnnotPos(e);
+
+    // Mode figure : enregistrer le point de départ
+    if (FIGURE_MODES.includes(currentDrawMode)) {
+        _pdfFigureStart = pos;
+        _pdfAnnotPainting = true;
+        return;
+    }
+
+    _pdfAnnotPainting = true;
+    api.startStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos.x, pos.y);
+}
+
+function _pdfAnnotContinueStroke(e) {
+    if (!_pdfAnnotPainting) return;
+    const tool = _pdfAnnotEffectiveTool();
+    if (tool === 'text') return;
+
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+
+    const pos = _getPdfAnnotPos(e);
+
+    // Mode figure : preview en temps réel
+    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart) {
+        const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
+        if (pts) api.previewFigure(_pdfAnnotGetColor(), _pdfAnnotGetSize(), pts);
+        return;
+    }
+
+    api.continueStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos.x, pos.y);
+}
+
+function _pdfAnnotEndStroke(e) {
+    if (!_pdfAnnotPainting) return;
+    _pdfAnnotPainting = false;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+
+    // Mode figure : dessiner la figure finale
+    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart && e) {
+        const pos = _getPdfAnnotPos(e);
+        const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
+        _pdfFigureStart = null;
+        if (pts && pts.length >= 2) api.addFigureStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), pts);
+        return;
+    }
+    _pdfFigureStart = null;
+    api.endStroke();
+}
+
+// ── Insertion de texte ────────────────────────────────────────────────────
+
+function _pdfAnnotInsertText(e) {
+    // Utiliser prompt() — simple et fiable, gère bien le focus/blur
+    const text = prompt('Texte à ajouter :');
+    if (!text || !text.trim()) return;
+
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+
+    const pos = _getPdfAnnotPos(e);
+    const color = _pdfAnnotGetColor();
+    const size  = _pdfAnnotGetSize();
+
+    // Ajouter via l'API addTextStroke si disponible, sinon via startStroke/endStroke
+    if (api.addTextStroke) {
+        api.addTextStroke(text, color, size, pos.x, pos.y);
+    } else {
+        // Fallback : dessiner directement sur le canvas
+        const canvas = api.getAnnotCanvas();
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            const fontSize = Math.max(12, size * 2);
+            ctx.save();
+            ctx.font      = `${fontSize}px sans-serif`;
+            ctx.fillStyle = color;
+            ctx.fillText(text, pos.x, pos.y);
+            ctx.restore();
+        }
+    }
+}
+
+// ── Gestionnaires d'événements ────────────────────────────────────────────
+
+function _pdfAnnotMouseDown(e)  {
+    if (e.button !== 0) return;
+    if (e.target.closest && e.target.closest('button')) return;
+    _pdfAnnotStartStroke(e);
+}
+function _pdfAnnotMouseMove(e)  { _pdfAnnotContinueStroke(e); }
+function _pdfAnnotMouseUp(e)    { _pdfAnnotEndStroke(e); }
+function _pdfAnnotMouseLeave(e) { _pdfAnnotEndStroke(e); }
+
+function _pdfAnnotTouchStart(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) _pdfAnnotStartStroke(e.touches[0]);
+}
+function _pdfAnnotTouchMove(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) _pdfAnnotContinueStroke(e.touches[0]);
+}
+function _pdfAnnotTouchEnd(e) {
+    if (e.changedTouches && e.changedTouches[0]) _pdfAnnotEndStroke(e.changedTouches[0]);
+    else _pdfAnnotEndStroke(null);
+}
+
+// ── Intégration avec stopDrawing ──────────────────────────────────────────
+// Quand on ferme la draw-toolbar, on coupe aussi le mode annotation PDF
+
+const _origStopDrawing = stopDrawing;
+stopDrawing = function() {
+    _origStopDrawing();
+    if (_pdfAnnotMode) _stopPdfAnnotMode();
+};
+
+// ── Toast d'information ───────────────────────────────────────────────────
+
+function _showPdfAnnotToast(msg) {
+    let toast = document.getElementById('pdf-annot-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'pdf-annot-toast';
+        toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a3a20;color:#5ddd7e;border:1px solid #3dbb5e;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;z-index:99999;pointer-events:none;transition:opacity .3s;white-space:nowrap;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 

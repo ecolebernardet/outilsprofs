@@ -56,14 +56,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     const annotCanvas   = container.querySelector('.pdf-annot-canvas');
     const navBar        = container.querySelector('.pdf-nav');
     const zoomBar       = container.querySelector('.pdf-zoom-bar');
-    const annotBar      = container.querySelector('.pdf-annot-bar');
     const pageInfo      = container.querySelector('.pdf-page-info');
 
     if (placeholder) placeholder.style.display = 'none';
     if (canvasWrap)  canvasWrap.style.display = 'block';
     if (navBar)      navBar.style.display = 'flex';
     if (zoomBar)     zoomBar.style.display = 'flex';
-    if (annotBar)    annotBar.style.display = 'flex';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
 
     function base64ToUint8Array(b64) {
@@ -169,7 +167,20 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 }
                 if (!stroke.pts || stroke.pts.length < 1) return;
                 ctx.save();
-                if (stroke.tool === 'highlighter') {
+                if (stroke.tool === 'figure') {
+                    ctx.strokeStyle = stroke.color;
+                    ctx.lineWidth = stroke.size * canvasW / 600;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    stroke.pts.forEach((p, i) => {
+                        const cp = fromNorm(p.x, p.y);
+                        i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
+                    });
+                    ctx.stroke();
+                    ctx.restore();
+                    return;
+                } else if (stroke.tool === 'highlighter') {
                     ctx.globalAlpha = 0.35;
                     ctx.globalCompositeOperation = 'multiply';
                     ctx.lineWidth = sizeScaled * 5;
@@ -225,18 +236,23 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             // ── Events dessin ─────────────────────────────────────────────
             function onPointerDown(e) {
                 if (e.button !== undefined && e.button !== 0) return;
+                // Ne dessiner que si le mode annotation PDF est actif
+                if (!window._pdfAnnotMode) return;
                 e.preventDefault();
-                const colorInput = container.querySelector('.pdf-annot-color');
-                const sizeSelect = container.querySelector('.pdf-annot-size');
-                const color = colorInput ? colorInput.value : '#e74c3c';
-                const size  = sizeSelect ? parseInt(sizeSelect.value) : 4;
+                const color = window._drawColor
+                    || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
+                    || (document.querySelector('#cpick-draw-color .cpick-swatch') && document.querySelector('#cpick-draw-color .cpick-swatch').style.background)
+                    || '#111111';
+                const sizeEl = document.getElementById('draw-size');
+                const size = sizeEl ? (parseInt(sizeEl.value) || 4) : 4;
+                const tool = (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) ? _pdfAnnotTool : activeTool;
                 const px = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
 
-                if (activeTool === 'text') {
+                if (tool === 'text') {
                     const textVal = prompt('Texte à ajouter :');
                     if (!textVal) return;
-                    // Stocker en normalisé
+                    // Stocker en normalisé avec la couleur de la draw-toolbar
                     const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
                     getLayer(currentPage).strokes.push(stroke);
                     redrawAnnotations(currentPage);
@@ -245,15 +261,27 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
                 isDrawing = true;
                 // Stocker pts en normalisé dès le départ
-                currentStrokeAnnot = { tool: activeTool, color, size, pts: [norm] };
+                currentStrokeAnnot = { tool: tool, color, size, pts: [norm] };
             }
 
             function onPointerMove(e) {
                 if (!isDrawing || !currentStrokeAnnot) return;
+                if (!window._pdfAnnotMode) return;
                 e.preventDefault();
                 const px   = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
                 currentStrokeAnnot.pts.push(norm);
+                // Mettre à jour couleur/taille depuis draw-toolbar en temps réel
+                const color = window._drawColor
+                    || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
+                    || currentStrokeAnnot.color;
+                const sizeEl = document.getElementById('draw-size');
+                const size = sizeEl ? (parseInt(sizeEl.value) || currentStrokeAnnot.size) : currentStrokeAnnot.size;
+                currentStrokeAnnot.color = color;
+                currentStrokeAnnot.size  = size;
+                if (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) {
+                    currentStrokeAnnot.tool = _pdfAnnotTool;
+                }
 
                 // Dessin temps réel : convertir les 2 derniers points en pixels courants
                 const pts = currentStrokeAnnot.pts;
@@ -390,6 +418,111 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
             renderPage(currentPage);
 
+            // ── API publique pour draw.js (mode annotation via draw-toolbar) ──
+            // Exposée sur le widget DOM pour que draw.js puisse y accéder.
+            const widget = container.closest('.widget');
+            if (widget) {
+                widget._pdfAnnotAPI = {
+                    // Démarre un trait
+                    startStroke(color, size, tool, px, py) {
+                        const norm = toNorm(px, py);
+                        currentStrokeAnnot = { tool, color, size, pts: [norm] };
+                        isDrawing = true;
+                    },
+                    // Continue le trait en cours (dessin temps réel + accumule les points)
+                    continueStroke(color, size, tool, px, py) {
+                        if (!isDrawing || !currentStrokeAnnot) return;
+                        const norm = toNorm(px, py);
+                        currentStrokeAnnot.pts.push(norm);
+                        currentStrokeAnnot.color = color;
+                        currentStrokeAnnot.size  = size;
+                        currentStrokeAnnot.tool  = tool;
+
+                        const canvasW    = annotCanvas.width;
+                        const sizeScaled = size * canvasW / 600;
+                        const pts  = currentStrokeAnnot.pts;
+                        const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
+                        const cur  = fromNorm(norm.x, norm.y);
+
+                        actx.save();
+                        if (tool === 'highlighter') {
+                            actx.globalAlpha = 0.35;
+                            actx.globalCompositeOperation = 'multiply';
+                            actx.lineWidth = sizeScaled * 5;
+                        } else if (tool === 'eraser') {
+                            actx.globalCompositeOperation = 'destination-out';
+                            actx.lineWidth = sizeScaled * 6;
+                        } else {
+                            actx.lineWidth = sizeScaled;
+                        }
+                        actx.strokeStyle = color;
+                        actx.lineCap  = 'round';
+                        actx.lineJoin = 'round';
+                        actx.beginPath();
+                        actx.moveTo(prev.x, prev.y);
+                        actx.lineTo(cur.x, cur.y);
+                        actx.stroke();
+                        actx.restore();
+                    },
+                    // Termine le trait et le sauvegarde dans annotLayers
+                    endStroke() {
+                        if (!isDrawing || !currentStrokeAnnot) return;
+                        isDrawing = false;
+                        if (currentStrokeAnnot.pts.length > 0) {
+                            getLayer(currentPage).strokes.push(currentStrokeAnnot);
+                            redrawAnnotations(currentPage);
+                        }
+                        currentStrokeAnnot = null;
+                    },
+                    // Annuler le dernier stroke
+                    undo() {
+                        const layer = getLayer(currentPage);
+                        if (layer.strokes.length > 0) { layer.strokes.pop(); redrawAnnotations(currentPage); }
+                    },
+                    // Effacer toutes les annotations de la page courante
+                    clear() {
+                        getLayer(currentPage).strokes = [];
+                        redrawAnnotations(currentPage);
+                    },
+                    // Accès au canvas pour récupérer les coordonnées
+                    getAnnotCanvas() { return annotCanvas; },
+                    // Ajouter un texte (stocké dans annotLayers, survit au zoom/changement de page)
+                    addTextStroke(text, color, size, px, py) {
+                        const norm = toNorm(px, py);
+                        const stroke = { tool: 'text', color, size, text: text, nx: norm.x, ny: norm.y };
+                        getLayer(currentPage).strokes.push(stroke);
+                        redrawAnnotations(currentPage);
+                    },
+                    // Preview d'une figure en cours de tracé (sans sauvegarder)
+                    previewFigure(color, size, pts) {
+                        redrawAnnotations(currentPage);
+                        const canvasW = annotCanvas.width;
+                        const sizeScaled = size * canvasW / 600;
+                        actx.save();
+                        actx.strokeStyle = color;
+                        actx.lineWidth = sizeScaled;
+                        actx.lineCap = 'round';
+                        actx.lineJoin = 'round';
+                        actx.setLineDash([6, 4]);
+                        actx.globalAlpha = 0.7;
+                        actx.beginPath();
+                        pts.forEach((p, i) => {
+                            i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y);
+                        });
+                        actx.stroke();
+                        actx.setLineDash([]);
+                        actx.restore();
+                    },
+                    // Ajouter une figure (stockée en normalisé dans annotLayers)
+                    addFigureStroke(color, size, pts) {
+                        const normPts = pts.map(p => toNorm(p.x, p.y));
+                        const stroke = { tool: 'figure', color, size, pts: normPts };
+                        getLayer(currentPage).strokes.push(stroke);
+                        redrawAnnotations(currentPage);
+                    }
+                };
+            }
+
         }).catch(err => {
             console.error('PDF.js erreur :', err);
             if (canvasWrap) canvasWrap.innerHTML = '<p style="color:red;padding:16px;">Impossible de lire ce PDF.</p>';
@@ -401,38 +534,33 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 // PLEIN ÉCRAN, YOUTUBE, IFRAME
 // =========================================================================
 let _fsEl = null, _fsW = '', _fsH = '', _fsWidgetW = '', _fsWidgetH = '';
+
 function toggleFullScreen(el) {
     if (!document.fullscreenElement) {
         _fsEl = el;
-        // Sauvegarder la taille inline si définie, sinon la taille réelle calculée
         _fsW  = el.style.width  || el.offsetWidth  + 'px';
         _fsH  = el.style.height || el.offsetHeight + 'px';
         const widget = el.closest('.widget');
         if (widget) {
             _fsWidgetW = widget.style.width  || '';
             _fsWidgetH = widget.style.height || '';
+            // Snapshot complet pour restauration dans index.html fullscreenchange
+            const wStyle = {};
+            ['width','height','top','left','right','bottom','transform',
+             'maxWidth','maxHeight','minWidth','minHeight','position'].forEach(function(p) {
+                wStyle[p] = widget.style[p] || '';
+            });
+            window._fsWidgetSnapshot = { widget: widget, container: el, cW: _fsW, cH: _fsH, wStyle: wStyle };
         }
-        el.requestFullscreen().catch(err => console.log(err));
+        el.requestFullscreen().catch(function(err) { console.log(err); });
     } else {
         document.exitFullscreen();
     }
 }
-document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && _fsEl) {
-        // Restaurer la taille de l'editor-container
-        _fsEl.style.width  = _fsW;
-        _fsEl.style.height = _fsH;
-        const widget = _fsEl.closest('.widget');
-        if (widget) {
-            // Supprimer toute dimension parasite laissée par le navigateur en plein écran
-            widget.style.width  = _fsWidgetW;
-            widget.style.height = _fsWidgetH;
-            // Forcer le recalcul du layout pour effacer les styles résiduels du fullscreen
-            widget.style.maxWidth  = '';
-            widget.style.maxHeight = '';
-            widget.style.minWidth  = '';
-            widget.style.minHeight = '';
-        }
+document.addEventListener('fullscreenchange', function() {
+    // La restauration complète est gérée dans index.html via window._fsWidgetSnapshot
+    // On remet juste _fsEl à null ici
+    if (!document.fullscreenElement) {
         _fsEl = null;
     }
 });
