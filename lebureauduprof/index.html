@@ -477,7 +477,7 @@
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
 		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }
-		.widget-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+		.widget-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: var(--border-radius); }
 		.editor-container { display: flex; flex-direction: column; border: 1px solid #eee; border-radius: 8px; background: white; flex-grow: 1; overflow: hidden; resize: none; min-width: 180px; min-height: 70px; }
 		.widget:hover .editor-container { resize: both; }
 		.editor-container::-webkit-resizer { background-color: transparent; }
@@ -912,19 +912,19 @@
         /* Calendrier & horloge → widgets-datetime.js */
         /* --- AGENDA --- */
         .agenda-container { display: flex; flex-direction: column; background: #fff; border-radius: 8px; border: 1px solid #eee; overflow: hidden; min-height: 200px; }
-        .agenda-header-title { background: #2b7fff; color: white; padding: 5px 10px; font-weight: bold; display: flex; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.6em; }
+        .agenda-header-title { background: #2b7fff; color: white; padding: 5px 10px; font-weight: bold; display: flex; font-family: 'Segoe UI', sans-serif; border-radius: 4px 4px 0 0; font-size: 1.4em; }
         .agenda-current-time { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
         .agenda-list { padding: 1px; flex-grow: 1; }
         .agenda-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #eee; position: relative; }
         .agenda-item:last-child { border-bottom: none; }
         .agenda-item.dragging { opacity: 0.5; background: #f0f7ff; border: 1px dashed var(--primary-color); }
-        .agenda-time { font-weight: bold; color: #4a90e2; font-size: 1.6em; min-width: 45px; outline: none; cursor: text; }
-        .agenda-text { outline: none; flex-grow: 1; font-size: 1.6em; color: #333; }
-        .agenda-add-btn { background: #f8f9fa; border: none; border-top: 1px solid #eee; padding: 5px; cursor: pointer; color: #4a90e2; font-weight: bold; font-size: 1.2em; transition: background 0.2s; }
+        .agenda-time { font-weight: bold; color: #4a90e2; font-size: 1.4em; min-width: 45px; outline: none; cursor: text; }
+        .agenda-text { outline: none; flex-grow: 1; font-size: 1.3em; color: #333; }
+        .agenda-add-btn { background: #f8f9fa; border: none; border-top: 1px solid #eee; padding: 5px; cursor: pointer; color: #4a90e2; font-weight: bold; font-size: 1.1em; transition: background 0.2s; }
         .agenda-add-btn:hover { background: #eef2f5; color: #2c3e50; }
         .agenda-row-handle { cursor: grab; color: #ccc; padding: 0 5px; font-size: 0.75em; user-select: none; }
         .agenda-row-handle:active { cursor: grabbing; }
-        .agenda-delete-row { cursor: pointer; color: #e74c3c; font-weight: bold; font-size: 1.2em; padding: 0 5px; opacity: 0; transition: opacity 0.2s; }
+        .agenda-delete-row { cursor: pointer; color: #e74c3c; font-weight: bold; font-size: 1.1em; padding: 0 5px; opacity: 0; transition: opacity 0.2s; }
         .agenda-item:hover .agenda-delete-row { opacity: 1; }
 
         /* --- PANNEAU ÉDITION FORME --- */
@@ -1752,13 +1752,13 @@
                 <span class="agenda-current-date"></span>
             </div>
             <div class="agenda-list">
-                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">08:30</span><div class="agenda-text" contenteditable="true">Accueil / Appel / Rituels</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
-                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">09:15</span><div class="agenda-text" contenteditable="true">Français</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
-                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><span class="agenda-time" contenteditable="true">10:20</span><div class="agenda-text" contenteditable="true">Récréation</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">08:30</div><div class="agenda-text" contenteditable="true">Accueil / Appel / Rituels</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">09:15</div><div class="agenda-text" contenteditable="true">Français</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">10:20</div><div class="agenda-text" contenteditable="true">Récréation</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">10:45</div><div class="agenda-text" contenteditable="true">Mathématiques</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">11:45</div><div class="agenda-text" contenteditable="true">Fin de la matinée</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
-                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">--:--</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
-                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">13:45</div><div class="agenda-text" contenteditable="true">Rituel / Quart d'heure lecture</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+                <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-text" contenteditable="true">🍕🥖🥗🍔🥪🍨🍰🍭🍓🍫</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
+				<div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">13:45</div><div class="agenda-text" contenteditable="true">Rituel / Quart d'heure lecture</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">14:00</div><div class="agenda-text" contenteditable="true">Matière</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">15:20</div><div class="agenda-text" contenteditable="true">Récréation</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
                 <div class="agenda-item" draggable="true"><span class="agenda-row-handle">⋮⋮</span><div class="agenda-time" contenteditable="true">15:45</div><div class="agenda-text" contenteditable="true">Matière</div><span class="agenda-delete-row" onclick="deleteAgendaLine(this)" title="Supprimer">×</span></div>
