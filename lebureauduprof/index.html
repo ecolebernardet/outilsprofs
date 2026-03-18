@@ -1418,6 +1418,7 @@
 
 					
 					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
+					<input type="file" id="yt-lib-import-input" style="display:none" accept=".json" onchange="ytImportLibraryFromInput(event)">
 
 
 					
@@ -1733,9 +1734,9 @@
         <!-- Bibliothèque -->
         <div class="yt-library">
             <div class="yt-library-toolbar">
-                <input type="text" class="yt-lib-filter" placeholder="Filtrer par titre ou tag…" oninput="ytRenderLibrary(this.closest('.editor-container'))">
-                <button onclick="ytImportLibrary(this)" title="Importer un fichier JSON">⬆ Importer</button>
-                <button onclick="ytExportLibrary()" title="Exporter la bibliothèque">⬇ Exporter</button>
+                <input type="text" class="yt-lib-filter" placeholder="Filtrer par titre ou tag…" oninput="ytRenderLibrary(this.closest('.editor-container'))" onkeydown="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
+                <button onmousedown="event.stopPropagation()" onclick="ytImportLibrary(this)" title="Importer un fichier JSON">⬆ Importer</button>
+                <button onmousedown="event.stopPropagation()" onclick="ytExportLibrary()" title="Exporter la bibliothèque">⬇ Exporter</button>
             </div>
             <div class="yt-lib-grid"></div>
         </div>
@@ -2943,5 +2944,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="toolbar-text.js"></script>
 <script src="widget-devoirs.js"></script>
 <!-- preset-boards.js conservé mais non chargé -->
+<input type="file" id="yt-import-input" style="display:none" accept=".json">
+<a id="yt-export-link" style="display:none" download="bibliotheque-youtube.json"></a>
 </body>
 </html>

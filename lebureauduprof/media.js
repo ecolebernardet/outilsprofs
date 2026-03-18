@@ -502,7 +502,7 @@ function ytRenderLibrary(container) {
         return;
     }
     grid.innerHTML = items.map((v, i) => `
-        <div class="yt-lib-card" onclick="ytPlayFromLib('${v.id}', this)">
+        <div class="yt-lib-card" onmousedown="event.stopPropagation()" onclick="ytPlayFromLib('${v.id}', this)">
             <img src="${v.thumb}" alt="${v.title.replace(/"/g,'&quot;')}" loading="lazy">
             <button class="yt-lib-del" onclick="event.stopPropagation();ytRemoveFromLib(${_ytLibrary.indexOf(v)},this)" title="Supprimer">×</button>
             <div class="yt-lib-info">
@@ -535,32 +535,47 @@ function ytRemoveFromLib(index, btn) {
     ytRenderLibrary(container);
 }
 
+let _ytImportBtn = null;
 function ytImportLibrary(btn) {
-    const input = document.createElement('input');
-    input.type = 'file'; input.accept = '.json';
-    input.onchange = e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const data = JSON.parse(ev.target.result);
-                if (!Array.isArray(data)) throw new Error();
-                _ytLibrary = data;
+    _ytImportBtn = btn;
+    document.getElementById('yt-lib-import-input').click();
+}
+function ytImportLibraryFromInput(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    const btn = _ytImportBtn;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (!Array.isArray(data)) throw new Error();
+            _ytLibrary = data;
+            if (btn) {
                 ytRenderLibrary(btn.closest('.editor-container'));
-                alert(`${data.length} vidéo(s) importée(s).`);
-            } catch { alert('Fichier JSON invalide.'); }
-        };
-        reader.readAsText(file);
+                btn.textContent = '✓ ' + data.length + ' importée(s)';
+                setTimeout(() => btn.textContent = '⬆ Importer', 2500);
+            }
+        } catch {
+            if (btn) {
+                btn.textContent = '⚠ JSON invalide';
+                setTimeout(() => btn.textContent = '⬆ Importer', 2500);
+            }
+        }
     };
-    input.click();
+    reader.readAsText(file);
 }
 
 function ytExportLibrary() {
-    if (_ytLibrary.length === 0) { alert('La bibliothèque est vide.'); return; }
-    const blob = new Blob([JSON.stringify(_ytLibrary, null, 2)], { type: 'application/json' });
+    const btns = document.querySelectorAll('.yt-library-toolbar button');
+    const btn = Array.from(btns).find(b => b.textContent.includes('Exporter'));
+    if (_ytLibrary.length === 0) {
+        if (btn) { const t = btn.textContent; btn.textContent = '⚠ Vide'; setTimeout(() => btn.textContent = t, 2000); }
+        return;
+    }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(_ytLibrary, null, 2));
     a.download = 'bibliotheque-youtube.json';
-    a.click();
+    document.body.appendChild(a); a.click(); a.remove();
+    if (btn) { const t = btn.textContent; btn.textContent = '✓ Exporté'; setTimeout(() => btn.textContent = t, 2000); }
 }
