@@ -758,7 +758,7 @@
 			background: #cce0f8 !important; border-color: #4a90e2 !important; color: #1a5a9a !important;
 		}
 		body.menu-light #geo-draw-btn.btn-mode-active {
-			background: #e8e0ff !important; border-color: #a78bfa !important; color: #5b21b6 !important;
+			background: #cce0f8 !important; border-color: #4a90e2 !important; color: #1a5a9a !important;
 		}
 		/* ── Thème figures-submenu + geo-submenu (suit menu-light) ── */
 		body.menu-light #figures-submenu,
@@ -1521,7 +1521,7 @@
 			<button id="draw-free-btn" onclick="setDrawMode('free')" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Dessin libre">✏️</button>
 
 			<!-- Outils géo -->
-			<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;color:#a78bfa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
+			<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
 
 			<!-- Formes -->
 			<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="2,17 9,3 16,17" fill="#7a9abf" fill-opacity="0.85" stroke="#4a6a8a" stroke-width="1.2" stroke-linejoin="round"/><circle cx="14" cy="13" r="6" fill="#c0635a" fill-opacity="0.85" stroke="#7a3530" stroke-width="1.2"/></svg></button>
@@ -2898,18 +2898,18 @@ function _toggleGeoCompactSubmenu() {
     if (figSub) { figSub.style.display = 'none'; figSub.classList.remove('open'); }
     if (isOpen) {
         sub.style.display = 'none';
-        if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; btn.classList.remove('btn-mode-active'); }
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = ''; btn.classList.remove('btn-mode-active'); }
     } else {
         sub.style.display = 'flex';
         requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
-        if (btn) { btn.style.borderColor = '#a78bfa'; btn.style.background = '#1a1030'; btn.style.color = '#c4b5fd'; btn.classList.add('btn-mode-active'); }
+        if (btn) { btn.style.borderColor = '#4a90e2'; btn.style.background = '#0d2a45'; btn.style.color = ''; btn.classList.add('btn-mode-active'); }
     }
 }
 function _closeGeoSubmenu() {
     const sub = document.getElementById('geo-submenu');
     const btn = document.getElementById('geo-draw-btn');
     if (sub) sub.style.display = 'none';
-    if (btn) { btn.style.borderColor = '#555'; btn.style.background = '#2a2a2e'; btn.style.color = '#a78bfa'; btn.classList.remove('btn-mode-active'); }
+    if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = ''; btn.classList.remove('btn-mode-active'); }
 }
 // Fermer le sous-menu géo quand on clique ailleurs
 document.addEventListener('mousedown', function(e) {

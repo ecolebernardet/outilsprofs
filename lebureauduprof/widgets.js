@@ -237,6 +237,34 @@ function _updateAllActionBarsCompact() {
 // Écouter mouseup global (fin de resize ou drag)
 document.addEventListener('mouseup', () => {
     requestAnimationFrame(_updateAllActionBarsCompact);
+    requestAnimationFrame(_updateScActionBarCompact);
+});
+
+// Barre d'action compacte pour #selection-controls (dessins & figures)
+function _updateScActionBarCompact() {
+    const sc = document.getElementById('selection-controls');
+    if (!sc || sc.style.display === 'none') return;
+    const w = sc.offsetWidth;
+    // 5 boutons visibles × 32px + 4 gaps × 4px = ~176px nécessaires
+    const BTN = 32, GAP = 4, N = 5;
+    const needed = N * BTN + (N - 1) * GAP; // 176px
+    const compact = w > 0 && w < needed + 20;
+    const bar = document.getElementById('sc-action-bar');
+    if (!bar) return;
+    bar.style.gap = compact ? '2px' : '';
+    bar.querySelectorAll('.sc-btn').forEach(btn => {
+        btn.style.width      = compact ? '20px' : '';
+        btn.style.height     = compact ? '20px' : '';
+        btn.style.fontSize   = compact ? '10px' : '';
+        btn.style.borderRadius = compact ? '4px' : '';
+    });
+}
+// Observer les changements de taille de #selection-controls
+document.addEventListener('DOMContentLoaded', () => {
+    const sc = document.getElementById('selection-controls');
+    if (sc && typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(() => _updateScActionBarCompact()).observe(sc);
+    }
 });
 
 function _updateActionBarCompact(widget) {
