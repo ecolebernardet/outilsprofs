@@ -227,6 +227,41 @@ function findFreePosition() {
 
 
 // =========================================================================
+// BARRE D'ACTION COMPACTE — widgets < 136px de large
+// =========================================================================
+
+// Mise à jour globale de tous les widgets après un resize
+function _updateAllActionBarsCompact() {
+    document.querySelectorAll('.widget, .shape-widget').forEach(w => _updateActionBarCompact(w));
+}
+// Écouter mouseup global (fin de resize ou drag)
+document.addEventListener('mouseup', () => {
+    requestAnimationFrame(_updateAllActionBarsCompact);
+});
+
+function _updateActionBarCompact(widget) {
+    const bar = widget.querySelector('.widget-action-bar');
+    if (!bar) return;
+    // Pour les shapes : taille dans l'attribut width du SVG
+    // Pour les widgets : taille via editor-container ou offsetWidth
+    const svg = widget.querySelector('.shape-svg-wrap svg');
+    const ec  = widget.querySelector('.editor-container');
+    const w   = svg
+        ? (parseFloat(svg.getAttribute('width')) || widget.offsetWidth)
+        : (ec ? ec.offsetWidth : widget.offsetWidth);
+    const BTN_NORMAL = 26, GAP_NORMAL = 4, N = 4;
+    const barNeeded = N * BTN_NORMAL + (N - 1) * GAP_NORMAL; // 116px
+    const compact = w > 0 && w < barNeeded + 20; // +20px de marge
+    bar.style.gap = compact ? '2px' : '';
+    bar.querySelectorAll('.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-menu-handle').forEach(btn => {
+        btn.style.width        = compact ? '18px' : '';
+        btn.style.height       = compact ? '18px' : '';
+        btn.style.fontSize     = compact ? '10px' : '';
+        btn.style.borderRadius = compact ? '4px'  : '';
+    });
+}
+
+// =========================================================================
 // CRÉATION DE WIDGET
 // =========================================================================
 function createWidget(type, x = null, y = null, doSnapshot = true) {
@@ -386,6 +421,18 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             }, 50);
         }
     }
+
+    // Barre d'action compacte : observer le contenu (resize CSS natif sur editor-container)
+    if (typeof ResizeObserver !== 'undefined') {
+        const _roCompact = new ResizeObserver(() => _updateActionBarCompact(widget));
+        // Observer le widget ET son editor-container (resize natif CSS)
+        _roCompact.observe(widget);
+        const ec = widget.querySelector('.editor-container');
+        if (ec) _roCompact.observe(ec);
+    }
+    // Appel immédiat + différé pour couvrir les widgets restaurés
+    requestAnimationFrame(() => _updateActionBarCompact(widget));
+    setTimeout(() => _updateActionBarCompact(widget), 200);
 
     return widget;
 }
