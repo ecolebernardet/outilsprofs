@@ -452,6 +452,27 @@
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
 		.widget[data-type="iframe"] .editor-toolbar,
+		/* YouTube widget */
+		.yt-tab-btn { background:#fff;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 7px;height:26px; }
+		.yt-tab-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
+		.yt-fav-btn { font-size:14px;background:none;border:none;cursor:pointer;padding:2px 4px;line-height:1; }
+		.yt-fav-btn.saved { color:#e00; }
+		.yt-library { display:none;flex-direction:column;background:#111;overflow:hidden;flex-shrink:0;max-height:260px; }
+		.yt-library.open { display:flex; }
+		.yt-library-toolbar { display:flex;gap:6px;align-items:center;padding:6px 8px;background:#1a1a1a;flex-shrink:0; }
+		.yt-library-toolbar input { flex:1;background:#333;border:1px solid #444;color:#eee;border-radius:4px;padding:2px 6px;font-size:11px; }
+		.yt-library-toolbar button { background:#333;border:1px solid #444;color:#eee;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;white-space:nowrap; }
+		.yt-library-toolbar button:hover { background:#555; }
+		.yt-lib-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;overflow-y:auto; }
+		.yt-lib-card { background:#222;border-radius:6px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative; }
+		.yt-lib-card:hover { transform:scale(1.03);box-shadow:0 0 0 2px #f00; }
+		.yt-lib-card img { width:100%;aspect-ratio:16/9;object-fit:cover;display:block; }
+		.yt-lib-card .yt-lib-info { padding:4px 6px; }
+		.yt-lib-card .yt-lib-title { font-size:10px;color:#eee;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+		.yt-lib-card .yt-lib-tag { font-size:9px;color:#aaa;margin-top:2px; }
+		.yt-lib-card .yt-lib-del { position:absolute;top:3px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;cursor:pointer;display:none; }
+		.yt-lib-card:hover .yt-lib-del { display:block; }
+		.yt-lib-empty { color:#666;font-size:12px;text-align:center;padding:24px;grid-column:1/-1; }
 		.widget[data-type="youtube"] .editor-toolbar,
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
@@ -1687,15 +1708,39 @@
     </div>
 </template>
 <template id="template-youtube">
-    <div class="editor-container" style="height:350px;width:600px;">
-        <div class="editor-toolbar">
-            <input type="text" placeholder="Collez le lien YouTube ici..." style="flex-grow:1;" onchange="loadYoutube(this)">
-            <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔇 Son seul</button>
-            <button onclick="toggleYoutubeView(this,'block')" title="Mode Vidéo">📺 Vidéo</button>
+    <div class="editor-container" style="height:420px;width:660px;">
+        <div class="editor-toolbar" style="flex-wrap:wrap;gap:4px;padding:4px 35px;">
+            <!-- Onglets -->
+            <button class="yt-tab-btn active" onclick="ytSwitchTab(this,'url')" title="Coller une URL">🔗 URL</button>
+            <button class="yt-tab-btn" onclick="ytSwitchTab(this,'search')" title="Rechercher une vidéo">🔍 Recherche</button>
+            <!-- Barre URL -->
+            <div class="yt-url-bar" style="display:flex;flex:1;gap:4px;min-width:0;">
+                <input type="text" class="yt-url-input" placeholder="Collez le lien YouTube ici…" style="flex-grow:1;" onchange="loadYoutube(this)">
+            </div>
+            <!-- Barre Recherche -->
+            <div class="yt-search-bar" style="display:none;flex:1;gap:4px;min-width:0;">
+                <input type="text" class="yt-search-input" placeholder="Rechercher sur YouTube…" style="flex-grow:1;" onkeydown="if(event.key==='Enter')ytSearchNewTab(this.closest('.editor-container'))">
+                <button onclick="ytSearchNewTab(this.closest('.editor-container'))" title="Ouvrir la recherche dans un nouvel onglet">🔍 Ouvrir YouTube</button>
+            </div>
+            <!-- Boutons droite -->
+            <button class="yt-fav-btn" onclick="ytToggleFav(this)" title="Ajouter à la bibliothèque">♥</button>
+            <button onclick="ytToggleLibrary(this)" title="Ma bibliothèque">📚</button>
+            <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔇</button>
+            <button onclick="toggleYoutubeView(this,'flex')" title="Mode Vidéo">📺</button>
             <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
             <button onclick="toggleTransparency(this)" title="Fond transparent"><span class="icon-transparency"></span></button>
         </div>
-        <iframe src="" style="flex-grow:1;border:none;background:#000;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe>
+        <!-- Bibliothèque -->
+        <div class="yt-library">
+            <div class="yt-library-toolbar">
+                <input type="text" class="yt-lib-filter" placeholder="Filtrer par titre ou tag…" oninput="ytRenderLibrary(this.closest('.editor-container'))">
+                <button onclick="ytImportLibrary(this)" title="Importer un fichier JSON">⬆ Importer</button>
+                <button onclick="ytExportLibrary()" title="Exporter la bibliothèque">⬇ Exporter</button>
+            </div>
+            <div class="yt-lib-grid"></div>
+        </div>
+        <!-- Lecteur -->
+        <iframe class="yt-player" src="" style="flex-grow:1;border:none;background:#000;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe>
     </div>
 </template>
 <template id="template-agenda">

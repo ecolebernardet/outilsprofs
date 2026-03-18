@@ -420,7 +420,8 @@ function loadIframe(input) {
     iframe.src = url; saveBoard();
 }
 function loadYoutube(input) {
-    const iframe = input.closest('.editor-container').querySelector('iframe');
+    const container = input.closest('.editor-container');
+    const iframe = container.querySelector('iframe.yt-player');
     let url = input.value.trim();
     const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
     iframe.src = match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : url;
@@ -428,7 +429,138 @@ function loadYoutube(input) {
 }
 function toggleYoutubeView(btn, display) {
     const c = btn.closest('.editor-container');
-    c.querySelector('iframe').style.display = display;
+    c.querySelector('iframe.yt-player').style.display = display;
     c.style.height = display === 'none' ? '50px' : '';
     saveBoard();
+}
+function ytSwitchTab(btn, tab) {
+    const container = btn.closest('.editor-container');
+    container.querySelectorAll('.yt-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    container.querySelector('.yt-url-bar').style.display    = tab === 'url'    ? 'flex' : 'none';
+    container.querySelector('.yt-search-bar').style.display = tab === 'search' ? 'flex' : 'none';
+    if (tab === 'search') container.querySelector('.yt-search-input').focus();
+}
+function ytSearchNewTab(container) {
+    const query = container.querySelector('.yt-search-input').value.trim();
+    if (!query) return;
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+}
+
+// ── Bibliothèque YouTube ──────────────────────────────────────────
+let _ytLibrary = [];
+
+function _ytCurrentVideoId(container) {
+    const src = container.querySelector('iframe.yt-player').src;
+    const m = src.match(/embed\/([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+}
+
+async function ytToggleFav(btn) {
+    const container = btn.closest('.editor-container');
+    const videoId = _ytCurrentVideoId(container);
+    if (!videoId) { alert('Aucune vidéo chargée.'); return; }
+    const existing = _ytLibrary.findIndex(v => v.id === videoId);
+    if (existing !== -1) {
+        if (!confirm('Retirer cette vidéo de la bibliothèque ?')) return;
+        _ytLibrary.splice(existing, 1);
+        btn.classList.remove('saved');
+        btn.title = 'Ajouter à la bibliothèque';
+    } else {
+        const tag = prompt('Catégorie / tag (optionnel) :', '') || '';
+        btn.textContent = '⏳';
+        try {
+            const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+            const data = await res.json();
+            _ytLibrary.push({ id: videoId, title: data.title, thumb: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, tag });
+        } catch {
+            const title = prompt('Titre de la vidéo :', '') || videoId;
+            _ytLibrary.push({ id: videoId, title, thumb: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, tag });
+        }
+        btn.classList.add('saved');
+        btn.title = 'Retirer de la bibliothèque';
+    }
+    btn.textContent = '♥';
+    ytRenderLibrary(container);
+}
+
+function ytToggleLibrary(btn) {
+    const container = btn.closest('.editor-container');
+    const lib = container.querySelector('.yt-library');
+    lib.classList.toggle('open');
+    if (lib.classList.contains('open')) ytRenderLibrary(container);
+}
+
+function ytRenderLibrary(container) {
+    const filter = (container.querySelector('.yt-lib-filter').value || '').toLowerCase();
+    const grid = container.querySelector('.yt-lib-grid');
+    const items = _ytLibrary.filter(v =>
+        v.title.toLowerCase().includes(filter) || v.tag.toLowerCase().includes(filter)
+    );
+    if (items.length === 0) {
+        grid.innerHTML = '<div class="yt-lib-empty">Bibliothèque vide.<br>Chargez une vidéo puis cliquez sur ♥</div>';
+        return;
+    }
+    grid.innerHTML = items.map((v, i) => `
+        <div class="yt-lib-card" onclick="ytPlayFromLib('${v.id}', this)">
+            <img src="${v.thumb}" alt="${v.title.replace(/"/g,'&quot;')}" loading="lazy">
+            <button class="yt-lib-del" onclick="event.stopPropagation();ytRemoveFromLib(${_ytLibrary.indexOf(v)},this)" title="Supprimer">×</button>
+            <div class="yt-lib-info">
+                <div class="yt-lib-title">${v.title}</div>
+                ${v.tag ? `<div class="yt-lib-tag">🏷 ${v.tag}</div>` : ''}
+            </div>
+        </div>`).join('');
+    // Marquer le favori actif
+    const currentId = _ytCurrentVideoId(container);
+    const favBtn = container.querySelector('.yt-fav-btn');
+    const isSaved = _ytLibrary.some(v => v.id === currentId);
+    favBtn.classList.toggle('saved', isSaved);
+    favBtn.title = isSaved ? 'Retirer de la bibliothèque' : 'Ajouter à la bibliothèque';
+}
+
+function ytPlayFromLib(videoId, card) {
+    const container = card.closest('.editor-container');
+    const iframe = container.querySelector('iframe.yt-player');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    container.querySelector('.yt-library').classList.remove('open');
+    const favBtn = container.querySelector('.yt-fav-btn');
+    favBtn.classList.add('saved');
+    favBtn.title = 'Retirer de la bibliothèque';
+    saveBoard();
+}
+
+function ytRemoveFromLib(index, btn) {
+    _ytLibrary.splice(index, 1);
+    const container = btn.closest('.editor-container');
+    ytRenderLibrary(container);
+}
+
+function ytImportLibrary(btn) {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!Array.isArray(data)) throw new Error();
+                _ytLibrary = data;
+                ytRenderLibrary(btn.closest('.editor-container'));
+                alert(`${data.length} vidéo(s) importée(s).`);
+            } catch { alert('Fichier JSON invalide.'); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function ytExportLibrary() {
+    if (_ytLibrary.length === 0) { alert('La bibliothèque est vide.'); return; }
+    const blob = new Blob([JSON.stringify(_ytLibrary, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bibliotheque-youtube.json';
+    a.click();
 }
