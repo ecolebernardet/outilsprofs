@@ -17,6 +17,55 @@
             box-shadow: none !important;
         }
 
+        /* ── Thème clair (body.menu-light) ── */
+        body.menu-light .dc-container {
+            background: #f0f2f5;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            color: #1a1a1a;
+        }
+        body.menu-light .dc-controls {
+            background: #e2e6ea;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        body.menu-light .dc-label {
+            opacity: 0.55;
+            color: #1a1a1a;
+        }
+        body.menu-light .dc-mode-wrap {
+            background: rgba(0,0,0,0.07);
+        }
+        body.menu-light .dc-mode-btn {
+            border-color: rgba(0,0,0,0.12);
+            color: rgba(0,0,0,0.5);
+        }
+        body.menu-light .dc-time-pill {
+            background: rgba(0,0,0,0.07);
+            border-color: rgba(0,0,0,0.12);
+        }
+        body.menu-light .dc-time-val {
+            color: #1a1a1a;
+        }
+        body.menu-light .dc-slider {
+            background: rgba(0,0,0,0.12);
+        }
+        body.menu-light .dc-url-input {
+            background: rgba(0,0,0,0.06);
+            border-color: rgba(0,0,0,0.15);
+            color: #1a1a1a;
+        }
+        body.menu-light .dc-url-input::placeholder {
+            color: rgba(0,0,0,0.35);
+        }
+        body.menu-light .dc-pixel-block {
+            background: #f0f2f5;
+        }
+        body.menu-light .dc-msg-start {
+            color: #1a1a1a;
+        }
+        body.menu-light .dc-resize-handle {
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.2) 50%);
+        }
+
         .dc-container {
             background: #121212;
             border: 0px solid rgba(255,255,255,0.12);
@@ -971,9 +1020,19 @@ function createDeficalmeWidget() {
         if (typeof positionActionBar === 'function') positionActionBar(widget);
     });
 
-    // Nettoyer l'audio quand le widget est supprimé
+    // ── Thème clair / sombre ─────────────────────────────────────────────
+    // Le thème est géré par CSS via body.menu-light — voir les règles en haut du fichier.
+    // Le MutationObserver ci-dessous écoute le changement de classe sur body pour
+    // régénérer la grille pixels quand le thème bascule (les blocs sont créés en JS
+    // et héritent automatiquement du bon style CSS à la recréation).
+    const themeObserver = new MutationObserver(() => {
+        if (currentMode === 'pixels') generateGrid();
+    });
+    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    // Nettoyer l'audio et les observers quand le widget est supprimé
     const observer = new MutationObserver(() => {
-        if (!widget.isConnected) { stopAudio(); observer.disconnect(); }
+        if (!widget.isConnected) { stopAudio(); observer.disconnect(); themeObserver.disconnect(); }
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
