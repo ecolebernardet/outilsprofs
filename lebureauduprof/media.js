@@ -163,7 +163,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 if (stroke.tool === 'text') {
                     const pos = fromNorm(stroke.nx, stroke.ny);
                     ctx.save();
-                    ctx.font = `${(stroke.size * 4 + 10) * canvasW / 600}px 'Segoe UI', sans-serif`;
+                    // fontSize proportionnel à la largeur du canvas (suit le zoom/redimensionnement)
+                    const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * canvasW / 600);
+                    ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
                     ctx.fillStyle = stroke.color;
                     ctx.fillText(stroke.text || '', pos.x, pos.y);
                     ctx.restore();
@@ -247,19 +249,42 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
                     || (document.querySelector('#cpick-draw-color .cpick-swatch') && document.querySelector('#cpick-draw-color .cpick-swatch').style.background)
                     || '#111111';
-                const sizeEl = document.getElementById('draw-size');
+                // Si la gomme draw est active, forcer l'outil eraser et utiliser eraser-size
+                const tool = (window.isEraserMode) ? 'eraser'
+                           : (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) ? _pdfAnnotTool
+                           : activeTool;
+                const sizeElId = (tool === 'eraser') ? 'eraser-size' : 'draw-size';
+                const sizeEl = document.getElementById(sizeElId);
                 const size = sizeEl ? (parseInt(sizeEl.value) || 4) : 4;
-                const tool = (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) ? _pdfAnnotTool : activeTool;
                 const px = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
 
                 if (tool === 'text') {
-                    const textVal = prompt('Texte à ajouter :');
-                    if (!textVal) return;
-                    // Stocker en normalisé avec la couleur de la draw-toolbar
-                    const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
-                    getLayer(currentPage).strokes.push(stroke);
-                    redrawAnnotations(currentPage);
+                    // Éditeur inline positionné au clic
+                    const canvasW    = annotCanvas.width;
+                    const rect       = annotCanvas.getBoundingClientRect();
+                    const cssScaleX  = rect.width / canvasW;
+                    const fontSizePx = Math.round((size * 4 + 10) * canvasW / 600 * cssScaleX);
+                    const clientX    = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY    = e.touches ? e.touches[0].clientY : e.clientY;
+
+                    if (typeof _showPdfInlineTextEditor === 'function') {
+                        _showPdfInlineTextEditor({
+                            clientX, clientY, color, fontSizePx,
+                            onValidate(textVal) {
+                                if (!textVal.trim()) return;
+                                const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
+                                getLayer(currentPage).strokes.push(stroke);
+                                redrawAnnotations(currentPage);
+                            }
+                        });
+                    } else {
+                        const textVal = prompt('Texte à ajouter :');
+                        if (!textVal) return;
+                        const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
+                        getLayer(currentPage).strokes.push(stroke);
+                        redrawAnnotations(currentPage);
+                    }
                     return;
                 }
 
@@ -283,7 +308,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 const size = sizeEl ? (parseInt(sizeEl.value) || currentStrokeAnnot.size) : currentStrokeAnnot.size;
                 currentStrokeAnnot.color = color;
                 currentStrokeAnnot.size  = size;
-                if (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) {
+                if (window.isEraserMode) {
+                    currentStrokeAnnot.tool = 'eraser';
+                } else if (typeof _pdfAnnotTool !== 'undefined' && window._pdfAnnotMode) {
                     currentStrokeAnnot.tool = _pdfAnnotTool;
                 }
 
@@ -432,6 +459,40 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             });
 
             renderPage(currentPage);
+
+            // ── ResizeObserver : maintenir le fit-to-width si zoomScale === null ──
+            // Anti-scintillement : pendant le redimensionnement, on scale le canvas en CSS
+            // (instantané), et on ne re-rend le PDF qu'une fois le resize terminé (debounce).
+            if (typeof ResizeObserver !== 'undefined') {
+                let _resizeTimer = null;
+                let _lastWrapWidth = canvasWrap.clientWidth;
+
+                const _resizeObs = new ResizeObserver(() => {
+                    if (zoomScale !== null) return; // zoom manuel actif → ne pas toucher
+
+                    const newWidth = canvasWrap.clientWidth;
+                    if (newWidth === _lastWrapWidth) return; // pas de changement de largeur
+
+                    // Scaling CSS immédiat pour éviter le blanc / scintillement
+                    const cssScale = (newWidth - 24) / pdfCanvas.width;
+                    pdfCanvas.style.transformOrigin  = 'top left';
+                    annotCanvas.style.transformOrigin = 'top left';
+                    pdfCanvas.style.transform  = `scale(${cssScale})`;
+                    annotCanvas.style.transform = `scale(${cssScale})`;
+
+                    // Re-rendu réel différé (une fois le resize terminé)
+                    if (_resizeTimer) clearTimeout(_resizeTimer);
+                    _resizeTimer = setTimeout(() => {
+                        _resizeTimer = null;
+                        _lastWrapWidth = canvasWrap.clientWidth;
+                        // Retirer le scaling CSS avant le vrai rendu
+                        pdfCanvas.style.transform  = '';
+                        annotCanvas.style.transform = '';
+                        renderPage(currentPage);
+                    }, 150);
+                });
+                _resizeObs.observe(canvasWrap);
+            }
 
             // ── API publique pour draw.js (mode annotation via draw-toolbar) ──
             // Exposée sur le widget DOM pour que draw.js puisse y accéder.
@@ -623,6 +684,94 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer._snapshot = imgData;
                         // Nettoyer les strokes normaux car le snapshot les inclut
                         layer.strokes = [];
+                    },
+                    // Déplacer un stroke texte en temps réel (pendant le drag)
+                    // Dessiner un cadre de sélection autour d'un stroke texte
+                    drawTextSelection(index) {
+                        const layer = getLayer(currentPage);
+                        const s = layer.strokes[index];
+                        if (!s || s.tool !== 'text') return;
+                        redrawAnnotations(currentPage);
+                        const canvasW  = annotCanvas.width;
+                        const pos      = fromNorm(s.nx, s.ny);
+                        const fontSize = Math.round(6 * Math.pow(1.12, s.size) * canvasW / 600);
+                        actx.save();
+                        actx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+                        const metrics = actx.measureText(s.text || '');
+                        actx.restore();
+                        const pad = 4 * canvasW / 600;
+                        const x = pos.x - pad;
+                        const y = pos.y - fontSize - pad;
+                        const w = metrics.width + pad * 2;
+                        const h = fontSize * 1.3 + pad * 2;
+                        actx.save();
+                        actx.strokeStyle = '#4a90e2';
+                        actx.lineWidth   = 2 * canvasW / 600;
+                        actx.setLineDash([5, 3]);
+                        actx.strokeRect(x, y, w, h);
+                        const r = 4 * canvasW / 600;
+                        actx.fillStyle = '#4a90e2';
+                        [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([cx,cy]) => {
+                            actx.beginPath();
+                            actx.arc(cx, cy, r, 0, Math.PI*2);
+                            actx.fill();
+                        });
+                        actx.restore();
+                    },
+                    moveTextStroke(index, px, py) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        const norm = toNorm(px, py);
+                        layer.strokes[index] = { ...layer.strokes[index], nx: norm.x, ny: norm.y };
+                        redrawAnnotations(currentPage);
+                    },
+                    // Sauvegarder la position finale après drag (ajoute à l'historique)
+                    saveTextMove(index) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                    },
+                    // px, py : coordonnées canvas pixels ; retourne le stroke trouvé ou null
+                    findTextStrokeAt(px, py) {
+                        const layer = getLayer(currentPage);
+                        const canvasW = annotCanvas.width;
+                        // Parcourir en sens inverse pour prendre le stroke le plus en avant
+                        for (let i = layer.strokes.length - 1; i >= 0; i--) {
+                            const s = layer.strokes[i];
+                            if (s.tool !== 'text') continue;
+                            const pos      = fromNorm(s.nx, s.ny);
+                            const fontSize = Math.round(6 * Math.pow(1.12, s.size) * canvasW / 600);
+                            actx.save();
+                            actx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+                            const metrics = actx.measureText(s.text || '');
+                            actx.restore();
+                            const x0 = pos.x;
+                            const y0 = pos.y - fontSize;       // baseline - hauteur approx
+                            const x1 = pos.x + metrics.width;
+                            const y1 = pos.y + fontSize * 0.3; // un peu sous la baseline
+                            // Zone de hit élargie de 6px
+                            if (px >= x0 - 6 && px <= x1 + 6 && py >= y0 - 6 && py <= y1 + 6) {
+                                return { index: i, stroke: s };
+                            }
+                        }
+                        return null;
+                    },
+                    // Mettre à jour le texte d'un stroke existant
+                    updateTextStroke(index, newText, newSize, newColor) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                        layer.strokes[index] = {
+                            ...layer.strokes[index],
+                            text: newText,
+                            ...(newSize  !== undefined ? { size:  newSize  } : {}),
+                            ...(newColor !== undefined ? { color: newColor } : {})
+                        };
+                        redrawAnnotations(currentPage);
                     }
                 };
             }

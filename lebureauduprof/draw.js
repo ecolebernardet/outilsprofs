@@ -1910,13 +1910,14 @@ function _startPdfAnnotMode() {
 
     // Attacher les événements sur le widget parent
     _pdfAnnotEvTarget = target;
-    _pdfAnnotEvTarget.addEventListener('mousedown',  _pdfAnnotMouseDown);
-    _pdfAnnotEvTarget.addEventListener('mousemove',  _pdfAnnotMouseMove);
-    _pdfAnnotEvTarget.addEventListener('mouseup',    _pdfAnnotMouseUp);
-    _pdfAnnotEvTarget.addEventListener('mouseleave', _pdfAnnotMouseLeave);
-    _pdfAnnotEvTarget.addEventListener('touchstart', _pdfAnnotTouchStart, { passive: false });
-    _pdfAnnotEvTarget.addEventListener('touchmove',  _pdfAnnotTouchMove,  { passive: false });
-    _pdfAnnotEvTarget.addEventListener('touchend',   _pdfAnnotTouchEnd);
+    _pdfAnnotEvTarget.addEventListener('mousedown',   _pdfAnnotMouseDown);
+    _pdfAnnotEvTarget.addEventListener('mousemove',   _pdfAnnotMouseMove);
+    _pdfAnnotEvTarget.addEventListener('mouseup',     _pdfAnnotMouseUp);
+    _pdfAnnotEvTarget.addEventListener('mouseleave',  _pdfAnnotMouseLeave);
+    _pdfAnnotEvTarget.addEventListener('contextmenu', _pdfAnnotContextMenu);
+    _pdfAnnotEvTarget.addEventListener('touchstart',  _pdfAnnotTouchStart, { passive: false });
+    _pdfAnnotEvTarget.addEventListener('touchmove',   _pdfAnnotTouchMove,  { passive: false });
+    _pdfAnnotEvTarget.addEventListener('touchend',    _pdfAnnotTouchEnd);
     _pdfAnnotEvTarget.style.cursor = 'crosshair';
 
     _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
@@ -1927,13 +1928,14 @@ function _stopPdfAnnotMode() {
 
     // Détacher les événements du widget parent
     if (_pdfAnnotEvTarget) {
-        _pdfAnnotEvTarget.removeEventListener('mousedown',  _pdfAnnotMouseDown);
-        _pdfAnnotEvTarget.removeEventListener('mousemove',  _pdfAnnotMouseMove);
-        _pdfAnnotEvTarget.removeEventListener('mouseup',    _pdfAnnotMouseUp);
-        _pdfAnnotEvTarget.removeEventListener('mouseleave', _pdfAnnotMouseLeave);
-        _pdfAnnotEvTarget.removeEventListener('touchstart', _pdfAnnotTouchStart);
-        _pdfAnnotEvTarget.removeEventListener('touchmove',  _pdfAnnotTouchMove);
-        _pdfAnnotEvTarget.removeEventListener('touchend',   _pdfAnnotTouchEnd);
+        _pdfAnnotEvTarget.removeEventListener('mousedown',   _pdfAnnotMouseDown);
+        _pdfAnnotEvTarget.removeEventListener('mousemove',   _pdfAnnotMouseMove);
+        _pdfAnnotEvTarget.removeEventListener('mouseup',     _pdfAnnotMouseUp);
+        _pdfAnnotEvTarget.removeEventListener('mouseleave',  _pdfAnnotMouseLeave);
+        _pdfAnnotEvTarget.removeEventListener('contextmenu', _pdfAnnotContextMenu);
+        _pdfAnnotEvTarget.removeEventListener('touchstart',  _pdfAnnotTouchStart);
+        _pdfAnnotEvTarget.removeEventListener('touchmove',   _pdfAnnotTouchMove);
+        _pdfAnnotEvTarget.removeEventListener('touchend',    _pdfAnnotTouchEnd);
         _pdfAnnotEvTarget.style.cursor = '';
         _pdfAnnotEvTarget = null;
     }
@@ -2126,10 +2128,35 @@ var _pdfPanLastX = null;
 // ── Dessin — tout passe par l'API de media.js ─────────────────────────────
 
 var _pdfFigureStart = null; // point de départ pour les figures PDF
+var _pdfDragText = null;    // { index, stroke, startPos } lors d'un drag de texte
 
 function _pdfAnnotStartStroke(e) {
     const tool = _pdfAnnotEffectiveTool();
-    if (tool === 'text') { _pdfAnnotInsertText(e); return; }
+    if (tool === 'text') {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        const pos = _getPdfAnnotPos(e);
+        const found = api && api.findTextStrokeAt ? api.findTextStrokeAt(pos.x, pos.y) : null;
+
+        if (found) {
+            if (_pdfSelectedText && _pdfSelectedText.index === found.index) {
+                // Texte déjà sélectionné + clic dessus → préparer drag ou édition
+                const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+                _pdfDragText = { index: found.index, stroke: found.stroke, startPos: pos, startClientX: clientX, startClientY: clientY, moved: false };
+                _pdfAnnotPainting = true;
+                if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.cursor = 'grab';
+            } else {
+                // Nouveau texte cliqué → sélectionner
+                _pdfAnnotSelectText(e);
+            }
+            return;
+        }
+
+        // Clic dans le vide → désélectionner et créer nouveau texte
+        _pdfAnnotDeselect();
+        _pdfAnnotInsertText(e);
+        return;
+    }
 
     // Mode pan : enregistrer le point de départ
     if (tool === 'pan') {
@@ -2147,20 +2174,42 @@ function _pdfAnnotStartStroke(e) {
 
     const pos = _getPdfAnnotPos(e);
 
-    // Mode figure : enregistrer le point de départ
-    if (FIGURE_MODES.includes(currentDrawMode)) {
+    // Mode figure : enregistrer le point de départ (sauf si gomme active)
+    if (FIGURE_MODES.includes(currentDrawMode) && tool !== 'eraser') {
         _pdfFigureStart = pos;
         _pdfAnnotPainting = true;
         return;
     }
 
     _pdfAnnotPainting = true;
-    api.startStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos.x, pos.y);
+    const eraserSize = tool === 'eraser' ? (parseInt((document.getElementById('eraser-size') || {}).value) || 20) : null;
+    api.startStroke(_pdfAnnotGetColor(), eraserSize !== null ? eraserSize : _pdfAnnotGetSize(), tool, pos.x, pos.y);
 }
 
 function _pdfAnnotContinueStroke(e) {
     if (!_pdfAnnotPainting) return;
     const tool = _pdfAnnotEffectiveTool();
+
+    // Drag d'un texte existant
+    if (_pdfDragText) {
+        const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+        const dx = clientX - _pdfDragText.startClientX;
+        const dy = clientY - _pdfDragText.startClientY;
+        if (!_pdfDragText.moved && Math.sqrt(dx*dx + dy*dy) > 5) {
+            _pdfDragText.moved = true;
+            if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.cursor = 'grabbing';
+        }
+        if (_pdfDragText.moved) {
+            const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            if (api) {
+                const pos = _getPdfAnnotPos(e);
+                api.moveTextStroke(_pdfDragText.index, pos.x, pos.y);
+            }
+        }
+        return;
+    }
+
     if (tool === 'text') return;
 
     // Mode pan : scroller le conteneur PDF
@@ -2186,19 +2235,40 @@ function _pdfAnnotContinueStroke(e) {
 
     const pos = _getPdfAnnotPos(e);
 
-    // Mode figure : preview en temps réel
-    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart) {
+    // Mode figure : preview en temps réel (sauf si gomme active)
+    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart && tool !== 'eraser') {
         const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
         if (pts) api.previewFigure(_pdfAnnotGetColor(), _pdfAnnotGetSize(), pts);
         return;
     }
 
-    api.continueStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos.x, pos.y);
+    const eraserSize2 = tool === 'eraser' ? (parseInt((document.getElementById('eraser-size') || {}).value) || 20) : null;
+    api.continueStroke(_pdfAnnotGetColor(), eraserSize2 !== null ? eraserSize2 : _pdfAnnotGetSize(), tool, pos.x, pos.y);
 }
 
 function _pdfAnnotEndStroke(e) {
     if (!_pdfAnnotPainting) return;
     _pdfAnnotPainting = false;
+
+    // Fin du drag texte
+    if (_pdfDragText) {
+        if (!_pdfDragText.moved) {
+            // Pas de mouvement sur texte sélectionné → ouvrir l'éditeur
+            const api2 = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            const found2 = api2 && api2.findTextStrokeAt ? api2.findTextStrokeAt(_pdfDragText.startPos.x, _pdfDragText.startPos.y) : null;
+            if (found2) {
+                _pdfAnnotDeselect();
+                _pdfAnnotOpenEditorForStroke(e, found2);
+            }
+        } else {
+            // Drag terminé → sauvegarder
+            const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            if (api && api.saveTextMove) api.saveTextMove(_pdfDragText.index);
+        }
+        _pdfDragText = null;
+        if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.cursor = 'crosshair';
+        return;
+    }
 
     // Mode pan : remettre le curseur grab
     if (_pdfAnnotTool === 'pan') {
@@ -2211,8 +2281,8 @@ function _pdfAnnotEndStroke(e) {
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api) return;
 
-    // Mode figure : dessiner la figure finale
-    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart && e) {
+    // Mode figure : dessiner la figure finale (sauf si gomme active)
+    if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart && e && !isEraserMode) {
         const pos = _getPdfAnnotPos(e);
         const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
         _pdfFigureStart = null;
@@ -2220,39 +2290,278 @@ function _pdfAnnotEndStroke(e) {
         return;
     }
     _pdfFigureStart = null;
+    _pdfFigureStart = null;
     api.endStroke();
 }
 
-// ── Insertion de texte ────────────────────────────────────────────────────
+// ── Insertion / édition de texte inline ──────────────────────────────────
 
 function _pdfAnnotInsertText(e) {
-    // Utiliser prompt() — simple et fiable, gère bien le focus/blur
-    const text = prompt('Texte à ajouter :');
-    if (!text || !text.trim()) return;
-
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api) return;
+    const canvas = api.getAnnotCanvas();
+    if (!canvas) return;
 
-    const pos = _getPdfAnnotPos(e);
-    const color = _pdfAnnotGetColor();
-    const size  = _pdfAnnotGetSize();
+    const pos     = _getPdfAnnotPos(e);
+    const color   = _pdfAnnotGetColor();
+    const size    = _pdfAnnotGetSize();
+    const rect       = canvas.getBoundingClientRect();
+    const fontSizePx = Math.round(6 * Math.pow(1.12, size) * rect.width / 600);
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
 
-    // Ajouter via l'API addTextStroke si disponible, sinon via startStroke/endStroke
-    if (api.addTextStroke) {
-        api.addTextStroke(text, color, size, pos.x, pos.y);
-    } else {
-        // Fallback : dessiner directement sur le canvas
-        const canvas = api.getAnnotCanvas();
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            const fontSize = Math.max(12, size * 2);
-            ctx.save();
-            ctx.font      = `${fontSize}px sans-serif`;
-            ctx.fillStyle = color;
-            ctx.fillText(text, pos.x, pos.y);
-            ctx.restore();
+    _showPdfInlineTextEditor({
+        clientX, clientY, color, size, fontSizePx,
+        onValidate(text, finalSize, finalColor) {
+            if (!text.trim()) return;
+            if (api.addTextStroke) api.addTextStroke(text, finalColor ?? color, finalSize ?? size, pos.x, pos.y);
         }
+    });
+}
+
+function _pdfAnnotOpenEditorForStroke(e, found) {
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+    const { index, stroke } = found;
+    const canvas     = api.getAnnotCanvas();
+    const rect       = canvas.getBoundingClientRect();
+    const fontSizePx = Math.round(6 * Math.pow(1.12, stroke.size) * rect.width / 600);
+    const screenX    = rect.left + stroke.nx * rect.width;
+    const screenY    = rect.top  + stroke.ny * rect.height;
+    _showPdfInlineTextEditor({
+        clientX: screenX, clientY: screenY,
+        color: stroke.color, size: stroke.size, fontSizePx,
+        initialText: stroke.text || '',
+        onValidate(newText, finalSize, finalColor) {
+            if (!newText.trim()) return;
+            api.updateTextStroke(index, newText, finalSize ?? stroke.size, finalColor ?? stroke.color);
+        }
+    });
+}
+
+// ── Sélection d'un texte existant (clic droit) ───────────────────────────
+var _pdfSelectedText = null; // { index, stroke }
+var _pdfSelectColorInterval = null;
+
+function _pdfAnnotSelectText(e) {
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api || !api.findTextStrokeAt) return;
+    const pos   = _getPdfAnnotPos(e);
+    const found = api.findTextStrokeAt(pos.x, pos.y);
+
+    // Clic droit ailleurs → désélectionner
+    if (!found) {
+        _pdfAnnotDeselect();
+        return;
     }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Sélectionner ce stroke
+    _pdfSelectedText = { index: found.index, stroke: { ...found.stroke } };
+
+    // Synchroniser le color picker ET le slider de taille avec le stroke
+    window._drawColor = found.stroke.color;
+    if (typeof cpickSet === 'function') cpickSet('draw-color', found.stroke.color, true);
+    const drawSizeEl = document.getElementById('draw-size');
+    const drawSizeLabelEl = document.getElementById('draw-size-label');
+    if (drawSizeEl) { drawSizeEl.value = found.stroke.size; drawSizeEl.dispatchEvent(new Event('input')); }
+    if (drawSizeLabelEl) drawSizeLabelEl.textContent = found.stroke.size;
+
+    // Dessiner le cadre de sélection
+    api.drawTextSelection(found.index);
+
+    // Surveiller les changements de couleur et de taille du picker
+    if (_pdfSelectColorInterval) clearInterval(_pdfSelectColorInterval);
+    let lastPickerColor = found.stroke.color;
+    let lastPickerSize  = found.stroke.size;
+    _pdfSelectColorInterval = setInterval(() => {
+        if (!_pdfSelectedText) { clearInterval(_pdfSelectColorInterval); return; }
+        const pickerColor = _pdfAnnotGetColor();
+        const pickerSize  = _pdfAnnotGetSize();
+        let changed = false;
+        if (pickerColor && pickerColor !== lastPickerColor) {
+            lastPickerColor = pickerColor;
+            _pdfSelectedText.stroke.color = pickerColor;
+            changed = true;
+        }
+        if (pickerSize && pickerSize !== lastPickerSize) {
+            lastPickerSize = pickerSize;
+            _pdfSelectedText.stroke.size = pickerSize;
+            changed = true;
+        }
+        if (changed) {
+            api.updateTextStroke(_pdfSelectedText.index,
+                _pdfSelectedText.stroke.text,
+                _pdfSelectedText.stroke.size,
+                _pdfSelectedText.stroke.color);
+            api.drawTextSelection(_pdfSelectedText.index);
+        }
+    }, 100);
+}
+
+function _pdfAnnotDeselect() {
+    if (_pdfSelectColorInterval) { clearInterval(_pdfSelectColorInterval); _pdfSelectColorInterval = null; }
+    if (_pdfSelectedText) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.redrawAnnotations) api.redrawAnnotations();
+    }
+    _pdfSelectedText = null;
+}
+
+function _pdfAnnotRightClick(e) {
+    e.preventDefault();
+    _pdfAnnotSelectText(e);
+}
+
+// Affiche un éditeur de texte inline positionné à (clientX, clientY)
+function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, initialText = '', onValidate }) {
+    // Fermer un éditeur déjà ouvert sans valider
+    const existing = document.getElementById('_pdf-inline-text-editor-wrap');
+    if (existing) existing.remove();
+
+    // Taille courante (modifiable via +/-)
+    let currentSize = size;
+    let currentFontPx = fontSizePx;
+
+    // Wrapper positionné à l'endroit du clic
+    const wrap = document.createElement('div');
+    wrap.id = '_pdf-inline-text-editor-wrap';
+    wrap.style.cssText = `
+        position: fixed;
+        left: ${clientX}px;
+        top: ${clientY - fontSizePx - 28}px;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.22));
+    `;
+
+    // Bandeau taille
+    const toolbar = document.createElement('div');
+    toolbar.style.cssText = `
+        display: flex; align-items: center; gap: 4px;
+        background: rgba(40,40,40,0.92); border-radius: 5px;
+        padding: 2px 6px; width: fit-content;
+        user-select: none;
+    `;
+    const btnMinus = document.createElement('button');
+    btnMinus.textContent = '−';
+    btnMinus.style.cssText = 'background:transparent;border:none;color:#fff;font-size:14px;cursor:pointer;padding:0 3px;line-height:1;';
+    const sizeLabel = document.createElement('span');
+    sizeLabel.style.cssText = 'color:#fff;font-size:11px;min-width:22px;text-align:center;';
+    sizeLabel.textContent = currentSize;
+    const btnPlus = document.createElement('button');
+    btnPlus.textContent = '+';
+    btnPlus.style.cssText = 'background:transparent;border:none;color:#fff;font-size:14px;cursor:pointer;padding:0 3px;line-height:1;';
+    toolbar.append(btnMinus, sizeLabel, btnPlus);
+
+    // Zone de texte
+    const editor = document.createElement('div');
+    editor.id = '_pdf-inline-text-editor';
+    editor.contentEditable = 'true';
+    editor.spellcheck = false;
+    editor.style.cssText = `
+        min-width: 80px;
+        max-width: 500px;
+        padding: 2px 5px;
+        font-size: ${fontSizePx}px;
+        font-family: 'Segoe UI', sans-serif;
+        color: ${color};
+        background: rgba(255,255,255,0.92);
+        border: 1.5px dashed ${color};
+        border-radius: 3px;
+        outline: none;
+        white-space: pre;
+        cursor: text;
+        line-height: 1.3;
+    `;
+
+    wrap.append(toolbar, editor);
+
+    // Mise à jour de la taille
+    function updateSize(delta) {
+        currentSize = Math.max(1, Math.min(40, currentSize + delta));
+        // Recalculer fontSizePx à partir de la même formule que drawStroke
+        const canvas = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI && _pdfAnnotWidget._pdfAnnotAPI.getAnnotCanvas();
+        const rect = canvas ? canvas.getBoundingClientRect() : { width: 600 };
+        currentFontPx = Math.round((currentSize + 8) * rect.width / 600);
+        editor.style.fontSize = currentFontPx + 'px';
+        sizeLabel.textContent = currentSize;
+    }
+    btnMinus.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); ev.preventDefault(); updateSize(-1); editor.focus(); });
+    btnPlus.addEventListener('pointerdown',  (ev) => { ev.stopPropagation(); ev.preventDefault(); updateSize(+1); editor.focus(); });
+
+    // Synchronisation couleur depuis le color picker (window._drawColor)
+    let currentColor = color;
+    let lastPickerColor = _pdfAnnotGetColor(); // valeur picker au moment de l'ouverture
+    const colorInterval = setInterval(() => {
+        const pickerColor = _pdfAnnotGetColor();
+        if (pickerColor && pickerColor !== lastPickerColor) {
+            lastPickerColor = pickerColor;
+            currentColor = pickerColor;
+            editor.style.color = currentColor;
+            editor.style.borderColor = currentColor;
+            editor.focus();
+        }
+    }, 100);
+
+    let validated = false;
+    function validate() {
+        if (validated) return;
+        validated = true;
+        clearInterval(colorInterval);
+        const text = editor.innerText;
+        wrap.remove();
+        document.removeEventListener('pointerdown', onOutsideClick, true);
+        onValidate(text, currentSize, currentColor);
+    }
+    function cancel() {
+        if (validated) return;
+        validated = true;
+        clearInterval(colorInterval);
+        wrap.remove();
+        document.removeEventListener('pointerdown', onOutsideClick, true);
+    }
+
+    editor.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); validate(); }
+        if (ev.key === 'Escape') cancel();
+        ev.stopPropagation();
+    });
+
+    function onOutsideClick(ev) {
+        if (wrap.contains(ev.target)) return;
+        // Ne pas fermer si on clique sur le color picker draw
+        const cpick = document.getElementById('cpick-draw-color');
+        const cpickPop = document.getElementById('cpick-pop-draw-color');
+        if ((cpick && cpick.contains(ev.target)) || (cpickPop && cpickPop.contains(ev.target))) return;
+        document.removeEventListener('pointerdown', onOutsideClick, true);
+        ev.stopPropagation();
+        ev.preventDefault();
+        validate();
+    }
+    setTimeout(() => {
+        document.addEventListener('pointerdown', onOutsideClick, true);
+    }, 300);
+
+    wrap.addEventListener('pointerdown', (ev) => {
+        if (ev.target !== btnMinus && ev.target !== btnPlus) ev.stopPropagation();
+    });
+
+    document.body.appendChild(wrap);
+    if (initialText) editor.innerText = initialText;
+
+    requestAnimationFrame(() => {
+        editor.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    });
 }
 
 // ── Gestionnaires d'événements ────────────────────────────────────────────
@@ -2260,7 +2569,13 @@ function _pdfAnnotInsertText(e) {
 function _pdfAnnotMouseDown(e)  {
     if (e.button !== 0) return;
     if (e.target.closest && e.target.closest('button')) return;
+    // En mode texte, empêcher le mousedown de voler le focus à l'éditeur inline
+    if (_pdfAnnotEffectiveTool() === 'text') e.preventDefault();
     _pdfAnnotStartStroke(e);
+}
+function _pdfAnnotContextMenu(e) {
+    // En mode texte, le clic droit ne fait rien (sélection se fait au clic gauche)
+    e.preventDefault();
 }
 function _pdfAnnotMouseMove(e)  {
     _pdfAnnotContinueStroke(e);
@@ -2273,6 +2588,15 @@ function _pdfAnnotMouseMove(e)  {
             api.previewEraser(pos.x, pos.y, r);
         }
     }
+    // Curseur adaptatif en mode texte : grab sur texte existant, text sinon
+    if (!_pdfAnnotPainting && _pdfAnnotEffectiveTool() === 'text' && _pdfAnnotEvTarget) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.findTextStrokeAt) {
+            const pos = _getPdfAnnotPos(e);
+            const found = api.findTextStrokeAt(pos.x, pos.y);
+            _pdfAnnotEvTarget.style.cursor = found ? 'grab' : 'text';
+        }
+    }
 }
 function _pdfAnnotMouseUp(e)    { _pdfAnnotEndStroke(e); }
 function _pdfAnnotMouseLeave(e) {
@@ -2280,6 +2604,10 @@ function _pdfAnnotMouseLeave(e) {
     if (_pdfAnnotMode && isEraserMode) {
         const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
         if (api && api.redrawAnnotations) api.redrawAnnotations();
+    }
+    // Remettre le curseur par défaut du mode
+    if (_pdfAnnotEvTarget && _pdfAnnotEffectiveTool() === 'text') {
+        _pdfAnnotEvTarget.style.cursor = 'text';
     }
     _pdfAnnotEndStroke(e);
 }
