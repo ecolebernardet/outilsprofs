@@ -489,7 +489,7 @@ function makeDraggable(elmnt) {
     if (isTextLike) {
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle')) return;
             if (e.ctrlKey || e.metaKey) return;
             const container = elmnt.querySelector('.editor-container');
             if (container) {
@@ -502,7 +502,7 @@ function makeDraggable(elmnt) {
         });
 
         elmnt.addEventListener('dblclick', (e) => {
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle')) return;
             elmnt._dragPending = null;
             const editor = elmnt.querySelector('.editor-content');
             if (editor) {
@@ -550,7 +550,7 @@ function makeDraggable(elmnt) {
         // Support tactile pour les widgets texte
         elmnt.addEventListener('touchstart', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle')) return;
             const editor = elmnt.querySelector('.editor-content');
             if (editor && editor.contentEditable === 'true') return;
             const t = e.touches[0];
@@ -580,7 +580,7 @@ function makeDraggable(elmnt) {
     } else {
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             const container = elmnt.querySelector('.editor-container');
@@ -595,13 +595,102 @@ function makeDraggable(elmnt) {
 
         elmnt.addEventListener('touchstart', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             elmnt.focus();
             startWidgetDrag(e.touches[0], elmnt);
         }, { passive: false });
-    }
+
+    // Poignée de resize custom (touch + stylet + souris)
+    makeResizableByHandle(elmnt);
+}
+
+// =========================================================================
+// RESIZE CUSTOM (touch / stylet / souris)
+// Remplace le resize CSS natif qui ne fonctionne pas en tactile/stylet
+// =========================================================================
+function makeResizableByHandle(elmnt) {
+    const container = elmnt.querySelector('.editor-container');
+    if (!container) return;
+
+    // Éviter de créer deux poignées
+    if (container.querySelector('.custom-resize-handle')) return;
+
+    const handle = document.createElement('div');
+    handle.className = 'custom-resize-handle';
+    handle.title = 'Redimensionner';
+    handle.innerHTML = '&#x292F;';
+    handle.style.cssText = [
+        'position:absolute',
+        'bottom:0',
+        'right:0',
+        'width:22px',
+        'height:22px',
+        'cursor:se-resize',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'font-size:13px',
+        'color:#888',
+        'background:rgba(255,255,255,0.85)',
+        'border-top:1px solid #ddd',
+        'border-left:1px solid #ddd',
+        'border-radius:4px 0 6px 0',
+        'z-index:20',
+        'user-select:none',
+        'touch-action:none',
+        'opacity:0',
+        'transition:opacity 0.15s',
+    ].join(';');
+
+    // Visible au survol / focus
+    elmnt.addEventListener('mouseenter', () => handle.style.opacity = '1');
+    elmnt.addEventListener('mouseleave', () => handle.style.opacity = '0');
+    elmnt.addEventListener('focusin',    () => handle.style.opacity = '1');
+    elmnt.addEventListener('focusout',   () => handle.style.opacity = '0');
+
+    container.style.position = 'relative';
+    container.appendChild(handle);
+
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        e.stopPropagation();
+        e.preventDefault();
+        handle.setPointerCapture(e.pointerId);
+        handle.style.opacity = '1';
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startW = container.offsetWidth;
+        const startH = container.offsetHeight;
+
+        // Désactiver le resize CSS natif pendant le drag
+        const prevResize = container.style.resize;
+        container.style.resize = 'none';
+
+        function onMove(ev) {
+            ev.preventDefault();
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            const minW = parseInt(container.style.minWidth) || 180;
+            const minH = parseInt(container.style.minHeight) || 70;
+            container.style.width  = Math.max(minW, startW + dx) + 'px';
+            container.style.height = Math.max(minH, startH + dy) + 'px';
+        }
+
+        function onUp() {
+            container.style.resize = prevResize;
+            handle.removeEventListener('pointermove',   onMove);
+            handle.removeEventListener('pointerup',     onUp);
+            handle.removeEventListener('pointercancel', onUp);
+            if (typeof saveBoard === 'function') saveBoard();
+        }
+
+        handle.addEventListener('pointermove',   onMove);
+        handle.addEventListener('pointerup',     onUp);
+        handle.addEventListener('pointercancel', onUp);
+    });
 }
 
 function startWidgetDrag(e, elmnt) {
