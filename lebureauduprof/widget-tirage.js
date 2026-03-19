@@ -24,7 +24,7 @@
         box-shadow: none !important;
     }
 
-    /* ── Wrapper externe : resize natif dans toutes les directions ── */
+    /* ── Wrapper externe ── */
     .widget[data-type="tirage"] .tirage-outer {
         position: relative;
         width: 600px;
@@ -32,21 +32,15 @@
         min-width: 280px;
         min-height: 200px;
         overflow: hidden;
-        resize: both;
+        resize: none;
         box-sizing: border-box;
         border-radius: 20px;
     }
+    .widget[data-type="tirage"] .tirage-outer::-webkit-resizer { display: none; }
     .widget[data-type="tirage"]:hover .tirage-outer,
     .widget[data-type="tirage"]:focus-within .tirage-outer {
         outline: 2px dashed rgba(59,130,246,0.35);
         outline-offset: 1px;
-    }
-    .widget[data-type="tirage"] .tirage-outer::-webkit-resizer {
-        background-color: transparent;
-        background-image: linear-gradient(135deg,
-            transparent 50%, #3b82f6 50%, #3b82f6 60%,
-            transparent 60%, transparent 70%,
-            #3b82f6 70%, #3b82f6 80%, transparent 80%);
     }
 
     /* ── Container intérieur plein ── */
@@ -767,7 +761,7 @@
                 <div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
             </div>
             <div class="widget-ctx-menu"></div>
-            <div class="tirage-outer">${tirageInnerHTML()}</div>
+            <div class="tirage-outer editor-container">${tirageInnerHTML()}</div>
         `;
 
         board.appendChild(widget);
@@ -837,7 +831,7 @@
                         // Si le moteur de restauration a créé un placeholder vide, le remplacer
                         if (!outer) {
                             outer = document.createElement('div');
-                            outer.className = 'tirage-outer';
+                            outer.className = 'tirage-outer editor-container';
                             widget.appendChild(outer);
                         }
 
