@@ -675,12 +675,27 @@
     let _saveTimer=null,_isSaving=false,_pendingSave=false,_lastKnownDataCount=0;
 
     async function loadFromCloud() {
-        await checkAccess();
+        console.log("🔵 loadFromCloud() démarré");
+        document.getElementById('syncIndicator').innerText="⏳ Connexion…";
+        try {
+            await checkAccess();
+            console.log("🔵 checkAccess() OK, _encryptionKey=", !!_encryptionKey);
+        } catch(e) {
+            console.error("❌ checkAccess() échoué:", e);
+            document.getElementById('syncIndicator').innerText="❌ Accès refusé";
+            setupStickyNote();
+            return;
+        }
         updatePasswordToggleUI();
         try {
-            const {data}=await _supabase.from('absences_data').select('content').eq('id',1).single();
+            console.log("🔵 Appel Supabase en cours… URL=", SUPABASE_URL);
+            const {data, error}=await _supabase.from('absences_data').select('content').eq('id',1).single();
+            console.log("🔵 Réponse Supabase — data:", data, "error:", error);
+            if(error) throw error;
             if(data){
+                console.log("🔵 data.content.__encrypted=", data.content?.__encrypted);
                 const decrypted=await decryptData(data.content);
+                console.log("🔵 Déchiffrement OK, schoolData.length=", decrypted?.schoolData?.length);
                 if(data.content&&!data.content.__encrypted){
                     console.log("Migration RGPD…");
                     await _supabase.from('absences_data').upsert({id:1,content:await encryptData({schoolData:decrypted.schoolData||[],excludedDates:decrypted.excludedDates||[],sharedNote:decrypted.sharedNote||''})});
@@ -704,8 +719,15 @@
                 mobileSelectedDate=new Date();
                 updateMobileDayLabel();
                 refreshSchoolMonths();renderAll();
+            } else {
+                console.warn("⚠️ Aucune donnée retournée par Supabase (data est null/undefined)");
+                document.getElementById('syncIndicator').innerText="⚠️ Aucune donnée trouvée";
+                refreshSchoolMonths();renderAll();
             }
-        } catch(e){console.error("Erreur chargement:",e);document.getElementById('syncIndicator').innerText="❌ Erreur de connexion";}
+        } catch(e){
+            console.error("❌ Erreur chargement:", e);
+            document.getElementById('syncIndicator').innerText="❌ Erreur: "+e.message;
+        }
         setupStickyNote();
     }
 
