@@ -383,6 +383,17 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 const clone = el.cloneNode(true);
                 el.parentNode.replaceChild(clone, el);
                 clone.addEventListener('click', fn);
+                // Support tactile / stylet VPI : touchend + pointerup
+                clone.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    fn(e);
+                }, { passive: false });
+                clone.addEventListener('pointerup', (e) => {
+                    if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+                        e.preventDefault();
+                        fn(e);
+                    }
+                });
             }
 
             reattach('.pdf-zoom-in',  () => {

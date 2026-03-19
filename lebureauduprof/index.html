@@ -1867,7 +1867,7 @@
 
         <!-- BARRE PRINCIPALE -->
         <div class="editor-toolbar" style="gap:6px;flex-wrap:wrap;min-height:34px;">
-            <label style="cursor:pointer;background:#4a90e2;color:white;padding:3px 8px;border-radius:5px;font-size:11px;white-space:nowrap;">
+            <label style="cursor:pointer;background:#4a90e2;color:white;padding:3px 8px;border-radius:5px;font-size:11px;white-space:nowrap;touch-action:manipulation;" ontouchend="this.querySelector('input').click();event.preventDefault();" onpointerup="if(event.pointerType==='touch'||event.pointerType==='pen'){this.querySelector('input').click();event.preventDefault();}">
                 📄 Ouvrir PDF
                 <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
             </label>
@@ -1895,7 +1895,7 @@
         <div class="pdf-placeholder" style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#aaa;font-size:13px;">
             <span style="font-size:40px;">📄</span>
             <span>Aucun PDF ouvert</span>
-            <label style="cursor:pointer;background:#f0f4fa;border:1px dashed #4a90e2;color:#4a90e2;padding:6px 14px;border-radius:8px;font-size:12px;">
+            <label style="cursor:pointer;background:#f0f4fa;border:1px dashed #4a90e2;color:#4a90e2;padding:6px 14px;border-radius:8px;font-size:12px;touch-action:manipulation;" ontouchend="this.querySelector('input').click();event.preventDefault();" onpointerup="if(event.pointerType==='touch'||event.pointerType==='pen'){this.querySelector('input').click();event.preventDefault();}">
                 Cliquez pour ouvrir un PDF
                 <input type="file" accept=".pdf" style="display:none" onchange="loadPdfWidget(this)">
             </label>
