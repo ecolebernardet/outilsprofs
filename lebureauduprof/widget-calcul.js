@@ -17,7 +17,7 @@
 
     // ── CSS injecté une seule fois ────────────────────────────────────────
     const STYLE = `
-    /* ── Wrapper externe : poignée resize native ── */
+    /* ── Wrapper externe ── */
     .widget[data-type="calcul"] .calc-outer {
         position: relative;
         width: 600px;
@@ -25,20 +25,14 @@
         min-width: 300px;
         min-height: 320px;
         overflow: hidden;
-        resize: both;
+        resize: none;
         box-sizing: border-box;
         border-radius: 16px;
     }
+    .widget[data-type="calcul"] .calc-outer::-webkit-resizer { display: none; }
     .widget[data-type="calcul"]:hover .calc-outer,
     .widget[data-type="calcul"]:focus-within .calc-outer {
         outline: 2px dashed rgba(6,182,212,0.4);
-    }
-    .widget[data-type="calcul"] .calc-outer::-webkit-resizer {
-        background-color: transparent;
-        background-image: linear-gradient(135deg,
-            transparent 50%, #06b6d4 50%, #06b6d4 60%,
-            transparent 60%, transparent 70%,
-            #06b6d4 70%, #06b6d4 80%, transparent 80%);
     }
 
     /* ── Widget intérieur — layout natif sans scale ── */
