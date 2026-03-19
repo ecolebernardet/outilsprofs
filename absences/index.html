@@ -443,6 +443,7 @@
 </div>
 
 <script>
+    console.log("🟢 Script principal démarré");
     // ── CONFIG SUPABASE ──────────────────────────────────────────
     const SUPABASE_URL = 'https://osxbonycajarenugqsfa.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zeGJvbnljYWphcmVudWdxc2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTc4NDYsImV4cCI6MjA4NjQ5Mzg0Nn0.zV3JfxKVNDU3wUq0A-2eOIM3PPHksu73LEd0xydGkgo';
@@ -1057,9 +1058,7 @@
         const btn=document.getElementById('toggleBtn');
         if(btn)btn.innerHTML=schoolData.some(c=>c.isOpen)?"▲ Tout<br>Replier":"▼ Tout<br>Déplier";
     }
-</script>
 
-<script>
     // ── STATS ÉLÈVE ──────────────────────────────────────────────
     function showStudentStats(cIdx,sIdx){
         const student=schoolData[cIdx].students[sIdx];
@@ -1412,6 +1411,8 @@
         const nowMobile = isMobile();
         if (nowMobile !== _lastIsMobile) { _lastIsMobile = nowMobile; renderAll(); }
     });
+
+    // ── DÉMARRAGE (déplacé après définition de showPrompt) ──────
 
     // ── DÉMARRAGE ────────────────────────────────────────────────
     loadFromCloud();
