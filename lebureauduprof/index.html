@@ -2797,6 +2797,52 @@ function _updateEraserBtnInPanel() {
 
 <script>
 // =========================================================================
+// Fonction commune de drag toolbar : souris + touch + stylet (pointer events)
+    function _addToolbarDrag(handle, bar, onSave, drawMode) {
+        function startDrag(clientX, clientY, pointerId) {
+            handle.style.cursor = 'grabbing';
+            const rect = bar.getBoundingClientRect();
+            let offX = clientX - rect.left, offY = clientY - rect.top;
+
+            function onMove(ev) {
+                const cx = ev.clientX, cy = ev.clientY;
+                if (drawMode) {
+                    const THRESH = 80;
+                    const goH = cy < THRESH || cy > window.innerHeight - THRESH;
+                    if (goH !== bar.classList.contains('horizontal')) {
+                        bar.classList.toggle('horizontal', goH);
+                        void bar.offsetHeight;
+                        offY = bar.offsetHeight / 2;
+                        offX = Math.min(offX, bar.offsetWidth / 2);
+                    }
+                }
+                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+                let l = Math.max(0, Math.min(cx - offX, window.innerWidth  - bar.offsetWidth  - Math.max(scrollbarW, 12)));
+                let t = Math.max(0, Math.min(cy - offY, window.innerHeight - bar.offsetHeight));
+                bar.style.left = l + 'px'; bar.style.top = t + 'px';
+                bar.style.bottom = 'auto'; bar.style.right = 'auto';
+            }
+            function onUp() {
+                handle.style.cursor = 'grab';
+                handle.removeEventListener('pointermove', onMove);
+                handle.removeEventListener('pointerup',   onUp);
+                handle.removeEventListener('pointercancel', onUp);
+                if (onSave) onSave();
+            }
+            handle.setPointerCapture(pointerId);
+            handle.addEventListener('pointermove',   onMove);
+            handle.addEventListener('pointerup',     onUp);
+            handle.addEventListener('pointercancel', onUp);
+        }
+
+        handle.addEventListener('pointerdown', function(e) {
+            if (e.button !== undefined && e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            startDrag(e.clientX, e.clientY, e.pointerId);
+        });
+    }
+
 // TOOLBARS DÉPLAÇABLES
 // =========================================================================
 (function() {
@@ -2812,68 +2858,14 @@ function _updateEraserBtnInPanel() {
             }
         } catch(e) {}
 
-        handle.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            handle.style.cursor = 'grabbing';
-            const rect = bar.getBoundingClientRect();
-            const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
-            function onMove(ev) {
-                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-                let l = Math.max(0, Math.min(ev.clientX - offX, window.innerWidth - bar.offsetWidth - Math.max(scrollbarW, 12)));
-                let t = Math.max(0, Math.min(ev.clientY - offY, window.innerHeight - bar.offsetHeight));
-                bar.style.left = l + 'px'; bar.style.top = t + 'px';
-                bar.style.bottom = 'auto'; bar.style.right = 'auto';
-            }
-            function onUp() {
-                handle.style.cursor = 'grab';
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                try { localStorage.setItem('shapeToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+        _addToolbarDrag(handle, bar, function onSave() {
+            try { localStorage.setItem('shapeToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
         });
     }
 
     // Draw-toolbar : pas de localStorage, bascule horizontal/vertical selon bord
     function makeDrawDraggable(bar, handle) {
-        handle.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            handle.style.cursor = 'grabbing';
-            const rect = bar.getBoundingClientRect();
-            let offX = e.clientX - rect.left, offY = e.clientY - rect.top;
-
-            function onMove(ev) {
-                const THRESH = 80;
-                const goH = ev.clientY < THRESH || ev.clientY > window.innerHeight - THRESH;
-
-                // Basculer orientation si nécessaire, recalculer les offsets
-                if (goH !== bar.classList.contains('horizontal')) {
-                    bar.classList.toggle('horizontal', goH);
-                    void bar.offsetHeight; // force reflow
-                    offY = bar.offsetHeight / 2;
-                    offX = Math.min(offX, bar.offsetWidth / 2);
-                }
-
-                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-                const marginRight = Math.max(scrollbarW, 12);
-                let l = ev.clientX - offX;
-                let t = ev.clientY - offY;
-                l = Math.max(0, Math.min(l, window.innerWidth  - bar.offsetWidth  - marginRight));
-                t = Math.max(0, Math.min(t, window.innerHeight - bar.offsetHeight));
-                bar.style.left = l + 'px'; bar.style.top = t + 'px';
-                bar.style.bottom = 'auto'; bar.style.right = 'auto';
-            }
-
-            function onUp() {
-                handle.style.cursor = 'grab';
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            }
-
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
+        _addToolbarDrag(handle, bar, null, true); // true = mode draw avec bascule horizontal
     }
 
     // Bascule automatique en horizontal si la toolbar est trop haute pour l'écran
@@ -2929,26 +2921,8 @@ function _updateEraserBtnInPanel() {
                 bar.style.bottom = 'auto'; bar.style.right = 'auto';
             }
         } catch(e) {}
-        handle.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            handle.style.cursor = 'grabbing';
-            const rect = bar.getBoundingClientRect();
-            const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
-            function onMove(ev) {
-                const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-                let l = Math.max(0, Math.min(ev.clientX - offX, window.innerWidth - bar.offsetWidth - Math.max(scrollbarW, 12)));
-                let t = Math.max(0, Math.min(ev.clientY - offY, window.innerHeight - bar.offsetHeight));
-                bar.style.left = l + 'px'; bar.style.top = t + 'px';
-                bar.style.bottom = 'auto'; bar.style.right = 'auto';
-            }
-            function onUp() {
-                handle.style.cursor = 'grab';
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                try { localStorage.setItem('textToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+        _addToolbarDrag(handle, bar, function onSave() {
+            try { localStorage.setItem('textToolbarPos', JSON.stringify({ left: bar.offsetLeft, top: bar.offsetTop })); } catch(e) {}
         });
     }
 })();

@@ -303,8 +303,11 @@ function makeShapeResizable(widget) {
         flipV.addEventListener('click', e => { e.stopPropagation(); snapshotNow(); flipWidget(widget, 'v'); });
     }
 
-    handle.addEventListener('mousedown', (e) => {
+    // Resize shape : souris + touch + stylet via pointer events
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
         e.preventDefault(); e.stopPropagation();
+        handle.setPointerCapture(e.pointerId);
         snapshotNow();
         const svg = widget.querySelector('svg');
         const startX = e.clientX, startY = e.clientY;
@@ -314,43 +317,11 @@ function makeShapeResizable(widget) {
         const shapeId = widget.dataset.shapeType;
         const sc = widget.dataset.strokeColor, fc = widget.dataset.fillColor;
         const fo = widget.dataset.fillOpacity, sw = widget.dataset.strokeWidth != null ? parseInt(widget.dataset.strokeWidth) : 4;
-        document.onmousemove = (ev) => {
+
+        function onMove(ev) {
             const proportional = ev.shiftKey || (lockBtn && lockBtn.classList.contains('locked'));
             const rawW = Math.max(40, startW + ev.clientX - startX);
             const rawH = Math.max(40, startH + ev.clientY - startY);
-            let newW, newH;
-            if (proportional) {
-                newW = rawW;
-                newH = Math.max(40, newW * ratio);
-            } else {
-                newW = rawW; newH = rawH;
-            }
-            svg.setAttribute('width', newW); svg.setAttribute('height', newH);
-            svg.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
-            svg.innerHTML = buildShapeSVG(shapeId, newW, newH, sc, fc, fo, sw);
-            const curW = window.innerWidth, curVH = virtualH(curW);
-            widget.dataset.wPercent = (newW / curW) * 100;
-            widget.dataset.hPercent = (newH / curVH) * 100;
-        };
-        document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-    });
-    handle.addEventListener('touchstart', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        snapshotNow();
-        const svg = widget.querySelector('svg');
-        const t0 = e.touches[0];
-        const startX = t0.clientX, startY = t0.clientY;
-        const startW = parseFloat(svg.getAttribute('width'));
-        const startH = parseFloat(svg.getAttribute('height'));
-        const ratio = startH / startW;
-        const shapeId = widget.dataset.shapeType;
-        const sc = widget.dataset.strokeColor, fc = widget.dataset.fillColor;
-        const fo = widget.dataset.fillOpacity, sw = widget.dataset.strokeWidth != null ? parseInt(widget.dataset.strokeWidth) : 4;
-        function onMove(ev) {
-            const t = ev.touches[0];
-            const proportional = lockBtn && lockBtn.classList.contains('locked');
-            const rawW = Math.max(40, startW + t.clientX - startX);
-            const rawH = Math.max(40, startH + t.clientY - startY);
             let newW = rawW, newH = rawH;
             if (proportional) newH = Math.max(40, newW * ratio);
             svg.setAttribute('width', newW); svg.setAttribute('height', newH);
@@ -360,14 +331,16 @@ function makeShapeResizable(widget) {
             widget.dataset.wPercent = (newW / curW) * 100;
             widget.dataset.hPercent = (newH / curVH) * 100;
         }
-        function onEnd() {
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend',  onEnd);
+        function onUp() {
+            handle.removeEventListener('pointermove',   onMove);
+            handle.removeEventListener('pointerup',     onUp);
+            handle.removeEventListener('pointercancel', onUp);
             saveBoard();
         }
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend',  onEnd);
-    }, { passive: false });
+        handle.addEventListener('pointermove',   onMove);
+        handle.addEventListener('pointerup',     onUp);
+        handle.addEventListener('pointercancel', onUp);
+    });
 }
 
 // Applique une symétrie à un widget forme ou texte
