@@ -616,43 +616,38 @@ function makeResizableByHandle(elmnt) {
     if (!container) return;
 
     // Éviter de créer deux poignées
-    if (container.querySelector('.custom-resize-handle')) return;
+    if (elmnt.querySelector('.custom-resize-handle')) return;
 
+    // La poignée est placée sur le WIDGET (pas sur editor-container qui a overflow:hidden)
     const handle = document.createElement('div');
     handle.className = 'custom-resize-handle';
     handle.title = 'Redimensionner';
-    handle.innerHTML = '&#x292F;';
+    handle.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" style="display:block"><line x1="2" y1="11" x2="11" y2="2" stroke="#999" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="11" x2="11" y2="6" stroke="#999" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="11" x2="11" y2="10" stroke="#999" stroke-width="1.5" stroke-linecap="round"/></svg>';
     handle.style.cssText = [
         'position:absolute',
-        'bottom:0',
-        'right:0',
+        'bottom:2px',
+        'right:2px',
         'width:22px',
         'height:22px',
         'cursor:se-resize',
         'display:flex',
         'align-items:center',
         'justify-content:center',
-        'font-size:13px',
+        'font-size:14px',
         'color:#888',
-        'background:rgba(255,255,255,0.85)',
-        'border-top:1px solid #ddd',
-        'border-left:1px solid #ddd',
-        'border-radius:4px 0 6px 0',
-        'z-index:20',
+        'background:rgba(255,255,255,0.9)',
+        'border:1px solid #ccc',
+        'border-radius:4px',
+        'z-index:50',
         'user-select:none',
         'touch-action:none',
-        'opacity:0',
-        'transition:opacity 0.15s',
     ].join(';');
 
-    // Visible au survol / focus
-    elmnt.addEventListener('mouseenter', () => handle.style.opacity = '1');
-    elmnt.addEventListener('mouseleave', () => handle.style.opacity = '0');
-    elmnt.addEventListener('focusin',    () => handle.style.opacity = '1');
-    elmnt.addEventListener('focusout',   () => handle.style.opacity = '0');
-
-    container.style.position = 'relative';
-    container.appendChild(handle);
+    // Le widget doit être en position relative pour que absolute fonctionne
+    if (getComputedStyle(elmnt).position === 'static') {
+        elmnt.style.position = 'relative';
+    }
+    elmnt.appendChild(handle);
 
     handle.addEventListener('pointerdown', (e) => {
         if (e.button !== undefined && e.button !== 0) return;
@@ -666,22 +661,17 @@ function makeResizableByHandle(elmnt) {
         const startW = container.offsetWidth;
         const startH = container.offsetHeight;
 
-        // Désactiver le resize CSS natif pendant le drag
-        const prevResize = container.style.resize;
-        container.style.resize = 'none';
-
         function onMove(ev) {
             ev.preventDefault();
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
-            const minW = parseInt(container.style.minWidth) || 180;
-            const minH = parseInt(container.style.minHeight) || 70;
+            const minW = parseInt(getComputedStyle(container).minWidth) || 180;
+            const minH = parseInt(getComputedStyle(container).minHeight) || 70;
             container.style.width  = Math.max(minW, startW + dx) + 'px';
             container.style.height = Math.max(minH, startH + dy) + 'px';
         }
 
         function onUp() {
-            container.style.resize = prevResize;
             handle.removeEventListener('pointermove',   onMove);
             handle.removeEventListener('pointerup',     onUp);
             handle.removeEventListener('pointercancel', onUp);
