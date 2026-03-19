@@ -601,8 +601,9 @@ function makeDraggable(elmnt) {
             elmnt.focus();
             startWidgetDrag(e.touches[0], elmnt);
         }, { passive: false });
+    }
 
-    // Poignée de resize custom (touch + stylet + souris)
+    // Poignée de resize custom (touch + stylet + souris) — pour tous les widgets
     makeResizableByHandle(elmnt);
 }
 
