@@ -6,7 +6,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <script>console.log("🟡 HEAD inline — JS fonctionne");</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="console.error('❌ Échec jsPDF')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js" onerror="console.error('❌ Échec jsPDF-autotable')"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -445,7 +444,6 @@
 </div>
 
 <script>
-    console.log("🟢 Script principal démarré");
     // ── CONFIG SUPABASE ──────────────────────────────────────────
     const SUPABASE_URL = 'https://osxbonycajarenugqsfa.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zeGJvbnljYWphcmVudWdxc2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTc4NDYsImV4cCI6MjA4NjQ5Mzg0Nn0.zV3JfxKVNDU3wUq0A-2eOIM3PPHksu73LEd0xydGkgo';
@@ -678,40 +676,13 @@
     let _saveTimer=null,_isSaving=false,_pendingSave=false,_lastKnownDataCount=0;
 
     async function loadFromCloud() {
-        console.log("🔵 loadFromCloud() démarré");
-        document.getElementById('syncIndicator').innerText="⏳ Connexion…";
-        try {
-            await checkAccess();
-            console.log("🔵 checkAccess() OK, _encryptionKey=", !!_encryptionKey);
-        } catch(e) {
-            console.error("❌ checkAccess() échoué:", e);
-            document.getElementById('syncIndicator').innerText="❌ Accès refusé";
-            setupStickyNote();
-            return;
-        }
+        await checkAccess();
         updatePasswordToggleUI();
         try {
-            console.log("🔵 Appel Supabase en cours… URL=", SUPABASE_URL);
             const {data, error}=await _supabase.from('absences_data').select('content').eq('id',1).single();
-            console.log("🔵 Réponse Supabase — data:", data, "error:", error);
             if(error) throw error;
             if(data){
-                console.log("🔵 data.content.__encrypted=", data.content?.__encrypted);
                 const decrypted=await decryptData(data.content);
-                console.log("🔵 Déchiffrement OK, schoolData.length=", decrypted?.schoolData?.length);
-                console.log("🔵 Contenu déchiffré (extrait):", JSON.stringify(decrypted).substring(0, 500));
-                if(decrypted.schoolData && decrypted.schoolData.length === 0) {
-                    console.warn("⚠️ schoolData vide dans Supabase — restauration depuis backup intégré…");
-                    document.getElementById('syncIndicator').innerText="🔄 Restauration backup…";
-                    const BACKUP = {"schoolData":[{"name":"CP","isOpen":false,"students":[{"data":{"6-10-M":"A","6-10-AM":"A"},"name":"BEDDIAF Liyah"},{"data":{},"name":"BINET Anouck"},{"data":{},"name":"CLOT CONTATI Ange"},{"data":{},"name":"CORNARDEAU Giovanna"},{"data":{},"name":"DEKOUN Jennah"},{"data":{"5-24-M":"Exc","5-24-AM":"Exc","6-2-AM":"Exc"},"name":"DELPY Anatole"},{"data":{},"name":"DEVOS Benjamin"},{"data":{},"name":"DIA Souadou"},{"data":{"6-13-M":"A","6-13-AM":"A"},"name":"ETER Aydan"},{"data":{},"name":"FETAZ Lucie"},{"data":{"5-27-M":"A"},"name":"GUISGAND Jules"},{"data":{"5-27-M":"A"},"name":"GUISGAND Marcel"},{"data":{},"name":"KARABULUT Damla"},{"data":{},"name":"KORICHE Naila"},{"data":{},"name":"LEDION Elva"},{"data":{},"name":"PAQUIN Mayeul"},{"data":{},"name":"PHILIPPE Colyne"},{"data":{},"name":"RAMDIALE Théa"},{"data":{},"name":"ROCHAS Alma"},{"data":{},"name":"SALVI Lyah"},{"data":{},"name":"SIMEONE Loévan"},{"data":{},"name":"VAUDE LIZE Simone"},{"data":{"5-26-M":"A"},"name":"VELLARD Aria"},{"data":{"6-12-M":"Exc","6-12-AM":"Exc"},"name":"VIARD Capucine"}]},{"name":"CP-CE1","isOpen":false,"students":[{"data":{},"name":"ANGHEL RÉ Gabriel"},{"data":{},"name":"AUGERT Charline"},{"data":{},"name":"BOUGHABA EL ANSARI Sheyn"},{"data":{},"name":"LABSI Kenzi"},{"data":{"6-20-M":"Exc","6-20-AM":"Exc"},"name":"MELENDEZ Aurore"},{"data":{},"name":"MELENDEZ Elanore"},{"data":{},"name":"MOREAU MC ADAMS Alice"},{"data":{},"name":"RAMDIALE Andréa"},{"data":{},"name":"VERNAY Alicia"},{"data":{},"name":"ARMSPACH Alix"},{"data":{},"name":"BOUHENOUCHE Yassir"},{"data":{},"name":"CERQUEIRA Robin"},{"data":{},"name":"BRUNO Abel"},{"data":{},"name":"CHENAL Elisa"},{"data":{},"name":"COUDOUR Mélie"},{"data":{},"name":"ETER Elyan"},{"data":{"6-5-M":"A"},"name":"FURIN Mila"},{"data":{},"name":"HASSOUN Rim"},{"data":{"5-26-M":"Exc","5-26-AM":"Exc"},"name":"ROULLET HECKEL Hugo"},{"data":{},"name":"TABOUCHE Meryl"},{"data":{},"name":"VIGATO Eloïse"},{"data":{},"name":"VISENTIN Andréa"}]},{"name":"CE1","isOpen":false,"students":[{"data":{},"name":"ANLI OLLIVIER Owenn"},{"data":{},"name":"BAABAA Dimitri"},{"data":{},"name":"BENALI Marwa"},{"data":{},"name":"BOCQUET Maëlys"},{"data":{},"name":"BOUABDALLAH Djibril"},{"data":{},"name":"DELMARE Juliette"},{"data":{},"name":"DIALLO Siradjo"},{"data":{},"name":"DUNOYER LECOEUR Layana"},{"data":{},"name":"ESUKA Amani"},{"data":{},"name":"FOULON Roméo"},{"data":{},"name":"FROSSARD Naël"},{"data":{},"name":"FUCHS Rosalie"},{"data":{},"name":"GATT Giulian"},{"data":{},"name":"GACHE Liam"},{"data":{},"name":"LAOUBI Inès"},{"data":{},"name":"LOMBARDI Assia"},{"data":{},"name":"LOPEZ SOUDIN Louison"},{"data":{},"name":"MURE Lucas"},{"data":{},"name":"NAILI Nehal"},{"data":{},"name":"NASRI Noursine"},{"data":{},"name":"OUDOT TARA"},{"data":{},"name":"PHILOUZE Ninon"},{"data":{},"name":"SAMDAOUI Adem"},{"data":{},"name":"WESHAHI Janaa"}]},{"name":"CE2","isOpen":false,"students":[{"data":{},"name":"BARDASSIER Néo"},{"data":{},"name":"BILETTA-CONSTANT Millie"},{"data":{},"name":"BOUVIER Enzo"},{"data":{"6-10-M":"A","6-10-AM":"A","6-16-M":"Exc","6-16-AM":"Exc"},"name":"CABOT RAYANE"},{"data":{},"name":"CLARIOND Alice"},{"data":{"5-24-M":"Exc","5-24-AM":"Exc"},"name":"DELPY Eliot"},{"data":{},"name":"DESRUES Sohel"},{"data":{},"name":"EL HASNAOUI Nail"},{"data":{},"name":"EL YADRI Tasnyme"},{"data":{},"name":"ETER Ilyas"},{"data":{},"name":"FOULON Élisa"},{"data":{"6-5-M":"Exc","6-6-M":"Exc","6-6-AM":"Exc"},"name":"FURIN LUNA"},{"data":{},"name":"JOUBIER Noémie"},{"data":{"6-2-M":"Exc"},"name":"KHOUFACHE Thiago"},{"data":{},"name":"LAUTREY Aglaé"},{"data":{},"name":"LEBLANC SCALA Paul"},{"data":{},"name":"LESEUR Malo"},{"data":{"5-24-M":"Exc"},"name":"MAIRECHE Leïna"},{"data":{},"name":"MANAA Ayoub"},{"data":{"6-13-AM":"A"},"name":"NAILI Sirine"},{"data":{},"name":"PAQUIN Auriane"},{"data":{},"name":"RIABI Mohamed"},{"data":{},"name":"SAMSON ARIAS MELLA Madeleine"},{"data":{},"name":"SOUADIA MAYSSA"},{"data":{},"name":"TERKI Anahid"},{"data":{},"name":"THOMASSIN Lya"}]},{"name":"CE2-CM2","isOpen":false,"students":[{"data":{},"name":"BESSON VICTOR"},{"data":{},"name":"BRULÉ Elowan"},{"data":{},"name":"BRUNO Eden"},{"data":{},"name":"CONNAC Noa"},{"data":{},"name":"HOSGUL Milan"},{"data":{"6-12-AM":"Exc"},"name":"HUGOT Maëlys"},{"data":{},"name":"LE COADIC Soline"},{"data":{},"name":"NYCOLLIN YAHIAOUI Aliya"},{"data":{},"name":"PAGANO Jean"},{"data":{},"name":"PEGUET Ariane"},{"data":{},"name":"ROCHAS Galise"},{"data":{},"name":"SIMEONE Timéo"},{"data":{},"name":"THILLIEZ Zélie"},{"data":{"6-23-M":"Exc"},"name":"VERNAY Matteo"},{"data":{"6-20-M":"Exc","6-20-AM":"Exc"},"name":"ZERAÏΒΙ Sirine"},{"data":{"6-13-M":"Exc","6-19-M":"Exc","6-19-AM":"Exc","6-20-M":"Exc","6-20-AM":"Exc"},"name":"ALONSO Maxime"},{"data":{"5-27-M":"Exc","5-27-AM":"Exc","6-13-M":"Exc"},"name":"ALVAREZ Mayline"},{"data":{"6-20-M":"Exc","6-20-AM":"Exc"},"name":"BASSI Roumaïssa"},{"data":{},"name":"BAABAA Lila"},{"data":{"6-20-M":"Exc","6-20-AM":"Exc"},"name":"BENALI Marouane"},{"data":{"5-27-M":"Exc"},"name":"BLANC Madeline"},{"data":{},"name":"BOUTARIC Nolan"},{"data":{},"name":"DUBOIS Félix"},{"data":{"6-20-M":"Exc","6-20-AM":"Exc"},"name":"IKHLEF Célina"},{"data":{"6-17-M":"Exc","6-17-AM":"Exc"},"name":"ROUX Nino"}]},{"name":"CM1","isOpen":false,"students":[{"data":{},"name":"BEDDIAF Mélina"},{"data":{"6-17-M":"Exc","6-17-AM":"Exc"},"name":"BILLARD Louca"},{"data":{},"name":"BOURGUENOLLE Lino"},{"data":{},"name":"CHAALAL Maheidine"},{"data":{},"name":"COLLIARD Jules"},{"data":{},"name":"CORDEL Noemie"},{"data":{},"name":"DAGUIER Tom"},{"data":{},"name":"DÉSIR Jade"},{"data":{},"name":"HAMAM Julia"},{"data":{},"name":"HOSGUL Kiyan"},{"data":{},"name":"LAKEHAL Sunnah"},{"data":{"6-23-M":"Exc"},"name":"LEON Alenzo"},{"data":{},"name":"LEVY Malo"},{"data":{},"name":"MARIDET OWAIN"},{"data":{},"name":"ΜΕΚKIDECHE TESSA"},{"data":{"6-3-M":"A","6-3-AM":"A"},"name":"PAQUIN Apolline"},{"data":{},"name":"PHILOUZE Lola"},{"data":{},"name":"PINTO DOS REIS Lucie"},{"data":{"6-16-M":"Exc","6-16-AM":"Exc","6-9-M":"Exc","6-9-AM":"Exc","6-10-M":"Exc","6-10-AM":"Exc","6-12-M":"Exc","6-12-AM":"Exc","6-13-M":"Exc","6-13-AM":"Exc","6-17-M":"Exc","6-17-AM":"Exc"},"name":"SABILI Liybadi"},{"data":{},"name":"TERKI Aysser"},{"data":{},"name":"WENGER Lucas"},{"data":{},"name":"WESHAHI Zeyneb"},{"data":{},"name":"ZOUAQUI Dalhia"}]},{"name":"CM1-CM2","isOpen":false,"students":[{"data":{},"name":"BERTHOUD Léa"},{"data":{},"name":"BOURDIN Ange"},{"data":{},"name":"BOZLAK Ela"},{"data":{},"name":"CABOT Skander"},{"data":{},"name":"LAHEURTE MAITE"},{"data":{},"name":"LAUTROU-CABASSON Raphaël"},{"data":{},"name":"BESSON Eline"},{"data":{},"name":"CAMAJ Altiona"},{"data":{},"name":"CHENAL Anna"},{"data":{},"name":"CHEVALLIER Alecya"},{"data":{},"name":"CHIARI Michele"},{"data":{},"name":"COLLOMB Agathe"},{"data":{},"name":"DUCRUET Romain"},{"data":{},"name":"GUERAIN Alice"},{"data":{},"name":"GUNES Mustafa"},{"data":{},"name":"LAKEHAL Sejed"},{"data":{},"name":"LAUTREY Cassandre"},{"data":{},"name":"LE LABOUSSE Robin"},{"data":{},"name":"LOPEZ SOUDIN Johanès"},{"data":{"6-6-M":"Exc","6-6-AM":"Exc"},"name":"MANSE Noah"},{"data":{},"name":"MARCON Hélori"},{"data":{},"name":"ΜΟΝΤARU Gwendal"},{"data":{"6-12-M":"A","6-12-AM":"A"},"name":"PASTOR ANVAR Paco"},{"data":{},"name":"ROULLET HECKEL Lucie"},{"data":{},"name":"TAFFERANT Gibran"},{"data":{"6-12-M":"Exc","6-12-AM":"Exc"},"name":"VENET Myrtille"}]},{"name":"UEEA","isOpen":false,"students":[{"data":{},"name":"BELAMRI Ziyad"},{"data":{},"name":"BENYAMINA Rym"},{"data":{},"name":"DEMS GRAY Rayan"},{"data":{},"name":"DUBOIS Milo"},{"data":{},"name":"EL MALOULI Camil"},{"data":{},"name":"GUALA Léo"},{"data":{},"name":"RIBEIRO MARQUES Duarte"},{"data":{},"name":"SEBDAOUI ALIYAH"}]}],"excludedDates":[{"end":"2026-08-31","name":"été","start":"2026-07-04"},{"end":"2026-05-08","name":"8 mai","start":"2026-05-08"},{"end":"2026-05-25","name":"Pentecôte","start":"2026-05-25"},{"end":"2026-05-15","name":"Ascension","start":"2026-05-14"},{"end":"2026-02-22","name":"hiver","start":"2026-02-07"},{"end":"2026-05-01","name":"1er mai","start":"2026-05-01"},{"end":"2025-11-11","name":"11 novembre","start":"2025-11-11"},{"end":"2026-04-19","name":"Printemps","start":"2026-04-04"}]};
-                    schoolData = BACKUP.schoolData;
-                    excludedDates = BACKUP.excludedDates;
-                    // Rechiffrer et sauvegarder dans Supabase
-                    const restoredContent = await encryptData({schoolData, excludedDates, sharedNote: ""});
-                    await _supabase.from('absences_data').upsert({id:1, content: restoredContent});
-                    console.log("✅ Backup restauré et sauvegardé dans Supabase !");
-                    document.getElementById('syncIndicator').innerText="✅ Backup restauré !";
-                }
                 if(data.content&&!data.content.__encrypted){
                     console.log("Migration RGPD…");
                     await _supabase.from('absences_data').upsert({id:1,content:await encryptData({schoolData:decrypted.schoolData||[],excludedDates:decrypted.excludedDates||[],sharedNote:decrypted.sharedNote||''})});
@@ -735,15 +706,8 @@
                 mobileSelectedDate=new Date();
                 updateMobileDayLabel();
                 refreshSchoolMonths();renderAll();
-            } else {
-                console.warn("⚠️ Aucune donnée retournée par Supabase (data est null/undefined)");
-                document.getElementById('syncIndicator').innerText="⚠️ Aucune donnée trouvée";
-                refreshSchoolMonths();renderAll();
             }
-        } catch(e){
-            console.error("❌ Erreur chargement:", e);
-            document.getElementById('syncIndicator').innerText="❌ Erreur: "+e.message;
-        }
+        } catch(e){console.error("Erreur chargement:",e);document.getElementById('syncIndicator').innerText="❌ Erreur de connexion";}
         setupStickyNote();
     }
 
