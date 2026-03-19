@@ -1093,6 +1093,7 @@ function toggleSelectMode() {
 }
 function stopDrawing() {
     isDrawMode = false;
+    isPainting = false;
     if (drawCanvas) drawCanvas.classList.add('inactive');
     board.classList.remove('is-drawing');
     board.classList.remove('is-segment-mode');
@@ -1100,10 +1101,18 @@ function stopDrawing() {
     const figSub = document.getElementById('figures-submenu');
     if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
     if (typeof _closeGeoSubmenu === 'function') _closeGeoSubmenu();
-    const tb = document.getElementById('draw-toolbar');
-    if (tb) tb.style.display = 'none';
     cancelHandwritingRecognition();
     stopEraserMode();
+    // Repasser en mode sélection (curseur + bouton actif)
+    FIGURE_MODES.forEach(m => {
+        const btn = document.getElementById('draw-mode-'+m+'-btn');
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+    });
+    _setBtnActive('draw-figures-btn', false, 'figures');
+    _setBtnActive('draw-free-btn', false);
+    _setBtnActive('draw-select-btn', true);
+    const tb = document.getElementById('draw-toolbar');
+    if (tb) tb.style.display = 'none';
     if (typeof _updateDrawFabBtn === 'function') _updateDrawFabBtn();
 }
 function clearCanvas() {
