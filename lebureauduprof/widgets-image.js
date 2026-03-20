@@ -781,7 +781,11 @@ function toggleImagePanel() {
     } else {
         // Fermer les autres panneaux latéraux si nécessaire
         const stickerPanel = document.getElementById('sticker-panel');
-        if (stickerPanel) stickerPanel.classList.remove('active');
+        if (stickerPanel) {
+            stickerPanel.classList.remove('active');
+            const sb = document.getElementById('sticker-btn');
+            if (sb) sb.classList.remove('active-tool');
+        }
         panel.classList.add('active');
     }
 }
