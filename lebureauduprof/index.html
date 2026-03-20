@@ -233,15 +233,15 @@
         /* Curseur crayon pour le mode insertion de texte */
         .cursor-pencil { cursor: crosshair; }
         #board.is-drawing { cursor: crosshair; }
-        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *) { cursor: crosshair; }
+        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *):not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: crosshair; }
         .geo-tool-overlay, .geo-tool-overlay * { cursor: move !important; }
         .geo-tool-overlay button, .geo-tool-overlay .geo-rot-handle, .geo-tool-overlay .geo-trace-btn, .geo-tool-overlay .geo-close-tool { cursor: pointer !important; }
         #board.is-segment-mode { cursor: crosshair !important; }
-        #board.is-segment-mode * { cursor: crosshair !important; }
+        #board.is-segment-mode *:not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: crosshair !important; }
         #figures-submenu { display: none; }
         #figures-submenu.open { display: flex; }
         #board.is-erasing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
-        #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        #board.is-erasing *:not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         /* Curseur gomme */
         #draw-canvas.eraser-mode { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
 
@@ -1007,19 +1007,17 @@
 
 		/* --- MODE PRÉSENTATION --- */
 		#presentation-btn {
-			position:fixed;top:10px;left:10px;
-			z-index:100000;
-			background:#1a1a2e;color:white;
+			position:fixed;top:10px;right:24px;
+			z-index:100000;background:#1a1a2e;color:white;
 			border:1px solid rgba(255,255,255,0.25);
-			font-size:20px;padding:5px 5px;border-radius:30px;
+			font-size:25px;padding:5px 5px;border-radius:30px;
 			cursor:pointer;font-weight:600;display:flex;
 			align-items:center;gap:8px;
 			box-shadow:0 4px 16px rgba(0,0,0,0.5);
 			line-height: 1; padding-bottom: 10px;
-			opacity: 0.3 !important;
 		}
 			
-		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); opacity: 1 !important;}
+		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); }
 		
 		body.presentation-mode #board {
 			position: fixed !important;
@@ -1086,7 +1084,7 @@
 		body.presentation-mode #presentation-btn {
 			background: rgba(20,20,20,0.75) !important;
 			border-color: rgba(255,255,255,0.2) !important;
-			font-size: 10px !important;
+			font-size: 12px !important;
 			padding: 10px 5px !important;
 			border-radius: 12px !important;
 			opacity: 0.3 !important;
@@ -1156,49 +1154,18 @@
 
 		/* === PANNEAU STICKERS === */
 		#sticker-panel {
-			display: none;
-			position: fixed;
-			top: 0; right: 0;
-			width: 450px; height: 100vh;
-			background: #1e1e28;
-			border-left: 1px solid #2e2e3a;
-			z-index: 9200;
-			flex-direction: column;
-			box-shadow: -4px 0 24px rgba(0,0,0,0.5);
-			font-family: 'Segoe UI', system-ui, sans-serif;
+			display: none; position: fixed; bottom: 80px; left: 30px;
+			background: #1F1F21; border-radius: 16px; padding: 14px 14px 10px;
+			box-shadow: 0 -4px 30px rgba(0,0,0,0.5); z-index: 9998;
+			border: 1px solid #3a3a3f; width: 400px;
 		}
-		#sticker-panel.active { display: flex; }
-
-		#sticker-panel-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 14px 16px;
-			background: #28282f;
-			border-bottom: 1px solid #2e2e3a;
-			flex-shrink: 0;
-		}
-		#sticker-panel-header h3 {
-			margin: 0;
-			font-size: 14px;
-			font-weight: 700;
-			color: #ddd;
-		}
-		#sticker-panel-body {
-			flex: 1;
-			overflow-y: auto;
-			display: flex;
-			flex-direction: column;
-			padding: 10px 12px;
-		}
-		#sticker-panel-body::-webkit-scrollbar { width: 6px; }
-		#sticker-panel-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-		#sticker-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-
-		.sp-title { display: none; } /* ancien header masqué */
-		.sp-close { background: none; border: none; color: #aaa; cursor: pointer;
-			font-size: 20px; line-height: 1; padding: 0; transition: color .15s; }
-		.sp-close:hover { color: #fff; }
+		#sticker-panel.active { display: block; }
+		.sp-title { color: #888; font-size: 10px; font-weight: 700; text-transform: uppercase;
+			letter-spacing: 1.2px; margin-bottom: 10px; padding-bottom: 8px;
+			border-bottom: 1px solid #2e2e2e; display: flex; justify-content: space-between; align-items: center; }
+		.sp-close { background: none; border: none; color: #555; cursor: pointer;
+			font-size: 15px; line-height: 1; padding: 2px 5px; border-radius: 4px; }
+		.sp-close:hover { color: #aaa; }
 		.sp-tabs { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
 		.sp-tab { background: #28282f; color: #aaa; border: 1px solid #3a3a3f;
 			border-radius: 8px; padding: 4px 9px; font-size: 11px; cursor: pointer;
@@ -1212,7 +1179,7 @@
 		.sp-empty { color: #555; font-size: 12px; text-align: center; padding: 20px 0; }
 		/* Grille émojis animés Noto */
 		.sp-grid-anim { display: grid; grid-template-columns: repeat(7, 1fr);
-			gap: 4px; padding-right: 2px; }
+			gap: 4px; max-height: 270px; overflow-y: auto; padding-right: 2px; }
 		.sp-grid-anim::-webkit-scrollbar { width: 4px; }
 		.sp-grid-anim::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
 		.sp-anim-btn { background: #28282f; border: 1px solid #2e2e38;
@@ -1615,7 +1582,7 @@
 			</div>
 			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">✋&#xFE0E;</span></button>
 			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
-			<button id="pdf-annot-undo-btn" onclick="pdfAnnotUndo()" title="Annuler la dernière annotation" style="display:none;background:#2a2a2e;color:#aaa;border:1px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;">↩</button>
+
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -1741,11 +1708,6 @@
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
 <div id="sticker-panel">
-	<div id="sticker-panel-header">
-		<h3>✨ Stickers</h3>
-		<button class="sp-close" onclick="toggleStickerPanel()" title="Fermer">✕</button>
-	</div>
-	<div id="sticker-panel-body">
 	<div class="sp-title">
 		<span>✨ Stickers Animés</span>
 		<button class="sp-close" onclick="toggleStickerPanel()" title="Fermer">✖</button>
@@ -1767,6 +1729,7 @@
 			<button class="sp-tab" data-tab="💡 Objets">💡 Objets</button>
 			<button class="sp-tab" data-tab="🔣 Symboles">🔣 Symboles</button>
 			<button class="sp-tab" data-tab="🏳️ Drapeaux">🏳️ Drapeaux</button>
+			<button class="sp-tab" data-tab="👥 Personnes">👥 Personnes</button>
 		</div>
 	</div>
 	<!-- Section émojis classiques (hors-ligne) -->
@@ -1785,7 +1748,6 @@
 	</div>
 	<input type="text" class="sp-search" id="sp-search" placeholder="🔍 Rechercher dans tous les émojis…" oninput="renderStickerPanel()">
 	<div id="sp-content"></div>
-	</div>
 </div>
 
 <div id="modal-overlay">
@@ -2370,6 +2332,7 @@ function scheduleSaveSnapshot() {
 }
 
 function undoAction() {
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) { pdfAnnotUndo(); return; }
     if (undoStack.length <= 1) return;
     isRestoringState = true;
     clearTimeout(_pendingSnapshotTimer);
@@ -2390,6 +2353,7 @@ function undoAction() {
 }
 
 function redoAction() {
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) { pdfAnnotRedo(); return; }
     if (redoStack.length === 0) return;
     isRestoringState = true;
     clearTimeout(_pendingSnapshotTimer);
@@ -2481,19 +2445,11 @@ document.addEventListener('mouseenter', function(e) {
     if (!sub) return;
     // Réinitialiser avant mesure
     sub.style.top = '0';
-    sub.style.bottom = '';
     requestAnimationFrame(() => {
         const rect = sub.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const margin = 8;
-
-        if (rect.bottom > vh - margin) {
-            // Le sous-menu dépasse en bas : on le remonte
-            const overflow = rect.bottom - (vh - margin);
-            // On remonte, mais on ne dépasse pas le haut de l'écran
-            const maxUp = rect.top - margin; // distance disponible vers le haut
-            const shift = Math.min(overflow, maxUp);
-            sub.style.top = -shift + 'px';
+        if (rect.bottom > window.innerHeight - 8) {
+            const shift = rect.bottom - (window.innerHeight - 8);
+            sub.style.top = Math.max(-(rect.height - 40), -shift) + 'px';
         }
     });
 }, true);
@@ -2706,24 +2662,12 @@ document.addEventListener('webkitfullscreenchange', () => {
 
 function _fixSubmenuOverflow() {
     document.querySelectorAll('.mm-sub').forEach(sub => {
-        sub.style.left   = '';
-        sub.style.right  = '';
-        sub.style.top    = '0';
-        sub.style.bottom = '';
-        const r  = sub.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const margin = 8;
-        // Débordement horizontal
-        if (r.right > window.innerWidth - margin) {
+        sub.style.left  = '';
+        sub.style.right = '';
+        const r = sub.getBoundingClientRect();
+        if (r.right > window.innerWidth - 8) {
             sub.style.left  = 'auto';
             sub.style.right = '100%';
-        }
-        // Débordement vertical bas
-        if (r.bottom > vh - margin) {
-            const overflow = r.bottom - (vh - margin);
-            const maxUp    = r.top - margin;
-            const shift    = Math.min(overflow, maxUp);
-            sub.style.top  = -shift + 'px';
         }
     });
 }

@@ -549,6 +549,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             if (!layer.history) layer.history = [];
                             layer.history.push([...layer.strokes]);
                             if (layer.history.length > 30) layer.history.shift(); // max 30 niveaux
+                            layer.redoHistory = []; // toute nouvelle action efface le redo
                             layer.strokes.push(currentStrokeAnnot);
                         }
                         currentStrokeAnnot = null;
@@ -558,14 +559,26 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     undo() {
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
+                        if (!layer.redoHistory) layer.redoHistory = [];
                         if (layer.history.length > 0) {
-                            // Restaurer le dernier état sauvegardé
+                            layer.redoHistory.push([...layer.strokes]);
                             layer.strokes = layer.history.pop();
                             redrawAnnotations(currentPage);
                         } else if (layer.strokes.length > 0) {
+                            layer.redoHistory.push([...layer.strokes]);
                             layer.strokes.pop();
                             redrawAnnotations(currentPage);
                         }
+                    },
+                    // Rétablir le dernier stroke annulé
+                    redo() {
+                        const layer = getLayer(currentPage);
+                        if (!layer.redoHistory || layer.redoHistory.length === 0) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                        layer.strokes = layer.redoHistory.pop();
+                        redrawAnnotations(currentPage);
                     },
                     // Effacer toutes les annotations de la page courante
                     clear() {
@@ -575,6 +588,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (layer.strokes.length > 0) {
                             layer.history.push([...layer.strokes]);
                         }
+                        layer.redoHistory = [];
                         layer.strokes = [];
                         redrawAnnotations(currentPage);
                     },
@@ -588,6 +602,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        layer.redoHistory = [];
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
                     },
@@ -619,6 +634,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        layer.redoHistory = [];
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
                     },
@@ -732,6 +748,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        layer.redoHistory = [];
                     },
                     // px, py : coordonnées canvas pixels ; retourne le stroke trouvé ou null
                     findTextStrokeAt(px, py) {
@@ -765,6 +782,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        layer.redoHistory = [];
                         layer.strokes[index] = {
                             ...layer.strokes[index],
                             text: newText,
