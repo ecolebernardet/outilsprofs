@@ -616,10 +616,11 @@ function _insertImageWidget(src, label) {
 }
 
 function _doInsertImageWidget(src, label, naturalW, naturalH) {
-    const MAX_SIZE = 600;
+    const MAX_W = 600;
+    const MAX_H = 400;
     let w = naturalW, h = naturalH;
-    if (w > MAX_SIZE || h > MAX_SIZE) {
-        const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
+    if (w > MAX_W || h > MAX_H) {
+        const ratio = Math.min(MAX_W / w, MAX_H / h);
         w = Math.round(w * ratio);
         h = Math.round(h * ratio);
     }
