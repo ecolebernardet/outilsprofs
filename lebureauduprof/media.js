@@ -549,7 +549,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             if (!layer.history) layer.history = [];
                             layer.history.push([...layer.strokes]);
                             if (layer.history.length > 30) layer.history.shift(); // max 30 niveaux
-                            layer.redoHistory = []; // toute nouvelle action efface le redo
                             layer.strokes.push(currentStrokeAnnot);
                         }
                         currentStrokeAnnot = null;
@@ -559,26 +558,14 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     undo() {
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
-                        if (!layer.redoHistory) layer.redoHistory = [];
                         if (layer.history.length > 0) {
-                            layer.redoHistory.push([...layer.strokes]);
+                            // Restaurer le dernier état sauvegardé
                             layer.strokes = layer.history.pop();
                             redrawAnnotations(currentPage);
                         } else if (layer.strokes.length > 0) {
-                            layer.redoHistory.push([...layer.strokes]);
                             layer.strokes.pop();
                             redrawAnnotations(currentPage);
                         }
-                    },
-                    // Rétablir le dernier stroke annulé
-                    redo() {
-                        const layer = getLayer(currentPage);
-                        if (!layer.redoHistory || layer.redoHistory.length === 0) return;
-                        if (!layer.history) layer.history = [];
-                        layer.history.push([...layer.strokes]);
-                        if (layer.history.length > 30) layer.history.shift();
-                        layer.strokes = layer.redoHistory.pop();
-                        redrawAnnotations(currentPage);
                     },
                     // Effacer toutes les annotations de la page courante
                     clear() {
@@ -588,7 +575,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (layer.strokes.length > 0) {
                             layer.history.push([...layer.strokes]);
                         }
-                        layer.redoHistory = [];
                         layer.strokes = [];
                         redrawAnnotations(currentPage);
                     },
@@ -602,7 +588,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
-                        layer.redoHistory = [];
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
                     },
@@ -634,7 +619,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
-                        layer.redoHistory = [];
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
                     },
@@ -748,7 +732,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
-                        layer.redoHistory = [];
                     },
                     // px, py : coordonnées canvas pixels ; retourne le stroke trouvé ou null
                     findTextStrokeAt(px, py) {
@@ -782,7 +765,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
-                        layer.redoHistory = [];
                         layer.strokes[index] = {
                             ...layer.strokes[index],
                             text: newText,
@@ -1001,3 +983,42 @@ function ytExportLibrary() {
     document.body.appendChild(a); a.click(); a.remove();
     if (btn) { const t = btn.textContent; btn.textContent = '✓ Exporté'; setTimeout(() => btn.textContent = t, 2000); }
 }
+
+
+// =========================================================================
+// OUVERTURE PDF DEPUIS WINDOWS VIA ELECTRON
+// Écoute l'événement 'open-pdf' envoyé par main.js quand on
+// double-clique sur un PDF associé à l'application.
+// =========================================================================
+(function() {
+    if (!window.electronAPI) return; // pas dans Electron, on ignore
+
+    window.electronAPI.onOpenPdf(function(filePath) {
+        console.log('[Electron] PDF reçu :', filePath);
+        if (!filePath) return;
+
+        const filename = filePath.split(/[\\/]/).pop();
+
+        // Créer le widget PDF
+        const widget = createWidget('pdf');
+        if (!widget) return;
+        const container = widget.querySelector('.editor-container');
+        if (!container) return;
+
+        // Lire le fichier via le processus principal Electron (accès disque complet)
+        window.electronAPI.readPdfFile(filePath).then(function(base64) {
+            if (!base64) {
+                alert('Impossible de lire le PDF :\n' + filePath);
+                return;
+            }
+            if (!widget.dataset.pdfId) {
+                widget.dataset.pdfId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+            }
+            widget.dataset.pdfName = filename;
+            try { localStorage.setItem(widget.dataset.pdfId, base64); } catch(e) {}
+
+            _showPdfInWidget(container, base64, filename);
+            saveBoard();
+        });
+    });
+})();

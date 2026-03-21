@@ -1,0 +1,36 @@
+{
+  "name": "le-bureau-du-prof",
+  "version": "1.0.0",
+  "description": "Le Bureau du Prof — Application de bureau",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "fr.lebureauduprof",
+    "productName": "Le Bureau du Prof",
+    "win": {
+      "target": "portable",
+      "icon": "icon.ico",
+      "signingHashAlgorithms": null,
+      "sign": null
+    },
+    "portable": {
+      "artifactName": "LeBureauDuProf.exe"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/electron-builder/**",
+      "!node_modules/.cache/**",
+      "!dist/**"
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
