@@ -2388,7 +2388,7 @@ function _pdfAnnotInsertText(e) {
 
     const pos     = _getPdfAnnotPos(e);
     const color   = _pdfAnnotGetColor();
-    const size    = _pdfAnnotGetSize();
+    const size    = Math.max(_pdfAnnotGetSize(), 10); // taille min 10 pour le texte
     const rect       = canvas.getBoundingClientRect();
     const fontSizePx = Math.round(6 * Math.pow(1.12, size) * rect.width / 600);
     const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;

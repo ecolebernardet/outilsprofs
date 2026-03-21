@@ -286,7 +286,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                            : activeTool;
                 const sizeElId = (tool === 'eraser') ? 'eraser-size' : 'draw-size';
                 const sizeEl = document.getElementById(sizeElId);
-                const size = sizeEl ? (parseInt(sizeEl.value) || 4) : 4;
+                const _rawSize = sizeEl ? (parseInt(sizeEl.value) || 4) : 4;
+                const size = (tool === 'text') ? Math.max(_rawSize, 10) : _rawSize; // taille min 10 pour le texte
                 const px = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
 
@@ -301,7 +302,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
                     if (typeof _showPdfInlineTextEditor === 'function') {
                         _showPdfInlineTextEditor({
-                            clientX, clientY, color, fontSizePx,
+                            clientX, clientY, color, size, fontSizePx,
                             onValidate(textVal) {
                                 if (!textVal.trim()) return;
                                 const stroke = { tool: 'text', color, size, text: textVal, nx: norm.x, ny: norm.y };
