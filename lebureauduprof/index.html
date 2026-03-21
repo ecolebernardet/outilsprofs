@@ -477,6 +477,13 @@
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
 		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }
+		.widget[data-type="pdf"] .editor-toolbar { cursor: grab; }
+		.pdf-page-input::-webkit-inner-spin-button,
+		.pdf-page-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+		.widget[data-type="pdf"] .editor-toolbar button,
+		.widget[data-type="pdf"] .editor-toolbar label,
+		.widget[data-type="pdf"] .editor-toolbar select,
+		.widget[data-type="pdf"] .editor-toolbar input { cursor: pointer; }
 		.widget-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: var(--border-radius); }
 		.editor-container { display: flex; flex-direction: column; border: 1px solid #eee; border-radius: 8px; background: white; flex-grow: 1; overflow: hidden; resize: none; min-width: 180px; min-height: 70px; position: relative; }
 		.editor-container::-webkit-resizer { display: none; }
@@ -1581,9 +1588,8 @@
 				<!-- ANNOTATION PDF -->
 				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:34px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
 			</div>
-			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">✋&#xFE0E;</span></button>
+			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
 			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
-			<button id="pdf-annot-undo-btn" onclick="pdfAnnotUndo()" title="Annuler la dernière annotation" style="display:none;background:#2a2a2e;color:#aaa;border:1px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;">↩</button>
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -1877,7 +1883,11 @@
             <!-- Navigation pages : flèches + menu déroulant -->
             <div class="pdf-nav" style="display:none;align-items:center;gap:3px;font-size:12px;">
                 <button class="pdf-prev" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page précédente">◀</button>
-                <select class="pdf-page-select" style="font-size:12px;border:1px solid #ccc;border-radius:4px;padding:1px 4px;background:#f5f5f5;cursor:pointer;"></select>
+                <div style="position:relative;display:inline-flex;align-items:center;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;overflow:hidden;">
+                    <input class="pdf-page-input" type="number" min="1" value="1" style="font-size:12px;border:none;padding:1px 4px;background:transparent;width:45px;text-align:center;-moz-appearance:textfield;outline:none;z-index:2;position:relative;" title="Numéro de page">
+                    <div style="width:1px;background:#ccc;align-self:stretch;"></div>
+                    <select class="pdf-page-select" style="font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 2px;outline:none;appearance:auto;"></select>
+                </div>
                 <button class="pdf-next" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page suivante">▶</button>
             </div>
 

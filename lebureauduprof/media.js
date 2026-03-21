@@ -143,8 +143,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     if (zoomLabel) zoomLabel.textContent = Math.round(scale * 100) + '%';
 
                     // Mettre à jour le menu déroulant
-                    const pageSelect = container.querySelector('.pdf-page-select');
-                    if (pageSelect) pageSelect.value = num;
+                    const pageInput2 = container.querySelector('.pdf-page-input');
+                    if (pageInput2) pageInput2.value = num;
+                    const pageSelect3 = container.querySelector('.pdf-page-select');
+                    if (pageSelect3) pageSelect3.value = num;
 
                     const ctx = pdfCanvas.getContext('2d');
                     if (renderTask) renderTask.cancel();
@@ -389,6 +391,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             annotCanvas.style.pointerEvents = 'none';
             // annotCanvas transparent aux événements par défaut — draw.js le réactive en mode annotation
             annotCanvas.style.pointerEvents = 'none';
+            // annotCanvas transparent aux événements par défaut — draw.js le réactive en mode annotation
+            annotCanvas.style.pointerEvents = 'none';
             annotCanvas.addEventListener('mousedown',  onPointerDown);
             annotCanvas.addEventListener('mousemove',  onPointerMove);
             annotCanvas.addEventListener('mouseup',    onPointerUp);
@@ -487,21 +491,42 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 });
             }, { passive: false });
 
-            // ── Navigation pages : menu déroulant + flèches ───────────────
-            const pageSelect = container.querySelector('.pdf-page-select');
-            if (pageSelect) {
-                pageSelect.innerHTML = '';
+            // ── Navigation pages : input numérique + select déroulant + flèches ──
+            const pageInput = container.querySelector('.pdf-page-input');
+            if (pageInput) {
+                pageInput.max = totalPages;
+                pageInput.value = currentPage;
+                pageInput.addEventListener('change', () => {
+                    let p = parseInt(pageInput.value);
+                    if (isNaN(p)) p = 1;
+                    p = Math.max(1, Math.min(totalPages, p));
+                    pageInput.value = p;
+                    if (pageSelect2) pageSelect2.value = p;
+                    currentPage = p;
+                    renderPage(currentPage);
+                });
+                pageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { pageInput.blur(); }
+                });
+                pageInput.addEventListener('focus', () => {
+                    pageInput.select();
+                });
+            }
+            const pageSelect2 = container.querySelector('.pdf-page-select');
+            if (pageSelect2) {
+                pageSelect2.innerHTML = '';
                 for (let i = 1; i <= totalPages; i++) {
                     const opt = document.createElement('option');
                     opt.value = i;
-                    opt.textContent = 'Page ' + i + ' / ' + totalPages;
-                    pageSelect.appendChild(opt);
+                    opt.textContent = i + ' / ' + totalPages;
+                    pageSelect2.appendChild(opt);
                 }
-                pageSelect.value = currentPage;
-                const newSelect = pageSelect.cloneNode(true);
-                pageSelect.parentNode.replaceChild(newSelect, pageSelect);
+                pageSelect2.value = currentPage;
+                const newSelect = pageSelect2.cloneNode(true);
+                pageSelect2.parentNode.replaceChild(newSelect, pageSelect2);
                 newSelect.addEventListener('change', () => {
                     currentPage = parseInt(newSelect.value);
+                    if (pageInput) pageInput.value = currentPage;
                     renderPage(currentPage);
                 });
             }

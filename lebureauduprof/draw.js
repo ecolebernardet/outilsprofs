@@ -1759,7 +1759,7 @@ var _pdfPrevTool      = 'pen';  // outil mémorisé avant de passer en pan
 
 // Boutons supplémentaires (surligneur, texte, annuler, effacer) affichés
 // uniquement quand le mode est actif.
-var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn','pdf-annot-undo-btn'];
+var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn'];
 
 function _dtClearAction() {
     if (_pdfAnnotMode) {
@@ -1914,9 +1914,23 @@ function _updatePdfToolBtns() {
     _setBtn('draw-figures-btn',   tool === 'figure',      '#1a2a4a');
     _setBtn('pdf-text-btn',       tool === 'text',        '#1a3a2a');
 
-    // Curseur sur le widget cible
+    // Curseur sur le widget cible (sauf la toolbar qui garde son curseur grab)
     const cursor = _pdfCursor(tool);
-    if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', cursor, 'important');
+    if (_pdfAnnotEvTarget) {
+        _pdfAnnotEvTarget.style.setProperty('cursor', cursor, 'important');
+        _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
+            if (el.closest('.editor-toolbar')) {
+                // La toolbar garde grab, ses boutons gardent pointer
+                if (el.matches('button, label, input, select, a')) {
+                    el.style.setProperty('cursor', 'pointer', 'important');
+                } else {
+                    el.style.setProperty('cursor', 'grab', 'important');
+                }
+            } else {
+                el.style.setProperty('cursor', cursor, 'important');
+            }
+        });
+    }
     if (_pdfAnnotCanvas)   _pdfAnnotCanvas.style.cursor = cursor;
 }
 
@@ -2389,7 +2403,7 @@ function _pdfAnnotInsertText(e) {
 
     const pos     = _getPdfAnnotPos(e);
     const color   = _pdfAnnotGetColor();
-    const size    = Math.max(_pdfAnnotGetSize(), 10); // taille min 10 pour le texte
+    const size    = Math.max(_pdfAnnotGetSize(), 8); // taille min 8 pour le texte
     const rect       = canvas.getBoundingClientRect();
     const fontSizePx = Math.round(6 * Math.pow(1.12, size) * rect.width / 600);
     // Convertir pos (coordonnées canvas) en coordonnées écran pour positionner l'éditeur
