@@ -1746,29 +1746,44 @@ function _showPdfExtraBtns(show) {
 function _pdfCursor(tool) {
     let svg;
     if (tool === 'pan') {
-        // Main ✋
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20" font-family="sans-serif">✋</text></svg>`;
-        return `url("data:image/svg+xml;base64,${btoa(svg)}") 4 2, grab`;
+        // Main stylisée en SVG pur (pas d'emoji — btoa ne supporte pas l'unicode > 127)
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
+            + '<path d="M9 3.5C9 2.67 9.67 2 10.5 2S12 2.67 12 3.5V11h.5C13.33 11 14 11.67 14 12.5v.5c.83 0 1.5.67 1.5 1.5v.5c.83 0 1.5.67 1.5 1.5V19c0 1.66-1.34 3-3 3H9.5C7.57 22 6 20.43 6 18.5V10l1.5-1.5V3.5C7.5 2.67 8.17 2 9 3.5z" fill="#e6c000" stroke="#c8a000" stroke-width="1"/>'
+            + '</svg>';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 6 2, grab';
     }
     if (tool === 'pen') {
-        // Croix bleue + point central
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><line x1="10" y1="0" x2="10" y2="20" stroke="#4a90e2" stroke-width="1.5"/><line x1="0" y1="10" x2="20" y2="10" stroke="#4a90e2" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#4a90e2"/></svg>`;
-        return `url("data:image/svg+xml;base64,${btoa(svg)}") 10 10, crosshair`;
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+            + '<line x1="10" y1="0" x2="10" y2="20" stroke="#4a90e2" stroke-width="1.5"/>'
+            + '<line x1="0" y1="10" x2="20" y2="10" stroke="#4a90e2" stroke-width="1.5"/>'
+            + '<circle cx="10" cy="10" r="2" fill="#4a90e2"/>'
+            + '</svg>';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
     }
     if (tool === 'highlighter') {
-        // Croix jaune + point central
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><line x1="10" y1="0" x2="10" y2="20" stroke="#f5c518" stroke-width="2"/><line x1="0" y1="10" x2="20" y2="10" stroke="#f5c518" stroke-width="2"/><circle cx="10" cy="10" r="2.5" fill="#f5c518"/></svg>`;
-        return `url("data:image/svg+xml;base64,${btoa(svg)}") 10 10, crosshair`;
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+            + '<line x1="10" y1="0" x2="10" y2="20" stroke="#f5c518" stroke-width="2.5"/>'
+            + '<line x1="0" y1="10" x2="20" y2="10" stroke="#f5c518" stroke-width="2.5"/>'
+            + '<circle cx="10" cy="10" r="3" fill="#f5c518"/>'
+            + '</svg>';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
     }
     if (tool === 'eraser') {
-        // Carré gomme gris
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect x="2" y="6" width="16" height="10" rx="2" fill="#ccc" stroke="#888" stroke-width="1.2"/><line x1="2" y1="11" x2="18" y2="11" stroke="#888" stroke-width="0.8"/></svg>`;
-        return `url("data:image/svg+xml;base64,${btoa(svg)}") 10 10, cell`;
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="16">'
+            + '<rect x="1" y="2" width="20" height="12" rx="2" fill="#ddd" stroke="#888" stroke-width="1.2"/>'
+            + '<rect x="1" y="2" width="9" height="12" rx="2" fill="#ffb3b3" stroke="#888" stroke-width="1.2"/>'
+            + '<line x1="1" y1="8" x2="21" y2="8" stroke="#aaa" stroke-width="0.8"/>'
+            + '</svg>';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 11 8, cell';
     }
     if (tool === 'figure') {
-        // Croix grise + petit triangle en bas à droite
-        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><line x1="11" y1="0" x2="11" y2="22" stroke="#aaa" stroke-width="1.5"/><line x1="0" y1="11" x2="22" y2="11" stroke="#aaa" stroke-width="1.5"/><polygon points="14,14 20,14 14,20" fill="#7a9abf" stroke="#4a6a8a" stroke-width="1"/></svg>`;
-        return `url("data:image/svg+xml;base64,${btoa(svg)}") 11 11, crosshair`;
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22">'
+            + '<line x1="11" y1="0" x2="11" y2="22" stroke="#aaa" stroke-width="1.5"/>'
+            + '<line x1="0" y1="11" x2="22" y2="11" stroke="#aaa" stroke-width="1.5"/>'
+            + '<circle cx="11" cy="11" r="2" fill="#aaa"/>'
+            + '<polygon points="14,14 21,14 14,21" fill="#7a9abf" stroke="#4a6a8a" stroke-width="1"/>'
+            + '</svg>';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 11 11, crosshair';
     }
     if (tool === 'text') {
         return 'text';
@@ -1780,8 +1795,25 @@ function _pdfCursor(tool) {
 function setPdfAnnotTool(tool) {
     if (!_pdfAnnotMode) return;
 
-    // Désactiver la gomme si on passe sur autre chose
-    if (tool !== 'eraser' && isEraserMode) stopEraserMode();
+    // Bascule : recliqué sur le même outil → retour au crayon
+    if (_pdfAnnotTool === tool) tool = 'pen';
+
+    _pdfAnnotTool = tool;
+
+    // Gérer isEraserMode manuellement (sans appeler stopEraserMode qui
+    // déclenche _updatePdfToolBtns trop tôt avec le mauvais outil)
+    if (tool === 'eraser') {
+        isEraserMode = true;
+        isErasing = false;
+        if (drawCanvas) { drawCanvas.classList.remove('inactive'); drawCanvas.classList.add('eraser-mode'); }
+        board.classList.add('is-erasing');
+        if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    } else if (isEraserMode) {
+        isEraserMode = false;
+        isErasing = false;
+        if (drawCanvas) { drawCanvas.classList.remove('eraser-mode'); board.classList.remove('is-erasing'); }
+        if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    }
 
     // Désactiver le mode figure si on passe sur autre chose
     if (tool !== 'figure') {
@@ -1791,24 +1823,7 @@ function setPdfAnnotTool(tool) {
         if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
     }
 
-    // Bascule : recliqué sur le même outil → retour au crayon (sauf pan)
-    if (tool !== 'pan' && _pdfAnnotTool === tool) {
-        tool = 'pen';
-    } else if (tool === 'pan' && _pdfAnnotTool === 'pan') {
-        tool = 'pen';
-    }
-
-    _pdfAnnotTool = tool;
-
-    // Activer la gomme draw si outil eraser
-    if (tool === 'eraser' && !isEraserMode) {
-        isEraserMode = true;
-        if (drawCanvas) { drawCanvas.classList.remove('inactive'); drawCanvas.classList.add('eraser-mode'); }
-    } else if (tool !== 'eraser' && isEraserMode) {
-        stopEraserMode();
-    }
-
-    // Appliquer le curseur
+    // Appliquer le curseur SVG
     const cursor = _pdfCursor(tool);
     if (_pdfAnnotEvTarget) _pdfAnnotEvTarget.style.setProperty('cursor', cursor, 'important');
     if (_pdfAnnotCanvas)   _pdfAnnotCanvas.style.cursor = cursor;
@@ -1816,9 +1831,9 @@ function setPdfAnnotTool(tool) {
     _updatePdfToolBtns();
 }
 
-// Met à jour l'aspect visuel des 5 boutons — vérité unique : _pdfAnnotTool + isEraserMode
+// Met à jour l'aspect visuel des 5 boutons — source de vérité : _pdfAnnotTool
 function _updatePdfToolBtns() {
-    const tool = isEraserMode ? 'eraser' : _pdfAnnotTool;
+    const tool = _pdfAnnotTool;  // _pdfAnnotTool est toujours à jour avant cet appel
 
     // Helper : active ou désactive un bouton avec couleur donnée
     function _setBtn(id, active, activeColor) {
@@ -2093,8 +2108,6 @@ function _pdfAnnotGetSize() {
 // Récupère l'outil effectif : 'pen' | 'highlighter' | 'eraser' | 'text'
 // (la gomme PDF utilise eraser-size mais reste 'eraser' côté tool)
 function _pdfAnnotEffectiveTool() {
-    // Si le mode gomme global est actif, on l'utilise comme gomme PDF
-    if (isEraserMode) return 'eraser';
     return _pdfAnnotTool;
 }
 
