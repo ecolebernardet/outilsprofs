@@ -63,7 +63,35 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (zoomBar)     zoomBar.style.display = 'flex';
     const zoomFitBtn = container.querySelector('.pdf-zoom-fit');
     if (zoomFitBtn)  zoomFitBtn.style.display = 'inline-flex';
+    // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
+    if (canvasWrap)  canvasWrap.style.cursor = 'grab';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
+
+    // ── Drag-to-scroll natif (quand le mode annotation draw.js n'est pas actif) ──
+    let _dragScrolling = false, _dragStartX = 0, _dragStartY = 0, _dragScrollLeft = 0, _dragScrollTop = 0;
+    canvasWrap.addEventListener('mousedown', e => {
+        if (window._pdfAnnotMode) return; // draw.js gère le pan
+        if (e.button !== 0) return;
+        _dragScrolling = true;
+        _dragStartX = e.clientX;
+        _dragStartY = e.clientY;
+        _dragScrollLeft = canvasWrap.scrollLeft;
+        _dragScrollTop  = canvasWrap.scrollTop;
+        canvasWrap.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+    canvasWrap.addEventListener('mousemove', e => {
+        if (!_dragScrolling) return;
+        canvasWrap.scrollLeft = _dragScrollLeft - (e.clientX - _dragStartX);
+        canvasWrap.scrollTop  = _dragScrollTop  - (e.clientY - _dragStartY);
+    });
+    const _endDrag = () => {
+        if (!_dragScrolling) return;
+        _dragScrolling = false;
+        canvasWrap.style.cursor = window._pdfAnnotMode ? '' : 'grab';
+    };
+    canvasWrap.addEventListener('mouseup',    _endDrag);
+    canvasWrap.addEventListener('mouseleave', _endDrag);
 
     function base64ToUint8Array(b64) {
         const raw = atob(b64.split(',')[1]);

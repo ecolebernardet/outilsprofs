@@ -1014,9 +1014,19 @@ function enableDrawing() {
 }
 
 function toggleFiguresSubmenu() {
-    // En mode annotation PDF : activer l'outil figure
+    // En mode annotation PDF : activer l'outil figure ET ouvrir le sous-menu
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
-        setPdfAnnotTool('figure');
+        const sub = document.getElementById('figures-submenu');
+        const isOpen = sub && sub.classList.contains('open');
+        // N'activer 'figure' que si le sous-menu est fermé (premier clic)
+        // Si déjà ouvert, le second clic referme juste le sous-menu
+        if (!isOpen) setPdfAnnotTool('figure');
+        if (!sub) return;
+        sub.classList.toggle('open');
+        sub.style.display = sub.classList.contains('open') ? 'flex' : 'none';
+        if (sub.classList.contains('open') && typeof _positionSubmenuNextToDrawbar === 'function') {
+            requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+        }
         return;
     }
     // Désactiver la gomme si elle est active
@@ -1717,7 +1727,7 @@ var _pdfPrevTool      = 'pen';  // outil mémorisé avant de passer en pan
 
 // Boutons supplémentaires (surligneur, texte, annuler, effacer) affichés
 // uniquement quand le mode est actif.
-var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn','pdf-annot-undo-btn'];
+var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn'];
 
 function _dtClearAction() {
     if (_pdfAnnotMode) {
@@ -1746,11 +1756,7 @@ function _showPdfExtraBtns(show) {
 function _pdfCursor(tool) {
     let svg;
     if (tool === 'pan') {
-        // Main stylisée en SVG pur (pas d'emoji — btoa ne supporte pas l'unicode > 127)
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
-            + '<path d="M9 3.5C9 2.67 9.67 2 10.5 2S12 2.67 12 3.5V11h.5C13.33 11 14 11.67 14 12.5v.5c.83 0 1.5.67 1.5 1.5v.5c.83 0 1.5.67 1.5 1.5V19c0 1.66-1.34 3-3 3H9.5C7.57 22 6 20.43 6 18.5V10l1.5-1.5V3.5C7.5 2.67 8.17 2 9 3.5z" fill="#e6c000" stroke="#c8a000" stroke-width="1"/>'
-            + '</svg>';
-        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 6 2, grab';
+        return 'grab';
     }
     if (tool === 'pen') {
         svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
@@ -1914,7 +1920,7 @@ function _startPdfAnnotMode() {
     _pdfAnnotMode   = true;
     _pdfAnnotWidget = target;
     _pdfAnnotCanvas = annotCanvas;
-    _pdfAnnotTool   = 'pen'; // outil par défaut : stylo
+    _pdfAnnotTool   = 'pan'; // outil par défaut : main (scroll)
 
     // Marquer le widget cible
     target.classList.add('pdf-annot-target');
@@ -1950,10 +1956,13 @@ function _startPdfAnnotMode() {
     _pdfAnnotEvTarget.addEventListener('touchmove',   _pdfAnnotTouchMove,  { passive: false });
     _pdfAnnotEvTarget.addEventListener('touchend',    _pdfAnnotTouchEnd);
 
-    // Appliquer le curseur SVG dès l'ouverture (outil par défaut : pen)
+    // Appliquer le curseur SVG dès l'ouverture (outil par défaut : pan)
     const initCursor = _pdfCursor(_pdfAnnotTool);
     _pdfAnnotEvTarget.style.setProperty('cursor', initCursor, 'important');
     _pdfAnnotCanvas.style.cursor = initCursor;
+    // Retirer le curseur grab du canvasWrap — draw.js gère maintenant le curseur
+    const wrapAtStart = target.querySelector('.pdf-canvas-wrap');
+    if (wrapAtStart) wrapAtStart.style.cursor = '';
 
     _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
 }
@@ -1978,10 +1987,14 @@ function _stopPdfAnnotMode() {
     // Remettre le canvas cliquable pour zoom/scroll natif
     if (_pdfAnnotCanvas) {
         _pdfAnnotCanvas.style.pointerEvents = 'auto';
-        _pdfAnnotCanvas.style.cursor = 'crosshair';
-        // Réactiver les listeners natifs via l'API
+        _pdfAnnotCanvas.style.cursor = '';
         const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
         if (api && api.reattachNativeEvents) api.reattachNativeEvents();
+    }
+    // Remettre le curseur grab sur le canvasWrap
+    if (_pdfAnnotWidget) {
+        const wrap = _pdfAnnotWidget.querySelector('.pdf-canvas-wrap');
+        if (wrap) wrap.style.cursor = 'grab';
     }
 
     // Nettoyer le widget cible

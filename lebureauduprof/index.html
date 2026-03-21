@@ -244,6 +244,26 @@
         #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         /* Curseur gomme */
         #draw-canvas.eraser-mode { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        /* Curseur PDF annotation — prime sur is-drawing et is-erasing */
+        .pdf-annot-target, #board.is-drawing .pdf-annot-target,
+        #board.is-erasing .pdf-annot-target,
+        #board.is-drawing .pdf-annot-target *,
+        #board.is-erasing .pdf-annot-target * { cursor: inherit !important; }
+        /* Curseur grab sur le canvasWrap PDF — prime sur is-drawing/is-erasing */
+        .pdf-canvas-wrap,
+        #board.is-drawing .pdf-canvas-wrap,
+        #board.is-erasing .pdf-canvas-wrap { cursor: grab !important; }
+        .pdf-canvas-wrap:active,
+        #board.is-drawing .pdf-canvas-wrap:active,
+        #board.is-erasing .pdf-canvas-wrap:active { cursor: grabbing !important; }
+        /* pdf-annot-canvas suit toujours le curseur de son parent */
+        .pdf-annot-canvas,
+        #board.is-drawing .pdf-annot-canvas,
+        #board.is-erasing .pdf-annot-canvas { cursor: inherit !important; }
+        /* Exception : en mode annotation draw.js gère le curseur via pdf-annot-target */
+        #board .pdf-annot-target .pdf-canvas-wrap,
+        #board.is-drawing .pdf-annot-target .pdf-canvas-wrap,
+        #board.is-erasing .pdf-annot-target .pdf-canvas-wrap { cursor: inherit !important; }
 
         /* --- FORMES --- */
         .shape-widget {
@@ -1582,7 +1602,7 @@
 			</div>
 			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">✋&#xFE0E;</span></button>
 			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
-			<button id="pdf-annot-undo-btn" onclick="pdfAnnotUndo()" title="Annuler la dernière annotation" style="display:none;background:#2a2a2e;color:#aaa;border:1px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;">↩</button>
+
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -1885,7 +1905,23 @@
                 <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
                 <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
                 <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
-                <button class="pdf-annot-widget-btn" onclick="const tb=document.getElementById('draw-toolbar');if(!tb||tb.style.display==='none'||tb.style.display===''){toggleDrawToolbar();}if(!window._pdfAnnotMode)togglePdfAnnotMode();" title="Annoter ce PDF" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;" >✏️</button>
+                <button class="pdf-annot-widget-btn" onclick="
+                    const tb = document.getElementById('draw-toolbar');
+                    const tbVisible = tb && tb.style.display !== 'none' && tb.style.display !== '';
+                    if (tbVisible && window._pdfAnnotMode) {
+                        // Tout fermer : stopper annotation puis toolbar
+                        if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode();
+                        if (typeof stopDrawing === 'function') stopDrawing();
+                        tb.style.display = 'none';
+                    } else {
+                        if (!tbVisible) {
+                            if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar();
+                        }
+                        if (!window._pdfAnnotMode) {
+                            if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode();
+                        }
+                    }
+                " title="Annoter ce PDF" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;">✏️</button>
             </div>
 
             <div style="flex:1;"></div>
@@ -1909,7 +1945,7 @@
         <div class="pdf-canvas-wrap" style="flex-grow:1;overflow:auto;display:none;background:#525659;position:relative;">
             <div class="pdf-canvas-stack" style="position:relative;display:inline-block;margin:8px auto;display:flex;justify-content:center;">
                 <canvas class="pdf-canvas"  style="display:block;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></canvas>
-                <canvas class="pdf-annot-canvas" style="position:absolute;top:0;left:0;cursor:crosshair;touch-action:none;"></canvas>
+                <canvas class="pdf-annot-canvas" style="position:absolute;top:0;left:0;cursor:grab;touch-action:none;"></canvas>
             </div>
         </div>
     </div>
