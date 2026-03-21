@@ -56,12 +56,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     const annotCanvas   = container.querySelector('.pdf-annot-canvas');
     const navBar        = container.querySelector('.pdf-nav');
     const zoomBar       = container.querySelector('.pdf-zoom-bar');
-    const pageInfo      = container.querySelector('.pdf-page-info');
 
     if (placeholder) placeholder.style.display = 'none';
     if (canvasWrap)  canvasWrap.style.display = 'block';
     if (navBar)      navBar.style.display = 'flex';
     if (zoomBar)     zoomBar.style.display = 'flex';
+    const zoomFitBtn = container.querySelector('.pdf-zoom-fit');
+    if (zoomFitBtn)  zoomFitBtn.style.display = 'inline-flex';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
 
     function base64ToUint8Array(b64) {
@@ -109,12 +110,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     const zoomLabel = container.querySelector('.pdf-zoom-label');
                     if (zoomLabel) zoomLabel.textContent = Math.round(scale * 100) + '%';
 
-                    if (pageInfo) pageInfo.textContent = num + ' / ' + totalPages;
-
-                    const btnPrev = container.querySelector('.pdf-prev');
-                    const btnNext = container.querySelector('.pdf-next');
-                    if (btnPrev) btnPrev.disabled = num <= 1;
-                    if (btnNext) btnNext.disabled = num >= totalPages;
+                    // Mettre à jour le menu déroulant
+                    const pageSelect = container.querySelector('.pdf-page-select');
+                    if (pageSelect) pageSelect.value = num;
 
                     if (renderTask) renderTask.cancel();
                     renderTask = page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport });
@@ -436,13 +434,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 });
             });
             reattach('.pdf-zoom-fit', () => {
-                zoomScale = null; // retour fit-to-width
+                zoomScale = null;
                 renderPage(currentPage);
             });
 
-            // Zoom molette
+            // Zoom molette (Ctrl+molette ou Shift+molette)
             canvasWrap.addEventListener('wheel', e => {
-                if (!e.ctrlKey && !e.metaKey) return;
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) return;
                 e.preventDefault();
                 pdfDoc.getPage(currentPage).then(p => {
                     const base = zoomScale ?? fitScale(p);
@@ -450,12 +448,30 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 });
             }, { passive: false });
 
-            // ── Navigation pages ──────────────────────────────────────────
+            // ── Navigation pages : menu déroulant + flèches ───────────────
+            const pageSelect = container.querySelector('.pdf-page-select');
+            if (pageSelect) {
+                pageSelect.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = 'Page ' + i + ' / ' + totalPages;
+                    pageSelect.appendChild(opt);
+                }
+                pageSelect.value = currentPage;
+                const newSelect = pageSelect.cloneNode(true);
+                pageSelect.parentNode.replaceChild(newSelect, pageSelect);
+                newSelect.addEventListener('change', () => {
+                    currentPage = parseInt(newSelect.value);
+                    renderPage(currentPage);
+                });
+            }
+
             reattach('.pdf-prev', () => {
-                if (currentPage > 1) { redrawAnnotations(currentPage); currentPage--; renderPage(currentPage); }
+                if (currentPage > 1) { currentPage--; renderPage(currentPage); }
             });
             reattach('.pdf-next', () => {
-                if (currentPage < totalPages) { redrawAnnotations(currentPage); currentPage++; renderPage(currentPage); }
+                if (currentPage < totalPages) { currentPage++; renderPage(currentPage); }
             });
 
             renderPage(currentPage);
@@ -983,42 +999,3 @@ function ytExportLibrary() {
     document.body.appendChild(a); a.click(); a.remove();
     if (btn) { const t = btn.textContent; btn.textContent = '✓ Exporté'; setTimeout(() => btn.textContent = t, 2000); }
 }
-
-
-// =========================================================================
-// OUVERTURE PDF DEPUIS WINDOWS VIA ELECTRON
-// Écoute l'événement 'open-pdf' envoyé par main.js quand on
-// double-clique sur un PDF associé à l'application.
-// =========================================================================
-(function() {
-    if (!window.electronAPI) return; // pas dans Electron, on ignore
-
-    window.electronAPI.onOpenPdf(function(filePath) {
-        console.log('[Electron] PDF reçu :', filePath);
-        if (!filePath) return;
-
-        const filename = filePath.split(/[\\/]/).pop();
-
-        // Créer le widget PDF
-        const widget = createWidget('pdf');
-        if (!widget) return;
-        const container = widget.querySelector('.editor-container');
-        if (!container) return;
-
-        // Lire le fichier via le processus principal Electron (accès disque complet)
-        window.electronAPI.readPdfFile(filePath).then(function(base64) {
-            if (!base64) {
-                alert('Impossible de lire le PDF :\n' + filePath);
-                return;
-            }
-            if (!widget.dataset.pdfId) {
-                widget.dataset.pdfId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-            }
-            widget.dataset.pdfName = filename;
-            try { localStorage.setItem(widget.dataset.pdfId, base64); } catch(e) {}
-
-            _showPdfInWidget(container, base64, filename);
-            saveBoard();
-        });
-    });
-})();

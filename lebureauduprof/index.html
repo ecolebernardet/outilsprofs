@@ -233,15 +233,15 @@
         /* Curseur crayon pour le mode insertion de texte */
         .cursor-pencil { cursor: crosshair; }
         #board.is-drawing { cursor: crosshair; }
-        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *):not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: crosshair; }
+        #board.is-drawing *:not(.geo-tool-overlay):not(.geo-tool-overlay *) { cursor: crosshair; }
         .geo-tool-overlay, .geo-tool-overlay * { cursor: move !important; }
         .geo-tool-overlay button, .geo-tool-overlay .geo-rot-handle, .geo-tool-overlay .geo-trace-btn, .geo-tool-overlay .geo-close-tool { cursor: pointer !important; }
         #board.is-segment-mode { cursor: crosshair !important; }
-        #board.is-segment-mode *:not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: crosshair !important; }
+        #board.is-segment-mode * { cursor: crosshair !important; }
         #figures-submenu { display: none; }
         #figures-submenu.open { display: flex; }
         #board.is-erasing { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
-        #board.is-erasing *:not(.pdf-annot-target):not(.pdf-annot-target *) { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
+        #board.is-erasing * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
         /* Curseur gomme */
         #draw-canvas.eraser-mode { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect x='4' y='10' width='24' height='16' rx='3' fill='%23fff' stroke='%23aaa' stroke-width='2'/><rect x='4' y='10' width='12' height='16' rx='3' fill='%23ffcccc'/></svg>"), crosshair !important; }
 
@@ -1007,7 +1007,7 @@
 
 		/* --- MODE PRÉSENTATION --- */
 		#presentation-btn {
-			position:fixed;top:10px;left:10px;
+			position:fixed;top:10px;right:24px;
 			z-index:100000;background:#1a1a2e;color:white;
 			border:1px solid rgba(255,255,255,0.25);
 			font-size:25px;padding:5px 5px;border-radius:30px;
@@ -1015,10 +1015,9 @@
 			align-items:center;gap:8px;
 			box-shadow:0 4px 16px rgba(0,0,0,0.5);
 			line-height: 1; padding-bottom: 10px;
-			opacity: 0.3 !important;
 		}
 			
-		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); opacity: 1 !important;}
+		#presentation-btn:hover { background: #2e2e3a; transform: scale(1.1); }
 		
 		body.presentation-mode #board {
 			position: fixed !important;
@@ -1583,7 +1582,7 @@
 			</div>
 			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">✋&#xFE0E;</span></button>
 			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
-
+			<button id="pdf-annot-undo-btn" onclick="pdfAnnotUndo()" title="Annuler la dernière annotation" style="display:none;background:#2a2a2e;color:#aaa;border:1px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;">↩</button>
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -1863,7 +1862,7 @@
 </template>
 <!-- template-meteo → widgets-meteo.js -->
 <template id="template-pdf">
-    <div class="editor-container" style="height:500px;width:600px;">
+    <div class="editor-container" style="height:562px;width:1000px;">
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
 
         <!-- BARRE PRINCIPALE -->
@@ -1874,10 +1873,10 @@
             </label>
             <span class="pdf-filename" style="font-size:11px;color:#666;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;" title=""></span>
 
-            <!-- Navigation pages -->
+            <!-- Navigation pages : flèches + menu déroulant -->
             <div class="pdf-nav" style="display:none;align-items:center;gap:3px;font-size:12px;">
                 <button class="pdf-prev" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page précédente">◀</button>
-                <span class="pdf-page-info" style="color:#555;white-space:nowrap;">1 / 1</span>
+                <select class="pdf-page-select" style="font-size:12px;border:1px solid #ccc;border-radius:4px;padding:1px 4px;background:#f5f5f5;cursor:pointer;"></select>
                 <button class="pdf-next" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;" title="Page suivante">▶</button>
             </div>
 
@@ -1886,11 +1885,14 @@
                 <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
                 <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
                 <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
-                <button class="pdf-zoom-fit" style="padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:10px;" title="Adapter à la largeur">⊡</button>
+                <button class="pdf-annot-widget-btn" onclick="const tb=document.getElementById('draw-toolbar');if(!tb||tb.style.display==='none'||tb.style.display===''){toggleDrawToolbar();}if(!window._pdfAnnotMode)togglePdfAnnotMode();" title="Annoter ce PDF" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;" >✏️</button>
             </div>
 
-            <button class="pdf-collapse-btn" onclick="togglePdfCollapse(this.closest('.editor-container'))" title="Réduire / Déplier" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;touch-action:manipulation;">—</button>
+            <div style="flex:1;"></div>
+            <button class="pdf-zoom-fit" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:10px;" title="Adapter à la largeur">⊡</button>
             <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;">⛶</button>
+            <button class="pdf-collapse-btn" onclick="togglePdfCollapse(this.closest('.editor-container'))" title="Réduire / Déplier" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;touch-action:manipulation;">—</button>
+            <button onclick="this.closest('.widget').remove();saveBoard();" title="Fermer" style="font-size:13px;padding:1px 6px;border:1px solid #ffb3b3;border-radius:4px;background:#fff0f0;color:#cc0000;cursor:pointer;touch-action:manipulation;">✕</button>
         </div>
 
         <!-- PLACEHOLDER -->
@@ -2333,7 +2335,6 @@ function scheduleSaveSnapshot() {
 }
 
 function undoAction() {
-    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) { pdfAnnotUndo(); return; }
     if (undoStack.length <= 1) return;
     isRestoringState = true;
     clearTimeout(_pendingSnapshotTimer);
@@ -2354,7 +2355,6 @@ function undoAction() {
 }
 
 function redoAction() {
-    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) { pdfAnnotRedo(); return; }
     if (redoStack.length === 0) return;
     isRestoringState = true;
     clearTimeout(_pendingSnapshotTimer);
