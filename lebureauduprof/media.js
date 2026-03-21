@@ -131,8 +131,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     const viewport = page.getViewport({ scale });
                     pdfCanvas.width  = viewport.width;
                     pdfCanvas.height = viewport.height;
+                    pdfCanvas.style.width  = '';
+                    pdfCanvas.style.height = '';
                     annotCanvas.width  = viewport.width;
                     annotCanvas.height = viewport.height;
+                    annotCanvas.style.width  = '';
+                    annotCanvas.style.height = '';
 
                     // Mettre à jour label zoom
                     const zoomLabel = container.querySelector('.pdf-zoom-label');
@@ -142,8 +146,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     const pageSelect = container.querySelector('.pdf-page-select');
                     if (pageSelect) pageSelect.value = num;
 
+                    const ctx = pdfCanvas.getContext('2d');
                     if (renderTask) renderTask.cancel();
-                    renderTask = page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport });
+                    renderTask = page.render({ canvasContext: ctx, viewport });
                     renderTask.promise.then(() => {
                         renderTask = null;
                         redrawAnnotations(num);
@@ -378,6 +383,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 currentStrokeAnnot = null;
             }
 
+            // annotCanvas transparent aux événements par défaut — draw.js le réactive en mode annotation
+            annotCanvas.style.pointerEvents = 'none';
+            // annotCanvas transparent aux événements par défaut — draw.js le réactive en mode annotation
+            annotCanvas.style.pointerEvents = 'none';
             annotCanvas.addEventListener('mousedown',  onPointerDown);
             annotCanvas.addEventListener('mousemove',  onPointerMove);
             annotCanvas.addEventListener('mouseup',    onPointerUp);

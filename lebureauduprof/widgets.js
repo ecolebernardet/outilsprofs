@@ -401,6 +401,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         widget._enterEditMode = _enterEditMode;
     }
 
+    // Initialisation des widgets spéciaux
     // Widget PDF : la barre de titre (editor-toolbar) sert de poignée de déplacement
     if (type === 'pdf') {
         const pdfToolbar = widget.querySelector('.editor-toolbar');
@@ -424,7 +425,6 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         }
     }
 
-    // Initialisation des widgets spéciaux
     if (type === 'time')  { if (typeof initTimeWidget  === 'function') initTimeWidget(widget); }
     if (type === 'date')  { if (typeof initDateWidget  === 'function') initDateWidget(widget); }
     if (type === 'meteo') { if (typeof initMeteoWidget === 'function') initMeteoWidget(widget); }
