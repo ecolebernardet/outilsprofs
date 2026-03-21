@@ -198,6 +198,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * canvasW / 600);
                     ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
                     ctx.fillStyle = stroke.color;
+                    ctx.textBaseline = 'top';
                     ctx.fillText(stroke.text || '', pos.x, pos.y);
                     ctx.restore();
                     return;
@@ -287,7 +288,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 const sizeElId = (tool === 'eraser') ? 'eraser-size' : 'draw-size';
                 const sizeEl = document.getElementById(sizeElId);
                 const _rawSize = sizeEl ? (parseInt(sizeEl.value) || 4) : 4;
-                const size = (tool === 'text') ? Math.max(_rawSize, 10) : _rawSize; // taille min 10 pour le texte
+                const size = (tool === 'text') ? Math.max(_rawSize, 8) : _rawSize; // taille min 8 pour le texte
                 const px = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
 
@@ -771,7 +772,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         actx.restore();
                         const pad = 4 * canvasW / 600;
                         const x = pos.x - pad;
-                        const y = pos.y - fontSize - pad;
+                        const y = pos.y - pad;
                         const w = metrics.width + pad * 2;
                         const h = fontSize * 1.3 + pad * 2;
                         actx.save();
@@ -818,9 +819,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             const metrics = actx.measureText(s.text || '');
                             actx.restore();
                             const x0 = pos.x;
-                            const y0 = pos.y - fontSize;       // baseline - hauteur approx
+                            const y0 = pos.y;
                             const x1 = pos.x + metrics.width;
-                            const y1 = pos.y + fontSize * 0.3; // un peu sous la baseline
+                            const y1 = pos.y + fontSize * 1.3;
                             // Zone de hit élargie de 6px
                             if (px >= x0 - 6 && px <= x1 + 6 && py >= y0 - 6 && py <= y1 + 6) {
                                 return { index: i, stroke: s };

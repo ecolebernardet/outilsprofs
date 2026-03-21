@@ -1912,6 +1912,7 @@ function _updatePdfToolBtns() {
     _setBtn('draw-highlight-btn', tool === 'highlighter', '#2a2200');
     _setBtn('eraser-btn',         tool === 'eraser',      '#3a1a1a');
     _setBtn('draw-figures-btn',   tool === 'figure',      '#1a2a4a');
+    _setBtn('pdf-text-btn',       tool === 'text',        '#1a3a2a');
 
     // Curseur sur le widget cible
     const cursor = _pdfCursor(tool);
@@ -2391,14 +2392,17 @@ function _pdfAnnotInsertText(e) {
     const size    = Math.max(_pdfAnnotGetSize(), 10); // taille min 10 pour le texte
     const rect       = canvas.getBoundingClientRect();
     const fontSizePx = Math.round(6 * Math.pow(1.12, size) * rect.width / 600);
-    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    // Convertir pos (coordonnées canvas) en coordonnées écran pour positionner l'éditeur
+    const scaleX = rect.width  / canvas.width;
+    const scaleY = rect.height / canvas.height;
+    const screenX = rect.left + pos.x * scaleX;
+    const screenY = rect.top  + pos.y * scaleY;
 
     _showPdfInlineTextEditor({
-        clientX, clientY, color, size, fontSizePx,
+        clientX: screenX, clientY: screenY, color, size, fontSizePx,
         onValidate(text, finalSize, finalColor) {
             if (!text.trim()) return;
-            if (api.addTextStroke) api.addTextStroke(text, finalColor ?? color, finalSize ?? size, pos.x, pos.y);
+            if (api.addTextStroke) api.addTextStroke(text, finalColor ?? color, finalSize ?? size, pos.x, pos.y - 13);
         }
     });
 }
@@ -2515,7 +2519,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
     wrap.style.cssText = `
         position: fixed;
         left: ${clientX}px;
-        top: ${clientY - fontSizePx - 28}px;
+        top: ${clientY - fontSizePx - 24}px;
         z-index: 99999;
         display: flex;
         flex-direction: column;
