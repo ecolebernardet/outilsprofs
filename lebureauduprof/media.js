@@ -563,23 +563,37 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (currentStrokeAnnot.pts.length > 0) {
                             const layer = getLayer(currentPage);
                             if (!layer.history) layer.history = [];
+                            layer.redoHistory = []; // vider redo à chaque nouvelle action
                             layer.history.push([...layer.strokes]);
-                            if (layer.history.length > 30) layer.history.shift(); // max 30 niveaux
+                            if (layer.history.length > 30) layer.history.shift();
                             layer.strokes.push(currentStrokeAnnot);
                         }
                         currentStrokeAnnot = null;
-                        redrawAnnotations(currentPage); // toujours redessiner pour effacer le cercle preview
+                        redrawAnnotations(currentPage);
                     },
                     // Annuler le dernier stroke
                     undo() {
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
+                        if (!layer.redoHistory) layer.redoHistory = [];
                         if (layer.history.length > 0) {
-                            // Restaurer le dernier état sauvegardé
+                            layer.redoHistory.push([...layer.strokes]);
                             layer.strokes = layer.history.pop();
                             redrawAnnotations(currentPage);
                         } else if (layer.strokes.length > 0) {
+                            layer.redoHistory.push([...layer.strokes]);
                             layer.strokes.pop();
+                            redrawAnnotations(currentPage);
+                        }
+                    },
+                    // Refaire le dernier stroke annulé
+                    redo() {
+                        const layer = getLayer(currentPage);
+                        if (!layer.redoHistory) layer.redoHistory = [];
+                        if (layer.redoHistory.length > 0) {
+                            if (!layer.history) layer.history = [];
+                            layer.history.push([...layer.strokes]);
+                            layer.strokes = layer.redoHistory.pop();
                             redrawAnnotations(currentPage);
                         }
                     },
@@ -587,7 +601,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     clear() {
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
-                        // Sauvegarder l'état avant effacement pour undo
+                        layer.redoHistory = [];
                         if (layer.strokes.length > 0) {
                             layer.history.push([...layer.strokes]);
                         }
@@ -602,6 +616,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const stroke = { tool: 'text', color, size, text: text, nx: norm.x, ny: norm.y };
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
+                        layer.redoHistory = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         layer.strokes.push(stroke);
@@ -633,6 +648,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const stroke = { tool: 'figure', color, size, pts: normPts };
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
+                        layer.redoHistory = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         layer.strokes.push(stroke);
