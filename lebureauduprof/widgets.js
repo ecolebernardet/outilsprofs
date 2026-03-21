@@ -359,6 +359,8 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         widget.querySelectorAll('.agenda-item').forEach(attachAgendaItemEvents);
     }
 
+
+
     // Widgets texte / devoirs : mode déplacement par défaut, double-clic pour éditer
     if (type === 'text' || type === 'homework') {
         const editor = widget.querySelector('.editor-content');
@@ -397,6 +399,29 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         });
 
         widget._enterEditMode = _enterEditMode;
+    }
+
+    // Widget PDF : la barre de titre (editor-toolbar) sert de poignée de déplacement
+    if (type === 'pdf') {
+        const pdfToolbar = widget.querySelector('.editor-toolbar');
+        if (pdfToolbar) {
+            pdfToolbar.style.cursor = 'grab';
+            const _onPdfToolbarDown = (e) => {
+                if (isDrawMode || isEraserMode) return;
+                // Ignorer les clics sur boutons, labels, inputs, selects
+                if (e.target.closest('button, label, input, select, a')) return;
+                e.stopPropagation();
+                widget.focus();
+                pdfToolbar.style.cursor = 'grabbing';
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startWidgetDrag({ clientX, clientY, target: e.target }, widget);
+            };
+            const _onPdfToolbarUp = () => { pdfToolbar.style.cursor = 'grab'; };
+            pdfToolbar.addEventListener('mousedown',  _onPdfToolbarDown);
+            pdfToolbar.addEventListener('touchstart', _onPdfToolbarDown, { passive: false });
+            pdfToolbar.addEventListener('mouseup',    _onPdfToolbarUp);
+        }
     }
 
     // Initialisation des widgets spéciaux
