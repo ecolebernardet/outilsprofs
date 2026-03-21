@@ -987,6 +987,13 @@ function toggleDrawToolbar() {
     if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
     initCanvas(); enableDrawing();
     setDrawMode('free');
+    // Valeurs par défaut à l'ouverture
+    const _ds = document.getElementById('draw-size');
+    const _dsl = document.getElementById('draw-size-label');
+    if (_ds) { _ds.value = 2; if (_dsl) _dsl.textContent = 2; }
+    const _es = document.getElementById('eraser-size');
+    const _esl = document.getElementById('eraser-size-label');
+    if (_es) { _es.value = 15; if (_esl) _esl.textContent = 15; }
     if (tb) {
         tb.classList.remove('horizontal');
         tb.style.width  = '';
@@ -1920,7 +1927,7 @@ function _startPdfAnnotMode() {
     _pdfAnnotMode   = true;
     _pdfAnnotWidget = target;
     _pdfAnnotCanvas = annotCanvas;
-    _pdfAnnotTool   = 'pan'; // outil par défaut : main (scroll)
+    _pdfAnnotTool   = 'pen'; // outil par défaut : crayon
 
     // Marquer le widget cible
     target.classList.add('pdf-annot-target');
@@ -1941,6 +1948,11 @@ function _startPdfAnnotMode() {
     // Afficher les boutons extras
     _showPdfExtraBtns(true);
     _updatePdfToolBtns();
+    // Masquer les boutons inutiles en mode annotation PDF
+    const selBtn = document.getElementById('draw-select-btn');
+    if (selBtn) selBtn.style.display = 'none';
+    const geoBtn = document.getElementById('geo-draw-btn');
+    if (geoBtn) geoBtn.style.display = 'none';
 
     // Mettre pointerEvents:none sur le canvas pour bloquer les handlers natifs de media.js.
     _pdfAnnotCanvas.style.pointerEvents = 'none';
@@ -2006,12 +2018,9 @@ function _stopPdfAnnotMode() {
     _pdfAnnotEvTarget = null;
     _pdfAnnotPainting = false;
 
-    // Réactiver le dessin sur le board
-    if (!isDrawMode) {
-        isDrawMode = true;
-        if (drawCanvas) drawCanvas.classList.remove('inactive');
-        board.classList.add('is-drawing');
-    }
+    // Repasser en mode sélection (pas en mode dessin)
+    isDrawMode = true; // toggleSelectMode attend isDrawMode=true pour basculer
+    toggleSelectMode();
 
     // Bouton
     const btn = document.getElementById('pdf-annot-mode-btn');
@@ -2044,6 +2053,11 @@ function _stopPdfAnnotMode() {
 
     // Cacher boutons extras
     _showPdfExtraBtns(false);
+    // Réafficher les boutons masqués
+    const selBtnStop = document.getElementById('draw-select-btn');
+    if (selBtnStop) selBtnStop.style.display = '';
+    const geoBtnStop = document.getElementById('geo-draw-btn');
+    if (geoBtnStop) geoBtnStop.style.display = '';
 }
 
 // Variante de stopDrawing qui ne cache pas la toolbar (pour basculer depuis draw mode)
