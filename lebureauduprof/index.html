@@ -2543,6 +2543,8 @@ function updateUndoRedoBtns() {
 
 // ── Repositionnement des sous-menus hors écran ──────────────────────────────
 // Déclenché au mouseenter sur chaque mm-has-sub (mesure fiable car le sous-menu est visible)
+// Note : on utilise clientHeight plutôt que innerHeight car à 150% de mise à l'échelle
+// Windows, innerHeight peut inclure des pixels partiels invisibles.
 document.addEventListener('mouseenter', function(e) {
     if (!e.target || typeof e.target.closest !== 'function') return;
     const parent = e.target.closest('.mm-has-sub');
@@ -2552,9 +2554,10 @@ document.addEventListener('mouseenter', function(e) {
     // Réinitialiser avant mesure
     sub.style.top = '0';
     requestAnimationFrame(() => {
+        const vh = document.documentElement.clientHeight;
         const rect = sub.getBoundingClientRect();
-        if (rect.bottom > window.innerHeight - 8) {
-            const shift = rect.bottom - (window.innerHeight - 8);
+        if (rect.bottom > vh - 16) {
+            const shift = rect.bottom - (vh - 16);
             sub.style.top = Math.max(-(rect.height - 40), -shift) + 'px';
         }
     });
