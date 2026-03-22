@@ -63,7 +63,7 @@
 
         
         .light-card { 
-            background: var(--card-bg); border-radius: 1.5rem; padding: 25px 20px 20px 20px; 
+            background: var(--card-bg); border-radius: 1.5rem; padding: 10px 10px 10px 10px; 
             border: 1px solid var(--column-border); box-shadow: var(--shadow-custom); position: relative;
         }
 
@@ -76,11 +76,11 @@
             font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;
         }
         
-        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 0.85rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
+        .input-field { background: var(--input-bg); border: 1px solid var(--column-border); border-radius: 0.75rem; padding: 12px; font-size: 1.3rem; font-weight: 700; width: 100%; color: var(--text-main); outline: none; }
         .btn-add { width: 100%; padding: 14px; border-radius: 50px; font-weight: 900; font-size: 12px; text-transform: uppercase; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-game-action { height: 40px; border-radius: 9999px; font-size: 10px; font-weight: 900; color: white; transition: all 0.2s ease; text-transform: uppercase; }
         
-        .clock-svg { width: 140px; height: 140px; }
+        .clock-svg { width: 150px; height: 150px; }
         .clock-face { fill: white; stroke: #333; stroke-width: 2; }
         .clock-hand-hour { stroke: #111827; stroke-width: 4; stroke-linecap: round; }
         .clock-hand-min { stroke: #4b5563; stroke-width: 3; stroke-linecap: round; }
@@ -323,46 +323,32 @@ function showCorrection() {
         cards.forEach(card => {
             const hIn = card.querySelector('.exo-input-h');
             const mIn = card.querySelector('.exo-input-m');
-            const dIn = card.querySelector('.exo-input-duree');
 
             if (hIn && mIn) {
-                // Correction LECTURE
                 const isHCorrect = parseInt(hIn.value, 10) === parseInt(hIn.dataset.ansH, 10);
                 const isMCorrect = parseInt(mIn.value, 10) === parseInt(mIn.dataset.ansM, 10);
                 const isAllCorrect = isHCorrect && isMCorrect;
 
                 hIn.dataset.isCorrect = isAllCorrect;
-                hIn.value = hIn.dataset.ansH.padStart(2, '0');
+                hIn.value = hIn.dataset.ansH.padStart(hIn.placeholder === "0h" ? 1 : 2, '0');
                 mIn.value = mIn.dataset.ansM.padStart(2, '0');
+                
                 hIn.style.color = mIn.style.color = isAllCorrect ? '#10b981' : '#ef4444';
                 hIn.disabled = mIn.disabled = true;
-            } else if (dIn) {
-                // Correction DURÉE
-                const isCorrect = dIn.value.trim().toLowerCase().replace(/\s/g, '') === dIn.dataset.ans.toLowerCase().replace(/\s/g, '');
-                dIn.dataset.isCorrect = isCorrect;
-                dIn.value = dIn.dataset.ans;
-                dIn.style.color = isCorrect ? '#10b981' : '#ef4444';
-                dIn.disabled = true;
             }
         });
         btn.innerHTML = "🙈 masquer";
         btn.classList.replace('bg-green-500', 'bg-orange-500');
         isShowingCorrection = true;
     } else {
-        // Mode MASQUER
         cards.forEach(card => {
             const hIn = card.querySelector('.exo-input-h');
             const mIn = card.querySelector('.exo-input-m');
-            const dIn = card.querySelector('.exo-input-duree');
 
             if (hIn && hIn.dataset.isCorrect !== "true") {
                 hIn.value = mIn.value = "";
                 hIn.style.color = mIn.style.color = "";
                 hIn.disabled = mIn.disabled = false;
-            } else if (dIn && dIn.dataset.isCorrect !== "true") {
-                dIn.value = "";
-                dIn.style.color = "";
-                dIn.disabled = false;
             }
         });
         btn.innerHTML = "👁️ correction";
@@ -419,11 +405,11 @@ function showCorrection() {
     const titrePDF = typeExo === "lecture" ? "Lire l'heure" : "Calculer des durées";
 
     const genererContenuPage = (isCorrectionPage = false) => {
-        let yInitial = 45; // On descend le point de départ pour laisser place à l'en-tête
+        let yInitial = 45; 
         
         doc.setFont("helvetica", "bold");
         
-        // --- EN-TÊTE (Uniquement sur la page 1 des exercices) ---
+        // --- EN-TÊTE ---
         if (!isCorrectionPage && doc.internal.getNumberOfPages() === 1) {
             doc.setFontSize(10);
             doc.text("Nom : ..........................  Prénom : ..........................  Date : ...../...../.....", 20, 15);
@@ -436,13 +422,13 @@ function showCorrection() {
         cards.forEach((card, index) => {
             if (index > 0 && index % 10 === 0) { 
                 doc.addPage(); 
-                yInitial = 35; // Un peu plus haut sur les pages suivantes
+                yInitial = 35; 
             }
 
             const col = index % 2;
             const row = Math.floor((index % 10) / 2);
             const x = 20 + (col * 95);
-            const y = yInitial + (row * 48); // Ajustement de l'interligne
+            const y = yInitial + (row * 48);
             
             const hIn = card.querySelector('.exo-input-h');
             const mIn = card.querySelector('.exo-input-m');
@@ -451,34 +437,33 @@ function showCorrection() {
             const isDuree = card.innerHTML.includes('➔');
 
             if (isDuree && hIn.dataset.hStart) {
-				// Horloge 1
-				drawClock(doc, centerX - 20, centerY, parseInt(hIn.dataset.hStart), parseInt(hIn.dataset.mStart), 13);
-				
-				// --- DESSIN D'UNE VRAIE FLÈCHE ---
-				const arrowY = centerY;
-				const arrowXStart = centerX - 5;
-				const arrowXEnd = centerX + 5;
-				
-				doc.setLineWidth(0.5);
-				doc.setDrawColor(0);
-				// Ligne principale
-				doc.line(arrowXStart, arrowY, arrowXEnd, arrowY); 
-				// Pointe de la flèche (triangle)
-				doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY - 1.5);
-				doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY + 1.5);
-				
-				// Horloge 2
-				drawClock(doc, centerX + 20, centerY, parseInt(hIn.dataset.hEnd), parseInt(hIn.dataset.mEnd), 13);
+                // Horloge 1
+                drawClock(doc, centerX - 20, centerY, parseInt(hIn.dataset.hStart), parseInt(hIn.dataset.mStart), 13);
+                
+                // --- FLÈCHE ---
+                const arrowY = centerY;
+                const arrowXStart = centerX - 5;
+                const arrowXEnd = centerX + 5;
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(0);
+                doc.line(arrowXStart, arrowY, arrowXEnd, arrowY); 
+                doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY - 1.5);
+                doc.line(arrowXEnd, arrowY, arrowXEnd - 2, arrowY + 1.5);
+                
+                // Horloge 2
+                drawClock(doc, centerX + 20, centerY, parseInt(hIn.dataset.hEnd), parseInt(hIn.dataset.mEnd), 13);
             } else {
                 drawClock(doc, centerX, centerY, parseInt(hIn.dataset.ansH), parseInt(mIn.dataset.ansM), 13);
             }
 
+            // --- CASES DE RÉPONSE ---
             doc.setFontSize(9); doc.setDrawColor(200);
             doc.roundedRect(centerX - 12, y + 36, 10, 6, 1, 1, 'S');
             doc.text(isDuree ? "h" : ":", centerX, y + 40.5);
             doc.roundedRect(centerX + 4, y + 36, 10, 6, 1, 1, 'S');
             if(isDuree) doc.text("min", centerX + 15, y + 40.5);
             
+            // --- CORRECTION SI PAGE DE CORRIGÉ ---
             if (isCorrectionPage) {
                 doc.setTextColor('#10b981');
                 doc.setFontSize(8);
@@ -496,13 +481,9 @@ function showCorrection() {
 
     const drawClock = (pdf, x, y, h, m, size) => {
         if (isNaN(h) || isNaN(m)) return;
-        
-        // Cadran
         pdf.setLineWidth(0.3);
         pdf.setDrawColor(0);
         pdf.circle(x, y, size, 'S');
-
-        // Graduation et Chiffres
         pdf.setFontSize(size / 3);
         for (let i = 1; i <= 12; i++) {
             const angle = (i * 30 - 90) * (Math.PI / 180);
@@ -510,39 +491,38 @@ function showCorrection() {
             const ty = y + (size - 2.5) * Math.sin(angle) + 1.2;
             pdf.text(i.toString(), tx, ty, { align: "center" });
         }
-
-        // --- CALCULS DE PRÉCISION ---
-        
-        // Aiguille des MINUTES (Précision à 6° par minute)
-        // On vise 85% du rayon pour une lecture parfaite de l'index
         const mAngle = (m * 6 - 90) * (Math.PI / 180);
         const mLen = size * 0.82; 
         pdf.setLineWidth(0.5);
         pdf.line(x, y, x + mLen * Math.cos(mAngle), y + mLen * Math.sin(mAngle));
-
-        // Aiguille des HEURES (Précision incluant le décalage des minutes)
-        // L'heure avance de 0.5° par minute écoulée
         const hAngle = ((h % 12) * 30 + (m * 0.5) - 90) * (Math.PI / 180);
         const hLen = size * 0.55;
         pdf.setLineWidth(1.0);
         pdf.line(x, y, x + hLen * Math.cos(hAngle), y + hLen * Math.sin(hAngle));
-
-        // Point central (légèrement plus grand pour couvrir la jointure)
         pdf.setFillColor(0);
         pdf.circle(x, y, 0.7, 'F');
     };
 
+    // Génération des pages
     genererContenuPage(false); 
     doc.addPage();
     genererContenuPage(true); 
 
-    const pdfBase64 = doc.output('datauristring');
-    const link = document.createElement('a');
-    link.href = pdfBase64;
-    link.download = nomFichier;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // --- SORTIE ADAPTÉE ANDROID / NAVIGATEUR ---
+    const outputData = doc.output('datauristring');
+    
+    if (window.Android && window.Android.savePdfFromBase64) {
+        // On retire le préfixe "data:application/pdf;base64," avant l'envoi
+        const base64Clean = outputData.split(',')[1];
+        window.Android.savePdfFromBase64(base64Clean, nomFichier);
+    } else {
+        const link = document.createElement('a');
+        link.href = outputData;
+        link.download = nomFichier;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 }
 
     function ouvrirModal(id) { document.getElementById(id).style.display = 'flex'; }
