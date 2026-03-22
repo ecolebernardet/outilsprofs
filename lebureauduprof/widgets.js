@@ -679,7 +679,6 @@ function makeResizableByHandle(elmnt) {
         e.stopPropagation();
         e.preventDefault();
         handle.setPointerCapture(e.pointerId);
-        handle.style.opacity = '1';
 
         const startX = e.clientX;
         const startY = e.clientY;
@@ -700,6 +699,10 @@ function makeResizableByHandle(elmnt) {
             handle.removeEventListener('pointermove',   onMove);
             handle.removeEventListener('pointerup',     onUp);
             handle.removeEventListener('pointercancel', onUp);
+            // Nettoyer les styles inline pour que le CSS reprenne le contrôle de la visibilité
+            handle.style.opacity = '';
+            handle.style.pointerEvents = '';
+            elmnt.blur();
             if (typeof saveBoard === 'function') saveBoard();
         }
 
