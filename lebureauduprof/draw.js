@@ -1959,8 +1959,17 @@ function togglePdfAnnotMode() {
     }
 }
 
+function _startPdfAnnotModeOn(targetWidget) {
+    // Démarrer le mode annotation sur un widget spécifique
+    const origFind = _findActivePdfWidget;
+    // Patch temporaire : forcer le widget cible
+    window.__forcedPdfTarget = targetWidget;
+    _startPdfAnnotMode();
+    window.__forcedPdfTarget = null;
+}
+
 function _startPdfAnnotMode() {
-    const target = _findActivePdfWidget();
+    const target = window.__forcedPdfTarget || _findActivePdfWidget();
     if (!target) {
         _showPdfAnnotToast('⚠️ Ouvrez d\'abord un PDF dans un widget');
         return;

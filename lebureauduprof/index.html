@@ -1899,12 +1899,18 @@
                 <button class="pdf-annot-widget-btn" onclick="
                     const tb = document.getElementById('draw-toolbar');
                     const tbVisible = tb && tb.style.display !== 'none' && tb.style.display !== '';
-                    if (tbVisible && window._pdfAnnotMode) {
+                    const thisWidget = this.closest('.widget');
+                    const isThisWidget = window._pdfAnnotWidget === thisWidget;
+                    if (tbVisible && window._pdfAnnotMode && isThisWidget) {
+                        // Même widget : fermer
                         if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode();
                         if (typeof stopDrawing === 'function') stopDrawing();
                     } else {
+                        // Autre widget ou mode inactif : (re)brancher sur ce widget
+                        if (window._pdfAnnotMode) { if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode(); }
                         if (!tbVisible) { if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar(); }
-                        if (!window._pdfAnnotMode) { if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode(); }
+                        if (typeof _startPdfAnnotModeOn === 'function') _startPdfAnnotModeOn(thisWidget);
+                        else if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode();
                     }
                 " title="Annoter ce PDF" style="padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;">✏️</button>
             </div>
