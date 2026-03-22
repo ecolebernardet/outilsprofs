@@ -2544,6 +2544,7 @@ function updateUndoRedoBtns() {
 // ── Repositionnement des sous-menus hors écran ──────────────────────────────
 // Déclenché au mouseenter sur chaque mm-has-sub (mesure fiable car le sous-menu est visible)
 document.addEventListener('mouseenter', function(e) {
+    if (!e.target || typeof e.target.closest !== 'function') return;
     const parent = e.target.closest('.mm-has-sub');
     if (!parent) return;
     const sub = parent.querySelector(':scope > .mm-sub');

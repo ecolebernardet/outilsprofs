@@ -924,7 +924,12 @@ function loadYoutube(input) {
     const iframe = container.querySelector('iframe.yt-player');
     let url = input.value.trim();
     const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-    iframe.src = match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : url;
+    const videoId = match ? match[1] : null;
+    if (videoId && window.electronAPI && typeof window.electronAPI.openYoutube === 'function') {
+        window.electronAPI.openYoutube(videoId);
+    } else {
+        iframe.src = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1` : url;
+    }
     saveBoard();
 }
 function toggleYoutubeView(btn, display) {
@@ -1021,7 +1026,11 @@ function ytRenderLibrary(container) {
 function ytPlayFromLib(videoId, card) {
     const container = card.closest('.editor-container');
     const iframe = container.querySelector('iframe.yt-player');
-    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    if (window.electronAPI && typeof window.electronAPI.openYoutube === 'function') {
+        window.electronAPI.openYoutube(videoId);
+    } else {
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+    }
     container.querySelector('.yt-library').classList.remove('open');
     const favBtn = container.querySelector('.yt-fav-btn');
     favBtn.classList.add('saved');
