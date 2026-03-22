@@ -89,11 +89,9 @@
         #image-panel-tabs {
             display: flex;
             flex-shrink: 0;
+            flex-wrap: wrap;
             border-bottom: 1px solid #2e2e3a;
-            overflow-x: auto;
-            scrollbar-width: none;
         }
-        #image-panel-tabs::-webkit-scrollbar { display: none; }
 
         .img-tab-btn {
             flex-shrink: 0;
@@ -347,6 +345,83 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/saisons-printemps06.png',    label: 'Printemps' },
 				{ src: 'images/saisons-printemps07.png',    label: 'Printemps' },
 				{ src: 'images/saisons-printemps08.png',    label: 'Printemps' },
+				{ src: 'images/saisons-ete01.png',          label: 'Été' },
+            ]
+        },
+		{
+            id: 'météo',
+            label: 'Météo',
+            icon: '⛅',
+            images: [
+                { src: 'images/meteo-arcenciel1.png',    label: 'Arc en ciel' },
+				{ src: 'images/meteo-arcenciel2.png',    label: 'Arc en ciel' },
+				{ src: 'images/meteo-arcenciel3.png',    label: 'Arc en ciel' },
+				{ src: 'images/meteo-arcenciel4.png',           label: 'Arc en ciel' },
+				{ src: 'images/meteo-nuage1.png',               label: 'Nuage' },
+				{ src: 'images/meteo-pluie1.png',               label: 'Pluie' },
+				{ src: 'images/meteo-soleil-rayons1.png',       label: 'Soleil' },
+				{ src: 'images/meteo-soleil-rayons2.png',       label: 'Soleil' },
+            ]
+        },
+		{
+            id: 'cadres',
+            label: 'Cadres',
+            icon: '🖼️',
+            images: [
+                { src: 'images/cadre01.png',    label: 'Cadre' },
+				{ src: 'images/cadre02.png',    label: 'Cadre' },
+				{ src: 'images/cadre03.png',    label: 'Cadre' },
+				{ src: 'images/cadre04.png',    label: 'Cadre' },
+				{ src: 'images/cadre05.png',    label: 'Cadre' },
+				{ src: 'images/cadre06.png',    label: 'Cadre' },
+				{ src: 'images/cadre07.png',    label: 'Cadre' },
+				{ src: 'images/cadre08.png',    label: 'Cadre' },
+				{ src: 'images/cadre09.png',    label: 'Cadre' },
+				{ src: 'images/cadre10.png',    label: 'Cadre' },
+            ]
+        },
+		{
+            id: 'textures',
+            label: 'Textures',
+            icon: '📜',
+            images: [
+                { src: 'images/texture01.png',    label: 'Texture' },
+				{ src: 'images/texture02.png',    label: 'Texture' },
+				{ src: 'images/texture03.png',    label: 'Texture' },
+				{ src: 'images/texture04.png',    label: 'Texture' },
+				{ src: 'images/texture05.png',    label: 'Texture' },
+				{ src: 'images/texture06.png',    label: 'Texture' },
+				{ src: 'images/texture07.png',    label: 'Texture' },
+				{ src: 'images/texture08.png',    label: 'Texture' },
+				{ src: 'images/texture09.png',    label: 'Texture' },
+				{ src: 'images/texture10.png',    label: 'Texture' },
+            ]
+        },
+		{
+            id: 'BD',
+            label: 'BD',
+            icon: '💬',
+            images: [
+                { src: 'images/BD01.png',    label: 'BD' },
+				{ src: 'images/BD02.png',    label: 'BD' },
+				{ src: 'images/BD03.png',    label: 'BD' },
+				{ src: 'images/BD04.png',    label: 'BD' },
+				{ src: 'images/BD05.png',    label: 'BD' },
+				{ src: 'images/BD06.png',    label: 'BD' },
+				{ src: 'images/BD07.png',    label: 'BD' },
+				{ src: 'images/BD08.png',    label: 'BD' },
+				{ src: 'images/BD09.png',    label: 'BD' },
+				{ src: 'images/BD10.png',    label: 'BD' },
+				{ src: 'images/BD11.png',    label: 'BD' },
+				{ src: 'images/BD12.png',    label: 'BD' },
+				{ src: 'images/BD13.png',    label: 'BD' },
+				{ src: 'images/BD14.png',    label: 'BD' },
+				{ src: 'images/BD15.png',    label: 'BD' },
+				{ src: 'images/BD16.png',    label: 'BD' },
+				{ src: 'images/BD17.png',    label: 'BD' },
+				{ src: 'images/BD18.png',    label: 'BD' },
+				{ src: 'images/BD19.png',    label: 'BD' },
+				{ src: 'images/BD20.png',    label: 'BD' },
             ]
         },
     ];

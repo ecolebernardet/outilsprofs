@@ -488,7 +488,11 @@
 		.editor-container { display: flex; flex-direction: column; border: 1px solid #eee; border-radius: 8px; background: white; flex-grow: 1; overflow: hidden; resize: none; min-width: 180px; min-height: 70px; position: relative; }
 		.editor-container::-webkit-resizer { display: none; }
 		/* Poignée de resize custom — fonctionne avec souris, touch et stylet VPI */
-		.custom-resize-handle { position:absolute; bottom:2px; right:2px; width:22px; height:22px; cursor:se-resize; z-index:50; display:flex; align-items:center; justify-content:center; font-size:14px; color:#888; background:rgba(255,255,255,0.9); border:1px solid #ccc; border-radius:4px; user-select:none; touch-action:none; }
+		.custom-resize-handle { position:absolute; bottom:2px; right:2px; width:22px; height:22px; cursor:se-resize; z-index:50; display:flex; align-items:center; justify-content:center; font-size:14px; color:#888; background:rgba(255,255,255,0.9); border:1px solid #ccc; border-radius:4px; user-select:none; touch-action:none; opacity:0; transition:opacity 0.2s; pointer-events:none; }
+		.widget:focus-within .custom-resize-handle { opacity:1; pointer-events:auto; }
+		#board.single-select .widget.selected .custom-resize-handle { opacity:1; pointer-events:auto; }
+		#board.multi-select .widget.selected .custom-resize-handle { opacity:0 !important; pointer-events:none !important; }
+		body.presentation-mode .custom-resize-handle { opacity:0 !important; pointer-events:none !important; }
 		.editor-toolbar button, .editor-toolbar select, .editor-toolbar input { padding: 2px 4px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 11px; height: 26px; box-sizing: border-box; }
 		@font-face { font-family: 'KGPerfectPenmanship'; src: url('polices/KGPerfectPenmanship.ttf') format('truetype'); }
 		@font-face { font-family: 'Andika'; src: url('polices/Andika.ttf') format('truetype'); }
