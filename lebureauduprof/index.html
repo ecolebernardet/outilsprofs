@@ -2058,38 +2058,87 @@ const pdfStorage = (() => {
 
     return {
         set(id, base64) {
-            return tx('readwrite').then(store => new Promise((res, rej) => {
+            return tx('readwrite').then(store => new Promise((res) => {
                 const r = store.put(base64, id);
                 r.onsuccess = () => res();
-                r.onerror   = () => {
-                    // Fallback localStorage
-                    try { localStorage.setItem(id, base64); } catch(e) {}
-                    res();
-                };
-            })).catch(() => {
-                try { localStorage.setItem(id, base64); } catch(e) {}
-            });
+                r.onerror   = () => { console.warn('[pdfStorage] Erreur écriture IndexedDB:', r.error); res(); };
+            })).catch(err => { console.warn('[pdfStorage] set échoué:', err); });
         },
         get(id) {
             return tx('readonly').then(store => new Promise((res) => {
                 const r = store.get(id);
-                r.onsuccess = () => {
-                    if (r.result) { res(r.result); return; }
-                    // Fallback localStorage
-                    res(localStorage.getItem(id));
-                };
-                r.onerror = () => res(localStorage.getItem(id));
-            })).catch(() => Promise.resolve(localStorage.getItem(id)));
+                r.onsuccess = () => res(r.result || null);
+                r.onerror   = () => res(null);
+            })).catch(() => Promise.resolve(null));
         },
         remove(id) {
+            // Nettoyer aussi localStorage au cas où des anciennes entrées traîneraient
+            localStorage.removeItem(id);
             return tx('readwrite').then(store => new Promise((res) => {
                 store.delete(id).onsuccess = () => res();
-            })).catch(() => {}).finally(() => {
-                localStorage.removeItem(id);
-            });
+            })).catch(() => {});
+        },
+        // Retourne tous les IDs stockés
+        listIds() {
+            return tx('readonly').then(store => new Promise((res) => {
+                const r = store.getAllKeys();
+                r.onsuccess = () => res(r.result || []);
+                r.onerror   = () => res([]);
+            })).catch(() => []);
+        },
+        // Supprime les PDFs dont l'ID n'est pas dans usedIds
+        async purgeOrphans(usedIds) {
+            const storedIds = await this.listIds();
+            const usedSet = new Set(usedIds);
+            let removed = 0;
+            for (const id of storedIds) {
+                if (!usedSet.has(id)) {
+                    await this.remove(id);
+                    removed++;
+                }
+            }
+            if (removed > 0) console.log(`[pdfStorage] ${removed} PDF(s) orphelin(s) supprimé(s)`);
+            return removed;
         }
     };
 })();
+
+// Nettoyer les PDFs orphelins au démarrage (après chargement des projets)
+async function _cleanOrphanPdfs() {
+    try {
+        // Collecter tous les pdfIds utilisés dans tous les projets
+        const usedIds = new Set();
+        // PDFs dans le board courant
+        document.querySelectorAll('.widget[data-type="pdf"]').forEach(w => {
+            if (w.dataset.pdfId) usedIds.add(w.dataset.pdfId);
+        });
+        // PDFs dans les scènes sauvegardées (localStorage)
+        try {
+            const raw = localStorage.getItem('profBoardConfig');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                (parsed.widgets || []).forEach(w => { if (w.pdfId) usedIds.add(w.pdfId); });
+            }
+        } catch(e) {}
+        // PDFs dans tous les projets IndexedDB
+        if (typeof dbGetAll === 'function') {
+            try {
+                const projects = await dbGetAll();
+                for (const proj of projects) {
+                    for (const scene of (proj.scenes || [])) {
+                        try {
+                            const config = typeof scene.config === 'string' ? JSON.parse(scene.config) : scene.config;
+                            (config?.widgets || []).forEach(w => { if (w.pdfId) usedIds.add(w.pdfId); });
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {}
+        }
+        await pdfStorage.purgeOrphans([...usedIds]);
+    } catch(e) {
+        console.warn('[cleanOrphanPdfs]', e);
+    }
+}
 
 // =========================================================================
 // VARIABLES GLOBALES
@@ -2164,6 +2213,10 @@ window.onload = () => {
     applyBoardRatio(window.innerWidth);
     if (typeof loadBoard        === 'function') loadBoard();
     if (typeof initShapeToolbar === 'function') initShapeToolbar();
+    // Nettoyer les PDFs orphelins 5s après le démarrage (laisse le temps aux projets de charger)
+    setTimeout(() => _cleanOrphanPdfs(), 5000);
+    // Nettoyer immédiatement les anciennes clés pdf_* dans localStorage (migration)
+    Object.keys(localStorage).filter(k => k.startsWith('pdf_')).forEach(k => localStorage.removeItem(k));
     setTimeout(() => {
         isInitialLoading = false;
         _lastW = window.innerWidth;

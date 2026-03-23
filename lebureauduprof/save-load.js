@@ -253,8 +253,10 @@ function restoreBoardFromJSON(json) {
     // Compter les widgets non-stickers pour savoir quand tous les setTimeout(50ms) sont terminés
     const nonStickerCount = data.filter(w => w.type !== 'sticker').length;
     let restoredCount = 0;
-    // Flag pour bloquer saveBoard() pendant le chargement async des PDFs
-    window._pdfRestoring = true;
+    // Compteur de PDFs en attente — bloque saveBoard() dans togglePdfCollapse
+    const _pdfCount = data.filter(w => w.type === 'pdf' && w.pdfId).length;
+    let _pdfResolvingCount = _pdfCount;
+    window._pdfRestoring = _pdfCount > 0;
     data.forEach(w => {
         // Restauration spéciale des stickers (pas de template HTML)
         if (w.type === 'sticker') {
@@ -463,7 +465,8 @@ function restoreBoardFromJSON(json) {
                         }
                     }
                 }).finally(() => {
-                    window._pdfRestoring = false;
+                    _pdfResolvingCount--;
+                    if (_pdfResolvingCount <= 0) window._pdfRestoring = false;
                 });
             }
             applyEditorStyleFromConfig(widget, w.editorStyle);
