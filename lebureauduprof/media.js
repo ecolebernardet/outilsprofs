@@ -235,6 +235,15 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 ctx.lineJoin = 'round';
                 ctx.beginPath();
                 const p0 = fromNorm(stroke.pts[0].x, stroke.pts[0].y);
+                // Cas dot (tap simple sans mouvement) : dessiner un cercle plein
+                if (stroke.dot || stroke.pts.length === 1) {
+                    const r = sizeScaled / 2;
+                    ctx.arc(p0.x, p0.y, Math.max(r, 1), 0, Math.PI * 2);
+                    ctx.fillStyle = stroke.tool === 'eraser' ? 'rgba(0,0,0,1)' : stroke.color;
+                    ctx.fill();
+                    ctx.restore();
+                    return;
+                }
                 ctx.moveTo(p0.x, p0.y);
                 for (let i = 1; i < stroke.pts.length; i++) {
                     const p = fromNorm(stroke.pts[i].x, stroke.pts[i].y);
@@ -625,6 +634,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!isDrawing || !currentStrokeAnnot) return;
                         isDrawing = false;
                         if (currentStrokeAnnot.pts.length > 0) {
+                            // Un seul point = tap simple → marquer comme dot (point plein)
+                            if (currentStrokeAnnot.pts.length === 1) {
+                                currentStrokeAnnot.dot = true;
+                            }
                             const layer = getLayer(currentPage);
                             if (!layer.history) layer.history = [];
                             layer.redoHistory = []; // vider redo à chaque nouvelle action
