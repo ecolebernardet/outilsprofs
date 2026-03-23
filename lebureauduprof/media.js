@@ -36,9 +36,9 @@ function loadPdfWidget(input) {
             widget.dataset.pdfId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
         const pdfId = widget.dataset.pdfId;
-        pdfStorage.set(pdfId, base64).then(() => saveBoard());
         widget.dataset.pdfName = file.name;
         _showPdfInWidget(container, base64, file.name);
+        pdfStorage.set(pdfId, base64).then(() => saveBoard());
     };
     reader.readAsDataURL(file);
 }
@@ -58,6 +58,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (zoomBar)     zoomBar.style.display = 'flex';
     const zoomFitBtn = container.querySelector('.pdf-zoom-fit');
     if (zoomFitBtn)  zoomFitBtn.style.display = 'inline-flex';
+    const exportBtn = container.querySelector('.pdf-export-btn');
+    if (exportBtn)   exportBtn.style.display = 'inline-flex';
     // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
     if (canvasWrap)  canvasWrap.style.cursor = 'grab';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
@@ -233,7 +235,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
                     ctx.fillStyle = stroke.color;
                     ctx.textBaseline = 'top';
-                    ctx.fillText(stroke.text || '', pos.x, pos.y);
+                    // Gérer les retours à la ligne
+                    const lines = (stroke.text || '').split('\n');
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, pos.x, pos.y + i * fontSize * 1.3);
+                    });
                     ctx.restore();
                     return;
                 }
@@ -721,6 +727,21 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     },
                     // Accès au canvas pour récupérer les coordonnées
                     getAnnotCanvas() { return annotCanvas; },
+                    getPdfDoc()      { return pdfDoc; },
+                    getTotalPages()  { return totalPages; },
+                    getAnnotLayers() { return annotLayers; },
+                    drawStrokeOn(ctx, stroke, cw) {
+                        // Redessine un stroke sur un contexte externe (pour export)
+                        const savedW = annotCanvas.width;
+                        // Remplacer temporairement la largeur de référence
+                        const origW = annotCanvas.width;
+                        // drawStroke utilise annotCanvas.width directement
+                        // On passe ctx + on patch temporairement annotCanvas.width
+                        const _orig = annotCanvas.width;
+                        Object.defineProperty(annotCanvas, 'width', { value: cw, configurable: true });
+                        drawStroke(ctx, stroke);
+                        Object.defineProperty(annotCanvas, 'width', { value: _orig, configurable: true });
+                    },
                     // Ajouter un texte (stocké dans annotLayers, survit au zoom/changement de page)
                     addTextStroke(text, color, size, px, py) {
                         const norm = toNorm(px, py);
@@ -1134,4 +1155,170 @@ function ytExportLibrary() {
     a.download = 'bibliotheque-youtube.json';
     document.body.appendChild(a); a.click(); a.remove();
     if (btn) { const t = btn.textContent; btn.textContent = '✓ Exporté'; setTimeout(() => btn.textContent = t, 2000); }
+}
+
+// =========================================================================
+// EXPORT PDF AVEC ANNOTATIONS
+// =========================================================================
+async function _exportPdfWithAnnotations(container) {
+    const widget = container.closest('.widget');
+    if (!widget || !widget._pdfAnnotAPI) {
+        alert('Aucun PDF chargé dans ce widget.');
+        return;
+    }
+    const api = widget._pdfAnnotAPI;
+    const pdfDoc = api.getPdfDoc();
+    const totalPages = api.getTotalPages();
+    const annotLayers = api.getAnnotLayers();
+    if (!pdfDoc) { alert('PDF non disponible.'); return; }
+
+    // Charger jsPDF si pas encore chargé
+    if (!window.jspdf) {
+        await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+        });
+    }
+    const { jsPDF } = window.jspdf;
+
+    const btn = container.querySelector('.pdf-export-btn');
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+    try {
+        // Rendre chaque page à 2x pour la qualité
+        const SCALE = 2;
+        let pdf = null;
+
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: SCALE });
+            const W = viewport.width, H = viewport.height;
+
+            // Canvas PDF
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.width = W; pdfCanvas.height = H;
+            const pdfCtx = pdfCanvas.getContext('2d');
+            await page.render({ canvasContext: pdfCtx, viewport }).promise;
+
+            // Canvas annotation
+            const annotCanvas2 = document.createElement('canvas');
+            annotCanvas2.width = W; annotCanvas2.height = H;
+            const annotCtx = annotCanvas2.getContext('2d');
+
+            const layer = annotLayers[pageNum];
+            if (layer) {
+                // Restaurer snapshot si existant
+                if (layer._snapshot) {
+                    // Redimensionner le snapshot au scale SCALE
+                    const tmpC = document.createElement('canvas');
+                    tmpC.width  = layer._snapshot.width;
+                    tmpC.height = layer._snapshot.height;
+                    tmpC.getContext('2d').putImageData(layer._snapshot, 0, 0);
+                    annotCtx.drawImage(tmpC, 0, 0, W, H);
+                }
+                // Redessiner les strokes à l'échelle SCALE
+                if (layer.strokes) {
+                    for (const stroke of layer.strokes) {
+                        _drawStrokeScaled(annotCtx, stroke, W, H);
+                    }
+                }
+            }
+
+            // Fusionner les deux canvas
+            const merged = document.createElement('canvas');
+            merged.width = W; merged.height = H;
+            const mCtx = merged.getContext('2d');
+            mCtx.drawImage(pdfCanvas, 0, 0);
+            mCtx.drawImage(annotCanvas2, 0, 0);
+
+            const imgData = merged.toDataURL('image/jpeg', 0.92);
+            const pdfW = viewport.width / SCALE * 0.75; // px → pt (72dpi)
+            const pdfH = viewport.height / SCALE * 0.75;
+
+            if (!pdf) {
+                pdf = new jsPDF({
+                    orientation: pdfW > pdfH ? 'landscape' : 'portrait',
+                    unit: 'pt',
+                    format: [pdfW, pdfH]
+                });
+            } else {
+                pdf.addPage([pdfW, pdfH], pdfW > pdfH ? 'landscape' : 'portrait');
+            }
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+        }
+
+        const pdfName = (widget.dataset.pdfName || 'document').replace(/\.pdf$/i, '');
+        pdf.save(pdfName + '_annoté.pdf');
+
+    } catch(err) {
+        console.error('[Export PDF]', err);
+        alert('Erreur lors de l\'export : ' + err.message);
+    } finally {
+        if (btn) { btn.textContent = '💾'; btn.disabled = false; }
+    }
+}
+
+// Dessine un stroke sur un contexte externe avec W/H comme référence
+function _drawStrokeScaled(ctx, stroke, W, H) {
+    if (!stroke) return;
+    function fromN(nx, ny) { return { x: nx * W, y: ny * H }; }
+
+    if (stroke.tool === 'text') {
+        const pos = fromN(stroke.nx, stroke.ny);
+        const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * W / 600);
+        ctx.save();
+        ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle = stroke.color;
+        ctx.textBaseline = 'top';
+        const lines = (stroke.text || '').split('\n');
+        lines.forEach((line, i) => ctx.fillText(line, pos.x, pos.y + i * fontSize * 1.3));
+        ctx.restore();
+        return;
+    }
+    if (!stroke.pts || stroke.pts.length < 1) return;
+    const sizeScaled = stroke.size * W / 600;
+    ctx.save();
+    if (stroke.tool === 'figure') {
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = sizeScaled;
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        stroke.pts.forEach((p, i) => {
+            const cp = fromN(p.x, p.y);
+            i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
+        });
+        ctx.stroke();
+        ctx.restore(); return;
+    }
+    if (stroke.tool === 'highlighter') {
+        ctx.globalAlpha = 0.35;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.lineWidth = sizeScaled * 5;
+    } else if (stroke.tool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = sizeScaled * 2;
+    } else {
+        ctx.lineWidth = sizeScaled;
+    }
+    ctx.strokeStyle = stroke.color;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (stroke.dot) {
+        const p0 = fromN(stroke.pts[0].x, stroke.pts[0].y);
+        ctx.beginPath();
+        ctx.arc(p0.x, p0.y, Math.max(sizeScaled / 2, 1), 0, Math.PI * 2);
+        ctx.fillStyle = stroke.color;
+        ctx.fill();
+        ctx.restore(); return;
+    }
+    ctx.beginPath();
+    const p0 = fromN(stroke.pts[0].x, stroke.pts[0].y);
+    ctx.moveTo(p0.x, p0.y);
+    for (let i = 1; i < stroke.pts.length; i++) {
+        const p = fromN(stroke.pts[i].x, stroke.pts[i].y);
+        ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    ctx.restore();
 }

@@ -2,10 +2,6 @@ const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
-// Activer le rendu haute résolution (HiDPI) — doit être appelé avant app.ready
-app.commandLine.appendSwitch('high-dpi-support', '1');
-app.commandLine.appendSwitch('force-device-scale-factor', '0'); // 0 = laisser le système décider
-
 let mainWindow = null;
 let pendingPdfPath = null;
 let pageReady = false;
@@ -80,6 +76,16 @@ ipcMain.handle('read-pdf-file', async (event, filePath) => {
         return 'data:application/pdf;base64,' + data.toString('base64');
     } catch(err) {
         console.error('[Electron] Erreur lecture PDF :', err.message);
+        return null;
+    }
+});
+
+ipcMain.handle('capture-screenshot', async (event) => {
+    try {
+        const image = await mainWindow.webContents.capturePage();
+        return image.toPNG();
+    } catch(err) {
+        console.error('[Electron] Erreur capture écran :', err.message);
         return null;
     }
 });

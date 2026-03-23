@@ -2576,7 +2576,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
     editor.spellcheck = false;
     editor.style.cssText = `
         min-width: 80px;
-        max-width: 500px;
+        max-width: 90vw;
         padding: 2px 5px;
         font-size: ${fontSizePx}px;
         font-family: 'Segoe UI', sans-serif;
@@ -2585,7 +2585,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
         border: 1.5px dashed ${color};
         border-radius: 3px;
         outline: none;
-        white-space: pre;
+        white-space: pre-wrap;
         cursor: text;
         line-height: 1.3;
     `;
@@ -2638,7 +2638,9 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
     }
 
     editor.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); validate(); }
+        if (ev.key === 'Escape') { ev.preventDefault(); validate(); }
+        if (ev.key === 'Enter' && ev.shiftKey) { ev.preventDefault(); validate(); }
+        // Entrée seule = saut de ligne (comportement naturel du contentEditable)
         if (ev.key === 'Escape') cancel();
         ev.stopPropagation();
     });
@@ -2727,14 +2729,10 @@ function _pdfAnnotMouseLeave(e) {
 }
 
 function _pdfAnnotTouchStart(e) {
-    // Laisser passer les touches sur les boutons interactifs (barre d'action, toolbar...)
-    if (e.target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, .editor-toolbar, #toolbar-container, #shape-edit-panel')) return;
     e.preventDefault();
     if (e.touches.length === 1) _pdfAnnotStartStroke(e.touches[0]);
 }
 function _pdfAnnotTouchMove(e) {
-    // Laisser passer les touches sur les boutons interactifs
-    if (e.target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, .editor-toolbar, #toolbar-container, #shape-edit-panel')) return;
     e.preventDefault();
     if (e.touches.length === 1) _pdfAnnotContinueStroke(e.touches[0]);
 }

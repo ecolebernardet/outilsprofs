@@ -13,5 +13,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     openYoutube: (videoId) => {
         ipcRenderer.send('open-youtube', videoId);
     },
+    captureScreenshot: () => {
+        return ipcRenderer.invoke('capture-screenshot');
+    },
     isElectron: true
 });

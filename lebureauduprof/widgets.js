@@ -318,7 +318,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
                 (function(w){
                     snapshotNow();
                     closeCtxMenuAll();
-                    if(w.dataset.pdfId) pdfStorage.remove(w.dataset.pdfId);
+                    if(w.dataset.pdfId) localStorage.removeItem(w.dataset.pdfId);
                     w.remove();
                     saveBoard();
                 })(this.closest('.widget'))" title="Fermer">×</div>
@@ -456,7 +456,9 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             if (c?.style.width)  c.style.width  = (parseFloat(c.style.width)  * factor) + 'px';
             if (c?.style.height) c.style.height = (parseFloat(c.style.height) * factor) + 'px';
         }
-        saveBoard();
+        // Pour les PDFs : ne pas sauvegarder ici — le pdfId n'est pas encore posé,
+        // le caller (Electron / drag&drop) appelle saveBoard() après avoir posé pdfId
+        if (type !== 'pdf') saveBoard();
     }
 
     // Focus automatique sur l'éditeur à la création

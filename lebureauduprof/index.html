@@ -1571,6 +1571,15 @@
 					
 					<!-- PROJETS -->
 					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
+					<div class="mm-sub-item mm-has-sub" style="position:relative;">
+						<span class="mm-ico">📸</span>&nbsp;&nbsp;Capture du bureau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
+						<div class="mm-sub" id="sub-capture"><div class="mm-sub-inner" style="min-width:180px;">
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📸 Capture du bureau</div>
+							<div class="mm-sub-item" onclick="captureBoard('jpg');closeMainMenu()"><span class="mm-ico">🖼️</span>&nbsp;&nbsp;Enregistrer en JPG</div>
+							<div class="mm-sub-item" onclick="captureBoard('png');closeMainMenu()"><span class="mm-ico">🖼️</span>&nbsp;&nbsp;Enregistrer en PNG</div>
+							<div class="mm-sub-item" onclick="captureBoard('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Enregistrer en PDF</div>
+						</div></div>
+					</div>
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
 					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
 					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
@@ -1994,6 +2003,7 @@
 
             <div style="flex:1;"></div>
             <button class="pdf-zoom-fit" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:10px;" title="Adapter à la largeur">⊡</button>
+            <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))">💾</button>
             <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;">⛶</button>
             <button class="pdf-collapse-btn" onclick="togglePdfCollapse(this.closest('.editor-container'))" title="Réduire / Déplier" style="font-size:13px;padding:1px 5px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;touch-action:manipulation;">—</button>
             <button onclick="this.closest('.widget').remove();saveBoard();" title="Fermer" style="font-size:13px;padding:1px 6px;border:1px solid #ffb3b3;border-radius:4px;background:#fff0f0;color:#cc0000;cursor:pointer;touch-action:manipulation;">✕</button>
@@ -2625,6 +2635,126 @@ document.addEventListener('mouseenter', function(e) {
 
 
 // =========================================================================
+// CAPTURE DU BUREAU
+// =========================================================================
+async function captureBoard(format) {
+    // Charger html2canvas si nécessaire (fallback navigateur web)
+    if (!window.html2canvas && !(window.electronAPI && window.electronAPI.captureScreenshot)) {
+        await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+        });
+    }
+
+    // Feedback visuel
+    const toast = document.createElement('div');
+    toast.textContent = '📸 Capture en cours…';
+    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:999999;border:1px solid #444;';
+    document.body.appendChild(toast);
+
+    try {
+        const board = document.getElementById('board');
+        const dpr = window.devicePixelRatio || 1;
+        let canvas;
+
+        if (window.electronAPI && window.electronAPI.captureScreenshot) {
+            // Electron : capture native via capturePage (pas de problème cross-origin)
+            const pngBuffer = await window.electronAPI.captureScreenshot();
+            const blob = new Blob([pngBuffer], { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            await new Promise(res => { img.onload = res; img.src = url; });
+            canvas = document.createElement('canvas');
+            // Recadrer sur le board uniquement
+            const boardRect = board.getBoundingClientRect();
+            canvas.width  = boardRect.width  * dpr;
+            canvas.height = boardRect.height * dpr;
+            canvas.getContext('2d').drawImage(img,
+                boardRect.left * dpr, boardRect.top * dpr,
+                boardRect.width * dpr, boardRect.height * dpr,
+                0, 0, canvas.width, canvas.height
+            );
+            URL.revokeObjectURL(url);
+        } else {
+            // Navigateur web : capture via getDisplayMedia (capture d'écran native)
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: 'screen', cursor: 'never' },
+                    audio: false
+                });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                await new Promise(res => { video.onloadedmetadata = res; });
+                await video.play();
+                // Attendre une frame
+                await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
+                // Recadrer sur le board
+                const boardRect = board.getBoundingClientRect();
+                canvas = document.createElement('canvas');
+                canvas.width  = boardRect.width  * dpr;
+                canvas.height = boardRect.height * dpr;
+                const ctx3 = canvas.getContext('2d');
+                const scaleX = video.videoWidth  / window.screen.width;
+                const scaleY = video.videoHeight / window.screen.height;
+                ctx3.drawImage(video,
+                    (window.screenX + boardRect.left) * scaleX,
+                    (window.screenY + boardRect.top  + (window.outerHeight - window.innerHeight)) * scaleY,
+                    boardRect.width  * scaleX,
+                    boardRect.height * scaleY,
+                    0, 0, canvas.width, canvas.height
+                );
+                stream.getTracks().forEach(t => t.stop());
+                video.remove();
+            } catch(e) {
+                throw new Error('Capture annulée ou non supportée : ' + e.message);
+            }
+        }
+
+        const timestamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+        const filename = `bureau_${timestamp}`;
+
+        if (format === 'pdf') {
+            if (!window.jspdf) {
+                await new Promise((res, rej) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                    s.onload = res; s.onerror = rej;
+                    document.head.appendChild(s);
+                });
+            }
+            const { jsPDF } = window.jspdf;
+            const W = canvas.width, H = canvas.height;
+            const pdfW = W * 0.75, pdfH = H * 0.75; // px → pt
+            const pdf = new jsPDF({
+                orientation: W > H ? 'landscape' : 'portrait',
+                unit: 'pt',
+                format: [pdfW, pdfH]
+            });
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfW, pdfH);
+            pdf.save(filename + '.pdf');
+        } else {
+            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+            const quality  = format === 'png' ? 1 : 0.92;
+            const dataUrl  = canvas.toDataURL(mimeType, quality);
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = filename + '.' + format;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+        toast.textContent = '✅ Capture enregistrée !';
+        setTimeout(() => toast.remove(), 2000);
+    } catch(err) {
+        console.error('[captureBoard]', err);
+        toast.textContent = '❌ Erreur : ' + err.message;
+        setTimeout(() => toast.remove(), 3000);
+    }
+}
+
 // NOUVEAU MENU FLOTTANT
 // =========================================================================
 function toggleMenuTheme() {
@@ -3202,7 +3332,7 @@ function togglePdfCollapse(container) {
         container.dataset.collapsed = 'true';
     }
 
-    if (typeof saveBoard === 'function') saveBoard();
+    if (typeof saveBoard === 'function' && !window._pdfRestoring) saveBoard();
 }
 
 // TOOLBARS DÉPLAÇABLES
@@ -3449,9 +3579,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             }
             const filename = filePath.split(/[\\/]/).pop();
             widget.dataset.pdfName = filename;
-            pdfStorage.set(widget.dataset.pdfId, base64);
             _showPdfInWidget(container, base64, filename);
-            saveBoard();
+            pdfStorage.set(widget.dataset.pdfId, base64).then(() => saveBoard());
         } catch(err) {
             console.error('[Electron] Erreur ouverture PDF :', err);
         }
