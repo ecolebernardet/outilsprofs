@@ -64,15 +64,37 @@ function applyEditorStyleFromConfig(widget, style) {
 function buildBoardState() {
     const curW = window.innerWidth, curVH = virtualH(curW);
     const widgets = [];
+    // DEBUG
+    try {
+        const allWidgets = document.querySelectorAll('.widget');
+        const pdfInDom = [...allWidgets].filter(w => w.dataset.type === 'pdf').map(w => ({ pdfId: w.dataset.pdfId, pdfName: w.dataset.pdfName }));
+        const logs = JSON.parse(localStorage.getItem('_pdfDebugLog') || '[]');
+        logs.push({ t: Date.now(), stack: 'BUILD_STATE', pdfs: pdfInDom });
+        if (logs.length > 30) logs.shift();
+        localStorage.setItem('_pdfDebugLog', JSON.stringify(logs));
+    } catch(e) {}
     document.querySelectorAll('.widget').forEach(w => {
         const iframe = w.querySelector('iframe');
         const c = w.querySelector('.editor-container');
         const html = getInnerHTMLNormalized(w);
         const isTextLike = w.dataset.type === 'text' || w.dataset.type === 'homework';
-        let wP = 0, hP = 0;
-        if (c) { wP = (c.offsetWidth / curW) * 100; hP = ((c.offsetHeight - getToolbarHeight(c)) / curVH) * 100; }
-        const lP = (w.offsetLeft / curW) * 100;
-        const tP = (w.offsetTop  / curVH) * 100;
+        let wP = 0, hP = 0, lP = 0, tP = 0;
+        // Pour un PDF réduit : utiliser les dimensions/position d'ORIGINE (pas les valeurs réduites)
+        const _collapsed = c && c.dataset.collapsed === 'true';
+        if (_collapsed) {
+            const _savedWpx    = parseFloat(c.dataset.savedW);
+            const _savedHpx    = parseFloat(c.dataset.savedH);
+            const _savedTopPx  = parseFloat(c.dataset.savedTop);
+            const _savedLeftPx = parseFloat(c.dataset.savedLeft);
+            if (!isNaN(_savedWpx))  wP = (_savedWpx / curW) * 100;
+            if (!isNaN(_savedHpx))  hP = ((_savedHpx - getToolbarHeight(c)) / curVH) * 100;
+            lP = !isNaN(_savedLeftPx) ? (_savedLeftPx / curW) * 100 : (w.offsetLeft / curW) * 100;
+            tP = !isNaN(_savedTopPx)  ? (_savedTopPx  / curVH) * 100 : (w.offsetTop  / curVH) * 100;
+        } else {
+            if (c) { wP = (c.offsetWidth / curW) * 100; hP = ((c.offsetHeight - getToolbarHeight(c)) / curVH) * 100; }
+            lP = (w.offsetLeft / curW) * 100;
+            tP = (w.offsetTop  / curVH) * 100;
+        }
         Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         // Données propres aux stickers
         let stickerUrl = null, stickerEmoji = null, stickerSize = null;
@@ -110,6 +132,11 @@ function buildBoardState() {
 			pdfId: w.dataset.pdfId || null,
 			pdfName: w.dataset.pdfName || null,
 			pdfCollapsed: w.querySelector('.editor-container[data-collapsed="true"]') ? true : false,
+			// Pour un PDF réduit : sauvegarder position/taille d'ORIGINE en % (pas les valeurs réduites)
+			pdfSavedWPct:    (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedW); return isNaN(px) ? null : (px / curW) * 100; })(),
+			pdfSavedHPct:    (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedH); return isNaN(px) ? null : (px / curVH) * 100; })(),
+			pdfSavedTopPct:  (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedTop); return isNaN(px) ? null : (px / curVH) * 100; })(),
+			pdfSavedLeftPct: (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedLeft); return isNaN(px) ? null : (px / curW) * 100; })(),
 			animation: w.dataset.animation || null,
 			monnaieData
 		});
@@ -146,6 +173,16 @@ function buildBoardJSON() {
 function saveBoard() {
     if (isInitialLoading || isRestoringState) return;
     const json = JSON.stringify(buildBoardState());
+    // DEBUG : tracer les sauvegardes PDF dans localStorage
+    try {
+        const parsed = JSON.parse(json);
+        const pdfWidgets = parsed.widgets.filter(w => w.type === 'pdf');
+        const stack = new Error().stack.split('\n')[2]?.trim() || '?';
+        const logs = JSON.parse(localStorage.getItem('_pdfDebugLog') || '[]');
+        logs.push({ t: Date.now(), stack, pdfs: pdfWidgets.map(w => ({ pdfId: w.pdfId, pdfName: w.pdfName, w: Math.round(w.widthPercent), h: Math.round(w.contentHPercent) })) });
+        if (logs.length > 20) logs.shift();
+        localStorage.setItem('_pdfDebugLog', JSON.stringify(logs));
+    } catch(e) {}
     localStorage.setItem('profBoardConfig', json);
     // Mettre à jour la scène courante
     if (scenes && scenes.length > 0) {
@@ -158,6 +195,18 @@ function saveBoard() {
 
 function loadBoard() {
     const raw = localStorage.getItem('profBoardConfig');
+    // DEBUG : logger ce qu'on est sur le point de charger
+    try {
+        const logs = JSON.parse(localStorage.getItem('_pdfDebugLog') || '[]');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            const pdfWidgets = parsed.widgets ? parsed.widgets.filter(w => w.type === 'pdf') : [];
+            logs.push({ t: Date.now(), stack: 'LOAD', pdfs: pdfWidgets.map(w => ({ pdfId: w.pdfId, pdfName: w.pdfName, w: Math.round(w.widthPercent), h: Math.round(w.contentHPercent) })) });
+        } else {
+            logs.push({ t: Date.now(), stack: 'LOAD', pdfs: 'PAS DE CONFIG' });
+        }
+        localStorage.setItem('_pdfDebugLog', JSON.stringify(logs));
+    } catch(e) {}
     if (raw) {
         // localStorage contient une sauvegarde → on la charge, fin de l'histoire
         restoreBoardFromJSON(raw);
@@ -204,6 +253,8 @@ function restoreBoardFromJSON(json) {
     // Compter les widgets non-stickers pour savoir quand tous les setTimeout(50ms) sont terminés
     const nonStickerCount = data.filter(w => w.type !== 'sticker').length;
     let restoredCount = 0;
+    // Flag pour bloquer saveBoard() pendant le chargement async des PDFs
+    window._pdfRestoring = true;
     data.forEach(w => {
         // Restauration spéciale des stickers (pas de template HTML)
         if (w.type === 'sticker') {
@@ -286,6 +337,11 @@ function restoreBoardFromJSON(json) {
         const hP = w.contentHPercent !== undefined ? w.contentHPercent : w.heightPercent;
         Object.assign(widget.dataset, { widthPercent: w.widthPercent || 0, contentHPercent: hP || 0, leftPercent: w.leftPercent ?? 0, topPercent: w.topPercent ?? 0 });
         if (w.meteoCity) widget.dataset.meteoCity = w.meteoCity;
+        // Poser pdfId/pdfName immédiatement (pas dans setTimeout) pour que saveBoard() les trouve toujours
+        if (w.type === 'pdf' && w.pdfId) {
+            widget.dataset.pdfId  = w.pdfId;
+            if (w.pdfName) widget.dataset.pdfName = w.pdfName;
+        }
         if (c) {
             if (w.widthPercent > 0) c.style.width = (w.widthPercent / 100) * curW + 'px';
             if (hP > 0) c.style.height = ((hP / 100) * curVH) + getToolbarHeight(c) + 'px';
@@ -383,25 +439,35 @@ function restoreBoardFromJSON(json) {
             if (w.iframeSrc && iframe) iframe.src = w.iframeSrc;
             // Restaurer le PDF depuis IndexedDB si disponible
             if (w.type === 'pdf' && w.pdfId) {
-                widget.dataset.pdfId = w.pdfId;
-                if (w.pdfName) widget.dataset.pdfName = w.pdfName;
                 const _pdfContainer = widget.querySelector('.editor-container');
-                const _pdfCollapsed = w.pdfCollapsed;
+                const _pdfCollapsed  = w.pdfCollapsed;
+                const _pdfSavedWPct   = w.pdfSavedWPct   || null;
+                const _pdfSavedHPct   = w.pdfSavedHPct   || null;
+                const _pdfSavedTopPct  = w.pdfSavedTopPct  || null;
+                const _pdfSavedLeftPct = w.pdfSavedLeftPct || null;
                 const _pdfName     = w.pdfName || '';
                 pdfStorage.get(w.pdfId).then(base64 => {
-                    if (!base64 || !_pdfContainer) return;
-                    if (_pdfCollapsed) {
-                        const cw = _pdfContainer.querySelector('.pdf-canvas-wrap');
-                        if (cw) cw.dataset.neverRendered = 'true';
-                        togglePdfCollapse(_pdfContainer);
-                    } else {
-                        _showPdfInWidget(_pdfContainer, base64, _pdfName);
+                    if (base64 && _pdfContainer) {
+                        if (_pdfCollapsed) {
+                            const _rW = window.innerWidth, _rVH = virtualH(_rW);
+                            if (_pdfSavedWPct)    _pdfContainer.dataset.savedW    = ((_pdfSavedWPct   / 100) * _rW)  + 'px';
+                            if (_pdfSavedHPct)    _pdfContainer.dataset.savedH    = ((_pdfSavedHPct   / 100) * _rVH) + 'px';
+                            if (_pdfSavedTopPct)  _pdfContainer.dataset.savedTop  = ((_pdfSavedTopPct  / 100) * _rVH) + 'px';
+                            if (_pdfSavedLeftPct) _pdfContainer.dataset.savedLeft = ((_pdfSavedLeftPct / 100) * _rW)  + 'px';
+                            _pdfContainer.dataset.collapsed = 'false';
+                            const cw = _pdfContainer.querySelector('.pdf-canvas-wrap');
+                            if (cw) cw.dataset.neverRendered = 'true';
+                            togglePdfCollapse(_pdfContainer);
+                        } else {
+                            _showPdfInWidget(_pdfContainer, base64, _pdfName);
+                        }
                     }
+                }).finally(() => {
+                    window._pdfRestoring = false;
                 });
             }
             applyEditorStyleFromConfig(widget, w.editorStyle);
             scaleFontSizesFromRef(widget, refW);
-            // Libérer isRestoringState une fois que tous les widgets ont leur contenu
             restoredCount++;
             if (restoredCount >= nonStickerCount) {
                 isRestoringState = false;
