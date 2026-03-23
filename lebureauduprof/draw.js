@@ -2727,10 +2727,14 @@ function _pdfAnnotMouseLeave(e) {
 }
 
 function _pdfAnnotTouchStart(e) {
+    // Laisser passer les touches sur les boutons interactifs (barre d'action, toolbar...)
+    if (e.target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, .editor-toolbar, #toolbar-container, #shape-edit-panel')) return;
     e.preventDefault();
     if (e.touches.length === 1) _pdfAnnotStartStroke(e.touches[0]);
 }
 function _pdfAnnotTouchMove(e) {
+    // Laisser passer les touches sur les boutons interactifs
+    if (e.target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, .editor-toolbar, #toolbar-container, #shape-edit-panel')) return;
     e.preventDefault();
     if (e.touches.length === 1) _pdfAnnotContinueStroke(e.touches[0]);
 }
