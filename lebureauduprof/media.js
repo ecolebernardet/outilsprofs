@@ -93,6 +93,26 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     canvasWrap.addEventListener('mouseup',    _endDrag);
     canvasWrap.addEventListener('mouseleave', _endDrag);
 
+    // ── Drag-to-scroll tactile (hors mode annotation) ──
+    canvasWrap.addEventListener('touchstart', e => {
+        if (window._pdfAnnotMode) return; // draw.js gère le pan en mode annotation
+        if (e.touches.length !== 1) return;
+        _dragScrolling = true;
+        _dragStartX = e.touches[0].clientX;
+        _dragStartY = e.touches[0].clientY;
+        _dragScrollLeft = canvasWrap.scrollLeft;
+        _dragScrollTop  = canvasWrap.scrollTop;
+    }, { passive: true });
+    canvasWrap.addEventListener('touchmove', e => {
+        if (!_dragScrolling || window._pdfAnnotMode) return;
+        if (e.touches.length !== 1) return;
+        canvasWrap.scrollLeft = _dragScrollLeft - (e.touches[0].clientX - _dragStartX);
+        canvasWrap.scrollTop  = _dragScrollTop  - (e.touches[0].clientY - _dragStartY);
+        e.preventDefault();
+    }, { passive: false });
+    canvasWrap.addEventListener('touchend', _endDrag);
+    canvasWrap.addEventListener('touchcancel', _endDrag);
+
     function base64ToUint8Array(b64) {
         const raw = atob(b64.split(',')[1]);
         const arr = new Uint8Array(raw.length);
