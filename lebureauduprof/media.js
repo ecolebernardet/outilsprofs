@@ -148,15 +148,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             function renderPage(num) {
                 pdfDoc.getPage(num).then(page => {
                     const scale = zoomScale ?? fitScale(page);
-                    const viewport = page.getViewport({ scale });
+                    const dpr = window.devicePixelRatio || 1;
+                    const viewport = page.getViewport({ scale: scale * dpr });
+                    // Taille physique du canvas (haute résolution)
                     pdfCanvas.width  = viewport.width;
                     pdfCanvas.height = viewport.height;
-                    pdfCanvas.style.width  = '';
-                    pdfCanvas.style.height = '';
+                    // Taille CSS = taille logique (sans DPR) → rendu net sur écrans HiDPI
+                    pdfCanvas.style.width  = (viewport.width  / dpr) + 'px';
+                    pdfCanvas.style.height = (viewport.height / dpr) + 'px';
+                    // Le canvas d'annotation garde la même taille logique (les coords sont normalisées)
                     annotCanvas.width  = viewport.width;
                     annotCanvas.height = viewport.height;
-                    annotCanvas.style.width  = '';
-                    annotCanvas.style.height = '';
+                    annotCanvas.style.width  = (viewport.width  / dpr) + 'px';
+                    annotCanvas.style.height = (viewport.height / dpr) + 'px';
 
                     // Mettre à jour label zoom
                     const zoomLabel = container.querySelector('.pdf-zoom-label');
@@ -583,7 +587,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     if (newWidth === _lastWrapWidth) return; // pas de changement de largeur
 
                     // Scaling CSS immédiat pour éviter le blanc / scintillement
-                    const cssScale = (newWidth - 24) / pdfCanvas.width;
+                    // pdfCanvas.style.width est en pixels CSS logiques (sans DPR)
+                    const canvasCssWidth = parseFloat(pdfCanvas.style.width) || pdfCanvas.width;
+                    const cssScale = (newWidth - 24) / canvasCssWidth;
                     pdfCanvas.style.transformOrigin  = 'top left';
                     annotCanvas.style.transformOrigin = 'top left';
                     pdfCanvas.style.transform  = `scale(${cssScale})`;

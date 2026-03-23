@@ -2,6 +2,10 @@ const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
+// Activer le rendu haute résolution (HiDPI) — doit être appelé avant app.ready
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('force-device-scale-factor', '0'); // 0 = laisser le système décider
+
 let mainWindow = null;
 let pendingPdfPath = null;
 let pageReady = false;
