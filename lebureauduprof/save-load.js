@@ -381,21 +381,23 @@ function restoreBoardFromJSON(json) {
             }
             const iframe = widget.querySelector('iframe');
             if (w.iframeSrc && iframe) iframe.src = w.iframeSrc;
-            // Restaurer le PDF depuis localStorage si disponible
+            // Restaurer le PDF depuis IndexedDB si disponible
             if (w.type === 'pdf' && w.pdfId) {
                 widget.dataset.pdfId = w.pdfId;
                 if (w.pdfName) widget.dataset.pdfName = w.pdfName;
-                const base64 = localStorage.getItem(w.pdfId);
-                if (base64) {
-                    const container = widget.querySelector('.editor-container');
-                    if (container) {
-                        _showPdfInWidget(container, base64, w.pdfName || '');
-                        if (w.pdfCollapsed) {
-                            // Attendre que le PDF soit rendu avant de replier
-                            setTimeout(() => togglePdfCollapse(container), 200);
-                        }
+                const _pdfContainer = widget.querySelector('.editor-container');
+                const _pdfCollapsed = w.pdfCollapsed;
+                const _pdfName     = w.pdfName || '';
+                pdfStorage.get(w.pdfId).then(base64 => {
+                    if (!base64 || !_pdfContainer) return;
+                    if (_pdfCollapsed) {
+                        const cw = _pdfContainer.querySelector('.pdf-canvas-wrap');
+                        if (cw) cw.dataset.neverRendered = 'true';
+                        togglePdfCollapse(_pdfContainer);
+                    } else {
+                        _showPdfInWidget(_pdfContainer, base64, _pdfName);
                     }
-                }
+                });
             }
             applyEditorStyleFromConfig(widget, w.editorStyle);
             scaleFontSizesFromRef(widget, refW);

@@ -318,7 +318,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
                 (function(w){
                     snapshotNow();
                     closeCtxMenuAll();
-                    if(w.dataset.pdfId) localStorage.removeItem(w.dataset.pdfId);
+                    if(w.dataset.pdfId) pdfStorage.remove(w.dataset.pdfId);
                     w.remove();
                     saveBoard();
                 })(this.closest('.widget'))" title="Fermer">×</div>

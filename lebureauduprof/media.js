@@ -36,14 +36,9 @@ function loadPdfWidget(input) {
             widget.dataset.pdfId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         }
         const pdfId = widget.dataset.pdfId;
-        try {
-            localStorage.setItem(pdfId, base64);
-        } catch(err) {
-            alert('⚠️ Le fichier PDF est trop volumineux pour être sauvegardé automatiquement. Il restera disponible jusqu\'à la fermeture de l\'onglet.');
-        }
+        pdfStorage.set(pdfId, base64).then(() => saveBoard());
         widget.dataset.pdfName = file.name;
         _showPdfInWidget(container, base64, file.name);
-        saveBoard();
     };
     reader.readAsDataURL(file);
 }

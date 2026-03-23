@@ -2024,6 +2024,64 @@
 
 <script>
 // =========================================================================
+// PDF STORAGE — IndexedDB (capacité >> localStorage) avec fallback
+// API : pdfStorage.set(id, base64), pdfStorage.get(id) → Promise, pdfStorage.remove(id)
+// =========================================================================
+const pdfStorage = (() => {
+    const DB_NAME = 'BureauDuProf_PDFs';
+    const STORE   = 'pdfs';
+    let _db = null;
+
+    function openDB() {
+        if (_db) return Promise.resolve(_db);
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+            req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+            req.onerror   = () => reject(req.error);
+        });
+    }
+
+    function tx(mode) {
+        return openDB().then(db => db.transaction(STORE, mode).objectStore(STORE));
+    }
+
+    return {
+        set(id, base64) {
+            return tx('readwrite').then(store => new Promise((res, rej) => {
+                const r = store.put(base64, id);
+                r.onsuccess = () => res();
+                r.onerror   = () => {
+                    // Fallback localStorage
+                    try { localStorage.setItem(id, base64); } catch(e) {}
+                    res();
+                };
+            })).catch(() => {
+                try { localStorage.setItem(id, base64); } catch(e) {}
+            });
+        },
+        get(id) {
+            return tx('readonly').then(store => new Promise((res) => {
+                const r = store.get(id);
+                r.onsuccess = () => {
+                    if (r.result) { res(r.result); return; }
+                    // Fallback localStorage
+                    res(localStorage.getItem(id));
+                };
+                r.onerror = () => res(localStorage.getItem(id));
+            })).catch(() => Promise.resolve(localStorage.getItem(id)));
+        },
+        remove(id) {
+            return tx('readwrite').then(store => new Promise((res) => {
+                store.delete(id).onsuccess = () => res();
+            })).catch(() => {}).finally(() => {
+                localStorage.removeItem(id);
+            });
+        }
+    };
+})();
+
+// =========================================================================
 // VARIABLES GLOBALES
 // =========================================================================
 var board = document.getElementById('board');
@@ -3005,6 +3063,20 @@ function togglePdfCollapse(container) {
         if (placeholder) placeholder.style.display = placeholder.dataset.wasVisible === 'false' ? 'none' : '';
         if (canvasWrap && canvasWrap.dataset.wasVisible === 'true') canvasWrap.style.display = 'block';
 
+        // Si le PDF n'a jamais été rendu (restauration depuis état réduit), le charger maintenant
+        if (canvasWrap && canvasWrap.dataset.neverRendered === 'true') {
+            delete canvasWrap.dataset.neverRendered;
+            const pdfId = widget.dataset.pdfId;
+            const pdfName = widget.dataset.pdfName || '';
+            if (pdfId) {
+                pdfStorage.get(pdfId).then(base64 => {
+                    if (base64 && typeof _showPdfInWidget === 'function') {
+                        _showPdfInWidget(container, base64, pdfName);
+                    }
+                });
+            }
+        }
+
         // Supprimer la mini-barre
         const miniBar = widget.querySelector('.pdf-mini-bar');
         if (miniBar) miniBar.remove();
@@ -3377,7 +3449,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             }
             const filename = filePath.split(/[\\/]/).pop();
             widget.dataset.pdfName = filename;
-            try { localStorage.setItem(widget.dataset.pdfId, base64); } catch(e) {}
+            pdfStorage.set(widget.dataset.pdfId, base64);
             _showPdfInWidget(container, base64, filename);
             saveBoard();
         } catch(err) {
