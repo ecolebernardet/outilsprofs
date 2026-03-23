@@ -109,6 +109,7 @@ function buildBoardState() {
 			transform: w.style.transform || null,
 			pdfId: w.dataset.pdfId || null,
 			pdfName: w.dataset.pdfName || null,
+			pdfCollapsed: w.querySelector('.editor-container[data-collapsed="true"]') ? true : false,
 			animation: w.dataset.animation || null,
 			monnaieData
 		});
@@ -387,7 +388,13 @@ function restoreBoardFromJSON(json) {
                 const base64 = localStorage.getItem(w.pdfId);
                 if (base64) {
                     const container = widget.querySelector('.editor-container');
-                    if (container) _showPdfInWidget(container, base64, w.pdfName || '');
+                    if (container) {
+                        _showPdfInWidget(container, base64, w.pdfName || '');
+                        if (w.pdfCollapsed) {
+                            // Attendre que le PDF soit rendu avant de replier
+                            setTimeout(() => togglePdfCollapse(container), 200);
+                        }
+                    }
                 }
             }
             applyEditorStyleFromConfig(widget, w.editorStyle);
