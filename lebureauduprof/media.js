@@ -162,6 +162,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     annotCanvas.style.width  = (viewport.width  / dpr) + 'px';
                     annotCanvas.style.height = (viewport.height / dpr) + 'px';
 
+                    // Si le canvas est plus large que le wrap, centrer avec justify-content:flex-start
+                    // + margin auto pour que le scroll gauche fonctionne correctement.
+                    // Sinon, centrer normalement avec justify-content:center.
+                    const canvasStack = container.querySelector('.pdf-canvas-stack');
+                    if (canvasStack) {
+                        const canvasCssW = viewport.width / dpr;
+                        if (canvasCssW > canvasWrap.clientWidth) {
+                            canvasStack.style.justifyContent = 'flex-start';
+                        } else {
+                            canvasStack.style.justifyContent = 'center';
+                        }
+                    }
+
                     // Mettre à jour label zoom
                     const zoomLabel = container.querySelector('.pdf-zoom-label');
                     if (zoomLabel) zoomLabel.textContent = Math.round(scale * 100) + '%';
