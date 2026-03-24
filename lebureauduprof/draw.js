@@ -990,6 +990,11 @@ function setDrawMode(mode) {
         setPdfAnnotTool('highlighter');
         return;
     }
+    // En mode annotation PDF, cœur/étoile/flèche créent des widgets sur le board
+    // et ne fonctionnent pas sur le canvas PDF → bloquer silencieusement
+    if (['heart','star','arrow'].includes(mode) && typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
+        return;
+    }
     // Désactiver la gomme si elle est active
     if (isEraserMode) stopEraserMode();
     // Recliqué sur le mode déjà actif → retour en dessin libre
@@ -2154,6 +2159,12 @@ function _startPdfAnnotMode() {
     _pdfAnnotCanvas = annotCanvas;
     _pdfAnnotTool   = 'pen'; // outil par défaut : stylo
 
+    // Griser les boutons cœur/étoile/flèche (incompatibles avec l'annotation PDF)
+    ['draw-mode-heart-btn','draw-mode-star-btn','draw-mode-arrow-btn'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) { b.style.opacity = '0.3'; b.style.pointerEvents = 'none'; b.title += ' (non disponible en annotation PDF)'; }
+    });
+
     // Marquer le widget cible
     target.classList.add('pdf-annot-target');
 
@@ -2249,6 +2260,16 @@ function _stopPdfAnnotMode() {
     _pdfAnnotCanvas   = null;
     _pdfAnnotEvTarget = null;
     _pdfAnnotPainting = false;
+
+    // Réactiver les boutons cœur/étoile/flèche
+    ['draw-mode-heart-btn','draw-mode-star-btn','draw-mode-arrow-btn'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) {
+            b.style.opacity = '';
+            b.style.pointerEvents = '';
+            b.title = b.title.replace(' (non disponible en annotation PDF)', '');
+        }
+    });
 
     // Repasser en mode sélection (pas en mode dessin)
     isDrawMode = true; // toggleSelectMode attend isDrawMode=true pour basculer
