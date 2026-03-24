@@ -9,6 +9,28 @@
 
 // ── CSS ───────────────────────────────────────────────────────────────────
 (function () {
+    // CSS partagé boutons fenêtre (injecté une seule fois)
+    if (!document.getElementById('wf-btns-style')) {
+        const ws = document.createElement('style');
+        ws.id = 'wf-btns-style';
+        ws.textContent = `
+    .wf-btns { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+    .wf-btn { width:13px; height:13px; border-radius:50%; border:none; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; font-size:0;
+        transition:filter .15s, transform .1s; flex-shrink:0; position:relative; }
+    .wf-btn:hover { filter:brightness(0.82); transform:scale(1.15); }
+    .wf-btn:active { transform:scale(0.92); }
+    .wf-btn-min   { background:#febc2e; }
+    .wf-btn-max   { background:#28c840; }
+    .wf-btn-close { background:#ff5f57; }
+    .wf-btns:hover .wf-btn::after { font-size:8px; font-weight:900; color:rgba(0,0,0,0.5); line-height:1; }
+    .wf-btns:hover .wf-btn-min::after   { content:'−'; }
+    .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
+    .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
+        `;
+        document.head.appendChild(ws);
+    }
+
     const s = document.createElement('style');
     s.textContent = `
         .widget[data-type="monnaie"] {
@@ -18,8 +40,8 @@
             box-shadow: none !important;
         }
         .monnaie-container {
-            background: #fffdf4;
-            border: 2px solid #e8d89a;
+            background: #ffffff;
+            border: 1.5px solid #d1d5db;
             border-radius: 16px;
             padding: 14px 16px 12px;
             box-sizing: border-box;
@@ -43,12 +65,30 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            cursor: move;
+            user-select: none;
         }
         .monnaie-title {
             font-size: 13px;
             font-weight: 800;
-            color: #7a5c00;
+            color: #374151;
             letter-spacing: 0.3px;
+            pointer-events: none;
+        }
+
+        /* ── État réduit monnaie ── */
+        .monnaie-container.wf-minimized > *:not(.monnaie-header) { display: none !important; }
+        .monnaie-container.wf-minimized { gap: 0; }
+
+        /* ── État plein écran board monnaie ── */
+        .monnaie-container.wf-fullboard {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+            overflow-y: auto;
         }
         .monnaie-level-badge {
             font-size: 10px;
@@ -127,8 +167,8 @@
             height: 160px;
             overflow: hidden;
             padding: 8px;
-            background: #fff9e6;
-            border: 1px solid #edd;
+            background: #f8f9fa;
+            border: 1px solid #e5e7eb;
             border-radius: 10px;
             flex-shrink: 0;
             box-sizing: border-box;
@@ -243,7 +283,7 @@
         .monnaie-help-popup h4 {
             margin: 0 0 8px;
             font-size: 12px;
-            color: #7a5c00;
+            color: #374151;
         }
         .monnaie-help-popup .help-level {
             margin-bottom: 8px;
@@ -497,6 +537,11 @@ function createMonnaieWidget() {
     header.innerHTML = `
         <span class="monnaie-title">💶 Combien y a-t-il en tout ?</span>
         <span class="monnaie-level-badge facile">Facile</span>
+        <div class="wf-btns" style="margin-left:auto">
+            <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
+            <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
+            <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
+        </div>
     `;
     const badge = header.querySelector('.monnaie-level-badge');
     container.appendChild(header);
@@ -847,6 +892,52 @@ function createMonnaieWidget() {
     });
 
 
+
+    // ── Boutons fenêtre ───────────────────────────────────────────────────
+    const wfMin   = header.querySelector('[data-role="wf-min"]');
+    const wfMax   = header.querySelector('[data-role="wf-max"]');
+    const wfClose = header.querySelector('[data-role="wf-close"]');
+
+    let _savedW = null, _savedH = null;
+    let _isMin = false, _isMax = false;
+
+    if (wfMin) {
+        wfMin.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_isMax) wfMax.click();
+            _isMin = !_isMin;
+            if (_isMin) {
+                container.classList.add('wf-minimized');
+            } else {
+                container.classList.remove('wf-minimized');
+            }
+        });
+    }
+
+    if (wfMax) {
+        wfMax.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_isMin) { _isMin = false; container.classList.remove('wf-minimized'); }
+            _isMax = !_isMax;
+            if (_isMax) {
+                _savedW = container.style.width;
+                container.classList.add('wf-fullboard');
+            } else {
+                container.classList.remove('wf-fullboard');
+                if (_savedW) container.style.width = _savedW;
+                if (lastExercice) applyScaleToImages();
+            }
+        });
+    }
+
+    if (wfClose) {
+        wfClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            widget.remove();
+            if (typeof saveBoard === 'function') saveBoard();
+        });
+    }
 
     // ── Init ──────────────────────────────────────────────────────────────
     widget.addEventListener('mousedown', (e) => {

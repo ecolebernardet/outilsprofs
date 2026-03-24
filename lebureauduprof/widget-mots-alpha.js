@@ -16,6 +16,27 @@
 (function () {
 
     // ── CSS injecté une seule fois ────────────────────────────────────────
+    if (!document.getElementById('wf-btns-style')) {
+        const ws = document.createElement('style');
+        ws.id = 'wf-btns-style';
+        ws.textContent = `
+    .wf-btns { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+    .wf-btn { width:13px; height:13px; border-radius:50%; border:none; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; font-size:0;
+        transition:filter .15s, transform .1s; flex-shrink:0; position:relative; }
+    .wf-btn:hover { filter:brightness(0.82); transform:scale(1.15); }
+    .wf-btn:active { transform:scale(0.92); }
+    .wf-btn-min   { background:#febc2e; }
+    .wf-btn-max   { background:#28c840; }
+    .wf-btn-close { background:#ff5f57; }
+    .wf-btns:hover .wf-btn::after { font-size:8px; font-weight:900; color:rgba(0,0,0,0.5); line-height:1; }
+    .wf-btns:hover .wf-btn-min::after   { content:'−'; }
+    .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
+    .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
+        `;
+        document.head.appendChild(ws);
+    }
+
     if (!document.getElementById('widget-mots-alpha-style')) {
         const s = document.createElement('style');
         s.id = 'widget-mots-alpha-style';
@@ -30,8 +51,8 @@
 
         /* ── Conteneur principal ── */
         .alpha-container {
-            background: #fffdf4;
-            border: 2px solid #e8d89a;
+            background: #ffffff;
+            border: 1.5px solid #d1d5db;
             border-radius: 16px;
             padding: 14px 16px 12px;
             box-sizing: border-box;
@@ -59,12 +80,29 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            cursor: move;
+            user-select: none;
         }
         .alpha-title {
             font-size: 13px;
             font-weight: 800;
-            color: #7a5c00;
+            color: #374151;
             letter-spacing: 0.3px;
+            pointer-events: none;
+        }
+
+        /* ── État réduit alpha ── */
+        .alpha-container.wf-minimized > *:not(.alpha-header) { display: none !important; }
+        .alpha-container.wf-minimized { gap: 0; }
+
+        /* ── État plein écran board alpha ── */
+        .alpha-container.wf-fullboard {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
         }
         .alpha-level-badge {
             font-size: 10px;
@@ -122,14 +160,14 @@
             gap: 8px;
             align-items: center;
             padding: 10px;
-            background: #fff9e6;
-            border: 1px solid #e8d89a;
+            background: #f8f9fa;
+            border: 1px solid #e5e7eb;
             border-radius: 10px;
             justify-content: center;
             align-content: center;
             transition: background .15s, border-color .15s;
         }
-        .alpha-pool-zone.drag-over { background: #fef9c3; border-color: #facc15; }
+        .alpha-pool-zone.drag-over { background: #f0f0f0; border-color: #9ca3af; }
 
         /* ── Zone réponse : grille fixe 6 colonnes, 1 seule ligne ── */
         .alpha-drop-zone {
@@ -181,8 +219,8 @@
             cursor: grab;
             user-select: none;
             background: white;
-            border: 1.5px solid #e8d89a;
-            color: #7a5c00;
+            border: 1.5px solid #d1d5db;
+            color: #374151;
             box-shadow: 0 1px 4px rgba(0,0,0,0.10);
             white-space: nowrap;
             transition: box-shadow .12s, border-color .12s;
@@ -223,8 +261,8 @@
         }
         .alpha-result-text.show { opacity: 1; }
         .alpha-correction-text {
-            font-size: 11px; color: #7a5c00;
-            background: #fffbe6; border: 1px solid #e8d89a;
+            font-size: 11px; color: #374151;
+            background: #f8f9fa; border: 1px solid #e5e7eb;
             border-radius: 7px; padding: 4px 10px;
             display: none; flex: 1; line-height: 1.5;
         }
@@ -251,7 +289,7 @@
             font-size: 11px; color: #444; z-index: 10; line-height: 1.5;
         }
         .alpha-help-popup.show { display: block; }
-        .alpha-help-popup h4 { margin: 0 0 8px; font-size: 12px; color: #7a5c00; }
+        .alpha-help-popup h4 { margin: 0 0 8px; font-size: 12px; color: #374151; }
         .alpha-help-popup .help-level {
             margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee;
         }
@@ -298,6 +336,11 @@
   <div class="alpha-header">
     <span class="alpha-title">🔤 L'ordre alphabétique</span>
     <span class="alpha-level-badge facile">😊 Facile</span>
+    <div class="wf-btns" style="margin-left:auto">
+      <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
+      <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
+      <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
+    </div>
   </div>
 
   <!-- Contrôles -->
@@ -694,6 +737,55 @@
             helpPopup.classList.toggle('show');
         });
         document.addEventListener('click', () => helpPopup.classList.remove('show'));
+
+        // ── Boutons fenêtre ───────────────────────────────────────────────
+        const wfMin   = container.querySelector('[data-role="wf-min"]');
+        const wfMax   = container.querySelector('[data-role="wf-max"]');
+        const wfClose = container.querySelector('[data-role="wf-close"]');
+
+        let _savedW = null, _savedH = null;
+        let _isMin = false, _isMax = false;
+
+        if (wfMin) {
+            wfMin.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (_isMax) wfMax.click();
+                _isMin = !_isMin;
+                if (_isMin) {
+                    container.classList.add('wf-minimized');
+                } else {
+                    container.classList.remove('wf-minimized');
+                    applyCardScale();
+                }
+            });
+        }
+
+        if (wfMax) {
+            wfMax.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (_isMin) { _isMin = false; container.classList.remove('wf-minimized'); }
+                _isMax = !_isMax;
+                if (_isMax) {
+                    _savedW = container.style.width;
+                    _savedH = container.style.height;
+                    container.classList.add('wf-fullboard');
+                } else {
+                    container.classList.remove('wf-fullboard');
+                    if (_savedW) container.style.width  = _savedW;
+                    if (_savedH) container.style.height = _savedH;
+                }
+                applyCardScale();
+            });
+        }
+
+        if (wfClose) {
+            wfClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof snapshotNow === 'function') snapshotNow();
+                widget.remove();
+                if (typeof saveBoard === 'function') saveBoard();
+            });
+        }
 
         // ── Events boutons ────────────────────────────────────────────────
         newBtn.addEventListener('click',   newGame);

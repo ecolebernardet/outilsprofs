@@ -20,15 +20,24 @@
     /* ── Wrapper externe ── */
     .widget[data-type="calcul"] .calc-outer {
         position: relative;
-        width: 600px;
-        height: 600px;
+        width: 800px;
+        height: 520px;
         min-width: 300px;
         min-height: 320px;
         overflow: hidden;
         resize: none;
         box-sizing: border-box;
         border-radius: 16px;
+        cursor: move;
     }
+    .widget[data-type="calcul"] .calc-outer button,
+    .widget[data-type="calcul"] .calc-outer input,
+    .widget[data-type="calcul"] .calc-outer label {
+        cursor: default;
+    }
+    .widget[data-type="calcul"] .calc-outer button { cursor: pointer; }
+    .widget[data-type="calcul"] .calc-outer input  { cursor: text; }
+
     .widget[data-type="calcul"] .calc-outer::-webkit-resizer { display: none; }
     .widget[data-type="calcul"]:hover .calc-outer,
     .widget[data-type="calcul"]:focus-within .calc-outer {
@@ -56,10 +65,11 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 14px 9px;
+        padding: 7px 10px 7px 14px;
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
         flex-shrink: 0;
+        cursor: move;
     }
     .calc-title {
         font-size: 12px;
@@ -67,6 +77,67 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: #06b6d4;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* ── Boutons fenêtre (communs aux 3 widgets) ── */
+    .wf-btns {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .wf-btn {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0;
+        transition: filter 0.15s, transform 0.1s;
+        flex-shrink: 0;
+        position: relative;
+    }
+    .wf-btn:hover { filter: brightness(0.82); transform: scale(1.15); }
+    .wf-btn:active { transform: scale(0.92); }
+    .wf-btn-min   { background: #febc2e; }
+    .wf-btn-max   { background: #28c840; }
+    .wf-btn-close { background: #ff5f57; }
+    /* Icônes visibles au survol du groupe */
+    .wf-btns:hover .wf-btn::after {
+        font-size: 8px;
+        font-weight: 900;
+        color: rgba(0,0,0,0.5);
+        line-height: 1;
+    }
+    .wf-btns:hover .wf-btn-min::after   { content: '−'; }
+    .wf-btns:hover .wf-btn-max::after   { content: '⤢'; font-size: 7px; }
+    .wf-btns:hover .wf-btn-close::after { content: '×'; font-size: 10px; }
+
+    /* ── État réduit ── */
+    .calc-outer.wf-minimized .calc-widget {
+        overflow: hidden;
+    }
+    .calc-outer.wf-minimized .calc-body {
+        display: none;
+    }
+
+    /* ── État plein écran board ── */
+    .calc-outer.wf-fullboard {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 9999 !important;
+        border-radius: 0 !important;
+        transform: none !important;
+    }
+    .calc-outer.wf-fullboard .calc-widget {
+        border-radius: 0;
     }
     /* ── Corps ── */
     .calc-body {
@@ -99,7 +170,7 @@
         color: #555555;
         margin-bottom: 0px;
         text-align: center;
-		padding: 10px 20px
+		padding: 5px 20px
     }
 	
     /* ── Sélecteurs opérations — largeur fixe ── */
@@ -115,11 +186,11 @@
         border-radius: 20px;
         background: #f8fafc;
         width: 80px;
-        height: 60px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 40px;
+        font-size: 30px;
         font-weight: 900;
         color: #555555;
         transition: all 0.18s;
@@ -376,6 +447,20 @@
     .calc-btn-correct { background: #10b981; }
     .calc-btn-new     { background: #f59e0b; }
 
+    /* ── Poignée resize ── */
+    .calc-resize-handle {
+        position: absolute;
+        right: 0; bottom: 0;
+        width: 18px; height: 18px;
+        cursor: se-resize;
+        background: linear-gradient(135deg, transparent 50%, #aaa 50%);
+        border-radius: 0 0 16px 0;
+        opacity: 0;
+        transition: opacity .2s;
+        z-index: 5;
+    }
+    .calc-outer:hover .calc-resize-handle { opacity: 1; }
+
     /* ── Modale fin de temps ── */
     .calc-modal-overlay {
         display: none;
@@ -437,6 +522,11 @@
     <!-- HEADER -->
     <div class="calc-header">
       <span class="calc-title">🧮 Calcul Mental</span>
+      <div class="wf-btns">
+        <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
+        <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
+        <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
+      </div>
     </div>
 
     <div class="calc-body">
@@ -446,36 +536,36 @@
 
         <!-- Opérations -->
         <div>
-          <div class="calc-section-label" style="marging-top:20px">Opérations</div>
+          <div class="calc-section-label" style="marging-top:15px">Opérations</div>
           <div class="calc-ops-grid">
             <label class="calc-op-label">
               <input type="checkbox" class="calc-op-cb" value="+" checked>
-              <div class="calc-op-frame">+</div>
+              <div class="calc-op-frame">➕</div>
             </label>
             <label class="calc-op-label">
               <input type="checkbox" class="calc-op-cb" value="-">
-              <div class="calc-op-frame">−</div>
+              <div class="calc-op-frame">➖</div>
             </label>
             <label class="calc-op-label">
               <input type="checkbox" class="calc-op-cb" value="x">
-              <div class="calc-op-frame">×</div>
+              <div class="calc-op-frame">✖️</div>
             </label>
             <label class="calc-op-label">
               <input type="checkbox" class="calc-op-cb" value=":">
-              <div class="calc-op-frame">÷</div>
+              <div class="calc-op-frame">➗</div>
             </label>
           </div>
         </div>
 
         <!-- Tables -->
         <div>
-          <div class="calc-section-label" style="margin-top:20px">Tables (× et ÷)</div>
+          <div class="calc-section-label" style="margin-top:15px">Tables (× et ÷)</div>
           <div class="calc-tables-wrap" data-role="tables-wrap"></div>
         </div>
 
         <!-- Timer -->
         <div style="text-align: center;">
-          <div class="calc-section-label" style="margin-top:20px">⏱ Temps imparti &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;">(0:00 = sans limite)</span></div>
+          <div class="calc-section-label" style="margin-top:15px">⏱ Temps imparti &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;">(0:00 = sans limite)</span></div>
           <div class="calc-timer-wrap" style="gap:8px;display:flex;align-items:center;justify-content:center;">
             <div class="calc-spinner">
               <div class="calc-spinner-label">min</div>
@@ -485,7 +575,7 @@
                 <button class="calc-spinner-btn" data-role="timer-min-plus">+</button>
               </div>
             </div>
-            <span class="calc-timer-sep" style="margin-top:18px;">:</span>
+            <span class="calc-timer-sep" style="margin-top:15px;">:</span>
             <div class="calc-spinner">
               <div class="calc-spinner-label">sec</div>
               <div class="calc-spinner-inner">
@@ -499,7 +589,7 @@
 
         <!-- Paramètres -->
         <div>
-          <div class="calc-section-label" style="margin-top:20px">Paramètres</div>
+          <div class="calc-section-label" style="margin-top:15px">Paramètres</div>
           <div class="calc-params-wrap">
             <div class="calc-field-group">
               <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre min<br> dans les calculs</div>
@@ -552,6 +642,7 @@
     </div>
 
   </div><!-- /calc-widget -->
+  <div class="calc-resize-handle"></div>
 </div><!-- /calc-outer -->`;
         document.body.appendChild(tpl);
     }
@@ -564,9 +655,17 @@
         const outer     = widget.querySelector('.calc-outer');
         const questGrid = widget.querySelector('[data-role="questions-grid"]');
 
-        // ── Bloquer remontée mousedown ────────────────────────────────────────
+        // ── Mousedown : laisser remonter pour le drag, bloquer sur contrôles ──
         outer.addEventListener('mousedown', function (e) {
-            e.stopPropagation();
+            // Bloquer uniquement sur les éléments interactifs (sinon le drag remonte)
+            const tag = e.target.tagName;
+            if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'SELECT' || tag === 'LABEL') {
+                e.stopPropagation();
+            }
+            // Mettre au premier plan et donner le focus
+            if (typeof bringToFront === 'function') bringToFront(widget);
+            widget.focus();
+            if (typeof positionActionBar === 'function') positionActionBar(widget);
         });
 
         // ── Constantes ───────────────────────────────────────────────────────
@@ -837,6 +936,96 @@
             modalFin.classList.remove('visible');
             showCorrection();
         });
+
+        // ── Boutons fenêtre ───────────────────────────────────────────────────
+        const wfMin   = widget.querySelector('[data-role="wf-min"]');
+        const wfMax   = widget.querySelector('[data-role="wf-max"]');
+        const wfClose = widget.querySelector('[data-role="wf-close"]');
+
+        // Sauvegardes pour restauration
+        let _savedW = null, _savedH = null;
+        let _isMin = false, _isMax = false;
+
+        if (wfMin) {
+            wfMin.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (_isMax) wfMax.click(); // sortir du plein écran d'abord
+                _isMin = !_isMin;
+                if (_isMin) {
+                    _savedH = outer.style.height || outer.offsetHeight + 'px';
+                    outer.style.height = '42px';
+                    outer.classList.add('wf-minimized');
+                } else {
+                    outer.style.height = _savedH || '520px';
+                    outer.classList.remove('wf-minimized');
+                    updateGridLayout();
+                }
+            });
+        }
+
+        if (wfMax) {
+            wfMax.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (_isMin) { // sortir du mode réduit
+                    _isMin = false;
+                    outer.classList.remove('wf-minimized');
+                }
+                _isMax = !_isMax;
+                if (_isMax) {
+                    _savedW = outer.style.width  || outer.offsetWidth  + 'px';
+                    _savedH = outer.style.height || outer.offsetHeight + 'px';
+                    outer.classList.add('wf-fullboard');
+                } else {
+                    outer.classList.remove('wf-fullboard');
+                    outer.style.width  = _savedW || '800px';
+                    outer.style.height = _savedH || '520px';
+                }
+                updateGridLayout();
+            });
+        }
+
+        if (wfClose) {
+            wfClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof snapshotNow === 'function') snapshotNow();
+                widget.remove();
+                if (typeof saveBoard === 'function') saveBoard();
+            });
+        }
+
+        // ── Poignée resize ───────────────────────────────────────────────────
+        const resizeHandle = widget.querySelector('.calc-resize-handle');
+        if (resizeHandle) {
+            resizeHandle.addEventListener('mousedown', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                const startX = e.clientX, startY = e.clientY;
+                const startW = outer.offsetWidth, startH = outer.offsetHeight;
+                document.onmousemove = (ev) => {
+                    outer.style.width  = Math.max(300, startW + ev.clientX - startX) + 'px';
+                    outer.style.height = Math.max(320, startH + ev.clientY - startY) + 'px';
+                    updateGridLayout();
+                };
+                document.onmouseup = () => { document.onmousemove = null; };
+            });
+            resizeHandle.addEventListener('touchstart', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                const t0 = e.touches[0];
+                const startX = t0.clientX, startY = t0.clientY;
+                const startW = outer.offsetWidth, startH = outer.offsetHeight;
+                function onMove(ev) {
+                    const t = ev.touches[0];
+                    outer.style.width  = Math.max(300, startW + t.clientX - startX) + 'px';
+                    outer.style.height = Math.max(320, startH + t.clientY - startY) + 'px';
+                    updateGridLayout();
+                }
+                function onEnd() {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onEnd);
+            }, { passive: false });
+        }
 
         // Nettoyage si le widget est retiré du DOM
         const obs = new MutationObserver(function () {
