@@ -302,6 +302,17 @@ function paint(e) {
                 redrawStrokes({ ...currentStroke, points: pts }, { ...currentStroke, points: crossPts });
             } else if (pts) {
                 redrawStrokes({ ...currentStroke, points: pts });
+            } else if (['heart','star','arrow'].includes(currentDrawMode) && _figureStart) {
+                // Preview : rectangle en pointillés montrant la bounding box
+                const A = _figureStart;
+                const bboxPts = [
+                    { x: Math.min(A.x,pos.x), y: Math.min(A.y,pos.y) },
+                    { x: Math.max(A.x,pos.x), y: Math.min(A.y,pos.y) },
+                    { x: Math.max(A.x,pos.x), y: Math.max(A.y,pos.y) },
+                    { x: Math.min(A.x,pos.x), y: Math.max(A.y,pos.y) },
+                    { x: Math.min(A.x,pos.x), y: Math.min(A.y,pos.y) },
+                ];
+                redrawStrokes({ ...currentStroke, points: bboxPts, _dashed: true });
             }
         });
         return;
@@ -346,6 +357,29 @@ function endPaint() {
     _paintPendingPos = null;
     if (FIGURE_MODES.includes(currentDrawMode) && _figureStart) {
         const endPt = _figureEnd || _figureStart;
+
+        // Formes complexes (cœur, étoile, flèche) : créer directement le widget depuis la bbox A→B
+        if (['heart','star','arrow'].includes(currentDrawMode)) {
+            const A = { ..._figureStart }, B = { ...endPt };
+            const strokeSize = currentStroke.size;
+            const strokeColor = currentStroke.color;
+            _figureStart = null; _figureEnd = null; _segmentStart = null; _segmentEnd = null;
+            currentStroke = null;
+            const minX = Math.min(A.x, B.x), minY = Math.min(A.y, B.y);
+            const bw = Math.max(20, Math.abs(B.x - A.x));
+            const bh = Math.max(20, Math.abs(B.y - A.y));
+            const fill = _getFigFillOpts();
+            const fillColor   = fill.enabled ? fill.color  : 'none';
+            const fillOpacity = fill.enabled ? fill.opacity : 0;
+            const w = createShapeWidget(currentDrawMode, strokeColor, fillColor, fillOpacity,
+                bw, bh, minX+'px', minY+'px', false, strokeSize);
+            if (w) { const wrap = w.querySelector('.shape-svg-wrap'); if (wrap) wrap.classList.add('no-pad'); }
+            const cur = buildBoardJSON();
+            if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
+            saveBoard(true);
+            redrawStrokes();
+            return;
+        }
         const pts   = _buildFigurePoints(currentDrawMode, _figureStart, endPt);
         const center = { ..._figureStart };
         const strokeSize = currentStroke.size;
@@ -367,7 +401,8 @@ function endPaint() {
                     'triangle':'triangle','right-triangle':'right-triangle',
                     'equilateral-triangle':'equilateral-triangle','scalene-triangle':'scalene-triangle',
                     'parallelo':'parallelogram','pentagon':'pentagon','hexagon':'hexagon',
-                    'octagon':'octagon','ovale':'ellipse'
+                    'octagon':'octagon','ovale':'ellipse',
+                    'heart':'heart','star':'star','arrow':'arrow'
                 };
                 const shapeId = modeToShape[currentDrawMode] || currentDrawMode;
                 const fillColor   = fill.enabled ? fill.color  : 'none';
@@ -426,7 +461,7 @@ var _segmentEnd   = null;  // conservé pour compat
 var _figureStart  = null;  // point de départ pour tous les modes figure
 var _figureEnd    = null;  // point de relâchement
 
-const FIGURE_MODES = ['segment','carre','rectangle','cercle','ovale','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon'];
+const FIGURE_MODES = ['segment','carre','rectangle','cercle','ovale','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon','heart','star','arrow'];
 
 // Construit les points d'une petite croix centrée sur un point (pour le centre du cercle)
 function _buildCrossPoints(center, strokeSize) {
@@ -497,16 +532,16 @@ function _buildFigurePoints(mode, A, B) {
     }
 
     if (mode === 'parallelo') {
-        // A = sommet bas-gauche, B = sommet bas-droit
-        // Le décalage horizontal du côté haut = moitié de la largeur
         const w = dx, h = dy;
-        const shear = w * 0.3; // décalage horizontal du côté supérieur
+        // Le shear est toujours positif dans le sens du drag (abs),
+        // le côté haut est décalé vers la droite, le côté bas vers la gauche
+        const shear = Math.abs(w) * 0.25 * Math.sign(w);
         return [
-            { x: A.x,          y: A.y     },
-            { x: A.x + w,      y: A.y     },
-            { x: A.x + w + shear, y: A.y + h },
-            { x: A.x + shear,  y: A.y + h },
-            { x: A.x,          y: A.y     }
+            { x: A.x + shear,      y: A.y     },
+            { x: A.x + w,          y: A.y     },
+            { x: A.x + w - shear,  y: A.y + h },
+            { x: A.x,              y: A.y + h },
+            { x: A.x + shear,      y: A.y     }
         ];
     }
 
@@ -928,9 +963,12 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
     ctx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
     ctx.lineWidth   = highlight ? stroke.size + 6 : stroke.size;
     if (highlight) ctx.globalAlpha = 0.5;
+    if (stroke._dashed) { ctx.setLineDash([6, 4]); ctx.globalAlpha = 0.5; }
     ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
     stroke.points.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.stroke(); ctx.restore();
+    ctx.stroke();
+    if (stroke._dashed) ctx.setLineDash([]);
+    ctx.restore();
     if (highlight) {
         ctx.save(); ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         ctx.strokeStyle = stroke.color; ctx.lineWidth = stroke.size;
