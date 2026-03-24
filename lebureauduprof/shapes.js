@@ -2,7 +2,12 @@
 // FORMES GÉOMÉTRIQUES
 // =========================================================================
 var SHAPES = [
-    { id: 'circle',        label: 'Cercle',         svg: (w,h,sw,f,o) => `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2-sw/2}" ry="${h/2-sw/2}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
+    { id: 'circle',        label: 'Cercle',         svg: (w,h,sw,f,o) => {
+        const cx = w/2, cy = h/2, arm = Math.max(6, sw * 2.5);
+        return `<ellipse cx="${cx}" cy="${cy}" rx="${w/2-sw/2}" ry="${h/2-sw/2}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>`
+             + `<line x1="${cx-arm}" y1="${cy}" x2="${cx+arm}" y2="${cy}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>`
+             + `<line x1="${cx}" y1="${cy-arm}" x2="${cx}" y2="${cy+arm}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>`;
+    }},
     { id: 'square',        label: 'Carré',           svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'rectangle',     label: 'Rectangle',       svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'diamond',       label: 'Losange',         svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h/2} ${w/2},${h-sw} ${sw},${h/2}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },
@@ -175,11 +180,16 @@ function cloneShapeWidget(widget) {
     const newW = createShapeWidget(
         widget.dataset.shapeType, widget.dataset.strokeColor, widget.dataset.fillColor,
         parseFloat(widget.dataset.fillOpacity), sw, sh,
-        (widget.offsetLeft + 30) + 'px', (widget.offsetTop + 30) + 'px', true,
+        (widget.offsetLeft + 30) + 'px', (widget.offsetTop + 30) + 'px', false,
         widget.dataset.strokeWidth != null ? parseInt(widget.dataset.strokeWidth) : 4
     );
     const rot = getCurrentRotation(widget);
     if (rot) newW.style.transform = `rotate(${rot}deg)`;
+    // Préserver la classe no-pad si présente sur l'original
+    const origWrap = widget.querySelector('.shape-svg-wrap');
+    const newWrap  = newW.querySelector('.shape-svg-wrap');
+    if (origWrap && origWrap.classList.contains('no-pad') && newWrap) newWrap.classList.add('no-pad');
+    saveBoard();
 }
 
 function toggleShapeToolbar() {

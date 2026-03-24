@@ -261,6 +261,14 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const cp = fromNorm(p.x, p.y);
                         i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
                     });
+                    // Remplissage si défini
+                    if (stroke.fillColor && stroke.fillOpacity > 0) {
+                        ctx.save();
+                        ctx.globalAlpha = stroke.fillOpacity;
+                        ctx.fillStyle = stroke.fillColor;
+                        ctx.fill();
+                        ctx.restore();
+                    }
                     ctx.stroke();
                     ctx.restore();
                     return;
@@ -747,7 +755,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         redrawAnnotations(currentPage);
                     },
                     // Preview d'une figure en cours de tracé (sans sauvegarder)
-                    previewFigure(color, size, pts) {
+                    previewFigure(color, size, pts, fillColor, fillOpacity) {
                         redrawAnnotations(currentPage);
                         const canvasW = annotCanvas.width;
                         const sizeScaled = size * canvasW / 600;
@@ -762,14 +770,28 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         pts.forEach((p, i) => {
                             i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y);
                         });
+                        // Remplissage preview si défini
+                        if (fillColor && fillOpacity > 0) {
+                            actx.save();
+                            actx.globalAlpha = fillOpacity * 0.7; // légèrement transparent en preview
+                            actx.fillStyle = fillColor;
+                            actx.setLineDash([]);
+                            actx.fill();
+                            actx.restore();
+                            actx.setLineDash([6, 4]);
+                        }
                         actx.stroke();
                         actx.setLineDash([]);
                         actx.restore();
                     },
                     // Ajouter une figure (stockée en normalisé dans annotLayers)
-                    addFigureStroke(color, size, pts) {
+                    addFigureStroke(color, size, pts, fillColor, fillOpacity) {
                         const normPts = pts.map(p => toNorm(p.x, p.y));
                         const stroke = { tool: 'figure', color, size, pts: normPts };
+                        if (fillColor && fillOpacity > 0) {
+                            stroke.fillColor   = fillColor;
+                            stroke.fillOpacity = fillOpacity;
+                        }
                         const layer = getLayer(currentPage);
                         if (!layer.history) layer.history = [];
                         layer.redoHistory = [];
@@ -1281,6 +1303,14 @@ function _drawStrokeScaled(ctx, stroke, W, H) {
             const cp = fromN(p.x, p.y);
             i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
         });
+        // Remplissage si défini
+        if (stroke.fillColor && stroke.fillOpacity > 0) {
+            ctx.save();
+            ctx.globalAlpha = stroke.fillOpacity;
+            ctx.fillStyle = stroke.fillColor;
+            ctx.fill();
+            ctx.restore();
+        }
         ctx.stroke();
         ctx.restore(); return;
     }

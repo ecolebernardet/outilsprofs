@@ -74,6 +74,8 @@ function initCanvas() {
     // Pointer events pour stylet (plus fiables que mouse events sur Firefox/tablette)
     board.addEventListener('pointerdown', _boardDrawPointerDown);
     board.addEventListener('pointerup',   _boardDrawPointerUp);
+    // pointermove dédié au dessin stylet (latence réduite, contourne le filtre souris)
+    board.addEventListener('pointermove', _boardDrawPointerMove);
     document.getElementById('draw-size').addEventListener('input', function() {
         document.getElementById('draw-size-label').textContent = this.value;
     });
@@ -107,7 +109,7 @@ function getPos(e) {
 var _rightClickDownX = null, _rightClickDownY = null;
 var _rightClickPending = false;   // un appui bouton droit est en cours
 var _rightClickDone = false;      // basculement déjà effectué (évite double-trigger)
-var _RIGHT_CLICK_TOLERANCE = 30;  // px — large pour stylet
+var _RIGHT_CLICK_TOLERANCE = 60;  // px — large pour stylet
 
 var _pdfAnnotToolBeforeEraser = null; // outil mémorisé avant le clic droit en mode PDF
 var _pdfAnnotDrawModeBeforeEraser = null; // drawMode mémorisé (pour les figures)
@@ -149,7 +151,7 @@ function _doToggleEraserDraw() {
 
 function _tryRightClickToggle(clientX, clientY) {
     if (!_rightClickPending) return false;
-    if (!isDrawMode && !isEraserMode) return false;
+    if (!isDrawMode && !isEraserMode && !_pdfAnnotMode) return false;
     const dx = clientX - _rightClickDownX;
     const dy = clientY - _rightClickDownY;
     if (Math.hypot(dx, dy) <= _RIGHT_CLICK_TOLERANCE) {
@@ -174,6 +176,20 @@ function _boardDrawPointerUp(e) {
     if (e.button !== 2) return;
     _tryRightClickToggle(e.clientX, e.clientY);
     _rightClickPending = false;
+}
+// pointermove : gère le dessin libre et le surligneur via pointer events
+// (getCoalescedEvents récupère tous les points intermédiaires = trait plus fluide)
+function _boardDrawPointerMove(e) {
+    if (_pdfAnnotMode) return;
+    // Ne traiter que les stylets et le touch — la souris est gérée par mousemove
+    if (e.pointerType === 'mouse') return;
+    if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
+    if (FIGURE_MODES.includes(currentDrawMode)) return; // géré par mousemove
+    // Utiliser les coalesced events si disponibles (Firefox/Chrome stylet)
+    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ce of events) {
+        paint(ce);
+    }
 }
 
 // contextmenu — fallback si pointer events n'ont pas déclenché le toggle
@@ -222,6 +238,8 @@ function _boardDrawTouchStart(e) {
 function _boardDrawTouchMove(e) {
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
+    // Si le pointermove stylet est actif (isPainting + pen pointerType), ne pas doubler
+    if (isPainting && isDrawMode && !isEraserMode && e.touches[0] && e.touches[0].touchType === 'stylus') return;
     if (isEraserMode) { if (isErasing) eraseAt(getPos(e.touches[0])); }
     else paint(e.touches[0]);
 }
@@ -254,31 +272,78 @@ function startPaint(e) {
         document.addEventListener('mouseup', onDocUp);
     }
     if (currentDrawMode === 'text') clearTimeout(_hwRecogTimer);
+
+    // Pointer capture sur le board pour ne manquer aucun pointermove (stylet)
+    // uniquement si l'événement est un PointerEvent (pas un TouchEvent ou MouseEvent)
+    if (e.pointerId !== undefined && !FIGURE_MODES.includes(currentDrawMode) && board.setPointerCapture) {
+        try { board.setPointerCapture(e.pointerId); } catch(_) {}
+    }
 }
+
+// RAF throttle pour paint() — on accumule les points entre deux frames
+var _paintRafId = null;
+var _paintPendingPos = null;
 
 function paint(e) {
     if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
     if (FIGURE_MODES.includes(currentDrawMode)) {
         if (!_figureStart) return;
         const cur = getPos(e);
-        const pts = _buildFigurePoints(currentDrawMode, _figureStart, cur);
-        if (currentDrawMode === 'cercle' && pts) {
-            // Afficher le cercle + la croix centrale en preview
-            const crossPts = _buildCrossPoints(_figureStart, currentStroke.size);
-            redrawStrokes({ ...currentStroke, points: pts }, { ...currentStroke, points: crossPts });
-        } else if (pts) {
-            redrawStrokes({ ...currentStroke, points: pts });
-        }
+        // Throttle via RAF pour les figures en preview
+        _paintPendingPos = cur;
+        if (_paintRafId) return;
+        _paintRafId = requestAnimationFrame(() => {
+            _paintRafId = null;
+            if (!_paintPendingPos || !currentStroke) return;
+            const pos = _paintPendingPos; _paintPendingPos = null;
+            const pts = _buildFigurePoints(currentDrawMode, _figureStart, pos);
+            if (currentDrawMode === 'cercle' && pts) {
+                const crossPts = _buildCrossPoints(_figureStart, currentStroke.size);
+                redrawStrokes({ ...currentStroke, points: pts }, { ...currentStroke, points: crossPts });
+            } else if (pts) {
+                redrawStrokes({ ...currentStroke, points: pts });
+            }
+        });
         return;
     }
-    currentStroke.points.push(getPos(e));
+    const pos = getPos(e);
+    currentStroke.points.push(pos);
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
-    redrawStrokes(currentStroke);
+
+    // Dessin incrémental : on ajoute seulement le dernier segment sur drawCtx
+    // sans tout redessiner — beaucoup plus rapide avec le stylet
+    if (currentStroke.points.length >= 2 && drawCtx) {
+        const pts = currentStroke.points;
+        const prev = pts[pts.length - 2];
+        const cur2 = pts[pts.length - 1];
+        drawCtx.save();
+        drawCtx.beginPath();
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+        if (currentDrawMode === 'highlight') {
+            drawCtx.strokeStyle = currentStroke.color;
+            drawCtx.lineWidth = Math.max(currentStroke.size * 6, 24);
+            drawCtx.globalAlpha = 0.4;
+            drawCtx.globalCompositeOperation = 'multiply';
+            drawCtx.lineCap = 'square';
+        } else {
+            drawCtx.strokeStyle = currentStroke.color;
+            drawCtx.lineWidth = currentStroke.size;
+            drawCtx.globalAlpha = 1;
+        }
+        drawCtx.moveTo(prev.x, prev.y);
+        drawCtx.lineTo(cur2.x, cur2.y);
+        drawCtx.stroke();
+        drawCtx.restore();
+    }
 }
 
 function endPaint() {
     if (!isPainting || !currentStroke) return;
     isPainting = false;
+    // Annuler tout RAF en attente
+    if (_paintRafId) { cancelAnimationFrame(_paintRafId); _paintRafId = null; }
+    _paintPendingPos = null;
     if (FIGURE_MODES.includes(currentDrawMode) && _figureStart) {
         const endPt = _figureEnd || _figureStart;
         const pts   = _buildFigurePoints(currentDrawMode, _figureStart, endPt);
@@ -286,18 +351,45 @@ function endPaint() {
         const strokeSize = currentStroke.size;
         _figureStart = null; _figureEnd = null; _segmentStart = null; _segmentEnd = null;
         if (pts && pts.length >= 2) {
-            if (currentDrawMode === 'cercle') {
-                // Sauvegarder cercle + croix centrale groupés
-                const gid = 'cercle-' + Date.now();
-                const crossPts = _buildCrossPoints(center, strokeSize);
-                strokes.push({ ...currentStroke, points: pts,      groupId: gid });
-                strokes.push({ ...currentStroke, points: crossPts, groupId: gid });
+            if (['cercle','carre','rectangle','losange','triangle','right-triangle',
+                 'equilateral-triangle','scalene-triangle','parallelo',
+                 'pentagon','hexagon','octagon','ovale'].includes(currentDrawMode)) {
+                // Figures fermées → widget redimensionnable avec fond éventuel
+                const fill = _getFigFillOpts();
+                const strokeColor = currentStroke.color;
+                // Bounding box des points pour positionner/dimensionner le widget
+                let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+                pts.forEach(p=>{if(p.x<minX)minX=p.x;if(p.y<minY)minY=p.y;if(p.x>maxX)maxX=p.x;if(p.y>maxY)maxY=p.y;});
+                const bw = Math.max(4, maxX - minX);
+                const bh = Math.max(4, maxY - minY);
+                const modeToShape = {
+                    'cercle':'circle','carre':'square','rectangle':'rectangle','losange':'diamond',
+                    'triangle':'triangle','right-triangle':'right-triangle',
+                    'equilateral-triangle':'equilateral-triangle','scalene-triangle':'scalene-triangle',
+                    'parallelo':'parallelogram','pentagon':'pentagon','hexagon':'hexagon',
+                    'octagon':'octagon','ovale':'circle'
+                };
+                const shapeId = modeToShape[currentDrawMode] || currentDrawMode;
+                const fillColor   = fill.enabled ? fill.color  : 'none';
+                const fillOpacity = fill.enabled ? fill.opacity : 0;
+                const w = createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity,
+                    bw, bh, minX+'px', minY+'px', false, strokeSize);
+                // Supprimer le padding du shape-svg-wrap pour que le SVG
+                // se positionne exactement là où la figure a été dessinée
+                if (w) {
+                    const wrap = w.querySelector('.shape-svg-wrap');
+                    if (wrap) wrap.classList.add('no-pad');
+                }
+                const cur = buildBoardJSON();
+                if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
+                saveBoard(true);
             } else {
+                // Figures non fermées (segment) → stroke canvas classique
                 strokes.push({ ...currentStroke, points: pts });
+                const cur = buildBoardJSON();
+                if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
+                saveBoard(true);
             }
-            const cur = buildBoardJSON();
-            if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack = []; updateUndoRedoBtns(); }
-            saveBoard(true);
         }
         currentStroke = null; redrawStrokes();
         return;
@@ -490,8 +582,31 @@ function _buildFigurePoints(mode, A, B) {
 }
 
 // =========================================================================
-// RECONNAISSANCE D'ÉCRITURE MANUSCRITE
+// FOND COLORÉ DES FIGURES — helpers
 // =========================================================================
+
+// Active/désactive le slider d'opacité selon l'état de la checkbox
+function figFillToggle() {
+    const enabled = document.getElementById('fig-fill-enabled')?.checked;
+    const row     = document.getElementById('fig-fill-opacity-row');
+    const swatch  = document.getElementById('fig-fill-swatch');
+    if (row)    row.style.display    = enabled ? 'flex' : 'none';
+    if (swatch) swatch.style.opacity = enabled ? '1'   : '0.4';
+}
+
+// Retourne { enabled, color, opacity } depuis les contrôles du sous-menu
+function _getFigFillOpts() {
+    const enabled = document.getElementById('fig-fill-enabled')?.checked ?? false;
+    const color   = (typeof cpickGetValue === 'function' ? cpickGetValue('fig-fill-color') : null)
+                    || document.querySelector('#cpick-fig-fill-color .cpick-swatch')?.style?.background
+                    || '#4a90e2';
+    const opacity = enabled
+        ? (parseInt(document.getElementById('fig-fill-opacity')?.value ?? 40) / 100)
+        : 0;
+    return { enabled, color, opacity };
+}
+
+
 var _hwRecogTimer = null;
 var _hwPendingStrokes = []; // traits en attente de reconnaissance
 var _hwRecognizedText = '';
@@ -1156,6 +1271,10 @@ function clearCanvas() {
         }
     }
     strokes = []; selectedStrokes = []; redrawStrokes();
+    // Supprimer aussi les shape-widgets créés depuis la draw-toolbar (classe no-pad)
+    document.querySelectorAll('.shape-widget').forEach(w => {
+        if (w.querySelector('.shape-svg-wrap.no-pad')) w.remove();
+    });
     saveBoard();
 }
 
@@ -2027,6 +2146,9 @@ function _startPdfAnnotMode() {
     _pdfAnnotEvTarget.addEventListener('touchstart',  _pdfAnnotTouchStart, { passive: false });
     _pdfAnnotEvTarget.addEventListener('touchmove',   _pdfAnnotTouchMove,  { passive: false });
     _pdfAnnotEvTarget.addEventListener('touchend',    _pdfAnnotTouchEnd);
+    // Pointer events pour le clic droit stylet sur le widget PDF
+    _pdfAnnotEvTarget.addEventListener('pointerdown', _pdfAnnotPointerDown);
+    _pdfAnnotEvTarget.addEventListener('pointerup',   _pdfAnnotPointerUp);
     // Attacher aussi le contextmenu sur le pdfCanvas (capture phase)
     const _pdfCanvas = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
     if (_pdfCanvas) _pdfCanvas.addEventListener('contextmenu', _pdfAnnotContextMenu, true);
@@ -2055,6 +2177,8 @@ function _stopPdfAnnotMode() {
         _pdfAnnotEvTarget.removeEventListener('touchstart',  _pdfAnnotTouchStart);
         _pdfAnnotEvTarget.removeEventListener('touchmove',   _pdfAnnotTouchMove);
         _pdfAnnotEvTarget.removeEventListener('touchend',    _pdfAnnotTouchEnd);
+        _pdfAnnotEvTarget.removeEventListener('pointerdown', _pdfAnnotPointerDown);
+        _pdfAnnotEvTarget.removeEventListener('pointerup',   _pdfAnnotPointerUp);
         const _pdfCanvasStop = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
         if (_pdfCanvasStop) _pdfCanvasStop.removeEventListener('contextmenu', _pdfAnnotContextMenu, true);
         _pdfAnnotEvTarget.style.cursor = '';
@@ -2288,6 +2412,10 @@ function _pdfAnnotStartStroke(e) {
     api.startStroke(_pdfAnnotGetColor(), eraserSize !== null ? eraserSize : _pdfAnnotGetSize(), tool, pos.x, pos.y);
 }
 
+// RAF throttle pour les annotations PDF
+var _pdfPaintRafId = null;
+var _pdfPaintPendingE = null;
+
 function _pdfAnnotContinueStroke(e) {
     if (!_pdfAnnotPainting) return;
     const tool = _pdfAnnotEffectiveTool();
@@ -2343,17 +2471,42 @@ function _pdfAnnotContinueStroke(e) {
     // Mode figure : preview en temps réel (sauf si gomme active)
     if (FIGURE_MODES.includes(currentDrawMode) && _pdfFigureStart && tool !== 'eraser') {
         const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
-        if (pts) api.previewFigure(_pdfAnnotGetColor(), _pdfAnnotGetSize(), pts);
+        if (pts) {
+            const fill = _getFigFillOpts();
+            api.previewFigure(
+                _pdfAnnotGetColor(), _pdfAnnotGetSize(), pts,
+                fill.enabled ? fill.color  : null,
+                fill.enabled ? fill.opacity : 0
+            );
+        }
         return;
     }
 
     const eraserSize2 = tool === 'eraser' ? (parseInt((document.getElementById('eraser-size') || {}).value) || 20) : null;
+
+    // Throttle via RAF pour pen et highlighter (les plus sensibles à la latence)
+    if (tool === 'pen' || tool === 'highlighter') {
+        _pdfPaintPendingE = e;
+        if (_pdfPaintRafId) return;
+        _pdfPaintRafId = requestAnimationFrame(() => {
+            _pdfPaintRafId = null;
+            if (!_pdfPaintPendingE || !_pdfAnnotPainting) return;
+            const ev = _pdfPaintPendingE; _pdfPaintPendingE = null;
+            const pos2 = _getPdfAnnotPos(ev);
+            api.continueStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos2.x, pos2.y);
+        });
+        return;
+    }
+
     api.continueStroke(_pdfAnnotGetColor(), eraserSize2 !== null ? eraserSize2 : _pdfAnnotGetSize(), tool, pos.x, pos.y);
 }
 
 function _pdfAnnotEndStroke(e) {
     if (!_pdfAnnotPainting) return;
     _pdfAnnotPainting = false;
+    // Annuler tout RAF en attente
+    if (_pdfPaintRafId) { cancelAnimationFrame(_pdfPaintRafId); _pdfPaintRafId = null; }
+    _pdfPaintPendingE = null;
 
     // Fin du drag texte
     if (_pdfDragText) {
@@ -2394,7 +2547,14 @@ function _pdfAnnotEndStroke(e) {
         const pos = _getPdfAnnotPos(e);
         const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
         _pdfFigureStart = null;
-        if (pts && pts.length >= 2) api.addFigureStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), pts);
+        if (pts && pts.length >= 2) {
+            const fill = _getFigFillOpts();
+            api.addFigureStroke(
+                _pdfAnnotGetColor(), _pdfAnnotGetSize(), pts,
+                fill.enabled ? fill.color   : null,
+                fill.enabled ? fill.opacity  : 0
+            );
+        }
         return;
     }
     _pdfFigureStart = null;
@@ -2685,6 +2845,19 @@ function _pdfAnnotMouseDown(e)  {
     // En mode texte, empêcher le mousedown de voler le focus à l'éditeur inline
     if (_pdfAnnotEffectiveTool() === 'text') e.preventDefault();
     _pdfAnnotStartStroke(e);
+}
+function _pdfAnnotPointerDown(e) {
+    if (e.button !== 2) return;
+    _rightClickDownX = e.clientX;
+    _rightClickDownY = e.clientY;
+    _rightClickPending = true;
+    _rightClickDone = false;
+}
+function _pdfAnnotPointerUp(e) {
+    if (e.button !== 2) return;
+    e.preventDefault();
+    _tryRightClickToggle(e.clientX, e.clientY);
+    _rightClickPending = false;
 }
 function _pdfAnnotContextMenu(e) {
     e.preventDefault();
