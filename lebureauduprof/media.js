@@ -159,18 +159,24 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     annotCanvas.style.width  = (viewport.width  / dpr) + 'px';
                     annotCanvas.style.height = (viewport.height / dpr) + 'px';
 
-                    // Si le canvas est plus large que le wrap, centrer avec justify-content:flex-start
-                    // + margin auto pour que le scroll gauche fonctionne correctement.
-                    // Sinon, centrer normalement avec justify-content:center.
-                    const canvasStack = container.querySelector('.pdf-canvas-stack');
-                    if (canvasStack) {
-                        const canvasCssW = viewport.width / dpr;
-                        if (canvasCssW > canvasWrap.clientWidth) {
-                            canvasStack.style.justifyContent = 'flex-start';
-                        } else {
-                            canvasStack.style.justifyContent = 'center';
-                        }
-                    }
+                    // Centrage : margin auto quand le canvas est plus petit que le wrap,
+                    // margin:8px (pas de centrage) quand il déborde → scroll gauche/droite natif
+                    const canvasCssW = viewport.width / dpr;
+                    const marginVal = canvasCssW <= canvasWrap.clientWidth ? '8px auto' : '8px';
+                    pdfCanvas.style.display = 'block';
+                    pdfCanvas.style.margin  = marginVal;
+                    // annotCanvas : positionné en absolute par rapport au canvasStack (position:relative)
+                    // sa position doit suivre le pdfCanvas (qui peut être centré ou non)
+                    annotCanvas.style.display  = 'block';
+                    annotCanvas.style.position = 'absolute';
+                    annotCanvas.style.top  = '0';
+                    annotCanvas.style.left = '0';
+                    annotCanvas.style.margin = '0';
+                    // Synchroniser left de l'annotCanvas avec le margin-left du pdfCanvas après layout
+                    requestAnimationFrame(() => {
+                        annotCanvas.style.left = pdfCanvas.offsetLeft + 'px';
+                        annotCanvas.style.top  = pdfCanvas.offsetTop  + 'px';
+                    });
 
                     // Mettre à jour label zoom
                     const zoomLabel = container.querySelector('.pdf-zoom-label');
@@ -588,35 +594,21 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             renderPage(currentPage);
 
             // ── ResizeObserver : maintenir le fit-to-width si zoomScale === null ──
-            // Anti-scintillement : pendant le redimensionnement, on scale le canvas en CSS
-            // (instantané), et on ne re-rend le PDF qu'une fois le resize terminé (debounce).
             if (typeof ResizeObserver !== 'undefined') {
                 let _resizeTimer = null;
                 let _lastWrapWidth = canvasWrap.clientWidth;
 
                 const _resizeObs = new ResizeObserver(() => {
-                    if (zoomScale !== null) return; // zoom manuel actif → ne pas toucher
+                    if (zoomScale !== null) return;
 
                     const newWidth = canvasWrap.clientWidth;
-                    if (newWidth === _lastWrapWidth) return; // pas de changement de largeur
+                    if (newWidth === _lastWrapWidth) return;
 
-                    // Scaling CSS immédiat pour éviter le blanc / scintillement
-                    // pdfCanvas.style.width est en pixels CSS logiques (sans DPR)
-                    const canvasCssWidth = parseFloat(pdfCanvas.style.width) || pdfCanvas.width;
-                    const cssScale = (newWidth - 24) / canvasCssWidth;
-                    pdfCanvas.style.transformOrigin  = 'top left';
-                    annotCanvas.style.transformOrigin = 'top left';
-                    pdfCanvas.style.transform  = `scale(${cssScale})`;
-                    annotCanvas.style.transform = `scale(${cssScale})`;
-
-                    // Re-rendu réel différé (une fois le resize terminé)
+                    // Re-rendu différé (une fois le resize terminé)
                     if (_resizeTimer) clearTimeout(_resizeTimer);
                     _resizeTimer = setTimeout(() => {
                         _resizeTimer = null;
                         _lastWrapWidth = canvasWrap.clientWidth;
-                        // Retirer le scaling CSS avant le vrai rendu
-                        pdfCanvas.style.transform  = '';
-                        annotCanvas.style.transform = '';
                         renderPage(currentPage);
                     }, 150);
                 });
