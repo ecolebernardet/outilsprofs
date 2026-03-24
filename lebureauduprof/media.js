@@ -60,6 +60,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (zoomFitBtn)  zoomFitBtn.style.display = 'inline-flex';
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn)   exportBtn.style.display = 'inline-flex';
+    const annotBtn = container.querySelector('.pdf-annot-widget-btn');
+    if (annotBtn)    annotBtn.style.display = 'inline-flex';
     // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
     if (canvasWrap)  canvasWrap.style.cursor = 'grab';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }

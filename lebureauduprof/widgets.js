@@ -649,26 +649,7 @@ function makeResizableByHandle(elmnt) {
     const handle = document.createElement('div');
     handle.className = 'custom-resize-handle';
     handle.title = 'Redimensionner';
-    handle.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" style="display:block"><line x1="2" y1="11" x2="11" y2="2" stroke="#999" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="11" x2="11" y2="6" stroke="#999" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="11" x2="11" y2="10" stroke="#999" stroke-width="1.5" stroke-linecap="round"/></svg>';
-    handle.style.cssText = [
-        'position:absolute',
-        'bottom:2px',
-        'right:2px',
-        'width:22px',
-        'height:22px',
-        'cursor:se-resize',
-        'display:flex',
-        'align-items:center',
-        'justify-content:center',
-        'font-size:14px',
-        'color:#888',
-        'background:rgba(255,255,255,0.9)',
-        'border:1px solid #ccc',
-        'border-radius:4px',
-        'z-index:50',
-        'user-select:none',
-        'touch-action:none',
-    ].join(';');
+    // Pas de style inline : le CSS de index.html contrôle l'apparence et la visibilité au survol
 
     // Le widget doit être en position relative pour que absolute fonctionne
     if (getComputedStyle(elmnt).position === 'static') {
