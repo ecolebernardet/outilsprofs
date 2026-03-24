@@ -8,6 +8,7 @@ var SHAPES = [
              + `<line x1="${cx-arm}" y1="${cy}" x2="${cx+arm}" y2="${cy}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>`
              + `<line x1="${cx}" y1="${cy-arm}" x2="${cx}" y2="${cy+arm}" stroke="STROKECOLOR" stroke-width="${sw}" stroke-linecap="round"/>`;
     }},
+    { id: 'ellipse',       label: 'Ovale',          svg: (w,h,sw,f,o) => `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2-sw/2}" ry="${h/2-sw/2}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'square',        label: 'Carré',           svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'rectangle',     label: 'Rectangle',       svg: (w,h,sw,f,o) => `<rect x="${sw/2}" y="${sw/2}" width="${w-sw}" height="${h-sw}" stroke="${sw}" stroke-width="${sw}" fill="${f}" fill-opacity="${o}"/>` },
     { id: 'diamond',       label: 'Losange',         svg: (w,h,sw,f,o) => `<polygon points="${w/2},${sw} ${w-sw},${h/2} ${w/2},${h-sw} ${sw},${h/2}" stroke="${sw}" stroke-width="${sw}" stroke-linejoin="round" fill="${f}" fill-opacity="${o}"/>` },

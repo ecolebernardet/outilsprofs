@@ -1633,8 +1633,8 @@
 	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
 	<div id="figures-submenu" style="position:fixed;display:none;flex-direction:column;align-items:center;gap:6px;background:#1F1F21;border-radius:12px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,0.45);z-index:13001;border:1px solid #4a90e2;">
 		<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-			<button id="draw-mode-segment-btn"              onclick="setDrawMode('segment');toggleFiguresSubmenu()"              title="Segment"               style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">—</button>
 			<button id="draw-mode-cercle-btn"               onclick="setDrawMode('cercle');toggleFiguresSubmenu()"               title="Cercle"                style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="#aaa" stroke-width="1.8"/></svg></button>
+			<button id="draw-mode-ovale-btn"                onclick="setDrawMode('ovale');toggleFiguresSubmenu()"                title="Ovale"                 style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="14" viewBox="0 0 22 14" fill="none"><ellipse cx="11" cy="7" rx="10" ry="6" stroke="#aaa" stroke-width="1.8"/></svg></button>
 			<button id="draw-mode-carre-btn"                onclick="setDrawMode('carre');toggleFiguresSubmenu()"                title="Carré"                  style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="1" width="18" height="18" stroke="#aaa" stroke-width="1.8"/></svg></button>
 			<button id="draw-mode-rectangle-btn"            onclick="setDrawMode('rectangle');toggleFiguresSubmenu()"            title="Rectangle"             style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect x="1" y="1" width="20" height="14" stroke="#aaa" stroke-width="1.8"/></svg></button>
 			<button id="draw-mode-losange-btn"              onclick="setDrawMode('losange');toggleFiguresSubmenu()"              title="Losange"               style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="16" height="22" viewBox="0 0 16 22" fill="none"><polygon points="8,1 15,11 8,21 1,11" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
@@ -1646,7 +1646,7 @@
 			<button id="draw-mode-pentagon-btn"             onclick="setDrawMode('pentagon');toggleFiguresSubmenu()"             title="Pentagone"             style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,1 17,7 14,16 4,16 1,7" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
 			<button id="draw-mode-hexagon-btn"              onclick="setDrawMode('hexagon');toggleFiguresSubmenu()"              title="Hexagone"              style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
 			<button id="draw-mode-octagon-btn"              onclick="setDrawMode('octagon');toggleFiguresSubmenu()"              title="Octogone"              style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="6,1 12,1 17,6 17,12 12,17 6,17 1,12 1,6" stroke="#aaa" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-			<button id="draw-mode-ovale-btn"                onclick="setDrawMode('ovale');toggleFiguresSubmenu()"                title="Ovale"                 style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="14" viewBox="0 0 22 14" fill="none"><ellipse cx="11" cy="7" rx="10" ry="6" stroke="#aaa" stroke-width="1.8"/></svg></button>
+			<button id="draw-mode-segment-btn"              onclick="setDrawMode('segment');toggleFiguresSubmenu()"              title="Segment"               style="width:38px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;">—</button>
 		</div>
 		<!-- Séparateur + options fond -->
 		<div style="width:100%;height:1px;background:#333;margin:2px 0;flex-shrink:0;"></div>
@@ -1662,11 +1662,10 @@
 					<div class="cpick-popup" id="cpick-pop-fig-fill-color"></div>
 				</div>
 			</div>
-			<!-- Slider opacité (masqué si fond désactivé) -->
-			<div id="fig-fill-opacity-row" style="display:none;align-items:center;gap:5px;width:92px;">
-				<span style="font-size:10px;color:#888;flex-shrink:0;">Op.</span>
-				<input type="range" id="fig-fill-opacity" min="0" max="100" value="40" oninput="document.getElementById('fig-fill-opacity-val').textContent=this.value+'%'" style="flex:1;height:4px;accent-color:#4a90e2;cursor:pointer;min-width:0;">
-				<span id="fig-fill-opacity-val" style="font-size:10px;color:#aaa;min-width:28px;text-align:right;">40%</span>
+			<!-- Slider opacité pleine largeur + valeur dessous -->
+			<div id="fig-fill-opacity-row" style="display:none;flex-direction:column;align-items:center;gap:2px;width:82px;">
+				<input type="range" id="fig-fill-opacity" min="0" max="100" value="40" oninput="document.getElementById('fig-fill-opacity-val').textContent=this.value+'%'" style="width:100%;height:4px;accent-color:#4a90e2;cursor:pointer;">
+				<span id="fig-fill-opacity-val" style="font-size:10px;color:#aaa;">40%</span>
 			</div>
 		</div>
 	</div>

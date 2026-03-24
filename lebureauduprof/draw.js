@@ -367,7 +367,7 @@ function endPaint() {
                     'triangle':'triangle','right-triangle':'right-triangle',
                     'equilateral-triangle':'equilateral-triangle','scalene-triangle':'scalene-triangle',
                     'parallelo':'parallelogram','pentagon':'pentagon','hexagon':'hexagon',
-                    'octagon':'octagon','ovale':'circle'
+                    'octagon':'octagon','ovale':'ellipse'
                 };
                 const shapeId = modeToShape[currentDrawMode] || currentDrawMode;
                 const fillColor   = fill.enabled ? fill.color  : 'none';
@@ -997,9 +997,17 @@ function setDrawMode(mode) {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
         if (!btn) return;
         if (m === mode) {
-            btn.style.borderColor = '#4a90e2'; btn.style.background = '#1a3550'; btn.style.color = '#fff';
+            btn.style.borderColor = '#4a90e2';
+            btn.style.background  = '#1a3550';
+            btn.style.color       = '#fff';
+            btn.style.boxShadow   = '0 0 8px rgba(74,144,226,0.7)';
+            btn.querySelectorAll('svg *').forEach(el => el.style.setProperty('stroke','#7ab8f5','important'));
         } else {
-            btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa';
+            btn.style.borderColor = '#444';
+            btn.style.background  = '#2a2a2e';
+            btn.style.color       = '#aaa';
+            btn.style.boxShadow   = 'none';
+            btn.querySelectorAll('svg *').forEach(el => el.style.removeProperty('stroke'));
         }
     });
     const shapeOpts = document.getElementById('shape-recog-options');
@@ -1060,7 +1068,7 @@ function activatePencil() {
     if (figSubA) { figSubA.classList.remove('open'); figSubA.style.display = 'none'; }
     FIGURE_MODES.forEach(m => {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
-        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; btn.style.boxShadow = 'none'; btn.querySelectorAll('svg *').forEach(el => el.style.removeProperty('stroke')); }
     });
     // Bouton crayon actif
     const freeBtn = document.getElementById('draw-free-btn');
@@ -1224,7 +1232,7 @@ function toggleSelectMode() {
     // Mettre à jour tous les boutons de mode
     FIGURE_MODES.forEach(m => {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
-        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; btn.style.boxShadow = 'none'; btn.querySelectorAll('svg *').forEach(el => el.style.removeProperty('stroke')); }
     });
     _setBtnActive('draw-figures-btn', false, 'figures');
     _setBtnActive('draw-free-btn', false);
@@ -1245,7 +1253,7 @@ function stopDrawing() {
     // Repasser en mode sélection (curseur + bouton actif)
     FIGURE_MODES.forEach(m => {
         const btn = document.getElementById('draw-mode-'+m+'-btn');
-        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; }
+        if (btn) { btn.style.borderColor = '#444'; btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; btn.style.boxShadow = 'none'; btn.querySelectorAll('svg *').forEach(el => el.style.removeProperty('stroke')); }
     });
     _setBtnActive('draw-figures-btn', false, 'figures');
     _setBtnActive('draw-free-btn', false);
