@@ -1473,6 +1473,13 @@ function toggleEraserMode() {
     board.classList.add('is-erasing');
     clearSelection();
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    // Taille de gomme par défaut à 15 sur le board
+    const _esB = document.getElementById('eraser-size');
+    const _eslB = document.getElementById('eraser-size-label');
+    const _esl2B = document.getElementById('eraser-size-shapes-label');
+    if (_esB) { _esB.value = 15; _esB.dispatchEvent(new Event('input')); }
+    if (_eslB) _eslB.textContent = '15';
+    if (_esl2B) _esl2B.textContent = '15';
     // Désactiver visuellement crayon et surligneur quand la gomme s'active
     const hlBtnE = document.getElementById('draw-highlight-btn');
     if (hlBtnE) { hlBtnE.style.borderColor='#444'; hlBtnE.style.background='#2a2a2e'; hlBtnE.style.color='#aaa'; hlBtnE.classList.remove('btn-mode-active'); }
@@ -2223,6 +2230,14 @@ function _startPdfAnnotMode() {
     // Retirer le curseur grab du canvasWrap — draw.js gère maintenant le curseur
     const wrapAtStart = target.querySelector('.pdf-canvas-wrap');
     if (wrapAtStart) wrapAtStart.style.cursor = '';
+
+    // Taille de gomme par défaut à 10 en mode annotation PDF
+    const _es = document.getElementById('eraser-size');
+    const _esl = document.getElementById('eraser-size-label');
+    const _esl2 = document.getElementById('eraser-size-shapes-label');
+    if (_es) { _es.value = 10; _es.dispatchEvent(new Event('input')); }
+    if (_esl) _esl.textContent = '10';
+    if (_esl2) _esl2.textContent = '10';
 
     _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
 }
