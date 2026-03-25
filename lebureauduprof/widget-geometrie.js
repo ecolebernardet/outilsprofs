@@ -707,7 +707,7 @@ function spawnCompas(board, cx, cy) {
     overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - 60}px; width:${OVW}px; height:${OVH}px;`;
 
     // ── Barre de contrôle FIXE (body-level, toujours visible) ───────────
-    const BAR_W = 400;
+    const BAR_W = 560;
     const ctrlBar = document.createElement('div');
     ctrlBar.style.cssText = `
         position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
@@ -774,17 +774,36 @@ function spawnCompas(board, cx, cy) {
     const slider = document.createElement('input');
     slider.type = 'range'; slider.min = MIN_R; slider.max = MAX_R;
     slider.value = radius; slider.step = '2';
-    slider.style.cssText = 'width:90px; accent-color:#a78bfa; cursor:pointer; flex-shrink:0;';
-    slider.addEventListener('mousedown', e => e.stopPropagation());
-    slider.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    slider.style.cssText = 'width:250px; accent-color:#a78bfa; cursor:pointer; flex-shrink:0;';
 
     const rVal = document.createElement('span');
     rVal.textContent = radius + 'px';
     rVal.style.cssText = 'color:#a78bfa; font-size:11px; font-weight:700; min-width:36px; flex-shrink:0;';
 
+    slider.addEventListener('mousedown', e => e.stopPropagation());
+    slider.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+
     slider.addEventListener('input', function () {
+        // Lire la position board de la pointe AVANT de modifier le rayon
+        const ovLeft = parseFloat(overlay.style.left || 0);
+        const ovTop  = parseFloat(overlay.style.top  || 0);
+        const haOld  = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+        const pivBX  = ovLeft + PIV_X - Math.sin(haOld) * ARM_LEN;
+        const pivBY  = ovTop  + PIV_Y + Math.cos(haOld) * ARM_LEN;
+
+        // Nouveau rayon
         radius = parseInt(this.value);
         rVal.textContent = radius + 'px';
+
+        // Nouvelle position de la pointe dans le SVG
+        const haNew = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+        const newLx = PIV_X - Math.sin(haNew) * ARM_LEN;
+        const newLy = PIV_Y + Math.cos(haNew) * ARM_LEN;
+
+        // Déplacer l'overlay pour que la pointe reste fixe sur le board
+        overlay.style.left = (pivBX - newLx) + 'px';
+        overlay.style.top  = (pivBY - newLy) + 'px';
+
         updateSvg();
     });
 
