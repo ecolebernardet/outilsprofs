@@ -366,10 +366,10 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         const editor = widget.querySelector('.editor-content');
         if (editor) {
             editor.contentEditable = 'false';
-            editor.style.cursor = 'grab';
+            editor.style.cursor = 'move';
             editor.style.userSelect = 'none';
         }
-        widget.style.cursor = 'grab';
+        widget.style.cursor = 'move';
 
         function _enterEditMode() {
             const ed = widget.querySelector('.editor-content');
@@ -384,9 +384,9 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             const ed = widget.querySelector('.editor-content');
             if (!ed) return;
             ed.contentEditable = 'false';
-            ed.style.cursor = 'grab';
+            ed.style.cursor = 'move';
             ed.style.userSelect = 'none';
-            widget.style.cursor = 'grab';
+            widget.style.cursor = 'move';
         }
 
         // Sortir du mode édition au clic en dehors
@@ -406,19 +406,19 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
     if (type === 'pdf') {
         const pdfToolbar = widget.querySelector('.editor-toolbar');
         if (pdfToolbar) {
-            pdfToolbar.style.cursor = 'grab';
+            pdfToolbar.style.cursor = 'move';
             const _onPdfToolbarDown = (e) => {
                 if (isDrawMode || isEraserMode) return;
                 // Ignorer les clics sur boutons, labels, inputs, selects
                 if (e.target.closest('button, label, input, select, a')) return;
                 e.stopPropagation();
                 widget.focus();
-                pdfToolbar.style.cursor = 'grabbing';
+                pdfToolbar.style.cursor = 'move';
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 startWidgetDrag({ clientX, clientY, target: e.target }, widget);
             };
-            const _onPdfToolbarUp = () => { pdfToolbar.style.cursor = 'grab'; };
+            const _onPdfToolbarUp = () => { pdfToolbar.style.cursor = 'move'; };
             pdfToolbar.addEventListener('mousedown',  _onPdfToolbarDown);
             pdfToolbar.addEventListener('touchstart', _onPdfToolbarDown, { passive: false });
             pdfToolbar.addEventListener('mouseup',    _onPdfToolbarUp);
@@ -564,7 +564,7 @@ function makeDraggable(elmnt) {
             if (dx > 4 || dy > 4) {
                 if (editor) {
                     editor.contentEditable = 'false';
-                    editor.style.cursor = 'grab';
+                    editor.style.cursor = 'move';
                     editor.style.userSelect = 'none';
                 }
                 startWidgetDrag(elmnt._dragPending.e, elmnt);
@@ -594,7 +594,7 @@ function makeDraggable(elmnt) {
             if (dx > 4 || dy > 4) {
                 if (editor) {
                     editor.contentEditable = 'false';
-                    editor.style.cursor = 'grab';
+                    editor.style.cursor = 'move';
                     editor.style.userSelect = 'none';
                 }
                 startWidgetDrag(elmnt._dragPending.e, elmnt);

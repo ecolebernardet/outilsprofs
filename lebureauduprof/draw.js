@@ -1218,7 +1218,13 @@ function toggleFiguresSubmenu() {
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
         const sub = document.getElementById('figures-submenu');
         const isOpen = sub && sub.classList.contains('open');
-        if (!isOpen) setPdfAnnotTool('figure');
+        if (!isOpen) {
+            setPdfAnnotTool('figure');
+            // Sélectionner automatiquement le segment si aucun mode figure n'est actif
+            if (!FIGURE_MODES.includes(currentDrawMode) || currentDrawMode === 'free') {
+                setDrawMode('segment');
+            }
+        }
         if (!sub) return;
         sub.classList.toggle('open');
         sub.style.display = sub.classList.contains('open') ? 'flex' : 'none';
@@ -2255,6 +2261,29 @@ function _stopPdfAnnotMode() {
     // Nettoyer le widget cible
     if (_pdfAnnotWidget) _pdfAnnotWidget.classList.remove('pdf-annot-target');
 
+    // Supprimer le bouton ✕ overlay s'il est affiché
+    const _delBtn = document.getElementById('_annot-delete-btn');
+    if (_delBtn) _delBtn.remove();
+    ['_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.remove();
+    });
+    // Nettoyer les drags resize/rotate en cours
+    if (_pdfResizeFigure) {
+        document.removeEventListener('mousemove', _pdfFigureResizeMove);
+        document.removeEventListener('mouseup',   _pdfFigureResizeEnd);
+        _pdfResizeFigure = null;
+    }
+    if (_pdfRotateFigure) {
+        document.removeEventListener('mousemove', _pdfFigureRotateMove);
+        document.removeEventListener('mouseup',   _pdfFigureRotateEnd);
+        _pdfRotateFigure = null;
+    }
+    if (_pdfRotateText) {
+        document.removeEventListener('mousemove', _pdfTextRotateMove);
+        document.removeEventListener('mouseup',   _pdfTextRotateEnd);
+        _pdfRotateText = null;
+    }
+
     _pdfAnnotMode     = false;
     _pdfAnnotWidget   = null;
     _pdfAnnotCanvas   = null;
@@ -2416,9 +2445,218 @@ var _pdfPanLastX = null;
 
 var _pdfFigureStart = null; // point de départ pour les figures PDF
 var _pdfDragText = null;    // { index, stroke, startPos } lors d'un drag de texte
+var _pdfDragFigure = null;  // { index, stroke, startPos, startNx, startNy } lors d'un drag de figure
+var _pdfResizeFigure = null; // { index, startClientX, startClientY, startBboxW, startBboxH, cx, cy } resize
+var _pdfRotateFigure = null; // { index, startAngle, cx, cy } rotation
+
+// ── Appelé par le bouton overlay ⤡ (resize) ──────────────────────────────
+window._pdfFigureResizeStart = function(index, e) {
+    if (!_pdfAnnotWidget) return;
+    const api = _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+    const canvas = api.getAnnotCanvas();
+    if (!canvas) return;
+    const annotLayers = api.getAnnotLayers();
+    // Trouver la page courante contenant ce stroke
+    const currentPageNum = Object.keys(annotLayers).find(p =>
+        annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
+        annotLayers[p].strokes[index].tool === 'figure'
+    );
+    if (!currentPageNum) return;
+    const s = annotLayers[currentPageNum].strokes[index];
+    // Capturer les pts originaux et le bounding box au moment du démarrage
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    s.pts.forEach(p => {
+        if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
+        if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
+    });
+    _pdfResizeFigure = {
+        index,
+        origPts: s.pts.map(p => ({ ...p })),
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        startBboxW: maxX - minX,
+        startBboxH: maxY - minY
+    };
+    document.addEventListener('mousemove', _pdfFigureResizeMove);
+    document.addEventListener('mouseup',   _pdfFigureResizeEnd);
+};
+
+function _pdfFigureResizeMove(e) {
+    if (!_pdfResizeFigure) return;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api || !api.resizeFigureStroke) return;
+    const canvas = api.getAnnotCanvas();
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const dx = e.clientX - _pdfResizeFigure.startClientX;
+    const dy = e.clientY - _pdfResizeFigure.startClientY;
+    // Delta en normalisé
+    const dnx = dx / rect.width;
+    const dny = dy / rect.height;
+    const newBboxW = Math.max(0.01, _pdfResizeFigure.startBboxW + dnx);
+    const newBboxH = Math.max(0.01, _pdfResizeFigure.startBboxH + dny);
+    const scaleX = _pdfResizeFigure.startBboxW > 0.001 ? newBboxW / _pdfResizeFigure.startBboxW : 1;
+    const scaleY = _pdfResizeFigure.startBboxH > 0.001 ? newBboxH / _pdfResizeFigure.startBboxH : 1;
+    api.resizeFigureStroke(_pdfResizeFigure.index, scaleX, scaleY, _pdfResizeFigure.origPts);
+    if (api.drawFigureSelection) api.drawFigureSelection(_pdfResizeFigure.index);
+}
+
+function _pdfFigureResizeEnd() {
+    if (!_pdfResizeFigure) return;
+    document.removeEventListener('mousemove', _pdfFigureResizeMove);
+    document.removeEventListener('mouseup',   _pdfFigureResizeEnd);
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfResizeFigure.index);
+    if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfResizeFigure.index);
+    _pdfResizeFigure = null;
+}
+
+// ── Appelé par le bouton overlay ↻ (rotation) ────────────────────────────
+window._pdfFigureRotateStart = function(index, e) {
+    if (!_pdfAnnotWidget) return;
+    const api = _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+    const canvas = api.getAnnotCanvas();
+    if (!canvas) return;
+    const annotLayers = api.getAnnotLayers();
+    const currentPageNum = Object.keys(annotLayers).find(p =>
+        annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
+        annotLayers[p].strokes[index].tool === 'figure'
+    );
+    if (!currentPageNum) return;
+    const s = annotLayers[currentPageNum].strokes[index];
+    const cw = canvas.width, ch = canvas.height;
+    // Centre en pixels canvas → projection écran
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    s.pts.forEach(p => {
+        const px = p.x * cw, py = p.y * ch;
+        if (px < minX) minX = px; if (py < minY) minY = py;
+        if (px > maxX) maxX = px; if (py > maxY) maxY = py;
+    });
+    const cxNorm = ((minX + maxX) / 2) / cw;
+    const cyNorm = ((minY + maxY) / 2) / ch;
+    const rect = canvas.getBoundingClientRect();
+    const centerScreenX = rect.left + cxNorm * rect.width;
+    const centerScreenY = rect.top  + cyNorm * rect.height;
+    const startMouseAngle = Math.atan2(e.clientY - centerScreenY, e.clientX - centerScreenX);
+    // Capturer les pts d'origine pour une rotation absolue (pas de dérive cumulative)
+    _pdfRotateFigure = {
+        index,
+        origPts: s.pts.map(p => ({ ...p })),
+        centerScreenX,
+        centerScreenY,
+        startMouseAngle
+    };
+    document.addEventListener('mousemove', _pdfFigureRotateMove);
+    document.addEventListener('mouseup',   _pdfFigureRotateEnd);
+};
+
+// ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
+const _SNAP_ANGLES_RAD = [0, Math.PI/2, Math.PI, 3*Math.PI/2, 2*Math.PI];
+const _SNAP_THRESHOLD  = 5 * Math.PI / 180; // ±5°
+
+function _snapAngle(angle) {
+    let a = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    for (const snap of _SNAP_ANGLES_RAD) {
+        if (Math.abs(a - snap) < _SNAP_THRESHOLD) return snap === 2 * Math.PI ? 0 : snap;
+    }
+    return angle;
+}
+
+function _pdfFigureRotateMove(e) {
+    if (!_pdfRotateFigure) return;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api || !api.rotateFigureStroke) return;
+    // Angle absolu = différence entre angle souris actuel et angle souris au départ
+    const rawAngle = Math.atan2(
+        e.clientY - _pdfRotateFigure.centerScreenY,
+        e.clientX - _pdfRotateFigure.centerScreenX
+    ) - _pdfRotateFigure.startMouseAngle;
+    const snapped = _snapAngle(rawAngle);
+    api.rotateFigureStroke(_pdfRotateFigure.index, snapped, _pdfRotateFigure.origPts);
+    if (api.drawFigureSelection) api.drawFigureSelection(_pdfRotateFigure.index);
+}
+
+function _pdfFigureRotateEnd() {
+    if (!_pdfRotateFigure) return;
+    document.removeEventListener('mousemove', _pdfFigureRotateMove);
+    document.removeEventListener('mouseup',   _pdfFigureRotateEnd);
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfRotateFigure.index);
+    if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfRotateFigure.index);
+    _pdfRotateFigure = null;
+}
+
+var _pdfRotateText = null; // { index, startAngle, cx, cy (pixels canvas normalisés) }
+
+// ── Appelé par le bouton overlay ↻ sur un texte ──────────────────────────
+window._pdfTextRotateStart = function(index, e) {
+    if (!_pdfAnnotWidget) return;
+    const api = _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+    const canvas = api.getAnnotCanvas();
+    if (!canvas) return;
+    const annotLayers = api.getAnnotLayers();
+    const currentPageNum = Object.keys(annotLayers).find(p =>
+        annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
+        annotLayers[p].strokes[index].tool === 'text'
+    );
+    if (!currentPageNum) return;
+    const s = annotLayers[currentPageNum].strokes[index];
+    const cw = canvas.width, ch = canvas.height;
+    // Centre du texte en pixels canvas
+    const fontSize = Math.round(6 * Math.pow(1.12, s.size) * cw / 600);
+    const tmpCtx = canvas.getContext('2d');
+    tmpCtx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+    const lines = (s.text || '').split('\n');
+    const textW = Math.max(...lines.map(l => tmpCtx.measureText(l).width));
+    const textH = lines.length * fontSize * 1.3;
+    const pxX = s.nx * cw + textW / 2;
+    const pxY = s.ny * ch + textH / 2;
+    const rect = canvas.getBoundingClientRect();
+    const centerScreenX = rect.left + (pxX / cw) * rect.width;
+    const centerScreenY = rect.top  + (pxY / ch) * rect.height;
+    const baseAngle = s.rotation || 0;
+    const mouseAngle = Math.atan2(e.clientY - centerScreenY, e.clientX - centerScreenX);
+    _pdfRotateText = { index, centerScreenX, centerScreenY, baseAngle, mouseAngle };
+    document.addEventListener('mousemove', _pdfTextRotateMove);
+    document.addEventListener('mouseup',   _pdfTextRotateEnd);
+};
+
+function _pdfTextRotateMove(e) {
+    if (!_pdfRotateText) return;
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (!api || !api.rotateTextStroke) return;
+    const currentAngle = Math.atan2(
+        e.clientY - _pdfRotateText.centerScreenY,
+        e.clientX - _pdfRotateText.centerScreenX
+    );
+    const rawAngle = _pdfRotateText.baseAngle + (currentAngle - _pdfRotateText.mouseAngle);
+    const snapped = _snapAngle(rawAngle);
+    api.rotateTextStroke(_pdfRotateText.index, snapped);
+    if (api.drawTextSelection) api.drawTextSelection(_pdfRotateText.index);
+}
+
+function _pdfTextRotateEnd() {
+    if (!_pdfRotateText) return;
+    document.removeEventListener('mousemove', _pdfTextRotateMove);
+    document.removeEventListener('mouseup',   _pdfTextRotateEnd);
+    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+    if (api && api.saveTextTransform) api.saveTextTransform(_pdfRotateText.index);
+    if (api && api.drawTextSelection) api.drawTextSelection(_pdfRotateText.index);
+    _pdfRotateText = null;
+}
 
 function _pdfAnnotStartStroke(e) {
     const tool = _pdfAnnotEffectiveTool();
+
+    // Effacer tout cadre de sélection de figure résiduel si on commence une nouvelle action
+    if (!_pdfDragFigure) {
+        const _apiDesel = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (_apiDesel && _apiDesel.redrawAnnotations) _apiDesel.redrawAnnotations();
+    }
+
     if (tool === 'text') {
         const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
         const pos = _getPdfAnnotPos(e);
@@ -2467,8 +2705,30 @@ function _pdfAnnotStartStroke(e) {
 
     const pos = _getPdfAnnotPos(e);
 
-    // Mode figure : enregistrer le point de départ (sauf si gomme active)
+    // Mode figure : si un clic tombe sur une figure existante → préparer le drag
     if (FIGURE_MODES.includes(currentDrawMode) && tool !== 'eraser') {
+        const found = api.findFigureStrokeAt ? api.findFigureStrokeAt(pos.x, pos.y) : null;
+        if (found) {
+            // Clic sur une figure existante → démarrer le drag (pas de nouvelle figure)
+            const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+            const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+            _pdfDragFigure = {
+                index: found.index,
+                stroke: found.stroke,
+                startPos: pos,
+                startClientX: clientX,
+                startClientY: clientY,
+                moved: false
+            };
+            _pdfAnnotPainting = true;
+            api.drawFigureSelection(found.index);
+            if (_pdfAnnotEvTarget) {
+                _pdfAnnotEvTarget.style.setProperty('cursor', 'grab', 'important');
+                _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', 'grab', 'important'));
+            }
+            return;
+        }
+        // Pas de figure sous le curseur → dessiner une nouvelle figure
         _pdfFigureStart = pos;
         _pdfAnnotPainting = true;
         return;
@@ -2505,6 +2765,43 @@ function _pdfAnnotContinueStroke(e) {
             if (api) {
                 const pos = _getPdfAnnotPos(e);
                 api.moveTextStroke(_pdfDragText.index, pos.x, pos.y);
+            }
+        }
+        return;
+    }
+
+    // Drag d'une figure existante
+    if (_pdfDragFigure) {
+        const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+        const dx = clientX - _pdfDragFigure.startClientX;
+        const dy = clientY - _pdfDragFigure.startClientY;
+        if (!_pdfDragFigure.moved && Math.sqrt(dx*dx + dy*dy) > 5) {
+            _pdfDragFigure.moved = true;
+            if (_pdfAnnotEvTarget) {
+                _pdfAnnotEvTarget.style.setProperty('cursor', 'grabbing', 'important');
+                _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', 'grabbing', 'important'));
+            }
+        }
+        if (_pdfDragFigure.moved) {
+            const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            if (api && api.moveFigureStroke) {
+                const annotCanvas = api.getAnnotCanvas();
+                const cw = annotCanvas ? annotCanvas.width  : 600;
+                const ch = annotCanvas ? annotCanvas.height : 800;
+                // Convertir le delta client en delta normalisé
+                const rect = annotCanvas ? annotCanvas.getBoundingClientRect() : { width: cw, height: ch };
+                const scaleX = cw / rect.width;
+                const scaleY = ch / rect.height;
+                const pos = _getPdfAnnotPos(e);
+                const dnx = (pos.x - _pdfDragFigure.startPos.x) / cw;
+                const dny = (pos.y - _pdfDragFigure.startPos.y) / ch;
+                // Recalculer toujours depuis la position d'origine en stockant l'offset cumulé
+                api.moveFigureStroke(_pdfDragFigure.index, dnx, dny);
+                // Redessiner la sélection par-dessus
+                api.drawFigureSelection(_pdfDragFigure.index);
+                // Remettre startPos à jour pour un delta incrémental
+                _pdfDragFigure.startPos = pos;
             }
         }
         return;
@@ -2595,7 +2892,29 @@ function _pdfAnnotEndStroke(e) {
         return;
     }
 
-    // Mode pan : remettre le curseur grab
+    // Fin du drag figure
+    if (_pdfDragFigure) {
+        if (_pdfDragFigure.moved) {
+            // Drag terminé → sauvegarder dans l'historique
+            const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            if (api && api.saveFigureMove) api.saveFigureMove(_pdfDragFigure.index);
+            // Redessiner proprement sans le cadre de sélection
+            if (api && api.redrawAnnotations) api.redrawAnnotations();
+        } else {
+            // Pas de mouvement → simple clic, afficher juste le cadre de sélection
+            const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+            if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfDragFigure.index);
+        }
+        _pdfDragFigure = null;
+        // Restaurer le curseur figure (croix+figure) sur le widget et tous ses enfants
+        const figCursor = _pdfCursor(_pdfAnnotTool);
+        if (_pdfAnnotEvTarget) {
+            _pdfAnnotEvTarget.style.setProperty('cursor', figCursor, 'important');
+            _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', figCursor, 'important'));
+        }
+        if (_pdfAnnotCanvas) _pdfAnnotCanvas.style.cursor = figCursor;
+        return;
+    }
     if (_pdfAnnotTool === 'pan') {
         _pdfPanLastX = null;
         _pdfPanLastY = null;
@@ -2944,13 +3263,37 @@ function _pdfAnnotMouseMove(e)  {
             api.previewEraser(pos.x, pos.y, r);
         }
     }
-    // Curseur adaptatif en mode texte : grab sur texte existant, text sinon
+    // Curseur adaptatif en mode texte : déplacement sur texte existant, text sinon
     if (!_pdfAnnotPainting && _pdfAnnotEffectiveTool() === 'text' && _pdfAnnotEvTarget) {
         const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
         if (api && api.findTextStrokeAt) {
             const pos = _getPdfAnnotPos(e);
             const found = api.findTextStrokeAt(pos.x, pos.y);
-            _pdfAnnotEvTarget.style.setProperty('cursor', found ? 'grab' : 'text', 'important');
+            const cur = found ? 'move' : 'text';
+            _pdfAnnotEvTarget.style.setProperty('cursor', cur, 'important');
+            _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
+                if (!el.closest('.editor-toolbar')) {
+                    el.style.setProperty('cursor', cur, 'important');
+                }
+            });
+            if (_pdfAnnotCanvas) _pdfAnnotCanvas.style.setProperty('cursor', cur, 'important');
+        }
+    }
+    // Curseur adaptatif en mode figure : 4-flèches au survol d'une figure existante
+    if (!_pdfAnnotPainting && _pdfAnnotEffectiveTool() === 'figure' && _pdfAnnotEvTarget) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.findFigureStrokeAt) {
+            const pos = _getPdfAnnotPos(e);
+            const found = api.findFigureStrokeAt(pos.x, pos.y);
+            const cur = found ? 'move' : _pdfCursor('figure');
+            // Appliquer sur le widget, le canvas et tous leurs enfants
+            _pdfAnnotEvTarget.style.setProperty('cursor', cur, 'important');
+            _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
+                if (!el.closest('.editor-toolbar')) {
+                    el.style.setProperty('cursor', cur, 'important');
+                }
+            });
+            if (_pdfAnnotCanvas) _pdfAnnotCanvas.style.setProperty('cursor', cur, 'important');
         }
     }
 }

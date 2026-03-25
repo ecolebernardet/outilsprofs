@@ -91,6 +91,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     };
     canvasWrap.addEventListener('mouseup',    _endDrag);
     canvasWrap.addEventListener('mouseleave', _endDrag);
+    // Supprimer les boutons overlay si l'utilisateur scrolle (position désynchronisée)
+    canvasWrap.addEventListener('scroll', () => {
+        ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.remove();
+        });
+    });
 
     // ── Drag-to-scroll tactile (hors mode annotation) ──
     canvasWrap.addEventListener('touchstart', e => {
@@ -220,6 +226,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             // Redessiner toutes les annotations de la page (avec le zoom courant)
             function redrawAnnotations(pageNum) {
                 actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                // Supprimer tous les boutons overlay de figure s'ils existent
+                _removeAnnotFigureHandles();
                 const layer = getLayer(pageNum);
                 // Restaurer le snapshot s'il existe (après effacement)
                 if (layer._snapshot) {
@@ -230,6 +238,148 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 }
             }
 
+            // ── Bouton ✕ overlay pour supprimer une annotation sélectionnée ──
+            function _removeAnnotDeleteBtn() {
+                const existing = document.getElementById('_annot-delete-btn');
+                if (existing) existing.remove();
+            }
+
+            // Supprime tous les boutons overlay de figure
+            function _removeAnnotFigureHandles() {
+                ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+            }
+
+            // Crée un bouton overlay rond positionné à (canvasPx, canvasPy)
+            function _makeAnnotHandle(id, canvasPx, canvasPy, bg, title, symbol, onMouseDown, onClick) {
+                const existing = document.getElementById(id);
+                if (existing) existing.remove();
+                const rect   = annotCanvas.getBoundingClientRect();
+                const scaleX = rect.width  / annotCanvas.width;
+                const scaleY = rect.height / annotCanvas.height;
+                const screenX = rect.left + canvasPx * scaleX;
+                const screenY = rect.top  + canvasPy * scaleY;
+                const btn = document.createElement('div');
+                btn.id = id;
+                btn.title = title;
+                btn.style.cssText = `
+                    position: fixed;
+                    left: ${screenX - 10}px;
+                    top:  ${screenY - 10}px;
+                    width: 20px; height: 20px;
+                    background: ${bg};
+                    border: 2px solid #fff;
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    cursor: ${id === '_annot-resize-btn' ? 'nwse-resize' : id === '_annot-rotate-btn' ? 'grab' : 'pointer'};
+                    z-index: 99999;
+                    font-size: 11px; font-weight: 700;
+                    color: #fff;
+                    line-height: 1;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+                    user-select: none;
+                    pointer-events: auto;
+                    transition: transform 0.1s;
+                `;
+                btn.textContent = symbol;
+                btn.onmouseenter = () => btn.style.transform = 'scale(1.2)';
+                btn.onmouseleave = () => btn.style.transform = 'scale(1)';
+                btn.onmousedown  = (e) => { e.stopPropagation(); e.preventDefault(); if (onMouseDown) onMouseDown(e); };
+                btn.onclick      = (e) => { e.stopPropagation(); e.preventDefault(); if (onClick) onClick(e); };
+                document.body.appendChild(btn);
+                return btn;
+            }
+
+            // canvasPx, canvasPy : coordonnées en pixels canvas (haut-droit du cadre)
+            function _showAnnotDeleteBtn(canvasPx, canvasPy, onDelete) {
+                _removeAnnotDeleteBtn();
+                _makeAnnotHandle('_annot-delete-btn', canvasPx, canvasPy,
+                    '#ff4757', 'Supprimer', '✕',
+                    null,
+                    onDelete
+                );
+            }
+
+            // Affiche les 3 boutons overlay pour une figure sélectionnée
+            // bbox : { x, y, w, h } en pixels canvas
+            function _showAnnotFigureHandles(index, bbox) {
+                _removeAnnotFigureHandles();
+                const { x, y, w, h } = bbox;
+
+                // ✕ haut-droit : supprimer
+                _makeAnnotHandle('_annot-delete-btn', x + w, y,
+                    '#ff4757', 'Supprimer', '✕',
+                    null,
+                    () => {
+                        const layer2 = getLayer(currentPage);
+                        if (!layer2.history) layer2.history = [];
+                        layer2.history.push([...layer2.strokes]);
+                        if (layer2.history.length > 30) layer2.history.shift();
+                        layer2.strokes.splice(index, 1);
+                        redrawAnnotations(currentPage);
+                    }
+                );
+
+                // ⤡ bas-droit : resize
+                _makeAnnotHandle('_annot-resize-btn', x + w, y + h,
+                    '#27ae60', 'Redimensionner', '⤡',
+                    (e) => {
+                        // Notifier draw.js pour démarrer le resize drag
+                        if (typeof window._pdfFigureResizeStart === 'function') {
+                            window._pdfFigureResizeStart(index, e);
+                        }
+                    },
+                    null
+                );
+
+                // ↻ bas-gauche : rotation
+                _makeAnnotHandle('_annot-rotate-btn', x, y + h,
+                    '#8e44ad', 'Faire pivoter', '↻',
+                    (e) => {
+                        // Notifier draw.js pour démarrer la rotation drag
+                        if (typeof window._pdfFigureRotateStart === 'function') {
+                            window._pdfFigureRotateStart(index, e);
+                        }
+                    },
+                    null
+                );
+            }
+
+            // Affiche les 2 boutons overlay pour un texte sélectionné
+            // opts : { _deleteAt: {px,py}, _rotateAt: {px,py} } en pixels canvas
+            function _showAnnotTextHandles(index, opts) {
+                _removeAnnotFigureHandles();
+                const del = opts._deleteAt;
+                const rot = opts._rotateAt;
+
+                // ✕ haut-droit : supprimer
+                _makeAnnotHandle('_annot-delete-btn', del.px, del.py,
+                    '#ff4757', 'Supprimer', '✕',
+                    null,
+                    () => {
+                        const layer2 = getLayer(currentPage);
+                        if (!layer2.history) layer2.history = [];
+                        layer2.history.push([...layer2.strokes]);
+                        if (layer2.history.length > 30) layer2.history.shift();
+                        layer2.strokes.splice(index, 1);
+                        redrawAnnotations(currentPage);
+                    }
+                );
+
+                // ↻ bas-gauche : rotation
+                _makeAnnotHandle('_annot-rotate-btn', rot.px, rot.py,
+                    '#8e44ad', 'Faire pivoter', '↻',
+                    (e) => {
+                        if (typeof window._pdfTextRotateStart === 'function') {
+                            window._pdfTextRotateStart(index, e);
+                        }
+                    },
+                    null
+                );
+            }
+
             function drawStroke(ctx, stroke) {
                 // Épaisseur proportionnelle à la taille courante du canvas
                 const canvasW = annotCanvas.width;
@@ -238,12 +388,22 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 if (stroke.tool === 'text') {
                     const pos = fromNorm(stroke.nx, stroke.ny);
                     ctx.save();
-                    // fontSize proportionnel à la largeur du canvas (suit le zoom/redimensionnement)
                     const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * canvasW / 600);
                     ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
                     ctx.fillStyle = stroke.color;
                     ctx.textBaseline = 'top';
-                    // Gérer les retours à la ligne
+                    // Appliquer la rotation autour du centre du texte si elle existe
+                    if (stroke.rotation) {
+                        const lines = (stroke.text || '').split('\n');
+                        ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+                        const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+                        const textH = lines.length * fontSize * 1.3;
+                        const cx = pos.x + textW / 2;
+                        const cy = pos.y + textH / 2;
+                        ctx.translate(cx, cy);
+                        ctx.rotate(stroke.rotation);
+                        ctx.translate(-cx, -cy);
+                    }
                     const lines = (stroke.text || '').split('\n');
                     lines.forEach((line, i) => {
                         ctx.fillText(line, pos.x, pos.y + i * fontSize * 1.3);
@@ -877,26 +1037,53 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const fontSize = Math.round(6 * Math.pow(1.12, s.size) * canvasW / 600);
                         actx.save();
                         actx.font = `${fontSize}px 'Segoe UI', sans-serif`;
-                        const metrics = actx.measureText(s.text || '');
+                        const lines = (s.text || '').split('\n');
+                        const textW = Math.max(...lines.map(l => actx.measureText(l).width));
                         actx.restore();
+                        const textH = lines.length * fontSize * 1.3;
                         const pad = 4 * canvasW / 600;
+                        // Si le texte est pivoté, dessiner le cadre pivoté aussi
+                        const rot = s.rotation || 0;
+                        const cx = pos.x + textW / 2;
+                        const cy = pos.y + textH / 2;
                         const x = pos.x - pad;
                         const y = pos.y - pad;
-                        const w = metrics.width + pad * 2;
-                        const h = fontSize * 1.3 + pad * 2;
+                        const w = textW + pad * 2;
+                        const h = textH + pad * 2;
                         actx.save();
+                        if (rot) {
+                            actx.translate(cx, cy);
+                            actx.rotate(rot);
+                            actx.translate(-cx, -cy);
+                        }
                         actx.strokeStyle = '#4a90e2';
                         actx.lineWidth   = 2 * canvasW / 600;
                         actx.setLineDash([5, 3]);
                         actx.strokeRect(x, y, w, h);
                         const r = 4 * canvasW / 600;
                         actx.fillStyle = '#4a90e2';
-                        [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([cx,cy]) => {
+                        [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([bx,by]) => {
                             actx.beginPath();
-                            actx.arc(cx, cy, r, 0, Math.PI*2);
+                            actx.arc(bx, by, r, 0, Math.PI*2);
                             actx.fill();
                         });
                         actx.restore();
+                        // Boutons overlay : ✕ haut-droit, ↻ bas-gauche
+                        // Calculer les coins réels après rotation pour positionner les boutons
+                        const corners = [[x+w, y], [x, y+h]];
+                        const rotatedCorners = corners.map(([bx, by]) => {
+                            if (!rot) return [bx, by];
+                            const dx = bx - cx, dy = by - cy;
+                            return [cx + dx * Math.cos(rot) - dy * Math.sin(rot),
+                                    cy + dx * Math.sin(rot) + dy * Math.cos(rot)];
+                        });
+                        _showAnnotTextHandles(index, {
+                            x: rotatedCorners[0][0], y: rotatedCorners[0][1],
+                            w: 0, h: 0,
+                            // On passe directement les positions des coins
+                            _deleteAt:  { px: rotatedCorners[0][0], py: rotatedCorners[0][1] },
+                            _rotateAt:  { px: rotatedCorners[1][0], py: rotatedCorners[1][1] }
+                        });
                     },
                     moveTextStroke(index, px, py) {
                         const layer = getLayer(currentPage);
@@ -907,6 +1094,23 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     },
                     // Sauvegarder la position finale après drag (ajoute à l'historique)
                     saveTextMove(index) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                    },
+
+                    // Fait pivoter un texte (angle absolu en radians)
+                    rotateTextStroke(index, angle) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        layer.strokes[index] = { ...layer.strokes[index], rotation: angle };
+                        redrawAnnotations(currentPage);
+                    },
+
+                    // Sauvegarde dans l'historique après rotation texte
+                    saveTextTransform(index) {
                         const layer = getLayer(currentPage);
                         if (!layer.strokes[index]) return;
                         if (!layer.history) layer.history = [];
@@ -952,6 +1156,151 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             ...(newColor !== undefined ? { color: newColor } : {})
                         };
                         redrawAnnotations(currentPage);
+                    },
+
+                    // ── Sélection / déplacement des figures ──────────────────
+                    // Trouve la figure sous le curseur (px, py en pixels canvas)
+                    findFigureStrokeAt(px, py) {
+                        const layer = getLayer(currentPage);
+                        const canvasW = annotCanvas.width;
+                        const HIT_PAD = 8 * canvasW / 600; // tolérance de hit en px
+                        for (let i = layer.strokes.length - 1; i >= 0; i--) {
+                            const s = layer.strokes[i];
+                            if (s.tool !== 'figure' || !s.pts || s.pts.length < 2) continue;
+                            // Bounding box en pixels canvas
+                            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                            s.pts.forEach(p => {
+                                const cp = fromNorm(p.x, p.y);
+                                if (cp.x < minX) minX = cp.x;
+                                if (cp.y < minY) minY = cp.y;
+                                if (cp.x > maxX) maxX = cp.x;
+                                if (cp.y > maxY) maxY = cp.y;
+                            });
+                            // Vérification dans le bounding box élargi
+                            if (px >= minX - HIT_PAD && px <= maxX + HIT_PAD &&
+                                py >= minY - HIT_PAD && py <= maxY + HIT_PAD) {
+                                return { index: i, stroke: s, bbox: { minX, minY, maxX, maxY } };
+                            }
+                        }
+                        return null;
+                    },
+
+                    // Dessine un cadre de sélection autour d'une figure
+                    drawFigureSelection(index) {
+                        const layer = getLayer(currentPage);
+                        const s = layer.strokes[index];
+                        if (!s || s.tool !== 'figure' || !s.pts) return;
+                        redrawAnnotations(currentPage);
+                        const canvasW = annotCanvas.width;
+                        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                        s.pts.forEach(p => {
+                            const cp = fromNorm(p.x, p.y);
+                            if (cp.x < minX) minX = cp.x;
+                            if (cp.y < minY) minY = cp.y;
+                            if (cp.x > maxX) maxX = cp.x;
+                            if (cp.y > maxY) maxY = cp.y;
+                        });
+                        const pad = 6 * canvasW / 600;
+                        const x = minX - pad, y = minY - pad;
+                        const w = (maxX - minX) + pad * 2;
+                        const h = (maxY - minY) + pad * 2;
+                        actx.save();
+                        actx.strokeStyle = '#4a90e2';
+                        actx.lineWidth   = 2 * canvasW / 600;
+                        actx.setLineDash([5, 3]);
+                        actx.strokeRect(x, y, w, h);
+                        const r = 4 * canvasW / 600;
+                        actx.fillStyle = '#4a90e2';
+                        [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].forEach(([cx, cy]) => {
+                            actx.beginPath();
+                            actx.arc(cx, cy, r, 0, Math.PI * 2);
+                            actx.fill();
+                        });
+                        actx.restore();
+                        // Boutons overlay : ✕ haut-droit, ⤡ bas-droit, ↻ bas-gauche
+                        _showAnnotFigureHandles(index, { x, y, w, h });
+                    },
+
+                    // Déplace une figure (delta en pixels canvas normalisés)
+                    moveFigureStroke(index, dnx, dny) {
+                        const layer = getLayer(currentPage);
+                        const s = layer.strokes[index];
+                        if (!s || s.tool !== 'figure') return;
+                        layer.strokes[index] = {
+                            ...s,
+                            pts: s.pts.map(p => ({ x: p.x + dnx, y: p.y + dny }))
+                        };
+                        redrawAnnotations(currentPage);
+                    },
+
+                    // Sauvegarde le déplacement dans l'historique
+                    saveFigureMove(index) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
+                    },
+
+                    // Redimensionne une figure : scaleX/scaleY absolus depuis les pts d'origine
+                    // origPts : tableau des pts normalisés au moment du début du drag
+                    resizeFigureStroke(index, scaleX, scaleY, origPts) {
+                        const layer = getLayer(currentPage);
+                        const s = layer.strokes[index];
+                        if (!s || s.tool !== 'figure') return;
+                        const pts = origPts || s.pts;
+                        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                        pts.forEach(p => {
+                            if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
+                            if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
+                        });
+                        const cx = (minX + maxX) / 2;
+                        const cy = (minY + maxY) / 2;
+                        layer.strokes[index] = {
+                            ...s,
+                            pts: pts.map(p => ({
+                                x: cx + (p.x - cx) * scaleX,
+                                y: cy + (p.y - cy) * scaleY
+                            }))
+                        };
+                        redrawAnnotations(currentPage);
+                    },
+
+                    // Fait pivoter une figure d'un angle absolu autour de son centre d'origine
+                    // origPts : pts normalisés capturés au début du drag
+                    rotateFigureStroke(index, absAngle, origPts) {
+                        const layer = getLayer(currentPage);
+                        const s = layer.strokes[index];
+                        if (!s || s.tool !== 'figure') return;
+                        const pts = origPts || s.pts;
+                        // Travailler en pixels canvas pour que la rotation soit isométrique
+                        const pxPts = pts.map(p => fromNorm(p.x, p.y));
+                        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                        pxPts.forEach(p => {
+                            if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
+                            if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
+                        });
+                        const cx = (minX + maxX) / 2;
+                        const cy = (minY + maxY) / 2;
+                        const cos = Math.cos(absAngle);
+                        const sin = Math.sin(absAngle);
+                        layer.strokes[index] = {
+                            ...s,
+                            pts: pxPts.map(p => {
+                                const dx = p.x - cx, dy = p.y - cy;
+                                return toNorm(cx + dx * cos - dy * sin, cy + dx * sin + dy * cos);
+                            })
+                        };
+                        redrawAnnotations(currentPage);
+                    },
+
+                    // Sauvegarde dans l'historique (après resize ou rotate terminé)
+                    saveFigureTransform(index) {
+                        const layer = getLayer(currentPage);
+                        if (!layer.strokes[index]) return;
+                        if (!layer.history) layer.history = [];
+                        layer.history.push([...layer.strokes]);
+                        if (layer.history.length > 30) layer.history.shift();
                     }
                 };
             }
@@ -1289,6 +1638,14 @@ function _drawStrokeScaled(ctx, stroke, W, H) {
         ctx.fillStyle = stroke.color;
         ctx.textBaseline = 'top';
         const lines = (stroke.text || '').split('\n');
+        if (stroke.rotation) {
+            const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+            const textH = lines.length * fontSize * 1.3;
+            const cx = pos.x + textW / 2, cy = pos.y + textH / 2;
+            ctx.translate(cx, cy);
+            ctx.rotate(stroke.rotation);
+            ctx.translate(-cx, -cy);
+        }
         lines.forEach((line, i) => ctx.fillText(line, pos.x, pos.y + i * fontSize * 1.3));
         ctx.restore();
         return;
