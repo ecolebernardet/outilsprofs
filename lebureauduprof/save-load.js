@@ -81,11 +81,24 @@ function buildBoardState() {
         let wP = 0, hP = 0, lP = 0, tP = 0;
         // Pour un PDF réduit : utiliser les dimensions/position d'ORIGINE (pas les valeurs réduites)
         const _collapsed = c && c.dataset.collapsed === 'true';
+        // Pour un PDF en plein écran board : utiliser les dimensions/position d'ORIGINE sauvegardées
+        const _fullboard = c && c.classList.contains('wf-pdf-fullboard');
         if (_collapsed) {
             const _savedWpx    = parseFloat(c.dataset.savedW);
             const _savedHpx    = parseFloat(c.dataset.savedH);
             const _savedTopPx  = parseFloat(c.dataset.savedTop);
             const _savedLeftPx = parseFloat(c.dataset.savedLeft);
+            if (!isNaN(_savedWpx))  wP = (_savedWpx / curW) * 100;
+            if (!isNaN(_savedHpx))  hP = ((_savedHpx - getToolbarHeight(c)) / curVH) * 100;
+            lP = !isNaN(_savedLeftPx) ? (_savedLeftPx / curW) * 100 : (w.offsetLeft / curW) * 100;
+            tP = !isNaN(_savedTopPx)  ? (_savedTopPx  / curVH) * 100 : (w.offsetTop  / curVH) * 100;
+        } else if (_fullboard) {
+            // pfSavedW/H sont les dimensions du container avant le plein écran
+            const _savedWpx    = parseFloat(c.dataset.pfSavedW);
+            const _savedHpx    = parseFloat(c.dataset.pfSavedH);
+            // pfSavedWTop/WLeft sont les positions du widget avant le plein écran
+            const _savedTopPx  = parseFloat(c.dataset.pfSavedWTop);
+            const _savedLeftPx = parseFloat(c.dataset.pfSavedWLeft);
             if (!isNaN(_savedWpx))  wP = (_savedWpx / curW) * 100;
             if (!isNaN(_savedHpx))  hP = ((_savedHpx - getToolbarHeight(c)) / curVH) * 100;
             lP = !isNaN(_savedLeftPx) ? (_savedLeftPx / curW) * 100 : (w.offsetLeft / curW) * 100;

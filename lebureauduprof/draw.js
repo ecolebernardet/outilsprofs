@@ -2132,6 +2132,40 @@ function _findActivePdfWidget() {
     });
 }
 
+// ── Détacher uniquement les listeners du widget courant (sans reset UI) ───────
+function _detachPdfAnnotListeners() {
+    if (_pdfAnnotEvTarget) {
+        _pdfAnnotEvTarget.removeEventListener('mousedown',   _pdfAnnotMouseDown);
+        _pdfAnnotEvTarget.removeEventListener('mousemove',   _pdfAnnotMouseMove);
+        _pdfAnnotEvTarget.removeEventListener('mouseup',     _pdfAnnotMouseUp);
+        _pdfAnnotEvTarget.removeEventListener('mouseleave',  _pdfAnnotMouseLeave);
+        _pdfAnnotEvTarget.removeEventListener('contextmenu', _pdfAnnotContextMenu);
+        _pdfAnnotEvTarget.removeEventListener('touchstart',  _pdfAnnotTouchStart);
+        _pdfAnnotEvTarget.removeEventListener('touchmove',   _pdfAnnotTouchMove);
+        _pdfAnnotEvTarget.removeEventListener('touchend',    _pdfAnnotTouchEnd);
+        _pdfAnnotEvTarget.removeEventListener('pointerdown', _pdfAnnotPointerDown);
+        _pdfAnnotEvTarget.removeEventListener('pointerup',   _pdfAnnotPointerUp);
+        const _pdfCanvasStop = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
+        if (_pdfCanvasStop) _pdfCanvasStop.removeEventListener('contextmenu', _pdfAnnotContextMenu, true);
+        // Effacer tous les curseurs inline forcés sur le widget et ses enfants
+        _pdfAnnotEvTarget.style.cursor = '';
+        _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.cursor = '');
+        _pdfAnnotEvTarget = null;
+    }
+    if (_pdfAnnotWidget) {
+        _pdfAnnotWidget.classList.remove('pdf-annot-target');
+        const wrap = _pdfAnnotWidget.querySelector('.pdf-canvas-wrap');
+        if (wrap) wrap.style.cursor = 'grab';
+    }
+    if (_pdfAnnotCanvas) {
+        _pdfAnnotCanvas.style.pointerEvents = 'none';
+        _pdfAnnotCanvas.style.cursor = '';
+    }
+    _pdfAnnotWidget   = null;
+    _pdfAnnotCanvas   = null;
+    _pdfAnnotPainting = false;
+}
+
 // ── Activer / désactiver le mode ──────────────────────────────────────────
 
 function togglePdfAnnotMode() {
@@ -2163,6 +2197,14 @@ function _startPdfAnnotMode() {
         return;
     }
 
+    // Si déjà en mode annotation sur un AUTRE widget : détacher les anciens listeners
+    // sans réinitialiser l'UI (on reste en mode annotation, on change juste de cible)
+    const _switching = _pdfAnnotMode && _pdfAnnotWidget !== target;
+    const _prevTool  = _pdfAnnotTool; // conserver l'outil lors d'un switch
+    if (_switching) {
+        _detachPdfAnnotListeners();
+    }
+
     // Désactiver le dessin sur le board pendant le mode annotation PDF
     if (isEraserMode) stopEraserMode();
     if (isDrawMode) stopDrawing_keepToolbar();
@@ -2170,7 +2212,7 @@ function _startPdfAnnotMode() {
     _pdfAnnotMode   = true;
     _pdfAnnotWidget = target;
     _pdfAnnotCanvas = annotCanvas;
-    _pdfAnnotTool   = 'pen'; // outil par défaut : stylo
+    _pdfAnnotTool   = _switching ? _prevTool : 'pen'; // conserver l'outil si switch, sinon pen
 
     // Griser les boutons cœur/étoile/flèche (incompatibles avec l'annotation PDF)
     ['draw-mode-heart-btn','draw-mode-star-btn','draw-mode-arrow-btn'].forEach(id => {
@@ -2231,57 +2273,32 @@ function _startPdfAnnotMode() {
     const wrapAtStart = target.querySelector('.pdf-canvas-wrap');
     if (wrapAtStart) wrapAtStart.style.cursor = '';
 
-    // Taille de gomme par défaut à 10 en mode annotation PDF
-    const _es = document.getElementById('eraser-size');
-    const _esl = document.getElementById('eraser-size-label');
-    const _esl2 = document.getElementById('eraser-size-shapes-label');
-    if (_es) { _es.value = 10; _es.dispatchEvent(new Event('input')); }
-    if (_esl) _esl.textContent = '10';
-    if (_esl2) _esl2.textContent = '10';
+    // Taille de gomme par défaut à 10 en mode annotation PDF (seulement à la première activation)
+    if (!_switching) {
+        const _es = document.getElementById('eraser-size');
+        const _esl = document.getElementById('eraser-size-label');
+        const _esl2 = document.getElementById('eraser-size-shapes-label');
+        if (_es) { _es.value = 10; _es.dispatchEvent(new Event('input')); }
+        if (_esl) _esl.textContent = '10';
+        if (_esl2) _esl2.textContent = '10';
+        _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
+    }
 
-    _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
+    // Forcer le bon curseur sur tous les enfants du nouveau widget
+    _updatePdfToolBtns();
 }
 
 function _stopPdfAnnotMode() {
     if (!_pdfAnnotMode) return;
 
-    // Détacher les événements du widget parent
-    if (_pdfAnnotEvTarget) {
-        _pdfAnnotEvTarget.removeEventListener('mousedown',   _pdfAnnotMouseDown);
-        _pdfAnnotEvTarget.removeEventListener('mousemove',   _pdfAnnotMouseMove);
-        _pdfAnnotEvTarget.removeEventListener('mouseup',     _pdfAnnotMouseUp);
-        _pdfAnnotEvTarget.removeEventListener('mouseleave',  _pdfAnnotMouseLeave);
-        _pdfAnnotEvTarget.removeEventListener('contextmenu', _pdfAnnotContextMenu);
-        _pdfAnnotEvTarget.removeEventListener('touchstart',  _pdfAnnotTouchStart);
-        _pdfAnnotEvTarget.removeEventListener('touchmove',   _pdfAnnotTouchMove);
-        _pdfAnnotEvTarget.removeEventListener('touchend',    _pdfAnnotTouchEnd);
-        _pdfAnnotEvTarget.removeEventListener('pointerdown', _pdfAnnotPointerDown);
-        _pdfAnnotEvTarget.removeEventListener('pointerup',   _pdfAnnotPointerUp);
-        const _pdfCanvasStop = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
-        if (_pdfCanvasStop) _pdfCanvasStop.removeEventListener('contextmenu', _pdfAnnotContextMenu, true);
-        _pdfAnnotEvTarget.style.cursor = '';
-        _pdfAnnotEvTarget = null;
-    }
-
-    // Remettre annotCanvas transparent + curseur grab sur canvasWrap
-    if (_pdfAnnotCanvas) {
-        _pdfAnnotCanvas.style.pointerEvents = 'none';
-        _pdfAnnotCanvas.style.cursor = '';
-    }
-    if (_pdfAnnotWidget) {
-        const wrap = _pdfAnnotWidget.querySelector('.pdf-canvas-wrap');
-        if (wrap) wrap.style.cursor = 'grab';
-    }
-
-    // Nettoyer le widget cible
-    if (_pdfAnnotWidget) _pdfAnnotWidget.classList.remove('pdf-annot-target');
-
-    // Supprimer le bouton ✕ overlay s'il est affiché
-    const _delBtn = document.getElementById('_annot-delete-btn');
-    if (_delBtn) _delBtn.remove();
-    ['_annot-resize-btn','_annot-rotate-btn','_annot-lock-btn'].forEach(id => {
+    // Supprimer les boutons overlay d'annotation s'ils sont affichés
+    ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn','_annot-lock-btn'].forEach(id => {
         const el = document.getElementById(id); if (el) el.remove();
     });
+
+    // Détacher les listeners et nettoyer le widget (met _pdfAnnotWidget/Canvas/EvTarget à null)
+    _detachPdfAnnotListeners();
+
     // Nettoyer les drags resize/rotate en cours
     if (_pdfResizeFigure) {
         document.removeEventListener('mousemove', _pdfFigureResizeMove);
@@ -2299,11 +2316,7 @@ function _stopPdfAnnotMode() {
         _pdfRotateText = null;
     }
 
-    _pdfAnnotMode     = false;
-    _pdfAnnotWidget   = null;
-    _pdfAnnotCanvas   = null;
-    _pdfAnnotEvTarget = null;
-    _pdfAnnotPainting = false;
+    _pdfAnnotMode = false;
 
     // Réactiver les boutons cœur/étoile/flèche
     ['draw-mode-heart-btn','draw-mode-star-btn','draw-mode-arrow-btn'].forEach(id => {

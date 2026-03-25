@@ -437,6 +437,23 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             pdfToolbar.addEventListener('touchstart', _onPdfToolbarDown, { passive: false });
             pdfToolbar.addEventListener('mouseup',    _onPdfToolbarUp);
         }
+
+        // Si le mode annotation PDF est actif et qu'on clique sur un autre widget PDF,
+        // re-basculer automatiquement le mode annotation sur ce widget
+        widget.addEventListener('mousedown', (e) => {
+            if (typeof _pdfAnnotMode === 'undefined' || !_pdfAnnotMode) return;
+            if (window._pdfAnnotWidget === widget) return; // déjà sur ce widget
+            // Ne switcher que si on clique sur la zone de contenu (canvas, canvasWrap)
+            // et pas sur les boutons, toolbar, labels, inputs
+            if (e.target.closest('button, label, input, select, a, .editor-toolbar')) return;
+            if (typeof _startPdfAnnotModeOn === 'function') _startPdfAnnotModeOn(widget);
+        });
+        widget.addEventListener('touchstart', (e) => {
+            if (typeof _pdfAnnotMode === 'undefined' || !_pdfAnnotMode) return;
+            if (window._pdfAnnotWidget === widget) return;
+            if (e.target.closest('button, label, input, select, a, .editor-toolbar')) return;
+            if (typeof _startPdfAnnotModeOn === 'function') _startPdfAnnotModeOn(widget);
+        }, { passive: true });
     }
 
     if (type === 'time')  { if (typeof initTimeWidget  === 'function') initTimeWidget(widget); }

@@ -249,6 +249,110 @@
             border-radius: 0 !important;
             margin: 0 !important;
         }
+
+        /* ── Barre d'onglets PDF plein écran ─────────────────────────── */
+        #pdf-fs-tabbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 38px;
+            background: #1a1a2e;
+            display: flex;
+            align-items: stretch;
+            gap: 2px;
+            padding: 4px 6px 0 6px;
+            z-index: 10001;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+        }
+        #pdf-fs-tabbar::-webkit-scrollbar { height: 3px; }
+        #pdf-fs-tabbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .pdf-fs-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 10px 0 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            color: rgba(255,255,255,0.55);
+            font-size: 12px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            white-space: nowrap;
+            max-width: 180px;
+            min-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background 0.15s, color 0.15s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .pdf-fs-tab:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.8); }
+        .pdf-fs-tab .tab-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .pdf-fs-tab .tab-wf-btn {
+            flex-shrink: 0;
+            width: 13px; height: 13px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0;
+            transition: filter .15s, transform .1s;
+            position: relative;
+        }
+        .pdf-fs-tab .tab-wf-btn:hover { filter: brightness(0.82); transform: scale(1.15); }
+        .pdf-fs-tab .tab-wf-btn:active { transform: scale(0.92); }
+        .pdf-fs-tab .tab-wf-btn-max  { background: #28c840; }
+        .pdf-fs-tab .tab-wf-btn-close { background: #ff5f57; }
+        .pdf-fs-tab:hover .tab-wf-btn::after { font-size: 8px; font-weight: 900; color: rgba(0,0,0,0.5); line-height: 1; }
+        .pdf-fs-tab:hover .tab-wf-btn-max::after   { content: '⤢'; font-size: 7px; }
+        .pdf-fs-tab:hover .tab-wf-btn-close::after { content: '×'; font-size: 10px; }
+        .pdf-fs-tab.active {
+            background: #3a3a5c;
+            color: white;
+            border-color: #4a90e2;
+            box-shadow: inset 0 -2px 0 #4a90e2;
+        }
+        #pdf-fs-exit-all {
+            flex-shrink: 0;
+            align-self: center;
+            margin: 0 4px 4px 4px;
+            padding: 3px 10px;
+            background: rgba(255, 95, 87, 0.18);
+            border: 1px solid rgba(255, 95, 87, 0.4);
+            border-radius: 5px;
+            color: rgba(255,200,200,0.85);
+            font-size: 11px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+        }
+        #pdf-fs-exit-all:hover {
+            background: #ff5f57;
+            color: white;
+            border-color: #ff5f57;
+        }
+
+        /* Quand la tabbar est visible, les PDFs fullboard doivent être décalés */
+        .editor-container.wf-pdf-fullboard.pdf-fs-tabbed {
+            top: 38px !important;
+            height: calc(100% - 38px) !important;
+        }
+        /* Widget associé aussi */
+        .widget.wf-pdf-widget-tabbed {
+            top: 38px !important;
+            height: calc(100% - 38px) !important;
+        }
         .widget-pin-handle:hover    { background: white; }
         .widget-back-handle:hover   { background: white; }
         .widget-rotate-handle:hover { color: #5a1fb8; background: white; }
@@ -2225,7 +2329,6 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
                         if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode();
                         if (typeof stopDrawing === 'function') stopDrawing();
                     } else {
-                        if (window._pdfAnnotMode) { if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode(); }
                         if (!tbVisible) { if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar(); }
                         if (typeof _startPdfAnnotModeOn === 'function') _startPdfAnnotModeOn(thisWidget);
                         else if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode();
@@ -2374,6 +2477,30 @@ async function _cleanOrphanPdfs() {
 // VARIABLES GLOBALES
 // =========================================================================
 var board = document.getElementById('board');
+
+// Observer les suppressions de widgets PDF en plein écran pour mettre à jour la tabbar
+(function() {
+    const _boardObs = new MutationObserver(function(mutations) {
+        // Ignorer si la fermeture est gérée manuellement (bouton rouge de l'onglet)
+        if (window._pdfFsManualClose) return;
+        let needRefresh = false;
+        mutations.forEach(function(m) {
+            m.removedNodes.forEach(function(node) {
+                if (node.nodeType === 1 && node.classList &&
+                    (node.classList.contains('widget') || node.querySelector && node.querySelector('.wf-pdf-fullboard'))) {
+                    needRefresh = true;
+                }
+            });
+        });
+        if (needRefresh && typeof _refreshPdfTabBar === 'function') {
+            setTimeout(_refreshPdfTabBar, 50);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const b = document.getElementById('board');
+        if (b) _boardObs.observe(b, { childList: true, subtree: false });
+    });
+})();
 var undoStack = [], redoStack = [];
 var MAX_UNDO = 60;
 let isInitialLoading = true;
@@ -2508,6 +2635,29 @@ document.addEventListener('keydown', (e) => {
         !e.target.closest('input') &&
         !e.target.closest('textarea')) {
         pasteWidgets();
+    }
+
+    // Navigation entre onglets PDF plein écran
+    // Escape → quitter le plein écran de l'onglet actif
+    // ArrowLeft / ArrowRight → switcher d'onglet
+    if (typeof _getPdfFsContainers === 'function') {
+        const fsCont = _getPdfFsContainers();
+        if (fsCont.length >= 2) {
+            const tabBar = document.getElementById('pdf-fs-tabbar');
+            if (tabBar && tabBar.style.display !== 'none') {
+                const visibleIdx = fsCont.findIndex(c => !c.classList.contains('pdf-fs-hidden'));
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    const active = fsCont[visibleIdx];
+                    if (active) togglePdfBoardFullscreen(active);
+                } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const dir = e.key === 'ArrowRight' ? 1 : -1;
+                    const next = (visibleIdx + dir + fsCont.length) % fsCont.length;
+                    _activatePdfFsTab(fsCont[next]);
+                }
+            }
+        }
     }
 });
 
@@ -3432,40 +3582,238 @@ function _updateEraserBtnInPanel() {
 // =========================================================================
 // PLEIN ÉCRAN BOARD — PDF (occupe le board sans F11)
 // =========================================================================
+// =========================================================================
+// PDF PLEIN ÉCRAN BOARD — Système d'onglets multi-PDF
+// =========================================================================
+
+// Retourne ou crée la barre d'onglets
+function _getPdfTabBar() {
+    let bar = document.getElementById('pdf-fs-tabbar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'pdf-fs-tabbar';
+        bar.style.display = 'none';
+        document.body.appendChild(bar);
+    }
+    return bar;
+}
+
+// Retourne tous les containers PDF actuellement en plein écran board
+function _getPdfFsContainers() {
+    return Array.from(document.querySelectorAll('.editor-container.wf-pdf-fullboard'));
+}
+
+// Reconstruit la barre d'onglets à partir des PDFs en cours
+function _refreshPdfTabBar() {
+    const bar = _getPdfTabBar();
+    const containers = _getPdfFsContainers();
+
+    if (containers.length < 2) {
+        // 0 ou 1 PDF en plein écran → pas de barre d'onglets
+        bar.style.display = 'none';
+        bar.innerHTML = '';
+        // Retirer la classe tabbed de tous
+        containers.forEach(c => {
+            c.classList.remove('pdf-fs-tabbed');
+            const w = c.closest('.widget');
+            if (w) w.classList.remove('wf-pdf-widget-tabbed');
+        });
+        return;
+    }
+
+    bar.style.display = 'flex';
+
+    // Reconstruire les onglets
+    bar.innerHTML = '';
+    containers.forEach((c, i) => {
+        const widget = c.closest('.widget');
+        const filename = (widget && widget.dataset.pdfName) || c.querySelector('.pdf-filename')?.textContent || ('PDF ' + (i + 1));
+        const isActive = !c.classList.contains('pdf-fs-hidden');
+
+        const tab = document.createElement('div');
+        tab.className = 'pdf-fs-tab' + (isActive ? ' active' : '');
+        tab.dataset.idx = i;
+        tab.innerHTML = `
+            <span class="tab-label" title="${filename}">📄 ${filename}</span>
+            <button class="tab-wf-btn tab-wf-btn-max"  title="Quitter le plein écran pour ce PDF"></button>
+            <button class="tab-wf-btn tab-wf-btn-close" title="Fermer ce PDF"></button>
+        `;
+
+        // Clic sur l'onglet → activer ce PDF
+        tab.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('tab-wf-btn')) return;
+            e.stopPropagation();
+            _activatePdfFsTab(c);
+        });
+        tab.addEventListener('touchend', (e) => {
+            if (e.target.classList.contains('tab-wf-btn')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            _activatePdfFsTab(c);
+        });
+
+        // Bouton vert → quitter le plein écran pour ce PDF
+        tab.querySelector('.tab-wf-btn-max').addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePdfBoardFullscreen(c);
+        });
+
+        // Bouton rouge → fermer le PDF (supprimer le widget)
+        tab.querySelector('.tab-wf-btn-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const w = c.closest('.widget');
+            const wasActive = !c.classList.contains('pdf-fs-hidden');
+
+            // Retirer ce container de l'état fullscreen sans toucher aux autres
+            _exitFsOne(c);
+
+            // Supprimer le widget du DOM
+            if (w) {
+                snapshotNow();
+                if (w.dataset.pdfId) localStorage.removeItem(w.dataset.pdfId);
+                window._pdfFsManualClose = true;
+                w.remove();
+                window._pdfFsManualClose = false;
+                saveBoard();
+            }
+
+            // Si c'était l'onglet actif, activer un autre
+            if (wasActive) {
+                const remaining = _getPdfFsContainers();
+                if (remaining.length > 0) {
+                    _activatePdfFsTab(remaining[0]);
+                    return; // _activatePdfFsTab appelle _refreshPdfTabBar
+                }
+            }
+            _refreshPdfTabBar();
+        });
+
+        bar.appendChild(tab);
+
+        // Appliquer la classe tabbed pour le décalage
+        c.classList.add('pdf-fs-tabbed');
+        if (widget) widget.classList.add('wf-pdf-widget-tabbed');
+    });
+
+    // Espaceur poussant le bouton "Tout quitter" à droite
+    const spacer = document.createElement('div');
+    spacer.style.cssText = 'flex:1;min-width:8px;';
+    bar.appendChild(spacer);
+
+    // Bouton "Tout quitter"
+    const exitAllBtn = document.createElement('button');
+    exitAllBtn.id = 'pdf-fs-exit-all';
+    exitAllBtn.title = 'Quitter le plein écran pour tous les PDFs';
+    exitAllBtn.textContent = '✕ Tout quitter';
+    exitAllBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Restaurer tous les PDFs en une passe, puis rafraîchir la tabbar une seule fois
+        _getPdfFsContainers().slice().forEach(c => _exitFsOne(c));
+        _refreshPdfTabBar();
+    });
+    bar.appendChild(exitAllBtn);
+}
+
+// Active un PDF (le rend visible), cache les autres
+function _activatePdfFsTab(targetContainer) {
+    const containers = _getPdfFsContainers();
+    containers.forEach(c => {
+        const widget = c.closest('.widget');
+        if (c === targetContainer) {
+            c.classList.remove('pdf-fs-hidden');
+            c.style.display = '';
+            if (widget) { widget.style.display = ''; widget.style.visibility = 'visible'; }
+        } else {
+            c.classList.add('pdf-fs-hidden');
+            c.style.display = 'none';
+            if (widget) { widget.style.visibility = 'hidden'; widget.style.display = 'none'; }
+        }
+    });
+    // Si le mode annotation PDF est actif, le ré-attacher sur le nouveau widget visible
+    const targetWidget = targetContainer.closest('.widget');
+    if (targetWidget && typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode &&
+        typeof _startPdfAnnotModeOn === 'function') {
+        _startPdfAnnotModeOn(targetWidget);
+    }
+    _refreshPdfTabBar();
+}
+
+// Restaure UN container hors plein écran SANS toucher à la tabbar
+// (à appeler en batch ; appeler _refreshPdfTabBar() après)
+function _exitFsOne(container) {
+    const widget = container.closest('.widget');
+    container.classList.remove('wf-pdf-fullboard');
+    container.classList.remove('pdf-fs-tabbed');
+    container.classList.remove('pdf-fs-hidden');
+    container.style.display    = '';
+    container.style.width      = container.dataset.pfSavedW || '';
+    container.style.height     = container.dataset.pfSavedH || '';
+    if (widget) {
+        widget.classList.remove('wf-pdf-widget-tabbed');
+        widget.style.position   = container.dataset.pfSavedWPos  || '';
+        widget.style.top        = container.dataset.pfSavedWTop  || '';
+        widget.style.left       = container.dataset.pfSavedWLeft || '';
+        widget.style.zIndex     = container.dataset.pfSavedWZ    || '';
+        widget.style.width      = '';
+        widget.style.height     = '';
+        widget.style.display    = '';
+        widget.style.visibility = '';
+    }
+}
+
 function togglePdfBoardFullscreen(container) {
     if (!container) return;
     const widget = container.closest('.widget');
     const isMax = container.classList.contains('wf-pdf-fullboard');
+
     if (isMax) {
-        // Restaurer
-        container.classList.remove('wf-pdf-fullboard');
-        container.style.width  = container.dataset.pfSavedW  || '';
-        container.style.height = container.dataset.pfSavedH  || '';
-        if (widget) {
-            widget.style.position = container.dataset.pfSavedWPos || '';
-            widget.style.top      = container.dataset.pfSavedWTop || '';
-            widget.style.left     = container.dataset.pfSavedWLeft || '';
-            widget.style.zIndex   = container.dataset.pfSavedWZ   || '';
-            widget.style.width    = '';
-            widget.style.height   = '';
+        // ── Sortir du plein écran (ce PDF uniquement) ──────────────────
+        _exitFsOne(container);
+
+        // Si d'autres PDFs sont encore en fullscreen, s'assurer qu'il y en a un visible
+        const remaining = _getPdfFsContainers();
+        if (remaining.length > 0) {
+            const visible = remaining.find(c => !c.classList.contains('pdf-fs-hidden'));
+            if (!visible) _activatePdfFsTab(remaining[0]);
+            else _refreshPdfTabBar();
+        } else {
+            _refreshPdfTabBar();
         }
+
     } else {
-        // Sauvegarder et maximiser
-        container.dataset.pfSavedW    = container.style.width  || container.offsetWidth  + 'px';
-        container.dataset.pfSavedH    = container.style.height || container.offsetHeight + 'px';
-        if (widget) {
-            container.dataset.pfSavedWPos  = widget.style.position || '';
-            container.dataset.pfSavedWTop  = widget.style.top      || '';
-            container.dataset.pfSavedWLeft = widget.style.left     || '';
-            container.dataset.pfSavedWZ    = widget.style.zIndex   || '';
-            widget.style.position = 'fixed';
-            widget.style.top      = '0';
-            widget.style.left     = '0';
-            widget.style.width    = '100%';
-            widget.style.height   = '100%';
-            widget.style.zIndex   = '9999';
+        // ── Mettre en plein écran ──────────────────────────────────────
+        // Fonction interne : passer UN container en fullscreen sans récursion
+        function _enterFs(c) {
+            const w = c.closest('.widget');
+            c.dataset.pfSavedW    = c.style.width  || c.offsetWidth  + 'px';
+            c.dataset.pfSavedH    = c.style.height || c.offsetHeight + 'px';
+            if (w) {
+                c.dataset.pfSavedWPos  = w.style.position || '';
+                c.dataset.pfSavedWTop  = w.style.top      || '';
+                c.dataset.pfSavedWLeft = w.style.left     || '';
+                c.dataset.pfSavedWZ    = w.style.zIndex   || '';
+                w.style.position   = 'fixed';
+                w.style.top        = '0';
+                w.style.left       = '0';
+                w.style.width      = '100%';
+                w.style.height     = '100%';
+                w.style.zIndex     = '9999';
+            }
+            c.classList.add('wf-pdf-fullboard');
         }
-        container.classList.add('wf-pdf-fullboard');
+
+        // Passer ce container en fullscreen
+        _enterFs(container);
+
+        // Passer AUSSI tous les autres widgets PDF (non encore en fullscreen) en fullscreen
+        const allPdfContainers = Array.from(
+            document.querySelectorAll('.widget[data-type="pdf"] .editor-container')
+        ).filter(c => c !== container && !c.classList.contains('wf-pdf-fullboard'));
+
+        allPdfContainers.forEach(c => _enterFs(c));
+
+        // Activer l'onglet du PDF qu'on vient d'ouvrir, cacher les autres
+        _activatePdfFsTab(container);
     }
 }
 
