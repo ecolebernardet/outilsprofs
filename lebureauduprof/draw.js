@@ -2264,7 +2264,7 @@ function _stopPdfAnnotMode() {
     // Supprimer le bouton ✕ overlay s'il est affiché
     const _delBtn = document.getElementById('_annot-delete-btn');
     if (_delBtn) _delBtn.remove();
-    ['_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+    ['_annot-resize-btn','_annot-rotate-btn','_annot-lock-btn'].forEach(id => {
         const el = document.getElementById(id); if (el) el.remove();
     });
     // Nettoyer les drags resize/rotate en cours

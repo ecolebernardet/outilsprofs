@@ -93,7 +93,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     canvasWrap.addEventListener('mouseleave', _endDrag);
     // Supprimer les boutons overlay si l'utilisateur scrolle (position désynchronisée)
     canvasWrap.addEventListener('scroll', () => {
-        ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+        ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn','_annot-lock-btn'].forEach(id => {
             const el = document.getElementById(id); if (el) el.remove();
         });
     });
@@ -246,7 +246,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
             // Supprime tous les boutons overlay de figure
             function _removeAnnotFigureHandles() {
-                ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn'].forEach(id => {
+                ['_annot-delete-btn','_annot-resize-btn','_annot-rotate-btn','_annot-lock-btn'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.remove();
                 });
@@ -302,7 +302,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 );
             }
 
-            // Affiche les 3 boutons overlay pour une figure sélectionnée
+            // Affiche les 4 boutons overlay pour une figure sélectionnée
             // bbox : { x, y, w, h } en pixels canvas
             function _showAnnotFigureHandles(index, bbox) {
                 _removeAnnotFigureHandles();
@@ -322,11 +322,24 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     }
                 );
 
+                // 🔒 haut-gauche : ancrer (verrouiller)
+                _makeAnnotHandle('_annot-lock-btn', x, y,
+                    '#e67e22', 'Ancrer la figure (ne plus pouvoir la sélectionner)', '🔒',
+                    null,
+                    () => {
+                        const layer2 = getLayer(currentPage);
+                        if (!layer2.history) layer2.history = [];
+                        layer2.history.push([...layer2.strokes]);
+                        if (layer2.history.length > 30) layer2.history.shift();
+                        layer2.strokes[index] = { ...layer2.strokes[index], locked: true };
+                        redrawAnnotations(currentPage);
+                    }
+                );
+
                 // ⤡ bas-droit : resize
                 _makeAnnotHandle('_annot-resize-btn', x + w, y + h,
                     '#27ae60', 'Redimensionner', '⤡',
                     (e) => {
-                        // Notifier draw.js pour démarrer le resize drag
                         if (typeof window._pdfFigureResizeStart === 'function') {
                             window._pdfFigureResizeStart(index, e);
                         }
@@ -338,7 +351,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 _makeAnnotHandle('_annot-rotate-btn', x, y + h,
                     '#8e44ad', 'Faire pivoter', '↻',
                     (e) => {
-                        // Notifier draw.js pour démarrer la rotation drag
                         if (typeof window._pdfFigureRotateStart === 'function') {
                             window._pdfFigureRotateStart(index, e);
                         }
@@ -1163,11 +1175,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     findFigureStrokeAt(px, py) {
                         const layer = getLayer(currentPage);
                         const canvasW = annotCanvas.width;
-                        const HIT_PAD = 8 * canvasW / 600; // tolérance de hit en px
+                        const HIT_PAD = 8 * canvasW / 600;
                         for (let i = layer.strokes.length - 1; i >= 0; i--) {
                             const s = layer.strokes[i];
                             if (s.tool !== 'figure' || !s.pts || s.pts.length < 2) continue;
-                            // Bounding box en pixels canvas
+                            if (s.locked) continue; // figure ancrée : invisible à la sélection
                             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                             s.pts.forEach(p => {
                                 const cp = fromNorm(p.x, p.y);
@@ -1176,7 +1188,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                                 if (cp.x > maxX) maxX = cp.x;
                                 if (cp.y > maxY) maxY = cp.y;
                             });
-                            // Vérification dans le bounding box élargi
                             if (px >= minX - HIT_PAD && px <= maxX + HIT_PAD &&
                                 py >= minY - HIT_PAD && py <= maxY + HIT_PAD) {
                                 return { index: i, stroke: s, bbox: { minX, minY, maxX, maxY } };
