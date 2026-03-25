@@ -1764,6 +1764,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>Le Compte est Bon</div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				</div></div>
 			</div>
@@ -4215,6 +4216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <script src="widgets.js"></script>
+<script src="widget-compte-est-bon.js"></script>
 <script src="widget-mots-alpha.js"></script>
 <script src="widgets_minuteur_chrono.js"></script>
 <script src="widget-sonometre.js"></script>
