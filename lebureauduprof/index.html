@@ -1327,6 +1327,164 @@
 		.sp-close { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; line-height: 1; padding: 0; transition: color .15s; }
 		.sp-close:hover { color: #fff; }
 
+
+/* ── Bibliothèque PDF ─────────────────────────────────────────────── */
+:root {
+    --pdf-lib-w: 320px;
+    --pdf-lib-bg: #1a1a24;
+    --pdf-lib-border: rgba(255,255,255,0.1);
+    --pdf-lib-hover: rgba(255,255,255,0.06);
+    --pdf-lib-selected: rgba(74,144,226,0.22);
+    --pdf-lib-text: rgba(255,255,255,0.88);
+    --pdf-lib-muted: rgba(255,255,255,0.45);
+    --pdf-lib-error: #ff6b6b;
+    --pdf-lib-accent: #4a90e2;
+}
+#pdf-library-panel {
+    position: fixed;
+    top: 0; right: calc(-1 * var(--pdf-lib-w));
+    width: var(--pdf-lib-w);
+    height: 100%;
+    background: var(--pdf-lib-bg);
+    border-left: 1px solid var(--pdf-lib-border);
+    z-index: 12500;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+}
+#pdf-library-panel.pdf-lib-open { right: 0; }
+#pdf-library-panel.pdf-lib-resizing { transition: none !important; }
+body.presentation-mode #pdf-library-panel,
+body.presentation-mode #pdf-library-tab { display: none !important; }
+/* Poignée de redimensionnement — bord gauche du panneau */
+#pdf-library-resize-handle {
+    position: absolute;
+    left: -4px; top: 0;
+    width: 8px; height: 100%;
+    cursor: ew-resize;
+    z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+}
+#pdf-library-resize-handle::after {
+    content: '';
+    display: block;
+    width: 3px; height: 40px;
+    background: var(--pdf-lib-border);
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+#pdf-library-resize-handle:hover::after { background: var(--pdf-lib-accent); }
+/* Onglet déclencheur sur le bord droit */
+#pdf-library-tab {
+    position: fixed;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 22px; height: 64px;
+    background: var(--pdf-lib-bg);
+    border: 1px solid var(--pdf-lib-border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    z-index: 12499;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--pdf-lib-muted);
+    transition: color 0.15s, background 0.15s, right 0.25s cubic-bezier(.4,0,.2,1);
+    writing-mode: vertical-rl;
+    letter-spacing: 1px;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+}
+#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); }
+#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); }
+#pdf-library-tab.pdf-lib-resizing { transition: none !important; }
+/* En-tête du panneau */
+#pdf-library-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--pdf-lib-border);
+    flex-shrink: 0;
+}
+#pdf-library-header span { font-size: 12px; font-weight: 600; color: var(--pdf-lib-text); }
+#pdf-library-close {
+    background: none; border: none; color: var(--pdf-lib-muted);
+    cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1;
+    transition: color 0.15s;
+}
+#pdf-library-close:hover { color: var(--pdf-lib-text); }
+/* Fil d'Ariane */
+#pdf-library-breadcrumb {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--pdf-lib-border);
+    min-height: 30px;
+    flex-shrink: 0;
+}
+.pdf-lib-crumb {
+    font-size: 11px; color: var(--pdf-lib-accent);
+    cursor: pointer; padding: 1px 3px; border-radius: 3px;
+    transition: background 0.1s;
+    white-space: nowrap; max-width: 120px;
+    overflow: hidden; text-overflow: ellipsis;
+}
+.pdf-lib-crumb:hover { background: rgba(74,144,226,0.15); }
+.pdf-lib-crumb-active { color: var(--pdf-lib-text); cursor: default; font-weight: 500; }
+.pdf-lib-crumb-active:hover { background: none; }
+.pdf-lib-sep { font-size: 10px; color: var(--pdf-lib-muted); padding: 0 1px; }
+/* Liste des fichiers */
+#pdf-library-list {
+    flex: 1; overflow-y: auto;
+    padding: 4px 0;
+}
+#pdf-library-list::-webkit-scrollbar { width: 4px; }
+#pdf-library-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.pdf-lib-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-radius: 4px; margin: 0 4px;
+}
+.pdf-lib-item:hover { background: var(--pdf-lib-hover); }
+.pdf-lib-item.pdf-lib-selected { background: var(--pdf-lib-selected); }
+.pdf-lib-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+.pdf-lib-name {
+    font-size: 12px; color: var(--pdf-lib-text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pdf-lib-dir .pdf-lib-name { color: rgba(255,255,255,0.75); }
+.pdf-lib-loading, .pdf-lib-empty {
+    font-size: 12px; color: var(--pdf-lib-muted);
+    text-align: center; padding: 20px 12px;
+}
+/* Pied de panneau */
+#pdf-library-footer {
+    padding: 8px 10px;
+    border-top: 1px solid var(--pdf-lib-border);
+    flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 5px;
+}
+#pdf-library-status {
+    font-size: 11px; color: var(--pdf-lib-muted);
+    text-align: center; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+}
+#pdf-library-choose {
+    width: 100%; font-size: 12px; padding: 6px 0;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--pdf-lib-border);
+    border-radius: 6px; color: var(--pdf-lib-muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+#pdf-library-choose:hover { background: rgba(255,255,255,0.12); color: var(--pdf-lib-text); }
+#pdf-library-reopen {
+    width: 100%; font-size: 12px; padding: 6px 0;
+    background: rgba(74,144,226,0.15);
+    border: 1px solid rgba(74,144,226,0.4);
+    border-radius: 6px; color: var(--pdf-lib-accent);
+    cursor: pointer; transition: background 0.15s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#pdf-library-reopen:hover { background: rgba(74,144,226,0.28); }
 </style>
 </head>
 <body>
@@ -1524,6 +1682,7 @@
 				<span class="mm-ico">📦</span>&nbsp;&nbsp;Widgets<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;PDF</div>
+				<div class="mm-sub-item" id="pdf-library-menu-btn" onclick="togglePdfLibrary();closeMainMenu()"><span class="mm-ico">📚</span>&nbsp;&nbsp;Bibliothèque PDF</div>
 				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>&nbsp;&nbsp;Fenêtre Web</div>
 				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>&nbsp;&nbsp;YouTube</div>
 				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date</div>
@@ -3754,5 +3913,23 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     window.electronAPI.notifyReady();
 }
 </script>
+<!-- ── Bibliothèque PDF ──────────────────────────────────────────────── -->
+<div id="pdf-library-panel">
+    <div id="pdf-library-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="pdf-library-header">
+        <span>📚 Bibliothèque PDF</span>
+        <button id="pdf-library-close" onclick="togglePdfLibrary()" title="Fermer">✕</button>
+    </div>
+    <div id="pdf-library-breadcrumb"></div>
+    <div id="pdf-library-list"></div>
+    <div id="pdf-library-footer">
+        <div id="pdf-library-status">Aucun dossier sélectionné</div>
+        <button id="pdf-library-choose" onclick="pdfLibChooseFolder()">📂 Choisir un dossier…</button>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord droit -->
+<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF">PDF</button>
+
+<script src="pdf-library.js"></script>
 </body>
 </html>

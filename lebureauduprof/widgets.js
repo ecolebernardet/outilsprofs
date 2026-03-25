@@ -293,7 +293,21 @@ function _updateActionBarCompact(widget) {
 // CRÉATION DE WIDGET
 // =========================================================================
 function createWidget(type, x = null, y = null, doSnapshot = true) {
-    if (x === null || y === null) { const p = findFreePosition(); x = p.x + 'px'; y = p.y + 'px'; }
+    if (x === null || y === null) {
+        if (type === 'pdf') {
+            const all = Array.from(document.querySelectorAll('.widget[data-type="pdf"]'));
+            if (all.length === 0) {
+                x = Math.round(window.innerWidth * 0.08) + 'px';
+                y = '60px';
+            } else {
+                const last = all[all.length - 1];
+                x = (last.offsetLeft + 50) + 'px';
+                y = (last.offsetTop  + 50) + 'px';
+            }
+        } else {
+            const p = findFreePosition(); x = p.x + 'px'; y = p.y + 'px';
+        }
+    }
     if (doSnapshot && !isInitialLoading && !isRestoringState) snapshotNow();
 
     const widget = document.createElement('div');
