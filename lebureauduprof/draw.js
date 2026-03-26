@@ -1689,6 +1689,19 @@ function initSelectionRect() {
     board.appendChild(selectionRect);
 }
 
+// Hit-test manuel pour trouver un .widget ou .shape-widget sous un point (x, y) écran.
+// Nécessaire parce que les SVG des shape-widgets ont pointer-events:none :
+// avec le stylet, e.target pointe sur l'élément derrière le widget, pas sur le widget lui-même.
+function _findWidgetAtPoint(clientX, clientY) {
+    // elementsFromPoint retourne tous les éléments empilés sous le point, du plus haut au plus bas
+    const els = document.elementsFromPoint(clientX, clientY);
+    for (const el of els) {
+        const w = el.closest('.widget, .shape-widget');
+        if (w) return w;
+    }
+    return null;
+}
+
 function initBoardSelection() {
     initSelectionRect();
     board.addEventListener('mousedown', onBoardMouseDown);
@@ -1697,11 +1710,27 @@ function initBoardSelection() {
         if (e.pointerType === 'mouse') return; // déjà géré par mousedown
         if (isDrawMode || isEraserMode) return;
         if (e.button !== 0) return;
-        const target = e.target;
-        if (target.closest('.geo-tool-overlay')) return;
-        if (target.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, #selection-controls, #toolbar-container, #shape-edit-panel')) return;
+
+        // Le SVG des shape-widgets a pointer-events:none, donc e.target peut
+        // pointer sur le board ou le canvas au lieu du widget.
+        // On fait un hit-test manuel en cherchant le widget le plus proche
+        // parmi tous les éléments sous le stylet.
+        let target = e.target;
+        const realTarget = _findWidgetAtPoint(e.clientX, e.clientY) || target;
+
+        if (realTarget.closest('.geo-tool-overlay')) return;
+        if (realTarget.closest('button, a, input, select, textarea, .widget-action-bar, .widget-ctx-menu, #selection-controls, #toolbar-container, #shape-edit-panel')) return;
         e.preventDefault();
-        onBoardMouseDown(e);
+        // Construire un event synthétique avec le bon target
+        const synth = {
+            clientX: e.clientX,
+            clientY: e.clientY,
+            target:  realTarget,
+            ctrlKey: e.ctrlKey,
+            metaKey: e.metaKey,
+            button:  0,
+        };
+        onBoardMouseDown(synth);
     });
     board.addEventListener('touchstart', (e) => {
         if (isDrawMode || isEraserMode) return; // géré par _boardDrawTouchStart

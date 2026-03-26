@@ -766,6 +766,7 @@ function startWidgetDrag(e, elmnt) {
     let px = e.clientX, py = e.clientY;
 
     function onMove(ev) {
+        // Pointer events (stylet/touch) et touch events ont clientX direct ou via touches
         const point = ev.touches ? ev.touches[0] : ev;
         const dx = point.clientX - px;
         const dy = point.clientY - py;
@@ -777,12 +778,19 @@ function startWidgetDrag(e, elmnt) {
         if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
     }
 
+    function onPointerMove(ev) {
+        if (ev.pointerType === 'mouse') return; // géré par mousemove
+        onMove(ev);
+    }
+
     function onEnd() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup',   onEnd);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend',  onEnd);
-        document.onmousemove = null;
+        document.removeEventListener('mousemove',    onMove);
+        document.removeEventListener('mouseup',      onEnd);
+        document.removeEventListener('pointermove',  onPointerMove);
+        document.removeEventListener('pointerup',    onEnd);
+        document.removeEventListener('pointercancel',onEnd);
+        document.removeEventListener('touchmove',    onMove);
+        document.removeEventListener('touchend',     onEnd);
         overlays.forEach(o => o.remove());
         const curW = window.innerWidth, curVH = virtualH(curW);
         groupMembers.forEach(w => {
@@ -793,22 +801,13 @@ function startWidgetDrag(e, elmnt) {
         saveBoard();
     }
 
-    document.addEventListener('mousemove',   onMove);
-    document.addEventListener('mouseup',     onEnd);
-    document.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'mouse') onMove(ev); });
-    document.addEventListener('pointerup',   (ev) => { if (ev.pointerType !== 'mouse') onEnd(); });
-    document.addEventListener('touchmove',   onMove, { passive: false });
-    document.addEventListener('touchend',    onEnd);
-    // Nettoyer les anciens handlers onmousemove/onmouseup si présents
-    document.onmousemove = null;
-    document.onmouseup   = null;
-
-    const _cleanPointer = () => {
-        document.removeEventListener('mousemove',   onMove);
-        document.removeEventListener('mouseup',     onEnd);
-        document.removeEventListener('touchmove',   onMove);
-        document.removeEventListener('touchend',    onEnd);
-    };
+    document.addEventListener('mousemove',    onMove);
+    document.addEventListener('mouseup',      onEnd);
+    document.addEventListener('pointermove',  onPointerMove);
+    document.addEventListener('pointerup',    onEnd);
+    document.addEventListener('pointercancel',onEnd);
+    document.addEventListener('touchmove',    onMove, { passive: false });
+    document.addEventListener('touchend',     onEnd);
 }
 
 
@@ -851,25 +850,34 @@ function makeDraggableRotate(elmnt) {
             }
         }
 
+        function onPointerMove(ev) {
+            if (ev.pointerType === 'mouse') return;
+            onMove(ev);
+        }
+        function onPointerEnd(ev) {
+            if (ev.pointerType === 'mouse') return;
+            onEnd();
+        }
+
         function onEnd() {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup',   onEnd);
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend',  onEnd);
-            document.onmousemove = null;
-            document.onmouseup   = null;
+            document.removeEventListener('mousemove',    onMove);
+            document.removeEventListener('mouseup',      onEnd);
+            document.removeEventListener('pointermove',  onPointerMove);
+            document.removeEventListener('pointerup',    onPointerEnd);
+            document.removeEventListener('pointercancel',onPointerEnd);
+            document.removeEventListener('touchmove',    onMove);
+            document.removeEventListener('touchend',     onEnd);
             hideRotationIndicator();
             saveBoard();
         }
 
-        document.addEventListener('mousemove',   onMove);
-        document.addEventListener('mouseup',     onEnd);
-        document.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'mouse') onMove(ev); });
-        document.addEventListener('pointerup',   (ev) => { if (ev.pointerType !== 'mouse') onEnd(); });
-        document.addEventListener('touchmove',   onMove, { passive: false });
-        document.addEventListener('touchend',    onEnd);
-        document.onmousemove = null;
-        document.onmouseup   = null;
+        document.addEventListener('mousemove',    onMove);
+        document.addEventListener('mouseup',      onEnd);
+        document.addEventListener('pointermove',  onPointerMove);
+        document.addEventListener('pointerup',    onPointerEnd);
+        document.addEventListener('pointercancel',onPointerEnd);
+        document.addEventListener('touchmove',    onMove, { passive: false });
+        document.addEventListener('touchend',     onEnd);
     }
 
     handle.onmousedown = (e) => {
