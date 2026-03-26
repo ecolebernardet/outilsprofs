@@ -239,6 +239,16 @@
         .wf-btns:hover .wf-btn-min::after   { content:'−'; }
         .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
         .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
+        /* État plein écran board iframe */
+        .editor-container.wf-iframe-fullboard {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+        }
         /* État plein écran board PDF */
         .editor-container.wf-pdf-fullboard {
             position: fixed !important;
@@ -601,7 +611,6 @@
 		/* date/time widget CSS → widgets-datetime.js */
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
-		.widget[data-type="iframe"] .editor-toolbar,
 		/* YouTube widget */
 		.yt-tab-btn { background:#fff;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 7px;height:26px; }
 		.yt-tab-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
@@ -624,10 +633,17 @@
 		.yt-lib-card:hover .yt-lib-del { display:block; }
 		.yt-lib-empty { color:#666;font-size:12px;text-align:center;padding:24px;grid-column:1/-1; }
 		.widget[data-type="youtube"] .editor-toolbar,
+		.widget[data-type="iframe"] .editor-toolbar,
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
 		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }
+		.widget[data-type="youtube"] .editor-toolbar { cursor: move; }
+		.widget[data-type="youtube"] .editor-toolbar button,
+		.widget[data-type="youtube"] .editor-toolbar input { cursor: pointer; }
 		.widget[data-type="pdf"] .editor-toolbar { cursor: move; }
+		.widget[data-type="iframe"] .editor-toolbar { cursor: move; }
+		.widget[data-type="iframe"] .editor-toolbar button,
+		.widget[data-type="iframe"] .editor-toolbar input { cursor: pointer; }
 		.widget[data-type="pdf"] .editor-toolbar button,
 		.widget[data-type="pdf"] .editor-toolbar label,
 		.widget[data-type="pdf"] .editor-toolbar select,
@@ -2213,7 +2229,10 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
         <div class="editor-toolbar">
             <input type="text" placeholder="Collez l'URL ici..." style="flex-grow:1;" onchange="loadIframe(this)">
-            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
+            <div class="wf-btns" style="margin-left:4px;">
+                <button class="wf-btn wf-btn-max"   title="Plein écran"  style="touch-action:manipulation;" onclick="toggleIframeBoardFullscreen(this.closest('.editor-container'))"></button>
+                <button class="wf-btn wf-btn-close" title="Fermer"       style="touch-action:manipulation;" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();"></button>
+            </div>
         </div>
         <iframe src="" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
     </div>
@@ -2248,8 +2267,11 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
             <button onclick="ytToggleLibrary(this)" title="Ma bibliothèque">📚</button>
             <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔊</button>
             <button onclick="toggleYoutubeView(this,'flex')" title="Mode Vidéo">📺</button>
-            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
             <button onclick="toggleTransparency(this)" title="Fond transparent"><span class="icon-transparency"></span></button>
+            <div class="wf-btns" style="margin-left:4px;">
+                <button class="wf-btn wf-btn-max"   title="Plein écran bureau" style="touch-action:manipulation;" onclick="toggleIframeBoardFullscreen(this.closest('.editor-container'))"></button>
+                <button class="wf-btn wf-btn-close" title="Fermer"             style="touch-action:manipulation;" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();"></button>
+            </div>
         </div>
         <!-- Bibliothèque -->
         <div class="yt-library">
@@ -3769,6 +3791,65 @@ function _exitFsOne(container) {
         widget.style.height     = '';
         widget.style.display    = '';
         widget.style.visibility = '';
+    }
+}
+
+function toggleIframeBoardFullscreen(container) {
+    if (!container) return;
+    const widget = container.closest('.widget');
+    const isMax = container.classList.contains('wf-iframe-fullboard');
+
+    if (isMax) {
+        // Sortir du plein écran — restaurer styles
+        container.classList.remove('wf-iframe-fullboard');
+        container.style.width  = container.dataset.pfSavedW || '';
+        container.style.height = container.dataset.pfSavedH || '';
+        if (widget) {
+            widget.style.position = container.dataset.pfSavedWPos  || '';
+            widget.style.top      = container.dataset.pfSavedWTop  || '';
+            widget.style.left     = container.dataset.pfSavedWLeft || '';
+            widget.style.zIndex   = container.dataset.pfSavedWZ    || '';
+            widget.style.width    = '';
+            widget.style.height   = '';
+            // Restaurer les datasets de pourcentage pour que saveBoard() retrouve les bonnes valeurs
+            widget.dataset.widthPercent    = container.dataset.pfSavedWPct  || widget.dataset.widthPercent;
+            widget.dataset.contentHPercent = container.dataset.pfSavedHPct  || widget.dataset.contentHPercent;
+            widget.dataset.leftPercent     = container.dataset.pfSavedLPct  || widget.dataset.leftPercent;
+            widget.dataset.topPercent      = container.dataset.pfSavedTPct  || widget.dataset.topPercent;
+        }
+    } else {
+        // Sauvegarder les dimensions et pourcentages actuels avant de passer en fullscreen
+        const curW  = window.innerWidth;
+        const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+        const tb    = typeof getToolbarHeight === 'function' ? getToolbarHeight(container) : 0;
+
+        container.dataset.pfSavedW    = container.style.width  || container.offsetWidth  + 'px';
+        container.dataset.pfSavedH    = container.style.height || container.offsetHeight + 'px';
+        // Sauvegarder aussi les pourcentages pour les restaurer après
+        container.dataset.pfSavedWPct = widget ? ((container.offsetWidth  / curW)  * 100).toString() : '';
+        container.dataset.pfSavedHPct = widget ? (((container.offsetHeight - tb) / curVH) * 100).toString() : '';
+        container.dataset.pfSavedLPct = widget ? ((widget.offsetLeft / curW)  * 100).toString() : '';
+        container.dataset.pfSavedTPct = widget ? ((widget.offsetTop  / curVH) * 100).toString() : '';
+
+        if (widget) {
+            container.dataset.pfSavedWPos  = widget.style.position || '';
+            container.dataset.pfSavedWTop  = widget.style.top      || '';
+            container.dataset.pfSavedWLeft = widget.style.left     || '';
+            container.dataset.pfSavedWZ    = widget.style.zIndex   || '';
+            widget.style.position = 'fixed';
+            widget.style.top      = '0';
+            widget.style.left     = '0';
+            widget.style.width    = '100%';
+            widget.style.height   = '100%';
+            widget.style.zIndex   = '9999';
+            // Figer les datasets aux valeurs d'avant le fullscreen
+            // pour que tout saveBoard() intermédiaire reste correct
+            widget.dataset.widthPercent    = container.dataset.pfSavedWPct;
+            widget.dataset.contentHPercent = container.dataset.pfSavedHPct;
+            widget.dataset.leftPercent     = container.dataset.pfSavedLPct;
+            widget.dataset.topPercent      = container.dataset.pfSavedTPct;
+        }
+        container.classList.add('wf-iframe-fullboard');
     }
 }
 
