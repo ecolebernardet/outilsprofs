@@ -290,6 +290,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 // Stylet : pointerdown arrive avant mousedown — on l'intercepte aussi
                 btn.onpointerdown = (e) => {
                     e.stopPropagation(); e.preventDefault();
+                    const _pid = e.pointerId;
+                    // La capture implicite se crée après le traitement du pointerdown.
+                    // On la libère au prochain tick pour que les pointermove suivants
+                    // arrivent sur document (pas capturés par le bouton).
+                    setTimeout(() => {
+                        try { btn.releasePointerCapture(_pid); } catch(_) {}
+                    }, 0);
                     if (onMouseDown) onMouseDown(e);
                 };
                 btn.onclick      = (e) => { e.stopPropagation(); e.preventDefault(); if (onClick) onClick(e); };

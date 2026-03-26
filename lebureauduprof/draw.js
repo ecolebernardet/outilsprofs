@@ -2532,14 +2532,12 @@ window._pdfFigureResizeStart = function(index, e) {
     const canvas = api.getAnnotCanvas();
     if (!canvas) return;
     const annotLayers = api.getAnnotLayers();
-    // Trouver la page courante contenant ce stroke
     const currentPageNum = Object.keys(annotLayers).find(p =>
         annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
         annotLayers[p].strokes[index].tool === 'figure'
     );
     if (!currentPageNum) return;
     const s = annotLayers[currentPageNum].strokes[index];
-    // Capturer les pts originaux et le bounding box au moment du démarrage
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     s.pts.forEach(p => {
         if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
@@ -2548,16 +2546,22 @@ window._pdfFigureResizeStart = function(index, e) {
     _pdfResizeFigure = {
         index,
         origPts: s.pts.map(p => ({ ...p })),
-        startClientX: e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || 0,
-        startClientY: e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || 0,
+        startClientX: e.clientX || 0,
+        startClientY: e.clientY || 0,
         startBboxW: maxX - minX,
-        startBboxH: maxY - minY
+        startBboxH: maxY - minY,
+        pointerId: e.pointerId
     };
-    document.addEventListener('mousemove',   _pdfFigureResizeMove);
-    document.addEventListener('mouseup',     _pdfFigureResizeEnd);
-    document.addEventListener('pointermove', _pdfFigureResizeMove);
-    document.addEventListener('pointerup',   _pdfFigureResizeEnd);
-    document.addEventListener('pointercancel', _pdfFigureResizeEnd);
+    // Libérer la capture implicite du bouton overlay pour que les pointermove
+    // arrivent sur document via bubbling normal
+    if (e.pointerId !== undefined && e.target && e.target.releasePointerCapture) {
+        try { e.target.releasePointerCapture(e.pointerId); } catch(_) {}
+    }
+    document.addEventListener('mousemove',    _pdfFigureResizeMove);
+    document.addEventListener('mouseup',      _pdfFigureResizeEnd);
+    document.addEventListener('pointermove',  _pdfFigureResizeMove);
+    document.addEventListener('pointerup',    _pdfFigureResizeEnd);
+    document.addEventListener('pointercancel',_pdfFigureResizeEnd);
 };
 
 function _pdfFigureResizeMove(e) {
@@ -2631,13 +2635,18 @@ window._pdfFigureRotateStart = function(index, e) {
         origPts: s.pts.map(p => ({ ...p })),
         centerScreenX,
         centerScreenY,
-        startMouseAngle
+        startMouseAngle,
+        pointerId: e.pointerId
     };
-    document.addEventListener('mousemove',   _pdfFigureRotateMove);
-    document.addEventListener('mouseup',     _pdfFigureRotateEnd);
-    document.addEventListener('pointermove', _pdfFigureRotateMove);
-    document.addEventListener('pointerup',   _pdfFigureRotateEnd);
-    document.addEventListener('pointercancel', _pdfFigureRotateEnd);
+    // Libérer la capture implicite du bouton overlay
+    if (e.pointerId !== undefined && e.target && e.target.releasePointerCapture) {
+        try { e.target.releasePointerCapture(e.pointerId); } catch(_) {}
+    }
+    document.addEventListener('mousemove',    _pdfFigureRotateMove);
+    document.addEventListener('mouseup',      _pdfFigureRotateEnd);
+    document.addEventListener('pointermove',  _pdfFigureRotateMove);
+    document.addEventListener('pointerup',    _pdfFigureRotateEnd);
+    document.addEventListener('pointercancel',_pdfFigureRotateEnd);
 };
 
 // ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
