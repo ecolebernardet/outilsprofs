@@ -741,14 +741,14 @@
 		/* Sous-menu flyout à droite au survol */
 		.mm-has-sub { position: relative; }
 		.mm-sub {
-			position: absolute; left: 100%; top: 0;
-			padding-left: 7px; /* pont invisible élargi — zone de passage souris */
+			position: absolute; left: 100%; top: 50%;
+			transform: translateY(-50%);
+			padding-left: 7px;
 			min-width: 120px;
 			display: flex; flex-direction: column; gap: 3px;
 			opacity: 0; pointer-events: none;
-			/* Pas de transform/translate : évite tout gap pendant la transition */
 			transition: opacity .12s ease;
-			z-index: 1;
+			z-index: 14100;
 		}
 		.mm-sub-inner {
 			display: flex; flex-direction: column; gap: 3px;
@@ -1484,7 +1484,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     position: fixed;
     right: 0; top: 50%;
     transform: translateY(-50%);
-    width: 22px; height: 64px;
+    width: 30px; height: 64px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
     border-right: none;
@@ -1497,9 +1497,10 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     writing-mode: vertical-rl;
     letter-spacing: 1px;
     box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+	opacity: 0.5;
 }
-#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); }
-#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); }
+#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); opacity: 1;}
+#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
 #pdf-library-tab.pdf-lib-resizing { transition: none !important; }
 /* En-tête du panneau */
 #pdf-library-header {
@@ -1882,7 +1883,6 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 
 					
 					<!-- PROJETS -->
-					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">📸</span>&nbsp;&nbsp;Capture du bureau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-capture"><div class="mm-sub-inner" style="min-width:180px;">
@@ -1892,6 +1892,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 							<div class="mm-sub-item" onclick="captureBoard('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Enregistrer en PDF</div>
 						</div></div>
 					</div>
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
 					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
 					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
@@ -2324,11 +2325,11 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
                 <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
                 <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
                 <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
-                <button class="pdf-zoom-fit" style="display:none;padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;line-height:1;" title="Adapter à la largeur du widget">⟺</button>
+                <button class="pdf-zoom-fit" style="display:none;padding:1px 2px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;line-height:1.8;" title="Adapter à la largeur du widget">⟺</button>
             </div>
 
             <div style="flex:1;"></div>
-            <button class="pdf-annot-widget-btn" style="display:none;padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;" title="Annoter ce PDF" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="
+            <button class="pdf-annot-widget-btn" style="display:none;padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Annoter ce PDF" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="
                     const tb = document.getElementById('draw-toolbar');
                     const tbVisible = tb && tb.style.display !== 'none' && tb.style.display !== '';
                     const thisWidget = this.closest('.widget');
@@ -2342,7 +2343,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
                         else if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode();
                     }
                 ">✏️</button>
-            <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}">💾</button>
+            <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}">💾</button>
             <div class="wf-btns" style="margin-left:4px;">
                 <button class="wf-btn wf-btn-min"   title="Réduire"      style="touch-action:manipulation;" onpointerdown="if(event.pointerType==='pen'||event.pointerType==='touch')this._penFired=true;" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="if(this.closest('.editor-container').classList.contains('wf-pdf-fullboard'))togglePdfBoardFullscreen(this.closest('.editor-container'));togglePdfCollapse(this.closest('.editor-container'))"></button>
                 <button class="wf-btn wf-btn-max"   title="Plein écran"  style="touch-action:manipulation;" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="togglePdfBoardFullscreen(this.closest('.editor-container'))"></button>
@@ -3050,28 +3051,6 @@ function updateUndoRedoBtns() {
 		if (e.key === 'Escape' && isLaserMode) toggleLaser();
 	});
 
-// ── Repositionnement des sous-menus hors écran ──────────────────────────────
-// Déclenché au mouseenter sur chaque mm-has-sub (mesure fiable car le sous-menu est visible)
-// Note : on utilise clientHeight plutôt que innerHeight car à 150% de mise à l'échelle
-// Windows, innerHeight peut inclure des pixels partiels invisibles.
-document.addEventListener('mouseenter', function(e) {
-    if (!e.target || typeof e.target.closest !== 'function') return;
-    const parent = e.target.closest('.mm-has-sub');
-    if (!parent) return;
-    const sub = parent.querySelector(':scope > .mm-sub');
-    if (!sub) return;
-    // Réinitialiser avant mesure
-    sub.style.top = '0';
-    requestAnimationFrame(() => {
-        const vh = document.documentElement.clientHeight;
-        const rect = sub.getBoundingClientRect();
-        if (rect.bottom > vh - 16) {
-            const shift = rect.bottom - (vh - 16);
-            sub.style.top = Math.max(-(rect.height - 40), -shift) + 'px';
-        }
-    });
-}, true);
-
 // → color-picker.js
 
 
@@ -3403,7 +3382,7 @@ function _fixSubmenuOverflow() {
         sub.style.left  = '';
         sub.style.right = '';
         const r = sub.getBoundingClientRect();
-        if (r.right > window.innerWidth - 8) {
+        if (r.right > document.documentElement.clientWidth - 8) {
             sub.style.left  = 'auto';
             sub.style.right = '100%';
         }
@@ -3420,49 +3399,50 @@ function _fixSubmenuOverflow() {
     function openSub(item) {
         const sub = item.querySelector(':scope > .mm-sub');
         if (!sub) return;
-        // Fermer tous les sous-menus ouverts qui ne contiennent pas cet item
-        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+        document.querySelectorAll('.mm-sub.open').forEach(function (s) {
             if (s !== sub && !s.contains(item)) s.classList.remove('open');
         });
+        // Réinitialiser avant ouverture
+        sub.style.top = '50%';
+        sub.style.transform = 'translateY(-50%)';
         sub.classList.add('open');
+        // Corriger débordement vertical si nécessaire
+        requestAnimationFrame(() => {
+            const vh = document.documentElement.clientHeight;
+            const rect = sub.getBoundingClientRect();
+            if (rect.bottom > vh - 8) {
+                const overflow = rect.bottom - (vh - 8);
+                // Décaler vers le haut en ajustant le translateY
+                const currentShift = rect.height / 2; // translateY(-50%) = -height/2
+                const newShift = currentShift + overflow;
+                sub.style.transform = 'translateY(-' + Math.round(newShift) + 'px)';
+            }
+            if (rect.top < 8) {
+                sub.style.top = '0';
+                sub.style.transform = 'translateY(0)';
+            }
+        });
     }
 
     // Ferme tous les sous-menus ouverts
     function closeAllSubs() {
-        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+        document.querySelectorAll('.mm-sub.open').forEach(function (s) {
             s.classList.remove('open');
-        });
-    }
-
-    // Ferme les sous-menus frères d'un item
-    // Remonte jusqu'à mm-section ou #main-menu pour couvrir tous les niveaux
-    function closeSiblings(item) {
-        // Chercher le conteneur de plus haut niveau (mm-section ou #main-menu)
-        let container = item.parentElement;
-        while (container && container.id !== 'main-menu' && !container.classList.contains('mm-section') && !container.classList.contains('mm-sub-inner')) {
-            container = container.parentElement;
-        }
-        if (!container) return;
-        container.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
-            s.classList.remove('open');
+            s.style.top = '';
+            s.style.transform = '';
         });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        // Délégation sur tout le menu : mouseenter avec capture pour attraper tous les niveaux
         document.getElementById('main-menu').addEventListener('mouseenter', function (e) {
-            // Trouver l'item englobant le plus proche (mm-item ou mm-sub-item)
             let node = e.target;
             while (node && node !== this) {
                 if (node.classList && (node.classList.contains('mm-item') || node.classList.contains('mm-sub-item'))) {
                     if (node.classList.contains('mm-has-sub')) {
-                        // Item avec sous-menu : l'ouvrir et fermer les frères
                         openSub(node);
                     } else {
-                        // Item sans sous-menu : fermer uniquement les sous-menus
-                        // qui ne contiennent pas cet item (ne pas fermer le parent ouvert)
-                        document.querySelectorAll('.mm-has-sub > .mm-sub.open').forEach(function (s) {
+                        document.querySelectorAll('.mm-sub.open').forEach(function (s) {
                             if (!s.contains(node)) s.classList.remove('open');
                         });
                     }
@@ -3472,7 +3452,6 @@ function _fixSubmenuOverflow() {
             }
         }, true);
 
-        // Clic hors du menu → ferme tous les sous-menus
         document.addEventListener('mousedown', function (e) {
             if (!e.target.closest('#main-menu')) {
                 closeAllSubs();
