@@ -180,7 +180,7 @@ function _boardDrawPointerUp(e) {
 // pointermove : gère le dessin libre et le surligneur via pointer events
 // (getCoalescedEvents récupère tous les points intermédiaires = trait plus fluide)
 function _boardDrawPointerMove(e) {
-    if (_pdfAnnotMode) return;
+    if (_pdfAnnotMode) return;  // dessin stylet PDF géré par _pdfAnnotPointerMove
     // Ne traiter que les stylets et le touch — la souris est gérée par mousemove
     if (e.pointerType === 'mouse') return;
     if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
@@ -230,12 +230,14 @@ function _boardDrawMouseLeave(e) {
     if (isDrawMode) endPaint(); else if (isEraserMode) { endErase(); redrawStrokes(); }
 }
 function _boardDrawTouchStart(e) {
+    if (_pdfAnnotMode) return; // le touch est géré par _pdfAnnotPointerDown en mode PDF
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
     if (isEraserMode) { snapshotNow(); isErasing = true; eraseAt(getPos(e.touches[0])); }
     else startPaint(e.touches[0]);
 }
 function _boardDrawTouchMove(e) {
+    if (_pdfAnnotMode) return;
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
     // Si le pointermove stylet est actif (isPainting + pen pointerType), ne pas doubler
@@ -244,6 +246,7 @@ function _boardDrawTouchMove(e) {
     else paint(e.touches[0]);
 }
 function _boardDrawTouchEnd(e) {
+    if (_pdfAnnotMode) return;
     if (isDrawMode && FIGURE_MODES.includes(currentDrawMode) && e.changedTouches && e.changedTouches[0]) {
         _figureEnd = getPos(e.changedTouches[0]);
         _segmentEnd = _figureEnd;
@@ -2143,8 +2146,10 @@ function _detachPdfAnnotListeners() {
         _pdfAnnotEvTarget.removeEventListener('touchstart',  _pdfAnnotTouchStart);
         _pdfAnnotEvTarget.removeEventListener('touchmove',   _pdfAnnotTouchMove);
         _pdfAnnotEvTarget.removeEventListener('touchend',    _pdfAnnotTouchEnd);
-        _pdfAnnotEvTarget.removeEventListener('pointerdown', _pdfAnnotPointerDown);
-        _pdfAnnotEvTarget.removeEventListener('pointerup',   _pdfAnnotPointerUp);
+        _pdfAnnotEvTarget.removeEventListener('pointerdown',   _pdfAnnotPointerDown);
+        _pdfAnnotEvTarget.removeEventListener('pointerup',     _pdfAnnotPointerUp);
+        _pdfAnnotEvTarget.removeEventListener('pointermove',   _pdfAnnotPointerMove);
+        _pdfAnnotEvTarget.removeEventListener('pointercancel', _pdfAnnotPointerCancel);
         const _pdfCanvasStop = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
         if (_pdfCanvasStop) _pdfCanvasStop.removeEventListener('contextmenu', _pdfAnnotContextMenu, true);
         // Effacer tous les curseurs inline forcés sur le widget et ses enfants
@@ -2258,9 +2263,11 @@ function _startPdfAnnotMode() {
     _pdfAnnotEvTarget.addEventListener('touchstart',  _pdfAnnotTouchStart, { passive: false });
     _pdfAnnotEvTarget.addEventListener('touchmove',   _pdfAnnotTouchMove,  { passive: false });
     _pdfAnnotEvTarget.addEventListener('touchend',    _pdfAnnotTouchEnd);
-    // Pointer events pour le clic droit stylet sur le widget PDF
-    _pdfAnnotEvTarget.addEventListener('pointerdown', _pdfAnnotPointerDown);
-    _pdfAnnotEvTarget.addEventListener('pointerup',   _pdfAnnotPointerUp);
+    // Pointer events : clic droit + dessin stylet/touch sur le widget PDF
+    _pdfAnnotEvTarget.addEventListener('pointerdown',   _pdfAnnotPointerDown);
+    _pdfAnnotEvTarget.addEventListener('pointerup',     _pdfAnnotPointerUp);
+    _pdfAnnotEvTarget.addEventListener('pointermove',   _pdfAnnotPointerMove, { passive: false });
+    _pdfAnnotEvTarget.addEventListener('pointercancel', _pdfAnnotPointerCancel);
     // Attacher aussi le contextmenu sur le pdfCanvas (capture phase)
     const _pdfCanvas = _pdfAnnotWidget && _pdfAnnotWidget.querySelector('.pdf-canvas');
     if (_pdfCanvas) _pdfCanvas.addEventListener('contextmenu', _pdfAnnotContextMenu, true);
@@ -3253,7 +3260,15 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
 
 // ── Gestionnaires d'événements ────────────────────────────────────────────
 
+// Flag : le dernier pointerdown sur le widget PDF venait d'un stylet ou du touch.
+// Permet de bloquer le mousedown synthétique que le navigateur génère ensuite,
+// qui causerait un double-démarrage du trait.
+var _pdfLastPointerWasPen = false;
+
 function _pdfAnnotMouseDown(e)  {
+    // Le navigateur génère un mousedown synthétique après chaque pointerdown stylet/touch.
+    // On l'ignore : le trait a déjà été démarré dans _pdfAnnotPointerDown.
+    if (_pdfLastPointerWasPen) { _pdfLastPointerWasPen = false; return; }
     if (e.button !== 0) return;
     if (e.target.closest && e.target.closest('button')) return;
     // En mode texte, empêcher le mousedown de voler le focus à l'éditeur inline
@@ -3261,17 +3276,64 @@ function _pdfAnnotMouseDown(e)  {
     _pdfAnnotStartStroke(e);
 }
 function _pdfAnnotPointerDown(e) {
-    if (e.button !== 2) return;
-    _rightClickDownX = e.clientX;
-    _rightClickDownY = e.clientY;
-    _rightClickPending = true;
-    _rightClickDone = false;
+    // Clic droit (bouton gomme stylet ou clic droit souris)
+    if (e.button === 2) {
+        _rightClickDownX = e.clientX;
+        _rightClickDownY = e.clientY;
+        _rightClickPending = true;
+        _rightClickDone = false;
+        return;
+    }
+    // Stylet ou touch (bouton 0) : démarrer le trait directement.
+    // Mémoriser le flag pour bloquer le mousedown synthétique suivant.
+    if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+        if (e.target.closest && e.target.closest('button')) return;
+        e.preventDefault();
+        _pdfLastPointerWasPen = true;
+        // Capturer tous les pointermove suivants sur ce target
+        try { if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId); } catch(_) {}
+        _pdfAnnotStartStroke(e);
+    }
 }
 function _pdfAnnotPointerUp(e) {
-    if (e.button !== 2) return;
+    if (e.button === 2) {
+        e.preventDefault();
+        _tryRightClickToggle(e.clientX, e.clientY);
+        _rightClickPending = false;
+        return;
+    }
+    // Stylet ou touch : terminer le trait
+    if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+        e.preventDefault();
+        _pdfAnnotEndStroke(e);
+    }
+}
+// Mouvement stylet/touch en mode annotation PDF
+function _pdfAnnotPointerMove(e) {
+    // Uniquement stylet et touch — la souris est gérée par mousemove
+    if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+    if (!_pdfAnnotPainting) return;
     e.preventDefault();
-    _tryRightClickToggle(e.clientX, e.clientY);
-    _rightClickPending = false;
+    // Coalesced events pour plus de fluidité (Firefox/Chrome avec stylet)
+    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ce of events) {
+        _pdfAnnotContinueStroke(ce);
+    }
+    // Preview du cercle gomme
+    if (isEraserMode) {
+        const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
+        if (api && api.previewEraser) {
+            const pos = _getPdfAnnotPos(e);
+            const r = parseInt(document.getElementById('eraser-size').value) || 20;
+            api.previewEraser(pos.x, pos.y, r);
+        }
+    }
+}
+// Annulation du trait (déconnexion stylet, interruption système)
+function _pdfAnnotPointerCancel(e) {
+    if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+        _pdfAnnotEndStroke(null);
+    }
 }
 function _pdfAnnotContextMenu(e) {
     e.preventDefault();
@@ -3281,6 +3343,9 @@ function _pdfAnnotContextMenu(e) {
     }
 }
 function _pdfAnnotMouseMove(e)  {
+    // Ignorer les mousemove synthétiques générés par le stylet (déjà traités par pointermove)
+    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+    if (_pdfAnnotPainting && e.movementX === 0 && e.movementY === 0) return; // event fantôme
     _pdfAnnotContinueStroke(e);
     // Prévisualisation du cercle gomme — toujours après le dessin/effacement
     if (_pdfAnnotMode && isEraserMode) {
@@ -3325,7 +3390,11 @@ function _pdfAnnotMouseMove(e)  {
         }
     }
 }
-function _pdfAnnotMouseUp(e)    { _pdfAnnotEndStroke(e); }
+function _pdfAnnotMouseUp(e)    {
+    // Ignorer le mouseup synthétique après un pointerup stylet/touch
+    if (e.pointerType === 'pen' || e.pointerType === 'touch') return;
+    _pdfAnnotEndStroke(e);
+}
 function _pdfAnnotMouseLeave(e) {
     // Effacer le cercle gomme preview en redessinant les annotations
     if (_pdfAnnotMode && isEraserMode) {
