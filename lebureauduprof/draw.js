@@ -2508,13 +2508,16 @@ window._pdfFigureResizeStart = function(index, e) {
     _pdfResizeFigure = {
         index,
         origPts: s.pts.map(p => ({ ...p })),
-        startClientX: e.clientX,
-        startClientY: e.clientY,
+        startClientX: e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || 0,
+        startClientY: e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || 0,
         startBboxW: maxX - minX,
         startBboxH: maxY - minY
     };
-    document.addEventListener('mousemove', _pdfFigureResizeMove);
-    document.addEventListener('mouseup',   _pdfFigureResizeEnd);
+    document.addEventListener('mousemove',   _pdfFigureResizeMove);
+    document.addEventListener('mouseup',     _pdfFigureResizeEnd);
+    document.addEventListener('pointermove', _pdfFigureResizeMove);
+    document.addEventListener('pointerup',   _pdfFigureResizeEnd);
+    document.addEventListener('pointercancel', _pdfFigureResizeEnd);
 };
 
 function _pdfFigureResizeMove(e) {
@@ -2539,8 +2542,11 @@ function _pdfFigureResizeMove(e) {
 
 function _pdfFigureResizeEnd() {
     if (!_pdfResizeFigure) return;
-    document.removeEventListener('mousemove', _pdfFigureResizeMove);
-    document.removeEventListener('mouseup',   _pdfFigureResizeEnd);
+    document.removeEventListener('mousemove',   _pdfFigureResizeMove);
+    document.removeEventListener('mouseup',     _pdfFigureResizeEnd);
+    document.removeEventListener('pointermove', _pdfFigureResizeMove);
+    document.removeEventListener('pointerup',   _pdfFigureResizeEnd);
+    document.removeEventListener('pointercancel', _pdfFigureResizeEnd);
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfResizeFigure.index);
     if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfResizeFigure.index);
@@ -2583,8 +2589,11 @@ window._pdfFigureRotateStart = function(index, e) {
         centerScreenY,
         startMouseAngle
     };
-    document.addEventListener('mousemove', _pdfFigureRotateMove);
-    document.addEventListener('mouseup',   _pdfFigureRotateEnd);
+    document.addEventListener('mousemove',   _pdfFigureRotateMove);
+    document.addEventListener('mouseup',     _pdfFigureRotateEnd);
+    document.addEventListener('pointermove', _pdfFigureRotateMove);
+    document.addEventListener('pointerup',   _pdfFigureRotateEnd);
+    document.addEventListener('pointercancel', _pdfFigureRotateEnd);
 };
 
 // ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
@@ -2615,8 +2624,11 @@ function _pdfFigureRotateMove(e) {
 
 function _pdfFigureRotateEnd() {
     if (!_pdfRotateFigure) return;
-    document.removeEventListener('mousemove', _pdfFigureRotateMove);
-    document.removeEventListener('mouseup',   _pdfFigureRotateEnd);
+    document.removeEventListener('mousemove',   _pdfFigureRotateMove);
+    document.removeEventListener('mouseup',     _pdfFigureRotateEnd);
+    document.removeEventListener('pointermove', _pdfFigureRotateMove);
+    document.removeEventListener('pointerup',   _pdfFigureRotateEnd);
+    document.removeEventListener('pointercancel', _pdfFigureRotateEnd);
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfRotateFigure.index);
     if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfRotateFigure.index);
@@ -2655,8 +2667,11 @@ window._pdfTextRotateStart = function(index, e) {
     const baseAngle = s.rotation || 0;
     const mouseAngle = Math.atan2(e.clientY - centerScreenY, e.clientX - centerScreenX);
     _pdfRotateText = { index, centerScreenX, centerScreenY, baseAngle, mouseAngle };
-    document.addEventListener('mousemove', _pdfTextRotateMove);
-    document.addEventListener('mouseup',   _pdfTextRotateEnd);
+    document.addEventListener('mousemove',   _pdfTextRotateMove);
+    document.addEventListener('mouseup',     _pdfTextRotateEnd);
+    document.addEventListener('pointermove', _pdfTextRotateMove);
+    document.addEventListener('pointerup',   _pdfTextRotateEnd);
+    document.addEventListener('pointercancel', _pdfTextRotateEnd);
 };
 
 function _pdfTextRotateMove(e) {
@@ -2675,8 +2690,11 @@ function _pdfTextRotateMove(e) {
 
 function _pdfTextRotateEnd() {
     if (!_pdfRotateText) return;
-    document.removeEventListener('mousemove', _pdfTextRotateMove);
-    document.removeEventListener('mouseup',   _pdfTextRotateEnd);
+    document.removeEventListener('mousemove',   _pdfTextRotateMove);
+    document.removeEventListener('mouseup',     _pdfTextRotateEnd);
+    document.removeEventListener('pointermove', _pdfTextRotateMove);
+    document.removeEventListener('pointerup',   _pdfTextRotateEnd);
+    document.removeEventListener('pointercancel', _pdfTextRotateEnd);
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (api && api.saveTextTransform) api.saveTextTransform(_pdfRotateText.index);
     if (api && api.drawTextSelection) api.drawTextSelection(_pdfRotateText.index);
@@ -3288,6 +3306,9 @@ function _pdfAnnotPointerDown(e) {
     // Mémoriser le flag pour bloquer le mousedown synthétique suivant.
     if (e.pointerType === 'pen' || e.pointerType === 'touch') {
         if (e.target.closest && e.target.closest('button')) return;
+        // Ne pas interférer avec les boutons overlay (resize/rotate/delete/lock)
+        const _annotBtnIds = ['_annot-resize-btn','_annot-rotate-btn','_annot-delete-btn','_annot-lock-btn'];
+        if (_annotBtnIds.some(id => e.target.id === id || (e.target.closest && e.target.closest('#'+id)))) return;
         e.preventDefault();
         _pdfLastPointerWasPen = true;
         // Capturer tous les pointermove suivants sur ce target
@@ -3312,6 +3333,8 @@ function _pdfAnnotPointerUp(e) {
 function _pdfAnnotPointerMove(e) {
     // Uniquement stylet et touch — la souris est gérée par mousemove
     if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+    // Ne pas interférer avec un resize/rotate en cours (géré par les handlers document)
+    if (_pdfResizeFigure || _pdfRotateFigure || _pdfRotateText) return;
     if (!_pdfAnnotPainting) return;
     e.preventDefault();
     // Coalesced events pour plus de fluidité (Firefox/Chrome avec stylet)

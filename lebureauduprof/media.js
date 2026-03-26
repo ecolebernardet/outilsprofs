@@ -287,6 +287,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 btn.onmouseenter = () => btn.style.transform = 'scale(1.2)';
                 btn.onmouseleave = () => btn.style.transform = 'scale(1)';
                 btn.onmousedown  = (e) => { e.stopPropagation(); e.preventDefault(); if (onMouseDown) onMouseDown(e); };
+                // Stylet : pointerdown arrive avant mousedown — on l'intercepte aussi
+                btn.onpointerdown = (e) => {
+                    e.stopPropagation(); e.preventDefault();
+                    if (onMouseDown) onMouseDown(e);
+                };
                 btn.onclick      = (e) => { e.stopPropagation(); e.preventDefault(); if (onClick) onClick(e); };
                 document.body.appendChild(btn);
                 return btn;
