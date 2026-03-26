@@ -290,14 +290,43 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 // Stylet : pointerdown arrive avant mousedown — on l'intercepte aussi
                 btn.onpointerdown = (e) => {
                     e.stopPropagation(); e.preventDefault();
-                    const _pid = e.pointerId;
-                    // La capture implicite se crée après le traitement du pointerdown.
-                    // On la libère au prochain tick pour que les pointermove suivants
-                    // arrivent sur document (pas capturés par le bouton).
-                    setTimeout(() => {
-                        try { btn.releasePointerCapture(_pid); } catch(_) {}
-                    }, 0);
-                    if (onMouseDown) onMouseDown(e);
+                    if (!onMouseDown) return;
+
+                    // Le bouton reçoit la capture implicite du pointeur après pointerdown.
+                    // Au lieu de lutter contre ça, on EN PROFITE :
+                    // on pose pointermove/pointerup directement sur le bouton qui a la capture,
+                    // ce qui garantit de recevoir tous les events même quand le stylet bouge ailleurs.
+                    function onBtnMove(ev) {
+                        ev.stopPropagation();
+                        // Retransmettre comme si c'était un mousemove sur document
+                        const fakeMove = new MouseEvent('mousemove', {
+                            clientX: ev.clientX, clientY: ev.clientY, bubbles: true
+                        });
+                        document.dispatchEvent(fakeMove);
+                        // Appeler directement les handlers pointermove sur document
+                        document.dispatchEvent(new PointerEvent('pointermove', {
+                            clientX: ev.clientX, clientY: ev.clientY,
+                            pointerId: ev.pointerId, pointerType: ev.pointerType, bubbles: true
+                        }));
+                    }
+                    function onBtnUp(ev) {
+                        ev.stopPropagation();
+                        btn.removeEventListener('pointermove', onBtnMove);
+                        btn.removeEventListener('pointerup',   onBtnUp);
+                        btn.removeEventListener('pointercancel', onBtnUp);
+                        document.dispatchEvent(new PointerEvent('pointerup', {
+                            clientX: ev.clientX, clientY: ev.clientY,
+                            pointerId: ev.pointerId, pointerType: ev.pointerType, bubbles: true
+                        }));
+                        document.dispatchEvent(new MouseEvent('mouseup', {
+                            clientX: ev.clientX, clientY: ev.clientY, bubbles: true
+                        }));
+                    }
+                    btn.addEventListener('pointermove',  onBtnMove);
+                    btn.addEventListener('pointerup',    onBtnUp);
+                    btn.addEventListener('pointercancel',onBtnUp);
+
+                    onMouseDown(e);
                 };
                 btn.onclick      = (e) => { e.stopPropagation(); e.preventDefault(); if (onClick) onClick(e); };
                 document.body.appendChild(btn);
