@@ -2518,10 +2518,19 @@ window._pdfFigureResizeStart = function(index, e) {
     document.addEventListener('pointermove', _pdfFigureResizeMove);
     document.addEventListener('pointerup',   _pdfFigureResizeEnd);
     document.addEventListener('pointercancel', _pdfFigureResizeEnd);
+    // Libérer tout pointer capture actif sur le widget PDF pour que les pointermove
+    // arrivent bien sur document (et non capturés par le widget)
+    if (_pdfAnnotEvTarget && e.pointerId !== undefined) {
+        try { _pdfAnnotEvTarget.releasePointerCapture(e.pointerId); } catch(_) {}
+    }
 };
 
 function _pdfFigureResizeMove(e) {
     if (!_pdfResizeFigure) return;
+    // Éviter le double-traitement mouse+pointer : ignorer mousemove si on a eu un pointerdown stylet
+    if (e.type === 'mousemove' && _pdfResizeFigure._isPointer) return;
+    if (e.type === 'pointermove' && e.pointerType === 'mouse') return; // la souris est gérée via mousemove
+    if (e.type === 'pointermove') _pdfResizeFigure._isPointer = true;
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api || !api.resizeFigureStroke) return;
     const canvas = api.getAnnotCanvas();
@@ -2594,6 +2603,9 @@ window._pdfFigureRotateStart = function(index, e) {
     document.addEventListener('pointermove', _pdfFigureRotateMove);
     document.addEventListener('pointerup',   _pdfFigureRotateEnd);
     document.addEventListener('pointercancel', _pdfFigureRotateEnd);
+    if (_pdfAnnotEvTarget && e.pointerId !== undefined) {
+        try { _pdfAnnotEvTarget.releasePointerCapture(e.pointerId); } catch(_) {}
+    }
 };
 
 // ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
@@ -2610,6 +2622,9 @@ function _snapAngle(angle) {
 
 function _pdfFigureRotateMove(e) {
     if (!_pdfRotateFigure) return;
+    if (e.type === 'mousemove' && _pdfRotateFigure._isPointer) return;
+    if (e.type === 'pointermove' && e.pointerType === 'mouse') return;
+    if (e.type === 'pointermove') _pdfRotateFigure._isPointer = true;
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api || !api.rotateFigureStroke) return;
     // Angle absolu = différence entre angle souris actuel et angle souris au départ
@@ -2676,6 +2691,9 @@ window._pdfTextRotateStart = function(index, e) {
 
 function _pdfTextRotateMove(e) {
     if (!_pdfRotateText) return;
+    if (e.type === 'mousemove' && _pdfRotateText._isPointer) return;
+    if (e.type === 'pointermove' && e.pointerType === 'mouse') return;
+    if (e.type === 'pointermove') _pdfRotateText._isPointer = true;
     const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
     if (!api || !api.rotateTextStroke) return;
     const currentAngle = Math.atan2(
