@@ -455,9 +455,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     return;
                 }
                 ctx.moveTo(p0.x, p0.y);
-                for (let i = 1; i < stroke.pts.length; i++) {
-                    const p = fromNorm(stroke.pts[i].x, stroke.pts[i].y);
-                    ctx.lineTo(p.x, p.y);
+                if (stroke.pts.length === 2) {
+                    const p1 = fromNorm(stroke.pts[1].x, stroke.pts[1].y);
+                    ctx.lineTo(p1.x, p1.y);
+                } else {
+                    for (let i = 1; i < stroke.pts.length - 1; i++) {
+                        const pi  = fromNorm(stroke.pts[i].x,     stroke.pts[i].y);
+                        const pi1 = fromNorm(stroke.pts[i+1].x, stroke.pts[i+1].y);
+                        const mx = (pi.x + pi1.x) / 2;
+                        const my = (pi.y + pi1.y) / 2;
+                        ctx.quadraticCurveTo(pi.x, pi.y, mx, my);
+                    }
+                    const last = fromNorm(stroke.pts[stroke.pts.length-1].x, stroke.pts[stroke.pts.length-1].y);
+                    ctx.lineTo(last.x, last.y);
                 }
                 ctx.stroke();
                 ctx.restore();
@@ -801,29 +811,56 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         currentStrokeAnnot.size  = size;
                         currentStrokeAnnot.tool  = tool;
 
+                        // ── Filtre exponentiel IIR (lissage stylet) ──────────────
+                        const alpha = (typeof SMOOTH_ALPHA !== 'undefined') ? SMOOTH_ALPHA : 0.45;
+                        if (!currentStrokeAnnot._sl) {
+                            currentStrokeAnnot._sl  = norm;
+                            currentStrokeAnnot._spts = [norm];
+                        } else {
+                            const sl = currentStrokeAnnot._sl;
+                            const sn = { x: sl.x + alpha * (norm.x - sl.x), y: sl.y + alpha * (norm.y - sl.y) };
+                            currentStrokeAnnot._sl = sn;
+                            currentStrokeAnnot._spts.push(sn);
+                        }
+                        const sPts = currentStrokeAnnot._spts;
                         const canvasW    = annotCanvas.width;
                         const sizeScaled = size * canvasW / 600;
-                        const pts  = currentStrokeAnnot.pts;
-                        const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
-                        const cur  = fromNorm(norm.x, norm.y);
 
+                        // Redessiner le stroke en cours en entier (Bézier quadratique)
+                        redrawAnnotations(currentPage);
                         actx.save();
                         if (tool === 'highlighter') {
                             actx.globalAlpha = 0.35;
                             actx.globalCompositeOperation = 'multiply';
                             actx.lineWidth = sizeScaled * 5;
+                            actx.lineCap   = 'square';
                         } else if (tool === 'eraser') {
                             actx.globalCompositeOperation = 'destination-out';
                             actx.lineWidth = sizeScaled * 2;
+                            actx.lineCap   = 'round';
                         } else {
                             actx.lineWidth = sizeScaled;
+                            actx.lineCap   = 'round';
                         }
                         actx.strokeStyle = color;
-                        actx.lineCap  = 'round';
-                        actx.lineJoin = 'round';
+                        actx.lineJoin    = 'round';
                         actx.beginPath();
-                        actx.moveTo(prev.x, prev.y);
-                        actx.lineTo(cur.x, cur.y);
+                        const p0 = fromNorm(sPts[0].x, sPts[0].y);
+                        actx.moveTo(p0.x, p0.y);
+                        if (sPts.length === 2) {
+                            const p1 = fromNorm(sPts[1].x, sPts[1].y);
+                            actx.lineTo(p1.x, p1.y);
+                        } else {
+                            for (let i = 1; i < sPts.length - 1; i++) {
+                                const pi  = fromNorm(sPts[i].x,     sPts[i].y);
+                                const pi1 = fromNorm(sPts[i+1].x, sPts[i+1].y);
+                                const mx = (pi.x + pi1.x) / 2;
+                                const my = (pi.y + pi1.y) / 2;
+                                actx.quadraticCurveTo(pi.x, pi.y, mx, my);
+                            }
+                            const last = fromNorm(sPts[sPts.length-1].x, sPts[sPts.length-1].y);
+                            actx.lineTo(last.x, last.y);
+                        }
                         actx.stroke();
                         actx.restore();
                     },
@@ -1691,9 +1728,19 @@ function _drawStrokeScaled(ctx, stroke, W, H) {
     ctx.beginPath();
     const p0 = fromN(stroke.pts[0].x, stroke.pts[0].y);
     ctx.moveTo(p0.x, p0.y);
-    for (let i = 1; i < stroke.pts.length; i++) {
-        const p = fromN(stroke.pts[i].x, stroke.pts[i].y);
-        ctx.lineTo(p.x, p.y);
+    if (stroke.pts.length === 2) {
+        const p1 = fromN(stroke.pts[1].x, stroke.pts[1].y);
+        ctx.lineTo(p1.x, p1.y);
+    } else {
+        for (let i = 1; i < stroke.pts.length - 1; i++) {
+            const pi  = fromN(stroke.pts[i].x,     stroke.pts[i].y);
+            const pi1 = fromN(stroke.pts[i+1].x, stroke.pts[i+1].y);
+            const mx = (pi.x + pi1.x) / 2;
+            const my = (pi.y + pi1.y) / 2;
+            ctx.quadraticCurveTo(pi.x, pi.y, mx, my);
+        }
+        const last = fromN(stroke.pts[stroke.pts.length-1].x, stroke.pts[stroke.pts.length-1].y);
+        ctx.lineTo(last.x, last.y);
     }
     ctx.stroke();
     ctx.restore();

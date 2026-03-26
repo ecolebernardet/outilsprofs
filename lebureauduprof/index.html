@@ -2026,6 +2026,13 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 				<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
 			</div>
 
+			<!-- LISSAGE TRAIT (stylet VPI) : ∿ − val + -->
+			<div style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
+				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+				<span id="draw-smooth-label" data-v="5" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿5</span>
+				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(9,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+			</div>
+
 			<!-- COULEUR TRAIT -->
 			<div class="dt-color" style="display:flex;align-items:center;gap:4px;width:64px;justify-content:center;">
 				<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
