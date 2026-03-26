@@ -37,6 +37,67 @@ function togglePdfLibrary() {
 }
 window.togglePdfLibrary = togglePdfLibrary;
 
+// ── Persistance du handle dossier via IndexedDB ───────────────────────────
+// Permet de retrouver le dossier au rechargement sans re-sélectionner
+const IDB_NAME    = 'pdfLibraryDB';
+const IDB_STORE   = 'handles';
+const IDB_KEY     = 'rootHandle';
+
+function _idbOpen() {
+    return new Promise((res, rej) => {
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+        req.onsuccess = e => res(e.target.result);
+        req.onerror   = e => rej(e.target.error);
+    });
+}
+async function _idbSaveHandle(handle) {
+    try {
+        const db = await _idbOpen();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(handle, IDB_KEY);
+    } catch(e) {}
+}
+async function _idbLoadHandle() {
+    try {
+        const db = await _idbOpen();
+        return await new Promise((res, rej) => {
+            const tx  = db.transaction(IDB_STORE, 'readonly');
+            const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
+            req.onsuccess = e => res(e.target.result || null);
+            req.onerror   = e => rej(e.target.error);
+        });
+    } catch(e) { return null; }
+}
+async function _idbClearHandle() {
+    try {
+        const db = await _idbOpen();
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(IDB_KEY);
+    } catch(e) {}
+}
+
+// Tente de restaurer le handle sauvegardé et demande juste la permission
+async function _tryRestoreHandle() {
+    if (!window.showDirectoryPicker) return false;
+    const handle = await _idbLoadHandle();
+    if (!handle) return false;
+    try {
+        // Demande la permission (un simple clic "Autoriser", sans re-naviguer)
+        const perm = await handle.requestPermission({ mode: 'read' });
+        if (perm !== 'granted') return false;
+        _rootHandle = handle;
+        _rootName   = handle.name;
+        _navStack   = [{ handle, name: handle.name }];
+        try { localStorage.setItem(STORAGE_KEY, handle.name); } catch(e) {}
+        _showReopenBtn(handle.name);
+        _hideReopenBtn();
+        _setStatus('');
+        await _renderDir(_navStack[0]);
+        return true;
+    } catch(e) { return false; }
+}
+
 // ── Choisir le dossier racine ─────────────────────────────────────────────
 async function pdfLibChooseFolder() {
     // Electron avec API dédiée
@@ -54,7 +115,26 @@ async function pdfLibChooseFolder() {
             console.warn('[PdfLib] Electron chooseDirectory échoué, fallback', err);
         }
     }
-    // Fallback universel : <input webkitdirectory> — fonctionne partout (file://, http, Electron)
+    // File System Access API (Chrome/Edge) — handle persistable en IDB
+    if (window.showDirectoryPicker) {
+        try {
+            const handle = await window.showDirectoryPicker({ mode: 'read' });
+            _rootHandle = handle;
+            _rootName   = handle.name;
+            _navStack   = [{ handle, name: handle.name }];
+            try { localStorage.setItem(STORAGE_KEY, handle.name); } catch(e) {}
+            await _idbSaveHandle(handle);
+            _showReopenBtn(handle.name);
+            _hideReopenBtn();
+            _setStatus('');
+            await _renderDir(_navStack[0]);
+            return;
+        } catch(err) {
+            if (err.name === 'AbortError') return; // l'utilisateur a annulé
+            console.warn('[PdfLib] showDirectoryPicker échoué, fallback', err);
+        }
+    }
+    // Fallback universel : <input webkitdirectory>
     _pickFolderViaInput();
 }
 window.pdfLibChooseFolder = pdfLibChooseFolder;
@@ -362,7 +442,12 @@ function _showReopenBtn(name) {
     }
     btn.textContent = '↺ Rouvrir ' + name;
     btn.title = 'Rouvrir le dossier : ' + name;
-    btn.onclick = () => _pickFolderViaInput();
+    btn.onclick = async () => {
+        // Essayer d'abord de restaurer via le handle IDB (juste un clic "Autoriser")
+        const restored = await _tryRestoreHandle();
+        // Si pas de handle sauvegardé (ex: webkitdirectory fallback), re-sélectionner
+        if (!restored) _pickFolderViaInput();
+    };
     btn.style.display = '';
 }
 
@@ -436,6 +521,7 @@ function _init() {
     } catch(e) {}
 
     // Afficher le nom du dossier mémorisé + bouton Rouvrir
+    // Tenter d'abord une restauration automatique via IDB (Chrome/Edge)
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -443,6 +529,25 @@ function _init() {
             try { name = JSON.parse(saved).name || saved; } catch(e) {}
             _setStatus('Dernier dossier : ' + name);
             _showReopenBtn(name);
+            // Tentative silencieuse de restauration automatique du handle
+            // (fonctionne si la permission est déjà accordée pour cette session)
+            _idbLoadHandle().then(async handle => {
+                if (!handle) return;
+                try {
+                    const perm = await handle.queryPermission({ mode: 'read' });
+                    if (perm === 'granted') {
+                        // Permission déjà accordée → restauration sans aucun clic
+                        _rootHandle = handle;
+                        _rootName   = handle.name;
+                        _navStack   = [{ handle, name: handle.name }];
+                        _showReopenBtn(handle.name);
+                        _hideReopenBtn();
+                        _setStatus('');
+                        await _renderDir(_navStack[0]);
+                    }
+                    // Sinon : la permission sera demandée au clic sur "Rouvrir"
+                } catch(e) {}
+            });
         } else {
             _setStatus('Aucun dossier sélectionné');
         }
