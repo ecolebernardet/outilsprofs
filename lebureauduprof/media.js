@@ -288,45 +288,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 btn.onmouseleave = () => btn.style.transform = 'scale(1)';
                 btn.onmousedown  = (e) => { e.stopPropagation(); e.preventDefault(); if (onMouseDown) onMouseDown(e); };
                 // Stylet : pointerdown arrive avant mousedown — on l'intercepte aussi
+                // Stylet : pointerdown avant mousedown
                 btn.onpointerdown = (e) => {
                     e.stopPropagation(); e.preventDefault();
-                    if (!onMouseDown) return;
-
-                    // Le bouton reçoit la capture implicite du pointeur après pointerdown.
-                    // Au lieu de lutter contre ça, on EN PROFITE :
-                    // on pose pointermove/pointerup directement sur le bouton qui a la capture,
-                    // ce qui garantit de recevoir tous les events même quand le stylet bouge ailleurs.
-                    function onBtnMove(ev) {
-                        ev.stopPropagation();
-                        // Retransmettre comme si c'était un mousemove sur document
-                        const fakeMove = new MouseEvent('mousemove', {
-                            clientX: ev.clientX, clientY: ev.clientY, bubbles: true
-                        });
-                        document.dispatchEvent(fakeMove);
-                        // Appeler directement les handlers pointermove sur document
-                        document.dispatchEvent(new PointerEvent('pointermove', {
-                            clientX: ev.clientX, clientY: ev.clientY,
-                            pointerId: ev.pointerId, pointerType: ev.pointerType, bubbles: true
-                        }));
-                    }
-                    function onBtnUp(ev) {
-                        ev.stopPropagation();
-                        btn.removeEventListener('pointermove', onBtnMove);
-                        btn.removeEventListener('pointerup',   onBtnUp);
-                        btn.removeEventListener('pointercancel', onBtnUp);
-                        document.dispatchEvent(new PointerEvent('pointerup', {
-                            clientX: ev.clientX, clientY: ev.clientY,
-                            pointerId: ev.pointerId, pointerType: ev.pointerType, bubbles: true
-                        }));
-                        document.dispatchEvent(new MouseEvent('mouseup', {
-                            clientX: ev.clientX, clientY: ev.clientY, bubbles: true
-                        }));
-                    }
-                    btn.addEventListener('pointermove',  onBtnMove);
-                    btn.addEventListener('pointerup',    onBtnUp);
-                    btn.addEventListener('pointercancel',onBtnUp);
-
-                    onMouseDown(e);
+                    if (onMouseDown) onMouseDown(e);
                 };
                 btn.onclick      = (e) => { e.stopPropagation(); e.preventDefault(); if (onClick) onClick(e); };
                 document.body.appendChild(btn);
@@ -343,7 +308,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 );
             }
 
-            // Affiche les 4 boutons overlay pour une figure sélectionnée
+            // Affiche les 2 boutons overlay pour une figure sélectionnée (supprimer + ancrer)
             // bbox : { x, y, w, h } en pixels canvas
             function _showAnnotFigureHandles(index, bbox) {
                 _removeAnnotFigureHandles();
@@ -375,28 +340,6 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer2.strokes[index] = { ...layer2.strokes[index], locked: true };
                         redrawAnnotations(currentPage);
                     }
-                );
-
-                // ⤡ bas-droit : resize
-                _makeAnnotHandle('_annot-resize-btn', x + w, y + h,
-                    '#27ae60', 'Redimensionner', '⤡',
-                    (e) => {
-                        if (typeof window._pdfFigureResizeStart === 'function') {
-                            window._pdfFigureResizeStart(index, e);
-                        }
-                    },
-                    null
-                );
-
-                // ↻ bas-gauche : rotation
-                _makeAnnotHandle('_annot-rotate-btn', x, y + h,
-                    '#8e44ad', 'Faire pivoter', '↻',
-                    (e) => {
-                        if (typeof window._pdfFigureRotateStart === 'function') {
-                            window._pdfFigureRotateStart(index, e);
-                        }
-                    },
-                    null
                 );
             }
 

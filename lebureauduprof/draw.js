@@ -2347,16 +2347,6 @@ function _stopPdfAnnotMode() {
     _detachPdfAnnotListeners();
 
     // Nettoyer les drags resize/rotate en cours
-    if (_pdfResizeFigure) {
-        document.removeEventListener('mousemove', _pdfFigureResizeMove);
-        document.removeEventListener('mouseup',   _pdfFigureResizeEnd);
-        _pdfResizeFigure = null;
-    }
-    if (_pdfRotateFigure) {
-        document.removeEventListener('mousemove', _pdfFigureRotateMove);
-        document.removeEventListener('mouseup',   _pdfFigureRotateEnd);
-        _pdfRotateFigure = null;
-    }
     if (_pdfRotateText) {
         document.removeEventListener('mousemove', _pdfTextRotateMove);
         document.removeEventListener('mouseup',   _pdfTextRotateEnd);
@@ -2521,121 +2511,6 @@ var _pdfPanLastX = null;
 var _pdfFigureStart = null; // point de départ pour les figures PDF
 var _pdfDragText = null;    // { index, stroke, startPos } lors d'un drag de texte
 var _pdfDragFigure = null;  // { index, stroke, startPos, startNx, startNy } lors d'un drag de figure
-var _pdfResizeFigure = null; // { index, startClientX, startClientY, startBboxW, startBboxH, cx, cy } resize
-var _pdfRotateFigure = null; // { index, startAngle, cx, cy } rotation
-
-// ── Appelé par le bouton overlay ⤡ (resize) ──────────────────────────────
-window._pdfFigureResizeStart = function(index, e) {
-    if (!_pdfAnnotWidget) return;
-    const api = _pdfAnnotWidget._pdfAnnotAPI;
-    if (!api) return;
-    const canvas = api.getAnnotCanvas();
-    if (!canvas) return;
-    const annotLayers = api.getAnnotLayers();
-    const currentPageNum = Object.keys(annotLayers).find(p =>
-        annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
-        annotLayers[p].strokes[index].tool === 'figure'
-    );
-    if (!currentPageNum) return;
-    const s = annotLayers[currentPageNum].strokes[index];
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    s.pts.forEach(p => {
-        if (p.x < minX) minX = p.x; if (p.y < minY) minY = p.y;
-        if (p.x > maxX) maxX = p.x; if (p.y > maxY) maxY = p.y;
-    });
-    _pdfResizeFigure = {
-        index,
-        origPts: s.pts.map(p => ({ ...p })),
-        startClientX: e.clientX || 0,
-        startClientY: e.clientY || 0,
-        startBboxW: maxX - minX,
-        startBboxH: maxY - minY,
-        pointerId: e.pointerId
-    };
-    document.addEventListener('mousemove',    _pdfFigureResizeMove);
-    document.addEventListener('mouseup',      _pdfFigureResizeEnd);
-    document.addEventListener('pointermove',  _pdfFigureResizeMove);
-    document.addEventListener('pointerup',    _pdfFigureResizeEnd);
-    document.addEventListener('pointercancel',_pdfFigureResizeEnd);
-};
-
-function _pdfFigureResizeMove(e) {
-    if (!_pdfResizeFigure) return;
-    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
-    if (!api || !api.resizeFigureStroke) return;
-    const canvas = api.getAnnotCanvas();
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const dx = e.clientX - _pdfResizeFigure.startClientX;
-    const dy = e.clientY - _pdfResizeFigure.startClientY;
-    // Delta en normalisé
-    const dnx = dx / rect.width;
-    const dny = dy / rect.height;
-    const newBboxW = Math.max(0.01, _pdfResizeFigure.startBboxW + dnx);
-    const newBboxH = Math.max(0.01, _pdfResizeFigure.startBboxH + dny);
-    const scaleX = _pdfResizeFigure.startBboxW > 0.001 ? newBboxW / _pdfResizeFigure.startBboxW : 1;
-    const scaleY = _pdfResizeFigure.startBboxH > 0.001 ? newBboxH / _pdfResizeFigure.startBboxH : 1;
-    api.resizeFigureStroke(_pdfResizeFigure.index, scaleX, scaleY, _pdfResizeFigure.origPts);
-    if (api.drawFigureSelection) api.drawFigureSelection(_pdfResizeFigure.index);
-}
-
-function _pdfFigureResizeEnd() {
-    if (!_pdfResizeFigure) return;
-    document.removeEventListener('mousemove',   _pdfFigureResizeMove);
-    document.removeEventListener('mouseup',     _pdfFigureResizeEnd);
-    document.removeEventListener('pointermove', _pdfFigureResizeMove);
-    document.removeEventListener('pointerup',   _pdfFigureResizeEnd);
-    document.removeEventListener('pointercancel', _pdfFigureResizeEnd);
-    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
-    if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfResizeFigure.index);
-    if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfResizeFigure.index);
-    _pdfResizeFigure = null;
-}
-
-// ── Appelé par le bouton overlay ↻ (rotation) ────────────────────────────
-window._pdfFigureRotateStart = function(index, e) {
-    if (!_pdfAnnotWidget) return;
-    const api = _pdfAnnotWidget._pdfAnnotAPI;
-    if (!api) return;
-    const canvas = api.getAnnotCanvas();
-    if (!canvas) return;
-    const annotLayers = api.getAnnotLayers();
-    const currentPageNum = Object.keys(annotLayers).find(p =>
-        annotLayers[p] && annotLayers[p].strokes && annotLayers[p].strokes[index] &&
-        annotLayers[p].strokes[index].tool === 'figure'
-    );
-    if (!currentPageNum) return;
-    const s = annotLayers[currentPageNum].strokes[index];
-    const cw = canvas.width, ch = canvas.height;
-    // Centre en pixels canvas → projection écran
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    s.pts.forEach(p => {
-        const px = p.x * cw, py = p.y * ch;
-        if (px < minX) minX = px; if (py < minY) minY = py;
-        if (px > maxX) maxX = px; if (py > maxY) maxY = py;
-    });
-    const cxNorm = ((minX + maxX) / 2) / cw;
-    const cyNorm = ((minY + maxY) / 2) / ch;
-    const rect = canvas.getBoundingClientRect();
-    const centerScreenX = rect.left + cxNorm * rect.width;
-    const centerScreenY = rect.top  + cyNorm * rect.height;
-    const startMouseAngle = Math.atan2(e.clientY - centerScreenY, e.clientX - centerScreenX);
-    // Capturer les pts d'origine pour une rotation absolue (pas de dérive cumulative)
-    _pdfRotateFigure = {
-        index,
-        origPts: s.pts.map(p => ({ ...p })),
-        centerScreenX,
-        centerScreenY,
-        startMouseAngle,
-        pointerId: e.pointerId
-    };
-    document.addEventListener('mousemove',    _pdfFigureRotateMove);
-    document.addEventListener('mouseup',      _pdfFigureRotateEnd);
-    document.addEventListener('pointermove',  _pdfFigureRotateMove);
-    document.addEventListener('pointerup',    _pdfFigureRotateEnd);
-    document.addEventListener('pointercancel',_pdfFigureRotateEnd);
-};
-
 // ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
 const _SNAP_ANGLES_RAD = [0, Math.PI/2, Math.PI, 3*Math.PI/2, 2*Math.PI];
 const _SNAP_THRESHOLD  = 5 * Math.PI / 180; // ±5°
@@ -2646,33 +2521,6 @@ function _snapAngle(angle) {
         if (Math.abs(a - snap) < _SNAP_THRESHOLD) return snap === 2 * Math.PI ? 0 : snap;
     }
     return angle;
-}
-
-function _pdfFigureRotateMove(e) {
-    if (!_pdfRotateFigure) return;
-    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
-    if (!api || !api.rotateFigureStroke) return;
-    // Angle absolu = différence entre angle souris actuel et angle souris au départ
-    const rawAngle = Math.atan2(
-        e.clientY - _pdfRotateFigure.centerScreenY,
-        e.clientX - _pdfRotateFigure.centerScreenX
-    ) - _pdfRotateFigure.startMouseAngle;
-    const snapped = _snapAngle(rawAngle);
-    api.rotateFigureStroke(_pdfRotateFigure.index, snapped, _pdfRotateFigure.origPts);
-    if (api.drawFigureSelection) api.drawFigureSelection(_pdfRotateFigure.index);
-}
-
-function _pdfFigureRotateEnd() {
-    if (!_pdfRotateFigure) return;
-    document.removeEventListener('mousemove',   _pdfFigureRotateMove);
-    document.removeEventListener('mouseup',     _pdfFigureRotateEnd);
-    document.removeEventListener('pointermove', _pdfFigureRotateMove);
-    document.removeEventListener('pointerup',   _pdfFigureRotateEnd);
-    document.removeEventListener('pointercancel', _pdfFigureRotateEnd);
-    const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
-    if (api && api.saveFigureTransform) api.saveFigureTransform(_pdfRotateFigure.index);
-    if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfRotateFigure.index);
-    _pdfRotateFigure = null;
 }
 
 var _pdfRotateText = null; // { index, startAngle, cx, cy (pixels canvas normalisés) }
@@ -3347,7 +3195,7 @@ function _pdfAnnotPointerDown(e) {
     if (e.pointerType === 'pen' || e.pointerType === 'touch') {
         if (e.target.closest && e.target.closest('button')) return;
         // Ne pas interférer avec les boutons overlay (resize/rotate/delete/lock)
-        const _annotBtnIds = ['_annot-resize-btn','_annot-rotate-btn','_annot-delete-btn','_annot-lock-btn'];
+        const _annotBtnIds = ['_annot-delete-btn','_annot-lock-btn'];
         if (_annotBtnIds.some(id => e.target.id === id || (e.target.closest && e.target.closest('#'+id)))) return;
         e.preventDefault();
         _pdfLastPointerWasPen = true;
@@ -3372,7 +3220,7 @@ function _pdfAnnotPointerMove(e) {
     // Uniquement stylet et touch — la souris est gérée par mousemove
     if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
     // Ne pas interférer avec un resize/rotate en cours (géré par les handlers document)
-    if (_pdfResizeFigure || _pdfRotateFigure || _pdfRotateText) return;
+    if (_pdfRotateText) return;
     if (!_pdfAnnotPainting) return;
     e.preventDefault();
     // Coalesced events pour plus de fluidité (Firefox/Chrome avec stylet)
