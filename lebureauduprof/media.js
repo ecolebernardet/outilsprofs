@@ -25,6 +25,59 @@ function _ensurePdfJs(cb) {
     document.head.appendChild(s);
 }
 
+// ── Support stylet VPI pour les boutons : ajoute pointerup pen en plus du click ──
+// À appeler sur tout bouton qui n'a que onclick (toolbar wf-btn, onglets PDF, etc.)
+function _addPenClick(el, fn) {
+    if (!el || el._penClickAttached) return;
+    el._penClickAttached = true;
+    el.addEventListener('pointerup', (e) => {
+        if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+        if (el._penClickBusy) return; // anti-double
+        el._penClickBusy = true;
+        setTimeout(() => el._penClickBusy = false, 300);
+        e.preventDefault();
+        e.stopPropagation();
+        fn(e);
+    });
+    // Feedback visuel immédiat au pointerdown (le :active CSS ne se déclenche pas toujours avec stylet)
+    el.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+        el.style.transform = 'scale(0.92)';
+        el.style.filter    = 'brightness(0.82)';
+    });
+    el.addEventListener('pointerleave', () => {
+        el.style.transform = '';
+        el.style.filter    = '';
+    });
+    el.addEventListener('pointerup', () => {
+        el.style.transform = '';
+        el.style.filter    = '';
+    }, { capture: false });
+}
+
+// Attache _addPenClick à tous les wf-btn d'un container PDF (toolbar)
+function _attachPenSupportToPdfToolbar(container) {
+    if (!container) return;
+    // wf-btn (min, max, close)
+    container.querySelectorAll('.wf-btn').forEach(btn => {
+        _addPenClick(btn, () => btn.click());
+    });
+    // Bouton annotation ✏️
+    const annotBtn = container.querySelector('.pdf-annot-widget-btn');
+    if (annotBtn) _addPenClick(annotBtn, () => annotBtn.click());
+    // Bouton export 💾
+    const exportBtn = container.querySelector('.pdf-export-btn');
+    if (exportBtn) _addPenClick(exportBtn, () => exportBtn.click());
+    // Boutons nav ◀ ▶ (avant reattach — ne nuit pas)
+    const prevBtn = container.querySelector('.pdf-prev');
+    if (prevBtn) _addPenClick(prevBtn, () => prevBtn.click());
+    const nextBtn = container.querySelector('.pdf-next');
+    if (nextBtn) _addPenClick(nextBtn, () => nextBtn.click());
+    // Bouton "Ouvrir un PDF" label
+    const openLabel = container.querySelector('.pdf-placeholder label');
+    if (openLabel) _addPenClick(openLabel, () => openLabel.querySelector('input')?.click());
+}
+
 function loadPdfWidget(input) {
     const file = input.files[0]; if (!file) return;
     const widget = input.closest('.widget');
@@ -65,6 +118,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
     if (canvasWrap)  canvasWrap.style.cursor = 'grab';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
+    // Support stylet VPI sur tous les boutons de la toolbar PDF
+    _attachPenSupportToPdfToolbar(container.closest('.editor-container') || container);
 
     // ── Drag-to-scroll natif (quand le mode annotation draw.js n'est pas actif) ──
     let _dragScrolling = false, _dragStartX = 0, _dragStartY = 0, _dragScrollLeft = 0, _dragScrollTop = 0;
