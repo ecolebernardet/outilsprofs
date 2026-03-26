@@ -528,11 +528,11 @@ function createDeficalmeWidget() {
     const sensSlider = document.createElement('input');
     sensSlider.type = 'range';
     sensSlider.className = 'dc-slider';
-    sensSlider.min = 1; sensSlider.max = 100; sensSlider.value = 50;
+    sensSlider.min = 1; sensSlider.max = 100; sensSlider.value = 45;
 
     const sensVal = document.createElement('span');
     sensVal.className = 'dc-sens-val';
-    sensVal.textContent = '50';
+    sensVal.textContent = '45';
 
     row2.appendChild(sensLabel);
     row2.appendChild(sensSlider);
@@ -716,11 +716,10 @@ function createDeficalmeWidget() {
             audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
+            analyser.fftSize = 1024;
             const source = audioContext.createMediaStreamSource(audioStream);
-            scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
             source.connect(analyser);
-            analyser.connect(scriptProcessor);
-            scriptProcessor.connect(audioContext.destination);
+            // Pas de scriptProcessor : la lecture du volume se fait dans gameLoop via RAF
             return true;
         } catch (err) {
             alert('🎤 Micro non accessible. Vérifiez les permissions.');
@@ -736,16 +735,20 @@ function createDeficalmeWidget() {
     }
 
     function stopAudio() {
-        if (scriptProcessor) { scriptProcessor.onaudioprocess = null; }
+        if (scriptProcessor) {
+            try { scriptProcessor.disconnect(); } catch(e) {}
+            scriptProcessor = null;
+        }
         if (audioStream) { audioStream.getTracks().forEach(t => t.stop()); audioStream = null; }
         if (audioContext) { audioContext.close(); audioContext = null; }
-        analyser = null; scriptProcessor = null;
+        analyser = null;
     }
 
     // ── Jeu ───────────────────────────────────────────────────────────────
-    function gameLoop() {
+    let rafId = null;
+
+    function gameLoop(now) {
         if (!isPlaying) return;
-        const now = performance.now();
         const delta = (now - lastTime) / 1000;
         lastTime = now;
 
@@ -764,11 +767,14 @@ function createDeficalmeWidget() {
 
         if (progress >= 100) {
             isPlaying = false;
-            scriptProcessor && (scriptProcessor.onaudioprocess = null);
+            rafId = null;
             btnStart.classList.add('dc-hidden');
             btnStop.classList.add('dc-hidden');
             btnReset.classList.remove('dc-hidden');
+            return;
         }
+
+        rafId = requestAnimationFrame(gameLoop);
     }
 
     async function toggleStart() {
@@ -778,12 +784,12 @@ function createDeficalmeWidget() {
             isPlaying = true;
             lastTime = performance.now();
             msgStart.style.display = 'none';
-            if (scriptProcessor) scriptProcessor.onaudioprocess = gameLoop;
+            rafId = requestAnimationFrame(gameLoop);
             btnStart.textContent = '⏸ Pause';
             btnStop.classList.remove('dc-hidden');
         } else {
             isPlaying = false;
-            if (scriptProcessor) scriptProcessor.onaudioprocess = null;
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
             btnStart.textContent = '▶ Reprendre';
         }
     }
@@ -791,7 +797,7 @@ function createDeficalmeWidget() {
     function stopDefi() {
         isPlaying = false;
         progress = 0;
-        if (scriptProcessor) scriptProcessor.onaudioprocess = null;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         stopAudio();
         micBarFill.style.width = '0%';
         updateUI();
@@ -805,6 +811,7 @@ function createDeficalmeWidget() {
     function resetDefi() {
         isPlaying = false;
         progress = 0;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         stopAudio();
         micBarFill.style.width = '0%';
         // Réinitialiser l'aperçu si actif
@@ -1032,9 +1039,15 @@ function createDeficalmeWidget() {
 
     // Nettoyer l'audio et les observers quand le widget est supprimé
     const observer = new MutationObserver(() => {
-        if (!widget.isConnected) { stopAudio(); observer.disconnect(); themeObserver.disconnect(); }
+        if (!widget.isConnected) {
+            isPlaying = false;
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            stopAudio();
+            observer.disconnect();
+            themeObserver.disconnect();
+        }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(widget.parentNode || document.body, { childList: true });
 
     // ── Init ──────────────────────────────────────────────────────────────
     board.appendChild(widget);
