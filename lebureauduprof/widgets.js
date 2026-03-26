@@ -535,6 +535,13 @@ function makeDraggable(elmnt) {
             elmnt.focus();
             startWidgetDrag(e, elmnt);
         };
+        // Stylet
+        handle.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse') return;
+            e.stopPropagation(); e.preventDefault();
+            elmnt.focus();
+            startWidgetDrag(e, elmnt);
+        });
         handle.addEventListener('touchstart', (e) => {
             e.stopPropagation();
             elmnt.focus();
@@ -786,10 +793,22 @@ function startWidgetDrag(e, elmnt) {
         saveBoard();
     }
 
-    document.onmousemove = onMove;
-    document.onmouseup   = onEnd;
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend',  onEnd);
+    document.addEventListener('mousemove',   onMove);
+    document.addEventListener('mouseup',     onEnd);
+    document.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'mouse') onMove(ev); });
+    document.addEventListener('pointerup',   (ev) => { if (ev.pointerType !== 'mouse') onEnd(); });
+    document.addEventListener('touchmove',   onMove, { passive: false });
+    document.addEventListener('touchend',    onEnd);
+    // Nettoyer les anciens handlers onmousemove/onmouseup si présents
+    document.onmousemove = null;
+    document.onmouseup   = null;
+
+    const _cleanPointer = () => {
+        document.removeEventListener('mousemove',   onMove);
+        document.removeEventListener('mouseup',     onEnd);
+        document.removeEventListener('touchmove',   onMove);
+        document.removeEventListener('touchend',    onEnd);
+    };
 }
 
 
@@ -843,16 +862,27 @@ function makeDraggableRotate(elmnt) {
             saveBoard();
         }
 
-        document.onmousemove = onMove;
-        document.onmouseup   = onEnd;
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend',  onEnd);
+        document.addEventListener('mousemove',   onMove);
+        document.addEventListener('mouseup',     onEnd);
+        document.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'mouse') onMove(ev); });
+        document.addEventListener('pointerup',   (ev) => { if (ev.pointerType !== 'mouse') onEnd(); });
+        document.addEventListener('touchmove',   onMove, { passive: false });
+        document.addEventListener('touchend',    onEnd);
+        document.onmousemove = null;
+        document.onmouseup   = null;
     }
 
     handle.onmousedown = (e) => {
         e.preventDefault(); e.stopPropagation();
         startRotate(e.clientX, e.clientY);
     };
+
+    // Stylet
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse') return;
+        e.preventDefault(); e.stopPropagation();
+        startRotate(e.clientX, e.clientY);
+    });
 
     handle.addEventListener('touchstart', (e) => {
         e.preventDefault(); e.stopPropagation();
