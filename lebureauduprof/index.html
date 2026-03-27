@@ -3612,6 +3612,17 @@ function _refreshPdfTabBar() {
 
     bar.style.display = 'flex';
 
+    // Bloquer TOUS les pointerdown stylet/touch sur la barre (même sur l'espace vide)
+    // pour qu'ils n'atteignent jamais le board en dessous
+    if (!bar._penDownBlocked) {
+        bar._penDownBlocked = true;
+        bar.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+            e.stopPropagation();
+            e.preventDefault();
+        });
+    }
+
     // Reconstruire les onglets
     bar.innerHTML = '';
     containers.forEach((c, i) => {
@@ -3640,21 +3651,29 @@ function _refreshPdfTabBar() {
             e.stopPropagation();
             _activatePdfFsTab(c);
         });
-        // Support stylet : pointerdown stoppe la propagation immédiatement (empêche le board de capturer)
+        // Support stylet : capture le pointeur dès le pointerdown pour que
+        // le board ne reçoive jamais l'événement (setPointerCapture est la seule
+        // méthode fiable sur tablettes VPI / Wacom)
         tab.addEventListener('pointerdown', (e) => {
             if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
-            if (e.target.classList.contains('tab-wf-btn')) return;
             e.stopPropagation();
+            e.preventDefault();
+            try { tab.setPointerCapture(e.pointerId); } catch(_) {}
+            tab._penPointerId = e.pointerId;
         });
         tab.addEventListener('pointerup', (e) => {
             if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+            e.preventDefault();
+            e.stopPropagation();
+            try { tab.releasePointerCapture(e.pointerId); } catch(_) {}
             if (e.target.classList.contains('tab-wf-btn')) return;
             if (tab._tabPenBusy) return;
             tab._tabPenBusy = true;
             setTimeout(() => { tab._tabPenBusy = false; }, 300);
-            e.preventDefault();
-            e.stopPropagation();
             _activatePdfFsTab(c);
+        });
+        tab.addEventListener('pointercancel', (e) => {
+            try { tab.releasePointerCapture(e.pointerId); } catch(_) {}
         });
 
         // Bouton vert → quitter le plein écran pour ce PDF
@@ -3663,10 +3682,22 @@ function _refreshPdfTabBar() {
             e.stopPropagation();
             togglePdfBoardFullscreen(c);
         });
+        btnMax.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+            e.stopPropagation(); e.preventDefault();
+            try { btnMax.setPointerCapture(e.pointerId); } catch(_) {}
+        });
         btnMax.addEventListener('pointerup', (e) => {
             if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
             e.preventDefault(); e.stopPropagation();
+            try { btnMax.releasePointerCapture(e.pointerId); } catch(_) {}
+            if (btnMax._btnPenBusy) return;
+            btnMax._btnPenBusy = true;
+            setTimeout(() => { btnMax._btnPenBusy = false; }, 300);
             togglePdfBoardFullscreen(c);
+        });
+        btnMax.addEventListener('pointercancel', (e) => {
+            try { btnMax.releasePointerCapture(e.pointerId); } catch(_) {}
         });
 
         // Bouton rouge → fermer le PDF (supprimer le widget)
@@ -3699,10 +3730,22 @@ function _refreshPdfTabBar() {
             }
             _refreshPdfTabBar();
         });
+        btnClose.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+            e.stopPropagation(); e.preventDefault();
+            try { btnClose.setPointerCapture(e.pointerId); } catch(_) {}
+        });
         btnClose.addEventListener('pointerup', (e) => {
             if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
             e.preventDefault(); e.stopPropagation();
+            try { btnClose.releasePointerCapture(e.pointerId); } catch(_) {}
+            if (btnClose._btnPenBusy) return;
+            btnClose._btnPenBusy = true;
+            setTimeout(() => { btnClose._btnPenBusy = false; }, 300);
             btnClose.click();
+        });
+        btnClose.addEventListener('pointercancel', (e) => {
+            try { btnClose.releasePointerCapture(e.pointerId); } catch(_) {}
         });
 
         bar.appendChild(tab);
@@ -3728,10 +3771,19 @@ function _refreshPdfTabBar() {
         _getPdfFsContainers().slice().forEach(c => _exitFsOne(c));
         _refreshPdfTabBar();
     });
+    exitAllBtn.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+        e.stopPropagation(); e.preventDefault();
+        try { exitAllBtn.setPointerCapture(e.pointerId); } catch(_) {}
+    });
     exitAllBtn.addEventListener('pointerup', (e) => {
         if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
         e.preventDefault(); e.stopPropagation();
+        try { exitAllBtn.releasePointerCapture(e.pointerId); } catch(_) {}
         exitAllBtn.click();
+    });
+    exitAllBtn.addEventListener('pointercancel', (e) => {
+        try { exitAllBtn.releasePointerCapture(e.pointerId); } catch(_) {}
     });
     bar.appendChild(exitAllBtn);
 }
