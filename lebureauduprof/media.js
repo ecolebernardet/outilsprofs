@@ -830,13 +830,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         customMenu.style.display = 'none';
                         renderPage(currentPage);
                     };
+                    item.addEventListener('pointerdown', (e) => e.stopPropagation());
                     item.addEventListener('click', goToPage);
-                    item.addEventListener('pointerup', (e) => {
-                        if (e.pointerType === 'pen' || e.pointerType === 'touch') {
-                            e.preventDefault();
-                            goToPage();
-                        }
-                    });
+                    item.addEventListener('pointerup', (e) => { e.stopPropagation(); goToPage(); });
                     customMenu.appendChild(item);
                 }
 
@@ -865,7 +861,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     if (e.pointerType === 'pen' || e.pointerType === 'touch') toggleMenu(e);
                 });
 
-                // Fermer le menu si on clique ailleurs
+                // Fermer le menu si on clique ailleurs (mousedown pour ne pas interférer avec pointerup des items)
+                document.addEventListener('mousedown', (e) => {
+                    if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
+                });
                 document.addEventListener('pointerdown', (e) => {
                     if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
                 });
