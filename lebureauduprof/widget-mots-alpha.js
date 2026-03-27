@@ -275,14 +275,14 @@
             color: #666; font-size: 12px; font-weight: 700;
             cursor: pointer; display: flex; align-items: center;
             justify-content: center; flex-shrink: 0;
-            transition: background .15s; margin-left: auto;
+            transition: background .15s;
         }
         .alpha-help-btn:hover { background: #e0e0e0; color: #333; }
 
         /* ── Popup aide ── */
         .alpha-help-popup {
             display: none; position: absolute;
-            bottom: 42px; right: 10px;
+            top: 36px; right: 10px;
             background: #fff; border: 1px solid #ddd;
             border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
             padding: 12px 14px; width: 260px;
@@ -337,6 +337,7 @@
     <span class="alpha-title">🔤 L'ordre alphabétique</span>
     <span class="alpha-level-badge facile">😊 Facile</span>
     <div class="wf-btns" style="margin-left:auto">
+      <button class="alpha-help-btn" title="Aide sur les niveaux">?</button>
       <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
       <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
       <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
@@ -366,7 +367,6 @@
     <button class="alpha-btn alpha-btn-check">✔ Vérifier</button>
     <span class="alpha-result-text"></span>
     <div class="alpha-correction-text"></div>
-    <button class="alpha-help-btn" title="Aide sur les niveaux">?</button>
   </div>
 
   <!-- Popup aide -->

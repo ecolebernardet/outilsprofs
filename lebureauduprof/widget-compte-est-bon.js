@@ -358,7 +358,7 @@
             color: #666; font-size: calc(12px * var(--ceb-s)); font-weight: 700;
             cursor: pointer; display: flex; align-items: center;
             justify-content: center; flex-shrink: 0;
-            transition: background .15s; margin-left: auto;
+            transition: background .15s;
         }
         .ceb-help-btn:hover { background: #e0e0e0; color: #333; }
 
@@ -366,7 +366,7 @@
         .ceb-help-popup {
             display: none;
             position: absolute;
-            bottom: 42px; right: 10px;
+            top: 36px; right: 10px;
             background: #fff; border: 1px solid #ddd;
             border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
             padding: 12px 14px; width: 290px;
@@ -648,6 +648,7 @@
                 <span class="ceb-title">🔢 Le Compte est Bon</span>
                 <span class="ceb-level-badge facile">Facile</span>
                 <div class="wf-btns" style="margin-left:auto">
+                    <button class="ceb-help-btn" title="Aide sur les niveaux">?</button>
                     <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
                     <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
                     <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
@@ -703,7 +704,6 @@
             <!-- Résultat -->
             <div class="ceb-result-zone">
                 <span class="ceb-result-text"></span>
-                <button class="ceb-help-btn" title="Aide sur les niveaux">?</button>
             </div>
 
             <!-- Solution révélée -->

@@ -202,6 +202,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             }
 
             function renderPage(num) {
+                _invalidateSnapshot(); // le canvas va être redimensionné → snapshot obsolète
                 pdfDoc.getPage(num).then(page => {
                     const scale = zoomScale ?? fitScale(page);
                     const dpr = window.devicePixelRatio || 1;
@@ -273,8 +274,29 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 return { x: nx * annotCanvas.width, y: ny * annotCanvas.height };
             }
 
+            // Snapshot ImageData du canvas annoté (strokes validés uniquement, sans le stroke en cours)
+            // Utilisé pour éviter de tout redessiner à chaque point lors du tracé en temps réel.
+            let _annotSnapshot = null;
+
+            // Invalide le snapshot (à appeler dès qu'on modifie layer.strokes)
+            function _invalidateSnapshot() { _annotSnapshot = null; }
+
+            // Construit le snapshot à partir des strokes validés de la page
+            function _buildSnapshot(pageNum) {
+                actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                const layer = getLayer(pageNum);
+                if (layer._snapshot) {
+                    actx.putImageData(layer._snapshot, 0, 0);
+                }
+                for (const stroke of layer.strokes) {
+                    drawStroke(actx, stroke);
+                }
+                _annotSnapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+            }
+
             // Redessiner toutes les annotations de la page (avec le zoom courant)
             function redrawAnnotations(pageNum) {
+                _invalidateSnapshot();
                 actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
                 // Supprimer tous les boutons overlay de figure s'ils existent
                 _removeAnnotFigureHandles();
@@ -603,6 +625,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 }
 
                 isDrawing = true;
+                // Construire le snapshot des strokes validés avant de commencer à dessiner
+                // → onPointerMove pourra restaurer ce snapshot au lieu de tout redessiner
+                _buildSnapshot(currentPage);
                 // Stocker pts en normalisé dès le départ
                 currentStrokeAnnot = { tool: tool, color, size, pts: [norm] };
             }
@@ -907,6 +932,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const norm = toNorm(px, py);
                         currentStrokeAnnot = { tool, color, size, pts: [norm] };
                         isDrawing = true;
+                        // Snapshot des strokes validés → continueStroke restaure ce snapshot
+                        // au lieu de tout redessiner à chaque point (critique sur gros PDF)
+                        _buildSnapshot(currentPage);
                     },
                     // Continue le trait en cours (dessin temps réel + accumule les points)
                     continueStroke(color, size, tool, px, py) {
@@ -932,8 +960,17 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const canvasW    = annotCanvas.width;
                         const sizeScaled = size * canvasW / 600;
 
-                        // Redessiner le stroke en cours en entier (Bézier quadratique)
-                        redrawAnnotations(currentPage);
+                        // Restaurer le snapshot (strokes validés) puis dessiner le stroke en cours
+                        // Beaucoup plus rapide que redrawAnnotations sur de gros PDF
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                        } else {
+                            // Fallback si snapshot absent (ex: après zoom)
+                            actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                            const layer2 = getLayer(currentPage);
+                            if (layer2._snapshot) actx.putImageData(layer2._snapshot, 0, 0);
+                            for (const s of layer2.strokes) drawStroke(actx, s);
+                        }
                         actx.save();
                         if (tool === 'highlighter') {
                             actx.globalAlpha = 0.35;
@@ -1103,8 +1140,15 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     },
                     // Prévisualisation du cercle gomme
                     previewEraser(px, py, r) {
-                        // Toujours redessiner les annotations proprement
-                        redrawAnnotations(currentPage);
+                        // Restaurer le snapshot si disponible, sinon full redraw
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                        } else {
+                            actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                            const layer2 = getLayer(currentPage);
+                            if (layer2._snapshot) actx.putImageData(layer2._snapshot, 0, 0);
+                            for (const s of layer2.strokes) drawStroke(actx, s);
+                        }
                         // Si effacement en cours, redessiner le trait d'effacement accumulé
                         if (isDrawing && currentStrokeAnnot && currentStrokeAnnot.tool === 'eraser' && currentStrokeAnnot.pts.length > 1) {
                             const canvasW2 = annotCanvas.width;
@@ -1170,7 +1214,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const layer = getLayer(currentPage);
                         const s = layer.strokes[index];
                         if (!s || s.tool !== 'text') return;
-                        redrawAnnotations(currentPage);
+                        // Utiliser le snapshot si disponible (drag en cours)
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, s);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                         const canvasW  = annotCanvas.width;
                         const pos      = fromNorm(s.nx, s.ny);
                         const fontSize = Math.round(6 * Math.pow(1.12, s.size) * canvasW / 600);
@@ -1229,7 +1279,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.strokes[index]) return;
                         const norm = toNorm(px, py);
                         layer.strokes[index] = { ...layer.strokes[index], nx: norm.x, ny: norm.y };
-                        redrawAnnotations(currentPage);
+                        // Pendant le drag, on utilise le snapshot si disponible
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, layer.strokes[index]);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                     },
                     // Sauvegarder la position finale après drag (ajoute à l'historique)
                     saveTextMove(index) {
@@ -1238,6 +1294,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        _invalidateSnapshot(); // strokes validés ont changé
                     },
 
                     // Fait pivoter un texte (angle absolu en radians)
@@ -1245,7 +1302,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const layer = getLayer(currentPage);
                         if (!layer.strokes[index]) return;
                         layer.strokes[index] = { ...layer.strokes[index], rotation: angle };
-                        redrawAnnotations(currentPage);
+                        // Pendant la rotation, snapshot + redessiner juste ce stroke
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, layer.strokes[index]);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                     },
 
                     // Sauvegarde dans l'historique après rotation texte
@@ -1255,6 +1318,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        _invalidateSnapshot(); // strokes validés ont changé
                     },
                     // px, py : coordonnées canvas pixels ; retourne le stroke trouvé ou null
                     findTextStrokeAt(px, py) {
@@ -1328,7 +1392,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const layer = getLayer(currentPage);
                         const s = layer.strokes[index];
                         if (!s || s.tool !== 'figure' || !s.pts) return;
-                        redrawAnnotations(currentPage);
+                        // Utiliser le snapshot de drag si disponible (évite un full redraw)
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, s);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                         const canvasW = annotCanvas.width;
                         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                         s.pts.forEach(p => {
@@ -1359,6 +1429,25 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         _showAnnotFigureHandles(index, { x, y, w, h });
                     },
 
+                    // Prépare un drag de figure : construit un snapshot sans la figure draggée
+                    // → moveFigureStroke / drawFigureSelection utilisent ce snapshot pendant le drag
+                    startDragFigure(index) {
+                        const layer = getLayer(currentPage);
+                        actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                        if (layer._snapshot) actx.putImageData(layer._snapshot, 0, 0);
+                        layer.strokes.forEach((s, i) => { if (i !== index) drawStroke(actx, s); });
+                        _annotSnapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+                    },
+
+                    // Prépare un drag de texte : snapshot sans le texte draggé
+                    startDragText(index) {
+                        const layer = getLayer(currentPage);
+                        actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                        if (layer._snapshot) actx.putImageData(layer._snapshot, 0, 0);
+                        layer.strokes.forEach((s, i) => { if (i !== index) drawStroke(actx, s); });
+                        _annotSnapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+                    },
+
                     // Déplace une figure (delta en pixels canvas normalisés)
                     moveFigureStroke(index, dnx, dny) {
                         const layer = getLayer(currentPage);
@@ -1368,7 +1457,13 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             ...s,
                             pts: s.pts.map(p => ({ x: p.x + dnx, y: p.y + dny }))
                         };
-                        redrawAnnotations(currentPage);
+                        // Pendant le drag, snapshot (sans la figure) + redessiner la figure déplacée
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, layer.strokes[index]);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                     },
 
                     // Sauvegarde le déplacement dans l'historique
@@ -1378,6 +1473,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        _invalidateSnapshot(); // strokes validés ont changé
                     },
 
                     // Redimensionne une figure : scaleX/scaleY absolus depuis les pts d'origine
@@ -1401,7 +1497,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                                 y: cy + (p.y - cy) * scaleY
                             }))
                         };
-                        redrawAnnotations(currentPage);
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, layer.strokes[index]);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                     },
 
                     // Fait pivoter une figure d'un angle absolu autour de son centre d'origine
@@ -1429,7 +1530,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                                 return toNorm(cx + dx * cos - dy * sin, cy + dx * sin + dy * cos);
                             })
                         };
-                        redrawAnnotations(currentPage);
+                        if (_annotSnapshot) {
+                            actx.putImageData(_annotSnapshot, 0, 0);
+                            drawStroke(actx, layer.strokes[index]);
+                        } else {
+                            redrawAnnotations(currentPage);
+                        }
                     },
 
                     // Sauvegarde dans l'historique (après resize ou rotate terminé)
@@ -1439,6 +1545,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (!layer.history) layer.history = [];
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
+                        _invalidateSnapshot(); // strokes validés ont changé
                     }
                 };
             }

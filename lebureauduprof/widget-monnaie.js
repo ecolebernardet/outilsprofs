@@ -259,14 +259,13 @@
             justify-content: center;
             flex-shrink: 0;
             transition: background .15s;
-            margin-left: auto;
         }
         .monnaie-help-btn:hover { background: #e0e0e0; color: #333; }
 
         .monnaie-help-popup {
             display: none;
             position: absolute;
-            bottom: 42px;
+            top: 36px;
             right: 10px;
             background: #fff;
             border: 1px solid #ddd;
@@ -593,12 +592,13 @@ function createMonnaieWidget() {
     answerZone.appendChild(checkBtn);
     answerZone.appendChild(answerText);
 
-    // Bouton aide
+    // Bouton aide (inséré dans le header, à gauche du bouton jaune)
     const helpBtn = document.createElement('button');
     helpBtn.className = 'monnaie-help-btn';
     helpBtn.title = 'Aide sur les niveaux';
     helpBtn.textContent = '?';
-    answerZone.appendChild(helpBtn);
+    const wfBtnsDiv = header.querySelector('.wf-btns');
+    wfBtnsDiv.insertBefore(helpBtn, wfBtnsDiv.firstChild);
 
     // Popup aide
     const helpPopup = document.createElement('div');

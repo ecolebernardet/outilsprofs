@@ -2649,6 +2649,8 @@ function _pdfAnnotStartStroke(e) {
                 const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
                 _pdfDragText = { index: found.index, stroke: found.stroke, startPos: pos, startClientX: clientX, startClientY: clientY, moved: false };
                 _pdfAnnotPainting = true;
+                // Préparer le snapshot sans le texte (optimisation gros PDF)
+                if (api && api.startDragText) api.startDragText(found.index);
                 if (_pdfAnnotEvTarget) {
                 _pdfAnnotEvTarget.style.setProperty('cursor', 'grabbing', 'important');
                 _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', 'grabbing', 'important'));
@@ -2701,6 +2703,8 @@ function _pdfAnnotStartStroke(e) {
                 moved: false
             };
             _pdfAnnotPainting = true;
+            // Préparer le snapshot sans la figure (optimisation gros PDF)
+            if (api.startDragFigure) api.startDragFigure(found.index);
             api.drawFigureSelection(found.index);
             if (_pdfAnnotEvTarget) {
                 _pdfAnnotEvTarget.style.setProperty('cursor', 'grab', 'important');
