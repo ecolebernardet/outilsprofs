@@ -713,7 +713,7 @@
 			100% { box-shadow: 0 0 10px rgba(74, 144, 226, 0.4), 0 0 0 0   rgba(74, 144, 226, 0); }
 		}
 		#draw-fab-btn {
-			position: fixed; bottom: 20px; left: 78px; z-index: 14000;
+			position: fixed; bottom: 20px; right: 20px; z-index: 14000;
 			width: 50px; height: 50px; border-radius: 50%;
 			background: #1a1a2e; border: 2px solid #333;
 			color: #fff; font-size: 22px; cursor: pointer;
@@ -1466,25 +1466,25 @@
 }
 #pdf-library-panel {
     position: fixed;
-    top: 0; right: calc(-1 * var(--pdf-lib-w));
+    top: 0; left: calc(-1 * var(--pdf-lib-w));
     width: var(--pdf-lib-w);
     height: 100%;
     background: var(--pdf-lib-bg);
-    border-left: 1px solid var(--pdf-lib-border);
+    border-right: 1px solid var(--pdf-lib-border);
     z-index: 12500;
     display: flex;
     flex-direction: column;
-    transition: right 0.25s cubic-bezier(.4,0,.2,1);
-    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+    transition: left 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
 }
-#pdf-library-panel.pdf-lib-open { right: 0; }
+#pdf-library-panel.pdf-lib-open { left: 0; }
 #pdf-library-panel.pdf-lib-resizing { transition: none !important; }
 body.presentation-mode #pdf-library-panel,
 body.presentation-mode #pdf-library-tab { display: none !important; }
-/* Poignée de redimensionnement — bord gauche du panneau */
+/* Poignée de redimensionnement — bord droit du panneau */
 #pdf-library-resize-handle {
     position: absolute;
-    left: -4px; top: 0;
+    right: -4px; top: 0;
     width: 8px; height: 100%;
     cursor: ew-resize;
     z-index: 10;
@@ -1499,28 +1499,28 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     transition: background 0.15s;
 }
 #pdf-library-resize-handle:hover::after { background: var(--pdf-lib-accent); }
-/* Onglet déclencheur sur le bord droit */
+/* Onglet déclencheur sur le bord gauche */
 #pdf-library-tab {
     position: fixed;
-    right: 0; top: 50%;
+    left: 0; top: 50%;
     transform: translateY(-50%);
     width: 30px; height: 70px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
     z-index: 12499;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; color: var(--pdf-lib-muted);
-    transition: color 0.15s, background 0.15s, right 0.25s cubic-bezier(.4,0,.2,1);
+    transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
     writing-mode: vertical-rl;
     letter-spacing: 1px;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
 	opacity: 0.5;
 }
 #pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); opacity: 1;}
-#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
+#pdf-library-tab.pdf-lib-tab-open { left: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
 #pdf-library-tab.pdf-lib-resizing { transition: none !important; }
 /* En-tête du panneau */
 #pdf-library-header {

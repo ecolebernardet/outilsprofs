@@ -489,7 +489,7 @@ function _init() {
 
         document.addEventListener('mousemove', (e) => {
             if (!_dragging) return;
-            const dx = _startX - e.clientX; // glisser vers la gauche = agrandir
+            const dx = e.clientX - _startX; // glisser vers la droite = agrandir
             const newW = Math.max(MIN_W, Math.min(MAX_W, _startW + dx));
             document.documentElement.style.setProperty('--pdf-lib-w', newW + 'px');
         });
