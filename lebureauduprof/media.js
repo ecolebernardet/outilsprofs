@@ -68,11 +68,7 @@ function _attachPenSupportToPdfToolbar(container) {
     // Bouton export 💾
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn) _addPenClick(exportBtn, () => exportBtn.click());
-    // Boutons nav ◀ ▶ (avant reattach — ne nuit pas)
-    const prevBtn = container.querySelector('.pdf-prev');
-    if (prevBtn) _addPenClick(prevBtn, () => prevBtn.click());
-    const nextBtn = container.querySelector('.pdf-next');
-    if (nextBtn) _addPenClick(nextBtn, () => nextBtn.click());
+    // Boutons nav ◀ ▶ : gérés directement dans reattach() avec _penHandled, pas besoin de _addPenClick ici
     // Bouton "Ouvrir un PDF" label
     const openLabel = container.querySelector('.pdf-placeholder label');
     if (openLabel) _addPenClick(openLabel, () => openLabel.querySelector('input')?.click());
@@ -734,15 +730,21 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 if (!el) return;
                 const clone = el.cloneNode(true);
                 el.parentNode.replaceChild(clone, el);
-                clone.addEventListener('click', fn);
+                clone.addEventListener('click', (e) => {
+                    // Si l'action a déjà été déclenchée par pointerup (stylet/touch), on ignore le click
+                    if (clone._penHandled) { clone._penHandled = false; return; }
+                    fn(e);
+                });
                 // Support tactile / stylet VPI : touchend + pointerup
                 clone.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    clone._penHandled = true;
                     fn(e);
                 }, { passive: false });
                 clone.addEventListener('pointerup', (e) => {
                     if (e.pointerType === 'touch' || e.pointerType === 'pen') {
                         e.preventDefault();
+                        clone._penHandled = true;
                         fn(e);
                     }
                 });
