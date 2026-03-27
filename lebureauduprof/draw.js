@@ -291,13 +291,11 @@ function startPaint(e) {
 var _paintRafId = null;
 var _paintPendingPos = null;
 
-// ── Lissage du trait stylet ────────────────────────────────────────────────
-// SMOOTH_ALPHA : facteur du filtre exponentiel IIR
-//   0.1 = très lissé (boucles fluides, léger délai)   2.0 = quasi brut (très réactif)
-// Valeur par défaut 1.0 → réactif, correspondant au label ∿10 dans l'interface
+// SMOOTH_ALPHA : lissage IIR léger sur la position du stylet (anti-jitter)
+// Valeur par défaut 1.0 = quasi brut (∿10). Ajustable dans la toolbar.
 var SMOOTH_ALPHA = 1.0;
-var _smoothPts   = [];   // points lissés du trait en cours
-var _smoothLast  = null; // dernière position lissée
+var _smoothPts   = [];
+var _smoothLast  = null;
 
 function paint(e) {
     if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
@@ -332,7 +330,7 @@ function paint(e) {
     }
     const rawPos = getPos(e);
 
-    // ── Filtre exponentiel IIR ─────────────────────────────────────────────
+    // Filtre IIR léger (anti-jitter stylet)
     const smoothed = {
         x: _smoothLast.x + SMOOTH_ALPHA * (rawPos.x - _smoothLast.x),
         y: _smoothLast.y + SMOOTH_ALPHA * (rawPos.y - _smoothLast.y)
@@ -342,13 +340,14 @@ function paint(e) {
     currentStroke.points.push(rawPos);
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
 
-    // ── Dessin incrémental avec Bézier local sur les 3 derniers points ────
-    // Pas de redraw global — on ajoute juste le nouveau morceau de courbe.
-    // Ça adoucit les angles sans aucune latence perceptible.
+    // Dessin incrémental simple (lineTo) — aucune latence, trait visible immédiatement
+    // Le rendu Bézier s'applique uniquement à la sauvegarde finale (drawStroke)
     const n = _smoothPts.length;
     if (n < 2 || !drawCtx) return;
-
+    const prev = _smoothPts[n - 2];
+    const cur2 = _smoothPts[n - 1];
     drawCtx.save();
+    drawCtx.beginPath();
     drawCtx.lineCap  = 'round';
     drawCtx.lineJoin = 'round';
     if (currentDrawMode === 'highlight') {
@@ -362,22 +361,8 @@ function paint(e) {
         drawCtx.lineWidth   = currentStroke.size;
         drawCtx.globalAlpha = 1;
     }
-    drawCtx.beginPath();
-    if (n === 2) {
-        // 2 points : segment droit simple
-        drawCtx.moveTo(_smoothPts[0].x, _smoothPts[0].y);
-        drawCtx.lineTo(_smoothPts[1].x, _smoothPts[1].y);
-    } else {
-        // 3+ points : Bézier quadratique sur les 3 derniers uniquement
-        // Départ = milieu entre pts[n-3] et pts[n-2] (jointure propre avec le segment précédent)
-        // Fin    = milieu entre pts[n-2] et pts[n-1]
-        // Contrôle = pts[n-2]
-        const p0 = _smoothPts[n - 3];
-        const p1 = _smoothPts[n - 2];
-        const p2 = _smoothPts[n - 1];
-        drawCtx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-        drawCtx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
-    }
+    drawCtx.moveTo(prev.x, prev.y);
+    drawCtx.lineTo(cur2.x, cur2.y);
     drawCtx.stroke();
     drawCtx.restore();
 }
@@ -992,8 +977,10 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
             ctx.lineTo(pts[1].x, pts[1].y);
         } else {
             for (let i = 1; i < pts.length - 1; i++) {
-                const mx = (pts[i].x + pts[i + 1].x) / 2;
-                const my = (pts[i].y + pts[i + 1].y) / 2;
+                // Tension réduite : ancrage à 25% au lieu de 50%
+                // → courbes plus fidèles au tracé, moins "surlissées"
+                const mx = pts[i].x + (pts[i + 1].x - pts[i].x) * 0.25;
+                const my = pts[i].y + (pts[i + 1].y - pts[i].y) * 0.25;
                 ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
             }
             ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);

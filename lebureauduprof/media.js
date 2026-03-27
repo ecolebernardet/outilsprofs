@@ -517,8 +517,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     for (let i = 1; i < stroke.pts.length - 1; i++) {
                         const pi  = fromNorm(stroke.pts[i].x,     stroke.pts[i].y);
                         const pi1 = fromNorm(stroke.pts[i+1].x, stroke.pts[i+1].y);
-                        const mx = (pi.x + pi1.x) / 2;
-                        const my = (pi.y + pi1.y) / 2;
+                        const mx = pi.x + (pi1.x - pi.x) * 0.25;
+                        const my = pi.y + (pi1.y - pi.y) * 0.25;
                         ctx.quadraticCurveTo(pi.x, pi.y, mx, my);
                     }
                     const last = fromNorm(stroke.pts[stroke.pts.length-1].x, stroke.pts[stroke.pts.length-1].y);
@@ -909,8 +909,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             for (let i = 1; i < sPts.length - 1; i++) {
                                 const pi  = fromNorm(sPts[i].x,     sPts[i].y);
                                 const pi1 = fromNorm(sPts[i+1].x, sPts[i+1].y);
-                                const mx = (pi.x + pi1.x) / 2;
-                                const my = (pi.y + pi1.y) / 2;
+                                const mx = pi.x + (pi1.x - pi.x) * 0.25;
+                                const my = pi.y + (pi1.y - pi.y) * 0.25;
                                 actx.quadraticCurveTo(pi.x, pi.y, mx, my);
                             }
                             const last = fromNorm(sPts[sPts.length-1].x, sPts[sPts.length-1].y);
@@ -1790,8 +1790,8 @@ function _drawStrokeScaled(ctx, stroke, W, H) {
         for (let i = 1; i < stroke.pts.length - 1; i++) {
             const pi  = fromN(stroke.pts[i].x,     stroke.pts[i].y);
             const pi1 = fromN(stroke.pts[i+1].x, stroke.pts[i+1].y);
-            const mx = (pi.x + pi1.x) / 2;
-            const my = (pi.y + pi1.y) / 2;
+            const mx = pi.x + (pi1.x - pi.x) * 0.25;
+            const my = pi.y + (pi1.y - pi.y) * 0.25;
             ctx.quadraticCurveTo(pi.x, pi.y, mx, my);
         }
         const last = fromN(stroke.pts[stroke.pts.length-1].x, stroke.pts[stroke.pts.length-1].y);
