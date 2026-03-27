@@ -244,8 +244,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     // Mettre à jour le menu déroulant
                     const pageInput2 = container.querySelector('.pdf-page-input');
                     if (pageInput2) pageInput2.value = num;
-                    const pageSelect3 = container.querySelector('.pdf-page-select');
-                    if (pageSelect3) pageSelect3.value = num;
+                    if (container._updatePageBtn) container._updatePageBtn(num);
 
                     const ctx = pdfCanvas.getContext('2d');
                     if (renderTask) renderTask.cancel();
@@ -790,7 +789,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     if (isNaN(p)) p = 1;
                     p = Math.max(1, Math.min(totalPages, p));
                     pageInput.value = p;
-                    if (pageSelect2) pageSelect2.value = p;
+                    if (container._updatePageBtn) container._updatePageBtn(p);
                     currentPage = p;
                     renderPage(currentPage);
                 });
@@ -803,21 +802,78 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             }
             const pageSelect2 = container.querySelector('.pdf-page-select');
             if (pageSelect2) {
-                pageSelect2.innerHTML = '';
+                // ── Remplacement du <select> natif par un menu custom (stylet-compatible) ──
+                const wrapper = pageSelect2.closest('div') || pageSelect2.parentNode;
+
+                // Créer le bouton qui affiche la page courante
+                const customBtn = document.createElement('button');
+                customBtn.className = 'pdf-page-custom-btn';
+                customBtn.style.cssText = 'font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 4px;outline:none;min-width:28px;text-align:center;touch-action:manipulation;';
+                customBtn.textContent = currentPage + ' / ' + totalPages;
+
+                // Créer le menu déroulant custom
+                const customMenu = document.createElement('div');
+                customMenu.className = 'pdf-page-custom-menu';
+                customMenu.style.cssText = 'display:none;position:absolute;z-index:99999;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.18);max-height:220px;overflow-y:auto;min-width:80px;left:0;top:100%;';
+
                 for (let i = 1; i <= totalPages; i++) {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = i + ' / ' + totalPages;
-                    pageSelect2.appendChild(opt);
+                    const item = document.createElement('div');
+                    item.textContent = i + ' / ' + totalPages;
+                    item.dataset.page = i;
+                    item.style.cssText = 'padding:6px 14px;cursor:pointer;font-size:12px;white-space:nowrap;touch-action:manipulation;';
+                    item.addEventListener('pointerenter', () => item.style.background = '#e8f0fe');
+                    item.addEventListener('pointerleave', () => item.style.background = '');
+                    const goToPage = () => {
+                        currentPage = i;
+                        customBtn.textContent = i + ' / ' + totalPages;
+                        if (pageInput) pageInput.value = i;
+                        customMenu.style.display = 'none';
+                        renderPage(currentPage);
+                    };
+                    item.addEventListener('click', goToPage);
+                    item.addEventListener('pointerup', (e) => {
+                        if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+                            e.preventDefault();
+                            goToPage();
+                        }
+                    });
+                    customMenu.appendChild(item);
                 }
-                pageSelect2.value = currentPage;
-                const newSelect = pageSelect2.cloneNode(true);
-                pageSelect2.parentNode.replaceChild(newSelect, pageSelect2);
-                newSelect.addEventListener('change', () => {
-                    currentPage = parseInt(newSelect.value);
-                    if (pageInput) pageInput.value = currentPage;
-                    renderPage(currentPage);
+
+                // Remplacer le select par le bouton custom + menu
+                const menuWrap = document.createElement('div');
+                menuWrap.style.cssText = 'position:relative;display:inline-flex;align-items:center;';
+                pageSelect2.replaceWith(menuWrap);
+                menuWrap.appendChild(customBtn);
+                menuWrap.appendChild(customMenu);
+
+                // Ouvrir/fermer le menu
+                const toggleMenu = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isOpen = customMenu.style.display !== 'none';
+                    customMenu.style.display = isOpen ? 'none' : 'block';
+                    if (!isOpen) {
+                        // Scroller jusqu'à la page courante
+                        const items = customMenu.querySelectorAll('[data-page]');
+                        const cur = customMenu.querySelector(`[data-page="${currentPage}"]`);
+                        if (cur) cur.scrollIntoView({ block: 'nearest' });
+                    }
+                };
+                customBtn.addEventListener('click', toggleMenu);
+                customBtn.addEventListener('pointerup', (e) => {
+                    if (e.pointerType === 'pen' || e.pointerType === 'touch') toggleMenu(e);
                 });
+
+                // Fermer le menu si on clique ailleurs
+                document.addEventListener('pointerdown', (e) => {
+                    if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
+                });
+
+                // Exposer une fonction pour mettre à jour le bouton depuis l'extérieur
+                container._updatePageBtn = (page) => {
+                    customBtn.textContent = page + ' / ' + totalPages;
+                };
             }
 
             reattach('.pdf-prev', () => {
