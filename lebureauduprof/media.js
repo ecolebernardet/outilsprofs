@@ -802,67 +802,34 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             }
             const pageSelect2 = container.querySelector('.pdf-page-select');
             if (pageSelect2) {
-                // ── Remplacement du <select> natif par un menu custom (stylet-compatible) ──
-
-                // Créer le bouton qui affiche la page courante
-                const customBtn = document.createElement('button');
-                customBtn.className = 'pdf-page-custom-btn';
-                customBtn.style.cssText = 'font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 4px;outline:none;min-width:28px;text-align:center;touch-action:manipulation;user-select:none;';
-                customBtn.textContent = currentPage + ' / ' + totalPages;
-
-                // Créer le menu déroulant custom
-                const customMenu = document.createElement('div');
-                customMenu.className = 'pdf-page-custom-menu';
-                customMenu.style.cssText = 'display:none;position:absolute;z-index:99999;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.18);max-height:220px;overflow-y:auto;min-width:80px;left:0;top:100%;';
-
+                pageSelect2.innerHTML = '';
                 for (let i = 1; i <= totalPages; i++) {
-                    const item = document.createElement('div');
-                    item.textContent = i + ' / ' + totalPages;
-                    item.dataset.page = i;
-                    item.style.cssText = 'padding:6px 14px;cursor:pointer;font-size:12px;white-space:nowrap;touch-action:manipulation;user-select:none;';
-                    item.addEventListener('pointerenter', () => item.style.background = '#e8f0fe');
-                    item.addEventListener('pointerleave', () => item.style.background = '');
-                    // Agir au pointerdown : avant tout listener de fermeture
-                    item.addEventListener('pointerdown', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        currentPage = i;
-                        customBtn.textContent = i + ' / ' + totalPages;
-                        if (pageInput) pageInput.value = i;
-                        customMenu.style.display = 'none';
-                        renderPage(currentPage);
-                    });
-                    customMenu.appendChild(item);
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = i + ' / ' + totalPages;
+                    pageSelect2.appendChild(opt);
                 }
-
-                // Remplacer le select par le bouton custom + menu
-                const menuWrap = document.createElement('div');
-                menuWrap.style.cssText = 'position:relative;display:inline-flex;align-items:center;';
-                pageSelect2.replaceWith(menuWrap);
-                menuWrap.appendChild(customBtn);
-                menuWrap.appendChild(customMenu);
-
-                // Ouvrir/fermer le menu au clic sur le bouton
-                customBtn.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const isOpen = customMenu.style.display !== 'none';
-                    customMenu.style.display = isOpen ? 'none' : 'block';
-                    if (!isOpen) {
-                        const cur = customMenu.querySelector(`[data-page="${currentPage}"]`);
-                        if (cur) cur.scrollIntoView({ block: 'nearest' });
+                pageSelect2.value = currentPage;
+                pageSelect2.style.touchAction = 'manipulation';
+                // Cloner pour repartir sans listeners parasites
+                const newSelect = pageSelect2.cloneNode(true);
+                pageSelect2.parentNode.replaceChild(newSelect, pageSelect2);
+                newSelect.addEventListener('change', () => {
+                    currentPage = parseInt(newSelect.value);
+                    if (pageInput) pageInput.value = currentPage;
+                    renderPage(currentPage);
+                });
+                // Stylet : forcer l'ouverture native du select via un vrai click()
+                newSelect.addEventListener('pointerdown', (e) => {
+                    if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+                        e.preventDefault();
+                        newSelect.focus();
+                        newSelect.click();
                     }
                 });
 
-                // Fermer si on appuie ailleurs
-                document.addEventListener('pointerdown', (e) => {
-                    if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
-                });
-
-                // Exposer une fonction pour mettre à jour le bouton depuis l'extérieur
-                container._updatePageBtn = (page) => {
-                    customBtn.textContent = page + ' / ' + totalPages;
-                };
+                // Exposer pour mise à jour externe
+                container._updatePageBtn = (page) => { newSelect.value = page; };
             }
 
             reattach('.pdf-prev', () => {
