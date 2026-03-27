@@ -273,6 +273,7 @@ function createShapeWidget(shapeId, strokeColor, fillColor, fillOpacity, svgW, s
         if (widget.dataset.background !== "true") bringToFront(widget);
     });
     widget.addEventListener('dblclick', (e) => {
+        if (isDrawMode || isEraserMode) return;
         const ignore = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.shape-resize-handle';
         if (!e.target.closest(ignore)) openShapeEditPanel(widget);
     });

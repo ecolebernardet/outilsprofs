@@ -149,10 +149,10 @@
             pointer-events: auto;
         }
         /* Afficher la barre dans les mêmes conditions que les autres handles */
-        .widget:focus-within .widget-action-bar,
-        .widget:focus .widget-action-bar,
-        .shape-widget:focus-within .widget-action-bar,
-        .shape-widget:focus .widget-action-bar,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-action-bar,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus .widget-action-bar,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-action-bar,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus .widget-action-bar,
         #board.single-select .widget.selected .widget-action-bar,
         #board.single-select .shape-widget.selected .widget-action-bar { opacity: 1; pointer-events: auto; }
         /* Masquer en multi-sélection */
@@ -161,22 +161,37 @@
         /* Masquer en présentation */
         body.presentation-mode .widget-action-bar,
         body.presentation-mode .shape-widget .widget-action-bar { opacity: 0 !important; pointer-events: none !important; }
-        .widget:focus-within .drag-handle,
-        .widget:focus .drag-handle,
-        .widget:focus-within .widget-close-handle,
-        .widget:focus-within .widget-pin-handle,
-        .widget:focus-within .widget-back-handle,
-        .widget:focus-within .widget-rotate-handle,
-        .widget:focus .widget-rotate-handle,
-        .widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
-        .shape-widget:focus-within .drag-handle,
-        .shape-widget:focus .drag-handle,
-        .shape-widget:focus-within .widget-close-handle,
-        .shape-widget:focus-within .widget-pin-handle,
-        .shape-widget:focus-within .widget-back-handle,
-        .shape-widget:focus-within .widget-rotate-handle,
-        .shape-widget:focus .widget-rotate-handle,
-        .shape-widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
+        /* Masquer en mode dessin ou gomme */
+        #board.is-drawing .widget-action-bar,
+        #board.is-drawing .drag-handle,
+        #board.is-drawing .widget-close-handle,
+        #board.is-drawing .widget-pin-handle,
+        #board.is-drawing .widget-back-handle,
+        #board.is-drawing .widget-rotate-handle,
+        #board.is-drawing .widget-menu-handle,
+        #board.is-erasing .widget-action-bar,
+        #board.is-erasing .drag-handle,
+        #board.is-erasing .widget-close-handle,
+        #board.is-erasing .widget-pin-handle,
+        #board.is-erasing .widget-back-handle,
+        #board.is-erasing .widget-rotate-handle,
+        #board.is-erasing .widget-menu-handle { opacity: 0 !important; pointer-events: none !important; }
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .drag-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus .drag-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-close-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-pin-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-back-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .drag-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus .drag-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-close-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-pin-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-back-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
         /* En multi-sélection, forcer le masquage des poignées malgré focus-within */
         #board.multi-select .widget.selected .drag-handle,
         #board.multi-select .widget.selected .widget-close-handle,
@@ -414,8 +429,10 @@
             background: linear-gradient(135deg, transparent 50%, #4a90e2 50%);
             border-radius: 0 0 4px 0;
         }
-        .shape-widget:focus-within .shape-resize-handle { opacity: 1; }
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .shape-resize-handle { opacity: 1; }
         .shape-widget[data-group-id]:focus-within .shape-resize-handle { opacity: 0 !important; pointer-events: none !important; }
+        #board.is-drawing .shape-resize-handle,
+        #board.is-erasing .shape-resize-handle { opacity: 0 !important; pointer-events: none !important; }
         /* Bouton verrou proportions sur forme individuelle */
         .resize-lock-btn {
             position: absolute; right: 20px; bottom: 0;
@@ -425,8 +442,10 @@
             z-index: 101; user-select: none; pointer-events: none;
             box-shadow: -1px 0 3px rgba(0,0,0,0.1);
         }
-        .shape-widget:focus-within .resize-lock-btn { opacity: 1; pointer-events: auto; }
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .resize-lock-btn { opacity: 1; pointer-events: auto; }
         .shape-widget[data-group-id]:focus-within .resize-lock-btn { opacity: 0 !important; pointer-events: none !important; }
+        #board.is-drawing .resize-lock-btn,
+        #board.is-erasing .resize-lock-btn { opacity: 0 !important; pointer-events: none !important; }
         .resize-lock-btn.locked { background: #4a90e2; color: white; border-color: #357abd; }
         /* Boutons symétrie sur forme individuelle */
         .flip-h-btn, .flip-v-btn {
@@ -438,10 +457,12 @@
         }
         .flip-h-btn { right: 60px; bottom: 0; border-radius: 4px 0 0 0; }
         .flip-v-btn { right: 40px; bottom: 0; border-radius: 0; }
-        .shape-widget:focus-within .flip-h-btn,
-        .shape-widget:focus-within .flip-v-btn { opacity: 1; pointer-events: auto; }
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .flip-h-btn,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .flip-v-btn { opacity: 1; pointer-events: auto; }
         .shape-widget[data-group-id]:focus-within .flip-h-btn,
         .shape-widget[data-group-id]:focus-within .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
+        #board.is-drawing .flip-h-btn, #board.is-drawing .flip-v-btn,
+        #board.is-erasing .flip-h-btn, #board.is-erasing .flip-v-btn { opacity: 0 !important; pointer-events: none !important; }
         .flip-h-btn:hover, .flip-v-btn:hover, .resize-lock-btn:hover { background: #eef2f5; }
         /* Boutons symétrie dans l'overlay groupe */
         #sc-flip-h-btn, #sc-flip-v-btn {
@@ -1483,7 +1504,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     position: fixed;
     right: 0; top: 50%;
     transform: translateY(-50%);
-    width: 22px; height: 64px;
+    width: 30px; height: 70px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
     border-right: none;
@@ -1496,9 +1517,10 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     writing-mode: vertical-rl;
     letter-spacing: 1px;
     box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+	opacity: 0.5;
 }
-#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); }
-#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); }
+#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); opacity: 1;}
+#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
 #pdf-library-tab.pdf-lib-resizing { transition: none !important; }
 /* En-tête du panneau */
 #pdf-library-header {
@@ -1786,7 +1808,6 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 				<span class="mm-ico">📦</span>&nbsp;&nbsp;Widgets<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;PDF</div>
-				<div class="mm-sub-item" id="pdf-library-menu-btn" onclick="togglePdfLibrary();closeMainMenu()"><span class="mm-ico">📚</span>&nbsp;&nbsp;Bibliothèque PDF</div>
 				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>&nbsp;&nbsp;Fenêtre Web</div>
 				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>&nbsp;&nbsp;YouTube</div>
 				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date</div>
@@ -1881,7 +1902,11 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 
 					
 					<!-- PROJETS -->
-					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
+					
+					<div class="mm-sub-item" id="pdf-library-menu-btn" onclick="togglePdfLibrary();closeMainMenu()"><span class="mm-ico">📚</span>&nbsp;&nbsp;Bibliothèque PDF</div>
+					
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+					
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">📸</span>&nbsp;&nbsp;Capture du bureau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-capture"><div class="mm-sub-inner" style="min-width:180px;">
@@ -1891,6 +1916,9 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 							<div class="mm-sub-item" onclick="captureBoard('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Enregistrer en PDF</div>
 						</div></div>
 					</div>
+					
+					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
+					
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
 					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
 					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
