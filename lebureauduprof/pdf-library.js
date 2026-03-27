@@ -554,6 +554,19 @@ function _init() {
     } catch(e) {}
 }
 
+// ── Fermeture au clic en dehors du panneau ────────────────────────────────
+document.addEventListener('pointerdown', (e) => {
+    const panel = _panel();
+    const tab   = $('pdf-library-tab');
+    if (!panel || !panel.classList.contains('pdf-lib-open')) return;
+    if (panel.contains(e.target) || (tab && tab.contains(e.target))) return;
+    panel.classList.remove('pdf-lib-open');
+    if (tab) tab.classList.remove('pdf-lib-tab-open');
+    const menuBtn = $('pdf-library-menu-btn');
+    if (menuBtn) menuBtn.classList.remove('btn-mode-active');
+    try { localStorage.setItem('pdfLibraryOpen', '0'); } catch(e) {}
+});
+
 document.addEventListener('DOMContentLoaded', _init);
 
 })();
