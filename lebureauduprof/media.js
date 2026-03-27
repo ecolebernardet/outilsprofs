@@ -730,22 +730,25 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 if (!el) return;
                 const clone = el.cloneNode(true);
                 el.parentNode.replaceChild(clone, el);
+                // Garde anti-double : un seul déclenchement par geste (stylet ou touch)
+                clone._lastFired = 0;
+                function _fireFn(e) {
+                    const now = Date.now();
+                    if (now - clone._lastFired < 400) return;
+                    clone._lastFired = now;
+                    fn(e);
+                }
                 clone.addEventListener('click', (e) => {
-                    // Si l'action a déjà été déclenchée par pointerup (stylet/touch), on ignore le click
-                    if (clone._penHandled) { clone._penHandled = false; return; }
+                    // Ignorer le click synthétique généré après pointerup stylet/touch
+                    if (e.pointerType === 'pen' || e.pointerType === 'touch') return;
+                    if (Date.now() - clone._lastFired < 400) return;
+                    clone._lastFired = Date.now();
                     fn(e);
                 });
-                // Support tactile / stylet VPI : touchend + pointerup
-                clone.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    clone._penHandled = true;
-                    fn(e);
-                }, { passive: false });
                 clone.addEventListener('pointerup', (e) => {
                     if (e.pointerType === 'touch' || e.pointerType === 'pen') {
                         e.preventDefault();
-                        clone._penHandled = true;
-                        fn(e);
+                        _fireFn(e);
                     }
                 });
             }
