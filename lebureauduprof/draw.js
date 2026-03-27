@@ -293,54 +293,17 @@ var _paintPendingPos = null;
 
 // ── Lissage du trait stylet ────────────────────────────────────────────────
 // SMOOTH_ALPHA : facteur du filtre exponentiel IIR
-//   1 = très lissé (boucles fluides, léger délai)   20 = quasi brut (très réactif, peu de lissage)
+//   0.1 = très lissé (boucles fluides, léger délai)   2.0 = quasi brut (très réactif)
 // Valeur par défaut 1.0 → réactif, correspondant au label ∿10 dans l'interface
 var SMOOTH_ALPHA = 1.0;
-var _smoothPts   = [];   // points lissés du trait en cours (rendu live)
+var _smoothPts   = [];   // points lissés du trait en cours
 var _smoothLast  = null; // dernière position lissée
-
-// Dessine le stroke en cours en temps réel via des courbes de Bézier quadratiques
-// (transitions douces même lorsque les points sont espacés à cause d'une écriture rapide)
-function _drawLiveStroke() {
-    if (!drawCtx || !currentStroke || _smoothPts.length < 2) return;
-    redrawStrokes(); // efface le canvas et redessine les strokes terminés
-    const pts = _smoothPts;
-    drawCtx.save();
-    drawCtx.beginPath();
-    drawCtx.lineCap  = 'round';
-    drawCtx.lineJoin = 'round';
-    if (currentDrawMode === 'highlight') {
-        drawCtx.strokeStyle = currentStroke.color;
-        drawCtx.lineWidth   = Math.max(currentStroke.size * 6, 24);
-        drawCtx.globalAlpha = 0.4;
-        drawCtx.globalCompositeOperation = 'multiply';
-        drawCtx.lineCap = 'square';
-    } else {
-        drawCtx.strokeStyle = currentStroke.color;
-        drawCtx.lineWidth   = currentStroke.size;
-        drawCtx.globalAlpha = 1;
-    }
-    drawCtx.moveTo(pts[0].x, pts[0].y);
-    if (pts.length === 2) {
-        drawCtx.lineTo(pts[1].x, pts[1].y);
-    } else {
-        for (let i = 1; i < pts.length - 1; i++) {
-            const mx = (pts[i].x + pts[i + 1].x) / 2;
-            const my = (pts[i].y + pts[i + 1].y) / 2;
-            drawCtx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
-        }
-        drawCtx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-    }
-    drawCtx.stroke();
-    drawCtx.restore();
-}
 
 function paint(e) {
     if (!isPainting || !isDrawMode || isEraserMode || !currentStroke) return;
     if (FIGURE_MODES.includes(currentDrawMode)) {
         if (!_figureStart) return;
         const cur = getPos(e);
-        // Throttle via RAF pour les figures en preview
         _paintPendingPos = cur;
         if (_paintRafId) return;
         _paintRafId = requestAnimationFrame(() => {
@@ -354,7 +317,6 @@ function paint(e) {
             } else if (pts) {
                 redrawStrokes({ ...currentStroke, points: pts, _figure: true });
             } else if (['heart','star','arrow'].includes(currentDrawMode) && _figureStart) {
-                // Preview : rectangle en pointillés montrant la bounding box
                 const A = _figureStart;
                 const bboxPts = [
                     { x: Math.min(A.x,pos.x), y: Math.min(A.y,pos.y) },
@@ -370,24 +332,54 @@ function paint(e) {
     }
     const rawPos = getPos(e);
 
-    // ── Filtre exponentiel IIR : lisse la position du stylet ──────────────
+    // ── Filtre exponentiel IIR ─────────────────────────────────────────────
     const smoothed = {
         x: _smoothLast.x + SMOOTH_ALPHA * (rawPos.x - _smoothLast.x),
         y: _smoothLast.y + SMOOTH_ALPHA * (rawPos.y - _smoothLast.y)
     };
     _smoothLast = smoothed;
     _smoothPts.push(smoothed);
-
-    // Les points bruts sont stockés dans currentStroke (fidélité pour la sauvegarde)
     currentStroke.points.push(rawPos);
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
 
-    // Rendu live via Bézier quadratiques (une seule frame RAF)
-    if (_paintRafId) return;
-    _paintRafId = requestAnimationFrame(() => {
-        _paintRafId = null;
-        _drawLiveStroke();
-    });
+    // ── Dessin incrémental avec Bézier local sur les 3 derniers points ────
+    // Pas de redraw global — on ajoute juste le nouveau morceau de courbe.
+    // Ça adoucit les angles sans aucune latence perceptible.
+    const n = _smoothPts.length;
+    if (n < 2 || !drawCtx) return;
+
+    drawCtx.save();
+    drawCtx.lineCap  = 'round';
+    drawCtx.lineJoin = 'round';
+    if (currentDrawMode === 'highlight') {
+        drawCtx.strokeStyle = currentStroke.color;
+        drawCtx.lineWidth   = Math.max(currentStroke.size * 6, 24);
+        drawCtx.globalAlpha = 0.4;
+        drawCtx.globalCompositeOperation = 'multiply';
+        drawCtx.lineCap = 'square';
+    } else {
+        drawCtx.strokeStyle = currentStroke.color;
+        drawCtx.lineWidth   = currentStroke.size;
+        drawCtx.globalAlpha = 1;
+    }
+    drawCtx.beginPath();
+    if (n === 2) {
+        // 2 points : segment droit simple
+        drawCtx.moveTo(_smoothPts[0].x, _smoothPts[0].y);
+        drawCtx.lineTo(_smoothPts[1].x, _smoothPts[1].y);
+    } else {
+        // 3+ points : Bézier quadratique sur les 3 derniers uniquement
+        // Départ = milieu entre pts[n-3] et pts[n-2] (jointure propre avec le segment précédent)
+        // Fin    = milieu entre pts[n-2] et pts[n-1]
+        // Contrôle = pts[n-2]
+        const p0 = _smoothPts[n - 3];
+        const p1 = _smoothPts[n - 2];
+        const p2 = _smoothPts[n - 1];
+        drawCtx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+        drawCtx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+    }
+    drawCtx.stroke();
+    drawCtx.restore();
 }
 
 function endPaint() {
