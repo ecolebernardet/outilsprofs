@@ -266,6 +266,7 @@
             overflow-y: hidden;
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.2) transparent;
+            touch-action: pan-x;
         }
         #pdf-fs-tabbar::-webkit-scrollbar { height: 3px; }
         #pdf-fs-tabbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
@@ -290,6 +291,7 @@
             transition: background 0.15s, color 0.15s;
             user-select: none;
             flex-shrink: 0;
+            touch-action: manipulation;
         }
         .pdf-fs-tab:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.8); }
         .pdf-fs-tab .tab-label {
@@ -308,6 +310,7 @@
             font-size: 0;
             transition: filter .15s, transform .1s;
             position: relative;
+            touch-action: manipulation;
         }
         .pdf-fs-tab .tab-wf-btn:hover { filter: brightness(0.82); transform: scale(1.15); }
         .pdf-fs-tab .tab-wf-btn:active { transform: scale(0.92); }
@@ -3637,9 +3640,18 @@ function _refreshPdfTabBar() {
             e.stopPropagation();
             _activatePdfFsTab(c);
         });
+        // Support stylet : pointerdown stoppe la propagation immédiatement (empêche le board de capturer)
+        tab.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
+            if (e.target.classList.contains('tab-wf-btn')) return;
+            e.stopPropagation();
+        });
         tab.addEventListener('pointerup', (e) => {
             if (e.pointerType !== 'pen' && e.pointerType !== 'touch') return;
             if (e.target.classList.contains('tab-wf-btn')) return;
+            if (tab._tabPenBusy) return;
+            tab._tabPenBusy = true;
+            setTimeout(() => { tab._tabPenBusy = false; }, 300);
             e.preventDefault();
             e.stopPropagation();
             _activatePdfFsTab(c);
