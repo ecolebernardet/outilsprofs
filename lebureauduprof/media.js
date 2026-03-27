@@ -802,34 +802,68 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             }
             const pageSelect2 = container.querySelector('.pdf-page-select');
             if (pageSelect2) {
-                pageSelect2.innerHTML = '';
-                for (let i = 1; i <= totalPages; i++) {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = i + ' / ' + totalPages;
-                    pageSelect2.appendChild(opt);
-                }
-                pageSelect2.value = currentPage;
-                pageSelect2.style.touchAction = 'manipulation';
-                // Cloner pour repartir sans listeners parasites
-                const newSelect = pageSelect2.cloneNode(true);
-                pageSelect2.parentNode.replaceChild(newSelect, pageSelect2);
-                newSelect.addEventListener('change', () => {
-                    currentPage = parseInt(newSelect.value);
-                    if (pageInput) pageInput.value = currentPage;
-                    renderPage(currentPage);
-                });
-                // Stylet : forcer l'ouverture native du select via un vrai click()
-                newSelect.addEventListener('pointerdown', (e) => {
-                    if (e.pointerType === 'pen' || e.pointerType === 'touch') {
-                        e.preventDefault();
-                        newSelect.focus();
-                        newSelect.click();
+                // ── Menu custom positionné sur body (évite overflow:hidden du parent) ──
+                const customBtn = document.createElement('button');
+                customBtn.style.cssText = 'font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 6px;outline:none;min-width:44px;text-align:center;touch-action:manipulation;user-select:none;';
+                customBtn.textContent = currentPage + ' / ' + totalPages;
+                pageSelect2.replaceWith(customBtn);
+
+                const customMenu = document.createElement('div');
+                customMenu.style.cssText = 'display:none;position:fixed;z-index:999999;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.25);max-height:240px;overflow-y:auto;min-width:90px;';
+                document.body.appendChild(customMenu);
+
+                const buildMenu = () => {
+                    customMenu.innerHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        const item = document.createElement('div');
+                        item.textContent = i + ' / ' + totalPages;
+                        item.style.cssText = 'padding:7px 16px;cursor:pointer;font-size:13px;white-space:nowrap;touch-action:manipulation;user-select:none;' + (i === currentPage ? 'background:#e8f0fe;font-weight:bold;' : '');
+                        const selectPage = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            currentPage = i;
+                            customBtn.textContent = i + ' / ' + totalPages;
+                            if (pageInput) pageInput.value = i;
+                            customMenu.style.display = 'none';
+                            renderPage(currentPage);
+                        };
+                        item.addEventListener('pointerdown', selectPage);
+                        customMenu.appendChild(item);
+                    }
+                };
+
+                const openMenu = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    buildMenu();
+                    const rect = customBtn.getBoundingClientRect();
+                    customMenu.style.display = 'block';
+                    // Positionner sous le bouton
+                    const menuH = Math.min(totalPages * 33, 240);
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    if (spaceBelow < menuH && rect.top > menuH) {
+                        customMenu.style.top = (rect.top - menuH) + 'px';
+                    } else {
+                        customMenu.style.top = rect.bottom + 'px';
+                    }
+                    customMenu.style.left = rect.left + 'px';
+                    // Scroller jusqu'à la page courante
+                    const cur = customMenu.children[currentPage - 1];
+                    if (cur) setTimeout(() => cur.scrollIntoView({ block: 'nearest' }), 0);
+                };
+
+                customBtn.addEventListener('pointerdown', openMenu);
+
+                // Fermer si on appuie ailleurs
+                document.addEventListener('pointerdown', (e) => {
+                    if (e.target !== customBtn && !customMenu.contains(e.target)) {
+                        customMenu.style.display = 'none';
                     }
                 });
 
-                // Exposer pour mise à jour externe
-                container._updatePageBtn = (page) => { newSelect.value = page; };
+                container._updatePageBtn = (page) => {
+                    customBtn.textContent = page + ' / ' + totalPages;
+                };
             }
 
             reattach('.pdf-prev', () => {
