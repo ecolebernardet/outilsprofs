@@ -803,12 +803,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             const pageSelect2 = container.querySelector('.pdf-page-select');
             if (pageSelect2) {
                 // ── Remplacement du <select> natif par un menu custom (stylet-compatible) ──
-                const wrapper = pageSelect2.closest('div') || pageSelect2.parentNode;
 
                 // Créer le bouton qui affiche la page courante
                 const customBtn = document.createElement('button');
                 customBtn.className = 'pdf-page-custom-btn';
-                customBtn.style.cssText = 'font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 4px;outline:none;min-width:28px;text-align:center;touch-action:manipulation;';
+                customBtn.style.cssText = 'font-size:12px;border:none;background:transparent;cursor:pointer;padding:1px 4px;outline:none;min-width:28px;text-align:center;touch-action:manipulation;user-select:none;';
                 customBtn.textContent = currentPage + ' / ' + totalPages;
 
                 // Créer le menu déroulant custom
@@ -820,19 +819,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     const item = document.createElement('div');
                     item.textContent = i + ' / ' + totalPages;
                     item.dataset.page = i;
-                    item.style.cssText = 'padding:6px 14px;cursor:pointer;font-size:12px;white-space:nowrap;touch-action:manipulation;';
+                    item.style.cssText = 'padding:6px 14px;cursor:pointer;font-size:12px;white-space:nowrap;touch-action:manipulation;user-select:none;';
                     item.addEventListener('pointerenter', () => item.style.background = '#e8f0fe');
                     item.addEventListener('pointerleave', () => item.style.background = '');
-                    const goToPage = () => {
+                    // Agir au pointerdown : avant tout listener de fermeture
+                    item.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         currentPage = i;
                         customBtn.textContent = i + ' / ' + totalPages;
                         if (pageInput) pageInput.value = i;
                         customMenu.style.display = 'none';
                         renderPage(currentPage);
-                    };
-                    item.addEventListener('pointerdown', (e) => e.stopPropagation());
-                    item.addEventListener('click', goToPage);
-                    item.addEventListener('pointerup', (e) => { e.stopPropagation(); goToPage(); });
+                    });
                     customMenu.appendChild(item);
                 }
 
@@ -843,28 +842,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 menuWrap.appendChild(customBtn);
                 menuWrap.appendChild(customMenu);
 
-                // Ouvrir/fermer le menu
-                const toggleMenu = (e) => {
+                // Ouvrir/fermer le menu au clic sur le bouton
+                customBtn.addEventListener('pointerdown', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     const isOpen = customMenu.style.display !== 'none';
                     customMenu.style.display = isOpen ? 'none' : 'block';
                     if (!isOpen) {
-                        // Scroller jusqu'à la page courante
-                        const items = customMenu.querySelectorAll('[data-page]');
                         const cur = customMenu.querySelector(`[data-page="${currentPage}"]`);
                         if (cur) cur.scrollIntoView({ block: 'nearest' });
                     }
-                };
-                customBtn.addEventListener('click', toggleMenu);
-                customBtn.addEventListener('pointerup', (e) => {
-                    if (e.pointerType === 'pen' || e.pointerType === 'touch') toggleMenu(e);
                 });
 
-                // Fermer le menu si on clique ailleurs (mousedown pour ne pas interférer avec pointerup des items)
-                document.addEventListener('mousedown', (e) => {
-                    if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
-                });
+                // Fermer si on appuie ailleurs
                 document.addEventListener('pointerdown', (e) => {
                     if (!menuWrap.contains(e.target)) customMenu.style.display = 'none';
                 });
