@@ -293,9 +293,9 @@ var _paintPendingPos = null;
 
 // ── Lissage du trait stylet ────────────────────────────────────────────────
 // SMOOTH_ALPHA : facteur du filtre exponentiel IIR
-//   0.3 = très lissé (boucles fluides, léger délai)   9 = pas de lissage
-// Valeur par défaut 0.45 → bon équilibre réactivité/fluidité pour VPI
-var SMOOTH_ALPHA = 0.45;
+//   1 = très lissé (boucles fluides, léger délai)   20 = quasi brut (très réactif, peu de lissage)
+// Valeur par défaut 1.0 → réactif, correspondant au label ∿10 dans l'interface
+var SMOOTH_ALPHA = 1.0;
 var _smoothPts   = [];   // points lissés du trait en cours (rendu live)
 var _smoothLast  = null; // dernière position lissée
 

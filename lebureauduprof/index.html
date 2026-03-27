@@ -239,16 +239,6 @@
         .wf-btns:hover .wf-btn-min::after   { content:'−'; }
         .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
         .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
-        /* État plein écran board iframe */
-        .editor-container.wf-iframe-fullboard {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 9999 !important;
-            border-radius: 0 !important;
-            margin: 0 !important;
-        }
         /* État plein écran board PDF */
         .editor-container.wf-pdf-fullboard {
             position: fixed !important;
@@ -611,6 +601,7 @@
 		/* date/time widget CSS → widgets-datetime.js */
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
+		.widget[data-type="iframe"] .editor-toolbar,
 		/* YouTube widget */
 		.yt-tab-btn { background:#fff;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 7px;height:26px; }
 		.yt-tab-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
@@ -633,17 +624,10 @@
 		.yt-lib-card:hover .yt-lib-del { display:block; }
 		.yt-lib-empty { color:#666;font-size:12px;text-align:center;padding:24px;grid-column:1/-1; }
 		.widget[data-type="youtube"] .editor-toolbar,
-		.widget[data-type="iframe"] .editor-toolbar,
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
 		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }
-		.widget[data-type="youtube"] .editor-toolbar { cursor: move; }
-		.widget[data-type="youtube"] .editor-toolbar button,
-		.widget[data-type="youtube"] .editor-toolbar input { cursor: pointer; }
 		.widget[data-type="pdf"] .editor-toolbar { cursor: move; }
-		.widget[data-type="iframe"] .editor-toolbar { cursor: move; }
-		.widget[data-type="iframe"] .editor-toolbar button,
-		.widget[data-type="iframe"] .editor-toolbar input { cursor: pointer; }
 		.widget[data-type="pdf"] .editor-toolbar button,
 		.widget[data-type="pdf"] .editor-toolbar label,
 		.widget[data-type="pdf"] .editor-toolbar select,
@@ -1500,7 +1484,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     position: fixed;
     right: 0; top: 50%;
     transform: translateY(-50%);
-    width: 30px; height: 64px;
+    width: 22px; height: 64px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
     border-right: none;
@@ -1513,10 +1497,9 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     writing-mode: vertical-rl;
     letter-spacing: 1px;
     box-shadow: -2px 0 8px rgba(0,0,0,0.3);
-	opacity: 0.5;
 }
-#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); opacity: 1;}
-#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
+#pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); }
+#pdf-library-tab.pdf-lib-tab-open { right: var(--pdf-lib-w); color: var(--pdf-lib-accent); }
 #pdf-library-tab.pdf-lib-resizing { transition: none !important; }
 /* En-tête du panneau */
 #pdf-library-header {
@@ -1899,6 +1882,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 
 					
 					<!-- PROJETS -->
+					<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">📁 Projets</div>
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">📸</span>&nbsp;&nbsp;Capture du bureau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-capture"><div class="mm-sub-inner" style="min-width:180px;">
@@ -1908,7 +1892,6 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 							<div class="mm-sub-item" onclick="captureBoard('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Enregistrer en PDF</div>
 						</div></div>
 					</div>
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
 					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
 					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
@@ -2046,8 +2029,8 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 			<!-- LISSAGE TRAIT (stylet VPI) : ∿ − val + -->
 			<div style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
 				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-				<span id="draw-smooth-label" data-v="5" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿5</span>
-				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(9,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
+				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
 			</div>
 
 			<!-- COULEUR TRAIT -->
@@ -2229,10 +2212,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
         <div class="editor-toolbar">
             <input type="text" placeholder="Collez l'URL ici..." style="flex-grow:1;" onchange="loadIframe(this)">
-            <div class="wf-btns" style="margin-left:4px;">
-                <button class="wf-btn wf-btn-max"   title="Plein écran"  style="touch-action:manipulation;" onclick="toggleIframeBoardFullscreen(this.closest('.editor-container'))"></button>
-                <button class="wf-btn wf-btn-close" title="Fermer"       style="touch-action:manipulation;" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();"></button>
-            </div>
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
         </div>
         <iframe src="" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
     </div>
@@ -2267,11 +2247,8 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
             <button onclick="ytToggleLibrary(this)" title="Ma bibliothèque">📚</button>
             <button onclick="toggleYoutubeView(this,'none')" title="Mode Audio">🔊</button>
             <button onclick="toggleYoutubeView(this,'flex')" title="Mode Vidéo">📺</button>
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran">⛶</button>
             <button onclick="toggleTransparency(this)" title="Fond transparent"><span class="icon-transparency"></span></button>
-            <div class="wf-btns" style="margin-left:4px;">
-                <button class="wf-btn wf-btn-max"   title="Plein écran bureau" style="touch-action:manipulation;" onclick="toggleIframeBoardFullscreen(this.closest('.editor-container'))"></button>
-                <button class="wf-btn wf-btn-close" title="Fermer"             style="touch-action:manipulation;" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();"></button>
-            </div>
         </div>
         <!-- Bibliothèque -->
         <div class="yt-library">
@@ -2347,11 +2324,11 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
                 <button class="pdf-zoom-out" style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Dézoomer">−</button>
                 <span class="pdf-zoom-label" style="color:#555;white-space:nowrap;min-width:38px;text-align:center;">100%</span>
                 <button class="pdf-zoom-in"  style="padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:14px;line-height:1;" title="Zoomer">+</button>
-                <button class="pdf-zoom-fit" style="display:none;padding:1px 2px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;line-height:1.8;" title="Adapter à la largeur du widget">⟺</button>
+                <button class="pdf-zoom-fit" style="display:none;padding:1px 7px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;line-height:1;" title="Adapter à la largeur du widget">⟺</button>
             </div>
 
             <div style="flex:1;"></div>
-            <button class="pdf-annot-widget-btn" style="display:none;padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Annoter ce PDF" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="
+            <button class="pdf-annot-widget-btn" style="display:none;padding:1px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;" title="Annoter ce PDF" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="
                     const tb = document.getElementById('draw-toolbar');
                     const tbVisible = tb && tb.style.display !== 'none' && tb.style.display !== '';
                     const thisWidget = this.closest('.widget');
@@ -2365,7 +2342,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
                         else if (typeof togglePdfAnnotMode === 'function') togglePdfAnnotMode();
                     }
                 ">✏️</button>
-            <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}">💾</button>
+            <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}">💾</button>
             <div class="wf-btns" style="margin-left:4px;">
                 <button class="wf-btn wf-btn-min"   title="Réduire"      style="touch-action:manipulation;" onpointerdown="if(event.pointerType==='pen'||event.pointerType==='touch')this._penFired=true;" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="if(this.closest('.editor-container').classList.contains('wf-pdf-fullboard'))togglePdfBoardFullscreen(this.closest('.editor-container'));togglePdfCollapse(this.closest('.editor-container'))"></button>
                 <button class="wf-btn wf-btn-max"   title="Plein écran"  style="touch-action:manipulation;" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}" onclick="togglePdfBoardFullscreen(this.closest('.editor-container'))"></button>
@@ -3791,65 +3768,6 @@ function _exitFsOne(container) {
         widget.style.height     = '';
         widget.style.display    = '';
         widget.style.visibility = '';
-    }
-}
-
-function toggleIframeBoardFullscreen(container) {
-    if (!container) return;
-    const widget = container.closest('.widget');
-    const isMax = container.classList.contains('wf-iframe-fullboard');
-
-    if (isMax) {
-        // Sortir du plein écran — restaurer styles
-        container.classList.remove('wf-iframe-fullboard');
-        container.style.width  = container.dataset.pfSavedW || '';
-        container.style.height = container.dataset.pfSavedH || '';
-        if (widget) {
-            widget.style.position = container.dataset.pfSavedWPos  || '';
-            widget.style.top      = container.dataset.pfSavedWTop  || '';
-            widget.style.left     = container.dataset.pfSavedWLeft || '';
-            widget.style.zIndex   = container.dataset.pfSavedWZ    || '';
-            widget.style.width    = '';
-            widget.style.height   = '';
-            // Restaurer les datasets de pourcentage pour que saveBoard() retrouve les bonnes valeurs
-            widget.dataset.widthPercent    = container.dataset.pfSavedWPct  || widget.dataset.widthPercent;
-            widget.dataset.contentHPercent = container.dataset.pfSavedHPct  || widget.dataset.contentHPercent;
-            widget.dataset.leftPercent     = container.dataset.pfSavedLPct  || widget.dataset.leftPercent;
-            widget.dataset.topPercent      = container.dataset.pfSavedTPct  || widget.dataset.topPercent;
-        }
-    } else {
-        // Sauvegarder les dimensions et pourcentages actuels avant de passer en fullscreen
-        const curW  = window.innerWidth;
-        const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
-        const tb    = typeof getToolbarHeight === 'function' ? getToolbarHeight(container) : 0;
-
-        container.dataset.pfSavedW    = container.style.width  || container.offsetWidth  + 'px';
-        container.dataset.pfSavedH    = container.style.height || container.offsetHeight + 'px';
-        // Sauvegarder aussi les pourcentages pour les restaurer après
-        container.dataset.pfSavedWPct = widget ? ((container.offsetWidth  / curW)  * 100).toString() : '';
-        container.dataset.pfSavedHPct = widget ? (((container.offsetHeight - tb) / curVH) * 100).toString() : '';
-        container.dataset.pfSavedLPct = widget ? ((widget.offsetLeft / curW)  * 100).toString() : '';
-        container.dataset.pfSavedTPct = widget ? ((widget.offsetTop  / curVH) * 100).toString() : '';
-
-        if (widget) {
-            container.dataset.pfSavedWPos  = widget.style.position || '';
-            container.dataset.pfSavedWTop  = widget.style.top      || '';
-            container.dataset.pfSavedWLeft = widget.style.left     || '';
-            container.dataset.pfSavedWZ    = widget.style.zIndex   || '';
-            widget.style.position = 'fixed';
-            widget.style.top      = '0';
-            widget.style.left     = '0';
-            widget.style.width    = '100%';
-            widget.style.height   = '100%';
-            widget.style.zIndex   = '9999';
-            // Figer les datasets aux valeurs d'avant le fullscreen
-            // pour que tout saveBoard() intermédiaire reste correct
-            widget.dataset.widthPercent    = container.dataset.pfSavedWPct;
-            widget.dataset.contentHPercent = container.dataset.pfSavedHPct;
-            widget.dataset.leftPercent     = container.dataset.pfSavedLPct;
-            widget.dataset.topPercent      = container.dataset.pfSavedTPct;
-        }
-        container.classList.add('wf-iframe-fullboard');
     }
 }
 
