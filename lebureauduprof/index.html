@@ -1340,7 +1340,6 @@
 			border-right: 1px solid #2e2e3a;
 			z-index: 9100;
 			flex-direction: column;
-			box-shadow: 4px 0 24px rgba(0,0,0,0.5);
 			font-family: 'Segoe UI', system-ui, sans-serif;
 			transition: left 0.25s cubic-bezier(.4,0,.2,1);
 		}
@@ -1480,7 +1479,6 @@
     border-right: 1px solid #2e3040;
     z-index: 9100;
     flex-direction: column;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
     font-family: 'Segoe UI', system-ui, sans-serif;
     transition: left 0.25s cubic-bezier(.4,0,.2,1);
 }
@@ -1530,7 +1528,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     white-space: nowrap;
 }
 #activities-panel-tab:hover { background: #252535; color: rgba(255,255,255,0.88); opacity: 1; }
-#activities-panel-tab.act-panel-tab-open { left: calc(var(--act-panel-w) - 25px); color: #f39c12; opacity: 1; }
+#activities-panel-tab.act-panel-tab-open { left: calc(var(--act-panel-w) - 25px); color: var(--pdf-lib-accent); opacity: 1; }
 #activities-panel-tab.act-panel-resizing { transition: none !important; }
 
 /* En-tête */
@@ -1624,7 +1622,6 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     display: flex;
     flex-direction: column;
     transition: left 0.25s cubic-bezier(.4,0,.2,1);
-    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
 }
 #pdf-library-panel.pdf-lib-open { left: 0; }
 #pdf-library-panel.pdf-lib-resizing { transition: none !important; }
@@ -1775,7 +1772,6 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     display: flex;
     flex-direction: column;
     transition: left 0.25s cubic-bezier(.4,0,.2,1);
-    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
 }
 #projects-panel.proj-panel-open { left: 0; }
 #projects-panel.proj-panel-resizing { transition: none !important; }

@@ -21,7 +21,6 @@
             border-right: 1px solid #2e2e3a;
             z-index: 9100;
             flex-direction: column;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.5);
             font-family: 'Segoe UI', system-ui, sans-serif;
             transition: left 0.25s cubic-bezier(.4,0,.2,1);
         }
