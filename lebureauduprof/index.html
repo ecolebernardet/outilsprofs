@@ -410,7 +410,7 @@
 
 	<!-- Barre outils DESSIN -->
 	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:10px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border:1px solid #444;overflow:visible;box-sizing:border-box;">
-		<div id="draw-toolbar-inner" style="display:flex;align-items:center;gap:6px;">
+		<div id="draw-toolbar-inner" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0;">
 
 			<!-- FERMER — en haut -->
 			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#555;border:1px solid #333;width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
@@ -441,22 +441,25 @@
 			<div class="dt-sep"></div>
 
 			<!-- TAILLE TRAIT : − valeur + -->
-			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
-				<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-				<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
-				<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
-				<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
-			</div>
-
-			<!-- LISSAGE TRAIT (stylet VPI) : ∿ − val + -->
-			<div style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
-				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-				<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
-				<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+			<!-- TAILLE TRAIT + LISSAGE empilés verticalement -->
+			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+				<!-- Taille trait : − valeur + -->
+				<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;">
+					<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+					<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
+					<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
+					<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				</div>
+				<!-- Lissage : ∿ − val + -->
+				<div style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
+					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+					<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
+					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				</div>
 			</div>
 
 			<!-- COULEUR TRAIT -->
-			<div class="dt-color" style="display:flex;align-items:center;gap:4px;width:64px;justify-content:center;">
+			<div class="dt-color" style="display:flex;align-items:center;gap:4px;flex-shrink:0;justify-content:center;">
 				<div class="cpick-wrap" id="cpick-draw-color"><div class="cpick-swatch" style="background:#e84393;" onclick="cpickOpen('draw-color',this)"></div><div class="cpick-popup" id="cpick-pop-draw-color"></div></div>
 				<!-- Couleurs prédéfinies 4x2 -->
 				<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;">
@@ -476,7 +479,7 @@
 			</div>
 
 			<!-- CRAYON + SURLIGNEUR côte à côte -->
-			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;width:64px;justify-content:center;">
+			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;justify-content:center;">
 				<button id="draw-free-btn" onclick="activatePencil()" style="width:30px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Dessin libre">✏️</button>
 				<button id="draw-highlight-btn" onclick="activateHighlighter()" style="width:30px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Surligneur">🖍️</button>
 			</div>
