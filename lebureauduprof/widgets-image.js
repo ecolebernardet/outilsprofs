@@ -13,24 +13,50 @@
     s.textContent = `
         /* ── Panneau galerie d'images ── */
         #image-panel {
-            display: none;
+            display: flex;
             position: fixed;
-            top: 0; right: 0;
-            width: 450px; height: 100vh;
+            top: 0; left: calc(-1 * 420px);
+            width: 420px; height: 100vh;
             background: #1e1e28;
-            border-left: 1px solid #2e2e3a;
-            z-index: 9200;
+            border-right: 1px solid #2e2e3a;
+            z-index: 9100;
             flex-direction: column;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.5);
             font-family: 'Segoe UI', system-ui, sans-serif;
+            transition: left 0.25s cubic-bezier(.4,0,.2,1);
         }
-        #image-panel.active { display: flex; }
+        #image-panel.active { left: 0; }
+        body.presentation-mode #image-panel,
+        body.presentation-mode #image-panel-tab { display: none !important; }
+
+        #image-panel-tab {
+            position: fixed;
+            left: -25px; top: calc(50% + 135px);
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: center center;
+            width: 80px; height: 30px;
+            background: #1e1e28;
+            border: 1px solid #2e2e3a;
+            border-right: none;
+            border-radius: 0px 0px 8px 8px;
+            z-index: 9105;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: rgba(255,255,255,0.45);
+            transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
+            letter-spacing: 1px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            opacity: 0.5;
+            white-space: nowrap;
+        }
+        #image-panel-tab:hover { background: #252530; color: rgba(255,255,255,0.88); opacity: 1; }
+        #image-panel-tab.active { left: 395px; color: #4a90e2; opacity: 1; }
 
         #image-panel-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 16px;
+            padding: 14px 16px 14px 35px;
             background: #28282f;
             border-bottom: 1px solid #2e2e3a;
             flex-shrink: 0;
@@ -54,7 +80,7 @@
         #image-panel-close:hover { color: #fff; }
 
         #image-panel-search {
-            padding: 10px 12px;
+            padding: 10px 12px 10px 35px;
             flex-shrink: 0;
             border-bottom: 1px solid #2e2e3a;
         }
@@ -75,7 +101,7 @@
         #image-panel-grid {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 10px 10px 10px 35px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
@@ -91,6 +117,7 @@
             flex-shrink: 0;
             flex-wrap: wrap;
             border-bottom: 1px solid #2e2e3a;
+            padding-left: 35px;
         }
 
         .img-tab-btn {
@@ -174,12 +201,12 @@
         /* Zone upload */
         #image-panel-footer {
             flex-shrink: 0;
-            padding: 10px 12px;
+            padding: 10px 12px 10px 35px;
             border-top: 1px solid #2e2e3a;
             background: #1e1e28;
         }
         #image-upload-btn {
-            width: 100%;
+            width: 95%;
             padding: 9px;
             background: #28282f;
             border: 1px dashed #3a3a4a;
@@ -856,18 +883,24 @@ function toggleImagePanel() {
     } else {
         // Fermer les autres panneaux latéraux si nécessaire
         const stickerPanel = document.getElementById('sticker-panel');
-        if (stickerPanel) {
+        if (stickerPanel && stickerPanel.classList.contains('active')) {
             stickerPanel.classList.remove('active');
             const sb = document.getElementById('sticker-btn');
             if (sb) sb.classList.remove('active-tool');
+            const st = document.getElementById('sticker-panel-tab');
+            if (st) st.classList.remove('active');
         }
         panel.classList.add('active');
+        const tab = document.getElementById('image-panel-tab');
+        if (tab) tab.classList.add('active');
     }
 }
 
 function closeImagePanel() {
     const panel = document.getElementById('image-panel');
     if (panel) panel.classList.remove('active');
+    const tab = document.getElementById('image-panel-tab');
+    if (tab) tab.classList.remove('active');
 }
 
 // Fermer le panneau au clic en dehors
@@ -875,7 +908,19 @@ document.addEventListener('mousedown', (e) => {
     const panel = document.getElementById('image-panel');
     if (!panel || !panel.classList.contains('active')) return;
     if (panel.contains(e.target)) return;
-    // Ne pas fermer si on clique sur le bouton d'ouverture
     if (e.target.closest('#image-panel-btn')) return;
+    if (e.target.closest('#image-panel-tab')) return;
     closeImagePanel();
+});
+
+// Créer l'onglet déclencheur dès le chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('image-panel-tab')) {
+        const tab = document.createElement('button');
+        tab.id = 'image-panel-tab';
+        tab.title = 'Images';
+        tab.textContent = '🖼️ Images';
+        tab.addEventListener('click', toggleImagePanel);
+        document.body.appendChild(tab);
+    }
 });

@@ -117,14 +117,16 @@ function toggleStickerPanel() {
   if (typeof closeMainMenu === 'function') closeMainMenu();
 	const panel = document.getElementById('sticker-panel');
 	const btn   = document.getElementById('sticker-btn');
+	const tab   = document.getElementById('sticker-panel-tab');
 	const open  = panel.classList.toggle('active');
 	if (btn) btn.classList.toggle('active-tool', open);
+	if (tab) tab.classList.toggle('active', open);
 	if (open) {
 		// Fermer le panneau images s'il est ouvert
 		if (typeof closeImagePanel === 'function') closeImagePanel();
-		document.getElementById('tools-menu').classList.remove('active');
-		document.getElementById('shape-toolbar').classList.remove('active');
-		document.getElementById('bg-submenu').classList.remove('active');
+		document.getElementById('tools-menu') && document.getElementById('tools-menu').classList.remove('active');
+		document.getElementById('shape-toolbar') && document.getElementById('shape-toolbar').classList.remove('active');
+		document.getElementById('bg-submenu') && document.getElementById('bg-submenu').classList.remove('active');
 		const sm = document.getElementById('scenes-menu');
 		if (sm) sm.style.display = 'none';
 		checkStickerConnectivity();
@@ -396,7 +398,10 @@ document.addEventListener('mousedown', (e) => {
 	if (!sp || !sp.classList.contains('active')) return;
 	if (sp.contains(e.target)) return;
 	if (e.target.closest('#sticker-btn')) return;
+	if (e.target.closest('#sticker-panel-tab')) return;
 	sp.classList.remove('active');
 	const sb = document.getElementById('sticker-btn');
 	if (sb) sb.classList.remove('active-tool');
+	const tab = document.getElementById('sticker-panel-tab');
+	if (tab) tab.classList.remove('active');
 });

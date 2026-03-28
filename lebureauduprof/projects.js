@@ -552,6 +552,7 @@ async function _projLoad(id) {
     if (project) {
         _updateProjectTitle(project.name);
         closeProjectsLibrary();
+        if (typeof refreshProjectsPanel === 'function') refreshProjectsPanel();
     }
 }
 
@@ -571,6 +572,7 @@ async function _projLoadAtScene(id, sceneIndex) {
     if (project) {
         _updateProjectTitle(project.name);
         closeProjectsLibrary();
+        if (typeof refreshProjectsPanel === 'function') refreshProjectsPanel();
     }
 }
 

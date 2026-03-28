@@ -1183,7 +1183,7 @@
 
 		/* --- MODE PRÉSENTATION --- */
 		#presentation-btn {
-			position:fixed;top:40px;left:20px;
+			position:fixed;top:20px;right:20px;
 			z-index:100000;background:#1a1a2e;color:white;
 			border:1px solid rgba(255,255,255,0.25);
 			font-size:25px;padding:5px 5px;border-radius:30px;
@@ -1330,26 +1330,52 @@
 		#scene-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 		/* === PANNEAU STICKERS === */
+		:root { --sticker-panel-w: 420px; }
 		#sticker-panel {
-			display: none;
+			display: flex;
 			position: fixed;
-			top: 0; right: 0;
-			width: 420px; height: 100vh;
+			top: 0; left: calc(-1 * var(--sticker-panel-w));
+			width: var(--sticker-panel-w); height: 100vh;
 			background: #1e1e28;
-			border-left: 1px solid #2e2e3a;
-			z-index: 9200;
+			border-right: 1px solid #2e2e3a;
+			z-index: 9100;
 			flex-direction: column;
-			box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+			box-shadow: 4px 0 24px rgba(0,0,0,0.5);
 			font-family: 'Segoe UI', system-ui, sans-serif;
+			transition: left 0.25s cubic-bezier(.4,0,.2,1);
 		}
-		#sticker-panel.active { display: flex; }
+		#sticker-panel.active { left: 0; }
+		body.presentation-mode #sticker-panel,
+		body.presentation-mode #sticker-panel-tab { display: none !important; }
+		#sticker-panel-tab {
+			position: fixed;
+			left: -25px; top: calc(50% + 45px);
+			transform: translateY(-50%) rotate(-90deg);
+			transform-origin: center center;
+			width: 80px; height: 30px;
+			background: #1e1e28;
+			border: 1px solid #2e2e3a;
+			border-right: none;
+			border-radius: 0px 0px 8px 8px;
+			z-index: 9105;
+			cursor: pointer;
+			display: flex; align-items: center; justify-content: center;
+			font-size: 11px; color: rgba(255,255,255,0.45);
+			transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
+			letter-spacing: 1px;
+			box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+			opacity: 0.5;
+			white-space: nowrap;
+		}
+		#sticker-panel-tab:hover { background: #252530; color: rgba(255,255,255,0.88); opacity: 1; }
+		#sticker-panel-tab.active { left: calc(var(--sticker-panel-w) - 25px); color: #4a90e2; opacity: 1; }
 
 		/* Header */
 		#sticker-panel-header {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			padding: 14px 16px;
+			padding: 14px 16px 14px 35px;
 			background: #28282f;
 			border-bottom: 1px solid #2e2e3a;
 			flex-shrink: 0;
@@ -1366,7 +1392,7 @@
 			display: flex;
 			gap: 6px;
 			align-items: center;
-			padding: 8px 12px;
+			padding: 8px 12px 8px 35px;
 			border-bottom: 1px solid #2e2e3a;
 			flex-shrink: 0;
 			background: #1e1e28;
@@ -1383,6 +1409,7 @@
 			flex-shrink: 0;
 			flex-wrap: wrap;
 			border-bottom: 1px solid #2e2e3a;
+			padding-left: 35px;
 		}
 		.sp-tab {
 			flex-shrink: 0;
@@ -1402,7 +1429,7 @@
 
 		/* Barre de recherche */
 		#sticker-panel-search {
-			padding: 10px 12px;
+			padding: 10px 12px 10px 35px;
 			flex-shrink: 0;
 			border-bottom: 1px solid #2e2e3a;
 		}
@@ -1418,7 +1445,7 @@
 		#sp-content {
 			flex: 1;
 			overflow-y: auto;
-			padding: 10px;
+			padding: 10px 10px 10px 35px;
 		}
 		#sp-content::-webkit-scrollbar { width: 6px; }
 		#sp-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
@@ -1444,7 +1471,7 @@
 
 /* ── Bibliothèque PDF ─────────────────────────────────────────────── */
 :root {
-    --pdf-lib-w: 320px;
+    --pdf-lib-w: 420px;
     --pdf-lib-bg: #1a1a24;
     --pdf-lib-border: rgba(255,255,255,0.1);
     --pdf-lib-hover: rgba(255,255,255,0.06);
@@ -1461,7 +1488,7 @@
     height: 100%;
     background: var(--pdf-lib-bg);
     border-right: 1px solid var(--pdf-lib-border);
-    z-index: 12500;
+    z-index: 9100;
     display: flex;
     flex-direction: column;
     transition: left 0.25s cubic-bezier(.4,0,.2,1);
@@ -1492,30 +1519,31 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 /* Onglet déclencheur sur le bord gauche */
 #pdf-library-tab {
     position: fixed;
-    left: 0; top: 50%;
-    transform: translateY(-50%);
-    width: 30px; height: 70px;
+    left: -25px; top: calc(50% - 135px);
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center center;
+    width: 80px; height: 30px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    z-index: 12499;
+    border-right: none;
+    border-radius: 0px 0px 8px 8px;
+    z-index: 9105;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; color: var(--pdf-lib-muted);
     transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
-    writing-mode: vertical-rl;
     letter-spacing: 1px;
     box-shadow: 2px 0 8px rgba(0,0,0,0.3);
 	opacity: 0.5;
+	white-space: nowrap;
 }
 #pdf-library-tab:hover { background: #252530; color: var(--pdf-lib-text); opacity: 1;}
-#pdf-library-tab.pdf-lib-tab-open { left: var(--pdf-lib-w); color: var(--pdf-lib-accent); opacity: 1;}
+#pdf-library-tab.pdf-lib-tab-open { left: calc(var(--pdf-lib-w) - 25px); color: var(--pdf-lib-accent); opacity: 1;}
 #pdf-library-tab.pdf-lib-resizing { transition: none !important; }
 /* En-tête du panneau */
 #pdf-library-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 12px;
+    padding: 10px 12px 10px 35px;
     border-bottom: 1px solid var(--pdf-lib-border);
     flex-shrink: 0;
 }
@@ -1529,7 +1557,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 /* Fil d'Ariane */
 #pdf-library-breadcrumb {
     display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
-    padding: 6px 12px;
+    padding: 6px 12px 6px 35px;
     border-bottom: 1px solid var(--pdf-lib-border);
     min-height: 30px;
     flex-shrink: 0;
@@ -1554,7 +1582,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 #pdf-library-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 .pdf-lib-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 7px 14px;
+    padding: 7px 14px 7px 35px;
     cursor: pointer;
     transition: background 0.1s;
     border-radius: 4px; margin: 0 4px;
@@ -1573,7 +1601,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 }
 /* Pied de panneau */
 #pdf-library-footer {
-    padding: 8px 10px;
+    padding: 8px 10px 8px 35px;
     border-top: 1px solid var(--pdf-lib-border);
     flex-shrink: 0;
     display: flex; flex-direction: column; gap: 5px;
@@ -1600,6 +1628,232 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 #pdf-library-reopen:hover { background: rgba(74,144,226,0.28); }
+
+/* ── Panneau latéral Projets ──────────────────────────────────────── */
+:root { --proj-panel-w: 420px; }
+
+#projects-panel {
+    position: fixed;
+    top: 0; left: calc(-1 * var(--proj-panel-w));
+    width: var(--proj-panel-w);
+    height: 100%;
+    background: #1a1a24;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    z-index: 9100;
+    display: flex;
+    flex-direction: column;
+    transition: left 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+}
+#projects-panel.proj-panel-open { left: 0; }
+#projects-panel.proj-panel-resizing { transition: none !important; }
+body.presentation-mode #projects-panel,
+body.presentation-mode #projects-panel-tab { display: none !important; }
+
+/* Poignée de resize */
+#projects-panel-resize-handle {
+    position: absolute;
+    right: -4px; top: 0;
+    width: 8px; height: 100%;
+    cursor: ew-resize;
+    z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+}
+#projects-panel-resize-handle::after {
+    content: '';
+    display: block;
+    width: 3px; height: 40px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+#projects-panel-resize-handle:hover::after { background: #4a90e2; }
+
+/* Onglet déclencheur */
+#projects-panel-tab {
+    position: fixed;
+    left: -25px; top: calc(50% - 45px);
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center center;
+    width: 80px; height: 30px;
+    background: #1a1a24;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-right: none;
+    border-radius: 0px 0px 8px 8px;
+    z-index: 9105;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: rgba(255,255,255,0.45);
+    transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
+    letter-spacing: 1px;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    opacity: 0.5;
+    white-space: nowrap;
+}
+#projects-panel-tab:hover { background: #252530; color: rgba(255,255,255,0.88); opacity: 1; }
+#projects-panel-tab.proj-panel-tab-open { left: calc(var(--proj-panel-w) - 25px); color: #4a90e2; opacity: 1; }
+#projects-panel-tab.proj-panel-resizing { transition: none !important; }
+
+/* En-tête */
+#proj-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px 10px 35px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    background: #1e1e2a;
+}
+#proj-panel-header span { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.88); }
+#proj-panel-close {
+    background: none; border: none; color: rgba(255,255,255,0.45);
+    cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1;
+    transition: color 0.15s;
+}
+#proj-panel-close:hover { color: rgba(255,255,255,0.88); }
+
+/* Barre d'actions globales */
+#proj-panel-actions {
+    display: flex; gap: 6px; padding: 8px 10px 8px 35px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+.proj-panel-action-btn {
+    flex: 1; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; color: rgba(255,255,255,0.6);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    padding: 6px 4px; text-align: center;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.3;
+}
+.proj-panel-action-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
+.proj-panel-action-btn.green { background: rgba(40,100,60,0.4); border-color: rgba(60,150,80,0.4); color: #6dbf7e; }
+.proj-panel-action-btn.green:hover { background: rgba(40,100,60,0.6); }
+
+/* Bouton nouveau projet */
+#proj-panel-new-btn {
+    display: flex; align-items: center; gap: 6px;
+    margin: 8px 10px 4px 35px;
+    padding: 7px 12px;
+    background: rgba(74,144,226,0.12);
+    border: 1px dashed rgba(74,144,226,0.4);
+    border-radius: 8px; color: #4a90e2;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+#proj-panel-new-btn:hover { background: rgba(74,144,226,0.22); }
+
+/* Liste */
+#proj-panel-list {
+    flex: 1; overflow-y: auto;
+    padding: 4px 0 8px;
+}
+#proj-panel-list::-webkit-scrollbar { width: 4px; }
+#proj-panel-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.proj-panel-loading, .proj-panel-empty {
+    font-size: 12px; color: rgba(255,255,255,0.35);
+    text-align: center; padding: 20px 12px;
+}
+.proj-panel-section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; color: rgba(255,255,255,0.4);
+    padding: 6px 12px 3px 35px;
+}
+.proj-panel-section-fav { color: #f0c040; }
+.proj-panel-sep { height: 1px; background: rgba(255,255,255,0.07); margin: 6px 8px 6px 35px; }
+
+/* Carte projet */
+.proj-panel-item-wrap {
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.07);
+    margin: 3px 8px 3px 35px;
+    background: rgba(255,255,255,0.03);
+    transition: border-color 0.15s;
+    overflow: hidden;
+}
+.proj-panel-item-wrap:hover { border-color: rgba(74,144,226,0.5); }
+.proj-panel-item-current {
+    border-color: #4a90e2 !important;
+    background: rgba(26,53,80,0.5);
+}
+
+.proj-panel-item-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px; cursor: pointer;
+}
+.proj-panel-arrow {
+    font-size: 8px; color: rgba(255,255,255,0.3);
+    flex-shrink: 0; user-select: none;
+    transition: transform 0.2s, color 0.2s;
+}
+.proj-panel-item-info { flex: 1; min-width: 0; }
+.proj-panel-item-name {
+    font-size: 12px; font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.proj-panel-item-current .proj-panel-item-name { color: #7ab8f5; }
+.proj-panel-item-meta {
+    font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px;
+}
+
+/* Boutons d'actions de la carte */
+.proj-panel-item-actions {
+    display: flex; gap: 3px; flex-shrink: 0;
+    opacity: 0; transition: opacity 0.15s;
+}
+.proj-panel-item-header:hover .proj-panel-item-actions { opacity: 1; }
+.proj-panel-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 5px; width: 24px; height: 24px; cursor: pointer;
+    font-size: 11px; display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.55); transition: background 0.12s;
+    flex-shrink: 0;
+}
+.proj-panel-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.proj-panel-btn-open { background: rgba(74,144,226,0.15); border-color: rgba(74,144,226,0.3); color: #7ab8f5; }
+.proj-panel-btn-open:hover { background: rgba(74,144,226,0.3); }
+.proj-panel-btn-fav-active { background: rgba(240,192,64,0.15); border-color: rgba(240,192,64,0.3); color: #f0c040; }
+.proj-panel-btn-delete { color: #ff6b6b; }
+.proj-panel-btn-delete:hover { background: rgba(255,60,60,0.2); border-color: rgba(255,60,60,0.4); }
+
+/* Accordion scènes */
+.proj-panel-accordion {
+    display: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.2);
+    padding: 4px 6px;
+}
+.proj-panel-accordion.proj-panel-accordion-open { display: block; }
+
+.proj-panel-scene {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 8px; border-radius: 6px;
+    font-size: 11px; color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: background 0.12s, color 0.12s;
+}
+.proj-panel-scene:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); }
+.proj-panel-scene-active {
+    color: #7ab8f5; font-weight: 700; cursor: default;
+    background: rgba(74,144,226,0.12);
+}
+.proj-panel-scene-active:hover { background: rgba(74,144,226,0.12); color: #7ab8f5; }
+.proj-panel-scene-icon { font-size: 7px; flex-shrink: 0; color: rgba(255,255,255,0.25); }
+.proj-panel-scene-active .proj-panel-scene-icon { color: #4a90e2; }
+.proj-panel-scene-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Brouillon banner */
+#proj-panel-draft-banner {
+    display: none;
+    margin: 6px 8px 0 35px;
+    background: rgba(42,42,26,0.8);
+    border: 1px solid rgba(90,80,32,0.6);
+    border-radius: 8px; padding: 8px 10px;
+    font-size: 11px; color: #f0c040;
+    flex-shrink: 0;
+}
+#proj-panel-draft-banner.visible { display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -2156,6 +2410,9 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 </div><!-- fin #toolbar-container -->
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
+<!-- Onglet déclencheur stickers -->
+<button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Stickers &amp; Émojis">🤓 Stickers</button>
+
 <div id="sticker-panel">
 	<!-- Header -->
 	<div id="sticker-panel-header">
@@ -4371,8 +4628,69 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord droit -->
-<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF">PDF</button>
+<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF">📄 PDF</button>
 
 <script src="pdf-library.js"></script>
+
+<!-- ── Panneau latéral Projets ───────────────────────────────────────── -->
+<div id="projects-panel">
+    <div id="projects-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="proj-panel-header">
+        <span>📁 Mes projets</span>
+        <button id="proj-panel-close" onclick="toggleProjectsPanel()" title="Fermer">✕</button>
+    </div>
+    <!-- Brouillon banner -->
+    <div id="proj-panel-draft-banner">
+        <span style="font-size:16px;flex-shrink:0;">📝</span>
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;">Brouillon en cours</div>
+            <div style="font-size:10px;color:#a08040;margin-top:1px;">Non sauvegardé</div>
+        </div>
+        <button onclick="_projSaveDraft()" style="background:#4a3a00;color:#f0c040;border:1px solid #6a5a10;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">💾 Enregistrer</button>
+    </div>
+    <!-- Bouton nouveau projet -->
+    <button id="proj-panel-new-btn" onclick="_projNewProject()">
+        <span style="font-size:15px;">＋</span> Nouveau projet
+    </button>
+    <!-- Actions export/import -->
+    <div id="proj-panel-actions">
+        <button class="proj-panel-action-btn green" onclick="exportAllProjects()" title="Exporter tous les projets">📤 Tout exporter</button>
+        <button class="proj-panel-action-btn green" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Tout importer</button>
+        <button class="proj-panel-action-btn" onclick="openProjectsLibrary()" title="Ouvrir la vue détaillée">⊞ Vue détaillée</button>
+    </div>
+    <!-- Liste des projets -->
+    <div id="proj-panel-list">
+        <div class="proj-panel-loading">Chargement…</div>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord gauche -->
+<button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets">📁 Projets</button>
+
+<script src="projects-panel.js"></script>
+<script>
+// Rafraîchir le panneau projets après toute sauvegarde ou suppression
+(function() {
+    const _origRenderProjectsList = window._renderProjectsList;
+    // Surveiller les appels à _renderProjectsList (utilisé dans projects.js)
+    // en patchant après chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const panel = document.getElementById('projects-panel');
+        if (!panel) return;
+        // Rafraîchir le brouillon banner à l'ouverture du panneau
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                if (m.attributeName === 'class') {
+                    const isOpen = panel.classList.contains('proj-panel-open');
+                    if (isOpen) {
+                        const banner = document.getElementById('proj-panel-draft-banner');
+                        if (banner) banner.classList.toggle('visible', typeof isDraftMode === 'function' && isDraftMode());
+                    }
+                }
+            });
+        });
+        observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    });
+})();
+</script>
 </body>
 </html>
