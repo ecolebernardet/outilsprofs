@@ -1183,7 +1183,7 @@
 
 		/* --- MODE PRÉSENTATION --- */
 		#presentation-btn {
-			position:fixed;top:20px;right:20px;
+			position:fixed;top:10px;right:80px;
 			z-index:100000;background:#1a1a2e;color:white;
 			border:1px solid rgba(255,255,255,0.25);
 			font-size:25px;padding:5px 5px;border-radius:30px;
@@ -1468,6 +1468,138 @@
 		.sp-close { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; line-height: 1; padding: 0; transition: color .15s; }
 		.sp-close:hover { color: #fff; }
 
+
+/* ── Panneau Activités ────────────────────────────────────────────── */
+:root { --act-panel-w: 380px; }
+#activities-panel {
+    display: flex;
+    position: fixed;
+    top: 0; left: calc(-1 * var(--act-panel-w));
+    width: var(--act-panel-w); height: 100vh;
+    background: #1a1e28;
+    border-right: 1px solid #2e3040;
+    z-index: 9100;
+    flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    transition: left 0.25s cubic-bezier(.4,0,.2,1);
+}
+#activities-panel.act-panel-open { left: 0; }
+#activities-panel.act-panel-resizing { transition: none !important; }
+body.presentation-mode #activities-panel,
+body.presentation-mode #activities-panel-tab { display: none !important; }
+
+/* Poignée resize */
+#activities-panel-resize-handle {
+    position: absolute;
+    right: -4px; top: 0;
+    width: 8px; height: 100%;
+    cursor: ew-resize;
+    z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+}
+#activities-panel-resize-handle::after {
+    content: '';
+    display: block;
+    width: 3px; height: 40px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+#activities-panel-resize-handle:hover::after { background: #f39c12; }
+
+/* Onglet déclencheur */
+#activities-panel-tab {
+    position: fixed;
+    left: -25px; top: calc(50% - 225px);
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center center;
+    width: 80px; height: 30px;
+    background: #1a1e28;
+    border: 1px solid #2e3040;
+    border-right: none;
+    border-radius: 0px 0px 8px 8px;
+    z-index: 9105;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: rgba(255,255,255,0.45);
+    transition: color 0.15s, background 0.15s, left 0.25s cubic-bezier(.4,0,.2,1);
+    letter-spacing: 1px;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    opacity: 0.5;
+    white-space: nowrap;
+}
+#activities-panel-tab:hover { background: #252535; color: rgba(255,255,255,0.88); opacity: 1; }
+#activities-panel-tab.act-panel-tab-open { left: calc(var(--act-panel-w) - 25px); color: #f39c12; opacity: 1; }
+#activities-panel-tab.act-panel-resizing { transition: none !important; }
+
+/* En-tête */
+#act-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 14px 35px;
+    background: #22222f;
+    border-bottom: 1px solid #2e3040;
+    flex-shrink: 0;
+}
+#act-panel-header h3 {
+    margin: 0; font-size: 14px; font-weight: 700; color: #ddd;
+}
+#act-panel-close {
+    background: none; border: none; color: #aaa;
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 0;
+    transition: color .15s;
+}
+#act-panel-close:hover { color: #fff; }
+
+/* Grille d'activités */
+#act-panel-content {
+    flex: 1; overflow-y: auto;
+    padding: 16px 12px 16px 35px;
+}
+#act-panel-content::-webkit-scrollbar { width: 6px; }
+#act-panel-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+#act-panel-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+.act-section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: rgba(255,255,255,0.35);
+    padding: 8px 0 8px; margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.act-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.act-card {
+    background: #28282f;
+    border: 1px solid #3a3a4a;
+    border-radius: 12px;
+    padding: 16px 12px;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    user-select: none;
+}
+.act-card:hover {
+    background: #1a3050;
+    border-color: #f39c12;
+    transform: translateY(-2px);
+}
+.act-card:active { transform: scale(0.97); }
+.act-card-ico { font-size: 32px; line-height: 1; }
+.act-card-name {
+    font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.3;
+}
+.act-card-desc {
+    font-size: 10px; color: rgba(255,255,255,0.4);
+    line-height: 1.3;
+}
 
 /* ── Bibliothèque PDF ─────────────────────────────────────────────── */
 :root {
@@ -2024,12 +2156,12 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 			<div class="mm-section-label">Contenu</div>
 
 			<!-- Activités -->
-			<div class="mm-item mm-has-sub">
+			<div class="mm-item mm-has-sub" id="activities-menu-btn">
 				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
-				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>Le Compte est Bon</div>
+				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				</div></div>
 			</div>
@@ -3533,6 +3665,15 @@ document.addEventListener('mousedown', function(e) {
         document.querySelectorAll('.cpick-popup.open').forEach(p => p.classList.remove('open'));
         document.querySelectorAll('.cpick-active').forEach(p => p.classList.remove('cpick-active'));
     }
+    // Fermer le panneau Activités si clic en dehors
+    const actPanel = document.getElementById('activities-panel');
+    const actTab   = document.getElementById('activities-panel-tab');
+    if (actPanel && actPanel.classList.contains('act-panel-open')) {
+        if (!actPanel.contains(e.target) && !(actTab && actTab.contains(e.target))) {
+            actPanel.classList.remove('act-panel-open');
+            if (actTab) actTab.classList.remove('act-panel-tab-open');
+        }
+    }
 });
 
 // Fermer les barres d'outils quand on clique sur un item du menu
@@ -4631,6 +4772,104 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF">📄 PDF</button>
 
 <script src="pdf-library.js"></script>
+
+<!-- ── Panneau latéral Activités ─────────────────────────────────── -->
+<div id="activities-panel">
+    <div id="activities-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="act-panel-header">
+        <h3>🎯 Activités</h3>
+        <button id="act-panel-close" onclick="toggleActivitiesPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="act-panel-content">
+        <div class="act-section-label">🎲 Jeux & Calcul</div>
+        <div class="act-grid">
+            <div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">💶</div>
+                <div class="act-card-name">Monnaie</div>
+                <div class="act-card-desc">Reconnaître et calculer avec les pièces et billets</div>
+            </div>
+            <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
+                <div class="act-card-ico">🧮</div>
+                <div class="act-card-name">Calcul Mental</div>
+                <div class="act-card-desc">Entraîner le calcul rapide en tête</div>
+            </div>
+            <div class="act-card" onclick="createCompteEstBonWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">🔢</div>
+                <div class="act-card-name">Le Compte est Bon</div>
+                <div class="act-card-desc">Atteindre un nombre cible avec les opérations</div>
+            </div>
+            <div class="act-card" onclick="createWidget('mots-alpha');toggleActivitiesPanel()">
+                <div class="act-card-ico">🔤</div>
+                <div class="act-card-name">Ordre Alphabétique</div>
+                <div class="act-card-desc">Trier et classer des mots dans l'ordre de l'alphabet</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord gauche -->
+<button id="activities-panel-tab" onclick="toggleActivitiesPanel()" title="Activités">🎯 Activités</button>
+
+<script>
+// ── Panneau Activités ──────────────────────────────────────────────
+(function() {
+    var ACT_W_KEY = 'act-panel-w';
+
+    function toggleActivitiesPanel() {
+        var panel = document.getElementById('activities-panel');
+        var tab   = document.getElementById('activities-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('act-panel-open');
+        if (isOpen) {
+            panel.classList.remove('act-panel-open');
+            tab.classList.remove('act-panel-tab-open');
+        } else {
+            panel.classList.add('act-panel-open');
+            tab.classList.add('act-panel-tab-open');
+        }
+    }
+    window.toggleActivitiesPanel = toggleActivitiesPanel;
+
+    // Resize du panneau
+    document.addEventListener('DOMContentLoaded', function() {
+        var handle = document.getElementById('activities-panel-resize-handle');
+        var panel  = document.getElementById('activities-panel');
+        var tab    = document.getElementById('activities-panel-tab');
+        if (!handle || !panel) return;
+
+        // Restaurer la largeur sauvegardée
+        var savedW = localStorage.getItem(ACT_W_KEY);
+        if (savedW) {
+            var w = parseInt(savedW);
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--act-panel-w', w + 'px');
+        }
+
+        var dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX;
+            startW = panel.offsetWidth;
+            panel.classList.add('act-panel-resizing');
+            tab.classList.add('act-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--act-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('act-panel-resizing');
+            tab.classList.remove('act-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(ACT_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+</script>
 
 <!-- ── Panneau latéral Projets ───────────────────────────────────────── -->
 <div id="projects-panel">
