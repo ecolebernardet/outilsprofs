@@ -139,15 +139,6 @@
             bottom: auto;
             top: -42px;
         }
-        /* Dans la barre d'action, les boutons sont positionnés en flex (pas absolute) */
-        .widget-action-bar .widget-close-handle,
-        .widget-action-bar .widget-pin-handle,
-        .widget-action-bar .widget-back-handle,
-        .widget-action-bar .widget-menu-handle {
-            position: static;
-            opacity: 1;
-            pointer-events: auto;
-        }
         /* Afficher la barre dans les mêmes conditions que les autres handles */
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-action-bar,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus .widget-action-bar,
@@ -579,9 +570,9 @@
         }
         #sc-action-bar.above { bottom: auto; top: -48px; }
         #sc-action-bar .sc-btn { position: static; }
-        #selection-controls .sc-merge   { bottom: -18px; left: 50%; transform: translateX(-50%); color: #2bcbba; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; transform: none; }
+        #selection-controls .sc-merge   { color: #2bcbba; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; }
         #selection-controls .sc-fuse    { color: #a78bfa; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; }
-        #selection-controls .sc-ungroup { bottom: -18px; left: 50%; transform: translateX(-50%); color: #f39c12; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; transform: none; }
+        #selection-controls .sc-ungroup { color: #f39c12; display: none; white-space: nowrap; width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; position: static; }
         #selection-controls .sc-delete { color: #ff5f56; }
         #selection-controls .sc-menu   { color: #555; }
         #selection-controls .sc-pin    { color: #f39c12; font-size: 13px; }
@@ -621,7 +612,6 @@
 		/* date/time widget CSS → widgets-datetime.js */
 		.editor-toolbar { display: flex; visibility: hidden; opacity: 0; gap: 4px; padding: 0px 35px; background: #f8f9fa; border-bottom: 1px solid #eee; flex-wrap: wrap; align-items: center; min-height: 36px; }
 		.widget:focus-within .editor-toolbar { visibility: visible; opacity: 1; }
-		.widget[data-type="iframe"] .editor-toolbar,
 		/* YouTube widget */
 		.yt-tab-btn { background:#fff;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 7px;height:26px; }
 		.yt-tab-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
@@ -643,6 +633,7 @@
 		.yt-lib-card .yt-lib-del { position:absolute;top:3px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;cursor:pointer;display:none; }
 		.yt-lib-card:hover .yt-lib-del { display:block; }
 		.yt-lib-empty { color:#666;font-size:12px;text-align:center;padding:24px;grid-column:1/-1; }
+		.widget[data-type="iframe"] .editor-toolbar,
 		.widget[data-type="youtube"] .editor-toolbar,
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
@@ -1159,7 +1150,6 @@
 
         /* --- CANVAS --- */
         #draw-canvas { position: absolute; top: 0; left: 0; z-index: 50; pointer-events: none !important; touch-action: none; }
-        #draw-canvas.inactive { /* canvas toujours visible, les dessins restent affichés */ }
         #selection-rect { position: absolute; border: 2px dashed #4a90e2; background: rgba(74,144,226,0.08); pointer-events: none; z-index: 600; display: none; }
 
         /* Calendrier & horloge → widgets-datetime.js */
@@ -1707,7 +1697,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 				</div>
 			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
-			<select onmousedown="savedSelection=saveCurrentSelection()" onchange="formatFontFamilyGlobal(this.value)" style="width:100px; cursor:pointer;" ">
+			<select onmousedown="savedSelection=saveCurrentSelection()" onchange="formatFontFamilyGlobal(this.value)" style="width:100px; cursor:pointer;">
 				<option value="Arial, sans-serif">Arial</option>
 				<option value="'Segoe UI', sans-serif">Segoe UI</option>
 				<option value="'Comic Sans MS', cursive">Comic Sans MS</option>
@@ -1763,7 +1753,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 				<button onclick="applyWidgetAnimation('typewriter')">🎭 Typewriter</button>
 			</div>
 			<div style="width:1px;height:30px;background:#444;"></div>
-			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;" ">✖</button>
+			<button onclick="closeGlobalToolbar()" style="margin-left:auto;background:#6c757d;color:white;padding:4px 8px;border-radius:4px; cursor:pointer;">✖</button>
 		</div>
 	</div>
 
@@ -3131,7 +3121,7 @@ async function captureBoard(format) {
             // Navigateur web : capture via getDisplayMedia (capture d'écran native)
             try {
                 const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { mediaSource: 'screen', cursor: 'never' },
+                    video: { cursor: 'never' },
                     audio: false
                 });
                 const video = document.createElement('video');
@@ -3334,7 +3324,6 @@ function togglePresentationMode() {
         const el = document.documentElement;
         if (el.requestFullscreen)            el.requestFullscreen();
         else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
         if (typeof resizeCanvas === 'function') setTimeout(resizeCanvas, 150);
     } else {
         document.body.classList.remove('presentation-mode');
@@ -4331,7 +4320,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="color-picker.js"></script>
 <script src="toolbar-text.js"></script>
 <script src="widget-devoirs.js"></script>
-<!-- preset-boards.js conservé mais non chargé -->
+
 <input type="file" id="yt-import-input" style="display:none" accept=".json">
 <a id="yt-export-link" style="display:none" download="bibliotheque-youtube.json"></a>
 
