@@ -409,23 +409,21 @@
 	</div>
 
 	<!-- Barre outils DESSIN -->
-	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:10px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border:1px solid #444;overflow:visible;box-sizing:border-box;">
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:5px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border:1px solid #444;overflow:visible;box-sizing:border-box;">
 		<div id="draw-toolbar-inner" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0;">
 
-			<!-- FERMER — en haut -->
-			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#555;border:1px solid #333;width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
-
-			<div class="dt-sep"></div>
-
+			<!-- FERMER -->
+			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#555;border:1px solid #333;width:20px;height:20px;border-radius:8px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
+			
 			<!-- EFFACER TOUT + ANNOTATION PDF sur la même ligne -->
 			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;justify-content:center;width:64px;flex-wrap:wrap;">
 				<!-- EFFACER TOUT — efface les annotations PDF si mode actif, sinon efface le board -->
-				<button id="dt-clear-btn" onclick="_dtClearAction()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:1px solid #5a2020;width:30px;height:34px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
+				<button id="dt-clear-btn" onclick="_dtClearAction()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:1px solid #5a2020;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
 				<!-- ANNOTATION PDF -->
-				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:34px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
+				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
 			</div>
-			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
-			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
+			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
+			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -436,27 +434,11 @@
 			</div>
 
 			<!-- GOMME -->
-			<button id="eraser-btn" onclick="toggleEraserMode()" title="Gomme (clic droit pour basculer)" style="background:#2a2a2e;color:#888;border:2px solid #444;width:64px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">🧽</button>
+			<button id="eraser-btn" onclick="toggleEraserMode()" title="Gomme (clic droit pour basculer)" style="background:#2a2a2e;color:#888;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">🧽</button>
 
 			<div class="dt-sep"></div>
 
-			<!-- TAILLE TRAIT : − valeur + -->
-			<!-- TAILLE TRAIT + LISSAGE empilés verticalement -->
-			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-				<!-- Taille trait : − valeur + -->
-				<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;">
-					<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-					<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
-					<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
-					<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
-				</div>
-				<!-- Lissage : ∿ − val + -->
-				<div style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
-					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-					<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
-					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
-				</div>
-			</div>
+			
 
 			<!-- COULEUR TRAIT -->
 			<div class="dt-color" style="display:flex;align-items:center;gap:4px;flex-shrink:0;justify-content:center;">
@@ -478,22 +460,40 @@
 				</div>
 			</div>
 
+			<!-- TAILLE TRAIT : − valeur + -->
+			<!-- TAILLE TRAIT + LISSAGE empilés verticalement -->
+			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+				<!-- Taille trait : − valeur + -->
+				<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;">
+					<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+					<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
+					<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
+					<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				</div>
+				<!-- Lissage : ∿ − val + -->
+				<div style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
+					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+					<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
+					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				</div>
+			</div>
+			
 			<!-- CRAYON + SURLIGNEUR côte à côte -->
 			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;justify-content:center;">
-				<button id="draw-free-btn" onclick="activatePencil()" style="width:30px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Dessin libre">✏️</button>
-				<button id="draw-highlight-btn" onclick="activateHighlighter()" style="width:30px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Surligneur">🖍️</button>
+				<button id="draw-free-btn" onclick="activatePencil()" style="width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Dessin libre">✏️</button>
+				<button id="draw-highlight-btn" onclick="activateHighlighter()" style="width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Surligneur">🖍️</button>
 			</div>
 
 			<!-- FIGURES + OUTILS GÉO côte à côte -->
 			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;width:64px;justify-content:center;">
-				<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:30px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="2,17 9,3 16,17" fill="#7a9abf" fill-opacity="0.85" stroke="#4a6a8a" stroke-width="1.2" stroke-linejoin="round"/><circle cx="14" cy="13" r="6" fill="#c0635a" fill-opacity="0.85" stroke="#7a3530" stroke-width="1.2"/></svg></button>
-				<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:30px;height:34px;border-radius:8px;border:2px solid #555;background:#2a2a2e;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
+				<button id="draw-figures-btn" onclick="toggleFiguresSubmenu()" style="width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Figures géométriques"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="2,17 9,3 16,17" fill="#7a9abf" fill-opacity="0.85" stroke="#4a6a8a" stroke-width="1.2" stroke-linejoin="round"/><circle cx="14" cy="13" r="6" fill="#c0635a" fill-opacity="0.85" stroke="#7a3530" stroke-width="1.2"/></svg></button>
+				<button id="geo-draw-btn" onclick="if(typeof stopEraserMode==='function')stopEraserMode();_toggleGeoCompactSubmenu()" style="width:30px;height:30px;border-radius:8px;border:2px solid #555;background:#2a2a2e;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;padding:0;" title="Outils géométriques">📐</button>
 			</div>
 
 			<div class="dt-sep"></div>
 
 			<!-- SÉLECTION -->
-			<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:64px;height:34px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+			<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:64px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
 
 			<div class="dt-sep"></div>
 
@@ -503,12 +503,10 @@
 				<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
 			</div>
 
-			<div class="dt-sep"></div>
-
-			<!-- HANDLE — en bas -->
-			<div id="draw-toolbar-drag-handle" class="dt-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;width:64px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
-				<svg class="dt-handle-svg-v" width="40" height="10" viewBox="0 0 40 10" fill="none"><circle cx="6" cy="5" r="2.5" fill="#999"/><circle cx="20" cy="5" r="2.5" fill="#999"/><circle cx="34" cy="5" r="2.5" fill="#999"/></svg>
-				<svg class="dt-handle-svg-h" width="10" height="24" viewBox="0 0 10 24" fill="none"><circle cx="5" cy="4" r="2.5" fill="#999"/><circle cx="5" cy="12" r="2.5" fill="#999"/><circle cx="5" cy="20" r="2.5" fill="#999"/></svg>
+			<!-- HANDLE -->
+			<div id="draw-toolbar-drag-handle" class="dt-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;width:20px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+				<svg class="dt-handle-svg-v" width="20" height="10" viewBox="0 0 20 10" fill="none"><circle cx="4" cy="5" r="2" fill="#999"/><circle cx="10" cy="5" r="2" fill="#999"/><circle cx="16" cy="5" r="2" fill="#999"/></svg>
+				<svg class="dt-handle-svg-h" width="10" height="16" viewBox="0 0 10 16" fill="none"><circle cx="5" cy="3" r="2" fill="#999"/><circle cx="5" cy="9" r="2" fill="#999"/><circle cx="5" cy="15" r="2" fill="#999"/></svg>
 			</div>
 
 		</div>
@@ -827,6 +825,7 @@
 
 <script src="pdf-widgets.js"></script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
+<button id="exit-presentation-btn" onclick="togglePresentationMode()" title="Quitter le mode présentation">📽️</button>
 <script src="widgets.js"></script>
 <script src="widget-compte-est-bon.js"></script>
 <script src="widget-mots-alpha.js"></script>
