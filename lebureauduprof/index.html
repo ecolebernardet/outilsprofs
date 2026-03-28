@@ -992,6 +992,243 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 })();
 </script>
 
+
+<!-- ── Panneau latéral Widgets ────────────────────────────────────────── -->
+<div id="widgets-panel">
+    <div id="widgets-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="widgets-panel-header">
+        <h3>📦 Widgets</h3>
+        <button id="widgets-panel-close" onclick="toggleWidgetsPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="widgets-panel-content">
+        <div class="widgets-section-label">✍️ Annotation</div>
+        <div class="widgets-grid">
+            <div class="widgets-card" onclick="window._nextTextOpenCreate=true;createWidget('text');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">✍️</div>
+                <div class="widgets-card-name">Texte</div>
+                <div class="widgets-card-desc">Ajouter une zone de texte libre</div>
+            </div>
+        </div>
+        <div class="widgets-section-label">📦 Médias & Info</div>
+        <div class="widgets-grid">
+            <div class="widgets-card" onclick="createWidget('pdf');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">📄</div>
+                <div class="widgets-card-name">PDF</div>
+                <div class="widgets-card-desc">Afficher et annoter un document PDF</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('iframe');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">💻</div>
+                <div class="widgets-card-name">Fenêtre Web</div>
+                <div class="widgets-card-desc">Intégrer un site web</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('youtube');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">🎬</div>
+                <div class="widgets-card-name">YouTube</div>
+                <div class="widgets-card-desc">Intégrer une vidéo YouTube</div>
+            </div>
+        </div>
+        <div class="widgets-section-label">🕒 Temps & Météo</div>
+        <div class="widgets-grid">
+            <div class="widgets-card" onclick="createWidget('date');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">📅</div>
+                <div class="widgets-card-name">Date</div>
+                <div class="widgets-card-desc">Afficher la date du jour</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('time');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">🕒</div>
+                <div class="widgets-card-name">Heure</div>
+                <div class="widgets-card-desc">Afficher l'heure en temps réel</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('meteo');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">⛅</div>
+                <div class="widgets-card-name">Météo</div>
+                <div class="widgets-card-desc">Afficher la météo locale</div>
+            </div>
+        </div>
+        <div class="widgets-section-label">📋 Organisation</div>
+        <div class="widgets-grid">
+            <div class="widgets-card" onclick="createWidget('homework');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">📝</div>
+                <div class="widgets-card-name">Devoirs</div>
+                <div class="widgets-card-desc">Afficher les devoirs de la classe</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('agenda');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">📌</div>
+                <div class="widgets-card-name">Planning</div>
+                <div class="widgets-card-desc">Afficher le planning de la semaine</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord gauche -->
+<button id="widgets-panel-tab" onclick="toggleWidgetsPanel()" title="Widgets">📦 Widgets</button>
+
+<script>
+// ── Panneau Widgets ──────────────────────────────────────────────
+(function() {
+    var WIDGETS_W_KEY = 'widgets-panel-w';
+
+    function toggleWidgetsPanel() {
+        var panel = document.getElementById('widgets-panel');
+        var tab   = document.getElementById('widgets-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('widgets-panel-open');
+        if (isOpen) {
+            panel.classList.remove('widgets-panel-open');
+            tab.classList.remove('widgets-panel-tab-open');
+        } else {
+            panel.classList.add('widgets-panel-open');
+            tab.classList.add('widgets-panel-tab-open');
+        }
+    }
+    window.toggleWidgetsPanel = toggleWidgetsPanel;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var handle = document.getElementById('widgets-panel-resize-handle');
+        var panel  = document.getElementById('widgets-panel');
+        var tab    = document.getElementById('widgets-panel-tab');
+        if (!handle || !panel) return;
+
+        var savedW = localStorage.getItem(WIDGETS_W_KEY);
+        if (savedW) {
+            var w = parseInt(savedW);
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--widgets-panel-w', w + 'px');
+        }
+
+        var dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX;
+            startW = panel.offsetWidth;
+            panel.classList.add('widgets-panel-resizing');
+            tab.classList.add('widgets-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--widgets-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('widgets-panel-resizing');
+            tab.classList.remove('widgets-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(WIDGETS_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+</script>
+
+<!-- ── Panneau latéral Outils ────────────────────────────────────────── -->
+<div id="tools-panel">
+    <div id="tools-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="tools-panel-header">
+        <h3>🛠️ Outils</h3>
+        <button id="tools-panel-close" onclick="toggleToolsPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="tools-panel-content">
+        <div class="tools-section-label">🧰 Outils classe</div>
+        <div class="tools-grid">
+            <div class="tools-card" onclick="createWidget('outilsprofs');toggleToolsPanel()">
+                <div class="tools-card-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:32px;height:32px;object-fit:contain;border-radius:6px;"></div>
+                <div class="tools-card-name">OutilsProfs</div>
+                <div class="tools-card-desc">Accès aux outils pédagogiques en ligne</div>
+            </div>
+            <div class="tools-card" onclick="createDeficalmeWidget();toggleToolsPanel()">
+                <div class="tools-card-ico">🧘</div>
+                <div class="tools-card-name">Défi Calme</div>
+                <div class="tools-card-desc">Exercice de relaxation et de concentration</div>
+            </div>
+            <div class="tools-card" onclick="createTirageWidget();toggleToolsPanel()">
+                <div class="tools-card-ico">🎡</div>
+                <div class="tools-card-name">Tirage au Sort</div>
+                <div class="tools-card-desc">Désigner un élève ou un groupe aléatoirement</div>
+            </div>
+            <div class="tools-card" onclick="createWidget('minuteur');toggleToolsPanel()">
+                <div class="tools-card-ico">⏱️</div>
+                <div class="tools-card-name">Minuteur & Chrono</div>
+                <div class="tools-card-desc">Gérer le temps des activités</div>
+            </div>
+            <div class="tools-card" onclick="createWidget('sonometre');toggleToolsPanel()">
+                <div class="tools-card-ico">🔊</div>
+                <div class="tools-card-name">Sonomètre</div>
+                <div class="tools-card-desc">Mesurer et afficher le niveau sonore</div>
+            </div>
+            <div class="tools-card" onclick="createWidget('radar');toggleToolsPanel()">
+                <div class="tools-card-ico">📡</div>
+                <div class="tools-card-name">Radar de Bruit</div>
+                <div class="tools-card-desc">Visualiser le bruit en temps réel</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord gauche -->
+<button id="tools-panel-tab" onclick="toggleToolsPanel()" title="Outils">🛠️ Outils</button>
+
+<script>
+// ── Panneau Outils ──────────────────────────────────────────────
+(function() {
+    var TOOLS_W_KEY = 'tools-panel-w';
+
+    function toggleToolsPanel() {
+        var panel = document.getElementById('tools-panel');
+        var tab   = document.getElementById('tools-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('tools-panel-open');
+        if (isOpen) {
+            panel.classList.remove('tools-panel-open');
+            tab.classList.remove('tools-panel-tab-open');
+        } else {
+            panel.classList.add('tools-panel-open');
+            tab.classList.add('tools-panel-tab-open');
+        }
+    }
+    window.toggleToolsPanel = toggleToolsPanel;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var handle = document.getElementById('tools-panel-resize-handle');
+        var panel  = document.getElementById('tools-panel');
+        var tab    = document.getElementById('tools-panel-tab');
+        if (!handle || !panel) return;
+
+        var savedW = localStorage.getItem(TOOLS_W_KEY);
+        if (savedW) {
+            var w = parseInt(savedW);
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--tools-panel-w', w + 'px');
+        }
+
+        var dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX;
+            startW = panel.offsetWidth;
+            panel.classList.add('tools-panel-resizing');
+            tab.classList.add('tools-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--tools-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('tools-panel-resizing');
+            tab.classList.remove('tools-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(TOOLS_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+</script>
+
 <!-- ── Panneau latéral Projets ───────────────────────────────────────── -->
 <div id="projects-panel">
     <div id="projects-panel-resize-handle" title="Redimensionner le panneau"></div>
@@ -1051,6 +1288,26 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
     });
 })();
+</script>
+
+<script>
+// ── Fermeture des panneaux latéraux au clic en dehors ─────────────────
+document.addEventListener('pointerdown', function(e) {
+    var panels = [
+        { panel: 'activities-panel', tab: 'activities-panel-tab', openClass: 'act-panel-open',       tabClass: 'act-panel-tab-open' },
+        { panel: 'tools-panel',      tab: 'tools-panel-tab',      openClass: 'tools-panel-open',     tabClass: 'tools-panel-tab-open' },
+        { panel: 'widgets-panel',    tab: 'widgets-panel-tab',    openClass: 'widgets-panel-open',   tabClass: 'widgets-panel-tab-open' },
+    ];
+    panels.forEach(function(cfg) {
+        var panel = document.getElementById(cfg.panel);
+        var tab   = document.getElementById(cfg.tab);
+        if (!panel || !panel.classList.contains(cfg.openClass)) return;
+        if (panel.contains(e.target)) return;
+        if (tab && tab.contains(e.target)) return;
+        panel.classList.remove(cfg.openClass);
+        if (tab) tab.classList.remove(cfg.tabClass);
+    });
+});
 </script>
 </body>
 </html>
