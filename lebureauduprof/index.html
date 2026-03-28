@@ -282,6 +282,7 @@
 					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>&nbsp;&nbsp;Pointeur laser</div>
 					<div class="mm-sub-item" id="menu-theme-btn" onclick="toggleMenuTheme()"><span class="mm-ico">☀️</span>&nbsp;&nbsp;Mode clair</div>
 					<div class="mm-sub-item" id="a4-mode-btn" onclick="toggleA4Mode();closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Format A4 Portrait</div>
+					<div class="mm-sub-item" id="presentation-menu-btn" onclick="togglePresentationMode();closeMainMenu()"><span class="mm-ico">📽️</span>&nbsp;&nbsp;Mode présentation</div>
 				</div></div>
 			</div>
 
@@ -897,7 +898,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <div id="activities-panel">
     <div id="activities-panel-resize-handle" title="Redimensionner le panneau"></div>
     <div id="act-panel-header">
-        <h3>🎯 Activités</h3>
+        <h3>🎯Activités</h3>
         <button id="act-panel-close" onclick="toggleActivitiesPanel()" title="Fermer">✕</button>
     </div>
     <div id="act-panel-content">

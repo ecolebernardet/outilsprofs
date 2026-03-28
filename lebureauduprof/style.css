@@ -1358,7 +1358,7 @@
 		#scene-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 		/* === PANNEAU STICKERS === */
-		:root { --sticker-panel-w: 420px; }
+		:root { --sticker-panel-w: 350px; }
 		#sticker-panel {
 			display: flex;
 			position: fixed;

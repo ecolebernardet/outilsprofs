@@ -282,7 +282,7 @@ function _initRulingScalePanel() {
     panel.style.cssText = `
         position: fixed;
         bottom: 24px;
-        right: 24px;
+        right: 100px;
         z-index: 12000;
         background: rgba(20,20,28,0.35);
         border: 1px solid rgba(255,255,255,0.10);
@@ -298,7 +298,7 @@ function _initRulingScalePanel() {
         -webkit-backdrop-filter: blur(4px);
     `;
     panel.innerHTML = `
-        <span style="font-size:14px;line-height:1;">📏</span>
+        <span style="font-size:12px;line-height:1; color:#fff;">réglure</span>
         <input type="range" id="bg-scale-slider" min="50" max="250" value="100" step="25"
             style="width:90px;cursor:pointer;accent-color:#7ab8f5;">
         <span id="bg-scale-label" style="color:#fff;font-size:11px;font-weight:600;min-width:34px;text-align:right;">100%</span>
