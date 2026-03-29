@@ -805,8 +805,8 @@ function toggleMenuTheme() {
     const btn = document.getElementById('menu-theme-btn');
     if (btn) {
         btn.innerHTML = isLight
-            ? '<span class="mm-ico">🌙</span>Mode sombre'
-            : '<span class="mm-ico">☀️</span>Mode clair';
+            ? '<span class="mm-ico">🌙</span><span>&nbsp;&nbsp;Mode sombre</span>'
+            : '<span class="mm-ico">☀️</span><span>&nbsp;&nbsp;Mode clair</span>';
     }
     localStorage.setItem('menuTheme', isLight ? 'light' : 'dark');
 }
