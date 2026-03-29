@@ -307,7 +307,7 @@ function _addStickerResizeHandle(w, minSize) {
 
 function insertStickerEmoji(emoji) {
 	snapshotNow();
-	const pos = findFreePosition();
+	const pos = findFreePosition(100, 100);
 	const w = document.createElement('div');
 	w.className = 'widget';
 	w.dataset.type = 'sticker';
@@ -350,7 +350,7 @@ function insertStickerEmoji(emoji) {
 
 function insertStickerImage(url, name) {
 	snapshotNow();
-	const pos = findFreePosition();
+	const pos = findFreePosition(130, 130);
 	const w = document.createElement('div');
 	w.className = 'widget';
 	w.dataset.type = 'sticker';

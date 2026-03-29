@@ -209,20 +209,37 @@ function addCtxBtn(menu, label, fn) {
 // =========================================================================
 // PLACEMENT AUTO (évite les chevauchements)
 // =========================================================================
-function findFreePosition() {
+function findFreePosition(widgetW, widgetH) {
     const curW = window.innerWidth, curVH = virtualH(curW);
+    const W = widgetW || 320, H = widgetH || 180;
+    const MARGIN = 20, STEP_X = Math.max(W, 200), STEP_Y = Math.max(H, 150);
     const occupied = Array.from(document.querySelectorAll('.widget, .shape-widget')).map(w => ({
         left: w.offsetLeft, top: w.offsetTop,
         right: w.offsetLeft + w.offsetWidth, bottom: w.offsetTop + w.offsetHeight
     }));
-    for (let y = 20; y < curVH - 200; y += 200) {
-        for (let x = 20; x < curW - 320; x += 320) {
-            const overlaps = occupied.some(r => x < r.right+20 && x+320 > r.left && y < r.bottom+20 && y+180 > r.top);
+    // Le coin HAUT-DROIT du widget est aligné sur le coin haut-droit du board :
+    // x de départ = curW - W (bord droit du widget = bord droit du board)
+    const startX = curW - W;
+    for (let y = MARGIN; y < curVH - H; y += STEP_Y) {
+        for (let x = startX; x >= MARGIN; x -= STEP_X) {
+            const overlaps = occupied.some(r => x < r.right + MARGIN && x + W > r.left && y < r.bottom + MARGIN && y + H > r.top);
             if (!overlaps) return { x, y };
         }
     }
+    // Fallback : décalage en cascade si tout est occupé
     const count = document.querySelectorAll('.widget, .shape-widget').length;
-    return { x: (20 + count * 30) % (curW - 200), y: (20 + count * 30) % (curVH - 200) };
+    return { x: Math.max(MARGIN, startX - (count * 30) % Math.max(1, startX - MARGIN)), y: (MARGIN + count * 30) % (curVH - H) };
+}
+
+// Appelé après insertion dans le DOM quand la taille du widget n'est pas connue à l'avance.
+// Recale le bord droit du widget sur le bord droit du board.
+function snapWidgetToTopRight(widget) {
+    requestAnimationFrame(() => {
+        const curW = window.innerWidth;
+        const w = widget.offsetWidth || 320;
+        widget.style.left = Math.max(0, curW - w) + 'px';
+        widget.style.top  = '20px';
+    });
 }
 
 
@@ -297,8 +314,9 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         if (type === 'pdf') {
             const all = Array.from(document.querySelectorAll('.widget[data-type="pdf"]'));
             if (all.length === 0) {
-                x = Math.round(window.innerWidth * 0.08) + 'px';
-                y = '60px';
+                // Le PDF sera recalé après rendu via snapWidgetToTopRight
+                x = Math.round(window.innerWidth * 0.72) + 'px';
+                y = '20px';
             } else {
                 const last = all[all.length - 1];
                 x = (last.offsetLeft + 50) + 'px';
@@ -350,6 +368,11 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
 
     board.appendChild(widget);
     bringToFront(widget);
+
+    // Pour le premier widget PDF, recaler le bord droit sur le bord droit du board
+    if (type === 'pdf' && document.querySelectorAll('.widget[data-type="pdf"]').length === 1) {
+        snapWidgetToTopRight(widget);
+    }
 
     // Touche Suppr/Delete = suppression du widget (quand il a le focus)
     widget.addEventListener('keydown', (e) => {

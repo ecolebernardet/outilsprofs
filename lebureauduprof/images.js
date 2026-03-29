@@ -19,12 +19,17 @@ if (!window.IMAGE_CATEGORIES) {
             icon: '🌍',
             images: [
                 { src: 'images/carte-france01.png',              label: 'France (vierge)' },
+				{ src: 'images/carte-france02.png',              label: 'France (contour)' },
                 { src: 'images/carte-france-departements01.png', label: 'Départements français (numéros)' },
+				{ src: 'images/carte-france-departements02.png', label: 'Départements français (vierge)' },
                 { src: 'images/carte-france-regions01.png',      label: 'Régions françaises (vierge)' },
 				{ src: 'images/carte-france-regions02.png',      label: 'Régions françaises (noms)' },
                 { src: 'images/carte-europe-pays01.png',         label: "Pays d'Europe (vierge)" },
+				{ src: 'images/carte-europe-pays02.png',         label: "Pays d'Europe (vierge)" },
                 { src: 'images/carte-monde01.png',               label: 'Monde (vierge)' },
+				{ src: 'images/carte-monde02.png',               label: 'Monde (vierge)' },
                 { src: 'images/carte-monde-pays01.png',          label: 'Pays du monde (noms)' },
+				{ src: 'images/carte-monde-drapeaux01.png',      label: 'Globe (drapeaux)' },
             ]
         },
         {
@@ -444,7 +449,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
     if (h < 80) { w = Math.round(w * 80 / h); h = 80; }
 
     snapshotNow();
-    const pos = findFreePosition();
+    const pos = findFreePosition(w, h);
 
     const widget = document.createElement('div');
     widget.className = 'widget';
