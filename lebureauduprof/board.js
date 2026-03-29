@@ -151,7 +151,7 @@ window.onload = () => {
     if (localStorage.getItem('menuTheme') === 'light') {
         document.body.classList.add('menu-light');
         const btn = document.getElementById('menu-theme-btn');
-        if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span>&nbsp;&nbsp;Mode sombre';
+        if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span><span>&nbsp;&nbsp;Mode sombre</span>';
     }
     const savedBg = localStorage.getItem('boardBackground');
     if (savedBg && typeof applyBackground === 'function') {
