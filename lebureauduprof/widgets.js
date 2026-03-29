@@ -576,6 +576,37 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
     if (type === 'date')  { if (typeof initDateWidget  === 'function') initDateWidget(widget); }
     if (type === 'meteo') { if (typeof initMeteoWidget === 'function') initMeteoWidget(widget); }
 
+    // Widget outilsprofs : la toolbar sert de poignée de déplacement
+    if (type === 'outilsprofs') {
+        requestAnimationFrame(() => {
+            const c = widget.querySelector('.editor-container');
+            if (!c) return;
+            const curW  = window.innerWidth;
+            const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+            const tb    = typeof getToolbarHeight === 'function' ? getToolbarHeight(c) : 0;
+            if (!widget.dataset.widthPercent    || widget.dataset.widthPercent    === '0') widget.dataset.widthPercent    = (c.offsetWidth  / curW)  * 100;
+            if (!widget.dataset.contentHPercent || widget.dataset.contentHPercent === '0') widget.dataset.contentHPercent = ((c.offsetHeight - tb) / curVH) * 100;
+            if (!widget.dataset.leftPercent     || widget.dataset.leftPercent     === '0') widget.dataset.leftPercent     = (widget.offsetLeft / curW)  * 100;
+            if (!widget.dataset.topPercent      || widget.dataset.topPercent      === '0') widget.dataset.topPercent      = (widget.offsetTop  / curVH) * 100;
+        });
+        const outilsToolbar = widget.querySelector('.editor-toolbar');
+        if (outilsToolbar) {
+            outilsToolbar.style.cursor = 'move';
+            const _onOutilsToolbarDown = (e) => {
+                if (isDrawMode || isEraserMode) return;
+                if (e.target.closest('button, label, input, select, a')) return;
+                e.stopPropagation();
+                widget.focus();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startWidgetDrag({ clientX, clientY, target: e.target }, widget);
+            };
+            outilsToolbar.addEventListener('mousedown',  _onOutilsToolbarDown);
+            outilsToolbar.addEventListener('touchstart', _onOutilsToolbarDown, { passive: false });
+            outilsToolbar.addEventListener('mouseup', () => { outilsToolbar.style.cursor = 'move'; });
+        }
+    }
+
     const editor = widget.querySelector('.editor-content');
     if (editor) {
         editor.addEventListener('mouseup', () => {
