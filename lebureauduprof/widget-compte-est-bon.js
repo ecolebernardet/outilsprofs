@@ -9,6 +9,76 @@
 
 (function () {
 
+    // Fonction utilitaire mini-barre collapse (injectée une seule fois)
+    if (!window._wfMiniBarCollapse) {
+        window._wfMiniBarCollapse = function(widget, label, opts) {
+            const COLLAPSED_W = 300, COLLAPSED_H = 50, GAP = 10, MARGIN_TOP = 8;
+            const onExpand = opts && opts.onExpand;
+            widget.dataset.wfMiniSavedTop  = widget.style.top;
+            widget.dataset.wfMiniSavedLeft = widget.style.left;
+            widget.dataset.wfMiniSavedW    = widget.style.width  || '';
+            widget.dataset.wfMiniSavedH    = widget.style.height || '';
+            const others = Array.from(document.querySelectorAll('.widget')).filter(w => w !== widget && w.querySelector('.wf-mini-bar'));
+            const occupiedX = others.reduce((maxX, w) => Math.max(maxX, w.offsetLeft + COLLAPSED_W + GAP), MARGIN_TOP);
+            widget.style.top = MARGIN_TOP + 'px'; widget.style.left = occupiedX + 'px';
+            widget.style.width = COLLAPSED_W + 'px'; widget.style.height = COLLAPSED_H + 'px';
+            widget.style.zIndex = '9000'; widget.style.background = '#2a2a3e';
+            widget.style.borderRadius = '8px'; widget.style.border = 'none';
+            widget.style.display = 'block'; widget.style.overflow = 'hidden'; widget.style.padding = '0';
+            const wc = widget.querySelector('.widget-content');
+            if (wc) { wc.style.padding = '0'; wc.style.background = 'transparent'; wc.style.borderRadius = '0'; }
+            widget.querySelectorAll('.drag-handle,.widget-action-bar,.widget-rotate-handle,.custom-resize-handle').forEach(el => el.style.display = 'none');
+            const miniBar = document.createElement('div');
+            miniBar.className = 'wf-mini-bar';
+            miniBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:' + COLLAPSED_H + 'px;display:flex;align-items:center;padding:0 8px;box-sizing:border-box;background:#2a2a3e;border-radius:8px;cursor:move;user-select:none;gap:6px;z-index:1;';
+            const labelEl = document.createElement('span');
+            labelEl.textContent = label;
+            labelEl.style.cssText = 'font-size:11px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;';
+            const expandBtn = document.createElement('button');
+            expandBtn.title = 'Déplier'; expandBtn.textContent = '▲';
+            expandBtn.style.cssText = 'flex-shrink:0;background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;position:relative;z-index:2;';
+            expandBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+            expandBtn.addEventListener('mousedown',   (e) => { e.stopPropagation(); });
+            expandBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); e.preventDefault();
+                widget.style.top = widget.dataset.wfMiniSavedTop || widget.style.top;
+                widget.style.left = widget.dataset.wfMiniSavedLeft || widget.style.left;
+                widget.style.width = widget.dataset.wfMiniSavedW || '';
+                widget.style.height = widget.dataset.wfMiniSavedH || '';
+                widget.style.zIndex = ''; widget.style.background = ''; widget.style.borderRadius = '';
+                widget.style.border = ''; widget.style.display = ''; widget.style.overflow = ''; widget.style.padding = '';
+                const wc2 = widget.querySelector('.widget-content');
+                if (wc2) { wc2.style.padding = ''; wc2.style.background = ''; wc2.style.borderRadius = ''; }
+                widget.querySelectorAll('.drag-handle,.widget-action-bar,.widget-rotate-handle,.custom-resize-handle').forEach(el => el.style.display = '');
+                miniBar.remove();
+                const curW = window.innerWidth, curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+                widget.dataset.leftPercent = (widget.offsetLeft / curW) * 100;
+                widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+                if (onExpand) onExpand();
+                if (typeof saveBoard === 'function') saveBoard();
+            });
+            miniBar.appendChild(labelEl); miniBar.appendChild(expandBtn); widget.appendChild(miniBar);
+            miniBar.addEventListener('pointerdown', (e) => {
+                if (e.target === expandBtn || expandBtn.contains(e.target)) return;
+                e.stopPropagation(); e.preventDefault(); miniBar.setPointerCapture(e.pointerId);
+                const startX = e.clientX - widget.offsetLeft, startY = e.clientY - widget.offsetTop;
+                const onMove = (ev) => { widget.style.left = Math.max(0, ev.clientX - startX) + 'px'; widget.style.top = Math.max(0, ev.clientY - startY) + 'px'; };
+                const onUp = () => {
+                    miniBar.removeEventListener('pointermove', onMove); miniBar.removeEventListener('pointerup', onUp);
+                    const curW = window.innerWidth, curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+                    widget.dataset.leftPercent = (widget.offsetLeft / curW) * 100;
+                    widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+                    if (typeof saveBoard === 'function') saveBoard();
+                };
+                miniBar.addEventListener('pointermove', onMove); miniBar.addEventListener('pointerup', onUp);
+            });
+            const curW = window.innerWidth, curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+            widget.dataset.leftPercent = (widget.offsetLeft / curW) * 100;
+            widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+            if (typeof saveBoard === 'function') saveBoard();
+        };
+    }
+
     // ── CSS injecté une seule fois ─────────────────────────────────────────
     if (!document.getElementById('wf-btns-style')) {
         const ws = document.createElement('style');
@@ -1151,8 +1221,7 @@
             wfMin.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (_isMax) wfMax.click();
-                _isMin = !_isMin;
-                container.classList.toggle('wf-minimized', _isMin);
+                window._wfMiniBarCollapse(widget, '🔢 Le Compte est Bon');
             });
         }
         if (wfMax) {
