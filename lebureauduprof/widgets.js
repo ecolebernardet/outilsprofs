@@ -792,7 +792,7 @@ function makeDraggable(elmnt) {
     } else {
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             const container = elmnt.querySelector('.editor-container');
@@ -807,7 +807,7 @@ function makeDraggable(elmnt) {
 
         elmnt.addEventListener('touchstart', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             elmnt.focus();

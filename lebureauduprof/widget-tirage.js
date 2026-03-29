@@ -71,6 +71,7 @@
         justify-content: space-between;
         gap: 8px;
         flex-shrink: 0;
+        cursor: move;
     }
     .tirage-header-title {
         font-size: 12px;
@@ -407,8 +408,23 @@
 
         const outer = widget.querySelector('.tirage-outer');
 
-        // Bloquer la remontée mousedown (sinon le drag se déclenche)
+        // Bloquer la remontée mousedown depuis l'intérieur (sinon le drag se déclenche)
         outer.addEventListener('mousedown', e => e.stopPropagation());
+
+        // ── Header draggable (une seule fois) ─────────────────────────────
+        const tirageHeader = widget.querySelector('.tirage-header');
+        if (tirageHeader && !tirageHeader._dragInit) {
+            tirageHeader._dragInit = true;
+            const onHeaderDown = (e) => {
+                if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
+                if (e.target.closest('button')) return;
+                if (typeof bringToFront === 'function') bringToFront(widget);
+                widget.focus();
+                if (typeof startWidgetDrag === 'function') startWidgetDrag(e.touches ? e.touches[0] : e, widget);
+            };
+            tirageHeader.addEventListener('mousedown',  onHeaderDown);
+            tirageHeader.addEventListener('touchstart', onHeaderDown, { passive: false });
+        }
 
         // ── Références DOM ────────────────────────────────────────────────
         const importZone      = widget.querySelector('.tirage-import-zone');
