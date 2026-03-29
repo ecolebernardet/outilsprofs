@@ -135,6 +135,7 @@
         z-index: 9999 !important;
         border-radius: 0 !important;
         transform: none !important;
+        padding-left: 40px !important;
     }
     .calc-outer.wf-fullboard .calc-widget {
         border-radius: 0;

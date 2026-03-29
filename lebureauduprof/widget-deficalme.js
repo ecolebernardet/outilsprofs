@@ -1055,6 +1055,7 @@ function createDeficalmeWidget() {
 
     // ── Init ──────────────────────────────────────────────────────────────
     board.appendChild(widget);
+    if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
     bringToFront(widget);
     makeDraggable(widget);
     makeDraggableRotate(widget);

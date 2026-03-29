@@ -82,6 +82,7 @@
             z-index: 9999 !important;
             border-radius: 0 !important;
             overflow-y: auto;
+            padding-left: 40px !important;
         }
 
         /* ── En-tête ── */
@@ -1238,6 +1239,7 @@
         });
 
         board.appendChild(widget);
+        if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
         if (typeof bringToFront === 'function') bringToFront(widget);
         makeDraggable(widget);
         makeDraggableRotate(widget);

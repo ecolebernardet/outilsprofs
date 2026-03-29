@@ -89,6 +89,7 @@
             z-index: 9999 !important;
             border-radius: 0 !important;
             overflow-y: auto;
+            padding-left: 40px !important;
         }
         .monnaie-level-badge {
             font-size: 10px;
@@ -949,6 +950,7 @@ function createMonnaieWidget() {
     });
 
     board.appendChild(widget);
+    if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
     bringToFront(widget);
     makeDraggable(widget);
     makeDraggableRotate(widget);

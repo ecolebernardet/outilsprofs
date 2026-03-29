@@ -232,13 +232,26 @@ function findFreePosition(widgetW, widgetH) {
 }
 
 // Appelé après insertion dans le DOM quand la taille du widget n'est pas connue à l'avance.
-// Recale le bord droit du widget sur le bord droit du board.
+// Recale le bord droit du widget sur le bord droit du board s'il déborde.
 function snapWidgetToTopRight(widget) {
     requestAnimationFrame(() => {
         const curW = window.innerWidth;
-        const w = widget.offsetWidth || 320;
-        widget.style.left = Math.max(0, curW - w) + 'px';
+        const wW = widget.offsetWidth || 320;
+        const left = Math.max(0, curW - wW);
+        widget.style.left = left + 'px';
         widget.style.top  = '20px';
+    });
+}
+
+// Empêche un widget de dépasser du bord droit du board après rendu.
+function clampWidgetToBoardRight(widget) {
+    requestAnimationFrame(() => {
+        const curW = window.innerWidth;
+        const wLeft = widget.offsetLeft;
+        const wW    = widget.offsetWidth;
+        if (wLeft + wW > curW) {
+            widget.style.left = Math.max(0, curW - wW) + 'px';
+        }
     });
 }
 
@@ -310,6 +323,7 @@ function _updateActionBarCompact(widget) {
 // CRÉATION DE WIDGET
 // =========================================================================
 function createWidget(type, x = null, y = null, doSnapshot = true) {
+    const _isNewPlacement = (x === null || y === null);
     if (x === null || y === null) {
         if (type === 'pdf') {
             const all = Array.from(document.querySelectorAll('.widget[data-type="pdf"]'));
@@ -369,7 +383,10 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
     board.appendChild(widget);
     bringToFront(widget);
 
-    // Pour le premier widget PDF, recaler le bord droit sur le bord droit du board
+    // Recaler le bord droit si le widget déborde (taille réelle inconnue avant rendu)
+    if (_isNewPlacement) clampWidgetToBoardRight(widget);
+
+    // Pour le premier widget PDF, forcer l'alignement coin haut-droit
     if (type === 'pdf' && document.querySelectorAll('.widget[data-type="pdf"]').length === 1) {
         snapWidgetToTopRight(widget);
     }

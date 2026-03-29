@@ -765,6 +765,7 @@
         `;
 
         board.appendChild(widget);
+        if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
         makeDraggable(widget);
         makeDraggableRotate(widget);
         bringToFront(widget);

@@ -103,6 +103,7 @@
             height: 100% !important;
             z-index: 9999 !important;
             border-radius: 0 !important;
+            padding-left: 40px !important;
         }
         .alpha-level-badge {
             font-size: 10px;
@@ -135,7 +136,7 @@
         .alpha-btn:active { transform: scale(0.96); }
         .alpha-btn-new   { background: #4a90e2; color: white; }
         .alpha-btn-new:hover   { background: #357abd; }
-        .alpha-btn-check { background: #4a90e2; color: white; }
+        .alpha-btn-check { background: #4a90e2; color: white; margin-left: 30px; }
         .alpha-btn-check:hover { background: #357abd; }
         .alpha-btn-show  { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
         .alpha-btn-show:hover  { background: #e0e0e0; }
