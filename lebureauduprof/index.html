@@ -1001,14 +1001,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <button id="widgets-panel-close" onclick="toggleWidgetsPanel()" title="Fermer">✕</button>
     </div>
     <div id="widgets-panel-content">
-        <div class="widgets-section-label">✍️ Annotation</div>
-        <div class="widgets-grid">
-            <div class="widgets-card" onclick="window._nextTextOpenCreate=true;createWidget('text');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">✍️</div>
-                <div class="widgets-card-name">Texte</div>
-                <div class="widgets-card-desc">Ajouter une zone de texte libre</div>
-            </div>
-        </div>
         <div class="widgets-section-label">📦 Médias & Info</div>
         <div class="widgets-grid">
             <div class="widgets-card" onclick="createWidget('pdf');toggleWidgetsPanel()">
@@ -1050,12 +1042,20 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             <div class="widgets-card" onclick="createWidget('homework');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📝</div>
                 <div class="widgets-card-name">Devoirs</div>
-                <div class="widgets-card-desc">Afficher les devoirs de la classe</div>
+                <div class="widgets-card-desc">Éditer les devoirs de la classe</div>
             </div>
             <div class="widgets-card" onclick="createWidget('agenda');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📌</div>
                 <div class="widgets-card-name">Planning</div>
-                <div class="widgets-card-desc">Afficher le planning de la semaine</div>
+                <div class="widgets-card-desc">Afficher le planning de la journée</div>
+            </div>
+		</div>
+		<div class="widgets-section-label">✍️ Annotation</div>
+        <div class="widgets-grid">
+            <div class="widgets-card" onclick="window._nextTextOpenCreate=true;createWidget('text');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">✍️</div>
+                <div class="widgets-card-name">Texte</div>
+                <div class="widgets-card-desc">Ajouter une zone de texte libre</div>
             </div>
         </div>
     </div>
