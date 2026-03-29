@@ -856,7 +856,9 @@ function createDeficalmeWidget() {
         const startX = e.clientX;
         const startW = container.offsetWidth;
         document.onmousemove = (ev) => {
-            container.style.width = Math.max(320, startW + ev.clientX - startX) + 'px';
+            const newW = Math.max(320, startW + ev.clientX - startX);
+            container.style.width = newW + 'px';
+            widget.dataset.widthPercent = (newW / window.innerWidth) * 100;
         };
         document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
     });
@@ -865,7 +867,9 @@ function createDeficalmeWidget() {
         const startX = e.touches[0].clientX;
         const startW = container.offsetWidth;
         function onMove(ev) {
-            container.style.width = Math.max(320, startW + ev.touches[0].clientX - startX) + 'px';
+            const newW = Math.max(320, startW + ev.touches[0].clientX - startX);
+            container.style.width = newW + 'px';
+            widget.dataset.widthPercent = (newW / window.innerWidth) * 100;
         }
         function onEnd() {
             document.removeEventListener('touchmove', onMove);

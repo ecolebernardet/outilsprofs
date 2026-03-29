@@ -516,6 +516,15 @@ function handleWindowResize() {
     }
     const newVH = virtualH(newW);
     document.querySelectorAll('.widget').forEach(w => {
+        // Cas spécial : widget défi calme (pas de .editor-container, largeur sur .dc-container)
+        if (w.dataset.type === 'deficalme') {
+            const dc = w.querySelector('.dc-container');
+            if (dc && parseFloat(w.dataset.widthPercent) > 0)
+                dc.style.width = (parseFloat(w.dataset.widthPercent) / 100) * newW + 'px';
+            if (parseFloat(w.dataset.leftPercent) > 0) w.style.left = (parseFloat(w.dataset.leftPercent) / 100) * newW + 'px';
+            if (parseFloat(w.dataset.topPercent)  > 0) w.style.top  = (parseFloat(w.dataset.topPercent)  / 100) * newVH + 'px';
+            return;
+        }
         const c = w.querySelector('.editor-container');
         if (c) {
             if (parseFloat(w.dataset.widthPercent) > 0)

@@ -83,7 +83,15 @@ function buildBoardState() {
         const _collapsed = c && c.dataset.collapsed === 'true';
         // Pour un PDF en plein écran board : utiliser les dimensions/position d'ORIGINE sauvegardées
         const _fullboard = c && c.classList.contains('wf-pdf-fullboard');
-        if (_collapsed) {
+        // Pour le widget défi calme : largeur du .dc-container (pas de .editor-container)
+        if (w.dataset.type === 'deficalme') {
+            const dc = w.querySelector('.dc-container');
+            wP = dc ? (dc.offsetWidth  / curW)  * 100 : 0;
+            hP = 0; // hauteur auto (aspect-ratio)
+            lP = (w.offsetLeft / curW)  * 100;
+            tP = (w.offsetTop  / curVH) * 100;
+            Object.assign(w.dataset, { widthPercent: wP, contentHPercent: 0, leftPercent: lP, topPercent: tP });
+        } else if (_collapsed) {
             const _savedWpx    = parseFloat(c.dataset.savedW);
             const _savedHpx    = parseFloat(c.dataset.savedH);
             const _savedTopPx  = parseFloat(c.dataset.savedTop);
@@ -108,7 +116,9 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW) * 100;
             tP = (w.offsetTop  / curVH) * 100;
         }
-        Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
+        if (w.dataset.type !== 'deficalme') {
+            Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
+        }
         // Données propres aux stickers
         let stickerUrl = null, stickerEmoji = null, stickerSize = null;
         if (w.dataset.type === 'sticker') {
@@ -334,6 +344,11 @@ function restoreBoardFromJSON(json) {
         let widget;
         if (w.type === 'deficalme') {
             widget = createDeficalmeWidget();
+            // Restaurer la largeur proportionnellement à l'écran courant
+            if (w.widthPercent > 0) {
+                const dc = widget.querySelector('.dc-container');
+                if (dc) dc.style.width = (w.widthPercent / 100) * curW + 'px';
+            }
         } else if (w.type === 'monnaie') {
             widget = createMonnaieWidget();
             // Restaurer les dimensions sauvegardées
