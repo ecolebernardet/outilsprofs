@@ -1050,7 +1050,9 @@ function _fixSubmenuOverflow() {
         const subH = sub.offsetHeight || 100;
 
         // Horizontal : à droite de l'item, repli à gauche si débordement
-        let left = pr.right;
+        // +10 uniquement pour le niveau 1 (item direct du main-menu)
+        const gap = item.closest('.mm-sub') ? 7 : 10;
+        let left = pr.right + gap;
         if (left + subW > vw - margin) left = pr.left - subW;
         left = Math.max(margin, left);
 
