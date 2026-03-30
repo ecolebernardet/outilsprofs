@@ -945,18 +945,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         currentStrokeAnnot.size  = size;
                         currentStrokeAnnot.tool  = tool;
 
-                        // ── Filtre exponentiel IIR (lissage stylet) ──────────────
-                        const alpha = (typeof SMOOTH_ALPHA !== 'undefined') ? SMOOTH_ALPHA : 0.45;
-                        if (!currentStrokeAnnot._sl) {
-                            currentStrokeAnnot._sl  = norm;
-                            currentStrokeAnnot._spts = [norm];
-                        } else {
-                            const sl = currentStrokeAnnot._sl;
-                            const sn = { x: sl.x + alpha * (norm.x - sl.x), y: sl.y + alpha * (norm.y - sl.y) };
-                            currentStrokeAnnot._sl = sn;
-                            currentStrokeAnnot._spts.push(sn);
-                        }
-                        const sPts = currentStrokeAnnot._spts;
+                        // Pas de lissage IIR supplémentaire : le Bézier quadratique
+                        // s'en charge déjà, comme sur le board. Un double lissage
+                        // exagère les boucles et les courbes.
+                        const sPts = currentStrokeAnnot.pts;
                         const canvasW    = annotCanvas.width;
                         const sizeScaled = size * canvasW / 600;
 
