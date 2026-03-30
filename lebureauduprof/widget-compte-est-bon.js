@@ -922,7 +922,11 @@
                 if (tile.usedBy !== null) {
                     el.classList.add('used');
                 } else {
-                    el.addEventListener('click', () => onTileClick(tile.id, el));
+                    el.addEventListener('pointerdown', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onTileClick(tile.id, el);
+                    });
                 }
                 tilesZone.appendChild(el);
             });
@@ -971,7 +975,9 @@
 
         // ── Clic sur un opérateur ──────────────────────────────────────────
         opBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 selOp = btn.dataset.op;
                 opBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -1300,12 +1306,23 @@
         });
 
         // ── Init ───────────────────────────────────────────────────────────
-        widget.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        function _onWidgetDown(e) {
+            // Bloquer la propagation vers le drag pour tous les éléments interactifs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
+                e.target.classList.contains('ceb-tile') ||
+                e.target.classList.contains('ceb-op-btn') ||
+                e.target.classList.contains('ceb-lvl-btn') ||
+                e.target.classList.contains('ceb-btn') ||
+                e.target.classList.contains('step-del')) {
+                e.stopPropagation();
+                return;
+            }
             if (typeof bringToFront === 'function') bringToFront(widget);
             widget.focus();
             if (typeof positionActionBar === 'function') positionActionBar(widget);
-        });
+        }
+        widget.addEventListener('mousedown',   _onWidgetDown);
+        widget.addEventListener('pointerdown', _onWidgetDown);
 
         board.appendChild(widget);
         if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
