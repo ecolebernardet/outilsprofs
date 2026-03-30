@@ -902,6 +902,12 @@ function makeResizableByHandle(elmnt) {
 function startWidgetDrag(e, elmnt) {
     if (e && e.preventDefault) e.preventDefault();
 
+    // Bloquer le scroll du body pendant le drag (critique pour stylet sur VPI :
+    // le navigateur décide de scroller dès le pointerdown selon pointerType=pen,
+    // et preventDefault() sur pointermove arrive trop tard)
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.touchAction = 'none';
+
     // Si le widget appartient à un groupe, déplacer tous les membres du groupe
     const groupId = elmnt.dataset.groupId;
     const groupMembers = groupId
@@ -964,6 +970,7 @@ function startWidgetDrag(e, elmnt) {
     }
 
     function onEnd() {
+        document.body.style.touchAction = prevTouchAction; // restaurer le scroll
         document.removeEventListener('pointermove',  onPointerMove);
         document.removeEventListener('pointerup',    onEnd);
         document.removeEventListener('pointercancel',onEnd);
