@@ -554,6 +554,10 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             pdfToolbar.addEventListener('mouseup',    _onPdfToolbarUp);
 
             // Support stylet (pointerType === 'pen') sur tablettes VPI / Wacom
+            // IMPORTANT : on filtre sur 'pen' uniquement.
+            // Si on laissait passer 'mouse', mousedown ET pointerdown(mouse) déclencheraient
+            // tous les deux startWidgetDrag → deux instances du drag en parallèle → vitesse ×2.
+            // Si on laissait passer 'touch', idem avec touchstart.
             pdfToolbar.addEventListener('pointerdown', (e) => {
                 if (e.pointerType !== 'pen') return;
                 if (isDrawMode || isEraserMode) return;
@@ -926,31 +930,38 @@ function startWidgetDrag(e, elmnt) {
 
     let px = e.clientX, py = e.clientY;
 
-    function onMove(ev) {
-        // Pointer events (stylet/touch) et touch events ont clientX direct ou via touches
-        const point = ev.touches ? ev.touches[0] : ev;
-        const dx = point.clientX - px;
-        const dy = point.clientY - py;
+    function onPointerMove(ev) {
+        // pointermove couvre souris, stylet et touch — une seule source, pas de double comptage
+        const dx = ev.clientX - px;
+        const dy = ev.clientY - py;
         groupMembers.forEach(w => {
             w.style.top  = (w.offsetTop  + dy) + "px";
             w.style.left = (w.offsetLeft + dx) + "px";
         });
-        px = point.clientX; py = point.clientY;
+        px = ev.clientX; py = ev.clientY;
         if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
     }
 
-    function onPointerMove(ev) {
-        if (ev.pointerType === 'mouse') return; // géré par mousemove
-        onMove(ev);
+    // Fallback touch (navigateurs anciens sans pointer events complets)
+    function onTouchMove(ev) {
+        if (ev.touches && ev.touches[0]) {
+            const t = ev.touches[0];
+            const dx = t.clientX - px;
+            const dy = t.clientY - py;
+            groupMembers.forEach(w => {
+                w.style.top  = (w.offsetTop  + dy) + "px";
+                w.style.left = (w.offsetLeft + dx) + "px";
+            });
+            px = t.clientX; py = t.clientY;
+            if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
+        }
     }
 
     function onEnd() {
-        document.removeEventListener('mousemove',    onMove);
-        document.removeEventListener('mouseup',      onEnd);
         document.removeEventListener('pointermove',  onPointerMove);
         document.removeEventListener('pointerup',    onEnd);
         document.removeEventListener('pointercancel',onEnd);
-        document.removeEventListener('touchmove',    onMove);
+        document.removeEventListener('touchmove',    onTouchMove);
         document.removeEventListener('touchend',     onEnd);
         overlays.forEach(o => o.remove());
         const curW = window.innerWidth, curVH = virtualH(curW);
@@ -962,12 +973,10 @@ function startWidgetDrag(e, elmnt) {
         saveBoard();
     }
 
-    document.addEventListener('mousemove',    onMove);
-    document.addEventListener('mouseup',      onEnd);
     document.addEventListener('pointermove',  onPointerMove);
     document.addEventListener('pointerup',    onEnd);
     document.addEventListener('pointercancel',onEnd);
-    document.addEventListener('touchmove',    onMove, { passive: false });
+    document.addEventListener('touchmove',    onTouchMove, { passive: false });
     document.addEventListener('touchend',     onEnd);
 }
 
