@@ -43,11 +43,12 @@
         resize: none;
         box-sizing: border-box;
         border-radius: 24px;
-        background: #121212;
+        background: #f5f7fa;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
     }
     .widget[data-type="radar"]:hover .radar-outer,
     .widget[data-type="radar"]:focus-within .radar-outer {
-        outline: 2px dashed rgba(74,144,226,0.35);
+        outline: 2px dashed rgba(74,144,226,0.45);
     }
 
     /* Poignée de resize proportionnel */
@@ -87,9 +88,9 @@
         justify-content: space-between;
         padding: 18px 16px 16px;
         box-sizing: border-box;
-        background: #121212;
+        background: #f5f7fa;
         border-radius: 24px;
-        color: #fff;
+        color: #1a1a2e;
         font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         user-select: none;
         gap: 0;
@@ -101,7 +102,7 @@
         font-weight: 900;
         letter-spacing: 2px;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.45);
+        color: rgba(0,0,0,0.35);
         flex-shrink: 0;
     }
 
@@ -120,7 +121,7 @@
         position: absolute;
         border-radius: 50%;
         border: 4px solid #3b82f6;
-        opacity: 0.1;
+        opacity: 0.12;
         top: 0; left: 0;
         width: 100%; height: 100%;
         box-sizing: border-box;
@@ -129,7 +130,7 @@
     .radar-threshold-ring {
         position: absolute;
         border-radius: 50%;
-        border: 2px dashed rgba(255,255,255,0.45);
+        border: 2px dashed rgba(0,0,0,0.3);
         top: 0; left: 0;
         width: 100%; height: 100%;
         box-sizing: border-box;
@@ -143,7 +144,7 @@
         width: 100%; height: 100%;
         border-radius: 50%;
         background: #3b82f6;
-        box-shadow: 0 0 40px #3b82f6;
+        box-shadow: 0 0 40px rgba(59,130,246,0.4);
         z-index: 10;
         transform: scale(0);
         transition: transform 0.1s ease-out, background-color 0.4s ease, box-shadow 0.4s ease;
@@ -151,7 +152,7 @@
 
     .radar-blob.is-alerting {
         background: #ef4444 !important;
-        box-shadow: 0 0 50px #ef4444 !important;
+        box-shadow: 0 0 50px rgba(239,68,68,0.4) !important;
     }
 
     /* ── Bouton démarrer (au centre du radar) ── */
@@ -170,7 +171,7 @@
         color: #fff;
         background: #3b82f6;
         transition: opacity 0.3s, transform 0.3s;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 16px rgba(59,130,246,0.35);
     }
     .radar-btn-start.is-listening {
         opacity: 0.15;
@@ -192,8 +193,9 @@
         font-size: 9px;
         font-weight: 900;
         text-transform: uppercase;
-        opacity: 0.45;
+        opacity: 0.4;
         letter-spacing: 1px;
+        color: #1a1a2e;
     }
     .radar-alert-count {
         font-size: 32px;
@@ -213,27 +215,27 @@
     .radar-sound-btn {
         background: none;
         border: none;
-        color: rgba(255,255,255,0.5);
+        color: rgba(0,0,0,0.4);
         cursor: pointer;
         padding: 4px;
         border-radius: 6px;
         font-size: 14px;
         transition: color 0.2s;
     }
-    .radar-sound-btn:hover { color: #fff; }
-    .radar-sound-btn.muted { color: rgba(255,100,100,0.6); }
+    .radar-sound-btn:hover { color: rgba(0,0,0,0.8); }
+    .radar-sound-btn.muted { color: rgba(220,50,50,0.6); }
     .radar-reset-btn {
         font-size: 9px;
         font-weight: 900;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.35);
+        color: rgba(0,0,0,0.3);
         background: none;
         border: none;
         cursor: pointer;
         text-decoration: underline;
         transition: color 0.2s;
     }
-    .radar-reset-btn:hover { color: rgba(255,255,255,0.7); }
+    .radar-reset-btn:hover { color: rgba(0,0,0,0.6); }
 
     /* ── Contrôles (sliders) ── */
     .radar-controls {
@@ -256,7 +258,7 @@
         align-items: center;
         gap: 8px;
         font-size: 10px;
-        color: rgba(255,255,255,0.55);
+        color: rgba(0,0,0,0.5);
     }
     .radar-slider-label {
         width: 72px;
@@ -271,7 +273,7 @@
         accent-color: #3b82f6;
         height: 4px;
         cursor: pointer;
-        background: rgba(255,255,255,0.15);
+        background: rgba(0,0,0,0.12);
         border-radius: 4px;
         outline: none;
         -webkit-appearance: none;
@@ -283,7 +285,7 @@
         border-radius: 50%;
         background: #3b82f6;
         cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
     .radar-slider::-moz-range-thumb {
         width: 14px; height: 14px;
@@ -297,7 +299,7 @@
         text-align: right;
         font-size: 10px;
         font-weight: 700;
-        color: rgba(255,255,255,0.6);
+        color: rgba(0,0,0,0.5);
         flex-shrink: 0;
     }
 
@@ -305,10 +307,10 @@
     .radar-toggle-controls {
         position: absolute;
         top: 8px; left: 10px;
-        background: rgba(255,255,255,0.07);
+        background: rgba(0,0,0,0.06);
         border: none;
         border-radius: 6px;
-        color: rgba(255,255,255,0.4);
+        color: rgba(0,0,0,0.35);
         font-size: 11px;
         padding: 3px 8px;
         cursor: pointer;
@@ -316,8 +318,8 @@
         z-index: 15;
     }
     .radar-toggle-controls:hover {
-        background: rgba(255,255,255,0.14);
-        color: rgba(255,255,255,0.9);
+        background: rgba(0,0,0,0.12);
+        color: rgba(0,0,0,0.8);
     }
 
     /* ── Alerte flash ── */
@@ -326,7 +328,7 @@
         position: absolute;
         inset: 0;
         border-radius: 24px;
-        background: rgba(239,68,68,0.18);
+        background: rgba(239,68,68,0.12);
         pointer-events: none;
         z-index: 2;
         animation: radar-flash 0.6s ease-in-out infinite alternate;
@@ -340,7 +342,7 @@
     /* ── No mic ── */
     .radar-no-mic {
         font-size: 10px;
-        color: rgba(255,100,100,0.8);
+        color: rgba(200,50,50,0.9);
         text-align: center;
         padding: 2px 8px;
         display: none;
@@ -633,7 +635,7 @@
                 controlsVisible = !controlsVisible;
                 controlsEl.classList.toggle('hidden', !controlsVisible);
                 toggleBtn.style.color = controlsVisible
-                    ? 'rgba(255,255,255,0.4)'
+                    ? 'rgba(0,0,0,0.35)'
                     : '#3b82f6';
             });
 
@@ -648,6 +650,16 @@
                     e.stopPropagation();
                 }
             }, { passive: true });
+
+            // ── Curseur move sauf sur éléments interactifs et coin resize ──
+            outer.addEventListener('mousemove', function (e) {
+                if (e.target.closest('button, input')) { return; }
+                if (e.target.closest('.radar-resize-handle')) { outer.style.cursor = 'nwse-resize'; return; }
+                outer.style.cursor = 'move';
+            });
+            outer.addEventListener('mouseleave', function () {
+                outer.style.cursor = '';
+            });
 
             // ── Nettoyage à la suppression ──
             var obs = new MutationObserver(function () {
