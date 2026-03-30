@@ -726,8 +726,8 @@
         const outer     = widget.querySelector('.calc-outer');
         const questGrid = widget.querySelector('[data-role="questions-grid"]');
 
-        // ── Mousedown : laisser remonter pour le drag, bloquer sur contrôles ──
-        outer.addEventListener('mousedown', function (e) {
+        // ── Mousedown / Pointerdown : laisser remonter pour le drag, bloquer sur contrôles ──
+        function _handleInteractiveDown(e) {
             // Bloquer uniquement sur les éléments interactifs (sinon le drag remonte)
             const tag = e.target.tagName;
             if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'SELECT' || tag === 'LABEL') {
@@ -737,7 +737,9 @@
             if (typeof bringToFront === 'function') bringToFront(widget);
             widget.focus();
             if (typeof positionActionBar === 'function') positionActionBar(widget);
-        });
+        }
+        outer.addEventListener('mousedown',   _handleInteractiveDown);
+        outer.addEventListener('pointerdown', _handleInteractiveDown);
 
         // ── Constantes ───────────────────────────────────────────────────────
         const MAX_CALCULS       = 50;
@@ -787,12 +789,15 @@
                 _holdInterval = null;
             }
 
-            minusBtn.addEventListener('mousedown', e => { e.stopPropagation(); _startHold(-1); });
-            plusBtn.addEventListener('mousedown',  e => { e.stopPropagation(); _startHold(+1); });
+            minusBtn.addEventListener('mousedown',   e => { e.stopPropagation(); _startHold(-1); });
+            plusBtn.addEventListener('mousedown',    e => { e.stopPropagation(); _startHold(+1); });
+            minusBtn.addEventListener('pointerdown', e => { e.stopPropagation(); _startHold(-1); });
+            plusBtn.addEventListener('pointerdown',  e => { e.stopPropagation(); _startHold(+1); });
             // Arrêt sur relâchement ou sortie
             [minusBtn, plusBtn].forEach(btn => {
                 btn.addEventListener('mouseup',    _stopHold);
                 btn.addEventListener('mouseleave', _stopHold);
+                btn.addEventListener('pointerup',  _stopHold);
             });
             // Support tactile
             minusBtn.addEventListener('touchstart', e => { e.preventDefault(); _startHold(-1); });
