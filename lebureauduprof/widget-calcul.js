@@ -771,39 +771,40 @@
             if (!minusBtn || !plusBtn || !inputEl) return;
             let _holdInterval = null;
             let _holdTimeout  = null;
+            let _active       = false;
 
             function _step(delta) {
                 const v = parseInt(inputEl.value) || 0;
                 inputEl.value = Math.min(max, Math.max(min, v + delta));
             }
             function _startHold(delta) {
-                _step(delta); // premier clic immédiat
+                if (_active) return;   // évite double-déclenchement souris synthétique
+                _active = true;
+                _step(delta);
                 _holdTimeout = setTimeout(() => {
                     _holdInterval = setInterval(() => _step(delta), 80);
-                }, 400); // délai avant répétition
+                }, 400);
             }
             function _stopHold() {
+                _active = false;
                 clearTimeout(_holdTimeout);
                 clearInterval(_holdInterval);
                 _holdTimeout = null;
                 _holdInterval = null;
             }
 
-            minusBtn.addEventListener('mousedown',   e => { e.stopPropagation(); _startHold(-1); });
-            plusBtn.addEventListener('mousedown',    e => { e.stopPropagation(); _startHold(+1); });
-            minusBtn.addEventListener('pointerdown', e => { e.stopPropagation(); _startHold(-1); });
-            plusBtn.addEventListener('pointerdown',  e => { e.stopPropagation(); _startHold(+1); });
-            // Arrêt sur relâchement ou sortie
-            [minusBtn, plusBtn].forEach(btn => {
-                btn.addEventListener('mouseup',    _stopHold);
-                btn.addEventListener('mouseleave', _stopHold);
-                btn.addEventListener('pointerup',  _stopHold);
+            [minusBtn, plusBtn].forEach((btn, i) => {
+                const delta = i === 0 ? -1 : +1;
+                btn.addEventListener('pointerdown', e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    btn.setPointerCapture(e.pointerId);
+                    _startHold(delta);
+                });
+                btn.addEventListener('pointerup',     e => { btn.releasePointerCapture(e.pointerId); _stopHold(); });
+                btn.addEventListener('pointercancel', e => { btn.releasePointerCapture(e.pointerId); _stopHold(); });
+                btn.addEventListener('lostpointercapture', _stopHold);
             });
-            // Support tactile
-            minusBtn.addEventListener('touchstart', e => { e.preventDefault(); _startHold(-1); });
-            plusBtn.addEventListener('touchstart',  e => { e.preventDefault(); _startHold(+1); });
-            minusBtn.addEventListener('touchend',   _stopHold);
-            plusBtn.addEventListener('touchend',    _stopHold);
         }
         _bindSpinner(timerMin, 'timer-min-minus', 'timer-min-plus', 0, 59);
         _bindSpinner(timerSec, 'timer-sec-minus', 'timer-sec-plus', 0, 59);
@@ -864,10 +865,33 @@
                 <div class="calc-table-frame calc-table-all-frame">Toutes</div>
             </label>`;
             tablesWrap.innerHTML = html;
+
+            // Toggle "Toutes" via pointerdown (stylet + souris)
             tablesWrap.querySelector('.calc-all-tables-cb').addEventListener('change', function () {
                 widget.querySelectorAll('.calc-table-cb').forEach(cb => cb.checked = this.checked);
             });
+            tablesWrap.querySelectorAll('.calc-table-label, label.calc-table-label').forEach(lbl => {
+                lbl.addEventListener('pointerdown', e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const cb = lbl.querySelector('input[type="checkbox"]');
+                    if (!cb) return;
+                    cb.checked = !cb.checked;
+                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            });
         })();
+
+        // ── Toggle opérations via pointerdown (stylet + souris) ──────────────
+        widget.querySelectorAll('.calc-op-label').forEach(lbl => {
+            lbl.addEventListener('pointerdown', e => {
+                e.stopPropagation();
+                e.preventDefault();
+                const cb = lbl.querySelector('input[type="checkbox"]');
+                if (!cb) return;
+                cb.checked = !cb.checked;
+            });
+        });
 
         // ── Sons ─────────────────────────────────────────────────────────────
         function playBeep() {
