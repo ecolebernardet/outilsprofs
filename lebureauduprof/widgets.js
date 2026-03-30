@@ -537,6 +537,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         const pdfToolbar = widget.querySelector('.editor-toolbar');
         if (pdfToolbar) {
             pdfToolbar.style.cursor = 'move';
+            pdfToolbar.style.touchAction = 'none'; // empêche le browser de réserver le scroll vertical avant pointermove
             const _onPdfToolbarDown = (e) => {
                 if (isDrawMode || isEraserMode) return;
                 // Ignorer les clics sur boutons, labels, inputs, selects
@@ -951,6 +952,7 @@ function startWidgetDrag(e, elmnt) {
     }
 
     function onPointerMove(ev) {
+        ev.preventDefault(); // bloque le scroll du board pendant le drag
         applyMove(ev.clientX, ev.clientY);
     }
 
@@ -977,7 +979,7 @@ function startWidgetDrag(e, elmnt) {
         saveBoard();
     }
 
-    document.addEventListener('pointermove',  onPointerMove);
+    document.addEventListener('pointermove',  onPointerMove, { passive: false });
     document.addEventListener('pointerup',    onEnd);
     document.addEventListener('pointercancel',onEnd);
     document.addEventListener('touchmove',    onTouchMove, { passive: false });
