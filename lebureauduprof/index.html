@@ -1499,7 +1499,7 @@ function toggleOutilsProfsCollapse(container) {
 // =========================================================================
 (function() {
     function positionMmSub(sub) {
-        const parent = sub.closest('.mm-has-sub, .mm-item');
+        const parent = sub.parentElement;
         if (!parent) return;
         const pr = parent.getBoundingClientRect();
         const margin = 6;
