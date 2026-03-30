@@ -928,32 +928,36 @@ function startWidgetDrag(e, elmnt) {
         overlays.push(overlay);
     });
 
-    let px = e.clientX, py = e.clientY;
+    // Approche "offset fixe" (comme widget-calcul) :
+    // on calcule une seule fois l'écart entre le pointeur et le coin du widget,
+    // puis on positionne en absolu. Cela évite tout cumul d'erreurs et le
+    // double-comptage stylet (pointermove parasite juste après pointerdown).
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
+    // Mémoriser la position initiale de chaque membre du groupe
+    const startPositions = groupMembers.map(w => ({
+        left: w.offsetLeft,
+        top:  w.offsetTop
+    }));
+
+    function applyMove(clientX, clientY) {
+        const dx = clientX - startClientX;
+        const dy = clientY - startClientY;
+        groupMembers.forEach((w, i) => {
+            w.style.left = (startPositions[i].left + dx) + "px";
+            w.style.top  = (startPositions[i].top  + dy) + "px";
+        });
+        if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
+    }
 
     function onPointerMove(ev) {
-        // pointermove couvre souris, stylet et touch — une seule source, pas de double comptage
-        const dx = ev.clientX - px;
-        const dy = ev.clientY - py;
-        groupMembers.forEach(w => {
-            w.style.top  = (w.offsetTop  + dy) + "px";
-            w.style.left = (w.offsetLeft + dx) + "px";
-        });
-        px = ev.clientX; py = ev.clientY;
-        if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
+        applyMove(ev.clientX, ev.clientY);
     }
 
     // Fallback touch (navigateurs anciens sans pointer events complets)
     function onTouchMove(ev) {
         if (ev.touches && ev.touches[0]) {
-            const t = ev.touches[0];
-            const dx = t.clientX - px;
-            const dy = t.clientY - py;
-            groupMembers.forEach(w => {
-                w.style.top  = (w.offsetTop  + dy) + "px";
-                w.style.left = (w.offsetLeft + dx) + "px";
-            });
-            px = t.clientX; py = t.clientY;
-            if (typeof updateSelectionOverlay === 'function') updateSelectionOverlay();
+            applyMove(ev.touches[0].clientX, ev.touches[0].clientY);
         }
     }
 
