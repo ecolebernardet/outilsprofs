@@ -734,7 +734,8 @@
 			transition: background .15s, border-color .15s, transform .12s;
 			min-width: 120px;
 		}
-		.mm-item:hover { background: #2a2a36; border-color: #555; transform: translateX(3px); }
+		.mm-item:hover { background: #2a2a36; border-color: #555; }
+		.mm-item:not(.mm-has-sub):hover { transform: translateX(3px); }
 		.mm-item.active { background: #1a3550; border-color: #4a90e2; color: #7ab8f5; }
 		.mm-item .mm-ico { font-size: 25px; width: 26px; text-align: center; flex-shrink: 0; }
 		.mm-item .mm-arrow { margin-left: auto; font-size: 10px; color: #666; }
@@ -745,8 +746,8 @@
 		/* Sous-menu flyout à droite au survol */
 		.mm-has-sub { position: relative; }
 		.mm-sub {
-			position: fixed; left: auto;
-			padding-left: 7px;
+			position: fixed;
+			left: 0; top: 0;
 			min-width: 120px;
 			display: flex; flex-direction: column; gap: 3px;
 			opacity: 0; pointer-events: none;

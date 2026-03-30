@@ -1491,68 +1491,7 @@ function toggleOutilsProfsCollapse(container) {
 </script>
 
 <script>
-// =========================================================================
-// POSITIONNEMENT FIXE DES SOUS-MENUS mm-sub
-// Évite le battement (flicker) sur petits écrans / zoom Windows 150%
-// Les .mm-sub sont en position:fixed ; on calcule left/top au moment de
-// l'ouverture pour qu'ils restent dans la fenêtre.
-// =========================================================================
-(function() {
-    function positionMmSub(sub) {
-        const parent = sub.parentElement;
-        if (!parent) return;
-        const pr = parent.getBoundingClientRect();
-        const margin = 6;
-        const maxH = window.innerHeight - margin * 2;
-
-        // Limiter la hauteur max du sous-menu
-        const inner = sub.querySelector('.mm-sub-inner');
-        if (inner) inner.style.maxHeight = maxH + 'px';
-
-        // Positionnement horizontal : à droite du parent (+ padding-left CSS = 7px)
-        const left = pr.right;
-        sub.style.left = left + 'px';
-
-        // Forcer un reflow pour obtenir les vraies dimensions
-        sub.style.visibility = 'hidden';
-        sub.style.top = '0px';
-        const subH = sub.offsetHeight || (inner ? inner.scrollHeight + 10 : 200);
-        sub.style.visibility = '';
-
-        // Centrer verticalement sur le parent, puis recaler si ça dépasse
-        let top = pr.top + pr.height / 2 - subH / 2;
-        top = Math.max(margin, Math.min(top, window.innerHeight - subH - margin));
-        sub.style.top = top + 'px';
-    }
-
-    // Observer l'ajout de la classe 'open' sur tous les .mm-sub
-    document.addEventListener('DOMContentLoaded', function() {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(m) {
-                if (m.type === 'attributes' && m.attributeName === 'class') {
-                    const el = m.target;
-                    if (el.classList.contains('mm-sub') && el.classList.contains('open')) {
-                        positionMmSub(el);
-                    }
-                }
-            });
-        });
-
-        document.querySelectorAll('.mm-sub').forEach(function(sub) {
-            observer.observe(sub, { attributes: true, attributeFilter: ['class'] });
-            // Pour les sous-menus ouverts via opacity (cpick-active), observer aussi le parent
-            const parent = sub.closest('.mm-has-sub, .mm-item');
-            if (parent) {
-                observer.observe(parent, { attributes: true, attributeFilter: ['class'] });
-            }
-        });
-
-        // Repositionner à chaque resize (zoom Windows peut changer)
-        window.addEventListener('resize', function() {
-            document.querySelectorAll('.mm-sub.open').forEach(positionMmSub);
-        });
-    });
-})();
+// Script de positionnement des sous-menus supprimé — géré dans board.js
 </script>
 </body>
 </html>

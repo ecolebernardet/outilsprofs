@@ -1035,6 +1035,34 @@ function _fixSubmenuOverflow() {
 // =========================================================================
 (function () {
 
+    // Positionne un sous-menu (fixed) à droite de son item parent
+    function positionSub(sub, item) {
+        const margin = 8;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pr = item.getBoundingClientRect();
+        const inner = sub.querySelector('.mm-sub-inner');
+
+        if (inner) inner.style.maxHeight = (vh - margin * 2) + 'px';
+
+        // Mesurer les dimensions du sous-menu
+        const subW = sub.offsetWidth || 220;
+        const subH = sub.offsetHeight || 100;
+
+        // Horizontal : à droite de l'item, repli à gauche si débordement
+        let left = pr.right;
+        if (left + subW > vw - margin) left = pr.left - subW;
+        left = Math.max(margin, left);
+
+        // Vertical : centré sur l'item, recalé dans le viewport
+        let top = pr.top + pr.height / 2 - subH / 2;
+        top = Math.max(margin, Math.min(top, vh - subH - margin));
+
+        sub.style.transform = '';
+        sub.style.left = left + 'px';
+        sub.style.top  = top  + 'px';
+    }
+
     // Ouvre le sous-menu direct d'un item et ferme tous les autres non-ancêtres
     function openSub(item) {
         const sub = item.querySelector(':scope > .mm-sub');
@@ -1042,26 +1070,8 @@ function _fixSubmenuOverflow() {
         document.querySelectorAll('.mm-sub.open').forEach(function (s) {
             if (s !== sub && !s.contains(item)) s.classList.remove('open');
         });
-        // Réinitialiser avant ouverture
-        sub.style.top = '50%';
-        sub.style.transform = 'translateY(-50%)';
         sub.classList.add('open');
-        // Corriger débordement vertical si nécessaire
-        requestAnimationFrame(() => {
-            const vh = document.documentElement.clientHeight;
-            const rect = sub.getBoundingClientRect();
-            if (rect.bottom > vh - 8) {
-                const overflow = rect.bottom - (vh - 8);
-                // Décaler vers le haut en ajustant le translateY
-                const currentShift = rect.height / 2; // translateY(-50%) = -height/2
-                const newShift = currentShift + overflow;
-                sub.style.transform = 'translateY(-' + Math.round(newShift) + 'px)';
-            }
-            if (rect.top < 8) {
-                sub.style.top = '0';
-                sub.style.transform = 'translateY(0)';
-            }
-        });
+        positionSub(sub, item);
     }
 
     // Ferme tous les sous-menus ouverts
