@@ -29,6 +29,12 @@
         box-sizing: border-box;
         border-radius: 12px;
     }
+    .widget[data-type="minuteur"] .mc-outer button,
+    .widget[data-type="minuteur"] .mc-outer input,
+    .widget[data-type="minuteur"] .mc-outer label,
+    .widget[data-type="minuteur"] .mc-outer select {
+        cursor: pointer;
+    }
     /* Poignée resize visible au survol */
     .widget[data-type="minuteur"]:hover .mc-outer,
     .widget[data-type="minuteur"]:focus-within .mc-outer {
@@ -271,16 +277,32 @@
             guard.observe(document.body, { childList: true, subtree: true });
         }
 
-        // ── Bloquer la remontée du mousedown vers makeDraggable ──────────────
-        // widgets.js déclenche startWidgetDrag sur mousedown sauf sur certaines classes.
-        // On stopPropagation sur mc-outer pour que le widget ne se déplace pas
-        // quand on clique sur les boutons/inputs intérieurs.
+        // ── Drag depuis n'importe où sauf boutons/inputs ─────────────────────
+        // On laisse remonter le mousedown vers makeDraggable sauf si la cible
+        // est un élément interactif (bouton, input, label, checkbox).
+        const INTERACTIVE = 'button, input, label, select, textarea, .mc-num-btn, .mc-tab';
         outer.addEventListener('mousedown', function(e) {
-            e.stopPropagation();
+            if (e.target.closest(INTERACTIVE)) { e.stopPropagation(); return; }
+            // Bloquer aussi le drag si on est dans le coin resize
+            const r = outer.getBoundingClientRect();
+            const nearCorner = (r.right - e.clientX) < RESIZE_ZONE && (r.bottom - e.clientY) < RESIZE_ZONE;
+            if (nearCorner) e.stopPropagation();
         });
         outer.addEventListener('touchstart', function(e) {
-            e.stopPropagation();
+            if (e.target.closest(INTERACTIVE)) e.stopPropagation();
         }, { passive: true });
+
+        // ── Curseur move sauf sur la zone resize (coin bas-droit ~20px) ──────
+        const RESIZE_ZONE = 20;
+        outer.addEventListener('mousemove', function(e) {
+            if (e.target.closest(INTERACTIVE)) return;
+            const r = outer.getBoundingClientRect();
+            const nearCorner = (r.right - e.clientX) < RESIZE_ZONE && (r.bottom - e.clientY) < RESIZE_ZONE;
+            outer.style.cursor = nearCorner ? 'se-resize' : 'move';
+        });
+        outer.addEventListener('mouseleave', function() {
+            outer.style.cursor = '';
+        });
 
         // ── Onglets ──────────────────────────────────────────────────────────
         const tabs   = widget.querySelectorAll('.mc-tab');
