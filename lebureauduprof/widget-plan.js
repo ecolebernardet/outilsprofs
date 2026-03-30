@@ -1822,3 +1822,17 @@ function createPlanWidget() {
     saveBoard();
     return widget;
 }
+
+// ── Hook createWidget — intercepter le type 'plan' ────────────────────────
+(function patchCreateWidgetForPlan() {
+    function doPatch() {
+        const _orig = window.createWidget;
+        if (typeof _orig !== 'function') return;
+        window.createWidget = function (type) {
+            if (type === 'plan') return window.createPlanWidget();
+            return _orig.apply(this, arguments);
+        };
+    }
+    if (typeof window.createWidget === 'function') doPatch();
+    else document.addEventListener('DOMContentLoaded', doPatch);
+})();
