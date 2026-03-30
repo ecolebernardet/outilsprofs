@@ -213,6 +213,7 @@
 				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
 				<div class="mm-sub-item" onclick="createWidget('sonometre');closeMainMenu()"><span class="mm-ico">🔊</span>&nbsp;&nbsp;Sonomètre</div>
 				<div class="mm-sub-item" onclick="createWidget('radar');closeMainMenu()"><span class="mm-ico">📡</span>&nbsp;&nbsp;Radar de Bruit</div>
+				<div class="mm-sub-item" onclick="createPlanWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Plan de classe</div>
 				</div></div>
 			</div>
 
@@ -442,7 +443,7 @@
 				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
 			</div>
 			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
-			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;align-items:center;justify-content:center;padding:0;">T</button>
+			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;align-items:center;justify-content:center;padding:0;">Texte</button>
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -858,10 +859,10 @@
 <script src="stickers.js"></script>
 <script src="paste-image.js"></script>
 <script src="images.js"></script>
+<script src="widget-plan.js"></script>
 <script src="widget-monnaie.js"></script>
 <script src="widget-deficalme.js"></script>
 <div id="laser-pointer"></div>
-
 <script src="pdf-widgets.js"></script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
 <button id="exit-presentation-btn" onclick="togglePresentationMode()" title="Quitter le mode présentation">📽️</button>
@@ -1200,6 +1201,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="tools-card-ico">📡</div>
                 <div class="tools-card-name">Radar de Bruit</div>
                 <div class="tools-card-desc">Visualiser le bruit en temps réel</div>
+            </div>
+			<div class="tools-card" onclick="createWidget('plan');toggleToolsPanel()">
+                <div class="tools-card-ico">🏫</div>
+                <div class="tools-card-name">Plan</div>
+                <div class="tools-card-desc">Créer et éditer le plan de la classe</div>
             </div>
         </div>
     </div>

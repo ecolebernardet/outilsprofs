@@ -139,6 +139,16 @@ function buildBoardState() {
                 level:      w.dataset.monnaieLevel || 'facile'
             };
         }
+        // Données propres au widget plan
+        let planData = null;
+        if (w.dataset.type === 'plan') {
+            const pc = w.querySelector('.plan-container');
+            planData = {
+                containerW: pc ? pc.offsetWidth  : null,
+                containerH: pc ? pc.offsetHeight : null,
+                items: w._planData ? JSON.stringify(w._planData) : null
+            };
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -161,7 +171,8 @@ function buildBoardState() {
 			pdfSavedTopPct:  (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedTop); return isNaN(px) ? null : (px / curVH) * 100; })(),
 			pdfSavedLeftPct: (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedLeft); return isNaN(px) ? null : (px / curW) * 100; })(),
 			animation: w.dataset.animation || null,
-			monnaieData
+			monnaieData,
+			planData
 		});
     });
     const shapes = [];
@@ -359,6 +370,18 @@ function restoreBoardFromJSON(json) {
                 if (mz && w.monnaieData.itemsH)     mz.style.height  = w.monnaieData.itemsH     + 'px';
                 // Restaurer le niveau
                 if (w.monnaieData.level && widget._setLevel) widget._setLevel(w.monnaieData.level);
+            }
+        } else if (w.type === 'plan') {
+            widget = createPlanWidget();
+            // Restaurer les dimensions sauvegardées
+            if (w.planData) {
+                const pc = widget.querySelector('.plan-container');
+                if (pc && w.planData.containerW) pc.style.width  = w.planData.containerW + 'px';
+                if (pc && w.planData.containerH) pc.style.height = w.planData.containerH + 'px';
+                // Restaurer les éléments du plan
+                if (w.planData.items && widget._setPlanData) {
+                    try { widget._setPlanData(JSON.parse(w.planData.items)); } catch(e) {}
+                }
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);
