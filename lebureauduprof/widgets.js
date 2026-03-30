@@ -552,6 +552,20 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             pdfToolbar.addEventListener('mousedown',  _onPdfToolbarDown);
             pdfToolbar.addEventListener('touchstart', _onPdfToolbarDown, { passive: false });
             pdfToolbar.addEventListener('mouseup',    _onPdfToolbarUp);
+
+            // Support stylet (pointerType === 'pen') sur tablettes VPI / Wacom
+            pdfToolbar.addEventListener('pointerdown', (e) => {
+                if (e.pointerType !== 'pen') return;
+                if (isDrawMode || isEraserMode) return;
+                if (e.target.closest('button, label, input, select, a')) return;
+                e.preventDefault();
+                e.stopPropagation();
+                widget.focus();
+                // Ne pas appeler setPointerCapture ici : startWidgetDrag écoute sur document,
+                // et setPointerCapture redirige les pointermove vers l'élément capturé,
+                // ce qui empêche document de les recevoir.
+                startWidgetDrag({ clientX: e.clientX, clientY: e.clientY, target: e.target }, widget);
+            });
         }
 
         // Si le mode annotation PDF est actif et qu'on clique sur un autre widget PDF,
