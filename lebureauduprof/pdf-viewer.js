@@ -940,29 +940,19 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     continueStroke(color, size, tool, px, py) {
                         if (!isDrawing || !currentStrokeAnnot) return;
                         const norm = toNorm(px, py);
-                        currentStrokeAnnot.pts.push(norm);
+                        const pts  = currentStrokeAnnot.pts;
+                        const prev = pts[pts.length - 1];
+                        pts.push(norm);
                         currentStrokeAnnot.color = color;
                         currentStrokeAnnot.size  = size;
                         currentStrokeAnnot.tool  = tool;
 
-                        // Pas de lissage IIR supplémentaire : le Bézier quadratique
-                        // s'en charge déjà, comme sur le board. Un double lissage
-                        // exagère les boucles et les courbes.
-                        const sPts = currentStrokeAnnot.pts;
                         const canvasW    = annotCanvas.width;
                         const sizeScaled = size * canvasW / 600;
 
-                        // Restaurer le snapshot (strokes validés) puis dessiner le stroke en cours
-                        // Beaucoup plus rapide que redrawAnnotations sur de gros PDF
-                        if (_annotSnapshot) {
-                            actx.putImageData(_annotSnapshot, 0, 0);
-                        } else {
-                            // Fallback si snapshot absent (ex: après zoom)
-                            actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
-                            const layer2 = getLayer(currentPage);
-                            if (layer2._snapshot) actx.putImageData(layer2._snapshot, 0, 0);
-                            for (const s of layer2.strokes) drawStroke(actx, s);
-                        }
+                        // Dessin incrémental : on ne trace que le nouveau segment
+                        // entre l'avant-dernier et le dernier point — zéro putImageData,
+                        // zéro boucle sur tous les points → latence identique au board.
                         actx.save();
                         if (tool === 'highlighter') {
                             actx.globalAlpha = 0.35;
@@ -980,22 +970,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         actx.strokeStyle = color;
                         actx.lineJoin    = 'round';
                         actx.beginPath();
-                        const p0 = fromNorm(sPts[0].x, sPts[0].y);
-                        actx.moveTo(p0.x, p0.y);
-                        if (sPts.length === 2) {
-                            const p1 = fromNorm(sPts[1].x, sPts[1].y);
-                            actx.lineTo(p1.x, p1.y);
-                        } else {
-                            for (let i = 1; i < sPts.length - 1; i++) {
-                                const pi  = fromNorm(sPts[i].x,     sPts[i].y);
-                                const pi1 = fromNorm(sPts[i+1].x, sPts[i+1].y);
-                                const mx = pi.x + (pi1.x - pi.x) * 0.25;
-                                const my = pi.y + (pi1.y - pi.y) * 0.25;
-                                actx.quadraticCurveTo(pi.x, pi.y, mx, my);
-                            }
-                            const last = fromNorm(sPts[sPts.length-1].x, sPts[sPts.length-1].y);
-                            actx.lineTo(last.x, last.y);
-                        }
+                        const pPrev = fromNorm(prev.x, prev.y);
+                        const pCur  = fromNorm(norm.x, norm.y);
+                        actx.moveTo(pPrev.x, pPrev.y);
+                        actx.lineTo(pCur.x,  pCur.y);
                         actx.stroke();
                         actx.restore();
                     },
