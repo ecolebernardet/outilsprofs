@@ -2832,20 +2832,8 @@ function _pdfAnnotContinueStroke(e) {
 
     const eraserSize2 = tool === 'eraser' ? (parseInt((document.getElementById('eraser-size') || {}).value) || 20) : null;
 
-    // Throttle via RAF pour pen et highlighter (les plus sensibles à la latence)
-    if (tool === 'pen' || tool === 'highlighter') {
-        _pdfPaintPendingE = e;
-        if (_pdfPaintRafId) return;
-        _pdfPaintRafId = requestAnimationFrame(() => {
-            _pdfPaintRafId = null;
-            if (!_pdfPaintPendingE || !_pdfAnnotPainting) return;
-            const ev = _pdfPaintPendingE; _pdfPaintPendingE = null;
-            const pos2 = _getPdfAnnotPos(ev);
-            api.continueStroke(_pdfAnnotGetColor(), _pdfAnnotGetSize(), tool, pos2.x, pos2.y);
-        });
-        return;
-    }
-
+    // Dessin direct sans RAF throttle pour pen et highlighter (latence minimale, comme le board)
+    // Les coalesced events sont récupérés en amont dans _pdfAnnotPointerMove
     api.continueStroke(_pdfAnnotGetColor(), eraserSize2 !== null ? eraserSize2 : _pdfAnnotGetSize(), tool, pos.x, pos.y);
 }
 
