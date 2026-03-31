@@ -1364,7 +1364,7 @@
 			display: flex;
 			position: fixed;
 			top: 0; left: calc(-1 * var(--sticker-panel-w));
-			width: var(--sticker-panel-w); height: 100vh;
+			width: var(--sticker-panel-w); height: calc(100vh - 90px);
 			background: #111;
 			border-right: 1px solid #2e2e3a;
 			z-index: 9100;
@@ -1506,7 +1506,7 @@
     display: flex;
     position: fixed;
     top: 0; left: calc(-1 * var(--widgets-panel-w));
-    width: var(--widgets-panel-w); height: 100vh;
+    width: var(--widgets-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
     z-index: 9100;
@@ -1627,7 +1627,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-1 * var(--tools-panel-w));
-    width: var(--tools-panel-w); height: 100vh;
+    width: var(--tools-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
     z-index: 9100;
@@ -1760,7 +1760,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-1 * var(--act-panel-w));
-    width: var(--act-panel-w); height: 100vh;
+    width: var(--act-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
     z-index: 9100;
@@ -1902,7 +1902,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     position: fixed;
     top: 0; left: calc(-1 * var(--pdf-lib-w));
     width: var(--pdf-lib-w);
-    height: 100%;
+    height: calc(100% - 90px);
     background: var(--pdf-lib-bg);
     border-right: 1px solid var(--pdf-lib-border);
     z-index: 9100;
@@ -2053,7 +2053,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     position: fixed;
     top: 0; left: calc(-1 * var(--proj-panel-w));
     width: var(--proj-panel-w);
-    height: 100%;
+    height: calc(100% - 90px);
     background: #111;
     border-right: 1px solid rgba(255,255,255,0.1);
     z-index: 9100;
@@ -2278,7 +2278,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-1 * 420px);
-    width: 420px; height: 100vh;
+    width: 420px; height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
     z-index: 9100;
