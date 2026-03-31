@@ -1096,7 +1096,7 @@ function spawnCompas(board, cx, cy) {
         overlay.dataset.radius = radius;
     }
 
-    // ── Bouton tracer (logique inchangée) ───────────────────────────────
+    // ── Bouton tracer ────────────────────────────────────────────────────
     traceBtn.onclick = function (e) {
         e.stopPropagation();
         const t    = getOverlayTransform(overlay);
@@ -1110,7 +1110,6 @@ function spawnCompas(board, cx, cy) {
         const C = 6;
         const cx_ = worldPiv.x, cy_ = worldPiv.y;
         const steps = Math.max(60, Math.round(2 * Math.PI * r / 3));
-        const gid = 'geo-' + Date.now();
 
         const ptsCercle = [];
         for (let i = 0; i <= steps; i++) {
@@ -1120,14 +1119,8 @@ function spawnCompas(board, cx, cy) {
         const ptsH = [{ x: cx_ - C, y: cy_ }, { x: cx_ + C, y: cy_ }];
         const ptsV = [{ x: cx_, y: cy_ - C }, { x: cx_, y: cy_ + C }];
 
-        const color = getDrawColor(), size = getDrawSize();
-        if (typeof window.strokes !== 'undefined' && typeof window.redrawStrokes === 'function') {
-            [ptsCercle, ptsH, ptsV].forEach(pts => {
-                window.strokes.push({ points: pts, color, size, groupId: gid });
-            });
-            window.redrawStrokes();
-            if (typeof saveBoard === 'function') saveBoard();
-        }
+        // Passe par traceOnCanvas → route automatiquement vers le PDF si mode actif
+        traceOnCanvas([ptsCercle, ptsH, ptsV]);
     };
     addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
