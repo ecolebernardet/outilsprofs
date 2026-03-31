@@ -139,6 +139,24 @@ function buildBoardState() {
                 level:      w.dataset.monnaieLevel || 'facile'
             };
         }
+        // Données propres au widget conjugaison
+        let conjData = null;
+        if (w.dataset.type === 'conjugaison') {
+            const cc = w.querySelector('.conj-container');
+            conjData = { containerW: cc ? cc.offsetWidth : null };
+        }
+        // Données propres au widget heure
+        let heureData = null;
+        if (w.dataset.type === 'heure') {
+            const hc = w.querySelector('.heure-container');
+            const hz = w.querySelector('.heure-clocks-zone');
+            heureData = {
+                containerW: hc ? hc.offsetWidth  : null,
+                clocksZoneH: hz ? hz.offsetHeight : null,
+                level:      w.dataset.heureLevel || 'facile',
+                mode:       w.dataset.heureMode  || 'lecture'
+            };
+        }
         // Données propres au widget plan
         let planData = null;
         if (w.dataset.type === 'plan') {
@@ -172,7 +190,9 @@ function buildBoardState() {
 			pdfSavedLeftPct: (() => { const c = w.querySelector('.editor-container[data-collapsed="true"]'); if (!c) return null; const px = parseFloat(c.dataset.savedLeft); return isNaN(px) ? null : (px / curW) * 100; })(),
 			animation: w.dataset.animation || null,
 			monnaieData,
-			planData
+			planData,
+			heureData,
+			conjData
 		});
     });
     const shapes = [];
@@ -370,6 +390,22 @@ function restoreBoardFromJSON(json) {
                 if (mz && w.monnaieData.itemsH)     mz.style.height  = w.monnaieData.itemsH     + 'px';
                 // Restaurer le niveau
                 if (w.monnaieData.level && widget._setLevel) widget._setLevel(w.monnaieData.level);
+            }
+        } else if (w.type === 'conjugaison') {
+            widget = createConjugaisonWidget();
+            if (w.conjData) {
+                const cc = widget.querySelector('.conj-container');
+                if (cc && w.conjData.containerW) cc.style.width = w.conjData.containerW + 'px';
+            }
+        } else if (w.type === 'heure') {
+            widget = createHeureWidget();
+            if (w.heureData) {
+                const hc = widget.querySelector('.heure-container');
+                const hz = widget.querySelector('.heure-clocks-zone');
+                if (hc && w.heureData.containerW)  hc.style.width  = w.heureData.containerW  + 'px';
+                if (hz && w.heureData.clocksZoneH) hz.style.height = w.heureData.clocksZoneH + 'px';
+                if (w.heureData.level && widget._setLevel) widget._setLevel(w.heureData.level);
+                if (w.heureData.mode  && widget._setMode)  widget._setMode(w.heureData.mode);
             }
         } else if (w.type === 'plan') {
             widget = createPlanWidget();

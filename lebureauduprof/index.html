@@ -197,6 +197,8 @@
 				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
+				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
+				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
 				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
@@ -861,6 +863,8 @@
 <script src="images.js"></script>
 <script src="widget-plan.js"></script>
 <script src="widget-monnaie.js"></script>
+<script src="widget-heure.js"></script>
+<script src="widget-conjugaison.js"></script>
 <script src="widget-deficalme.js"></script>
 <div id="laser-pointer"></div>
 <script src="pdf-widgets.js"></script>
@@ -962,6 +966,16 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico">🔤</div>
                 <div class="act-card-name">Ordre Alphabétique</div>
                 <div class="act-card-desc">Trier et classer des mots dans l'ordre de l'alphabet</div>
+            </div>
+            <div class="act-card" onclick="createHeureWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">🕑</div>
+                <div class="act-card-name">Heures et durées</div>
+                <div class="act-card-desc">Lire l'heure ou calculer une durée</div>
+            </div>
+            <div class="act-card" onclick="createConjugaisonWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">✏️</div>
+                <div class="act-card-name">Conjugaison</div>
+                <div class="act-card-desc">Test flash de conjugaison — présent, imparfait, futur</div>
             </div>
         </div>
     </div>
