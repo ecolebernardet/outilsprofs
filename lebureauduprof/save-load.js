@@ -143,7 +143,11 @@ function buildBoardState() {
         let conjData = null;
         if (w.dataset.type === 'conjugaison') {
             const cc = w.querySelector('.conj-container');
-            conjData = { containerW: cc ? cc.offsetWidth : null };
+            const cg = w.querySelector('.conj-grid');
+            conjData = {
+                containerW: cc ? cc.offsetWidth : null,
+                gridH: cg ? (parseInt(cg.style.height) || null) : null
+            };
         }
         // Données propres au widget heure
         let heureData = null;
@@ -395,7 +399,9 @@ function restoreBoardFromJSON(json) {
             widget = createConjugaisonWidget();
             if (w.conjData) {
                 const cc = widget.querySelector('.conj-container');
+                const cg = widget.querySelector('.conj-grid');
                 if (cc && w.conjData.containerW) cc.style.width = w.conjData.containerW + 'px';
+                if (cg && w.conjData.gridH)      cg.style.height = w.conjData.gridH + 'px';
             }
         } else if (w.type === 'heure') {
             widget = createHeureWidget();

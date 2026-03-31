@@ -176,9 +176,9 @@
         }
         .conj-verbes-input {
             width: 100%; box-sizing: border-box;
-            padding: 7px 10px; border: 1.5px solid #d1d5db; border-radius: 8px;
-            font-size: 13px; font-family: 'Segoe UI', system-ui, sans-serif;
-            resize: vertical; min-height: 70px; outline: none;
+            padding: 10px 12px; border: 1.5px solid #d1d5db; border-radius: 8px;
+            font-size: 16px; font-family: 'Segoe UI', system-ui, sans-serif;
+            resize: vertical; min-height: 200px; outline: none;
             transition: border-color .2s; background: #fff;
         }
         .conj-verbes-input:focus { border-color: #4a90e2; }
@@ -235,13 +235,13 @@
             display: flex; align-items: center; gap: 8px;
         }
         .conj-pronom {
-            font-size: 18px; font-weight: 700; color: #374151;
-            min-width: 72px; flex-shrink: 0;
+            font-size: 24px; font-weight: 700; color: #374151;
+            min-width: 90px; flex-shrink: 0;
         }
         .conj-answer-input {
             flex: 1; background: transparent;
             border: none; border-bottom: 2px solid #d1d5db;
-            outline: none; font-size: 20px; font-weight: 700;
+            outline: none; font-size: 24px; font-weight: 700;
             color: #4a90e2; text-align: center; padding: 2px 4px;
             font-family: 'Segoe UI', system-ui, sans-serif;
             transition: border-color .2s, color .2s;
@@ -410,6 +410,7 @@ function createConjugaisonWidget() {
     container.className = 'conj-container';
     const initW = Math.min(Math.round(window.innerWidth * 0.65), 820);
     container.style.width = initW + 'px';
+    container.style.minHeight = '500px';
 
     // ── Header ────────────────────────────────────────────────────────────
     const header = document.createElement('div');
@@ -465,6 +466,7 @@ function createConjugaisonWidget() {
     const grid = document.createElement('div');
     grid.className = 'conj-grid';
     grid.style.display = 'none';
+    grid.style.height = '500px';
     container.appendChild(grid);
 
     // ── Resize handle ─────────────────────────────────────────────────────
@@ -583,10 +585,18 @@ function createConjugaisonWidget() {
     resizeHandle.addEventListener('mousedown', e => {
         e.preventDefault(); e.stopPropagation();
         const startX = e.clientX, startY = e.clientY;
-        const startW = container.offsetWidth, startH = grid.offsetHeight || 400;
+        const startW  = container.offsetWidth;
+        const startGridH = parseInt(grid.style.height) || 500;
+        const startContH = container.offsetHeight;
+        const gridVisible = grid.style.display !== 'none';
         const onMove = ev => {
+            const dy = ev.clientY - startY;
             container.style.width = Math.max(380, startW + ev.clientX - startX) + 'px';
-            if (grid.style.display !== 'none') grid.style.height = Math.max(200, startH + ev.clientY - startY) + 'px';
+            if (gridVisible) {
+                grid.style.height = Math.max(200, startGridH + dy) + 'px';
+            } else {
+                container.style.minHeight = Math.max(200, startContH + dy) + 'px';
+            }
         };
         const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); saveBoard(); };
         document.addEventListener('mousemove', onMove);
@@ -595,10 +605,18 @@ function createConjugaisonWidget() {
     resizeHandle.addEventListener('touchstart', e => {
         e.preventDefault(); e.stopPropagation();
         const t0 = e.touches[0], startX = t0.clientX, startY = t0.clientY;
-        const startW = container.offsetWidth, startH = grid.offsetHeight || 400;
+        const startW  = container.offsetWidth;
+        const startGridH = parseInt(grid.style.height) || 500;
+        const startContH = container.offsetHeight;
+        const gridVisible = grid.style.display !== 'none';
         const onMove = ev => {
+            const dy = ev.touches[0].clientY - startY;
             container.style.width = Math.max(380, startW + ev.touches[0].clientX - startX) + 'px';
-            if (grid.style.display !== 'none') grid.style.height = Math.max(200, startH + ev.touches[0].clientY - startY) + 'px';
+            if (gridVisible) {
+                grid.style.height = Math.max(200, startGridH + dy) + 'px';
+            } else {
+                container.style.minHeight = Math.max(200, startContH + dy) + 'px';
+            }
         };
         const onEnd = () => { document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); saveBoard(); };
         document.addEventListener('touchmove', onMove, { passive: false });
