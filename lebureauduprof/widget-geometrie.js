@@ -186,6 +186,7 @@ document.body.appendChild(bar);
 // ── API publique ──────────────────────────────────────────────────────────
 window.toggleGeoToolbar = function () {
     bar.classList.toggle('open');
+    _updateGeoPdfBadge();
 };
 window.closeGeoToolbar = function () {
     bar.classList.remove('open');
@@ -225,8 +226,34 @@ window.toggleGeoFromDrawBar = function () {
         }
         bar.classList.add('open');
         if (btn) { btn.style.background = '#1a2a4a'; btn.style.borderColor = '#a78bfa'; btn.classList.add('btn-mode-active'); }
+        _updateGeoPdfBadge();
     }
 };
+
+// ── Badge PDF dans la barre géo ───────────────────────────────────────────
+// Affiche un indicateur "📄 Tracé sur PDF" quand le mode annotation PDF est actif
+function _updateGeoPdfBadge() {
+    let badge = document.getElementById('geo-pdf-badge');
+    const inPdfMode = !!window._pdfAnnotMode;
+    if (inPdfMode && bar.classList.contains('open')) {
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'geo-pdf-badge';
+            badge.style.cssText = `
+                display:flex; align-items:center; gap:4px;
+                background:#1a3a20; color:#5ddd7e;
+                border:1px solid #3dbb5e; border-radius:7px;
+                padding:3px 8px; font-size:10px; font-weight:700;
+                white-space:nowrap; pointer-events:none;
+                animation: geo-badge-in 0.2s ease;
+            `;
+            badge.textContent = '📄 Tracé sur PDF actif';
+            bar.appendChild(badge);
+        }
+    } else if (badge) {
+        badge.remove();
+    }
+}
 
 // ── Utilitaire : tracer sur le canvas de dessin ───────────────────────────
 function getDrawCanvas() {
@@ -251,7 +278,13 @@ function getDrawSize() {
 
 function traceOnCanvas(pointsList) {
     // pointsList : tableau de tableaux [{x,y}] — un tableau par trait
-    // On pousse chaque trait comme un vrai stroke dans draw.js
+    // ── Mode annotation PDF : tracer sur le canvas d'annotation ─────────────
+    if (window._pdfAnnotMode && window._pdfAnnotWidget) {
+        _traceOnPdfCanvas(pointsList);
+        return;
+    }
+
+    // ── Mode board normal ────────────────────────────────────────────────────
     const color = getDrawColor();
     const size  = getDrawSize();
 
@@ -283,6 +316,81 @@ function traceOnCanvas(pointsList) {
     });
     ctx.restore();
     if (typeof saveBoard === 'function') saveBoard();
+}
+
+// ── Tracé sur le canvas d'annotation PDF ─────────────────────────────────
+// Convertit les points board (px relatifs au board) en pixels canvas PDF
+// internes, puis pousse chaque trait via addFigureStroke() de l'API.
+function _traceOnPdfCanvas(pointsList) {
+    const api = window._pdfAnnotWidget && window._pdfAnnotWidget._pdfAnnotAPI;
+    if (!api) return;
+
+    const annotCanvas = api.getAnnotCanvas ? api.getAnnotCanvas() : null;
+    if (!annotCanvas) return;
+
+    // Rect CSS du canvas d'annotation dans le viewport
+    const canvasRect = annotCanvas.getBoundingClientRect();
+    // Rect du board dans le viewport (les points geo sont relatifs au board)
+    const boardEl = document.getElementById('board');
+    const boardRect = boardEl ? boardEl.getBoundingClientRect() : { left: 0, top: 0 };
+
+    // Ratio px CSS → px canvas interne (tient compte du zoom PDF et du devicePixelRatio)
+    const scaleX = annotCanvas.width  / canvasRect.width;
+    const scaleY = annotCanvas.height / canvasRect.height;
+
+    const color = getDrawColor();
+    const size  = getDrawSize();
+
+    pointsList.forEach(function (pts) {
+        if (pts.length < 2) return;
+
+        // board px → viewport px → CSS canvas px → canvas interne px
+        const pxPts = pts.map(function (p) {
+            const vx = boardRect.left + p.x;   // px viewport
+            const vy = boardRect.top  + p.y;
+            const cx = vx - canvasRect.left;    // px CSS dans le canvas
+            const cy = vy - canvasRect.top;
+            return { x: cx * scaleX, y: cy * scaleY }; // px canvas interne
+        });
+
+        // Ne garder que les points visibles dans le canvas (avec une marge)
+        const W = annotCanvas.width, H = annotCanvas.height;
+        const MARGIN = Math.max(size * scaleX * 4, 20);
+        const visible = pxPts.filter(p =>
+            p.x >= -MARGIN && p.x <= W + MARGIN &&
+            p.y >= -MARGIN && p.y <= H + MARGIN
+        );
+        if (visible.length < 2) return;
+
+        // addFigureStroke attend des pixels canvas internes (toNorm() est appelé dedans)
+        if (typeof api.addFigureStroke === 'function') {
+            api.addFigureStroke(color, size, visible, null, 0);
+        } else {
+            // Fallback : dessin direct si l'API n'est pas disponible
+            _traceDirectOnPdfCanvas(annotCanvas, visible, color, size);
+        }
+    });
+
+    // Déclencher la sauvegarde PDF
+    if (typeof window.saveBoard === 'function') window.saveBoard();
+}
+
+// Fallback dessin direct sur le canvas PDF (sans sauvegarde dans annotLayers)
+function _traceDirectOnPdfCanvas(annotCanvas, pxPts, color, size) {
+    const ctx = annotCanvas.getContext('2d');
+    if (!ctx || pxPts.length < 2) return;
+    // Adapter l'épaisseur au scale du canvas (comme le fait pdf-viewer.js)
+    const sizeScaled = size * annotCanvas.width / 600;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = sizeScaled;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.beginPath();
+    ctx.moveTo(pxPts[0].x, pxPts[0].y);
+    pxPts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.stroke();
+    ctx.restore();
 }
 
 // ── Spawn d'un outil ─────────────────────────────────────────────────────

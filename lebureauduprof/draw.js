@@ -2326,8 +2326,12 @@ function _startPdfAnnotMode() {
     // Masquer les boutons inutiles en mode annotation PDF
     const selBtn = document.getElementById('draw-select-btn');
     if (selBtn) selBtn.style.display = 'none';
+    // Le bouton géo reste visible : les outils géo peuvent tracer sur le PDF
     const geoBtn = document.getElementById('geo-draw-btn');
-    if (geoBtn) geoBtn.style.display = 'none';
+    if (geoBtn) {
+        geoBtn.style.display = '';
+        geoBtn.title = 'Outils géométriques (tracé sur PDF)';
+    }
 
     // Mettre pointerEvents:none sur le canvas pour bloquer les handlers natifs de media.js.
     _pdfAnnotCanvas.style.pointerEvents = 'none';
@@ -2443,7 +2447,7 @@ function _stopPdfAnnotMode() {
     const selBtnStop = document.getElementById('draw-select-btn');
     if (selBtnStop) selBtnStop.style.display = '';
     const geoBtnStop = document.getElementById('geo-draw-btn');
-    if (geoBtnStop) geoBtnStop.style.display = '';
+    if (geoBtnStop) { geoBtnStop.style.display = ''; geoBtnStop.title = 'Outils géométriques'; }
 }
 
 // Variante de stopDrawing qui ne cache pas la toolbar (pour basculer depuis draw mode)
