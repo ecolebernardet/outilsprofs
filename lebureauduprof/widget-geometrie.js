@@ -330,9 +330,16 @@ function _traceOnPdfCanvas(pointsList) {
 
     // Rect CSS du canvas d'annotation dans le viewport
     const canvasRect = annotCanvas.getBoundingClientRect();
-    // Rect du board dans le viewport (les points geo sont relatifs au board)
+    // Rect du board dans le viewport
+    // Les points geo sont normalement relatifs au board.
+    // En mode plein écran (overlay fixed), les overlays sont dans le body :
+    // getOverlayTransform() retourne des coords viewport → origin = {0,0}.
+    // On détecte via la présence d'un overlay fixed.
+    const hasFixedOverlay = !!document.querySelector('.geo-tool-overlay[data-geo-fixed="true"]');
     const boardEl = document.getElementById('board');
-    const boardRect = boardEl ? boardEl.getBoundingClientRect() : { left: 0, top: 0 };
+    const boardRect = (!hasFixedOverlay && boardEl)
+        ? boardEl.getBoundingClientRect()
+        : { left: 0, top: 0 };
 
     // Ratio px CSS → px canvas interne (tient compte du zoom PDF et du devicePixelRatio)
     const scaleX = annotCanvas.width  / canvasRect.width;
@@ -398,7 +405,7 @@ window.geoSpawnTool = function (type) {
     const board = document.getElementById('board');
     if (!board) return;
 
-    // Centrer l'outil dans le viewport
+    // Centrer dans le viewport (cx/cy toujours en coordonnées board-relatives)
     const bRect = board.getBoundingClientRect();
     const cx = (window.innerWidth  / 2) - bRect.left;
     const cy = (window.innerHeight / 2) - bRect.top;
@@ -406,13 +413,44 @@ window.geoSpawnTool = function (type) {
     if      (type === 'regle')   spawnRegle(board, cx, cy);
     else if (type === 'equerre') spawnEquerre(board, cx, cy);
     else if (type === 'compas')  spawnCompas(board, cx, cy);
+
+    // ── Mode plein écran PDF : l'overlay est dans le board (position:absolute,
+    //    z-index:9500) mais le widget PDF est en position:fixed z-index:9999 →
+    //    l'overlay est invisible. On le sort du board, on le passe en fixed
+    //    sur le body avec un z-index supérieur au widget PDF.
+    const pdfFullboard = document.querySelector('.editor-container.wf-pdf-fullboard');
+    if (pdfFullboard) {
+        const overlays = board.querySelectorAll('.geo-tool-overlay');
+        const overlay  = overlays[overlays.length - 1];
+        if (overlay) {
+            // Position actuelle en coordonnées board → convertir en viewport
+            const oLeft = parseFloat(overlay.style.left || 0);
+            const oTop  = parseFloat(overlay.style.top  || 0);
+            board.removeChild(overlay);
+            overlay.style.position = 'fixed';
+            overlay.style.left     = (bRect.left + oLeft) + 'px';
+            overlay.style.top      = (bRect.top  + oTop)  + 'px';
+            overlay.style.zIndex   = '10000';
+            overlay.dataset.geoFixed = 'true';
+            document.body.appendChild(overlay);
+
+            // Pour le compas : repositionner sa barre de contrôle maintenant
+            // que l'overlay est à sa position finale
+            if (type === 'compas' && typeof overlay._repositionBar === 'function') {
+                overlay._repositionBar();
+            }
+        }
+    }
 };
 
 // ── Helpers drag + rotate ────────────────────────────────────────────────
 function makeDraggableGeo(overlay, onDragEnd) {
     function startGeoDrag(clientX, clientY) {
-        const board   = overlay.parentElement;
-        const bRect   = board.getBoundingClientRect();
+        // En mode fixed (parent = body), la référence est le viewport (left:0,top:0).
+        // En mode board (parent = #board), la référence est le coin haut-gauche du board.
+        const isFixed = overlay.dataset.geoFixed === 'true' || overlay.style.position === 'fixed';
+        const parent  = isFixed ? null : overlay.parentElement;
+        const bRect   = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
         const startX  = clientX - bRect.left - parseFloat(overlay.style.left || 0);
         const startY  = clientY - bRect.top  - parseFloat(overlay.style.top  || 0);
         overlay.classList.add('geo-selected');
@@ -828,17 +866,19 @@ function spawnCompas(board, cx, cy) {
 
     // Positionne la barre en fixed en fonction de la position de l'overlay
     function repositionBar() {
-        const bRect  = board.getBoundingClientRect();
         const ovLeft = parseFloat(overlay.style.left || 0);
         const ovTop  = parseFloat(overlay.style.top  || 0);
         const MARGIN = 8;
 
-        // Centre X de l'overlay en coordonnées viewport
+        // En mode fixed (overlay sorti du board), ovLeft/ovTop sont déjà en viewport.
+        // En mode normal (overlay dans le board), il faut ajouter bRect.left/top.
+        const isFixed = overlay.style.position === 'fixed' || overlay.dataset.geoFixed === 'true';
+        const bRect   = (!isFixed && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
+
         const centerX = bRect.left + ovLeft + OVW / 2;
         let barLeft = centerX - BAR_W / 2;
         barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
 
-        // Y : juste au-dessus de l'overlay si possible, sinon juste en-dessous
         const ovTopVP = bRect.top + ovTop;
         let barTop = ovTopVP - 52;
         if (barTop < MARGIN) {
@@ -1130,6 +1170,10 @@ function spawnCompas(board, cx, cy) {
 
     updateSvg();
     repositionBar();
+
+    // Exposer repositionBar sur l'overlay pour que geoSpawnTool puisse le rappeler
+    // après avoir déplacé l'overlay en position:fixed (mode PDF plein écran)
+    overlay._repositionBar = repositionBar;
 
     // Rebrancher repositionBar après chaque drag
     makeDraggableGeo(overlay, repositionBar);
