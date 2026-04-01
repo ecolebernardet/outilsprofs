@@ -217,28 +217,32 @@ function findFreePosition(widgetW, widgetH) {
         left: w.offsetLeft, top: w.offsetTop,
         right: w.offsetLeft + w.offsetWidth, bottom: w.offsetTop + w.offsetHeight
     }));
-    // Le coin HAUT-DROIT du widget est aligné sur le coin haut-droit du board :
-    // x de départ = curW - W (bord droit du widget = bord droit du board)
-    const startX = curW - W;
+    // Départ : centre haut du board
+    const startX = Math.round((curW - W) / 2);
+    // Cherche d'abord en partant du centre, puis vers la droite, puis vers la gauche
     for (let y = MARGIN; y < curVH - H; y += STEP_Y) {
-        for (let x = startX; x >= MARGIN; x -= STEP_X) {
-            const overlaps = occupied.some(r => x < r.right + MARGIN && x + W > r.left && y < r.bottom + MARGIN && y + H > r.top);
-            if (!overlaps) return { x, y };
+        for (let dx = 0; dx < curW; dx += STEP_X) {
+            for (const dir of [0, 1, -1]) {
+                const x = startX + dir * dx;
+                if (x < MARGIN || x + W > curW - MARGIN) continue;
+                const overlaps = occupied.some(r => x < r.right + MARGIN && x + W > r.left && y < r.bottom + MARGIN && y + H > r.top);
+                if (!overlaps) return { x, y };
+            }
         }
     }
     // Fallback : décalage en cascade si tout est occupé
     const count = document.querySelectorAll('.widget, .shape-widget').length;
-    return { x: Math.max(MARGIN, startX - (count * 30) % Math.max(1, startX - MARGIN)), y: (MARGIN + count * 30) % (curVH - H) };
+    return { x: startX, y: (MARGIN + count * 30) % (curVH - H) };
 }
 
 // Appelé après insertion dans le DOM quand la taille du widget n'est pas connue à l'avance.
-// Recale le bord droit du widget sur le bord droit du board s'il déborde.
+// Centre le widget horizontalement en haut du board.
 function snapWidgetToTopRight(widget) {
     requestAnimationFrame(() => {
         const curW = window.innerWidth;
         const wW = widget.offsetWidth || 320;
-        const left = Math.max(0, curW - wW);
-        widget.style.left = left + 'px';
+        const left = Math.round((curW - wW) / 2);
+        widget.style.left = Math.max(0, left) + 'px';
         widget.style.top  = '20px';
     });
 }
@@ -328,8 +332,8 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         if (type === 'pdf') {
             const all = Array.from(document.querySelectorAll('.widget[data-type="pdf"]'));
             if (all.length === 0) {
-                // Le PDF sera recalé après rendu via snapWidgetToTopRight
-                x = Math.round(window.innerWidth * 0.72) + 'px';
+                // Le PDF sera recentré après rendu via snapWidgetToTopRight
+                x = Math.round(window.innerWidth * 0.5) + 'px';
                 y = '20px';
             } else {
                 const last = all[all.length - 1];
