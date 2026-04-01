@@ -14,6 +14,19 @@
 if (!window.IMAGE_CATEGORIES) {
     window.IMAGE_CATEGORIES = [
         {
+            id: 'maths',
+            label: 'Maths',
+            icon: '✖️',
+            images: [
+                { src: 'images/maths-table-pythagore.jpg',                     label: 'Maths (table de Pythagore)' },
+				{ src: 'images/maths-tableau-conversion-contenances.jpg',      label: 'Maths (tableau de conversion des mesures de contenances)' },
+                { src: 'images/maths-tableau-conversion-longueurs.jpg',        label: 'Maths (tableau de conversion des mesures de longueurs)' },
+				{ src: 'images/maths-tableau-conversion-masses.jpg',           label: 'Maths (tableau de conversion des mesures de masses)' },
+                { src: 'images/maths-tableau-numeration-decimaux.jpg',         label: 'Maths (tableau de numération des nombres décimaux)' },
+				{ src: 'images/maths-tableau-numeration-entiers.jpg',          label: 'Maths (tableau de numération des nombres entiers)' },
+            ]
+        },
+		{
             id: 'geographie',
             label: 'Géographie',
             icon: '🌍',
@@ -436,9 +449,9 @@ function _insertImageWidget(src, label) {
     tmpImg.src = src;
 }
 
-function _doInsertImageWidget(src, label, naturalW, naturalH) {
-    const MAX_W = 600;
-    const MAX_H = 400;
+function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
+    const MAX_W = 900;
+    const MAX_H = 600;
     let w = naturalW, h = naturalH;
     if (w > MAX_W || h > MAX_H) {
         const ratio = Math.min(MAX_W / w, MAX_H / h);
@@ -449,7 +462,9 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
     if (h < 80) { w = Math.round(w * 80 / h); h = 80; }
 
     snapshotNow();
-    const pos = findFreePosition(w, h);
+    const pos = (opts && opts.skipFreePos)
+        ? { x: opts.left || 0, y: opts.top || 0 }
+        : findFreePosition(w, h);
 
     const widget = document.createElement('div');
     widget.className = 'widget';
@@ -482,7 +497,6 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
         <div class="flip-h-btn"      title="Symétrie horizontale">↔</div>
         <div class="flip-v-btn"      title="Symétrie verticale">↕</div>
         <div class="resize-lock-btn" title="Verrouiller les proportions (ou Shift)">🔓</div>
-        <div class="shape-resize-handle" title="Redimensionner"></div>
     `;
     widget.appendChild(img);
 
@@ -519,16 +533,23 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
         lockBtn.textContent = locked ? '🔒' : '🔓';
     });
 
-    // ── Resize (poignée coin bas-droite, comme shapes) ──
-    const resizeHandle = widget.querySelector('.shape-resize-handle');
-    resizeHandle.addEventListener('mousedown', e => {
+    // ── Poignée resize custom (même système que les autres widgets) ──
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'custom-resize-handle';
+    resizeHandle.title = 'Redimensionner';
+    widget.appendChild(resizeHandle);
+
+    resizeHandle.addEventListener('pointerdown', e => {
+        if (e.button !== undefined && e.button !== 0) return;
         e.preventDefault(); e.stopPropagation();
+        resizeHandle.setPointerCapture(e.pointerId);
         snapshotNow();
         const startX = e.clientX, startY = e.clientY;
         const startW = widget.offsetWidth, startH = widget.offsetHeight;
         const ratio  = startH / startW;
 
-        document.onmousemove = ev => {
+        function onMove(ev) {
+            ev.preventDefault();
             const proportional = ev.shiftKey || lockBtn.classList.contains('locked');
             let newW = Math.max(40, startW + ev.clientX - startX);
             let newH = Math.max(40, startH + ev.clientY - startY);
@@ -536,34 +557,17 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
             widget.style.width  = newW + 'px';
             widget.style.height = newH + 'px';
             widget.style.setProperty('--sticker-h', newH + 'px');
-        };
-        document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-    });
-    resizeHandle.addEventListener('touchstart', e => {
-        e.preventDefault(); e.stopPropagation();
-        snapshotNow();
-        const t0 = e.touches[0];
-        const startX = t0.clientX, startY = t0.clientY;
-        const startW = widget.offsetWidth, startH = widget.offsetHeight;
-        const ratio  = startH / startW;
-        function onMove(ev) {
-            const t = ev.touches[0];
-            const proportional = lockBtn.classList.contains('locked');
-            let newW = Math.max(40, startW + t.clientX - startX);
-            let newH = Math.max(40, startH + t.clientY - startY);
-            if (proportional) newH = Math.round(newW * ratio);
-            widget.style.width  = newW + 'px';
-            widget.style.height = newH + 'px';
-            widget.style.setProperty('--sticker-h', newH + 'px');
         }
-        function onEnd() {
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend',  onEnd);
+        function onUp() {
+            resizeHandle.removeEventListener('pointermove',   onMove);
+            resizeHandle.removeEventListener('pointerup',     onUp);
+            resizeHandle.removeEventListener('pointercancel', onUp);
             saveBoard();
         }
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend',  onEnd);
-    }, { passive: false });
+        resizeHandle.addEventListener('pointermove',   onMove);
+        resizeHandle.addEventListener('pointerup',     onUp);
+        resizeHandle.addEventListener('pointercancel', onUp);
+    });
 
     widget.addEventListener('mousedown', () => {
         bringToFront(widget);
@@ -582,6 +586,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH) {
     makeDraggable(widget);
     makeDraggableRotate(widget);
     saveBoard();
+    return widget;
 }
 
 function _applyImgFlip(widget, img) {

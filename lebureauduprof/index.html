@@ -198,7 +198,7 @@
 				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
-				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
+				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Tableau de numération</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
@@ -300,6 +300,15 @@
 								<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');closeMainMenu()" title="Ardoise lignes"></div>
 							</div>
 							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">👍 Pratiques</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-entiers-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');closeMainMenu()" title="Tableau de numération des entiers CM"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-decimaux-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');closeMainMenu()" title="Tableau de numération des décimaux CM"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-longueurs.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de longueurs"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-masses.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-masses.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-masses.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de masses"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-contenances.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de contenances"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-table-pythagore.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-table-pythagore.jpg)');saveBg('url(fonds/fond-maths-table-pythagore.jpg)');closeMainMenu()" title="Table de Pythagore"></div>
+							</div>
 						</div></div>
 					</div>
 					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>&nbsp;&nbsp;Pointeur laser</div>
@@ -956,14 +965,14 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-desc">Reconnaître et calculer avec les pièces et billets</div>
             </div>
             <div class="act-card" onclick="createTableauNumWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🔟</div>
+                <div class="act-card-ico">🔢</div>
                 <div class="act-card-name">Tableau de numération</div>
                 <div class="act-card-desc">Décomposer les nombres par classes et rangs</div>
             </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
                 <div class="act-card-ico">🧮</div>
                 <div class="act-card-name">Calcul Mental</div>
-                <div class="act-card-desc">S'entraîner au calcul mental</div>
+                <div class="act-card-desc">Entraîner le calcul rapide en tête</div>
             </div>
             <div class="act-card" onclick="createCompteEstBonWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">🔢</div>

@@ -188,6 +188,10 @@ function buildBoardState() {
 			groupId: w.dataset.groupId || null,
 			meteoCity: w.dataset.meteoCity || null,
 			stickerUrl, stickerEmoji, stickerSize,
+			isImageWidget: w.dataset.imageWidget === 'true',
+			imgOpacity: w.dataset.imgOpacity || null,
+			flipX: w.dataset.flipX || null,
+			flipY: w.dataset.flipY || null,
 			transform: w.style.transform || null,
 			pdfId: w.dataset.pdfId || null,
 			pdfName: w.dataset.pdfName || null,
@@ -327,6 +331,29 @@ function restoreBoardFromJSON(json) {
             const curWW = window.innerWidth, curVVH = virtualH(curWW);
             const lx = (w.leftPercent / 100) * curWW;
             const ty = (w.topPercent  / 100) * curVVH;
+
+            // Widget image avancé (avec poignée resize, flip, lock)
+            if (w.isImageWidget && w.stickerUrl && typeof _doInsertImageWidget === 'function') {
+                const szw = (w.stickerSize && w.stickerSize.w) ? w.stickerSize.w : 130;
+                const szh = (w.stickerSize && w.stickerSize.h) ? w.stickerSize.h : 130;
+                const iw = _doInsertImageWidget(w.stickerUrl, '', szw, szh, { left: lx, top: ty, skipFreePos: true });
+                if (iw) {
+                    if (w.transform)  iw.style.transform = w.transform;
+                    if (w.flipX)      iw.dataset.flipX = w.flipX;
+                    if (w.flipY)      iw.dataset.flipY = w.flipY;
+                    if (w.imgOpacity) iw.dataset.imgOpacity = w.imgOpacity;
+                    if (w.pinned)     bringToFront(iw, true);
+                    if (w.background) { iw.style.zIndex = 1; iw.dataset.background = 'true'; }
+                    if (w.groupId)    iw.dataset.groupId = w.groupId;
+                    // Réappliquer le flip si nécessaire
+                    const flipImg = iw.querySelector('img');
+                    if (flipImg) {
+                        const sx = parseFloat(w.flipX || 1), sy = parseFloat(w.flipY || 1);
+                        if (sx !== 1 || sy !== 1) flipImg.style.transform = `scale(${sx}, ${sy})`;
+                    }
+                }
+                return;
+            }
             const sw = document.createElement('div');
             sw.className = 'widget';
             sw.dataset.type = 'sticker';
