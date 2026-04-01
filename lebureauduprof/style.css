@@ -2973,10 +2973,115 @@ body.menu-light #image-upload-btn:hover {
     min-height: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
-    /* taille initiale confortable */
-    width: 620px;
-    height: auto;
+    width: 900px;
+    height: 500px;
 }
+
+/* ── Plein écran board ── */
+.tnum-container.tnum-fullboard {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+    padding-left: 80px !important;
+    box-sizing: border-box !important;
+}
+
+/* ── Header ── */
+.tnum-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.45em 0.8em;
+    background: #12122a;
+    border-bottom: 0.07em solid #2e2e50;
+    border-radius: 0.7em 0.7em 0 0;
+    user-select: none;
+    cursor: move;
+}
+.tnum-title {
+    font-size: 0.82em;
+    font-weight: 700;
+    color: #9090c0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Bouton aide ── */
+.tnum-help-btn {
+    background: rgba(255,255,255,.1);
+    border: 0.07em solid rgba(255,255,255,.2);
+    color: #a0a0cc;
+    font-size: 0.75em;
+    font-weight: 700;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background .15s, color .15s;
+    flex-shrink: 0;
+}
+.tnum-help-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+/* ── Popup aide ── */
+.tnum-help-popup {
+    display: none;
+    position: absolute;
+    top: 2.8em;
+    right: 0.5em;
+    z-index: 500;
+    background: #1e1e3a;
+    border: 1px solid #3a3a60;
+    border-radius: 0.7em;
+    padding: 0.9em 1em;
+    min-width: 240px;
+    max-width: 300px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.5);
+    font-size: 0.82em;
+    color: #b0b0d0;
+    line-height: 1.5;
+}
+.tnum-help-popup.tnum-help-show { display: block; }
+.tnum-help-popup h4 {
+    margin: 0 0 0.6em;
+    font-size: 1em;
+    color: #e0e0ff;
+    font-weight: 700;
+}
+.tnum-help-section {
+    margin-bottom: 0.6em;
+    padding-bottom: 0.6em;
+    border-bottom: 1px solid #2e2e50;
+}
+.tnum-help-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.tnum-help-section strong { color: #c0c0f0; }
+
+/* ── Mode clair : header + aide ── */
+body.menu-light .tnum-header { background: #eef0f8; border-bottom-color: #d4d4e8; }
+body.menu-light .tnum-title  { color: #6060a0; }
+body.menu-light .tnum-help-btn {
+    background: rgba(0,0,0,.07);
+    border-color: rgba(0,0,0,.15);
+    color: #6666aa;
+}
+body.menu-light .tnum-help-btn:hover { background: rgba(0,0,0,.14); color: #333; }
+body.menu-light .tnum-help-popup {
+    background: #fff;
+    border-color: #d4d4e8;
+    color: #444;
+    box-shadow: 0 6px 24px rgba(0,0,0,.15);
+}
+body.menu-light .tnum-help-popup h4 { color: #222; }
+body.menu-light .tnum-help-section { border-bottom-color: #e0e0ee; }
+body.menu-light .tnum-help-section strong { color: #333; }
 
 /* ── Conteneur principal ── */
 .tnum-container {
@@ -2988,6 +3093,7 @@ body.menu-light #image-upload-btn:hover {
     overflow: hidden;
     box-shadow: 0 0.3em 1.4em rgba(0,0,0,0.4);
     border: 0.07em solid #2e2e50;
+    position: relative;
 }
 
 /* ── Barre de paramètres ── */
@@ -2999,13 +3105,33 @@ body.menu-light #image-upload-btn:hover {
     padding: 0.55em 1em;
     background: #12122a;
     border-bottom: 0.07em solid #2e2e50;
+    overflow: hidden;
+    transition: max-height .22s ease, padding .22s ease, opacity .22s ease;
+    max-height: 10em;
+    opacity: 1;
 }
-.tnum-settings-title {
-    font-size: 1em;
-    color: #7070a0;
-    margin-right: 0.2em;
-    white-space: nowrap;
+.tnum-settings-bar.tnum-settings-hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    border-bottom-width: 0;
 }
+/* Le bouton ⚙️ dans le header */
+.tnum-settings-toggle {
+    background: none;
+    border: none;
+    font-size: 0.85em;
+    cursor: pointer;
+    padding: 0.15em 0.3em;
+    border-radius: 0.3em;
+    opacity: 0.6;
+    transition: opacity .15s, transform .22s;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.tnum-settings-toggle:hover { opacity: 1; }
+.tnum-settings-toggle.tnum-settings-open { transform: rotate(45deg); opacity: 1; }
 .tnum-toggle-label {
     display: flex;
     align-items: center;
@@ -3112,25 +3238,7 @@ body.menu-light .tnum-mode-btn.tnum-mode-active { background: #4f46e5; color: #f
 }
 
 /* ── Séparateur virgule ── */
-/* ── Virgule entre unités et décimales ── */
-.tnum-virgule-col {
-    position: relative;
-    padding-left: 0.5em !important;
-}
-.tnum-virgule-col::before {
-    content: ',';
-    position: absolute;
-    left: -0.35em;
-    bottom: 0.9em;
-    font-size: 2em;
-    font-weight: 900;
-    font-family: 'BelleAllureGS', cursive;
-    color: #e07b2a;
-    line-height: 1;
-    pointer-events: none;
-    z-index: 2;
-}
-body.menu-light .tnum-virgule-col::before { color: #c05a10; }
+.tnum-virgule-col { border-left: 0.14em dashed #6b3070 !important; }
 
 /* ── Cellule corps ── */
 .tnum-cell {

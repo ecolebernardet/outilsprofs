@@ -34,8 +34,39 @@ function createTableauNumWidget() {
             <div class="editor-container tnum-editor-container">
                 <div class="tnum-container">
 
+                  <div class="tnum-header">
+                    <span class="tnum-title">🔢 Tableau de numération</span>
+                    <button class="tnum-settings-toggle tnum-settings-open" title="Paramètres">⚙️</button>
+                    <div class="wf-btns" style="margin-left:auto">
+                      <button class="tnum-help-btn" title="Aide">?</button>
+                      <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
+                      <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran board"></button>
+                      <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
+                    </div>
+                  </div>
+
+                  <div class="tnum-help-popup">
+                    <h4>💡 Tableau de numération</h4>
+                    <div class="tnum-help-section">
+                      <strong>⚙️ Colonnes</strong><br>
+                      Activez ou désactivez les classes (Milliards, Millions, Milliers) et la partie décimale via les cases à cocher.
+                    </div>
+                    <div class="tnum-help-section">
+                      <strong>✏️ Saisie</strong><br>
+                      Cliquez sur une case et tapez un chiffre (0–9), ou utilisez les boutons + et − pour augmenter / diminuer.
+                    </div>
+                    <div class="tnum-help-section">
+                      <strong>🔢 Mode Libre / Nombre</strong><br>
+                      <em>Libre</em> : chaque case est indépendante.<br>
+                      <em>Nombre</em> : les retenues se propagent automatiquement (9+1 → 10, etc.).
+                    </div>
+                    <div class="tnum-help-section">
+                      <strong>➕ Lignes</strong><br>
+                      Ajoutez ou supprimez des lignes avec les boutons ＋ et × en bas du tableau.
+                    </div>
+                  </div>
+
                   <div class="tnum-settings-bar">
-                    <span class="tnum-settings-title">⚙️</span>
                     <label class="tnum-toggle-label" title="Classe des milliards">
                       <input type="checkbox" class="tnum-chk" data-col-group="milliards"> Milliards
                     </label>
@@ -83,6 +114,22 @@ function createTableauNumWidget() {
     if (typeof makeResizableByHandle   === 'function') makeResizableByHandle(widget);
     if (typeof clampWidgetToBoardRight === 'function') clampWidgetToBoardRight(widget);
 
+    // ── Header comme poignée de déplacement ───────────────────────
+    const tnumHeader = widget.querySelector('.tnum-header');
+    if (tnumHeader && typeof startWidgetDrag === 'function') {
+        tnumHeader.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button')) return;
+            e.stopPropagation();
+            widget.focus();
+            startWidgetDrag(e, widget);
+        });
+        tnumHeader.addEventListener('touchstart', (e) => {
+            if (e.target.closest('button')) return;
+            e.stopPropagation();
+            startWidgetDrag({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY, target: e.target }, widget);
+        }, { passive: false });
+    }
+
     // ── Scaling proportionnel via ResizeObserver ───────────────────
     _initTableauNumResize(widget);
 
@@ -100,6 +147,92 @@ function createTableauNumWidget() {
         if (typeof saveBoard === 'function') saveBoard();
     });
 
+    // ── Injecter CSS wf-btns si pas encore présent ────────────────
+    if (!document.getElementById('wf-btns-style')) {
+        const ws = document.createElement('style');
+        ws.id = 'wf-btns-style';
+        ws.textContent = `
+    .wf-btns { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+    .wf-btn { width:13px; height:13px; border-radius:50%; border:none; cursor:pointer;
+              display:flex; align-items:center; justify-content:center; padding:0; font-size:0; flex-shrink:0; }
+    .wf-btn:hover { filter:brightness(0.82); transform:scale(1.15); }
+    .wf-btn:active { transform:scale(0.92); }
+    .wf-btn-min   { background:#febc2e; }
+    .wf-btn-max   { background:#28c840; }
+    .wf-btn-close { background:#ff5f57; }
+    .wf-btns:hover .wf-btn::after { font-size:8px; font-weight:900; color:rgba(0,0,0,0.5); line-height:1; }
+    .wf-btns:hover .wf-btn-min::after   { content:'−'; }
+    .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
+    .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
+        `;
+        document.head.appendChild(ws);
+    }
+
+    // ── Boutons wf (min / max / close) ────────────────────────────
+    const ec      = widget.querySelector('.editor-container');
+    const wfMin   = widget.querySelector('[data-role="wf-min"]');
+    const wfMax   = widget.querySelector('[data-role="wf-max"]');
+    const wfClose = widget.querySelector('[data-role="wf-close"]');
+    let _tnumIsMax = false;
+
+    if (wfMin) {
+        wfMin.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_tnumIsMax) wfMax.click();
+            if (typeof window._wfMiniBarCollapse === 'function') {
+                window._wfMiniBarCollapse(widget, '🔢 Tableau de numération');
+            }
+        });
+    }
+
+    if (wfMax) {
+        wfMax.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _tnumIsMax = !_tnumIsMax;
+            const tnumCont = widget.querySelector('.tnum-container');
+            if (tnumCont) {
+                if (_tnumIsMax) {
+                    tnumCont.dataset.tnumSavedW = ec ? ec.style.width : '';
+                    tnumCont.classList.add('tnum-fullboard');
+                } else {
+                    tnumCont.classList.remove('tnum-fullboard');
+                    if (ec && tnumCont.dataset.tnumSavedW) ec.style.width = tnumCont.dataset.tnumSavedW;
+                }
+            }
+        });
+    }
+
+    if (wfClose) {
+        wfClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            widget.remove();
+            if (typeof saveBoard === 'function') saveBoard();
+        });
+    }
+
+    // ── Toggle paramètres ─────────────────────────────────────────
+    const settingsToggle = widget.querySelector('.tnum-settings-toggle');
+    const settingsBar    = widget.querySelector('.tnum-settings-bar');
+    if (settingsToggle && settingsBar) {
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const hidden = settingsBar.classList.toggle('tnum-settings-hidden');
+            settingsToggle.classList.toggle('tnum-settings-open', !hidden);
+        });
+    }
+
+    // ── Bouton aide ───────────────────────────────────────────────
+    const helpBtn   = widget.querySelector('.tnum-help-btn');
+    const helpPopup = widget.querySelector('.tnum-help-popup');
+    if (helpBtn && helpPopup) {
+        helpBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            helpPopup.classList.toggle('tnum-help-show');
+        });
+        document.addEventListener('click', () => helpPopup.classList.remove('tnum-help-show'));
+    }
+
     if (typeof saveBoard === 'function' && !window.isInitialLoading && !window.isRestoringState) saveBoard();
 
     return widget;
@@ -108,7 +241,7 @@ function createTableauNumWidget() {
 // ── Scaling proportionnel ──────────────────────────────────────────
 // Largeur de référence 600 px → font-size 14 px
 // Tout le CSS du widget est en em, donc tout scale automatiquement.
-const TNUM_REF_W   = 600;
+const TNUM_REF_W   = 900;
 const TNUM_BASE_FS = 14;
 
 function _initTableauNumResize(widget) {
@@ -410,37 +543,19 @@ function _initTableauNumWidget(widget) {
         }
 
         // Réécriture avec suppression des zéros de tête
-        // Règle spéciale : si la partie entière est nulle mais qu'il y a des
-        // décimales non nulles, on affiche 0 sur la dernière colonne entière.
-        const entierCols  = allCols.filter(c => !c.decimal);
-        const decimalCols = allCols.filter(c =>  c.decimal);
-        const entierSum   = entierCols.reduce((s, c, i) => s + digits[allCols.indexOf(c)], 0);
-        const decimalSum  = decimalCols.reduce((s, c, i) => s + digits[allCols.indexOf(c)], 0);
-        const needZeroEntier = entierSum === 0 && decimalSum > 0 && entierCols.length > 0;
-
         const isAllZero = digits.every(d => d === 0);
         let leadingZero = true;
         allCols.forEach((c, i) => {
             if (isAllZero) {
-                // Nombre nul : 0 sur la dernière colonne entière, vide ailleurs
+                // Nombre nul : case vide partout sauf la dernière colonne entière
                 const lastEntierIdx = allCols.reduce(
                     (last, col, idx) => col.decimal ? last : idx, -1
                 );
                 const showAt = lastEntierIdx >= 0 ? lastEntierIdx : allCols.length - 1;
                 row.cells[c.id] = i === showAt ? '0' : '';
-            } else if (needZeroEntier) {
-                // Partie entière = 0 mais décimales non nulles : 0 sur dernière colonne entière
-                if (!c.decimal) {
-                    const lastEntierIdx = allCols.reduce(
-                        (last, col, idx) => col.decimal ? last : idx, -1
-                    );
-                    row.cells[c.id] = i === lastEntierIdx ? '0' : '';
-                } else {
-                    row.cells[c.id] = String(digits[i]);
-                }
             } else {
-                if (leadingZero && digits[i] === 0 && !c.decimal) {
-                    row.cells[c.id] = '';   // zéro de tête entier → vide
+                if (leadingZero && digits[i] === 0) {
+                    row.cells[c.id] = '';   // zéro de tête → vide
                 } else {
                     leadingZero = false;
                     row.cells[c.id] = String(digits[i]);
