@@ -80,8 +80,14 @@ function createTableauNumWidget() {
                       <input type="checkbox" class="tnum-chk" data-col-group="unites" checked disabled> Unités
                     </label>
                     <span class="tnum-sep-v"></span>
-                    <label class="tnum-toggle-label" title="Partie décimale">
+                    <label class="tnum-toggle-label" title="Partie décimale (dixièmes)">
                       <input type="checkbox" class="tnum-chk" data-col-group="decimales"> Décimales
+                    </label>
+                    <label class="tnum-toggle-label tnum-dec-sub" title="Centièmes">
+                      <input type="checkbox" class="tnum-chk" data-col-group="centiemes" checked> Centièmes
+                    </label>
+                    <label class="tnum-toggle-label tnum-dec-sub" title="Millièmes">
+                      <input type="checkbox" class="tnum-chk" data-col-group="milliemes" checked> Millièmes
                     </label>
                     <span class="tnum-sep-v"></span>
                     <div class="tnum-mode-toggle" title="Changer de mode">
@@ -198,6 +204,8 @@ function createTableauNumWidget() {
                     tnumCont.classList.remove('tnum-fullboard');
                     if (ec && tnumCont.dataset.tnumSavedW) ec.style.width = tnumCont.dataset.tnumSavedW;
                 }
+                // Forcer recalcul du scaling après changement de mode
+                requestAnimationFrame(() => { if (widget._tnumApplyScale) widget._tnumApplyScale(); });
             }
         });
     }
@@ -245,11 +253,17 @@ const TNUM_REF_W   = 900;
 const TNUM_BASE_FS = 14;
 
 function _initTableauNumResize(widget) {
-    const ec = widget.querySelector('.editor-container');
+    const ec       = widget.querySelector('.editor-container');
+    const tnumCont = widget.querySelector('.tnum-container');
     if (!ec || typeof ResizeObserver === 'undefined') return;
 
     function _applyScale() {
-        const w = ec.offsetWidth;
+        // En mode plein écran, .tnum-container est fixed et occupe tout l'écran ;
+        // son offsetWidth reflète la vraie largeur affichée. Sinon on utilise ec.
+        const isFullboard = tnumCont && tnumCont.classList.contains('tnum-fullboard');
+        const w = isFullboard
+            ? (tnumCont.offsetWidth || window.innerWidth)
+            : ec.offsetWidth;
         if (!w) return;
         const fs = Math.max(6, Math.round((w / TNUM_REF_W) * TNUM_BASE_FS * 10) / 10);
         ec.style.fontSize = fs + 'px';
@@ -257,7 +271,11 @@ function _initTableauNumResize(widget) {
 
     const ro = new ResizeObserver(_applyScale);
     ro.observe(ec);
+    if (tnumCont) ro.observe(tnumCont);
     requestAnimationFrame(_applyScale);
+
+    // Exposer pour pouvoir forcer un recalcul après toggle fullboard
+    widget._tnumApplyScale = _applyScale;
 }
 
 // ── Définition des colonnes ────────────────────────────────────────
@@ -279,9 +297,9 @@ const TNUM_COLS = [
     { id: 'D',    label: 'dizaines',          abbr: 'd', group: 'unites',    cls: 'tnum-dizaines',  color: '#e07b2a' },
     { id: 'U',    label: 'unités',            abbr: 'u', group: 'unites',    cls: 'tnum-unites',    color: '#e07b2a' },
     // Décimales
-    { id: 'dix',  label: 'dixièmes',          abbr: '1/10',   group: 'decimales', cls: 'tnum-dixiemes',  color: '#be185d', decimal: true },
-    { id: 'cen',  label: 'centièmes',         abbr: '1/100',  group: 'decimales', cls: 'tnum-centiemes', color: '#be185d', decimal: true },
-    { id: 'mil',  label: 'millièmes',         abbr: '1/1000', group: 'decimales', cls: 'tnum-milliemes', color: '#be185d', decimal: true },
+    { id: 'dix',  label: 'dixièmes',          abbr: '1/10',   group: 'decimales',  cls: 'tnum-dixiemes',  color: '#be185d', decimal: true },
+    { id: 'cen',  label: 'centièmes',         abbr: '1/100',  group: 'centiemes',  cls: 'tnum-centiemes', color: '#be185d', decimal: true },
+    { id: 'mil',  label: 'millièmes',         abbr: '1/1000', group: 'milliemes',  cls: 'tnum-milliemes', color: '#be185d', decimal: true },
 ];
 
 const TNUM_CLASS_HEADERS = [
@@ -298,7 +316,7 @@ function _initTableauNumWidget(widget) {
     if (!container) return;
 
     const state = {
-        groups: { milliards: false, millions: false, milliers: true, unites: true, decimales: false },
+        groups: { milliards: false, millions: false, milliers: true, unites: true, decimales: false, centiemes: true, milliemes: true },
         mode:   'libre',   // 'libre' | 'nombre'
         rows:   [ { id: _tnumRowId(), cells: {} } ]
     };
@@ -326,6 +344,10 @@ function _initTableauNumWidget(widget) {
             if (g === 'unites') return;
             chk.checked = !!state.groups[g];
         });
+        // Afficher/masquer les sous-options décimales selon l'état de decimales
+        container.querySelectorAll('.tnum-dec-sub').forEach(el => {
+            el.style.display = state.groups['decimales'] ? 'flex' : 'none';
+        });
     }
 
     function _syncModeBtns() {
@@ -334,8 +356,22 @@ function _initTableauNumWidget(widget) {
         });
     }
 
+    function _ensureZeroUnite(row) {
+        _ensureZeroUniteForRow(row, _visibleCols());
+    }
+
+    function _refreshRowInputs(tr, row) {
+        _refreshRowInputsDOM(tr, row);
+    }
+
     function _visibleCols() {
-        return TNUM_COLS.filter(c => state.groups[c.group] !== false);
+        return TNUM_COLS.filter(c => {
+            // Les sous-groupes décimaux ne sont visibles que si decimales est actif
+            if (c.group === 'centiemes' || c.group === 'milliemes') {
+                return state.groups['decimales'] && state.groups[c.group] !== false;
+            }
+            return state.groups[c.group] !== false;
+        });
     }
 
     function _renderAll() { _renderHead(); _renderBody(); }
@@ -348,13 +384,16 @@ function _initTableauNumWidget(widget) {
 
         // Nombre de classes actives → label court si ≥ 3
         const activeGroups = TNUM_CLASS_HEADERS.filter(ch =>
-            vis.some(c => c.group === ch.group)
+            vis.some(c => ch.group === 'decimales' ? c.decimal : c.group === ch.group)
         ).length;
         const useShort = activeGroups >= 3;
 
         let r1 = '<tr class="tnum-head-classes"><th class="tnum-head-actions" rowspan="2"></th>';
         TNUM_CLASS_HEADERS.forEach(ch => {
-            const span = vis.filter(c => c.group === ch.group).length;
+            // Pour "partie décimale", compter toutes les colonnes décimales visibles
+            const span = ch.group === 'decimales'
+                ? vis.filter(c => c.decimal).length
+                : vis.filter(c => c.group === ch.group).length;
             if (!span) return;
             const txt = useShort ? ch.labelCourt : ch.label;
             r1 += `<th class="tnum-head-class tnum-cls-${ch.group}" colspan="${span}" title="${ch.label}">${txt}</th>`;
@@ -440,8 +479,11 @@ function _initTableauNumWidget(widget) {
                 input.addEventListener('input', () => {
                     let v = input.value.replace(/[^0-9]/g, '');
                     if (v.length > 1) v = v.slice(-1);
-                    input.value     = v;
+                    input.value       = v;
                     row.cells[col.id] = v;
+                    _ensureZeroUnite(row);
+                    // Rafraîchir les autres inputs de la ligne si un 0 a été posé
+                    _refreshRowInputs(tr, row);
                     if (typeof saveBoard === 'function') saveBoard();
                 });
 
@@ -497,6 +539,10 @@ function _initTableauNumWidget(widget) {
             else { next = cur + dir; if (next > 9) next = 0; if (next < 0) next = 9; }
             input.value      = next;
             row.cells[colId] = String(next);
+            _ensureZeroUnite(row);
+            // Rafraîchir si un 0 a été posé ailleurs
+            const trEl = input.closest('tr');
+            if (trEl) _refreshRowInputs(trEl, row);
         }
         if (typeof saveBoard === 'function') saveBoard();
     }
@@ -544,18 +590,29 @@ function _initTableauNumWidget(widget) {
 
         // Réécriture avec suppression des zéros de tête
         const isAllZero = digits.every(d => d === 0);
+        const entierCols  = allCols.filter(c => !c.decimal);
+        const decimalCols = allCols.filter(c =>  c.decimal);
+        const entierSum   = entierCols.reduce((s, c) => s + digits[allCols.indexOf(c)], 0);
+        const decimalSum  = decimalCols.reduce((s, c) => s + digits[allCols.indexOf(c)], 0);
+        // Dernière colonne entière (les Unités)
+        const lastEntierIdx = allCols.reduce((last, c, i) => c.decimal ? last : i, -1);
+
         let leadingZero = true;
         allCols.forEach((c, i) => {
             if (isAllZero) {
-                // Nombre nul : case vide partout sauf la dernière colonne entière
-                const lastEntierIdx = allCols.reduce(
-                    (last, col, idx) => col.decimal ? last : idx, -1
-                );
+                // Nombre nul : 0 sur la dernière colonne entière, vide ailleurs
                 const showAt = lastEntierIdx >= 0 ? lastEntierIdx : allCols.length - 1;
                 row.cells[c.id] = i === showAt ? '0' : '';
+            } else if (entierSum === 0 && decimalSum > 0 && entierCols.length > 0) {
+                // Partie entière nulle mais décimales présentes → 0 obligatoire sur dernière colonne entière
+                if (!c.decimal) {
+                    row.cells[c.id] = i === lastEntierIdx ? '0' : '';
+                } else {
+                    row.cells[c.id] = String(digits[i]);
+                }
             } else {
-                if (leadingZero && digits[i] === 0) {
-                    row.cells[c.id] = '';   // zéro de tête → vide
+                if (leadingZero && digits[i] === 0 && !c.decimal) {
+                    row.cells[c.id] = '';   // zéro de tête entier → vide
                 } else {
                     leadingZero = false;
                     row.cells[c.id] = String(digits[i]);
@@ -594,11 +651,42 @@ function _initTableauNumWidget(widget) {
     }
 
     // ── Checkboxes colonnes ────────────────────────────────────────
+    // Ordre hiérarchique des classes (du plus petit au plus grand)
+    const GROUP_ORDER = ['unites', 'milliers', 'millions', 'milliards'];
+
     container.querySelectorAll('.tnum-chk').forEach(chk => {
         const g = chk.dataset.colGroup;
         if (g === 'unites') return;
         chk.addEventListener('change', () => {
-            state.groups[g] = chk.checked;
+            if (g === 'decimales') {
+                state.groups['decimales'] = chk.checked;
+                // Si on désactive les décimales, réinitialiser les sous-groupes
+                if (!chk.checked) {
+                    state.groups['centiemes'] = true;
+                    state.groups['milliemes'] = true;
+                }
+            } else if (g === 'centiemes') {
+                state.groups['centiemes'] = chk.checked;
+                // Décocher centiemes → désactiver millièmes aussi
+                if (!chk.checked) state.groups['milliemes'] = false;
+            } else if (g === 'milliemes') {
+                state.groups['milliemes'] = chk.checked;
+                // Cocher millièmes → activer centiemes aussi
+                if (chk.checked) state.groups['centiemes'] = true;
+            } else if (chk.checked) {
+                // Activer ce groupe ET tous les groupes inférieurs
+                const idx = GROUP_ORDER.indexOf(g);
+                for (let i = 0; i <= idx; i++) {
+                    state.groups[GROUP_ORDER[i]] = true;
+                }
+            } else {
+                // Désactiver ce groupe ET tous les groupes supérieurs
+                const idx = GROUP_ORDER.indexOf(g);
+                for (let i = idx; i < GROUP_ORDER.length; i++) {
+                    if (GROUP_ORDER[i] !== 'unites') state.groups[GROUP_ORDER[i]] = false;
+                }
+            }
+            _syncCheckboxes();
             _renderAll();
             if (typeof snapshotNow === 'function') snapshotNow();
             if (typeof saveBoard   === 'function') saveBoard();
@@ -627,6 +715,31 @@ function _focusNoSelect(input) {
     // Déplacer le curseur à la fin sans sélectionner
     const len = input.value.length;
     input.setSelectionRange(len, len);
+}
+
+// ── Zéro obligatoire dans les unités si seules les décimales ont des valeurs ──
+// Appelé après chaque saisie/step en mode libre.
+function _ensureZeroUniteForRow(row, visibleCols) {
+    const entierCols  = visibleCols.filter(c => !c.decimal);
+    const decimalCols = visibleCols.filter(c =>  c.decimal);
+    if (!decimalCols.length || !entierCols.length) return;
+
+    const hasDecimal = decimalCols.some(c => row.cells[c.id] && row.cells[c.id] !== '');
+    const hasEntier  = entierCols.some(c  => row.cells[c.id] && row.cells[c.id] !== '');
+
+    if (hasDecimal && !hasEntier) {
+        // Poser 0 sur la dernière colonne entière (les Unités)
+        const lastEntier = entierCols[entierCols.length - 1];
+        row.cells[lastEntier.id] = '0';
+    }
+}
+
+// ── Rafraîchir les inputs DOM d'une ligne sans re-render complet ──
+function _refreshRowInputsDOM(tr, row) {
+    tr.querySelectorAll('.tnum-digit').forEach(inp => {
+        const cid = inp.closest('td')?.dataset.colId;
+        if (cid) inp.value = row.cells[cid] ?? '';
+    });
 }
 
 // ── ID unique de ligne ─────────────────────────────────────────────

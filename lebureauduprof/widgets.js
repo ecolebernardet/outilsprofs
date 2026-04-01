@@ -1106,18 +1106,17 @@ function hideRotationIndicator() {
 // =========================================================================
 function cloneWidget(widget) {
     snapshotNow();
+    const x = (widget.offsetLeft + 30) + 'px';
+    const y = (widget.offsetTop  + 30) + 'px';
+    const rot = getCurrentRotation(widget);
 
     // Cas sticker image : clonage direct sans passer par createWidget (pas de template)
     if (widget.dataset.type === 'sticker' && widget.querySelector('img')) {
         const srcImg = widget.querySelector('img');
-        const x = widget.offsetLeft + 30;
-        const y = widget.offsetTop  + 30;
-        const w = widget.offsetWidth;
-        const h = widget.offsetHeight;
         // Dupliquer le nœud DOM directement
         const clone = widget.cloneNode(true);
-        clone.style.left = x + 'px';
-        clone.style.top  = y + 'px';
+        clone.style.left = x;
+        clone.style.top  = y;
         // Recréer les listeners (cloneNode ne les copie pas)
         clone.addEventListener('mousedown', () => {
             bringToFront(clone);
@@ -1131,13 +1130,73 @@ function cloneWidget(widget) {
         makeDraggable(clone);
         makeDraggableRotate(clone);
         if (typeof _addStickerResizeHandle === 'function') _addStickerResizeHandle(clone, 40);
-        const rot = getCurrentRotation(widget);
         if (rot) clone.style.transform = `rotate(${rot}deg)`;
         saveBoard();
         return;
     }
 
-    const newWidget = createWidget(widget.dataset.type, (widget.offsetLeft + 30) + 'px', (widget.offsetTop + 30) + 'px', false);
+    // Widgets avec factory dédiée (pas de template HTML)
+    if (widget.dataset.type === 'tableau-num') {
+        const newWidget = createTableauNumWidget();
+        newWidget.style.left = x; newWidget.style.top = y;
+        if (widget._tnumGetData && newWidget._tnumSetData) {
+            newWidget._tnumSetData(JSON.parse(JSON.stringify(widget._tnumGetData())));
+        }
+        const ec = newWidget.querySelector('.editor-container');
+        const src = widget.querySelector('.editor-container');
+        if (ec && src) { ec.style.width = src.style.width; ec.style.height = src.style.height; }
+        if (rot) newWidget.style.transform = `rotate(${rot}deg)`;
+        saveBoard();
+        return;
+    }
+
+    if (widget.dataset.type === 'monnaie' && typeof createMonnaieWidget === 'function') {
+        const newWidget = createMonnaieWidget();
+        newWidget.style.left = x; newWidget.style.top = y;
+        const level = widget.dataset.monnaieLevel || 'facile';
+        if (newWidget._setLevel) newWidget._setLevel(level);
+        const mc = widget.querySelector('.monnaie-container');
+        const nc = newWidget.querySelector('.monnaie-container');
+        if (mc && nc) nc.style.width = mc.style.width || mc.offsetWidth + 'px';
+        if (rot) newWidget.style.transform = `rotate(${rot}deg)`;
+        saveBoard();
+        return;
+    }
+
+    if (widget.dataset.type === 'conjugaison' && typeof createConjugaisonWidget === 'function') {
+        const newWidget = createConjugaisonWidget();
+        newWidget.style.left = x; newWidget.style.top = y;
+        const cc = widget.querySelector('.conj-container');
+        const cg = widget.querySelector('.conj-grid');
+        const nc = newWidget.querySelector('.conj-container');
+        const ng = newWidget.querySelector('.conj-grid');
+        if (cc && nc) nc.style.width = cc.style.width || cc.offsetWidth + 'px';
+        if (cg && ng) ng.style.height = cg.style.height || cg.offsetHeight + 'px';
+        if (rot) newWidget.style.transform = `rotate(${rot}deg)`;
+        saveBoard();
+        return;
+    }
+
+    if (widget.dataset.type === 'heure' && typeof createHeureWidget === 'function') {
+        const newWidget = createHeureWidget();
+        newWidget.style.left = x; newWidget.style.top = y;
+        const level = widget.dataset.heureLevel || 'facile';
+        const mode  = widget.dataset.heureMode  || 'lecture';
+        if (newWidget._setMode)  newWidget._setMode(mode);
+        if (newWidget._setLevel) newWidget._setLevel(level);
+        const hc = widget.querySelector('.heure-container');
+        const hz = widget.querySelector('.heure-clocks-zone');
+        const nc = newWidget.querySelector('.heure-container');
+        const nz = newWidget.querySelector('.heure-clocks-zone');
+        if (hc && nc) nc.style.width  = hc.style.width  || hc.offsetWidth  + 'px';
+        if (hz && nz) nz.style.height = hz.style.height || hz.offsetHeight + 'px';
+        if (rot) newWidget.style.transform = `rotate(${rot}deg)`;
+        saveBoard();
+        return;
+    }
+
+    // Widgets standard avec template HTML
+    const newWidget = createWidget(widget.dataset.type, x, y, false);
     const sc = widget.querySelector('.editor-container'), dc = newWidget.querySelector('.editor-container');
     if (sc && dc) {
         dc.style.width  = sc.style.width  || sc.offsetWidth  + 'px';
@@ -1149,7 +1208,6 @@ function cloneWidget(widget) {
     if (sa && da) { da.innerHTML = sa.innerHTML; da.querySelectorAll('.agenda-item').forEach(attachAgendaItemEvents); }
     const si = widget.querySelector('iframe'), di = newWidget.querySelector('iframe');
     if (si && di) di.src = si.src;
-    const rot = getCurrentRotation(widget);
     if (rot) newWidget.style.transform = `rotate(${rot}deg)`;
     if (widget.dataset.transparent === "true") applyTransparency(newWidget, true);
     else if (widget.dataset.bgColor) { newWidget.dataset.bgColor = widget.dataset.bgColor; newWidget.style.background = widget.dataset.bgColor; }

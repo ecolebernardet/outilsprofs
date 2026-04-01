@@ -3154,6 +3154,9 @@ body.menu-light .tnum-help-section strong { color: #333; }
 .tnum-toggle-label input[disabled] { opacity: .45; cursor: default; }
 .tnum-sep-v { width: 0.07em; height: 1.4em; background: #2e2e50; }
 
+/* Sous-options décimales (centièmes, millièmes) — masquées par défaut */
+.tnum-dec-sub { display: none; }
+
 /* ── Toggle Libre / Retenue ── */
 .tnum-mode-toggle {
     display: flex;
@@ -3238,7 +3241,25 @@ body.menu-light .tnum-mode-btn.tnum-mode-active { background: #4f46e5; color: #f
 }
 
 /* ── Séparateur virgule ── */
-.tnum-virgule-col { border-left: 0.14em dashed #6b3070 !important; }
+/* ── Virgule entre unités et décimales ── */
+.tnum-virgule-col {
+    position: relative;
+    padding-left: 0.5em !important;
+}
+.tnum-virgule-col::before {
+    content: ',';
+    position: absolute;
+    left: -0.35em;
+    bottom: 0.9em;
+    font-size: 2em;
+    font-weight: 900;
+    font-family: 'BelleAllureGS', cursive;
+    color: #e07b2a;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+}
+body.menu-light .tnum-virgule-col::before { color: #c05a10; }
 
 /* ── Cellule corps ── */
 .tnum-cell {
