@@ -198,7 +198,7 @@
 				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
-				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Tableau de numération</div>
+				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
@@ -965,14 +965,14 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-desc">Reconnaître et calculer avec les pièces et billets</div>
             </div>
             <div class="act-card" onclick="createTableauNumWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🔢</div>
+                <div class="act-card-ico">🔟</div>
                 <div class="act-card-name">Tableau de numération</div>
                 <div class="act-card-desc">Décomposer les nombres par classes et rangs</div>
             </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
                 <div class="act-card-ico">🧮</div>
                 <div class="act-card-name">Calcul Mental</div>
-                <div class="act-card-desc">Entraîner le calcul rapide en tête</div>
+                <div class="act-card-desc">S'entraîner au calcul mental</div>
             </div>
             <div class="act-card" onclick="createCompteEstBonWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">🔢</div>
@@ -1383,6 +1383,27 @@ document.addEventListener('pointerdown', function(e) {
         if (tab) tab.classList.remove(cfg.tabClass);
     });
 });
+</script>
+
+<script>
+// ── Mise à jour visuelle du bouton gomme ──────────────────────────────────
+function _updateEraserBtnInPanel() {
+    const btn       = document.getElementById('eraser-btn');
+    const btnShapes = document.getElementById('eraser-btn-shapes');
+    const active    = window.isEraserMode;
+    [btn, btnShapes].forEach(b => {
+        if (!b) return;
+        if (active) {
+            b.style.borderColor = '#e05';
+            b.style.background  = '#3a0015';
+            b.style.color       = '#ff4488';
+        } else {
+            b.style.borderColor = '#444';
+            b.style.background  = b.id === 'eraser-btn' ? '#2a2a2e' : '#2a2a36';
+            b.style.color       = b.id === 'eraser-btn' ? '#888' : '#ccc';
+        }
+    });
+}
 </script>
 
 <script>

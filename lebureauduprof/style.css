@@ -160,11 +160,6 @@
         #board.is-erasing .widget-back-handle,
         #board.is-erasing .widget-rotate-handle,
         #board.is-erasing .widget-menu-handle { opacity: 0 !important; pointer-events: none !important; }
-        /* En mode dessin/gomme, les widgets ne doivent pas intercepter les événements */
-        #board.is-drawing .widget,
-        #board.is-drawing .shape-widget,
-        #board.is-erasing .widget,
-        #board.is-erasing .shape-widget { pointer-events: none !important; }
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .drag-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus .drag-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-close-handle,
@@ -2518,13 +2513,9 @@ body.presentation-mode #image-panel-tab { display: none !important; }
 
 /* On étend les règles focus-within au .widget[data-image-widget] */
 
-.widget[data-image-widget]:hover .shape-resize-handle,
-.widget[data-image-widget]:focus-within .shape-resize-handle { opacity: 1; pointer-events: auto; }
-.widget[data-image-widget]:hover .resize-lock-btn,
+.widget[data-image-widget]:focus-within .shape-resize-handle { opacity: 1; }
 .widget[data-image-widget]:focus-within .resize-lock-btn      { opacity: 1; pointer-events: auto; }
-.widget[data-image-widget]:hover .flip-h-btn,
 .widget[data-image-widget]:focus-within .flip-h-btn           { opacity: 1; pointer-events: auto; }
-.widget[data-image-widget]:hover .flip-v-btn,
 .widget[data-image-widget]:focus-within .flip-v-btn           { opacity: 1; pointer-events: auto; }
 
 /* ── Menu transparence image (double-clic) ── */
