@@ -139,6 +139,11 @@ function buildBoardState() {
                 level:      w.dataset.monnaieLevel || 'facile'
             };
         }
+        // Données propres au widget tableau de numération
+        let tableauNumData = null;
+        if (w.dataset.type === 'tableau-num' && typeof w._tnumGetData === 'function') {
+            tableauNumData = w._tnumGetData();
+        }
         // Données propres au widget conjugaison
         let conjData = null;
         if (w.dataset.type === 'conjugaison') {
@@ -196,7 +201,8 @@ function buildBoardState() {
 			monnaieData,
 			planData,
 			heureData,
-			conjData
+			conjData,
+			tableauNumData
 		});
     });
     const shapes = [];
@@ -394,6 +400,11 @@ function restoreBoardFromJSON(json) {
                 if (mz && w.monnaieData.itemsH)     mz.style.height  = w.monnaieData.itemsH     + 'px';
                 // Restaurer le niveau
                 if (w.monnaieData.level && widget._setLevel) widget._setLevel(w.monnaieData.level);
+            }
+        } else if (w.type === 'tableau-num') {
+            widget = createTableauNumWidget();
+            if (w.tableauNumData && typeof widget._tnumSetData === 'function') {
+                widget._tnumSetData(w.tableauNumData);
             }
         } else if (w.type === 'conjugaison') {
             widget = createConjugaisonWidget();

@@ -2958,3 +2958,331 @@ body.menu-light #image-upload-btn:hover {
     border-color: #4a90e2;
     color: var(--panel-light-text);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   widget-tableau-num.css  —  Tableau de numération décimale
+   Toutes les tailles sont en em : le ResizeObserver ajuste le
+   font-size de .editor-container et tout scale proportionnellement.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── editor-container spécifique au widget ── */
+.tnum-editor-container {
+    border: none !important;
+    background: transparent !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    /* taille initiale confortable */
+    width: 620px;
+    height: auto;
+}
+
+/* ── Conteneur principal ── */
+.tnum-container {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    border-radius: 0.7em;
+    padding: 0;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 0.3em 1.4em rgba(0,0,0,0.4);
+    border: 0.07em solid #2e2e50;
+}
+
+/* ── Barre de paramètres ── */
+.tnum-settings-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4em 1em;
+    padding: 0.55em 1em;
+    background: #12122a;
+    border-bottom: 0.07em solid #2e2e50;
+}
+.tnum-settings-title {
+    font-size: 1em;
+    color: #7070a0;
+    margin-right: 0.2em;
+    white-space: nowrap;
+}
+.tnum-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: 0.85em;
+    color: #b0b0d0;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.2em 0.55em;
+    border-radius: 0.45em;
+    transition: background .15s;
+}
+.tnum-toggle-label:hover { background: rgba(255,255,255,.06); }
+.tnum-toggle-label input[type=checkbox] {
+    accent-color: #6366f1;
+    width: 1em; height: 1em;
+    cursor: pointer;
+    margin: 0;
+}
+.tnum-toggle-label input[disabled] { opacity: .45; cursor: default; }
+.tnum-sep-v { width: 0.07em; height: 1.4em; background: #2e2e50; }
+
+/* ── Toggle Libre / Retenue ── */
+.tnum-mode-toggle {
+    display: flex;
+    border-radius: 0.45em;
+    overflow: hidden;
+    border: 0.07em solid #3a3a60;
+    flex-shrink: 0;
+}
+.tnum-mode-btn {
+    background: transparent;
+    border: none;
+    color: #6060a0;
+    font-size: 0.8em;
+    font-weight: 600;
+    padding: 0.25em 0.7em;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+    user-select: none;
+}
+.tnum-mode-btn + .tnum-mode-btn { border-left: 0.07em solid #3a3a60; }
+.tnum-mode-btn:hover { background: rgba(255,255,255,.06); color: #a0a0d0; }
+.tnum-mode-btn.tnum-mode-active {
+    background: #4f46e5;
+    color: #fff;
+}
+body.menu-light .tnum-mode-toggle { border-color: #c0c0e0; }
+body.menu-light .tnum-mode-btn { color: #8888bb; }
+body.menu-light .tnum-mode-btn + .tnum-mode-btn { border-left-color: #c0c0e0; }
+body.menu-light .tnum-mode-btn:hover { background: rgba(0,0,0,.06); color: #333; }
+body.menu-light .tnum-mode-btn.tnum-mode-active { background: #4f46e5; color: #fff; }
+
+/* ── Zone de défilement ── */
+.tnum-scroll-wrap { overflow: hidden; }
+
+/* ── Tableau ── */
+.tnum-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* ── En-têtes ligne 1 (classes) ── */
+.tnum-head-classes th {
+    padding: 0.25em 0.2em;
+    font-size: 0.68em;
+    font-weight: 700;
+    text-align: center;
+
+    letter-spacing: .02em;
+    border: 0.07em solid #2e2e50;
+    white-space: normal;
+    overflow: hidden;
+    line-height: 1.2;
+    word-break: break-word;
+}
+.tnum-head-actions { background: transparent !important; border: none !important; min-width: 2.1em; }
+.tnum-cls-milliards { background: rgba(124,58,237,.25); color: #c4b5fd; }
+.tnum-cls-millions  { background: rgba(8,145,178,.25);  color: #a5f3fc; }
+.tnum-cls-milliers  { background: rgba(5,150,105,.25);  color: #6ee7b7; }
+.tnum-cls-unites    { background: rgba(217,119,6,.22);  color: #fde68a; }
+.tnum-cls-decimales { background: rgba(190,24,93,.22);  color: #fbcfe8; border-left: 0.14em dashed #6b3070 !important; }
+
+/* ── En-têtes ligne 2 (colonnes) ── */
+.tnum-head-cols th {
+    padding: 0.28em 0.15em;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-align: center;
+    border: 0.07em solid #2e2e50;
+    overflow: hidden;
+    color: var(--tnum-col-color, #fff);
+}
+/* Fractions décimales : rendu empilé */
+.tnum-head-cols th.tnum-dixiemes,
+.tnum-head-cols th.tnum-centiemes,
+.tnum-head-cols th.tnum-milliemes {
+    font-size: 0.65em;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+/* ── Séparateur virgule ── */
+/* ── Virgule entre unités et décimales ── */
+.tnum-virgule-col {
+    position: relative;
+    padding-left: 0.5em !important;
+}
+.tnum-virgule-col::before {
+    content: ',';
+    position: absolute;
+    left: -0.35em;
+    bottom: 0.9em;
+    font-size: 2em;
+    font-weight: 900;
+    font-family: 'BelleAllureGS', cursive;
+    color: #e07b2a;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+}
+body.menu-light .tnum-virgule-col::before { color: #c05a10; }
+
+/* ── Cellule corps ── */
+.tnum-cell {
+    padding: 0.14em;
+    border: 0.07em solid #2a2a45;
+    text-align: center;
+    vertical-align: middle;
+}
+.tnum-cell-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05em;
+}
+
+/* ── Input chiffre ── */
+.tnum-digit {
+    width: 90%;
+    max-width: 2.7em;
+    height: 2.4em;
+    text-align: center;
+    font-size: 1.43em;
+    font-weight: 700;
+    font-family: 'BelleAllureGS', cursive;
+    color: var(--tnum-col-color, #fff);
+    background: #1a1a2e;
+    border: none;
+    outline: none;
+    caret-color: transparent;
+    padding: 0;
+    box-sizing: border-box;
+}
+.tnum-digit::placeholder { color: transparent; }
+body.menu-light .tnum-digit {
+    background: #f8f9ff;
+    color: var(--tnum-col-color, #333);
+}
+
+/* ── Boutons + − ── */
+.tnum-step {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.1);
+    font-size: 0.8em;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.3em;
+    border-radius: 0.2em;
+    transition: color .15s;
+    user-select: none;
+}
+.tnum-step:hover { color: rgba(255,255,255,.65); }
+body.menu-light .tnum-step { color: rgba(0,0,0,.1); }
+body.menu-light .tnum-step:hover { color: rgba(0,0,0,.55); }
+
+/* ── Colonne actions (supprimer ligne) ── */
+.tnum-row-actions {
+    padding: 0 0.28em;
+    border: none;
+    vertical-align: middle;
+    text-align: center;
+    background: transparent;
+}
+.tnum-del-row-btn {
+    background: none;
+    border: none;
+    color: #554455;
+    font-size: 1em;
+    cursor: pointer;
+    width: 1.6em; height: 1.6em;
+    border-radius: 0.28em;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: color .12s, background .12s;
+}
+.tnum-del-row-btn:hover { color: #ff6b6b; background: rgba(255,107,107,.12); }
+
+/* ── Footer ── */
+.tnum-footer {
+    padding: 0.55em 0.85em;
+    background: #12122a;
+    border-top: 0.07em solid #2e2e50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.7em;
+}
+.tnum-add-row-btn {
+    background: rgba(99,102,241,.15);
+    border: 0.07em dashed #6366f1;
+    color: #a5b4fc;
+    font-size: 0.6em;
+    font-weight: 600;
+    width: 2em;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.tnum-add-row-btn:hover { background: rgba(99,102,241,.3); color: #e0e7ff; }
+.tnum-reset-btn {
+    background: rgba(239,68,68,.1);
+    border: 0.07em solid rgba(239,68,68,.35);
+    font-size: 0.6em;
+    width: 2em;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: background .15s;
+}
+.tnum-reset-btn:hover { background: rgba(239,68,68,.25); }
+
+/* ── Mode clair ── */
+body.menu-light .tnum-container {
+    background: #f8f9ff;
+    border-color: #d4d4e8;
+    box-shadow: 0 0.3em 1.4em rgba(0,0,0,.1);
+}
+body.menu-light .tnum-settings-bar { background: #eef0f8; border-bottom-color: #d4d4e8; }
+body.menu-light .tnum-settings-title { color: #7070a0; }
+body.menu-light .tnum-toggle-label { color: #333355; }
+body.menu-light .tnum-toggle-label:hover { background: rgba(0,0,0,.06); }
+body.menu-light .tnum-sep-v { background: #d4d4e8; }
+body.menu-light .tnum-head-classes th { border-color: #d0d0e8; }
+body.menu-light .tnum-cls-milliards { background: rgba(124,58,237,.12); color: #5b21b6; }
+body.menu-light .tnum-cls-millions  { background: rgba(8,145,178,.12);  color: #075985; }
+body.menu-light .tnum-cls-milliers  { background: rgba(5,150,105,.12);  color: #065f46; }
+body.menu-light .tnum-cls-unites    { background: rgba(217,119,6,.12);  color: #92400e; }
+body.menu-light .tnum-cls-decimales { background: rgba(190,24,93,.12);  color: #831843; }
+body.menu-light .tnum-head-cols th { border-color: #d0d0e8; }
+body.menu-light .tnum-cell { border-color: #d8d8ec; }
+body.menu-light .tnum-step { color: rgba(0,0,0,.1); }
+body.menu-light .tnum-step:hover { color: rgba(0,0,0,.55); }
+body.menu-light .tnum-del-row-btn { color: #ccbbcc; }
+body.menu-light .tnum-del-row-btn:hover { color: #e00; background: rgba(220,0,0,.08); }
+body.menu-light .tnum-footer { background: #eef0f8; border-top-color: #d4d4e8; }
+body.menu-light .tnum-add-row-btn {
+    background: rgba(99,102,241,.08);
+    border-color: #8b8bef;
+    color: #4338ca;
+}
+body.menu-light .tnum-add-row-btn:hover { background: rgba(99,102,241,.18); color: #312e81; }
+body.menu-light .tnum-reset-btn {
+    background: rgba(239,68,68,.06);
+    border-color: rgba(239,68,68,.3);
+    color: #dc2626;
+}
+body.menu-light .tnum-reset-btn:hover { background: rgba(239,68,68,.15); color: #b91c1c; }
