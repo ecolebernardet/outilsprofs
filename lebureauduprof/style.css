@@ -2590,11 +2590,11 @@ body.presentation-mode #image-panel-tab { display: none !important; }
 
 /* ── Variables partagées mode clair panneaux ── */
 :root {
-    --panel-light-bg: #f0f2f5;
-    --panel-light-bg2: #e4e6ea;
+    --panel-light-bg: #ffffff;
+    --panel-light-bg2: #ffffff;
     --panel-light-border: #ccc;
     --panel-light-header-bg: #e8eaee;
-    --panel-light-text: #1a1a2e;
+    --panel-light-text: #000000;
     --panel-light-muted: #666;
     --panel-light-card-bg: #ffffff;
     --panel-light-card-hover: #e8f0fb;
