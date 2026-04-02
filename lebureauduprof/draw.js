@@ -29,6 +29,9 @@ window._drawCursorStyle = window._drawCursorStyle || 'size';
 // Opacité du trait (0.0–1.0), modifiable depuis les options avancées
 window._drawOpacity = (window._drawOpacity !== undefined) ? window._drawOpacity : 1.0;
 
+// Reconnaissance de forme automatique (désactivée par défaut)
+window._drawShapeRecog = window._drawShapeRecog || false;
+
 // Met à jour l'aspect visuel des 3 boutons de curseur
 function _updateDrawCursorBtns() {
     const style = window._drawCursorStyle || 'size';
@@ -353,7 +356,7 @@ function startPaint(e) {
         opacity: (window._drawOpacity !== undefined ? window._drawOpacity : 1.0)
     };
     if (_isHighlight) currentStroke.highlight = true;
-    if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
+    if (currentDrawMode === 'shape' || window._drawShapeRecog) _lastStrokePoints = [...currentStroke.points];
     if (FIGURE_MODES.includes(currentDrawMode)) {
         _figureStart = getPos(e); _figureEnd = null;
         _segmentStart = _figureStart; // compat
@@ -424,7 +427,7 @@ function paint(e) {
     _smoothLast = smoothed;
     _smoothPts.push(smoothed);
     currentStroke.points.push(rawPos);
-    if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
+    if (currentDrawMode === 'shape' || window._drawShapeRecog) _lastStrokePoints = [...currentStroke.points];
 
     // Dessin incrémental simple (lineTo) — aucune latence, trait visible immédiatement
     // Le rendu Bézier s'applique uniquement à la sauvegarde finale (drawStroke)
@@ -550,6 +553,15 @@ function endPaint() {
             redrawStrokes();
             recognizeAndReplaceShape({ points: _lastStrokePoints, color: (cpickGetValue('draw-color') || '#e84393'), size: parseInt(document.getElementById('draw-size').value) });
             _lastStrokePoints = null;
+            return;
+        }
+        // Reconnaissance de forme automatique (mode libre uniquement)
+        if (window._drawShapeRecog && currentDrawMode === 'free' && _lastStrokePoints && _lastStrokePoints.length > 3) {
+            const _recogStroke = { points: _lastStrokePoints, color: currentStroke.color, size: currentStroke.size };
+            currentStroke = null;
+            _lastStrokePoints = null;
+            redrawStrokes();
+            recognizeAndReplaceShape(_recogStroke);
             return;
         }
         strokes.push(currentStroke);
@@ -1495,20 +1507,42 @@ function recognizeAndReplaceShape(stroke) {
     const strokeColor = cpickGetValue('draw-color') || '#e84393';
     const strokeWidth = parseInt(document.getElementById('draw-size').value);
     const fillColor   = cpickGetValue('shape-recog-fill') || '#4a90e2';
-    const fillOpacity = parseInt(document.getElementById('shape-recog-opacity').value) / 100;
+    const _opacityEl  = document.getElementById('shape-recog-opacity');
+    const fillOpacity = _opacityEl ? parseInt(_opacityEl.value) / 100 : 0.5;
 
     const firstPt = pts[0], lastPt = pts[pts.length-1];
     const closeDist = Math.hypot(firstPt.x-lastPt.x, firstPt.y-lastPt.y);
     const diagLen   = Math.hypot(w, h);
     const isClosed  = closeDist < diagLen * 0.35;
 
+    // ── Reconnaissance ligne droite (forme ouverte) ──
+    // Simplifier le tracé : si on obtient 2 points, c'est une ligne
     if (!isClosed) {
-        strokes.push({ ...stroke, recognized: false });
-        const cur = buildBoardJSON();
-        if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
-        saveBoard(); redrawStrokes();
-        return false;
-    }
+		const lineLen = Math.hypot(lastPt.x - firstPt.x, lastPt.y - firstPt.y);
+		let maxDev = 0;
+		for (const p of pts) {
+			maxDev = Math.max(maxDev, perpendicularDist(p, firstPt, lastPt));
+		}
+		const threshold = Math.max(3, lineLen * 0.03);
+		if (maxDev <= threshold && lineLen > 15) {
+			const lineStroke = {
+				points: [firstPt, lastPt],
+				color:  strokeColor,
+				size:   strokeWidth,
+				opacity: stroke.opacity !== undefined ? stroke.opacity : 1.0
+			};
+			strokes.push(lineStroke);
+			const cur = buildBoardJSON();
+			if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
+			saveBoard(); redrawStrokes();
+			return true;
+		}
+		strokes.push({ ...stroke, recognized: false });
+		const cur = buildBoardJSON();
+		if (cur) { undoStack.push(cur); if (undoStack.length > MAX_UNDO) undoStack.shift(); redoStack=[]; updateUndoRedoBtns(); }
+		saveBoard(); redrawStrokes();
+		return false;
+	}
 
     const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
     const radii  = pts.map(p => Math.hypot(p.x-cx, p.y-cy));
