@@ -1171,6 +1171,9 @@ function activatePencil() {
         hlBtn.style.color       = '#aaa';
         hlBtn.classList.remove('btn-mode-active');
     }
+    // Bouton sélection inactif
+    _setBtnActive('draw-select-btn', false);
+    clearSelection();
     if (isEraserMode) stopEraserMode();
     if (!isDrawMode) {
         isDrawMode = true;
@@ -1204,6 +1207,8 @@ function activateHighlighter() {
     }
     // Bouton figures inactif
     _setBtnActive('draw-figures-btn', false, 'figures');
+    _setBtnActive('draw-select-btn', false);
+    clearSelection();
     const figSub = document.getElementById('figures-submenu');
     if (figSub) { figSub.classList.remove('open'); figSub.style.display = 'none'; }
     if (isEraserMode) stopEraserMode();
@@ -1327,6 +1332,8 @@ function toggleSelectMode() {
     });
     _setBtnActive('draw-figures-btn', false, 'figures');
     _setBtnActive('draw-free-btn', false);
+    const hlBtnSel = document.getElementById('draw-highlight-btn');
+    if (hlBtnSel) { hlBtnSel.style.borderColor='#444'; hlBtnSel.style.background='#2a2a2e'; hlBtnSel.style.color='#aaa'; hlBtnSel.classList.remove('btn-mode-active'); }
     _setBtnActive('draw-select-btn', true);
 }
 function stopDrawing() {
@@ -1527,6 +1534,15 @@ function toggleEraserMode() {
     if (hlBtnE) { hlBtnE.style.borderColor='#444'; hlBtnE.style.background='#2a2a2e'; hlBtnE.style.color='#aaa'; hlBtnE.classList.remove('btn-mode-active'); }
     const frBtnE = document.getElementById('draw-free-btn');
     if (frBtnE) { frBtnE.style.borderColor='#444'; frBtnE.style.background='#2a2a2e'; frBtnE.style.color='#aaa'; frBtnE.classList.remove('btn-mode-active'); }
+    // Activer visuellement le bouton gomme (même style qu'en mode annotation PDF)
+    const eraserBtnE = document.getElementById('eraser-btn');
+    if (eraserBtnE) {
+        eraserBtnE.style.setProperty('background',   '#3a1a1a', 'important');
+        eraserBtnE.style.setProperty('border-color', '#e05555', 'important');
+        eraserBtnE.style.setProperty('color',        '#fff',    'important');
+        eraserBtnE.style.setProperty('box-shadow',   '0 0 8px #e0555588', 'important');
+        eraserBtnE.classList.add('btn-mode-active');
+    }
     // En mode PDF : désactiver visuellement crayon et surligneur
     if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
 }
@@ -1543,6 +1559,18 @@ function stopEraserMode() {
     }
     isDrawMode = true;
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    // Désactiver visuellement le bouton gomme
+    const eraserBtnS = document.getElementById('eraser-btn');
+    if (eraserBtnS) {
+        eraserBtnS.style.removeProperty('background');
+        eraserBtnS.style.removeProperty('border-color');
+        eraserBtnS.style.removeProperty('color');
+        eraserBtnS.style.removeProperty('box-shadow');
+        eraserBtnS.style.background  = '#2a2a2e';
+        eraserBtnS.style.borderColor = '#444';
+        eraserBtnS.style.color       = '#aaa';
+        eraserBtnS.classList.remove('btn-mode-active');
+    }
     // En mode PDF : réactiver visuellement le bon outil
     if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
 }
