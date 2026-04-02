@@ -95,14 +95,10 @@ function loadPdfWidget(input) {
 function _showPdfInWidget(container, base64OrUrl, filename) {
     const placeholder   = container.querySelector('.pdf-placeholder');
     const nameSpan      = container.querySelector('.pdf-filename');
-    const canvasWrap    = container.querySelector('.pdf-canvas-wrap');
-    const pdfCanvas     = container.querySelector('.pdf-canvas');
-    const annotCanvas   = container.querySelector('.pdf-annot-canvas');
     const navBar        = container.querySelector('.pdf-nav');
     const zoomBar       = container.querySelector('.pdf-zoom-bar');
 
     if (placeholder) placeholder.style.display = 'none';
-    if (canvasWrap)  canvasWrap.style.display = 'block';
     if (navBar)      navBar.style.display = 'flex';
     if (zoomBar)     zoomBar.style.display = 'flex';
     const zoomFitBtn = container.querySelector('.pdf-zoom-fit');
@@ -111,11 +107,24 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (exportBtn)   exportBtn.style.display = 'inline-flex';
     const annotBtn = container.querySelector('.pdf-annot-widget-btn');
     if (annotBtn)    annotBtn.style.display = 'inline-flex';
-    // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
-    if (canvasWrap)  canvasWrap.style.cursor = 'grab';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
     // Support stylet VPI sur tous les boutons de la toolbar PDF
     _attachPenSupportToPdfToolbar(container.closest('.editor-container') || container);
+
+    // ── Cloner le canvasWrap pour supprimer tous les listeners accumulés ──
+    // (évite la fuite de listeners à chaque rechargement/switch de PDF)
+    let canvasWrap = container.querySelector('.pdf-canvas-wrap');
+    if (canvasWrap) {
+        const newWrap = canvasWrap.cloneNode(true);
+        canvasWrap.parentNode.replaceChild(newWrap, canvasWrap);
+        canvasWrap = newWrap;
+    }
+    const pdfCanvas   = canvasWrap ? canvasWrap.querySelector('.pdf-canvas')    : container.querySelector('.pdf-canvas');
+    const annotCanvas = canvasWrap ? canvasWrap.querySelector('.pdf-annot-canvas') : container.querySelector('.pdf-annot-canvas');
+
+    if (canvasWrap)  canvasWrap.style.display = 'block';
+    // Curseur main par défaut sur le conteneur (pas sur annotCanvas qui a pointer-events:none)
+    if (canvasWrap)  canvasWrap.style.cursor = 'grab';
 
     // ── Drag-to-scroll natif (quand le mode annotation draw.js n'est pas actif) ──
     let _dragScrolling = false, _dragStartX = 0, _dragStartY = 0, _dragScrollLeft = 0, _dragScrollTop = 0;
@@ -177,8 +186,16 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     }
 
     _ensurePdfJs(() => {
+        // ── Détruire l'ancien document PDF.js pour libérer mémoire/workers ──
+        if (container._currentPdfDoc) {
+            try { container._currentPdfDoc.destroy(); } catch(_) {}
+            container._currentPdfDoc = null;
+        }
+
         const data = base64ToUint8Array(base64OrUrl);
         pdfjsLib.getDocument({ data }).promise.then(pdfDoc => {
+            // Mémoriser pour pouvoir détruire lors du prochain chargement
+            container._currentPdfDoc = pdfDoc;
 
             // ── État ────────────────────────────────────────────────────────
             let currentPage = 1;
@@ -186,9 +203,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             let zoomScale = null; // null = fit-to-width
             const ZOOM_STEP = 0.2, ZOOM_MIN = 0.3, ZOOM_MAX = 5;
 
-            // Annotations : tableau de couches, une par page
-            // Chaque couche = { strokes: [{tool,color,size,pts:[],text,x,y}], ...}
-            const annotLayers = {};
+            // Annotations : restaurer les couches existantes si ce PDF a déjà été affiché
+            // (évite de perdre les annotations lors d'un rechargement/switch)
+            const annotLayers = container._savedAnnotLayers || {};
+            container._savedAnnotLayers = annotLayers; // référence vivante → toujours à jour
             function getLayer(p) {
                 if (!annotLayers[p]) annotLayers[p] = { strokes: [] };
                 return annotLayers[p];
