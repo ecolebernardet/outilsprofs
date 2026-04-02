@@ -479,36 +479,26 @@
 				<!-- Couleurs prédéfinies 4x2 -->
 				<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;">
 					<div onclick="_setDrawColor('#c62828',this)" title="Rouge"  style="width:11px;height:11px;border-radius:2px;background:#c62828;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
-					<div onclick="_setDrawColor('#2e7d32',this)" title="Vert"   style="width:11px;height:11px;border-radius:2px;background:#2e7d32;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#8e44ad',this)" title="Violet" style="width:11px;height:11px;border-radius:2px;background:#8e44ad;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#e84393',this)" title="Rose"   style="width:11px;height:11px;border-radius:2px;background:#e84393;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#111111',this)" title="Noir"   style="width:11px;height:11px;border-radius:2px;background:#111111;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#f58727',this)" title="Orange"   style="width:11px;height:11px;border-radius:2px;background:#f58727;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
-					<div onclick="_setDrawColor('#1565c0',this)" title="Bleu"   style="width:11px;height:11px;border-radius:2px;background:#1565c0;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
-					<div onclick="_setDrawColor('#e84393',this)" title="Rose"   style="width:11px;height:11px;border-radius:2px;background:#e84393;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#2e7d32',this)" title="Vert"   style="width:11px;height:11px;border-radius:2px;background:#2e7d32;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#b2f78d',this)" title="Vert clair"   style="width:11px;height:11px;border-radius:2px;background:#b2f78d;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#888888',this)" title="Gris"  style="width:11px;height:11px;border-radius:2px;background:#888888;cursor:pointer;border:1px solid #888;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#e6c000',this)" title="Jaune"  style="width:11px;height:11px;border-radius:2px;background:#e6c000;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+					<div onclick="_setDrawColor('#1565c0',this)" title="Bleu"   style="width:11px;height:11px;border-radius:2px;background:#1565c0;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#71d4f0',this)" title="Bleu clair"   style="width:11px;height:11px;border-radius:2px;background:#71d4f0;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
-					<div onclick="_setDrawColor('#b2f78d',this)" title="Vert clair"   style="width:11px;height:11px;border-radius:2px;background:#b2f78d;cursor:pointer;border:1px solid #555;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 					<div onclick="_setDrawColor('#ffffff',this)" title="Blanc"  style="width:11px;height:11px;border-radius:2px;background:#ffffff;cursor:pointer;border:1px solid #888;transition:transform .1s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
 				</div>
 			</div>
 
 			<!-- TAILLE TRAIT : − valeur + -->
-			<!-- TAILLE TRAIT + LISSAGE empilés verticalement -->
-			<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-				<!-- Taille trait : − valeur + -->
-				<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;">
+			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;flex-shrink:0;">
 					<button class="dt-minus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
 					<input type="range" id="draw-size" min="1" max="40" value="4" style="display:none;">
 					<span id="draw-size-label" style="color:#fff;font-size:11px;min-width:20px;text-align:center;">4</span>
 					<button class="dt-plus" onmousedown="(function(btn){var iv;function step(){var i=document.getElementById('draw-size');i.value=Math.min(40,+i.value+1);i.dispatchEvent(new Event('input'));}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
-				</div>
-				<!-- Lissage : ∿ − val + -->
-				<div style="display:flex;flex-direction:row;align-items:center;gap:3px;justify-content:center;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
-					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
-					<span id="draw-smooth-label" data-v="10" style="color:#aaa;font-size:10px;min-width:20px;text-align:center;cursor:default;">∿10</span>
-					<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent='∿'+v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
-				</div>
 			</div>
 			
 			<!-- CRAYON + SURLIGNEUR côte à côte -->
@@ -536,10 +526,40 @@
 				<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
 			</div>
 
-			<!-- HANDLE -->
-			<div id="draw-toolbar-drag-handle" class="dt-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;width:20px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
-				<svg class="dt-handle-svg-v" width="20" height="10" viewBox="0 0 20 10" fill="none"><circle cx="4" cy="5" r="2" fill="#999"/><circle cx="10" cy="5" r="2" fill="#999"/><circle cx="16" cy="5" r="2" fill="#999"/></svg>
-				<svg class="dt-handle-svg-h" width="10" height="16" viewBox="0 0 10 16" fill="none"><circle cx="5" cy="3" r="2" fill="#999"/><circle cx="5" cy="9" r="2" fill="#999"/><circle cx="5" cy="15" r="2" fill="#999"/></svg>
+			<!-- HANDLE + ENGRENAGE sur la même ligne -->
+			<div style="display:flex;flex-direction:row;align-items:center;gap:4px;flex-shrink:0;">
+				<div id="draw-toolbar-drag-handle" class="dt-handle" style="display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.6;transition:opacity 0.2s;background:rgba(255,255,255,0.06);border-radius:6px;width:20px;" title="Déplacer" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+					<svg class="dt-handle-svg-v" width="20" height="10" viewBox="0 0 20 10" fill="none"><circle cx="4" cy="5" r="2" fill="#999"/><circle cx="10" cy="5" r="2" fill="#999"/><circle cx="16" cy="5" r="2" fill="#999"/></svg>
+					<svg class="dt-handle-svg-h" width="10" height="16" viewBox="0 0 10 16" fill="none"><circle cx="5" cy="3" r="2" fill="#999"/><circle cx="5" cy="9" r="2" fill="#999"/><circle cx="5" cy="15" r="2" fill="#999"/></svg>
+				</div>
+				<!-- ENGRENAGE OPTIONS AVANCÉES -->
+				<div style="position:relative;">
+					<button id="draw-advanced-btn" onclick="_toggleDrawAdvancedPopover()" style="width:20px;height:20px;border-radius:6px;border:1px solid #444;background:transparent;color:#555;cursor:pointer;font-size:12px;line-height:1;padding:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;" title="Options avancées" onmouseenter="this.style.color='#999'" onmouseleave="this.style.color='#555'">&#9881;&#65039;</button>
+					<div id="draw-advanced-popover" style="display:none;position:fixed;background:#1e1e22;border:1px solid #444;border-radius:10px;padding:10px 12px;z-index:99999;min-width:175px;box-shadow:0 4px 16px #0008;">
+						<div style="color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Options avancées</div>
+						<!-- Lissage -->
+						<div style="display:flex;flex-direction:row;align-items:center;gap:4px;margin-bottom:10px;" title="Lissage du trait stylet&#10;Bas = très lissé (boucles fluides)&#10;Haut = moins lissé (plus réactif)">
+							<span style="color:#aaa;font-size:11px;flex:1;">Lissage</span>
+							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.max(1,+lbl.dataset.v-1);lbl.dataset.v=v;lbl.textContent=v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+							<span id="draw-smooth-label" data-v="10" style="color:#fff;font-size:11px;min-width:18px;text-align:center;cursor:default;">10</span>
+							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-smooth-label');var v=Math.min(20,+lbl.dataset.v+1);lbl.dataset.v=v;lbl.textContent=v;if(typeof SMOOTH_ALPHA!=='undefined')SMOOTH_ALPHA=v/10;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+						</div>
+						<!-- Opacité du trait -->
+						<div style="display:flex;flex-direction:row;align-items:center;gap:4px;margin-bottom:10px;" title="Opacité du trait (100% = opaque, 0% = transparent)">
+							<span style="color:#aaa;font-size:11px;flex:1;">Opacité</span>
+							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-opacity-label');var v=Math.max(10,+lbl.dataset.v-10);lbl.dataset.v=v;lbl.textContent=v+'%';if(typeof window!=='undefined')window._drawOpacity=v/100;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
+							<span id="draw-opacity-label" data-v="100" style="color:#fff;font-size:11px;min-width:28px;text-align:center;cursor:default;">100%</span>
+							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-opacity-label');var v=Math.min(100,+lbl.dataset.v+10);lbl.dataset.v=v;lbl.textContent=v+'%';if(typeof window!=='undefined')window._drawOpacity=v/100;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+						</div>
+						<!-- Curseur -->
+						<div style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Curseur</div>
+						<div style="display:flex;flex-direction:row;gap:5px;">
+							<button id="draw-cursor-btn-crosshair" onclick="_setDrawCursorStyle('crosshair')" title="Précision — croix fine" style="flex:1;height:32px;border-radius:7px;border:2px solid #555;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .15s,background .15s;">✛</button>
+							<button id="draw-cursor-btn-dot" onclick="_setDrawCursorStyle('dot')" title="Point — point coloré" style="flex:1;height:32px;border-radius:7px;border:2px solid #555;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .15s,background .15s;">⬤</button>
+							<button id="draw-cursor-btn-size" onclick="_setDrawCursorStyle('size')" title="Taille — cercle proportionnel à l'épaisseur" style="flex:1;height:32px;border-radius:7px;border:2px solid #4a90e2;background:#1a3550;color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .15s,background .15s;">◎</button>
+						</div>
+					</div>
+				</div>
 			</div>
 
 		</div>
@@ -1366,6 +1386,64 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 </script>
 
 <script>
+// ── Popover options avancées : positionnement intelligent ────────────
+function _toggleDrawAdvancedPopover() {
+    var pop = document.getElementById('draw-advanced-popover');
+    var btn = document.getElementById('draw-advanced-btn');
+    if (!pop || !btn) return;
+    if (pop.style.display === 'block') { pop.style.display = 'none'; return; }
+
+    // Afficher d'abord pour mesurer les dimensions
+    pop.style.display = 'block';
+    // Mettre à jour l'état des boutons de curseur
+    if (typeof _updateDrawCursorBtns === 'function') _updateDrawCursorBtns();
+    var tb     = document.getElementById('draw-toolbar');
+    var bBtn   = btn.getBoundingClientRect();
+    var bPop   = pop.getBoundingClientRect();
+    var bTb    = tb ? tb.getBoundingClientRect() : bBtn;
+    var vw     = window.innerWidth;
+    var vh     = window.innerHeight;
+    var margin = 8;
+
+    // Axe vertical : ouvrir en haut si toolbar dans la moitié basse, sinon en bas
+    var top;
+    if (bTb.top > vh / 2) {
+        // toolbar en bas → popover au-dessus du bouton
+        top = bBtn.top - bPop.height - margin;
+    } else {
+        // toolbar en haut → popover en dessous
+        top = bBtn.bottom + margin;
+    }
+
+    // Axe horizontal : ouvrir à droite si toolbar dans la moitié gauche, sinon à gauche
+    var left;
+    if (bTb.left < vw / 2) {
+        // toolbar à gauche → popover s'ouvre à droite du bouton
+        left = bBtn.right + margin;
+    } else {
+        // toolbar à droite → popover s'ouvre à gauche du bouton
+        left = bBtn.left - bPop.width - margin;
+    }
+
+    // Garder dans les limites de l'écran
+    left = Math.max(margin, Math.min(left, vw - bPop.width - margin));
+    top  = Math.max(margin, Math.min(top,  vh - bPop.height - margin));
+
+    pop.style.left = left + 'px';
+    pop.style.top  = top  + 'px';
+}
+
+// ── Fermeture du popover options avancées au clic en dehors ──────────
+document.addEventListener('pointerdown', function(e) {
+    var pop = document.getElementById('draw-advanced-popover');
+    var btn = document.getElementById('draw-advanced-btn');
+    if (pop && pop.style.display === 'block') {
+        if (!pop.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+            pop.style.display = 'none';
+        }
+    }
+});
+
 // ── Fermeture des panneaux latéraux au clic en dehors ─────────────────
 document.addEventListener('pointerdown', function(e) {
     var panels = [

@@ -23,24 +23,108 @@ function _setBtnActive(id, active, colorScheme) {
     btn.classList.toggle('btn-mode-active', active);
 }
 
-// Génère et applique un curseur SVG : point de la couleur courante + cercle gris r=8
+// Style de curseur actif : 'size' (défaut) | 'dot' | 'crosshair'
+window._drawCursorStyle = window._drawCursorStyle || 'size';
+
+// Opacité du trait (0.0–1.0), modifiable depuis les options avancées
+window._drawOpacity = (window._drawOpacity !== undefined) ? window._drawOpacity : 1.0;
+
+// Met à jour l'aspect visuel des 3 boutons de curseur
+function _updateDrawCursorBtns() {
+    const style = window._drawCursorStyle || 'size';
+    ['crosshair','dot','size'].forEach(function(s) {
+        const btn = document.getElementById('draw-cursor-btn-' + s);
+        if (!btn) return;
+        if (s === style) {
+            btn.style.setProperty('border', '2px solid #4a90e2', 'important');
+            btn.style.setProperty('background', '#1a3550', 'important');
+            btn.style.setProperty('color', '#fff', 'important');
+        } else {
+            btn.style.setProperty('border', '2px solid #555', 'important');
+            btn.style.setProperty('background', '#2a2a2e', 'important');
+            btn.style.setProperty('color', '#aaa', 'important');
+        }
+    });
+}
+
+// Change le style de curseur, met à jour les boutons et applique le curseur
+function _setDrawCursorStyle(style) {
+    window._drawCursorStyle = style;
+    _updateDrawCursorBtns();
+    updateDrawCursor();
+    // Si on est en mode annotation PDF avec l'outil crayon, mettre à jour le curseur PDF aussi
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode && _pdfAnnotTool === 'pen') {
+        const cursor = _pdfCursor('pen');
+        if (_pdfAnnotEvTarget) {
+            _pdfAnnotEvTarget.style.setProperty('cursor', cursor, 'important');
+            _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
+                if (!el.closest('.editor-toolbar')) el.style.setProperty('cursor', cursor, 'important');
+            });
+        }
+        if (_pdfAnnotCanvas) _pdfAnnotCanvas.style.cursor = cursor;
+    }
+}
+
+// Génère et applique le curseur selon window._drawCursorStyle
 function updateDrawCursor() {
     if (!isDrawMode || !board) return;
+    const style = window._drawCursorStyle || 'size';
+    const isHighlight = (currentDrawMode === 'highlight');
+
+    if (style === 'crosshair') {
+        board.style.setProperty('cursor', isHighlight ? _highlightCursorUrl() : 'crosshair', 'important');
+        return;
+    }
+
+    // Surligneur : toujours la croix jaune quelle que soit le style dot/size
+    if (isHighlight) {
+        board.style.setProperty('cursor', _highlightCursorUrl(), 'important');
+        return;
+    }
+
     const color = window._drawColor
         || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
         || document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background
         || '#e84393';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">`
-        + `<circle cx="10" cy="10" r="8" fill="none" stroke="#999" stroke-width="1.5"/>`
-        + `<circle cx="10" cy="10" r="2.5" fill="${color}"/>`
-        + `</svg>`;
+
+    let svg, hotX = 10, hotY = 10;
+
+    if (style === 'dot') {
+        // Point fixe 2px avec cercle gris autour
+        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">`
+            + `<circle cx="10" cy="10" r="8" fill="none" stroke="#999" stroke-width="1.5"/>`
+            + `<circle cx="10" cy="10" r="2" fill="${color}"/>`
+            + `</svg>`;
+    } else {
+        // 'size' : point seul dont la taille = épaisseur du trait, sans cercle
+        const size = parseInt((document.getElementById('draw-size') || {}).value) || 4;
+        const rDot = Math.max(2, Math.min(size / 2, 24));
+        const dim  = rDot * 2 + 4;
+        const cx   = dim / 2;
+        hotX = hotY = cx;
+        svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${dim}" height="${dim}">`
+            + `<circle cx="${cx}" cy="${cx}" r="${rDot}" fill="${color}"/>`
+            + `</svg>`;
+    }
+
     const b64 = btoa(svg);
-    const cursorUrl = `url("data:image/svg+xml;base64,${b64}") 10 10, crosshair`;
-    board.style.cursor = cursorUrl;
+    board.style.setProperty('cursor', `url("data:image/svg+xml;base64,${b64}") ${hotX} ${hotY}, crosshair`, 'important');
+}
+
+// Curseur surligneur : croix jaune (identique au mode annotation PDF)
+function _highlightCursorUrl() {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+        + '<line x1="10" y1="0" x2="10" y2="20" stroke="#f5c518" stroke-width="2.5"/>'
+        + '<line x1="0" y1="10" x2="20" y2="10" stroke="#f5c518" stroke-width="2.5"/>'
+        + '<circle cx="10" cy="10" r="3" fill="#f5c518"/>'
+        + '</svg>';
+    return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
 }
 
 function clearDrawCursor() {
-    if (board) board.style.cursor = '';
+    if (board) {
+        board.style.removeProperty('cursor');
+    }
 }
 
 function initCanvas() {
@@ -78,6 +162,7 @@ function initCanvas() {
     board.addEventListener('pointermove', _boardDrawPointerMove);
     document.getElementById('draw-size').addEventListener('input', function() {
         document.getElementById('draw-size-label').textContent = this.value;
+        if (isDrawMode && window._drawCursorStyle === 'size') updateDrawCursor();
     });
     // Initialiser window._drawColor depuis la couleur de la swatch si pas encore défini
     if (!window._drawColor) {
@@ -264,7 +349,8 @@ function startPaint(e) {
     currentStroke = {
         points: [getPos(e)],
         color: (window._drawColor || cpickGetValue('draw-color') || document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background || '#e84393'),
-        size: parseInt(document.getElementById('draw-size').value)
+        size: parseInt(document.getElementById('draw-size').value),
+        opacity: (window._drawOpacity !== undefined ? window._drawOpacity : 1.0)
     };
     if (_isHighlight) currentStroke.highlight = true;
     if (currentDrawMode === 'shape') _lastStrokePoints = [...currentStroke.points];
@@ -359,7 +445,7 @@ function paint(e) {
     } else {
         drawCtx.strokeStyle = currentStroke.color;
         drawCtx.lineWidth   = currentStroke.size;
-        drawCtx.globalAlpha = 1;
+        drawCtx.globalAlpha = (currentStroke.opacity !== undefined ? currentStroke.opacity : 1.0);
     }
     drawCtx.moveTo(prev.x, prev.y);
     drawCtx.lineTo(cur2.x, cur2.y);
@@ -1006,8 +1092,9 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
     ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.strokeStyle = highlight ? '#4a90e2' : stroke.color;
     ctx.lineWidth   = highlight ? stroke.size + 6 : stroke.size;
-    if (highlight) ctx.globalAlpha = 0.5;
-    if (stroke._dashed) { ctx.setLineDash([6, 4]); ctx.globalAlpha = 0.5; }
+    const _strokeAlpha = (stroke.opacity !== undefined ? stroke.opacity : 1.0);
+    ctx.globalAlpha = highlight ? 0.5 : _strokeAlpha;
+    if (stroke._dashed) { ctx.setLineDash([6, 4]); ctx.globalAlpha = Math.min(_strokeAlpha, 0.5); }
     bezierPath(stroke.points);
     ctx.stroke();
     if (stroke._dashed) ctx.setLineDash([]);
@@ -1104,11 +1191,16 @@ function setDrawMode(mode) {
         if (shapeOpts) shapeOpts.style.display = 'none';
         if (shapeHint) shapeHint.style.display = 'none';
     }
-    // Curseur crosshair en mode figure, curseur point en mode libre
+    // Curseur : figures → curseur SVG partagé, mode libre → curseur point
     // En mode annotation PDF, draw.js gère le curseur — ne pas toucher is-segment-mode
     if (board && !_pdfAnnotMode) {
-        if (FIGURE_MODES.includes(mode)) { board.classList.add('is-segment-mode'); clearDrawCursor(); }
-        else board.classList.remove('is-segment-mode');
+        if (FIGURE_MODES.includes(mode)) {
+            board.classList.add('is-segment-mode');
+            board.style.setProperty('cursor', _figureCursorUrl(), 'important');
+        } else {
+            board.classList.remove('is-segment-mode');
+            board.style.removeProperty('cursor');
+        }
     }
     // Si on choisit un mode figure alors qu'on était en mode sélection, réactiver le dessin
     if (FIGURE_MODES.includes(mode) && !isDrawMode) {
@@ -2078,18 +2170,46 @@ function _showPdfExtraBtns(show) {
 // Met à jour l'aspect visuel des boutons outil PDF
 // ── Curseurs SVG pour le mode annotation PDF ─────────────────────────────
 
+// Curseur SVG partagé pour les figures (board + PDF)
+function _figureCursorUrl() {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22">'
+        + '<line x1="11" y1="0" x2="11" y2="22" stroke="#aaa" stroke-width="1.5"/>'
+        + '<line x1="0" y1="11" x2="22" y2="11" stroke="#aaa" stroke-width="1.5"/>'
+        + '<circle cx="11" cy="11" r="2" fill="#aaa"/>'
+        + '<polygon points="14,14 21,14 14,21" fill="#7a9abf" stroke="#4a6a8a" stroke-width="1"/>'
+        + '</svg>';
+    return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 11 11, crosshair';
+}
+
 function _pdfCursor(tool) {
     let svg;
     if (tool === 'pan') {
         return 'grab';
     }
     if (tool === 'pen') {
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
-            + '<line x1="10" y1="0" x2="10" y2="20" stroke="#4a90e2" stroke-width="1.5"/>'
-            + '<line x1="0" y1="10" x2="20" y2="10" stroke="#4a90e2" stroke-width="1.5"/>'
-            + '<circle cx="10" cy="10" r="2" fill="#4a90e2"/>'
+        // Utiliser le même style de curseur que le board (dot / size / crosshair)
+        const style = window._drawCursorStyle || 'size';
+        if (style === 'crosshair') return 'crosshair';
+        const color = window._drawColor
+            || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
+            || document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background
+            || '#e84393';
+        if (style === 'dot') {
+            svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+                + '<circle cx="10" cy="10" r="8" fill="none" stroke="#999" stroke-width="1.5"/>'
+                + '<circle cx="10" cy="10" r="2" fill="' + color + '"/>'
+                + '</svg>';
+            return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
+        }
+        // style === 'size'
+        const size = parseInt((document.getElementById('draw-size') || {}).value) || 4;
+        const rDot = Math.max(2, Math.min(size / 2, 24));
+        const dim  = rDot * 2 + 4;
+        const cx   = dim / 2;
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + dim + '" height="' + dim + '">'
+            + '<circle cx="' + cx + '" cy="' + cx + '" r="' + rDot + '" fill="' + color + '"/>'
             + '</svg>';
-        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") ' + cx + ' ' + cx + ', crosshair';
     }
     if (tool === 'highlighter') {
         svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
@@ -2108,13 +2228,7 @@ function _pdfCursor(tool) {
         return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 11 8, cell';
     }
     if (tool === 'figure') {
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22">'
-            + '<line x1="11" y1="0" x2="11" y2="22" stroke="#aaa" stroke-width="1.5"/>'
-            + '<line x1="0" y1="11" x2="22" y2="11" stroke="#aaa" stroke-width="1.5"/>'
-            + '<circle cx="11" cy="11" r="2" fill="#aaa"/>'
-            + '<polygon points="14,14 21,14 14,21" fill="#7a9abf" stroke="#4a6a8a" stroke-width="1"/>'
-            + '</svg>';
-        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 11 11, crosshair';
+        return _figureCursorUrl();
     }
     if (tool === 'text') {
         return 'text';
@@ -3432,3 +3546,46 @@ function _showPdfAnnotToast(msg) {
     toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
+// ── Rafraîchissement curseur lors d'un changement de couleur ─────────────
+// cpickDispatch (color-picker.js) met à jour window._drawColor pour 'draw-color'.
+// On le wrappe pour rafraîchir le curseur board ET le curseur PDF pen.
+(function() {
+    function _refreshDrawCursorOnColor() {
+        // Board : mode libre ou surligneur
+        if (typeof isDrawMode !== 'undefined' && isDrawMode
+            && typeof currentDrawMode !== 'undefined'
+            && (currentDrawMode === 'free' || currentDrawMode === 'highlight')) {
+            updateDrawCursor();
+        }
+        // PDF annotation : outil pen actif
+        if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode
+            && typeof _pdfAnnotTool !== 'undefined' && _pdfAnnotTool === 'pen') {
+            const cursor = _pdfCursor('pen');
+            if (typeof _pdfAnnotEvTarget !== 'undefined' && _pdfAnnotEvTarget) {
+                _pdfAnnotEvTarget.style.setProperty('cursor', cursor, 'important');
+                _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
+                    if (!el.closest || !el.closest('.editor-toolbar'))
+                        el.style.setProperty('cursor', cursor, 'important');
+                });
+            }
+            if (typeof _pdfAnnotCanvas !== 'undefined' && _pdfAnnotCanvas)
+                _pdfAnnotCanvas.style.cursor = cursor;
+        }
+    }
+
+    // Wrapper appliqué après chargement de color-picker.js
+    function _patchCpickDispatch() {
+        if (typeof cpickDispatch !== 'function') return;
+        const _orig = cpickDispatch;
+        cpickDispatch = function(id, color) {
+            _orig(id, color);
+            if (id === 'draw-color') _refreshDrawCursorOnColor();
+        };
+    }
+    // Tenter immédiatement, puis au DOMContentLoaded si pas encore disponible
+    if (typeof cpickDispatch === 'function') {
+        _patchCpickDispatch();
+    } else {
+        document.addEventListener('DOMContentLoaded', _patchCpickDispatch);
+    }
+})();
