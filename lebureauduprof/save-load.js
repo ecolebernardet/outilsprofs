@@ -144,6 +144,14 @@ function buildBoardState() {
         if (w.dataset.type === 'tableau-num' && typeof w._tnumGetData === 'function') {
             tableauNumData = w._tnumGetData();
         }
+        // Données propres au widget horloge
+        let horlogeData = null;
+        if (w.dataset.type === 'horloge' && typeof w._hrlgGetData === 'function') {
+            horlogeData = {
+                ...w._hrlgGetData(),
+                widgetW: w.offsetWidth   // largeur du widget entier (pas du container)
+            };
+        }
         // Données propres au widget conjugaison
         let conjData = null;
         if (w.dataset.type === 'conjugaison') {
@@ -206,7 +214,8 @@ function buildBoardState() {
 			planData,
 			heureData,
 			conjData,
-			tableauNumData
+			tableauNumData,
+			horlogeData
 		});
     });
     const shapes = [];
@@ -450,6 +459,11 @@ function restoreBoardFromJSON(json) {
                 if (hz && w.heureData.clocksZoneH) hz.style.height = w.heureData.clocksZoneH + 'px';
                 if (w.heureData.level && widget._setLevel) widget._setLevel(w.heureData.level);
                 if (w.heureData.mode  && widget._setMode)  widget._setMode(w.heureData.mode);
+            }
+        } else if (w.type === 'horloge') {
+            widget = createHorlogeWidget();
+            if (w.horlogeData && typeof widget._hrlgSetData === 'function') {
+                widget._hrlgSetData(w.horlogeData);
             }
         } else if (w.type === 'plan') {
             widget = createPlanWidget();

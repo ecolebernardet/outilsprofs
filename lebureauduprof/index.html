@@ -214,6 +214,7 @@
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
 				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
+				<div class="mm-sub-item" onclick="createHorlogeWidget();closeMainMenu()"><span class="mm-ico">🕰️</span>&nbsp;&nbsp;Horloge interactive</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
 				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
@@ -917,6 +918,7 @@
 <script src="widget-monnaie.js"></script>
 <script src="widget-tableau-num.js"></script>
 <script src="widget-heure.js"></script>
+<script src="widget-horloge.js"></script>
 <script src="widget-conjugaison.js"></script>
 <script src="widget-deficalme.js"></script>
 <div id="laser-pointer"></div>
@@ -1024,6 +1026,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico">🕑</div>
                 <div class="act-card-name">Heures et durées</div>
                 <div class="act-card-desc">Lire l'heure ou calculer une durée</div>
+            </div>
+			<div class="act-card" onclick="createHorlogeWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">🕰️</div>
+                <div class="act-card-name">Horloge interactive</div>
+                <div class="act-card-desc">Manipuler les aiguilles pour régler l'heure</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
