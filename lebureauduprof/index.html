@@ -7,6 +7,19 @@
     <link rel="icon" type="image/x-icon" href="icon.ico">
     <link rel="stylesheet" href="style.css">
     <style>
+        @font-face {
+            font-family: 'Nunito';
+            src: url('polices/Nunito-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body, button, input, select, textarea,
+        .mm-item, .mm-sub-item, .mm-section-label,
+        .mm-sub, .mm-sub-inner, .mm-ico, .mm-arrow {
+            font-family: 'Nunito', sans-serif !important;
+        }
+
         .outilsprofs-container.wf-fullboard {
             position: fixed !important;
             inset: 0 !important;
@@ -131,6 +144,7 @@
 				<option value="'OpenDyslexicLocal', sans-serif">OpenDyslexic</option>
 				<option value="'BelleAllureGS', cursive">Belle Allure GS</option>
 				<option value="'Baloo', cursive">Baloo Regular</option>
+				<option value="'Nunito'">Nunito Regular</option>
 				<option value="'MDI', cursive">MDI école</option>
 			</select>
 			<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
@@ -550,6 +564,13 @@
 							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-opacity-label');var v=Math.max(10,+lbl.dataset.v-10);lbl.dataset.v=v;lbl.textContent=v+'%';if(typeof window!=='undefined')window._drawOpacity=v/100;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">−</button>
 							<span id="draw-opacity-label" data-v="100" style="color:#fff;font-size:11px;min-width:28px;text-align:center;cursor:default;">100%</span>
 							<button onmousedown="(function(btn){var iv;function step(){var lbl=document.getElementById('draw-opacity-label');var v=Math.min(100,+lbl.dataset.v+10);lbl.dataset.v=v;lbl.textContent=v+'%';if(typeof window!=='undefined')window._drawOpacity=v/100;}step();iv=setInterval(step,150);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:22px;height:22px;border-radius:6px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">+</button>
+						</div>
+						<!-- Reconnaissance de forme -->
+						<div style="display:flex;flex-direction:row;align-items:center;gap:6px;margin-bottom:10px;" title="Convertit automatiquement les formes dessinées à main levée en formes géométriques">
+							<span style="color:#aaa;font-size:11px;flex:1;">Reconnaître formes</span>
+							<button id="draw-shaperecog-btn" onclick="_toggleDrawShapeRecog()" style="width:38px;height:20px;border-radius:10px;border:none;background:#444;cursor:pointer;position:relative;padding:0;flex-shrink:0;transition:background .2s;" title="Activer/désactiver la reconnaissance de forme">
+								<span id="draw-shaperecog-knob" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#888;transition:left .2s,background .2s;"></span>
+							</button>
 						</div>
 						<!-- Curseur -->
 						<div style="color:#666;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Curseur</div>
@@ -977,7 +998,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <button id="act-panel-close" onclick="toggleActivitiesPanel()" title="Fermer">✕</button>
     </div>
     <div id="act-panel-content">
-        <div class="act-section-label">🎲 Jeux & Calcul</div>
+        <div class="act-section-label">🎲 Activités de mathématiques</div>
         <div class="act-grid">
             <div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">💶</div>
@@ -991,28 +1012,31 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
                 <div class="act-card-ico">🧮</div>
-                <div class="act-card-name">Calcul Mental</div>
+                <div class="act-card-name">Calcul mental</div>
                 <div class="act-card-desc">S'entraîner au calcul mental</div>
             </div>
             <div class="act-card" onclick="createCompteEstBonWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">🔢</div>
-                <div class="act-card-name">Le Compte est Bon</div>
+                <div class="act-card-name">Le compte est bon</div>
                 <div class="act-card-desc">Atteindre un nombre cible avec les opérations</div>
             </div>
-            <div class="act-card" onclick="createWidget('mots-alpha');toggleActivitiesPanel()">
-                <div class="act-card-ico">🔤</div>
-                <div class="act-card-name">Ordre Alphabétique</div>
-                <div class="act-card-desc">Trier et classer des mots dans l'ordre de l'alphabet</div>
-            </div>
-            <div class="act-card" onclick="createHeureWidget();toggleActivitiesPanel()">
+			<div class="act-card" onclick="createHeureWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">🕑</div>
                 <div class="act-card-name">Heures et durées</div>
                 <div class="act-card-desc">Lire l'heure ou calculer une durée</div>
             </div>
+		</div>
+		<div class="act-section-label">🎲 Activités de français</div>
+        <div class="act-grid">
+            <div class="act-card" onclick="createWidget('mots-alpha');toggleActivitiesPanel()">
+                <div class="act-card-ico">🔤</div>
+                <div class="act-card-name">Ordre alphabétique</div>
+                <div class="act-card-desc">Trier et classer des mots dans l'ordre de l'alphabet</div>
+            </div>
             <div class="act-card" onclick="createConjugaisonWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico">✏️</div>
                 <div class="act-card-name">Conjugaison</div>
-                <div class="act-card-desc">Test flash de conjugaison — présent, imparfait, futur</div>
+                <div class="act-card-desc">Test flash de conjugaison (présent, imparfait, futur)</div>
             </div>
         </div>
     </div>
@@ -1386,6 +1410,22 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 </script>
 
 <script>
+// ── Toggle reconnaissance de forme ───────────────────────────────────
+function _toggleDrawShapeRecog() {
+    window._drawShapeRecog = !window._drawShapeRecog;
+    _updateDrawShapeRecogBtn();
+}
+
+function _updateDrawShapeRecogBtn() {
+    const btn  = document.getElementById('draw-shaperecog-btn');
+    const knob = document.getElementById('draw-shaperecog-knob');
+    if (!btn || !knob) return;
+    const on = !!window._drawShapeRecog;
+    btn.style.background  = on ? '#4a90e2' : '#444';
+    knob.style.left       = on ? '20px' : '2px';
+    knob.style.background = on ? '#fff' : '#888';
+}
+
 // ── Popover options avancées : positionnement intelligent ────────────
 function _toggleDrawAdvancedPopover() {
     var pop = document.getElementById('draw-advanced-popover');
@@ -1397,6 +1437,8 @@ function _toggleDrawAdvancedPopover() {
     pop.style.display = 'block';
     // Mettre à jour l'état des boutons de curseur
     if (typeof _updateDrawCursorBtns === 'function') _updateDrawCursorBtns();
+    // Mettre à jour le toggle reconnaissance de forme
+    if (typeof _updateDrawShapeRecogBtn === 'function') _updateDrawShapeRecogBtn();
     var tb     = document.getElementById('draw-toolbar');
     var bBtn   = btn.getBoundingClientRect();
     var bPop   = pop.getBoundingClientRect();

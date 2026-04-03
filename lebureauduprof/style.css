@@ -652,6 +652,7 @@
 		@font-face { font-family: 'Andika'; src: url('polices/Andika.ttf') format('truetype'); }
 		@font-face { font-family: 'OpenDyslexicLocal'; src: url('polices/OpenDyslexic-Regular.otf') format('opentype'); }
 		@font-face { font-family: 'BelleAllureGS'; src: url('polices/BelleAllureGS-Gros.otf') format('opentype'); }
+		@font-face { font-family: 'Nunito'; src: url('polices/Nunito-Regular.otf') format('opentype'); }
 		@font-face { font-family: 'Baloo'; src: url('polices/Baloo-Regular.ttf') format('opentype'); }
 		@font-face { font-family: 'MDI'; src: url('polices/MDIecole-Regular.otf') format('opentype'); }
 		.editor-content { padding: 10px; outline: none; overflow: auto; text-align: left; flex-grow: 1; }
@@ -1853,7 +1854,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 }
 .act-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 20px;
 }
