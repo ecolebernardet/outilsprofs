@@ -3086,7 +3086,7 @@ body.menu-light .tnum-help-section strong { color: #333; }
 
 /* ── Conteneur principal ── */
 .tnum-container {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'nunito', Arial, sans-serif;
     background: #1a1a2e;
     border-radius: 0.7em;
     padding: 0;
@@ -3191,7 +3191,7 @@ body.menu-light .tnum-mode-btn:hover { background: rgba(0,0,0,.06); color: #333;
 body.menu-light .tnum-mode-btn.tnum-mode-active { background: #4f46e5; color: #fff; }
 
 /* ── Zone de défilement ── */
-.tnum-scroll-wrap { overflow: hidden; }
+.tnum-scroll-wrap { overflow: hidden; margin-top: 1.2em; margin-bottom: 1.2em; margin-right: 1.2em; }
 
 /* ── Tableau ── */
 .tnum-table {
@@ -3285,8 +3285,8 @@ body.menu-light .tnum-virgule-col::before { color: #c05a10; }
     font-size: 1.43em;
     font-weight: 700;
     font-family: 'BelleAllureGS', cursive;
-    color: var(--tnum-col-color, #fff);
-    background: #1a1a2e;
+    color: var(--tnum-col-color, #333);
+    background: #ffffff;
     border: none;
     outline: none;
     caret-color: transparent;
@@ -3392,11 +3392,11 @@ body.menu-light .tnum-toggle-label { color: #333355; }
 body.menu-light .tnum-toggle-label:hover { background: rgba(0,0,0,.06); }
 body.menu-light .tnum-sep-v { background: #d4d4e8; }
 body.menu-light .tnum-head-classes th { border-color: #d0d0e8; }
-body.menu-light .tnum-cls-milliards { background: rgba(124,58,237,.12); color: #5b21b6; }
-body.menu-light .tnum-cls-millions  { background: rgba(8,145,178,.12);  color: #075985; }
-body.menu-light .tnum-cls-milliers  { background: rgba(5,150,105,.12);  color: #065f46; }
-body.menu-light .tnum-cls-unites    { background: rgba(217,119,6,.12);  color: #92400e; }
-body.menu-light .tnum-cls-decimales { background: rgba(190,24,93,.12);  color: #831843; }
+body.menu-light .tnum-cls-milliards { background: rgba(124,58,237,.3); color: #5b21b6; }
+body.menu-light .tnum-cls-millions  { background: rgba(8,145,178,.3);  color: #075985; }
+body.menu-light .tnum-cls-milliers  { background: rgba(5,150,105,.3);  color: #065f46; }
+body.menu-light .tnum-cls-unites    { background: rgba(217,119,6,.3);  color: #92400e; }
+body.menu-light .tnum-cls-decimales { background: rgba(190,24,93,.3);  color: #831843; }
 body.menu-light .tnum-head-cols th { border-color: #d0d0e8; }
 body.menu-light .tnum-cell { border-color: #d8d8ec; }
 body.menu-light .tnum-step { color: rgba(0,0,0,.1); }
