@@ -286,11 +286,11 @@ function _activatePdfFsTab(targetContainer) {
             if (widget) { widget.style.visibility = 'hidden'; widget.style.display = 'none'; }
         }
     });
-    // Si le mode annotation PDF est actif, le ré-attacher sur le nouveau widget visible
-    const targetWidget = targetContainer.closest('.widget');
-    if (targetWidget && typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode &&
-        typeof _startPdfAnnotModeOn === 'function') {
-        _startPdfAnnotModeOn(targetWidget);
+    // Quand on change d'onglet, toujours repasser en mode déplacer/scroller
+    // (ne pas ré-activer le mode crayon sur le nouveau widget)
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode &&
+        typeof _stopPdfAnnotMode === 'function') {
+        _stopPdfAnnotMode();
     }
     _refreshPdfTabBar();
 }
