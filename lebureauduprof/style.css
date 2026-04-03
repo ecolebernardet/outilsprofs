@@ -3284,18 +3284,19 @@ body.menu-light .tnum-virgule-col::before { color: #c05a10; }
     text-align: center;
     font-size: 1.43em;
     font-weight: 700;
-    font-family: 'BelleAllureGS', cursive;
+    font-family: 'BelleAllureGS', cursive !important;
     color: var(--tnum-col-color, #333);
-    background: #ffffff;
+    background: color-mix(in srgb, var(--tnum-col-color, #ffffff) 18%, #1a1a35);
     border: none;
     outline: none;
     caret-color: transparent;
     padding: 0;
     box-sizing: border-box;
+    border-radius: 0.2em;
 }
 .tnum-digit::placeholder { color: transparent; }
 body.menu-light .tnum-digit {
-    background: #f8f9ff;
+    background: color-mix(in srgb, var(--tnum-col-color, #ffffff) 10%, #ffffff);
     color: var(--tnum-col-color, #333);
 }
 
