@@ -108,7 +108,7 @@ function createHorlogeWidget() {
         .hrlg-number { font-family: 'BelleAllureGS', cursive !important; font-weight: 700; fill: #c7d2fe; }
         .hrlg-hand { stroke-linecap: round; pointer-events: none; }
         .hrlg-hand-hour   { stroke: #ef4444; stroke-width: 5; }
-        .hrlg-hand-minute { stroke: #6366f1; stroke-width: 3; }
+        .hrlg-hand-minute { stroke: #3b82f6; stroke-width: 3; }
         .hrlg-drag-hour, .hrlg-drag-minute { stroke: transparent; stroke-width: 18; }
         .hrlg-center { fill: #6366f1; filter: drop-shadow(0 0 3px rgba(99,102,241,.8)); }
         .hrlg-digital-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.55em; width: 100%; }
@@ -143,11 +143,52 @@ function createHorlogeWidget() {
         body.menu-light .hrlg-tick-hour { stroke: #4338ca; }
         body.menu-light .hrlg-number { fill: #333366; }
         body.menu-light .hrlg-hand-hour { stroke: #dc2626; }
-        body.menu-light .hrlg-hand-minute { stroke: #4338ca; }
+        body.menu-light .hrlg-hand-minute { stroke: #2563eb; }
         body.menu-light .hrlg-center { fill: #4338ca; }
         body.menu-light .hrlg-digital { background: rgba(67,56,202,.07); border-color: rgba(67,56,202,.25); }
         body.menu-light .hrlg-time-display { color: #312e81; }
         body.menu-light .hrlg-toggle-time-btn { background: rgba(67,56,202,.08); border-color: rgba(67,56,202,.3); color: #4338ca; }
+
+        /* ── Barre de paramètres ── */
+        .hrlg-settings-toggle {
+            background: rgba(165,180,252,.12); border: 0.07em solid rgba(165,180,252,.3);
+            color: #a5b4fc; font-size: 0.72em;
+            width: 1.7em; height: 1.7em; border-radius: 0.4em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            transition: background 0.15s;
+        }
+        .hrlg-settings-toggle.hrlg-settings-open { background: rgba(99,102,241,.3); }
+        .hrlg-settings-bar {
+            display: flex; flex-wrap: wrap; gap: 0.4em 0.7em;
+            padding: 0.55em 0.85em; background: #161630;
+            border-bottom: 0.07em solid #2e2e50;
+            align-items: center;
+        }
+        .hrlg-settings-bar.hrlg-settings-hidden { display: none; }
+        .hrlg-settings-label {
+            display: flex; align-items: center; gap: 0.35em;
+            font-size: 0.65em; color: #c7d2fe; cursor: pointer;
+            white-space: nowrap; user-select: none;
+        }
+        .hrlg-settings-label input[type="checkbox"] { accent-color: #6366f1; cursor: pointer; }
+        .hrlg-swatch {
+            display: inline-block; width: 0.9em; height: 0.9em;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        body.menu-light .hrlg-settings-bar { background: #eef0f8; border-bottom-color: #d4d4e8; }
+        body.menu-light .hrlg-settings-label { color: #4338ca; }
+        .hrlg-container.wf-fullboard .hrlg-settings-label { font-size: 1em; }
+        .hrlg-container.wf-fullboard .hrlg-period-btn { font-size: 1em; }
+        .hrlg-settings-sep { width: 1px; height: 1.4em; background: rgba(165,180,252,.25); flex-shrink: 0; align-self: center; }
+        .hrlg-period-toggle { display: flex; border-radius: 0.4em; overflow: hidden; border: 0.07em solid rgba(165,180,252,.3); flex-shrink: 0; }
+        .hrlg-period-btn {
+            background: transparent; border: none; color: #a5b4fc;
+            font-size: 0.65em; font-weight: 600; padding: 0.25em 0.6em;
+            cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+        }
+        .hrlg-period-btn.hrlg-period-active { background: rgba(99,102,241,.4); color: #fff; }
+        body.menu-light .hrlg-period-btn { color: #4338ca; }
+        body.menu-light .hrlg-period-btn.hrlg-period-active { background: rgba(67,56,202,.25); color: #1e1b4b; }
         `;
         document.head.appendChild(s);
     }
@@ -190,6 +231,7 @@ function createHorlogeWidget() {
         <div class="hrlg-container" style="width:${initW}px">
             <div class="hrlg-header">
                 <span class="hrlg-title">🕐 Horloge</span>
+                <button class="hrlg-settings-toggle" title="Paramètres">⚙️</button>
                 <button class="hrlg-help-btn" title="Aide">?</button>
                 <div class="wf-btns" style="margin-left:auto">
                     <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
@@ -208,8 +250,51 @@ function createHorlogeWidget() {
                     Cacher/afficher l'heure pour les exercices.
                 </div>
                 <div class="hrlg-help-section">
+                    <strong>⚙️ Paramètres</strong><br>
+                    Afficher des portions colorées sur le cadran : et quart, et demi, trois-quarts, moins cinq, moins dix, moins le quart.
+                </div>
+                <div class="hrlg-help-section">
                     <strong>🔄 Réinitialiser</strong><br>
                     Remettre à 12h00.
+                </div>
+            </div>
+            <div class="hrlg-settings-bar hrlg-settings-hidden">
+                <label class="hrlg-settings-label" title="Et quart : de 12h00 à 3h00">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="quart">
+                    <span class="hrlg-swatch" style="background:#34d399"></span> Et quart
+                </label>
+                <label class="hrlg-settings-label" title="Et demi : de 12h00 à 6h00">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="demi">
+                    <span class="hrlg-swatch" style="background:#60a5fa"></span> Et demi
+                </label>
+                <label class="hrlg-settings-label" title="Trois-quarts : de 12h00 à 9h00">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="troiq">
+                    <span class="hrlg-swatch" style="background:#f472b6"></span> Trois-quarts
+                </label>
+                <label class="hrlg-settings-label" title="Moins cinq : de 55 à 60 min">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="m5">
+                    <span class="hrlg-swatch" style="background:#fbbf24"></span> Moins cinq
+                </label>
+                <label class="hrlg-settings-label" title="Moins dix : de 50 à 60 min">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="m10">
+                    <span class="hrlg-swatch" style="background:#fb923c"></span> Moins dix
+                </label>
+				<label class="hrlg-settings-label" title="Moins le quart : de 45 à 60 min">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="mq">
+                    <span class="hrlg-swatch" style="background:#f87171"></span> Moins le quart
+                </label>
+                <label class="hrlg-settings-label" title="Moins vingt : de 40 à 60 min">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="m20">
+                    <span class="hrlg-swatch" style="background:#c084fc"></span> Moins vingt
+                </label>
+                <label class="hrlg-settings-label" title="Moins vingt-cinq : de 35 à 60 min">
+                    <input type="checkbox" class="hrlg-arc-chk" data-arc="m25">
+                    <span class="hrlg-swatch" style="background:#e879f9"></span> Moins vingt-cinq
+                </label>
+                <span class="hrlg-settings-sep"></span>
+                <div class="hrlg-period-toggle" title="Afficher l'heure en matin (0–11h) ou après-midi (12–23h)">
+                    <button class="hrlg-period-btn" data-period="am">🌅 Matin</button>
+                    <button class="hrlg-period-btn" data-period="pm">🌇 Après-midi</button>
                 </div>
             </div>
             <div class="hrlg-body">
@@ -219,6 +304,7 @@ function createHorlogeWidget() {
                         <circle class="hrlg-border" cx="100" cy="100" r="96"/>
                         <g class="hrlg-ticks-min"></g>
                         <g class="hrlg-ticks-hour"></g>
+                        <g class="hrlg-arcs"></g>
                         <g class="hrlg-numbers"></g>
                         <line class="hrlg-hand hrlg-hand-hour"   x1="100" y1="100" x2="100" y2="46"/>
                         <line class="hrlg-hand hrlg-hand-minute" x1="100" y1="100" x2="100" y2="20"/>
@@ -393,19 +479,61 @@ function _initHorlogeWidget(widget) {
     const timeDisplay = widget.querySelector('.hrlg-time-display');
     const toggleBtn   = widget.querySelector('.hrlg-toggle-time-btn');
     const resetBtn    = widget.querySelector('.hrlg-reset-btn');
+    const arcsGroup   = widget.querySelector('.hrlg-arcs');
 
-    const state = { hours: 12, minutes: 0, showTime: true };
+    // ── Définition des arcs ───────────────────────────────────────
+    // startMin/endMin : en minutes sur le cadran (0 = 12h, 15 = 3h, 30 = 6h, 45 = 9h)
+    const ARC_DEFS = {
+        quart: { startMin: 0,  endMin: 15, color: '#34d399', opacity: 0.28 },
+        demi:  { startMin: 0,  endMin: 30, color: '#60a5fa', opacity: 0.22 },
+        troiq: { startMin: 0,  endMin: 45, color: '#f472b6', opacity: 0.20 },
+        m5:    { startMin: 55, endMin: 60, color: '#fbbf24', opacity: 0.38 },
+        m10:   { startMin: 50, endMin: 60, color: '#fb923c', opacity: 0.30 },
+        m20:   { startMin: 40, endMin: 60, color: '#c084fc', opacity: 0.25 },
+        m25:   { startMin: 35, endMin: 60, color: '#e879f9', opacity: 0.22 },
+        mq:    { startMin: 45, endMin: 60, color: '#f87171', opacity: 0.30 },
+    };
+
+    // Convertit des minutes (0-60) en coordonnées d'arc SVG (centre 100,100, rayon 78)
+    function _arcPath(startMin, endMin, r) {
+        r = r || 78;
+        const toRad = m => ((m * 6) - 90) * Math.PI / 180;
+        const s = toRad(startMin === 60 ? 59.99 : startMin);
+        const e = toRad(endMin   === 60 ? 59.99 : endMin);
+        const x1 = (100 + Math.cos(s) * r).toFixed(3);
+        const y1 = (100 + Math.sin(s) * r).toFixed(3);
+        const x2 = (100 + Math.cos(e) * r).toFixed(3);
+        const y2 = (100 + Math.sin(e) * r).toFixed(3);
+        const span = endMin - startMin;
+        const large = span > 30 ? 1 : 0;
+        return `M 100 100 L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+    }
+
+    // état des arcs (depuis state)
+    const state = { hours: 12, minutes: 0, showTime: true, arcs: {}, period: null };
 
     widget._hrlgGetData = () => {
         const cont = widget.querySelector('.hrlg-container');
         const isFullboard = cont && cont.classList.contains('wf-fullboard');
-        return { ...state, containerW: (!isFullboard && cont) ? cont.offsetWidth : null };
+        return { ...state, arcs: { ...state.arcs }, containerW: (!isFullboard && cont) ? cont.offsetWidth : null };
     };
     widget._hrlgSetData = (data) => {
         if (!data) return;
         if (data.hours    !== undefined) state.hours    = data.hours;
         if (data.minutes  !== undefined) state.minutes  = data.minutes;
         if (data.showTime !== undefined) state.showTime = data.showTime;
+        if (data.period   !== undefined) state.period   = data.period;
+        if (data.arcs     && typeof data.arcs === 'object') {
+            Object.assign(state.arcs, data.arcs);
+            // Synchroniser les checkboxes
+            widget.querySelectorAll('.hrlg-arc-chk').forEach(chk => {
+                chk.checked = !!state.arcs[chk.dataset.arc];
+            });
+        }
+        // Synchroniser boutons period
+        widget.querySelectorAll('.hrlg-period-btn').forEach(btn => {
+            btn.classList.toggle('hrlg-period-active', btn.dataset.period === state.period);
+        });
         if (data.containerW) {
             const cont = widget.querySelector('.hrlg-container');
             if (cont && !cont.classList.contains('wf-fullboard')) cont.style.width = data.containerW + 'px';
@@ -415,7 +543,23 @@ function _initHorlogeWidget(widget) {
 
     _buildClockFace(svg);
 
-    function _render() { _updateHands(); _updateDigital(); _updateToggleBtn(); }
+    function _render() { _updateHands(); _updateDigital(); _updateToggleBtn(); _updateArcs(); }
+
+    function _updateArcs() {
+        if (!arcsGroup) return;
+        arcsGroup.innerHTML = '';
+        Object.entries(ARC_DEFS).forEach(([key, def]) => {
+            if (!state.arcs[key]) return;
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', _arcPath(def.startMin, def.endMin));
+            path.setAttribute('fill', def.color);
+            path.setAttribute('fill-opacity', def.opacity);
+            path.setAttribute('stroke', def.color);
+            path.setAttribute('stroke-opacity', def.opacity * 1.5);
+            path.setAttribute('stroke-width', '0.5');
+            arcsGroup.appendChild(path);
+        });
+    }
 
     function _updateHands() {
         const hAngle = ((state.hours % 12) * 30) + (state.minutes * 0.5);
@@ -434,7 +578,18 @@ function _initHorlogeWidget(widget) {
     }
 
     function _updateDigital() {
-        const h = String(state.hours % 12 || 12).padStart(2, '0');
+        let h;
+        const base = state.hours % 12 || 12; // 1–12
+        if (state.period === 'am') {
+            // matin : 0–11h → 12 devient 0, 1–11 restent
+            h = String(state.hours % 12).padStart(2, '0'); // 0–11
+        } else if (state.period === 'pm') {
+            // après-midi : 12–23h → 12 reste 12, 1 devient 13, etc.
+            const pm = (state.hours % 12) + 12; // 12–23
+            h = String(pm).padStart(2, '0');
+        } else {
+            h = String(base).padStart(2, '0');
+        }
         const m = String(state.minutes).padStart(2, '0');
         timeDisplay.innerHTML = h + '<span class="hrlg-colon">:</span>' + m;
         timeDisplay.style.visibility = state.showTime ? 'visible' : 'hidden';
@@ -474,10 +629,45 @@ function _initHorlogeWidget(widget) {
         };
     }
 
-    dragHour.addEventListener('mousedown',  _makeDrag(a => { state.hours = Math.floor(a / 30); state.minutes = Math.round((a % 30) / 30 * 60) % 60; }));
-    dragHour.addEventListener('touchstart', _makeDrag(a => { state.hours = Math.floor(a / 30); state.minutes = Math.round((a % 30) / 30 * 60) % 60; }), { passive: false });
-    dragMin.addEventListener('mousedown',   _makeDrag(a => { state.minutes = Math.round(a / 6) % 60; }));
-    dragMin.addEventListener('touchstart',  _makeDrag(a => { state.minutes = Math.round(a / 6) % 60; }), { passive: false });
+    dragHour.addEventListener('mousedown',  _makeDrag(a => {
+        const h12 = Math.floor(a / 30); // 0–11
+        const offset = state.hours >= 12 ? 12 : 0; // conserver matin/après-midi
+        state.hours = h12 + offset;
+        state.minutes = Math.round((a % 30) / 30 * 60) % 60;
+    }));
+    dragHour.addEventListener('touchstart', _makeDrag(a => {
+        const h12 = Math.floor(a / 30);
+        const offset = state.hours >= 12 ? 12 : 0;
+        state.hours = h12 + offset;
+        state.minutes = Math.round((a % 30) / 30 * 60) % 60;
+    }), { passive: false });
+
+    // Drag des minutes : détecte le passage 59→0 (avance) et 0→59 (recule) pour changer d'heure
+    let _lastMinAngle = null;
+    function _dragMinMove(a) {
+        const newMin = Math.round(a / 6) % 60;
+        if (_lastMinAngle !== null) {
+            const prev = Math.round(_lastMinAngle / 6) % 60;
+            // Passage vers l'avant : 59 → 0..4
+            if (prev >= 55 && newMin <= 4) {
+                state.hours = (state.hours + 1) % 24;
+            }
+            // Passage vers l'arrière : 0..4 → 59
+            if (prev <= 4 && newMin >= 55) {
+                state.hours = (state.hours + 23) % 24;
+            }
+        }
+        _lastMinAngle = a;
+        state.minutes = newMin;
+    }
+    function _dragMinStart(onMove) {
+        return function(e) {
+            _lastMinAngle = null;
+            _makeDrag(onMove)(e);
+        };
+    }
+    dragMin.addEventListener('mousedown',  _dragMinStart(_dragMinMove));
+    dragMin.addEventListener('touchstart', _dragMinStart(_dragMinMove), { passive: false });
 
     toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation(); state.showTime = !state.showTime; _render();
@@ -489,6 +679,44 @@ function _initHorlogeWidget(widget) {
         if (typeof snapshotNow === 'function') snapshotNow();
         if (typeof saveBoard   === 'function') saveBoard();
     });
+
+    // ── Boutons matin / après-midi ────────────────────────────────
+    widget.querySelectorAll('.hrlg-period-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const p = btn.dataset.period;
+            // toggle : cliquer sur le bouton actif le désactive
+            state.period = (state.period === p) ? null : p;
+            widget.querySelectorAll('.hrlg-period-btn').forEach(b => {
+                b.classList.toggle('hrlg-period-active', b.dataset.period === state.period);
+            });
+            _render();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            if (typeof saveBoard   === 'function') saveBoard();
+        });
+    });
+
+    // ── Checkboxes d'arcs ─────────────────────────────────────────
+    widget.querySelectorAll('.hrlg-arc-chk').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+            e.stopPropagation();
+            state.arcs[chk.dataset.arc] = chk.checked;
+            _render();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            if (typeof saveBoard   === 'function') saveBoard();
+        });
+    });
+
+    // ── Bouton paramètres ─────────────────────────────────────────
+    const settingsToggle = widget.querySelector('.hrlg-settings-toggle');
+    const settingsBar    = widget.querySelector('.hrlg-settings-bar');
+    if (settingsToggle && settingsBar) {
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const hidden = settingsBar.classList.toggle('hrlg-settings-hidden');
+            settingsToggle.classList.toggle('hrlg-settings-open', !hidden);
+        });
+    }
 
     _render();
 }
