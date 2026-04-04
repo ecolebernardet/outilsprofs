@@ -215,11 +215,12 @@
 				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
 				<div class="mm-sub-item" onclick="createHorlogeWidget();closeMainMenu()"><span class="mm-ico">🕰️</span>&nbsp;&nbsp;Horloge interactive</div>
-				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createSolide3DWidget();closeMainMenu()"><span class="mm-ico">🧊</span>&nbsp;&nbsp;Solide 3D</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
 				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
+				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
+				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				</div></div>
 			</div>
 
@@ -649,8 +650,8 @@
 	</div>
 	<!-- Bascule Animés / Classiques -->
 	<div id="sticker-mode-bar">
-		<button id="sp-mode-animated" class="sp-mode-btn active" onclick="setStickerMode('animated')" title="Émojis animés Noto — connexion internet requise">🌐 Animés</button>
-		<button id="sp-mode-classic" class="sp-mode-btn" onclick="setStickerMode('classic')" title="Émojis classiques — fonctionne hors-ligne">📴 Classiques</button>
+		<button id="sp-mode-animated" class="sp-mode-btn active" onclick="setStickerMode('animated')" title="Émojis animés Noto — connexion internet requise">🌐 Stickers animés</button>
+		<button id="sp-mode-classic" class="sp-mode-btn" onclick="setStickerMode('classic')" title="Émojis classiques — fonctionne hors-ligne">📴 Émojis classiques</button>
 		<span id="sp-offline-badge" style="display:none;background:#ff4757;color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;">HORS-LIGNE</span>
 	</div>
 	<!-- Onglets catégories (barre horizontale scrollable) -->

@@ -196,11 +196,12 @@ function renderStickerPanel() {
 		grid.className = 'sp-grid-anim';
 		items.forEach(item => {
 			const webpUrl = NOTO_CDN + '/' + item.c + '/512.webp';
+			const pngUrl  = NOTO_CDN + '/' + item.c + '/512.png';
 			const btn = document.createElement('div');
 			btn.className = 'sp-anim-btn';
 			btn.title = item.n;
 			const img = document.createElement('img');
-			img.src = webpUrl;
+			img.src = pngUrl;
 			img.alt = item.n;
 			img.loading = 'lazy';
 			img.onerror = () => { btn.style.display = 'none'; };
