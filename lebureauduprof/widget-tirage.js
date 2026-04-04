@@ -34,14 +34,9 @@
         overflow: hidden;
         resize: none;
         box-sizing: border-box;
-        border-radius: 20px;
+        border-radius: 16px;
     }
     .widget[data-type="tirage"] .tirage-outer::-webkit-resizer { display: none; }
-    .widget[data-type="tirage"]:hover .tirage-outer,
-    .widget[data-type="tirage"]:focus-within .tirage-outer {
-        outline: 2px dashed rgba(59,130,246,0.35);
-        outline-offset: 1px;
-    }
 
     /* ── Container intérieur plein ── */
     .tirage-inner {
@@ -50,12 +45,12 @@
         display: flex;
         flex-direction: column;
         background: #ffffff;
-        border: 1.5px solid #dddddd;
-        border-radius: 20px;
+        border: 1.5px solid #d1d5db;
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        color: #111111;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: #374151;
         user-select: none;
         box-sizing: border-box;
         position: relative;
@@ -63,8 +58,8 @@
 
     /* ── Header ── */
     .tirage-header {
-        background: #f5f5f5;
-        border-bottom: 1px solid #e0e0e0;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
         padding: 10px 14px;
         display: flex;
         align-items: center;
@@ -74,31 +69,44 @@
         cursor: move;
     }
     .tirage-header-title {
-        font-size: 12px;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
         flex-grow: 1;
-        text-align: center;
-        color: #111;
+        color: #374151;
+        pointer-events: none;
     }
+    /* Boutons aide (legacy, gardés pour compatibilité) */
     .tirage-header-btn {
-        width: 30px; height: 30px;
+        width: 22px; height: 22px;
         border-radius: 50%;
-        border: none;
+        border: 1px solid #bbb;
         cursor: pointer;
         display: flex; align-items: center; justify-content: center;
-        font-size: 13px;
-        background: #e0e0e0;
-        color: #333;
-        transition: transform .15s, background .15s;
+        font-size: 12px;
+        font-weight: 700;
+        background: #f5f5f5;
+        color: #666;
+        transition: background .15s;
         flex-shrink: 0;
     }
-    .tirage-header-btn:hover { transform: scale(1.1); background: #cccccc; }
+    .tirage-header-btn:hover { background: #e0e0e0; color: #333; }
+    /* Bouton import dans le header */
+    .tirage-import-header-btn {
+        font-size: 14px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        flex-shrink: 0;
+        line-height: 1;
+        padding: 2px;
+        transition: transform .15s;
+    }
+    .tirage-import-header-btn:hover { transform: scale(1.15); }
 
     /* ── Import zone ── */
     .tirage-import-zone {
-        padding: 20px 16px;
+        padding: 24px 16px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -107,23 +115,23 @@
         flex: 1;
     }
     .tirage-import-btn {
-        padding: 10px 20px;
-        border-radius: 50px;
+        padding: 7px 16px;
+        border-radius: 8px;
         border: none;
         font-size: 11px;
-        font-weight: 900;
-        text-transform: uppercase;
+        font-weight: 700;
         cursor: pointer;
-        transition: transform .1s, opacity .2s;
+        transition: background .15s, transform .1s;
         font-family: inherit;
-        background: #3b82f6;
+        background: #4a90e2;
         color: #fff;
     }
-    .tirage-import-btn:active { transform: scale(0.95); }
+    .tirage-import-btn:hover { background: #357abd; }
+    .tirage-import-btn:active { transform: scale(0.96); }
     .tirage-status {
         font-size: 11px;
         font-weight: 600;
-        color: #999;
+        color: #9ca3af;
         text-align: center;
     }
     .tirage-status.ok  { color: #059669; }
@@ -133,24 +141,24 @@
     .tirage-level-tabs {
         display: none;
         flex-wrap: wrap;
-        gap: 5px;
-        padding: 8px 14px;
-        justify-content: center;
+        gap: 4px;
+        padding: 6px 10px;
+        align-items: center;
         flex-shrink: 0;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid #e5e7eb;
     }
     .tirage-level-tab {
-        padding: 3px 10px;
-        border-radius: 50px;
+        padding: 3px 9px;
+        border-radius: 6px;
         font-size: 10px;
-        font-weight: 900;
+        font-weight: 700;
         text-transform: uppercase;
         cursor: pointer;
-        border: 1.5px solid #e0e0e0;
+        border: 1px solid #ddd;
         transition: all .15s;
         font-family: inherit;
-        background: #f0f0f0;
-        color: #999;
+        background: #f5f5f5;
+        color: #666;
     }
 
     /* ── Grille élèves ── */
@@ -159,23 +167,25 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
-        flex: 1;
         overflow-y: auto;
         min-height: 0;
+        max-height: 55%;
+        flex-shrink: 1;
         scrollbar-width: thin;
-        scrollbar-color: #ccc transparent;
+        scrollbar-color: #d1d5db transparent;
         --pill-fs: 9px;
         --pill-pad: 4px;
         --pill-gap: 4px;
     }
     .tirage-level-label {
         font-size: 9px;
-        font-weight: 900;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-		margin-top: 10px;
-        margin-bottom: 10px;
+        margin-top: 10px;
+        margin-bottom: 6px;
         text-align: center;
+        color: #6b7280;
     }
     .tirage-grid {
         display: grid;
@@ -184,83 +194,83 @@
     }
     .tirage-pill {
         padding: var(--pill-pad, 4px) 2px;
-        border-radius: 999px;
+        border-radius: 6px;
         font-size: var(--pill-fs, 9px);
-        font-weight: 800;
+        font-weight: 700;
         text-align: center;
         cursor: pointer;
-        background: #f5f5f5;
-        border: 1px solid #e0e0e0;
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
         transition: all .15s;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         -webkit-tap-highlight-color: transparent;
+        color: #374151;
     }
-    .tirage-pill:hover { border-color: #bbb; background: #eeeeee; }
-    .tirage-pill.girl { color: #16a34a; }
-    .tirage-pill.boy  { color: #ea580c; }
+    .tirage-pill:hover { border-color: #9ca3af; background: #f0f2f5; }
+    .tirage-pill.girl { color: #16a34a; border-color: #bbf7d0; background: #f0fdf4; }
+    .tirage-pill.girl:hover { background: #dcfce7; }
+    .tirage-pill.boy  { color: #ea580c; border-color: #fed7aa; background: #fff7ed; }
+    .tirage-pill.boy:hover  { background: #ffedd5; }
     .tirage-pill.drawn {
-        background: #ebebeb !important;
-        color: #bbbbbb !important;
+        background: #f9fafb !important;
+        color: #d1d5db !important;
         text-decoration: line-through;
-        border-color: #dddddd !important;
-        opacity: 0.7;
+        border-color: #e5e7eb !important;
+        opacity: 0.6;
         transform: scale(0.94);
     }
 
     /* ── Carte résultat ── */
     .tirage-result-card {
-		display: block; /* Indispensable pour que margin: auto fonctionne */
-        margin: 0 auto; /* Centre horizontalement */
-        background: #f8f8f8;
-        border: 1px solid #e8e8e8;
-        border-radius: 14px;
-        padding: 12px;
-		width: 30%;
-		min-width: 200px;
         display: flex;
+        margin: 8px auto;
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 10px 12px;
+        width: 30%;
+        min-width: 200px;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex-shrink: 0;
-		margin-bottom: 20px;
     }
     .tirage-result-display {
         background: #ffffff;
-        border: 1px solid #dddddd;
-        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
         height: 60px;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2rem;
-        font-weight: 900;
+        font-weight: 800;
         transition: transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color .2s;
     }
     .tirage-draw-btn {
         width: 80%;
-        padding: 10px;
-        font-size: 10px;
-        font-weight: 900;
-        border-radius: 50px;
-        text-transform: uppercase;
+        padding: 7px 16px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 8px;
         border: none;
         cursor: pointer;
-		margin-top: 20px;
-		padding: 20px;
-        transition: transform .1s, opacity .2s;
+        margin-top: 4px;
+        transition: background .15s, transform .1s;
         font-family: inherit;
-        background: #3b82f6;
+        background: #4a90e2;
         color: #fff;
     }
-    .tirage-draw-btn:active { transform: scale(0.95); }
+    .tirage-draw-btn:hover { background: #357abd; }
+    .tirage-draw-btn:active { transform: scale(0.96); }
     .tirage-draw-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.5); }
     .tirage-stats {
-        font-size: 9px;
-        color: #aaa;
-        font-weight: 800;
+        font-size: 10px;
+        color: #9ca3af;
+        font-weight: 600;
     }
 
     /* ── Footer RàZ ── */
@@ -269,21 +279,22 @@
         flex-shrink: 0;
     }
     .tirage-reset-btn {
-		display: block; /* Indispensable pour que margin: auto fonctionne */
-        margin: 0 auto; /* Centre horizontalement */
+        display: block;
+        margin: 0 auto;
         width: 25%;
-		min-width: 200px;
-        padding: 10px;
-        border-radius: 50px;
-        font-size: 10px;
-        font-weight: 900;
+        min-width: 200px;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
         cursor: pointer;
         border: none;
         font-family: inherit;
-        background: #F87C63;
+        background: #f87171;
         color: #fff;
-        transition: transform .2s, opacity .2s;
+        transition: background .15s, transform .1s;
     }
+    .tirage-reset-btn:hover { background: #ef4444; }
     .tirage-reset-btn:active { transform: scale(0.98); }
 
     /* ── Modal confirmation ── */
@@ -292,35 +303,34 @@
         position: absolute;
         inset: 0;
         z-index: 200;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0,0,0,0.35);
         backdrop-filter: blur(4px);
         align-items: center;
         justify-content: center;
         padding: 20px;
-        border-radius: 20px;
+        border-radius: 16px;
         box-sizing: border-box;
     }
     .tirage-modal-overlay.open { display: flex; }
     .tirage-modal-box {
         background: #fff;
         padding: 20px;
-        border-radius: 18px;
+        border-radius: 12px;
         width: 100%;
         max-width: 290px;
-        color: #111;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        color: #374151;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.2);
     }
     .tirage-modal-title {
-        font-size: 14px;
-        font-weight: 900;
-        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 800;
         text-align: center;
         margin-bottom: 7px;
-        color: #111;
+        color: #374151;
     }
     .tirage-modal-text {
         font-size: 12px;
-        color: #555;
+        color: #6b7280;
         text-align: center;
         line-height: 1.5;
         font-weight: 500;
@@ -333,18 +343,43 @@
     }
     .tirage-modal-btn {
         flex: 1;
-        padding: 10px;
+        padding: 8px;
         border: none;
-        border-radius: 12px;
-        font-weight: 900;
+        border-radius: 8px;
+        font-weight: 700;
         font-size: 11px;
-        text-transform: uppercase;
         cursor: pointer;
         font-family: inherit;
-        transition: transform .15s;
+        transition: background .15s, transform .1s;
     }
-    .tirage-modal-btn:active { transform: scale(0.95); }
-    .tirage-modal-cancel { background: #eee; color: #666; }
+    .tirage-modal-btn:active { transform: scale(0.96); }
+    .tirage-modal-cancel { background: #f3f4f6; color: #6b7280; }
+    .tirage-modal-cancel:hover { background: #e5e7eb; }
+
+    /* ── Popup aide (style monnaie) ── */
+    .tirage-help-popup {
+        display: none;
+        position: absolute;
+        top: 42px;
+        right: 10px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        padding: 12px 14px;
+        width: 260px;
+        font-size: 11px;
+        color: #4b5563;
+        z-index: 10;
+        line-height: 1.6;
+    }
+    .tirage-help-popup.show { display: block; }
+    .tirage-help-popup h4 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: #374151;
+        font-weight: 800;
+    }
     `;
 
     if (!document.getElementById('tirage-widget-style')) {
@@ -354,13 +389,35 @@
         document.head.appendChild(s);
     }
 
+    // Injecter le CSS des boutons wf si pas déjà fait (normalement par widget-monnaie)
+    if (!document.getElementById('wf-btns-style')) {
+        const ws = document.createElement('style');
+        ws.id = 'wf-btns-style';
+        ws.textContent = `
+    .wf-btns { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+    .wf-btn { width:13px; height:13px; border-radius:50%; border:none; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; font-size:0;
+        transition:filter .15s, transform .1s; flex-shrink:0; position:relative; }
+    .wf-btn:hover { filter:brightness(0.82); transform:scale(1.15); }
+    .wf-btn:active { transform:scale(0.92); }
+    .wf-btn-min   { background:#febc2e; }
+    .wf-btn-max   { background:#28c840; }
+    .wf-btn-close { background:#ff5f57; }
+    .wf-btns:hover .wf-btn::after { font-size:8px; font-weight:900; color:rgba(0,0,0,0.5); line-height:1; }
+    .wf-btns:hover .wf-btn-min::after   { content:'−'; }
+    .wf-btns:hover .wf-btn-max::after   { content:'⤢'; font-size:7px; }
+    .wf-btns:hover .wf-btn-close::after { content:'×'; font-size:10px; }
+        `;
+        document.head.appendChild(ws);
+    }
+
     // ── Constantes ────────────────────────────────────────────────────────
     const TIRAGE_LEVEL_COLORS = {
         'CP': '#ec4899', 'CE1': '#3b82f6', 'CE2': '#eab308',
         'CM1': '#ef4444', 'CM2': '#22c55e', 'AUTRE': '#a855f7'
     };
     const TIRAGE_LEVEL_ORDER = ['CP','CE1','CE2','CM1','CM2','AUTRE'];
-    const TIRAGE_THEME       = '#3b82f6';
+    const TIRAGE_THEME       = '#4a90e2';
     const DRAW_ITERATIONS    = 15;
     const DRAW_INTERVAL      = 70;
 
@@ -369,9 +426,21 @@
         return `
         <div class="tirage-inner">
             <div class="tirage-header">
-                <button class="tirage-header-btn tirage-import-header-btn" title="Importer une liste">📂</button>
                 <div class="tirage-header-title">🎲 Tirage au Sort</div>
-                <button class="tirage-header-btn tirage-help-btn" title="Aide">💡</button>
+                <div class="wf-btns" style="margin-left:auto">
+                    <button class="tirage-help-btn-wf" title="Aide" onmousedown="event.stopPropagation()" style="width:22px;height:22px;border-radius:50%;border:1px solid #bbb;background:#f5f5f5;color:#666;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;font-family:inherit;">?</button>
+                    <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"      onmousedown="event.stopPropagation()"></button>
+                    <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"  onmousedown="event.stopPropagation()"></button>
+                    <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"       onmousedown="event.stopPropagation()"></button>
+                </div>
+            </div>
+            <div class="tirage-help-popup">
+                <h4>💡 Comment ça marche</h4>
+                <p>• Importez une liste d'élèves (.txt ou .csv)<br>
+                Format : <em>Prénom;NOM;sexe;NIVEAU;date</em><br><br>
+                • Cliquez sur un prénom pour l'exclure (absent).<br>
+                • Cliquez à nouveau pour le remettre.<br>
+                • Le tirage se fait parmi les élèves restants du niveau affiché.</p>
             </div>
             <div class="tirage-import-zone">
                 <button class="tirage-import-btn">📄 Importer une liste d'élèves</button>
@@ -381,7 +450,7 @@
             <div class="tirage-level-tabs"></div>
             <div class="tirage-body" style="display:none;"></div>
             <div class="tirage-result-card" style="display:none;">
-                <div class="tirage-result-display" style="color:#3b82f6;">PRÊT</div>
+                <div class="tirage-result-display" style="color:#4a90e2;">PRÊT</div>
                 <button class="tirage-draw-btn" disabled>🎲 Tirer un prénom</button>
                 <div class="tirage-stats">--</div>
             </div>
@@ -394,7 +463,7 @@
                     <p class="tirage-modal-text"></p>
                     <div class="tirage-modal-btns">
                         <button class="tirage-modal-btn tirage-modal-cancel">Annuler</button>
-                        <button class="tirage-modal-btn tirage-modal-confirm" style="background:#3b82f6;color:#fff;">Confirmer</button>
+                        <button class="tirage-modal-btn tirage-modal-confirm" style="background:#4a90e2;color:#fff;">Confirmer</button>
                     </div>
                 </div>
             </div>
@@ -429,7 +498,6 @@
         // ── Références DOM ────────────────────────────────────────────────
         const importZone      = widget.querySelector('.tirage-import-zone');
         const importBtn       = widget.querySelector('.tirage-import-btn');
-        const importHeaderBtn = widget.querySelector('.tirage-import-header-btn');
         const fileInput       = widget.querySelector('.tirage-file-input');
         const statusEl        = widget.querySelector('.tirage-status');
         const levelTabs       = widget.querySelector('.tirage-level-tabs');
@@ -441,7 +509,80 @@
         const footer          = widget.querySelector('.tirage-footer');
         const resetBtn        = widget.querySelector('.tirage-reset-btn');
         const modalOverlay    = widget.querySelector('.tirage-modal-overlay');
-        const helpBtn         = widget.querySelector('.tirage-help-btn');
+        const helpBtn         = widget.querySelector('.tirage-help-btn-wf');
+        const helpPopup       = widget.querySelector('.tirage-help-popup');
+
+        // ── Boutons fenêtre wf-btns ───────────────────────────────────────
+        const wfMin   = widget.querySelector('[data-role="wf-min"]');
+        const wfMax   = widget.querySelector('[data-role="wf-max"]');
+        const wfClose = widget.querySelector('[data-role="wf-close"]');
+        let _isMax = false;
+
+        if (wfMin) {
+            wfMin.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+            wfMin.addEventListener('mousedown',   (e) => { e.stopPropagation(); });
+            wfMin.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // Lire et persister les dimensions dans le dataset AVANT de cacher outer
+                // (buildBoardState utilisera ce dataset même quand outer est display:none)
+                const savedW = outer.offsetWidth  || parseFloat(widget.dataset.tirageW) || 600;
+                const savedH = outer.offsetHeight || parseFloat(widget.dataset.tirageH) || 700;
+                widget.dataset.tirageW = savedW;
+                widget.dataset.tirageH = savedH;
+                outer.style.display = 'none';
+                if (typeof window._wfMiniBarCollapse === 'function') {
+                    window._wfMiniBarCollapse(widget, '🎲 Tirage au Sort', {
+                        onExpand: () => {
+                            outer.style.display = '';
+                            outer.style.width   = savedW + 'px';
+                            outer.style.height  = savedH + 'px';
+                        }
+                    });
+                }
+            });
+        }
+        if (wfMax) {
+            wfMax.addEventListener('click', (e) => {
+                e.stopPropagation();
+                _isMax = !_isMax;
+                const inner = widget.querySelector('.tirage-inner');
+                if (_isMax) {
+                    inner.style.position = 'fixed';
+                    inner.style.inset = '0';
+                    inner.style.width = '100%';
+                    inner.style.height = '100%';
+                    inner.style.zIndex = '9999';
+                    inner.style.borderRadius = '0';
+                } else {
+                    inner.style.position = '';
+                    inner.style.inset = '';
+                    inner.style.width = '';
+                    inner.style.height = '';
+                    inner.style.zIndex = '';
+                    inner.style.borderRadius = '';
+                }
+            });
+        }
+        if (wfClose) {
+            wfClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof snapshotNow === 'function') snapshotNow();
+                widget.remove();
+                if (typeof saveBoard === 'function') saveBoard();
+            });
+        }
+
+        // ── Aide popup ────────────────────────────────────────────────────
+        if (helpBtn && helpPopup) {
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                helpPopup.classList.toggle('show');
+            });
+            helpBtn.addEventListener('mouseover', () => { helpBtn.style.background = '#e0e0e0'; helpBtn.style.color = '#333'; });
+            helpBtn.addEventListener('mouseout',  () => { helpBtn.style.background = '#f5f5f5'; helpBtn.style.color = '#666'; });
+            document.addEventListener('click', () => helpPopup.classList.remove('show'));
+        }
 
         // ── État ──────────────────────────────────────────────────────────
         let allStudents  = [];
@@ -474,7 +615,6 @@
 
         // ── Import ────────────────────────────────────────────────────────
         importBtn.addEventListener('click', () => fileInput.click());
-        importHeaderBtn.addEventListener('click', () => fileInput.click());
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -545,11 +685,22 @@
                 (TIRAGE_LEVEL_ORDER.indexOf(b) === -1 ? 99 : TIRAGE_LEVEL_ORDER.indexOf(b))
             );
             levelTabs.innerHTML = '';
-            if (niveaux.length <= 1) { levelTabs.style.display = 'none'; return; }
             levelTabs.style.display = 'flex';
-            levelTabs.appendChild(makeTab('Tous', 'tous'));
-            niveaux.forEach(niv => levelTabs.appendChild(makeTab(niv, niv)));
-            setActiveTab('tous');
+
+            // Bouton "Changer de classe" toujours présent dans la barre
+            const changeBtn = document.createElement('button');
+            changeBtn.className = 'tirage-level-tab tirage-change-class-btn';
+            changeBtn.title = 'Charger une autre liste';
+            changeBtn.textContent = '📂';
+            changeBtn.style.cssText = 'margin-right:auto;background:#f0f4ff;border-color:#c7d9f8;color:#4a90e2;';
+            changeBtn.addEventListener('click', () => fileInput.click());
+            levelTabs.appendChild(changeBtn);
+
+            if (niveaux.length > 1) {
+                levelTabs.appendChild(makeTab('Tous', 'tous'));
+                niveaux.forEach(niv => levelTabs.appendChild(makeTab(niv, niv)));
+                setActiveTab('tous');
+            }
         }
 
         function makeTab(label, value) {
@@ -696,13 +847,6 @@
             });
         });
 
-        // ── Aide ──────────────────────────────────────────────────────────
-        helpBtn.addEventListener('click', () => {
-            showConfirm('💡 Comment ça marche',
-                '• Cliquez sur un prénom pour l\'exclure (absent).\n• Cliquez à nouveau pour le remettre.\n• Le tirage se fait parmi les élèves restants du niveau affiché.',
-                null, 'Compris !');
-        });
-
         // ── Modal ─────────────────────────────────────────────────────────
         function showConfirm(title, text, onConfirm, confirmLabel) {
             modalOverlay.querySelector('.tirage-modal-title').textContent = title;
@@ -740,8 +884,11 @@
         // ── Sauvegarder la taille via ResizeObserver ──────────────────────
         if (window.ResizeObserver) {
             const ro = new ResizeObserver(() => {
-                if (outer.offsetWidth  > 0) widget.dataset.tirageW = outer.offsetWidth;
-                if (outer.offsetHeight > 0) widget.dataset.tirageH = outer.offsetHeight;
+                // Ne pas écraser les dimensions sauvegardées si le widget est réduit
+                if (outer.dataset.collapsed !== '1') {
+                    if (outer.offsetWidth  > 0) widget.dataset.tirageW = outer.offsetWidth;
+                    if (outer.offsetHeight > 0) widget.dataset.tirageH = outer.offsetHeight;
+                }
                 updatePillScale();
             });
             ro.observe(outer);
@@ -777,7 +924,7 @@
                 <div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
             </div>
             <div class="widget-ctx-menu"></div>
-            <div class="tirage-outer editor-container">${tirageInnerHTML()}</div>
+            <div class="tirage-outer">${tirageInnerHTML()}</div>
         `;
 
         board.appendChild(widget);
@@ -807,8 +954,15 @@
                     Math.abs(parseFloat(w.leftPercent) - parseFloat(widget.dataset.leftPercent)) < 0.5
                 );
                 if (match) {
-                    if (outer.offsetWidth  > 0) { match.tirageW = outer.offsetWidth;  widget.dataset.tirageW = outer.offsetWidth; }
-                    if (outer.offsetHeight > 0) { match.tirageH = outer.offsetHeight; widget.dataset.tirageH = outer.offsetHeight; }
+                    // Toujours utiliser le dataset (mis à jour avant le collapse)
+                    const w = parseFloat(widget.dataset.tirageW) || outer.offsetWidth;
+                    const h = parseFloat(widget.dataset.tirageH) || outer.offsetHeight;
+                    if (w > 0) match.tirageW = w;
+                    if (h > 0) match.tirageH = h;
+                    // Mettre widthPercent/contentHPercent à 0 : save-load.js ne touche pas outer
+                    // (outer n'a plus la classe editor-container, donc ce n'est qu'une sécurité)
+                    match.widthPercent    = 0;
+                    match.contentHPercent = 0;
                     if (widget.dataset.tirageStudents)  match.tirageStudents  = widget.dataset.tirageStudents;
                     if (widget.dataset.tirageRemaining) match.tirageRemaining = widget.dataset.tirageRemaining;
                 }
@@ -848,7 +1002,7 @@
                         // Si le moteur de restauration a créé un placeholder vide, le remplacer
                         if (!outer) {
                             outer = document.createElement('div');
-                            outer.className = 'tirage-outer editor-container';
+                            outer.className = 'tirage-outer';
                             widget.appendChild(outer);
                         }
 
