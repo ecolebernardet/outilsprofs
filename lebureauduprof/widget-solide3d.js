@@ -258,14 +258,21 @@ function createSolide3DWidget() {
         <div class="widget-content" style="height:100%;box-sizing:border-box;position:relative;">
             <div class="s3d-container">
                 <div class="s3d-header">
-                    <span class="s3d-title">Solide 3D</span>
-                    <div class="s3d-shape-btns">
-                        <button class="s3d-shape-btn active" data-shape="cube">Cube</button>
-                        <button class="s3d-shape-btn" data-shape="tetrahedron">Tétraèdre</button>
-                        <button class="s3d-shape-btn" data-shape="octahedron">Octaèdre</button>
-                        <button class="s3d-shape-btn" data-shape="pyramid">Pyramide</button>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0;">
+                        <span class="s3d-title">Solide 3D</span>
+                        <div class="s3d-shape-btns">
+                            <button class="s3d-shape-btn active" data-shape="cube">Cube</button>
+                            <button class="s3d-shape-btn" data-shape="parallelepiped">Pavé droit</button>
+                            <button class="s3d-shape-btn" data-shape="prism3">Prisme △</button>
+                            <button class="s3d-shape-btn" data-shape="prism6">Prisme ⬡</button>
+                            <button class="s3d-shape-btn" data-shape="tetrahedron">Tétraèdre</button>
+                            <button class="s3d-shape-btn" data-shape="octahedron">Octaèdre</button>
+                            <button class="s3d-shape-btn" data-shape="pyramid">Pyramide</button>
+							<button class="s3d-shape-btn" data-shape="cylinder">Cylindre</button>
+                            <button class="s3d-shape-btn" data-shape="cone">Cône</button>
+                        </div>
                     </div>
-                    <div class="wf-btns" style="margin-left:auto">
+                    <div class="wf-btns" style="flex-shrink:0;">
                         <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
                         <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran board"></button>
                         <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
@@ -277,8 +284,8 @@ function createSolide3DWidget() {
                 </div>
                 <div class="s3d-zoom-row">
                     <span class="s3d-label">Zoom</span>
-                    <input type="range" class="s3d-zoom-slider" min="20" max="100" value="80">
-                    <span class="s3d-zoom-val">80%</span>
+                    <input type="range" class="s3d-zoom-slider" min="20" max="150" value="90">
+                    <span class="s3d-zoom-val">90%</span>
                 </div>
                 <div class="s3d-controls">
                     <div class="s3d-ctrl-group">
@@ -391,7 +398,7 @@ function _initSolide3D(widget) {
     let rotX = 30 * Math.PI / 180;
     let rotY = 45 * Math.PI / 180;
     let rotZ = 0;
-    let zoom = 0.6;
+    let zoom = parseInt(widget.querySelector('.s3d-zoom-slider').value) / 100;
     let faceColor  = '#1a9ecc';
     let showEdges  = true;
     let autoRotate = false;
@@ -421,6 +428,20 @@ function _initSolide3D(widget) {
                 {idx:[0,4,7,3],n:[-1,0,0]},{idx:[1,2,6,5],n:[1,0,0]},
             ]};
         },
+        parallelepiped: ()=>{
+            // Pavé droit : 3 dimensions distinctes, normalisé sur la sphère unité
+            // Proportions 2.5 : 1.5 : 1 → clairement non cubique
+            const a=0.8111, b=0.4867, c=0.3244; // rayon max = 1
+            const v=[
+                [-a,-b,-c],[a,-b,-c],[a,b,-c],[-a,b,-c],
+                [-a,-b, c],[a,-b, c],[a,b, c],[-a,b, c],
+            ];
+            return {vertices:v,faces:[
+                {idx:[0,3,2,1],n:[0,0,-1]},{idx:[4,5,6,7],n:[0,0,1]},
+                {idx:[0,1,5,4],n:[0,-1,0]},{idx:[3,7,6,2],n:[0,1,0]},
+                {idx:[0,4,7,3],n:[-1,0,0]},{idx:[1,2,6,5],n:[1,0,0]},
+            ]};
+        },
         tetrahedron: ()=>{
             const s=Math.sqrt(8/9),a0=Math.PI/2,a1=a0+2*Math.PI/3,a2=a0+4*Math.PI/3;
             const v=[[0,1,0],[s*Math.cos(a0),-1/3,s*Math.sin(a0)],[s*Math.cos(a1),-1/3,s*Math.sin(a1)],[s*Math.cos(a2),-1/3,s*Math.sin(a2)]];
@@ -438,7 +459,6 @@ function _initSolide3D(widget) {
         pyramid: ()=>{
             const r=S3;
             const v=[[-r,-r,-r],[r,-r,-r],[r,-r,r],[-r,-r,r],[0,1,0]];
-            // Normales calculées par produit vectoriel sur la géométrie réelle
             const pv=(a,b,c)=>{
                 const ax=b[0]-a[0],ay=b[1]-a[1],az=b[2]-a[2];
                 const bx=c[0]-a[0],by=c[1]-a[1],bz=c[2]-a[2];
@@ -453,6 +473,74 @@ function _initSolide3D(widget) {
                 {idx:[2,4,3],   n:pv(v[2],v[4],v[3])},
                 {idx:[3,4,0],   n:pv(v[3],v[4],v[0])},
             ]};
+        },
+
+        prism3: ()=>{
+            const h = 0.75;
+            const R = Math.sqrt(1 - h*h);
+            const a0=Math.PI/2, a1=a0+2*Math.PI/3, a2=a0+4*Math.PI/3;
+            const v = [
+                [R*Math.cos(a0), -h, R*Math.sin(a0)], // 0 bas-A
+                [R*Math.cos(a1), -h, R*Math.sin(a1)], // 1 bas-B
+                [R*Math.cos(a2), -h, R*Math.sin(a2)], // 2 bas-C
+                [R*Math.cos(a0),  h, R*Math.sin(a0)], // 3 haut-A
+                [R*Math.cos(a1),  h, R*Math.sin(a1)], // 4 haut-B
+                [R*Math.cos(a2),  h, R*Math.sin(a2)], // 5 haut-C
+            ];
+            // Normales = barycentre de chaque face normalisé (toujours correct pour convexe centré)
+            const fn=(...is)=>{const cx=is.reduce((s,i)=>s+v[i][0],0)/is.length,cy=is.reduce((s,i)=>s+v[i][1],0)/is.length,cz=is.reduce((s,i)=>s+v[i][2],0)/is.length,l=Math.sqrt(cx*cx+cy*cy+cz*cz)||1;return[cx/l,cy/l,cz/l];};
+            return {vertices:v, faces:[
+                {idx:[0,1,2],   n:[0,-1,0]},            // base bas
+                {idx:[5,4,3],   n:[0, 1,0]},            // base haut
+                {idx:[3,4,1,0], n:fn(3,4,1,0)},         // face A-B
+                {idx:[4,5,2,1], n:fn(4,5,2,1)},         // face B-C
+                {idx:[5,3,0,2], n:fn(5,3,0,2)},         // face C-A
+            ]};
+        },
+
+        prism6: ()=>{
+            const h = 0.6;
+            const R = Math.sqrt(1 - h*h);
+            const v = [];
+            for (let i=0;i<6;i++){const a=i*Math.PI/3+Math.PI/6;v.push([R*Math.cos(a),-h,R*Math.sin(a)]);}
+            for (let i=0;i<6;i++){const a=i*Math.PI/3+Math.PI/6;v.push([R*Math.cos(a), h,R*Math.sin(a)]);}
+            const fn=(...is)=>{const cx=is.reduce((s,i)=>s+v[i][0],0)/is.length,cy=is.reduce((s,i)=>s+v[i][1],0)/is.length,cz=is.reduce((s,i)=>s+v[i][2],0)/is.length,l=Math.sqrt(cx*cx+cy*cy+cz*cz)||1;return[cx/l,cy/l,cz/l];};
+            const faces=[
+                {idx:[0,1,2,3,4,5], n:[0,-1,0]},
+                {idx:[11,10,9,8,7,6], n:[0,1,0]},
+            ];
+            for(let i=0;i<6;i++){const j=(i+1)%6;faces.push({idx:[i+6,j+6,j,i],n:fn(i+6,j+6,j,i)});}
+            return {vertices:v, faces};
+        },
+
+        cylinder: ()=>{
+            // Le cylindre utilise un rendu spécial (arc Canvas) — marqué isRound
+            const N=32, h=0.7, R=Math.sqrt(1-h*h);
+            const v=[];
+            for(let i=0;i<N;i++){const a=2*Math.PI*i/N;v.push([R*Math.cos(a),-h,R*Math.sin(a)]);}
+            for(let i=0;i<N;i++){const a=2*Math.PI*i/N;v.push([R*Math.cos(a), h,R*Math.sin(a)]);}
+            const faces=[];
+            for(let i=0;i<N;i++){
+                const j=(i+1)%N;
+                const a=(i+0.5)*2*Math.PI/N;
+                faces.push({idx:[i,j,j+N,i+N],n:[Math.cos(a),0,Math.sin(a)]});
+            }
+            return {vertices:v, faces, isRound:true, R, h, type:'cylinder'};
+        },
+
+        cone: ()=>{
+            const N=32, h=0.7, R=Math.sqrt(1-h*h);
+            const sY=R/Math.sqrt(R*R+4*h*h), sR=2*h/Math.sqrt(R*R+4*h*h);
+            const v=[];
+            for(let i=0;i<N;i++){const a=2*Math.PI*i/N;v.push([R*Math.cos(a),-h,R*Math.sin(a)]);}
+            v.push([0,h,0]); // apex
+            const faces=[];
+            for(let i=0;i<N;i++){
+                const j=(i+1)%N;
+                const a=(i+0.5)*2*Math.PI/N;
+                faces.push({idx:[i,j,N],n:[sR*Math.cos(a),sY,sR*Math.sin(a)]});
+            }
+            return {vertices:v, faces, isRound:true, R, h, type:'cone'};
         },
     };
 
@@ -469,7 +557,7 @@ function _initSolide3D(widget) {
     // sc est constant (ne dépend pas de la rotation) → pas de zoom parasite
     function project(v) {
         const W=canvas.width,H=canvas.height;
-        const sc=Math.min(W,H)*0.5*zoom;
+        const sc=Math.min(W,H)*0.46*zoom;
         return [W/2+v[0]*sc, H/2-v[1]*sc];
     }
 
@@ -492,50 +580,111 @@ function _initSolide3D(widget) {
         else       {bg.addColorStop(0,'#152535');bg.addColorStop(1,'#080f18');}
         ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-        const {vertices,faces}=SHAPES[currentShape]();
+        const shape=SHAPES[currentShape]();
+        const {vertices,faces}=shape;
         const T=vertices.map(v=>applyRot(v));
         const P=T.map(v=>project(v));
+        const sc=Math.min(W,H)*0.46*zoom;
 
-        const sorted=faces.map(face=>({
-            face, z:face.idx.reduce((s,i)=>s+T[i][2],0)/face.idx.length
-        })).sort((a,b)=>a.z-b.z);
+        // Trace le polygone d'un cercle 3D projeté (128 segments = visuellement parfait)
+        function circlePolygon(yVal, R) {
+            const N=128;
+            const pts=[];
+            for(let i=0;i<N;i++){
+                const a=2*Math.PI*i/N;
+                const p=applyRot([R*Math.cos(a), yVal, R*Math.sin(a)]);
+                pts.push([W/2+p[0]*sc, H/2-p[1]*sc]);
+            }
+            return pts;
+        }
+
+        // Pour cylindre/cône : préparer les bases circulaires
+        const isRound = shape.isRound || false;
+        let roundBases=[];
+        if(isRound){
+            const {R,h,type}=shape;
+            const rnB=applyRot([0,-1,0]);
+            roundBases.push({yVal:-h, R, rn:rnB, zVal:applyRot([0,-h,0])[2]});
+            if(type==='cylinder'){
+                const rnT=applyRot([0,1,0]);
+                roundBases.push({yVal:h, R, rn:rnT, zVal:applyRot([0,h,0])[2]});
+            }
+        }
+
+        // Trier les faces + les bases circulaires par Z moyen
+        const items=[];
+        for(const face of faces){
+            const z=face.idx.reduce((s,i)=>s+T[i][2],0)/face.idx.length;
+            items.push({type:'poly', face, z});
+        }
+        for(const base of roundBases) items.push({type:'circle', base, z:base.zVal});
+        items.sort((a,b)=>a.z-b.z);
 
         // Passe 1 : remplissage
-        for(const {face} of sorted){
-            const rn=applyRot(face.n);
-            if(rn[2]<=0) continue;
-            const br=0.2+0.8*Math.max(0,dot(rn,L));
-            ctx.beginPath();
-            ctx.moveTo(P[face.idx[0]][0],P[face.idx[0]][1]);
-            for(let k=1;k<face.idx.length;k++) ctx.lineTo(P[face.idx[k]][0],P[face.idx[k]][1]);
-            ctx.closePath();
-            ctx.fillStyle=shadedColor(faceColor,br);
-            ctx.fill();
+        for(const item of items){
+            if(item.type==='circle'){
+                const {base}=item;
+                if(base.rn[2]<=0) continue;
+                const br=0.2+0.8*Math.max(0,dot(base.rn,L));
+                const pts=circlePolygon(base.yVal, base.R);
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0],pts[0][1]);
+                for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
+                ctx.closePath();
+                ctx.fillStyle=shadedColor(faceColor,br);
+                ctx.fill();
+            } else {
+                const {face}=item;
+                const rn=applyRot(face.n);
+                if(rn[2]<=0) continue;
+                const br=0.2+0.8*Math.max(0,dot(rn,L));
+                ctx.beginPath();
+                ctx.moveTo(P[face.idx[0]][0],P[face.idx[0]][1]);
+                for(let k=1;k<face.idx.length;k++) ctx.lineTo(P[face.idx[k]][0],P[face.idx[k]][1]);
+                ctx.closePath();
+                ctx.fillStyle=shadedColor(faceColor,br);
+                ctx.fill();
+            }
         }
 
         // Passe 2 : arêtes par-dessus tout
         if(showEdges){
-            const edgeMap=new Map();
-            for(const {face} of sorted){
-                const rn=applyRot(face.n);
-                const vis=rn[2]>0;
-                for(let k=0;k<face.idx.length;k++){
-                    const a=face.idx[k],b=face.idx[(k+1)%face.idx.length];
-                    const key=a<b?`${a}_${b}`:`${b}_${a}`;
-                    const e=edgeMap.get(key)||{a,b,vis:0,hid:0};
-                    if(vis) e.vis++; else e.hid++;
-                    edgeMap.set(key,e);
-                }
-            }
             ctx.lineCap='round'; ctx.lineJoin='round';
             ctx.strokeStyle=isLight?'rgba(0,0,0,0.3)':'rgba(255,255,255,0.4)';
-            for(const e of edgeMap.values()){
-                if(e.vis===0) continue;
-                ctx.lineWidth=(e.hid>0)?2.0:1.2;
-                ctx.beginPath();
-                ctx.moveTo(P[e.a][0],P[e.a][1]);
-                ctx.lineTo(P[e.b][0],P[e.b][1]);
-                ctx.stroke();
+
+            if(isRound){
+                for(const base of roundBases){
+                    if(base.rn[2]<=0) continue;
+                    const pts=circlePolygon(base.yVal, base.R);
+                    ctx.lineWidth=1.8;
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0][0],pts[0][1]);
+                    for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            } else {
+                // Solides à faces planes : arêtes avec détection silhouette
+                const edgeMap=new Map();
+                for(const face of faces){
+                    const rn=applyRot(face.n);
+                    const vis=rn[2]>0;
+                    for(let k=0;k<face.idx.length;k++){
+                        const a=face.idx[k],b=face.idx[(k+1)%face.idx.length];
+                        const key=a<b?`${a}_${b}`:`${b}_${a}`;
+                        const e=edgeMap.get(key)||{a,b,vis:0,hid:0};
+                        if(vis) e.vis++; else e.hid++;
+                        edgeMap.set(key,e);
+                    }
+                }
+                for(const e of edgeMap.values()){
+                    if(e.vis===0) continue;
+                    ctx.lineWidth=(e.hid>0)?2.0:1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(P[e.a][0],P[e.a][1]);
+                    ctx.lineTo(P[e.b][0],P[e.b][1]);
+                    ctx.stroke();
+                }
             }
         }
     }
@@ -657,11 +806,13 @@ function _initSolide3D(widget) {
     });
 
     // ── Réinitialiser ─────────────────────────────────────────────
+    const ZOOM_DEFAULT = parseInt(widget.querySelector('.s3d-zoom-slider').value);
     widget.querySelector('.s3d-reset-btn').addEventListener('click', e => {
         e.stopPropagation();
-        rotX=30*Math.PI/180; rotY=45*Math.PI/180; rotZ=0; zoom=0.6;
-        zoomSlider.value    = 60;
-        zoomVal.textContent = '60%';
+        rotX=30*Math.PI/180; rotY=45*Math.PI/180; rotZ=0;
+        zoom = ZOOM_DEFAULT / 100;
+        zoomSlider.value    = ZOOM_DEFAULT;
+        zoomVal.textContent = ZOOM_DEFAULT + '%';
         if (!autoRotate) draw();
     });
 
