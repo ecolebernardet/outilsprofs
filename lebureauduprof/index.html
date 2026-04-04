@@ -1856,5 +1856,83 @@ function toggleMediaCollapse(container) {
     if (typeof saveBoard === 'function') saveBoard();
 }
 </script>
+
+<script>
+/* ── Hover JS pour les onglets latéraux (anti-clignotement) ── */
+(function() {
+    // [id, classe CSS panneau ouvert, emoji, label]
+    const TABS = [
+        ['activities-panel-tab', 'act-panel-tab-open',      '🎯', 'Activités'],
+        ['tools-panel-tab',      'tools-panel-tab-open',    '🛠️', 'Outils'],
+        ['widgets-panel-tab',    'widgets-panel-tab-open',  '📦', 'Widgets'],
+        ['sticker-panel-tab',    'active',                  '🤓', 'Stickers'],
+        ['image-panel-tab',      'active',                  '🖼️', 'Images'],
+        ['pdf-library-tab',      'pdf-lib-tab-open',        '📄', 'PDF'],
+        ['projects-panel-tab',   'proj-panel-tab-open',     '📁', 'Projets'],
+    ];
+    const HOVER_ZONE_X = 200;
+    let currentHovered = null;
+
+    function isOpen(tab, openClass) {
+        return tab.classList.contains(openClass);
+    }
+
+    function getNearestTab(mouseY) {
+        let best = null, bestDist = Infinity;
+        for (const [id, openClass] of TABS) {
+            const tab = document.getElementById(id);
+            if (!tab || isOpen(tab, openClass)) continue;
+            const rect = tab.getBoundingClientRect();
+            const dist = Math.abs(mouseY - (rect.top + rect.height / 2));
+            if (mouseY >= rect.top - 2 && mouseY <= rect.bottom + 2 && dist < bestDist) {
+                bestDist = dist;
+                best = tab;
+            }
+        }
+        return best;
+    }
+
+    function openTab(tab, emoji, label) {
+        tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
+        tab.classList.add('tab-js-hover');
+    }
+
+    function closeTab(tab, emoji, label) {
+        tab.classList.remove('tab-js-hover');
+        tab.innerHTML = emoji + '\u00a0' + label;
+    }
+
+    document.addEventListener('mousemove', function(e) {
+        if (e.clientX > HOVER_ZONE_X) {
+            if (currentHovered) {
+                const [id,,emoji,label] = TABS.find(t => t[0] === currentHovered.id) || [];
+                if (emoji) closeTab(currentHovered, emoji, label);
+                currentHovered = null;
+            }
+            return;
+        }
+        const nearest = getNearestTab(e.clientY);
+        if (nearest !== currentHovered) {
+            if (currentHovered) {
+                const entry = TABS.find(t => t[0] === currentHovered.id);
+                if (entry) closeTab(currentHovered, entry[2], entry[3]);
+            }
+            currentHovered = nearest;
+            if (currentHovered) {
+                const entry = TABS.find(t => t[0] === currentHovered.id);
+                if (entry) openTab(currentHovered, entry[2], entry[3]);
+            }
+        }
+    });
+
+    document.addEventListener('mouseleave', function() {
+        if (currentHovered) {
+            const entry = TABS.find(t => t[0] === currentHovered.id);
+            if (entry) closeTab(currentHovered, entry[2], entry[3]);
+            currentHovered = null;
+        }
+    });
+})();
+</script>
 </body>
 </html>
