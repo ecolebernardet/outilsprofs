@@ -209,7 +209,7 @@
 
 			<!-- Activités -->
 			<div class="mm-item mm-has-sub" id="activities-menu-btn">
-				<span class="mm-ico">🎯</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
+				<span class="mm-ico">🎲</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
 				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
@@ -245,11 +245,11 @@
 				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;PDF</div>
 				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>&nbsp;&nbsp;Fenêtre Web</div>
 				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>&nbsp;&nbsp;YouTube</div>
-				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date</div>
-				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>&nbsp;&nbsp;Heure</div>
+				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date du jour</div>
+				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>&nbsp;&nbsp;Heure actuelle</div>
 				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>&nbsp;&nbsp;Météo</div>
-				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Devoirs</div>
-				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>&nbsp;&nbsp;Planning</div>
+				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Devoirs à noter</div>
+				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>&nbsp;&nbsp;Planning de la journée</div>
 				</div></div>
 			</div>
 
@@ -999,44 +999,44 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <div id="activities-panel">
     <div id="activities-panel-resize-handle" title="Redimensionner le panneau"></div>
     <div id="act-panel-header">
-        <h3>🎯Activités</h3>
+        <h3>🎲Activités</h3>
         <button id="act-panel-close" onclick="toggleActivitiesPanel()" title="Fermer">✕</button>
     </div>
     <div id="act-panel-content">
         <div class="act-section-label">🎲 Activités de mathématiques</div>
         <div class="act-grid">
             <div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">💶</div>
+                <div class="act-card-ico"><img src="pics/activites-monnaie6.jpeg" alt="La monnaie" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Monnaie</div>
                 <div class="act-card-desc">Reconnaître et calculer avec les pièces et billets</div>
             </div>
             <div class="act-card" onclick="createTableauNumWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🔟</div>
+                <div class="act-card-ico"><img src="pics/activites-tableau-numeration6.png" alt="Tableau de numération" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Tableau de numération</div>
                 <div class="act-card-desc">Décomposer les nombres par classes et rangs</div>
             </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
-                <div class="act-card-ico">🧮</div>
+                <div class="act-card-ico"><img src="pics/activites-calcul-mental6.png" alt="Calcul mental" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Calcul mental</div>
                 <div class="act-card-desc">S'entraîner au calcul mental</div>
             </div>
             <div class="act-card" onclick="createCompteEstBonWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🔢</div>
+                <div class="act-card-ico"><img src="pics/activites-compteestbon6.jpeg" alt="Le compte est bon" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Le compte est bon</div>
                 <div class="act-card-desc">Atteindre un nombre cible avec les opérations</div>
             </div>
 			<div class="act-card" onclick="createHeureWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🕑</div>
+                <div class="act-card-ico"><img src="pics/activites-heure6.jpeg" alt="Heures et durées" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Heures et durées</div>
                 <div class="act-card-desc">Lire l'heure ou calculer une durée</div>
             </div>
 			<div class="act-card" onclick="createHorlogeWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🕰️</div>
+                <div class="act-card-ico"><img src="pics/activites-horloge6.jpeg" alt="Horloge interactive" style="width:100%;height:100%;object-fit:contain;">️</div>
                 <div class="act-card-name">Horloge interactive</div>
                 <div class="act-card-desc">Manipuler les aiguilles pour régler l'heure</div>
             </div>
 			<div class="act-card" onclick="createSolide3DWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">🧊</div>
+                <div class="act-card-ico"><img src="pics/activites-solides6.jpeg" alt="Solides 3D" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Solides 3D</div>
                 <div class="act-card-desc">Manipuler les solides en 3 dimensions</div>
             </div>
@@ -1044,12 +1044,12 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 		<div class="act-section-label">🎲 Activités de français</div>
         <div class="act-grid">
             <div class="act-card" onclick="createWidget('mots-alpha');toggleActivitiesPanel()">
-                <div class="act-card-ico">🔤</div>
+                <div class="act-card-ico"><img src="pics/activites-ordrealpha6.jpeg" alt="Ordre alphabétique" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Ordre alphabétique</div>
                 <div class="act-card-desc">Trier et classer des mots dans l'ordre de l'alphabet</div>
             </div>
             <div class="act-card" onclick="createConjugaisonWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico">✏️</div>
+                <div class="act-card-ico"><img src="pics/activites-conjugaison6.jpeg" alt="Conjugaison" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Conjugaison</div>
                 <div class="act-card-desc">Test flash de conjugaison (présent, imparfait, futur)</div>
             </div>
@@ -1057,7 +1057,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="activities-panel-tab" onclick="toggleActivitiesPanel()" title="Activités">🎯 Activités</button>
+<button id="activities-panel-tab" onclick="toggleActivitiesPanel()" title="Activités">🎲 Activités</button>
 
 <script>
 // ── Panneau Activités ──────────────────────────────────────────────
@@ -1152,17 +1152,17 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <div class="widgets-grid">
             <div class="widgets-card" onclick="createWidget('date');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📅</div>
-                <div class="widgets-card-name">Date</div>
+                <div class="widgets-card-name">Date du jour</div>
                 <div class="widgets-card-desc">Afficher la date du jour</div>
             </div>
             <div class="widgets-card" onclick="createWidget('time');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">🕒</div>
-                <div class="widgets-card-name">Heure</div>
+                <div class="widgets-card-name">Heure actuelle</div>
                 <div class="widgets-card-desc">Afficher l'heure en temps réel</div>
             </div>
             <div class="widgets-card" onclick="createWidget('meteo');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">⛅</div>
-                <div class="widgets-card-name">Météo</div>
+                <div class="widgets-card-name">Météo locale</div>
                 <div class="widgets-card-desc">Afficher la météo locale</div>
             </div>
         </div>
@@ -1170,13 +1170,13 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <div class="widgets-grid">
             <div class="widgets-card" onclick="createWidget('homework');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📝</div>
-                <div class="widgets-card-name">Devoirs</div>
-                <div class="widgets-card-desc">Afficher les devoirs de la classe</div>
+                <div class="widgets-card-name">Devoirs à noter</div>
+                <div class="widgets-card-desc">Éditer les devoirs de la classe</div>
             </div>
             <div class="widgets-card" onclick="createWidget('agenda');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📌</div>
-                <div class="widgets-card-name">Planning</div>
-                <div class="widgets-card-desc">Afficher le planning de la semaine</div>
+                <div class="widgets-card-name">Planning de la journée</div>
+                <div class="widgets-card-desc">Afficher le programme de la journée</div>
             </div>
 		</div>
 		<div class="widgets-section-label">✍️ Annotation</div>
@@ -1870,7 +1870,7 @@ function toggleMediaCollapse(container) {
 (function() {
     // [id, classe CSS panneau ouvert, emoji, label]
     const TABS = [
-        ['activities-panel-tab', 'act-panel-tab-open',      '🎯', 'Activités'],
+        ['activities-panel-tab', 'act-panel-tab-open',      '🎲', 'Activités'],
         ['tools-panel-tab',      'tools-panel-tab-open',    '🛠️', 'Outils'],
         ['widgets-panel-tab',    'widgets-panel-tab-open',  '📦', 'Widgets'],
         ['sticker-panel-tab',    'active',                  '🤓', 'Stickers'],
