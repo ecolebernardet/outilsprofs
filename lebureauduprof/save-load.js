@@ -149,8 +149,14 @@ function buildBoardState() {
         if (w.dataset.type === 'horloge' && typeof w._hrlgGetData === 'function') {
             horlogeData = {
                 ...w._hrlgGetData(),
-                widgetW: w.offsetWidth   // largeur du widget entier (pas du container)
+                widgetW: w.offsetWidth
             };
+        }
+        // Données propres au widget solide 3D
+        let s3dW = 0, s3dH = 0;
+        if (w.dataset.type === 'solide3d') {
+            s3dW = w.offsetWidth;
+            s3dH = w.offsetHeight;
         }
         // Données propres au widget conjugaison
         let conjData = null;
@@ -172,6 +178,26 @@ function buildBoardState() {
                 clocksZoneH: hz ? hz.offsetHeight : null,
                 level:      w.dataset.heureLevel || 'facile',
                 mode:       w.dataset.heureMode  || 'lecture'
+            };
+        }
+        // Données propres au widget écriture séyès
+        let seyesData = null;
+        if (w.dataset.type === 'seyes') {
+            const sc = w.querySelector('.seyes-container');
+            const se = w.querySelector('.seyes-editor');
+            const wa = w.querySelector('.seyes-writing-area');
+            const sm = w.querySelector('.seyes-editor-marge');
+            seyesData = {
+                containerW:   sc ? sc.offsetWidth  : null,
+                containerH:   sc ? sc.offsetHeight : null,
+                editorHTML:   se ? se.innerHTML     : '',
+                margeHTML:    sm ? sm.innerHTML     : '',
+                fontSize:     se ? se.style.fontSize   : null,
+                lineHeight:   se ? se.style.lineHeight  : null,
+                paddingTop:   se ? se.style.paddingTop  : null,
+                fontFamily:   se ? se.style.fontFamily  : null,
+                color:        se ? se.style.color       : null,
+                fullboard:    sc ? sc.classList.contains('wf-fullboard') : true
             };
         }
         // Données propres au widget plan
@@ -215,7 +241,9 @@ function buildBoardState() {
 			heureData,
 			conjData,
 			tableauNumData,
-			horlogeData
+			horlogeData,
+			s3dW, s3dH,
+			seyesData
 		});
     });
     const shapes = [];
@@ -465,6 +493,10 @@ function restoreBoardFromJSON(json) {
             if (w.horlogeData && typeof widget._hrlgSetData === 'function') {
                 widget._hrlgSetData(w.horlogeData);
             }
+        } else if (w.type === 'solide3d') {
+            widget = createSolide3DWidget();
+            if (w.s3dW > 0) widget.style.width  = w.s3dW + 'px';
+            if (w.s3dH > 0) widget.style.height = w.s3dH + 'px';
         } else if (w.type === 'plan') {
             widget = createPlanWidget();
             // Restaurer les dimensions sauvegardées
@@ -475,6 +507,44 @@ function restoreBoardFromJSON(json) {
                 // Restaurer les éléments du plan
                 if (w.planData.items && widget._setPlanData) {
                     try { widget._setPlanData(JSON.parse(w.planData.items)); } catch(e) {}
+                }
+            }
+        } else if (w.type === 'seyes') {
+            widget = createSeyesWidget();
+            if (w.seyesData) {
+                const sc = widget.querySelector('.seyes-container');
+                const se = widget.querySelector('.seyes-editor');
+                const sm = widget.querySelector('.seyes-editor-marge');
+                const isFullboard = w.seyesData.fullboard !== false; // true par défaut
+                // Restaurer dimensions seulement si PAS en fullboard
+                if (!isFullboard) {
+                    sc.classList.remove('wf-fullboard');
+                    if (sc && w.seyesData.containerW) sc.style.width  = w.seyesData.containerW + 'px';
+                    if (sc && w.seyesData.containerH) sc.style.height = w.seyesData.containerH + 'px';
+                }
+                // S'assurer que la classe fullboard est bien présente si nécessaire
+                if (isFullboard && sc) sc.classList.add('wf-fullboard');
+                if (se) {
+                    if (w.seyesData.fontSize)   se.style.fontSize   = w.seyesData.fontSize;
+                    if (w.seyesData.lineHeight)  se.style.lineHeight = w.seyesData.lineHeight;
+                    if (w.seyesData.paddingTop)  se.style.paddingTop = w.seyesData.paddingTop;
+                    if (w.seyesData.fontFamily)  se.style.fontFamily = w.seyesData.fontFamily;
+                    if (w.seyesData.color)       se.style.color      = w.seyesData.color;
+                    if (w.seyesData.editorHTML)  se.innerHTML        = w.seyesData.editorHTML;
+                }
+                if (sm && w.seyesData.margeHTML) {
+                    sm.innerHTML = w.seyesData.margeHTML;
+                    sm.classList.add('active');
+                }
+                if (w.seyesData.fontSize && sm) {
+                    sm.style.fontSize   = w.seyesData.fontSize;
+                    sm.style.lineHeight = w.seyesData.lineHeight;
+                    sm.style.paddingTop = w.seyesData.paddingTop;
+                }
+                // Restaurer le background-size du fond séyès selon le line-height
+                if (sc && w.seyesData.lineHeight) {
+                    const lh = parseFloat(w.seyesData.lineHeight);
+                    if (!isNaN(lh)) sc.style.backgroundSize = `100% 100%, auto ${lh}px, 100% 100%, ${lh}px auto`;
                 }
             }
         } else {
