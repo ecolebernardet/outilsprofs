@@ -1920,15 +1920,15 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 }
 .act-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 20px;
 }
 .act-card {
     background: #1a1a1a;
     border: 1px solid #333;
-    border-radius: 12px;
-    padding: 16px 12px;
+    border-radius: 0px;
+    padding: 8px 8px;
     cursor: pointer;
     display: flex; flex-direction: column;
     align-items: center; gap: 8px;
