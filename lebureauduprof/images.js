@@ -18,12 +18,17 @@ if (!window.IMAGE_CATEGORIES) {
             label: 'Maths',
             icon: '🧮️',
             images: [
-                { src: 'images/maths-table-pythagore.jpg',                     label: 'Maths (table de Pythagore)' },
-				{ src: 'images/maths-tableau-conversion-contenances.jpg',      label: 'Maths (tableau de conversion des mesures de contenances)' },
-                { src: 'images/maths-tableau-conversion-longueurs.jpg',        label: 'Maths (tableau de conversion des mesures de longueurs)' },
-				{ src: 'images/maths-tableau-conversion-masses.jpg',           label: 'Maths (tableau de conversion des mesures de masses)' },
-                { src: 'images/maths-tableau-numeration-decimaux.jpg',         label: 'Maths (tableau de numération des nombres décimaux)' },
-				{ src: 'images/maths-tableau-numeration-entiers.jpg',          label: 'Maths (tableau de numération des nombres entiers)' },
+                { src: 'images/maths-table-pythagore.jpg',                          label: 'Maths (table de Pythagore)' },
+				{ src: 'images/maths-tableau-conversion-contenances.jpg',           label: 'Maths (tableau de conversion des mesures de contenances)' },
+                { src: 'images/maths-tableau-conversion-longueurs.jpg',             label: 'Maths (tableau de conversion des mesures de longueurs)' },
+				{ src: 'images/maths-tableau-conversion-masses.jpg',                label: 'Maths (tableau de conversion des mesures de masses)' },
+                { src: 'images/maths-tableau-numeration-decimaux.jpg',              label: 'Maths (tableau de numération des nombres décimaux)' },
+				{ src: 'images/maths-tableau-numeration-entiers.jpg',               label: 'Maths (tableau de numération des nombres entiers)' },
+				{ src: 'images/maths-droite-numerique-petits-carreaux.jpg',         label: 'Maths (droite numérique - centièmes))' },
+				{ src: 'images/maths-droite-numerique-millimetre.jpg',              label: 'Maths (droite numérique - dixièmes)' },
+				{ src: 'images/maths-graphique.jpg',                                label: 'Maths (graphique)' },
+				{ src: 'images/maths-equerre.png',                                  label: 'Maths (équerre)' },
+				{ src: 'images/maths-tangram-24x24.jpg',                            label: 'Maths (tangram)' },
             ]
         },
 		{
@@ -163,6 +168,8 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/texture08.png',    label: 'Texture' },
 				{ src: 'images/texture09.png',    label: 'Texture' },
 				{ src: 'images/texture10.png',    label: 'Texture' },
+				{ src: 'images/texture11.png',    label: 'Texture' },
+				{ src: 'images/texture12.png',    label: 'Texture' },
             ]
         },
 		{
