@@ -226,7 +226,7 @@
 
 			<!-- Outils -->
 			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🛠️</span>&nbsp;&nbsp;Outils<span class="mm-arrow">›</span>
+				<span class="mm-ico">🧰</span>&nbsp;&nbsp;Outils<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>&nbsp;&nbsp;OutilsProfs</div>
 				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>&nbsp;&nbsp;Défi Calme</div>
@@ -1263,7 +1263,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <div class="tools-section-label">🧰 Outils classe</div>
         <div class="tools-grid">
             <div class="tools-card" onclick="createWidget('outilsprofs');toggleToolsPanel()">
-                <div class="tools-card-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:32px;height:32px;object-fit:contain;border-radius:6px;"></div>
+                <div class="tools-card-ico"><img src="pics/outilsprofs-icone.png" alt="OutilsProfs" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="tools-card-name">OutilsProfs</div>
                 <div class="tools-card-desc">Accès aux outils pédagogiques en ligne</div>
             </div>
@@ -1301,7 +1301,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="tools-panel-tab" onclick="toggleToolsPanel()" title="Outils">🛠️ Outils</button>
+<button id="tools-panel-tab" onclick="toggleToolsPanel()" title="Outils">🧰 Outils</button>
 
 <script>
 // ── Panneau Outils ──────────────────────────────────────────────
@@ -1871,7 +1871,7 @@ function toggleMediaCollapse(container) {
     // [id, classe CSS panneau ouvert, emoji, label]
     const TABS = [
         ['activities-panel-tab', 'act-panel-tab-open',      '🎲', 'Activités'],
-        ['tools-panel-tab',      'tools-panel-tab-open',    '🛠️', 'Outils'],
+        ['tools-panel-tab',      'tools-panel-tab-open',    '🧰', 'Outils'],
         ['widgets-panel-tab',    'widgets-panel-tab-open',  '📦', 'Widgets'],
         ['sticker-panel-tab',    'active',                  '🤓', 'Stickers'],
         ['image-panel-tab',      'active',                  '🖼️', 'Images'],
