@@ -1657,7 +1657,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     border-color: var(--pdf-lib-accent);
     transform: translateY(-2px);
 }
-.widgets-card-ico { font-size: 50px; line-height: 1; padding-bottom: 8px; display: flex; align-items: center; justify-content: center; height: 36px; }
+.widgets-card-ico { font-size: 50px; line-height: 1; height: 100px;}
 .widgets-card-name { font-size: 11px; font-weight: 700; color: #ddd; }
 .widgets-card-desc { font-size: 10px; color: rgba(255,255,255,0.4); line-height: 1.3; }
 

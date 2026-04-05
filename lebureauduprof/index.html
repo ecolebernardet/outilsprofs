@@ -1162,17 +1162,17 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <div class="widgets-section-label">📦 Médias & Info</div>
         <div class="widgets-grid">
             <div class="widgets-card" onclick="createWidget('pdf');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">📋</div>
+                <div class="widgets-card-ico"><img src="pics/widget-pdf.jpeg" alt="Afficher et annoter un document PDF" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">PDF</div>
                 <div class="widgets-card-desc">Afficher et annoter un document PDF</div>
             </div>
             <div class="widgets-card" onclick="createWidget('iframe');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">💻</div>
+                <div class="widgets-card-ico"><img src="pics/widget-fenetre-web.jpeg" alt="Intégrer un site web" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">Fenêtre Web</div>
                 <div class="widgets-card-desc">Intégrer un site web</div>
             </div>
             <div class="widgets-card" onclick="createWidget('youtube');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">🎬</div>
+                <div class="widgets-card-ico"><img src="pics/widget-youtube.jpeg" alt="Ouvrir une vidéo Youtube" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">YouTube</div>
                 <div class="widgets-card-desc">Intégrer une vidéo YouTube</div>
             </div>
@@ -1180,12 +1180,12 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <div class="widgets-section-label">🕒 Temps & Météo</div>
         <div class="widgets-grid">
             <div class="widgets-card" onclick="createWidget('date');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">📅</div>
+                <div class="widgets-card-ico"><img src="pics/widget-date.jpeg" alt="Afficher la date du jour" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">Date du jour</div>
                 <div class="widgets-card-desc">Afficher la date du jour</div>
             </div>
             <div class="widgets-card" onclick="createWidget('time');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">🕒</div>
+                <div class="widgets-card-ico"><img src="pics/widget-heure.jpeg" alt="Afficher l'heure en temps réel" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">Heure actuelle</div>
                 <div class="widgets-card-desc">Afficher l'heure en temps réel</div>
             </div>
@@ -1195,9 +1195,14 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="widgets-card-desc">Afficher la météo locale</div>
             </div>
         </div>
-        <div class="widgets-section-label">📋 Organisation</div>
+        <div class="widgets-section-label">📋 Organisation & Annotation</div>
         <div class="widgets-grid">
-            <div class="widgets-card" onclick="createWidget('homework');toggleWidgetsPanel()">
+            <div class="widgets-card" onclick="window._nextTextOpenCreate=true;createWidget('text');toggleWidgetsPanel()">
+                <div class="widgets-card-ico">✍️</div>
+                <div class="widgets-card-name">Texte</div>
+                <div class="widgets-card-desc">Ajouter une zone de texte libre</div>
+            </div>
+			<div class="widgets-card" onclick="createWidget('homework');toggleWidgetsPanel()">
                 <div class="widgets-card-ico">📝</div>
                 <div class="widgets-card-name">Devoirs à noter</div>
                 <div class="widgets-card-desc">Éditer les devoirs de la classe</div>
@@ -1208,15 +1213,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="widgets-card-desc">Afficher le programme de la journée</div>
             </div>
 		</div>
-		<div class="widgets-section-label">✍️ Annotation</div>
-        <div class="widgets-grid">
-            <div class="widgets-card" onclick="window._nextTextOpenCreate=true;createWidget('text');toggleWidgetsPanel()">
-                <div class="widgets-card-ico">✍️</div>
-                <div class="widgets-card-name">Texte</div>
-                <div class="widgets-card-desc">Ajouter une zone de texte libre</div>
-            </div>
-        </div>
-    </div>
+	</div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
 <button id="widgets-panel-tab" onclick="toggleWidgetsPanel()" title="Widgets">📦 Widgets</button>
