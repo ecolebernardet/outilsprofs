@@ -901,6 +901,35 @@
 <input type="file" id="bg-upload" style="display:none" accept="image/*" onchange="handleBgUpload(this)">
 
 <script src="board.js"></script>
+<script>
+/* ── Patch : synchronise l'onglet Mode Présentation avec l'état réel ── */
+(function() {
+    function _updatePresTab() {
+        var tab = document.getElementById('pres-mode-tab');
+        if (!tab) return;
+        var isOn = document.body.classList.contains('presentation-mode');
+        tab.classList.toggle('pres-mode-tab-active', isOn);
+        // Mise à jour du contenu texte (état normal, sans hover)
+        if (!tab.classList.contains('tab-js-hover')) {
+            tab.innerHTML = isOn ? '📽️ Off' : '📽️ On';
+        }
+    }
+
+    // Patcher togglePresentationMode pour mettre à jour l'onglet
+    var _origToggle = window.togglePresentationMode;
+    window.togglePresentationMode = function() {
+        if (typeof _origToggle === 'function') _origToggle();
+        _updatePresTab();
+    };
+
+    // Synchroniser aussi après les événements fullscreen (quitter avec Échap)
+    document.addEventListener('fullscreenchange', _updatePresTab);
+    document.addEventListener('webkitfullscreenchange', _updatePresTab);
+
+    // Synchroniser à l'initialisation
+    document.addEventListener('DOMContentLoaded', _updatePresTab);
+})();
+</script>
 <script src="background.js"></script>
 <script src="pdf-viewer.js"></script>
 <script src="media.js"></script>
@@ -1397,6 +1426,9 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <!-- Onglet déclencheur sur le bord gauche -->
 <button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets">📁 Projets</button>
 
+<!-- Onglet Mode Présentation (8e onglet) -->
+<button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation">📽️ Présentation</button>
+
 <script src="projects-panel.js"></script>
 <script>
 // Rafraîchir le panneau projets après toute sauvegarde ou suppression
@@ -1877,6 +1909,7 @@ function toggleMediaCollapse(container) {
         ['image-panel-tab',      'active',                  '🖼️', 'Images'],
         ['pdf-library-tab',      'pdf-lib-tab-open',        '📋', 'PDF'],
         ['projects-panel-tab',   'proj-panel-tab-open',     '📁', 'Projets'],
+        ['pres-mode-tab',        '',                        '📽️', 'Présentation'],
     ];
     let currentHovered = null;
 
@@ -1898,13 +1931,24 @@ function toggleMediaCollapse(container) {
     }
 
     function openTab(tab, emoji, label) {
+        // Pour l'onglet présentation, adapter le label selon l'état
+        if (tab.id === 'pres-mode-tab') {
+            var isOn = document.body.classList.contains('presentation-mode');
+            label = isOn ? 'Quitter' : 'Mode Présentation';
+        }
         tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
         tab.classList.add('tab-js-hover');
     }
 
     function closeTab(tab, emoji, label) {
         tab.classList.remove('tab-js-hover');
-        tab.innerHTML = emoji + '\u00a0' + label;
+        // Pour l'onglet présentation, adapter le contenu selon l'état
+        if (tab.id === 'pres-mode-tab') {
+            var isOn = document.body.classList.contains('presentation-mode');
+            tab.innerHTML = emoji + '\u00a0' + (isOn ? 'Off' : 'On');
+        } else {
+            tab.innerHTML = emoji + '\u00a0' + label;
+        }
     }
 
     let openTimer = null;

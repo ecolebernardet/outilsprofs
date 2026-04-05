@@ -1262,6 +1262,11 @@
 			opacity: 1 !important;
 		}
 
+		/* MODE PRÉSENTATION — anciens boutons flottants masqués (remplacés par l'onglet latéral) */
+		#presentation-btn,
+		#exit-presentation-btn { display: none !important; }
+		body.presentation-mode #exit-presentation-btn { display: none !important; }
+
 		/* Bouton quitter le mode présentation */
 		#exit-presentation-btn {
 			position: fixed; bottom: 20px; left: 80px;
@@ -1292,13 +1297,7 @@
 		}
 		body.presentation-mode #presentation-btn { display: none !important; }
 		body.presentation-mode #exit-presentation-btn {
-			display: flex !important;
-			background: rgba(20,20,20,0.75) !important;
-			border-color: rgba(255,255,255,0.2) !important;
-			opacity: 0.3 !important;
-		}
-		body.presentation-mode #exit-presentation-btn:hover {
-			opacity: 1 !important;
+			display: none !important;
 		}
 
 		/* POINTEUR LASER */
@@ -2202,6 +2201,59 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 }
 #projects-panel-tab.proj-panel-tab-open { display: none !important; }
 #projects-panel-tab.proj-panel-resizing { transition: none !important; }
+
+/* ── Onglet Mode Présentation (8e onglet) ─────────────────────── */
+#pres-mode-tab {
+    position: fixed;
+    left: -25px; top: calc(50% + 300px);
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center center;
+    width: 50px; height: 50px;
+    background: #1a2a3b;
+    border: 1px solid rgba(255,120,50,0.35);
+    border-right: none;
+    border-radius: 0px 0px 8px 8px;
+    z-index: 9105;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: flex-start;
+    font-size: 12px; color: rgba(100,170,235,0.65);
+    transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
+    letter-spacing: 1px;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    opacity: 0.55;
+    white-space: nowrap;
+    flex-direction: column-reverse;
+    gap: 2px;
+}
+#pres-mode-tab.tab-js-hover {
+    background: #243a52; color: rgba(100,170,235,0.95); opacity: 1;
+    width: 200px; height: 70px;
+    padding: 0;
+    transform: translateY(-50%) rotate(0deg);
+    flex-direction: column;
+    gap: 4px;
+    font-size: 10px;
+    transition: width 0.22s cubic-bezier(.4,0,.2,1), height 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.15s, color 0.15s, background 0.15s;
+    justify-content: center;
+    padding-left: 30px;
+}
+/* État actif (présentation ON) */
+#pres-mode-tab.pres-mode-tab-active {
+    background: #2a0a0a;
+    border-color: rgba(255,80,80,0.7);
+    color: rgba(255,100,100,0.9);
+    opacity: 0.33;
+}
+#pres-mode-tab.pres-mode-tab-active.tab-js-hover {
+    background: #3a0a0a;
+    color: #ff8080;
+    opacity: 1;
+}
+/* Toujours visible, même en mode présentation */
+body.presentation-mode #pres-mode-tab {
+    display: flex !important;
+    z-index: 100001;
+}
 
 /* En-tête */
 #proj-panel-header {
