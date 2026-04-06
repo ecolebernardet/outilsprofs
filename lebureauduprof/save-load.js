@@ -91,6 +91,13 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW)  * 100;
             tP = (w.offsetTop  / curVH) * 100;
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: 0, leftPercent: lP, topPercent: tP });
+        } else if (w.dataset.type === 'sondage') {
+            const sc = w.querySelector('.snd-container');
+            wP = sc ? (sc.offsetWidth  / curW)  * 100 : 0;
+            hP = sc ? (sc.offsetHeight / curVH) * 100 : 0;
+            lP = (w.offsetLeft / curW)  * 100;
+            tP = (w.offsetTop  / curVH) * 100;
+            Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         } else if (_collapsed) {
             const _savedWpx    = parseFloat(c.dataset.savedW);
             const _savedHpx    = parseFloat(c.dataset.savedH);
@@ -116,7 +123,7 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW) * 100;
             tP = (w.offsetTop  / curVH) * 100;
         }
-        if (w.dataset.type !== 'deficalme') {
+        if (w.dataset.type !== 'deficalme' && w.dataset.type !== 'sondage') {
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         }
         // Données propres aux stickers
@@ -151,6 +158,11 @@ function buildBoardState() {
                 ...w._hrlgGetData(),
                 widgetW: w.offsetWidth
             };
+        }
+        // Données propres au widget sondage
+        let sondageData = null;
+        if (w.dataset.type === 'sondage' && typeof w._sndGetData === 'function') {
+            sondageData = w._sndGetData();
         }
         // Données propres au widget solide 3D
         let s3dW = 0, s3dH = 0;
@@ -243,6 +255,7 @@ function buildBoardState() {
 			conjData,
 			tableauNumData,
 			horlogeData,
+			sondageData,
 			s3dW, s3dH,
 			seyesData
 		});
@@ -498,6 +511,20 @@ function restoreBoardFromJSON(json) {
             widget = createHorlogeWidget();
             if (w.horlogeData && typeof widget._hrlgSetData === 'function') {
                 widget._hrlgSetData(w.horlogeData);
+            }
+        } else if (w.type === 'sondage') {
+            widget = createSondageWidget();
+            if (w.sondageData && typeof widget._sndSetData === 'function') {
+                widget._sndSetData(w.sondageData);
+            }
+            const sc = widget.querySelector('.snd-container');
+            if (sc && w.sondageData) {
+                if (w.sondageData.fullboard) {
+                    sc.classList.add('snd-fullboard');
+                } else {
+                    if (w.sondageData.containerW) sc.style.width  = w.sondageData.containerW + 'px';
+                    if (w.sondageData.containerH) sc.style.height = w.sondageData.containerH + 'px';
+                }
             }
         } else if (w.type === 'solide3d') {
             widget = createSolide3DWidget();

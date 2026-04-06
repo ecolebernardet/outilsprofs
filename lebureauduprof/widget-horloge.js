@@ -45,14 +45,25 @@ function createHorlogeWidget() {
             box-sizing: border-box !important;
             border-radius: 0 !important;
             flex-shrink: 0 !important;
+            font-size: 14px !important;
         }
         .hrlg-container.wf-fullboard .hrlg-body {
-            width: min(650px, 80vmin) !important;
+            width: min(700px, 85vmin) !important;
             flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: center !important;
+            justify-content: flex-start !important;
+            padding-top: 1em !important;
+        }
+        .hrlg-container.wf-fullboard .hrlg-time-display {
+            font-size: 6em !important;
+        }
+        .hrlg-container.wf-fullboard .hrlg-toggle-time-btn,
+        .hrlg-container.wf-fullboard .hrlg-toggle-min-nums-btn,
+        .hrlg-container.wf-fullboard .hrlg-toggle-hour-nums-btn,
+        .hrlg-container.wf-fullboard .hrlg-reset-btn {
+            font-size: 1em !important;
         }
         .hrlg-container {
             display: flex;
@@ -64,6 +75,8 @@ function createHorlogeWidget() {
             font-size: 14px;
             min-width: 200px;
             width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         .hrlg-header {
             display: flex;
@@ -84,6 +97,7 @@ function createHorlogeWidget() {
             color: #a5b4fc; font-size: 0.65em; font-weight: 700;
             width: 1.7em; height: 1.7em; border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center; padding: 0;
+            flex-shrink: 0;
         }
         .hrlg-help-popup {
             display: none; position: absolute; top: 3em; left: 0.8em; right: 0.8em;
@@ -98,9 +112,10 @@ function createHorlogeWidget() {
         .hrlg-body {
             display: flex; flex-direction: column; align-items: center;
             padding: 1.1em 1em 0.9em; gap: 0.9em;
+            flex: 1; min-height: 0;
         }
-        .hrlg-clock-wrap { width: 100%; }
-        .hrlg-svg { width: 100%; height: auto; display: block; overflow: visible; }
+        .hrlg-clock-wrap { width: 100%; flex: 1; min-height: 0; }
+        .hrlg-svg { width: 100%; height: 100%; display: block; overflow: visible; max-height: 100%; }
         .hrlg-face   { fill: #1c1c3a; filter: drop-shadow(0 2px 12px rgba(0,0,0,.5)); }
         .hrlg-border { stroke: #4a4a80; stroke-width: 2.5; fill: none; }
         .hrlg-tick-min  { stroke: #3a3a65; stroke-width: 1; stroke-linecap: round; }
@@ -190,16 +205,6 @@ function createHorlogeWidget() {
         body.menu-light .hrlg-period-btn { color: #4338ca; }
         body.menu-light .hrlg-period-btn.hrlg-period-active { background: rgba(67,56,202,.25); color: #1e1b4b; }
 
-        /* ── Resize mode ── */
-        .hrlg-resize-mode-toggle { display: flex; border-radius: 0.4em; overflow: hidden; border: 0.07em solid rgba(165,180,252,.3); flex-shrink: 0; }
-        .hrlg-resize-mode-btn {
-            background: transparent; border: none; color: #a5b4fc;
-            font-size: 0.62em; font-weight: 600; padding: 0.25em 0.55em;
-            cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
-        }
-        .hrlg-resize-mode-btn.hrlg-resize-mode-active { background: rgba(99,102,241,.4); color: #fff; }
-        body.menu-light .hrlg-resize-mode-btn { color: #4338ca; }
-        body.menu-light .hrlg-resize-mode-btn.hrlg-resize-mode-active { background: rgba(67,56,202,.25); color: #1e1b4b; }
 
         /* ── Numéros de minutes sur le cadran ── */
         .hrlg-number-min { font-family: 'Nunito', sans-serif; font-weight: 700; fill: #60a5fa; font-size: 7px; }
@@ -257,8 +262,8 @@ function createHorlogeWidget() {
             <div class="hrlg-header">
                 <span class="hrlg-title">🕐 Horloge</span>
                 <button class="hrlg-settings-toggle" title="Paramètres">⚙️</button>
-                <button class="hrlg-help-btn" title="Aide">?</button>
                 <div class="wf-btns" style="margin-left:auto">
+                    <button class="hrlg-help-btn" title="Aide">?</button>
                     <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
                     <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran board"></button>
                     <button class="wf-btn wf-btn-close" data-role="wf-close" title="Fermer"></button>
@@ -268,19 +273,27 @@ function createHorlogeWidget() {
                 <h4>💡 Horloge interactive</h4>
                 <div class="hrlg-help-section">
                     <strong>🖱️ Manipuler les aiguilles</strong><br>
-                    Faites glisser l'aiguille des <em>heures</em> (courte, rouge) ou des <em>minutes</em> (longue, violette).
+                    Faites glisser l'aiguille des <em>heures</em> (courte, rouge) ou des <em>minutes</em> (longue, bleue) pour régler l'heure.
                 </div>
                 <div class="hrlg-help-section">
-                    <strong>👁️ Affichage numérique</strong><br>
-                    Cacher/afficher l'heure pour les exercices.
+                    <strong>👁️ Cacher / afficher l'heure</strong><br>
+                    Masque l'affichage numérique pour que les élèves lisent l'heure uniquement sur le cadran.
+                </div>
+                <div class="hrlg-help-section">
+                    <strong>🔢 Nº min</strong><br>
+                    Affiche ou cache les numéros des minutes (00, 05, 10…) à l'extérieur du cadran.
+                </div>
+                <div class="hrlg-help-section">
+                    <strong>🔢 Nº h</strong><br>
+                    Affiche ou cache les chiffres des heures (1 à 12) sur le cadran — utile pour travailler la lecture sans repères.
                 </div>
                 <div class="hrlg-help-section">
                     <strong>⚙️ Paramètres</strong><br>
-                    Afficher des portions colorées sur le cadran : et quart, et demi, trois-quarts, moins cinq, moins dix, moins le quart.
+                    Affiche des portions colorées sur le cadran : et quart, et demi, trois-quarts, moins cinq, moins dix, moins le quart, etc.
                 </div>
                 <div class="hrlg-help-section">
                     <strong>🔄 Réinitialiser</strong><br>
-                    Remettre à 12h00.
+                    Remet les aiguilles à 12h00.
                 </div>
             </div>
             <div class="hrlg-settings-bar hrlg-settings-hidden">
@@ -321,12 +334,7 @@ function createHorlogeWidget() {
                     <button class="hrlg-period-btn" data-period="am">🌅 Matin</button>
                     <button class="hrlg-period-btn" data-period="pm">🌇 Après-midi</button>
                 </div>
-                <span class="hrlg-settings-sep"></span>
-                <div class="hrlg-resize-mode-toggle" title="Mode de redimensionnement">
-                    <button class="hrlg-resize-mode-btn hrlg-resize-mode-active" data-resize-mode="free">↔↕ Libre</button>
-                    <button class="hrlg-resize-mode-btn" data-resize-mode="width">↔ Largeur</button>
-                    <button class="hrlg-resize-mode-btn" data-resize-mode="height">↕ Hauteur</button>
-                </div>
+
             </div>
             <div class="hrlg-body">
                 <div class="hrlg-clock-wrap">
@@ -435,6 +443,7 @@ function createHorlogeWidget() {
             if (_hrlgIsMax) {
                 _savedW = container.style.width;
                 container.classList.add('wf-fullboard');
+                requestAnimationFrame(() => { if (widget._hrlgApplyScale) widget._hrlgApplyScale(); });
             } else {
                 container.classList.remove('wf-fullboard');
                 if (_savedW) container.style.width = _savedW;
@@ -514,15 +523,16 @@ function _initHorlogeResize(widget) {
         document.head.appendChild(rs);
     }
 
-    // ── Mode de resize ─────────────────────────────────────────────
-    let _resizeMode = 'free';
-
     // ── Scaling ────────────────────────────────────────────────────
     function _applyScale() {
         if (cont.classList.contains('wf-fullboard')) return;
         const w = cont.offsetWidth;
         if (!w) return;
-        const fs = Math.max(8, Math.round((w / HRLG_REF_W) * HRLG_BASE_FS * 10) / 10);
+        const h = cont.offsetHeight;
+        const headerH = Math.round((w / HRLG_REF_W) * 120);
+        const availH = h > 0 ? h - headerH : Infinity;
+        const ref = Math.min(w, availH > 50 ? availH : w);
+        const fs = Math.max(8, Math.round((ref / HRLG_REF_W) * HRLG_BASE_FS * 10) / 10);
         cont.style.fontSize = fs + 'px';
     }
 
@@ -532,64 +542,6 @@ function _initHorlogeResize(widget) {
     }
     requestAnimationFrame(_applyScale);
     widget._hrlgApplyScale = _applyScale;
-
-    // ── Drag resize manuel ─────────────────────────────────────────
-    handle.addEventListener('mousedown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startW = cont.offsetWidth;
-        const startH = cont.offsetHeight;
-
-        // Curseur selon le mode
-        const cursorMap = { free: 'se-resize', width: 'ew-resize', height: 'ns-resize' };
-        document.body.style.cursor = cursorMap[_resizeMode] || 'se-resize';
-
-        function onMove(ev) {
-            const dx = ev.clientX - startX;
-            const dy = ev.clientY - startY;
-            if (_resizeMode === 'free' || _resizeMode === 'width') {
-                const newW = Math.max(160, startW + dx);
-                cont.style.width = newW + 'px';
-            }
-            if (_resizeMode === 'free' || _resizeMode === 'height') {
-                const newH = Math.max(160, startH + dy);
-                cont.style.height = newH + 'px';
-            }
-            _applyScale();
-        }
-        function onUp() {
-            document.body.style.cursor = '';
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            if (typeof snapshotNow === 'function') snapshotNow();
-            if (typeof saveBoard   === 'function') saveBoard();
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-    });
-
-    // Curseur de la poignée selon le mode
-    function _updateHandleCursor() {
-        const cursorMap = { free: 'se-resize', width: 'ew-resize', height: 'ns-resize' };
-        handle.style.cursor = cursorMap[_resizeMode] || 'se-resize';
-    }
-
-    // ── Boutons de mode de resize ──────────────────────────────────
-    widget.querySelectorAll('.hrlg-resize-mode-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            _resizeMode = btn.dataset.resizeMode;
-            widget.querySelectorAll('.hrlg-resize-mode-btn').forEach(b => {
-                b.classList.toggle('hrlg-resize-mode-active', b.dataset.resizeMode === _resizeMode);
-            });
-            _updateHandleCursor();
-            // En mode hauteur : libérer la hauteur fixe si elle avait été forcée
-            if (_resizeMode !== 'height') cont.style.height = '';
-        });
-    });
-
-    _updateHandleCursor();
 }
 
 // ── Logique interne ────────────────────────────────────────────────

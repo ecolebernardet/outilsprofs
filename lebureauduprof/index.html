@@ -236,6 +236,7 @@
 				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
 				<div class="mm-sub-item" onclick="createWidget('sonometre');closeMainMenu()"><span class="mm-ico">🔊</span>&nbsp;&nbsp;Sonomètre</div>
 				<div class="mm-sub-item" onclick="createWidget('radar');closeMainMenu()"><span class="mm-ico">📡</span>&nbsp;&nbsp;Radar de Bruit</div>
+				<div class="mm-sub-item" onclick="createSondageWidget();closeMainMenu()"><span class="mm-ico">📊</span>&nbsp;&nbsp;Sondage</div>
 				<div class="mm-sub-item" onclick="createPlanWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Plan de classe</div>
 				</div></div>
 			</div>
@@ -953,6 +954,7 @@
 <script src="widget-tableau-num.js"></script>
 <script src="widget-heure.js"></script>
 <script src="widget-horloge.js"></script>
+<script src="widget-sondage.js"></script>
 <script src="widget-solide3d.js"></script>
 <script src="widget-conjugaison.js"></script>
 <script src="widget-deficalme.js"></script>
@@ -1331,6 +1333,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="tools-card-ico">📡</div>
                 <div class="tools-card-name">Radar de Bruit</div>
                 <div class="tools-card-desc">Visualiser le bruit en temps réel</div>
+            </div>
+            <div class="tools-card" onclick="createSondageWidget();toggleToolsPanel()">
+                <div class="tools-card-ico">📊</div>
+                <div class="tools-card-name">Sondage</div>
+                <div class="tools-card-desc">Créer et voter pour un sondage express</div>
             </div>
 			<div class="tools-card" onclick="createWidget('plan');toggleToolsPanel()">
                 <div class="tools-card-ico">🏫</div>

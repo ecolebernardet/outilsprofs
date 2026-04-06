@@ -85,11 +85,13 @@ function hexToRgb(hex) {
 function applyTransparency(widget, isT) {
     const c = widget.querySelector('.editor-container');
     widget.dataset.transparent = isT;
+    const wc = widget.querySelector('.widget-content');
     if (isT) {
         widget.style.background = 'transparent';
         widget.style.boxShadow  = 'none';
         widget.style.border     = 'none';
-        if (c) c.style.background = 'transparent';
+        if (wc) wc.style.background = 'transparent';
+        if (c)  c.style.background  = 'transparent';
         widget.dataset.bgOpacity = 0;
         const slider = document.getElementById('widget-bg-opacity');
         const label  = document.getElementById('widget-bg-opacity-val');
@@ -97,6 +99,8 @@ function applyTransparency(widget, isT) {
         if (label)  label.textContent = '0%';
     } else {
         const bg = widget.dataset.bgColor || '#ffffff';
+        // Si l'opacité était à 0 (mise par le bouton transparent), on la remet à 1
+        if (parseFloat(widget.dataset.bgOpacity) === 0) widget.dataset.bgOpacity = 1;
         const opacity = parseFloat(widget.dataset.bgOpacity ?? 1);
         let finalBg = bg;
         if (opacity < 1) {
@@ -106,7 +110,6 @@ function applyTransparency(widget, isT) {
         widget.style.background = finalBg;
         widget.style.boxShadow  = '';
         widget.style.border     = '';
-        const wc = widget.querySelector('.widget-content');
         if (wc) wc.style.background = finalBg;
         if (c) c.style.background = finalBg;
         const slider = document.getElementById('widget-bg-opacity');
@@ -815,7 +818,7 @@ function makeDraggable(elmnt) {
     } else {
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             const container = elmnt.querySelector('.editor-container');
@@ -830,7 +833,7 @@ function makeDraggable(elmnt) {
 
         elmnt.addEventListener('touchstart', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city')) return;
+            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider')) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             elmnt.focus();
@@ -847,7 +850,7 @@ function makeDraggable(elmnt) {
 // Remplace le resize CSS natif qui ne fonctionne pas en tactile/stylet
 // =========================================================================
 function makeResizableByHandle(elmnt) {
-    const container = elmnt.querySelector('.editor-container');
+    const container = elmnt.querySelector('.editor-container') || elmnt.querySelector('.hrlg-container') || elmnt.querySelector('.snd-container');
     if (!container) return;
 
     // Éviter de créer deux poignées
@@ -882,8 +885,16 @@ function makeResizableByHandle(elmnt) {
             const dy = ev.clientY - startY;
             const minW = parseInt(getComputedStyle(container).minWidth) || 180;
             const minH = parseInt(getComputedStyle(container).minHeight) || 70;
-            container.style.width  = Math.max(minW, startW + dx) + 'px';
-            container.style.height = Math.max(minH, startH + dy) + 'px';
+            const newW = Math.max(minW, startW + dx);
+            container.style.width = newW + 'px';
+            // Synchroniser la largeur du widget parent (cadre) avec le contenu
+            // elmnt est box-sizing:border-box avec border 2px ; widget-content a padding 10px
+            const wContent = elmnt.querySelector('.widget-content');
+            const contentPad = wContent ? (parseFloat(getComputedStyle(wContent).paddingLeft) + parseFloat(getComputedStyle(wContent).paddingRight)) : 0;
+            const elmntBorder = parseFloat(getComputedStyle(elmnt).borderLeftWidth || 0) + parseFloat(getComputedStyle(elmnt).borderRightWidth || 0);
+            elmnt.style.width = (newW + contentPad + elmntBorder) + 'px';
+            const newH = Math.max(minH, startH + dy);
+            container.style.height = newH + 'px';
         }
 
         function onUp() {
