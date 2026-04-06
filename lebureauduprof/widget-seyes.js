@@ -1,10 +1,10 @@
 // =========================================================================
-// WIDGET ÉCRITURE SÉYÈS — Le Bureau du Prof
-// Zone d'écriture cursive sur fond Séyès clair avec marge.
-// Police BelleAllure alignée sur le lignage séyès (interligne = 16px,
+// WIDGET ÉCRITURE seyes — Le Bureau du Prof
+// Zone d'écriture cursive sur fond seyes clair avec marge.
+// Police BelleAllure alignée sur le lignage seyes (interligne = 16px,
 // grande ligne = 64px).
 //
-// Règles Séyès :
+// Règles seyes :
 //   • Corps de la lettre (minuscule sans jambage) = 1 interligne = 16px
 //   • Boucles hautes (l, b, d, f, h, k…)         = 3 interlignes = 48px au-dessus de la ligne de base
 //   • Barres hautes (t, d, p côté haut…)          = 2 interlignes = 32px au-dessus de la ligne de base
@@ -12,7 +12,7 @@
 //   • Ligne de base = grande ligne (toutes les 64px)
 //
 // La zone de texte est un <div contenteditable> transparent par-dessus
-// le fond séyès, avec line-height = 64px (une grande ligne par ligne de texte)
+// le fond seyes, avec line-height = 64px (une grande ligne par ligne de texte)
 // et font-size calé pour que les minuscules fassent exactement 16px de haut
 // (soit 1 interligne).
 //
@@ -156,7 +156,7 @@
         const s = document.createElement('style');
         s.id = 'widget-seyes-style';
 
-        // ── Variables Séyès ──────────────────────────────────────────────
+        // ── Variables seyes ──────────────────────────────────────────────
         // Grande ligne  : 64px  (= 4 interlignes)
         // Interligne    : 16px  (= corps de la lettre minuscule)
         // Marge rouge   : à 256px du bord gauche (identique au preset bg)
@@ -582,7 +582,7 @@ function createSeyesWidget() {
     const header = document.createElement('div');
     header.className = 'seyes-header';
     header.innerHTML = `
-        <span class="seyes-title">✏️ Écriture Séyès</span>
+        <span class="seyes-title">✏️ Écriture Seyes</span>
         <div class="seyes-toolbar" id="seyes-toolbar-inner"></div>
         <div class="wf-btns" style="margin-left:4px">
             <button class="seyes-help-btn" data-role="wf-pdf"  title="Exporter / Imprimer" style="width:auto;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">PDF</button>
@@ -609,39 +609,13 @@ function createSeyesWidget() {
         <div class="cpick-popup" id="cpick-pop-${seyesCpickId}"></div>
     `;
     toolbar.appendChild(colorWrap);
+    // Téléporter le popup vers document.body pour éviter les problèmes de z-index/stacking
+    document.body.appendChild(colorWrap.querySelector('.cpick-popup'));
 
-    // Initialiser cpick et brancher l'action couleur sur la sélection
-    const _origDispatch = window.cpickDispatch;
-    let _seyesSavedSelection = null; // sélection sauvegardée avant ouverture du picker
+    // Sélection sauvegardée avant ouverture du picker
+    let _seyesSavedSelection = null;
 
-    const _seyesCpickHandler = (id, color) => {
-        if (id === seyesCpickId) {
-            const swatch = colorWrap.querySelector('.cpick-swatch');
-            if (swatch) swatch.style.background = color;
-            // Restaurer la sélection et appliquer la couleur au texte sélectionné
-            if (_seyesSavedSelection) {
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(_seyesSavedSelection);
-            }
-            // Si une sélection existe → colorier uniquement le texte sélectionné
-            // Sinon → changer la couleur par défaut de l'éditeur actif
-            const sel = window.getSelection();
-            if (sel && !sel.isCollapsed) {
-                document.execCommand('foreColor', false, color);
-            } else {
-                const activeEd = document.activeElement;
-                const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
-                targetEd.style.color = color;
-            }
-            saveBoard();
-        } else if (typeof _origDispatch === 'function') {
-            _origDispatch(id, color);
-        }
-    };
-    window.cpickDispatch = _seyesCpickHandler;
-
-    // Sauvegarder la sélection juste avant l'ouverture du picker
+    // Sauvegarder la sélection juste avant l'ouverture du picker (texte)
     colorWrap.addEventListener('mousedown', () => {
         const sel = window.getSelection();
         _seyesSavedSelection = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
@@ -723,8 +697,8 @@ function createSeyesWidget() {
     });
     underlineGroup.appendChild(underlineBtn);
 
-    // Swatch couleur de soulignage
-    const seyesUlCpickId = 'seyes-ul-' + Date.now();
+    // Swatch couleur de soulignage (suffixe aléatoire pour éviter collision avec seyesCpickId)
+    const seyesUlCpickId = 'seyes-ul-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
     const ulColorWrap = document.createElement('div');
     ulColorWrap.className = 'cpick-wrap';
     ulColorWrap.id = 'cpick-' + seyesUlCpickId;
@@ -735,23 +709,65 @@ function createSeyesWidget() {
         <div class="cpick-popup" id="cpick-pop-${seyesUlCpickId}"></div>
     `;
     // Brancher l'action couleur de soulignage
-    const _origDispatch2 = window.cpickDispatch;
+    ulColorWrap.addEventListener('mousedown', () => {
+        const sel = window.getSelection();
+        _seyesSavedSelection = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+    });
+
+    // ── Dispatch cpick centralisé pour cette instance ────────────────────
+    const _origDispatch = window.cpickDispatch;
     window.cpickDispatch = (id, color) => {
-        if (id === seyesUlCpickId) {
+        if (id === seyesCpickId) {
+            // Couleur du texte
+            const swatch = colorWrap.querySelector('.cpick-swatch');
+            if (swatch) swatch.style.background = color;
+            if (_seyesSavedSelection) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(_seyesSavedSelection);
+            }
+            const sel = window.getSelection();
+            if (sel && !sel.isCollapsed) {
+                document.execCommand('foreColor', false, color);
+            } else {
+                const activeEd = document.activeElement;
+                const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
+                targetEd.style.color = color;
+            }
+            saveBoard();
+        } else if (id === seyesUlCpickId) {
+            // Couleur du soulignage : stocker et appliquer sur la sélection
             _underlineColor = color;
             const ulSwatch = ulColorWrap.querySelector('.cpick-swatch');
             if (ulSwatch) ulSwatch.style.background = color;
-            // Mettre à jour le bas du bouton S pour refléter la couleur
             underlineBtn.querySelector('span').style.textDecorationColor = color;
+            // Appliquer immédiatement sur la sélection sauvegardée si elle existe
+            if (_seyesSavedSelection && !_seyesSavedSelection.collapsed) {
+                const targetEd = (editorMarge && _seyesSavedSelection.intersectsNode && _seyesSavedSelection.intersectsNode(editorMarge)) ? editorMarge : editor;
+                targetEd.focus();
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                const rangeClone = _seyesSavedSelection.cloneRange();
+                sel.addRange(rangeClone);
+                const span = document.createElement('span');
+                span.style.textDecoration = 'underline';
+                span.style.textDecorationColor = color;
+                try {
+                    rangeClone.surroundContents(span);
+                } catch(err) {
+                    document.execCommand('underline', false, null);
+                }
+            }
             saveBoard();
-        } else {
-            window.cpickDispatch._prev(id, color);
+        } else if (typeof _origDispatch === 'function') {
+            _origDispatch(id, color);
         }
     };
-    window.cpickDispatch._prev = _origDispatch2;
 
     underlineGroup.appendChild(ulColorWrap);
     toolbar.appendChild(underlineGroup);
+    // Téléporter le popup soulignage vers document.body
+    document.body.appendChild(ulColorWrap.querySelector('.cpick-popup'));
 
     // Séparateur
     const sep4 = document.createElement('div');
@@ -814,7 +830,7 @@ function createSeyesWidget() {
     editor.style.lineHeight = LH + 'px';
     editor.style.paddingTop = pt + 'px';
 
-    // ── Fond séyès SVG tile ───────────────────────────────────────────────
+    // ── Fond seyes SVG tile ───────────────────────────────────────────────
     // Deux SVG tiles appliqués sur writingArea :
     // - svgMarge (sans colonnes) couvre toute la largeur depuis x=0
     // - svgCols  (avec colonnes) couvre depuis x=256px
@@ -999,7 +1015,7 @@ function createSeyesWidget() {
             // A4 = 210×297mm. Zone imprimable avec marges 15/12mm :
             //   largeur = 210 - 24 = 186mm = ~703px
             //   hauteur = 297 - 30 = 252mm = ~953px
-            // Grande ligne séyès = 8mm = ~30.24px → on arrondit à 30px
+            // Grande ligne seyes = 8mm = ~30.24px → on arrondit à 30px
             const LINE_H   = 30;   // px — 1 grande ligne (4 interlignes)
             const IL       = LINE_H / 4; // 7.5px — 1 interligne
             const PAGE_W   = 703;  // px zone imprimable
@@ -1007,7 +1023,7 @@ function createSeyesWidget() {
             const MARGE_X  = 128;  // px — largeur marge (≈34mm)
             const NB_LINES = Math.floor(PAGE_H / LINE_H);
 
-            // ── Génération SVG du fond séyès ─────────────────────────────
+            // ── Génération SVG du fond seyes ─────────────────────────────
             // On génère un SVG de PAGE_W × PAGE_H avec toutes les lignes
             let svgLines = '';
             for (let i = 0; i <= NB_LINES; i++) {
@@ -1044,7 +1060,7 @@ function createSeyesWidget() {
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Écriture Séyès</title>
+<title>Écriture Seyes</title>
 <style>
     @font-face {
         font-family: 'BelleAllureGS';
@@ -1126,11 +1142,11 @@ function createSeyesWidget() {
             overlay.className = 'seyes-modal-overlay';
             overlay.innerHTML = `
                 <div class="seyes-help-modal">
-                    <div class="seyes-help-modal-title">✏️ Aide — Écriture Séyès</div>
+                    <div class="seyes-help-modal-title">✏️ Aide — Écriture Seyes</div>
 
                     <div class="seyes-help-section">
                         <div class="seyes-help-section-title">Le lignage</div>
-                        <div class="seyes-help-row"><span class="seyes-help-row-icon">📏</span><span>Le fond reproduit un vrai séyès : 3 petits interlignes (16 px) pour 1 grande ligne (64 px). Les boucles hautes montent sur 3 interlignes, les barres (t, d…) sur 2, les jambages descendent sur 2.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">📏</span><span>Le fond reproduit un vrai Seyes : 3 petits interlignes (16 px) pour 1 grande ligne (64 px). Les boucles hautes montent sur 3 interlignes, les barres (t, d…) sur 2, les jambages descendent sur 2.</span></div>
                     </div>
 
                     <div class="seyes-help-section">
@@ -1174,7 +1190,7 @@ function createSeyesWidget() {
             widget.style.height = container.offsetHeight + 'px';
             // Masquer le container pour que overflow:hidden fonctionne proprement
             container.style.display = 'none';
-            window._wfMiniBarCollapse(widget, '✏️ Écriture Séyès', {
+            window._wfMiniBarCollapse(widget, '✏️ Écriture Seyes', {
                 onExpand: () => {
                     // Restaurer la largeur sur le container, pas sur le widget
                     container.style.width   = savedContainerW;
@@ -1202,6 +1218,11 @@ function createSeyesWidget() {
         wfClose.addEventListener('click', (e) => {
             e.stopPropagation();
             if (typeof snapshotNow === 'function') snapshotNow();
+            // Nettoyer les popups téléportés dans body
+            [seyesCpickId, seyesUlCpickId].forEach(id => {
+                const p = document.getElementById('cpick-pop-' + id);
+                if (p) p.remove();
+            });
             widget.remove();
             if (typeof saveBoard === 'function') saveBoard();
         });
@@ -1216,7 +1237,8 @@ function createSeyesWidget() {
     // ── Focus widget ──────────────────────────────────────────────────────
     widget.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
-            e.target.tagName === 'SELECT' || editor.contains(e.target)) return;
+            e.target.tagName === 'SELECT' || editor.contains(e.target) ||
+            e.target.closest('.cpick-popup, .cpick-wrap, .cpick-color')) return;
         bringToFront(widget);
         widget.focus();
         if (typeof positionActionBar === 'function') positionActionBar(widget);
@@ -1240,7 +1262,7 @@ function createSeyesWidget() {
 }
 
 // ── Utilitaire : calcule padding-top pour coller la baseline sur la grande ligne ──
-// La grande ligne séyès est en bas de chaque bloc line-height.
+// La grande ligne seyes est en bas de chaque bloc line-height.
 // On veut que la baseline du texte tombe dessus.
 // Estimation : ascent ≈ 0.80 * font-size pour BelleAllure
 // baseline_y = paddingTop + ascent
