@@ -22,6 +22,34 @@
         .clock-time { font-weight: 800; color: var(--primary-color); font-family: 'Courier New', monospace; display: flex; align-items: baseline; justify-content: center; width: 100%; gap: 4px; }
         .clock-seconds { font-size: 0.5em; color: #888; margin-left: 0.1em; }
         .icon-transparency { display: inline-block; width: 16px; height: 16px; border: 1px solid #333; background-color: #fff; background-image: linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size: 8px 8px; background-position: 0 0,0 4px,4px -4px,-4px 0px; vertical-align: middle; border-radius: 2px; }
+
+        /* Panneau paramètres horloge */
+        .clock-settings-panel {
+            position: absolute; top: 30px; right: 4px; z-index: 100;
+            background: white; border: 1px solid #ddd; border-radius: 8px;
+            padding: 10px 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: none; flex-direction: column; gap: 10px; min-width: 170px;
+        }
+        .clock-settings-panel.open { display: flex; }
+        .clock-settings-panel label { font-size: 11px; color: #555; font-weight: 600; margin-bottom: 2px; display: block; }
+        .clock-settings-panel .setting-row { display: flex; flex-direction: column; gap: 3px; }
+        .clock-settings-panel .color-row { display: flex; align-items: center; gap: 8px; }
+        .clock-settings-panel input[type="color"] { width: 32px; height: 22px; border: 1px solid #ccc; border-radius: 4px; padding: 0; cursor: pointer; }
+        .clock-settings-panel .color-presets { display: flex; gap: 4px; flex-wrap: wrap; }
+        .clock-settings-panel .color-preset { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+        .clock-settings-panel .color-preset:hover, .clock-settings-panel .color-preset.active { border-color: #333; }
+        .clock-settings-panel .mode-btns { display: flex; gap: 5px; }
+        .clock-settings-panel .mode-btn {
+            flex: 1; padding: 4px 0; font-size: 11px; border: 1px solid #ccc;
+            border-radius: 5px; background: #f5f5f5; cursor: pointer; text-align: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .clock-settings-panel .mode-btn.active { background: #D17B6B; color: white; border-color: #B5634F; }
+        .clock-settings-panel .sep { border: none; border-top: 1px solid #eee; margin: 2px 0; }
+
+        /* Horloge analogique */
+        .clock-analog { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .clock-analog svg { overflow: visible; }
     `;
     document.head.appendChild(s);
 })();
@@ -73,9 +101,115 @@ function updateDateTime() {
     document.querySelectorAll('.calendar-day-name').forEach(el   => el.textContent = days[now.getDay()]);
     document.querySelectorAll('.calendar-day-number').forEach(el => el.textContent = now.getDate());
     document.querySelectorAll('.calendar-month').forEach(el      => el.textContent = months[now.getMonth()]);
-    const hh = String(now.getHours()).padStart(2,'0'), mm = String(now.getMinutes()).padStart(2,'0'), ss = String(now.getSeconds()).padStart(2,'0');
+
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const ss = String(now.getSeconds()).padStart(2,'0');
+
+    // Mise à jour horloges numériques
     document.querySelectorAll('.clock-hm').forEach(el      => el.textContent = ` ${hh}:${mm} `);
     document.querySelectorAll('.clock-seconds').forEach(el => el.textContent = ss);
+
+    // Mise à jour horloges analogiques
+    document.querySelectorAll('.clock-analog-svg').forEach(svg => {
+        const h = now.getHours() % 12, m = now.getMinutes(), s = now.getSeconds();
+        const secDeg  = s * 6;
+        const minDeg  = m * 6 + s * 0.1;
+        const hourDeg = h * 30 + m * 0.5;
+        const handH   = svg.querySelector('.hand-hour');
+        const handM   = svg.querySelector('.hand-min');
+        const handS   = svg.querySelector('.hand-sec');
+        if (handH) handH.setAttribute('transform', `rotate(${hourDeg}, 50, 50)`);
+        if (handM) handM.setAttribute('transform', `rotate(${minDeg}, 50, 50)`);
+        if (handS) handS.setAttribute('transform', `rotate(${secDeg}, 50, 50)`);
+    });
+}
+
+// ── Créer SVG horloge analogique ──────────────────────────────────────────
+function buildAnalogSVG(color) {
+    color = color || '#2c3e50';
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.classList.add('clock-analog-svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.style.cssText = 'max-width:100%;max-height:100%;';
+
+    // Cadran
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', '50'); circle.setAttribute('cy', '50'); circle.setAttribute('r', '47');
+    circle.setAttribute('fill', 'white'); circle.setAttribute('stroke', color); circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+
+    // Graduations (traits minutes fins + traits heures épais)
+    for (let i = 0; i < 60; i++) {
+        const isHour = i % 5 === 0;
+        const angle = (i * 6 - 90) * Math.PI / 180;
+        const r1 = isHour ? 41 : 43, r2 = 46;
+        const x1 = 50 + r1 * Math.cos(angle), y1 = 50 + r1 * Math.sin(angle);
+        const x2 = 50 + r2 * Math.cos(angle), y2 = 50 + r2 * Math.sin(angle);
+        const tick = document.createElementNS(ns, 'line');
+        tick.setAttribute('x1', x1); tick.setAttribute('y1', y1);
+        tick.setAttribute('x2', x2); tick.setAttribute('y2', y2);
+        tick.setAttribute('stroke', color);
+        tick.setAttribute('stroke-width', isHour ? '2' : '0.8');
+        svg.appendChild(tick);
+    }
+
+    // Chiffres des heures 1–12
+    const numR = 35;
+    for (let h = 1; h <= 12; h++) {
+        const angle = (h * 30 - 90) * Math.PI / 180;
+        const x = 50 + numR * Math.cos(angle);
+        const y = 50 + numR * Math.sin(angle);
+        const txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', x);
+        txt.setAttribute('y', y);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('dominant-baseline', 'central');
+        txt.setAttribute('font-size', [3,6,9,12].includes(h) ? '8' : '7');
+        txt.setAttribute('font-weight', '600');
+        txt.setAttribute('font-family', 'sans-serif');
+        txt.setAttribute('fill', color);
+        txt.textContent = h;
+        svg.appendChild(txt);
+    }
+
+    // Aiguille heures
+    const handH = document.createElementNS(ns, 'line');
+    handH.classList.add('hand-hour');
+    handH.setAttribute('x1', '50'); handH.setAttribute('y1', '50');
+    handH.setAttribute('x2', '50'); handH.setAttribute('y2', '24');
+    handH.setAttribute('stroke', color); handH.setAttribute('stroke-width', '4');
+    handH.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(handH);
+
+    // Aiguille minutes
+    const handM = document.createElementNS(ns, 'line');
+    handM.classList.add('hand-min');
+    handM.setAttribute('x1', '50'); handM.setAttribute('y1', '50');
+    handM.setAttribute('x2', '50'); handM.setAttribute('y2', '16');
+    handM.setAttribute('stroke', color); handM.setAttribute('stroke-width', '3');
+    handM.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(handM);
+
+    // Aiguille secondes
+    const handS = document.createElementNS(ns, 'line');
+    handS.classList.add('hand-sec');
+    handS.setAttribute('x1', '50'); handS.setAttribute('y1', '56');
+    handS.setAttribute('x2', '50'); handS.setAttribute('y2', '12');
+    handS.setAttribute('stroke', '#D17B6B'); handS.setAttribute('stroke-width', '1.5');
+    handS.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(handS);
+
+    // Centre
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', '50'); dot.setAttribute('cy', '50'); dot.setAttribute('r', '3');
+    dot.setAttribute('fill', color);
+    svg.appendChild(dot);
+
+    return svg;
 }
 
 // ── Init widget Heure ─────────────────────────────────────────────────────
@@ -84,19 +218,77 @@ function initTimeWidget(widget) {
     const clockTime = widget.querySelector('.clock-time');
     if (!container || !clockTime) return;
 
+    // État des paramètres (avec valeurs par défaut)
+    let clockColor  = widget.dataset.clockColor  || '#2c3e50';
+    let clockMode   = widget.dataset.clockMode   || 'digital'; // 'digital' | 'analog'
+
+    // Appliquer couleur initiale
+    clockTime.style.color = clockColor;
+
     const resizeObserver = new ResizeObserver(() => {
         const h = container.offsetHeight, w = container.offsetWidth;
-        const sizeByH = Math.floor(h * 0.55);
-        const sizeByW = Math.floor(w * 0.28);
-        const size = Math.max(12, Math.min(sizeByH, sizeByW));
-        clockTime.style.fontSize = size + 'px';
-        const sec = widget.querySelector('.clock-seconds');
-        if (sec) sec.style.fontSize = Math.floor(size * 0.45) + 'px';
+        if (clockMode === 'digital') {
+            const sizeByH = Math.floor(h * 0.55);
+            const sizeByW = Math.floor(w * 0.28);
+            const size = Math.max(12, Math.min(sizeByH, sizeByW));
+            clockTime.style.fontSize = size + 'px';
+            const sec = widget.querySelector('.clock-seconds');
+            if (sec) sec.style.fontSize = Math.floor(size * 0.45) + 'px';
+        }
     });
     resizeObserver.observe(container);
     container.style.resize = 'none';
 
-    // Poignée de resize
+    // ── Fonction basculement mode ────────────────────────────────────────
+    function applyMode(mode) {
+        clockMode = mode;
+        widget.dataset.clockMode = mode;
+
+        const analog = container.querySelector('.clock-analog');
+
+        if (mode === 'analog') {
+            clockTime.style.display = 'none';
+            if (!analog) {
+                const wrap = document.createElement('div');
+                wrap.className = 'clock-analog';
+                wrap.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;';
+                wrap.appendChild(buildAnalogSVG(clockColor));
+                container.appendChild(wrap);
+            } else {
+                analog.style.display = 'flex';
+            }
+            updateDateTime(); // mettre à jour les aiguilles tout de suite
+        } else {
+            clockTime.style.display = 'flex';
+            if (analog) analog.style.display = 'none';
+        }
+        if (typeof saveBoard === 'function') saveBoard();
+    }
+
+    // ── Fonction changement couleur ──────────────────────────────────────
+    function applyColor(color) {
+        clockColor = color;
+        widget.dataset.clockColor = color;
+        clockTime.style.color = color;
+
+        // Mettre à jour l'analogique si présent
+        const svg = container.querySelector('.clock-analog-svg');
+        if (svg) {
+            // Recréer le SVG avec la nouvelle couleur
+            const wrap = container.querySelector('.clock-analog');
+            if (wrap) {
+                wrap.innerHTML = '';
+                wrap.appendChild(buildAnalogSVG(color));
+                updateDateTime();
+            }
+        }
+        if (typeof saveBoard === 'function') saveBoard();
+    }
+
+    // Appliquer le mode initial si déjà sauvegardé
+    if (clockMode === 'analog') applyMode('analog');
+
+    // ── Poignée de resize ────────────────────────────────────────────────
     const resizeHandle = document.createElement('div');
     resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,#aaa 50%);border-radius:0 0 4px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
     widget.appendChild(resizeHandle);
@@ -131,10 +323,10 @@ function initTimeWidget(widget) {
         document.addEventListener('touchend',  onEnd);
     }, { passive: false });
 
-    // Bouton transparence
+    // ── Bouton transparence ──────────────────────────────────────────────
     const transpBtn = document.createElement('button');
     transpBtn.title = 'Fond transparent';
-    transpBtn.style.cssText = 'position:absolute;top:4px;right:30px;background:rgba(255,255,255,0.8);border:1px solid #ddd;border-radius:4px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:10;padding:0;';
+    transpBtn.style.cssText = 'position:absolute;top:4px;right:54px;background:rgba(255,255,255,0.8);border:1px solid #ddd;border-radius:4px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:10;padding:0;';
     transpBtn.innerHTML = '<span class="icon-transparency"></span>';
     transpBtn.addEventListener('click', () => {
         snapshotNow();
@@ -142,8 +334,101 @@ function initTimeWidget(widget) {
         saveBoard();
     });
     widget.appendChild(transpBtn);
-    widget.addEventListener('mouseenter', () => transpBtn.style.opacity = '1');
-    widget.addEventListener('mouseleave', () => transpBtn.style.opacity = '0');
+
+    // ── Bouton paramètres ────────────────────────────────────────────────
+    const settingsBtn = document.createElement('button');
+    settingsBtn.title = 'Paramètres de l\'horloge';
+    settingsBtn.style.cssText = 'position:absolute;top:4px;right:30px;background:rgba(255,255,255,0.8);border:1px solid #ddd;border-radius:4px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:11;padding:0;font-size:13px;';
+    settingsBtn.textContent = '⚙';
+    widget.appendChild(settingsBtn);
+
+    // ── Panneau paramètres ───────────────────────────────────────────────
+    const PRESETS = ['#2c3e50','#D17B6B','#2980b9','#27ae60','#8e44ad','#e67e22','#e74c3c','#ffffff'];
+
+    const panel = document.createElement('div');
+    panel.className = 'clock-settings-panel';
+    panel.innerHTML = `
+        <div class="setting-row">
+            <label>Mode d'affichage</label>
+            <div class="mode-btns">
+                <button class="mode-btn" data-mode="digital">🔢 Numérique</button>
+                <button class="mode-btn" data-mode="analog">🕐 Analogique</button>
+            </div>
+        </div>
+        <hr class="sep">
+        <div class="setting-row">
+            <label>Couleur des chiffres</label>
+            <div class="color-row">
+                <input type="color" class="clock-color-picker" value="${clockColor}">
+                <div class="color-presets">
+                    ${PRESETS.map(c => `<div class="color-preset" data-color="${c}" style="background:${c};${c==='#ffffff'?'border:1px solid #ccc;':''}" title="${c}"></div>`).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    widget.appendChild(panel);
+
+    // Mettre à jour l'état visuel des boutons mode
+    function refreshModeButtons() {
+        panel.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === clockMode);
+        });
+    }
+    refreshModeButtons();
+
+    // Mettre à jour le preset actif
+    function refreshPresets(color) {
+        panel.querySelectorAll('.color-preset').forEach(p => {
+            p.classList.toggle('active', p.dataset.color === color);
+        });
+        panel.querySelector('.clock-color-picker').value = color.startsWith('#') && color.length === 7 ? color : '#2c3e50';
+    }
+    refreshPresets(clockColor);
+
+    // Events mode
+    panel.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyMode(btn.dataset.mode);
+            refreshModeButtons();
+        });
+    });
+
+    // Events couleur — picker
+    panel.querySelector('.clock-color-picker').addEventListener('input', (e) => {
+        e.stopPropagation();
+        applyColor(e.target.value);
+        refreshPresets(e.target.value);
+    });
+
+    // Events couleur — presets
+    panel.querySelectorAll('.color-preset').forEach(p => {
+        p.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyColor(p.dataset.color);
+            refreshPresets(p.dataset.color);
+        });
+    });
+
+    // Toggle panneau
+    settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+    });
+
+    // Fermer si clic ailleurs
+    document.addEventListener('click', () => panel.classList.remove('open'));
+    panel.addEventListener('click', e => e.stopPropagation());
+
+    // Visibilité au survol
+    widget.addEventListener('mouseenter', () => {
+        transpBtn.style.opacity = '1';
+        settingsBtn.style.opacity = '1';
+    });
+    widget.addEventListener('mouseleave', () => {
+        transpBtn.style.opacity = '0';
+        settingsBtn.style.opacity = '0';
+    });
 }
 
 // ── Init widget Date ──────────────────────────────────────────────────────
@@ -179,12 +464,12 @@ function initDateWidget(widget) {
             const n = 4;
             const margin = hw * 0.15;
             const step = (hw - margin * 2) / (n - 1);
-            const pw = Math.max(5, Math.min(10, hw * 0.04));   // largeur pilier
-            const pr = pw / 2;                                   // border-radius
-            const pillarTop = 4;                                 // top du pilier dans le SVG
-            const pillarBot = totalH * 0.78;                    // bas du pilier (dans la bande rouge)
+            const pw = Math.max(5, Math.min(10, hw * 0.04));
+            const pr = pw / 2;
+            const pillarTop = 4;
+            const pillarBot = totalH * 0.78;
             const pillarH = pillarBot - pillarTop;
-            const circR = Math.max(5, pw * 0.9);                // rayon du cercle bas
+            const circR = Math.max(5, pw * 0.9);
 
             let svgContent = `<defs>
                 <linearGradient id="pillarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
