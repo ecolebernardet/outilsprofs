@@ -174,28 +174,7 @@
         }
 
         .seyes-container {
-            /* Fond Séyès clair avec marge — reproduction fidèle du preset bg */
-            background-color: #fffef5;
-            background-image:
-                /* Marge rouge */
-                linear-gradient(to right, transparent 0px, transparent 254px, #e05050 254px, #e05050 256px, transparent 256px),
-                /* Lignes horizontales séyès */
-                repeating-linear-gradient(to bottom,
-                    transparent 0%,   transparent calc(25% - 1px),
-                    #c8d8eb calc(25% - 1px), #c8d8eb 25%,
-                    transparent 25%,  transparent calc(50% - 1px),
-                    #c8d8eb calc(50% - 1px), #c8d8eb 50%,
-                    transparent 50%,  transparent calc(75% - 1px),
-                    #c8d8eb calc(75% - 1px), #c8d8eb 75%,
-                    transparent 75%,  transparent calc(100% - 1px),
-                    #9aadbe calc(100% - 1px), #9aadbe 100%
-                ),
-                /* Cache la zone marge (pas de colonnes dans la marge) */
-                linear-gradient(to right, #fffef5 0px, #fffef5 256px, transparent 256px),
-                /* Colonnes verticales séyès (après la marge) */
-                repeating-linear-gradient(to right, #c8d8eb 0px, #c8d8eb 1px, transparent 1px, transparent 100%);
-            background-size: 100% 100%, auto 64px, 100% 100%, 64px auto;
-            background-position: top left, top left, top left, 256px top;
+            background-color: #fafcff;
             outline: none;
             border: 1.5px solid #c8d8eb;
             border-radius: 4px;
@@ -272,17 +251,29 @@
         .seyes-writing-area {
             flex: 1;
             position: relative;
-            overflow: hidden;
-            min-height: 192px; /* 3 grandes lignes */
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 192px;
+            background-color: #fafcff;
+        }
+
+        /* Couche de fond (derrière l'éditeur, grandit avec lui) */
+        .seyes-bg-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            min-height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Le contenteditable principal — commence APRÈS la marge */
         .seyes-editor {
             position: absolute;
-            top: 0; right: 0; bottom: 0;
-            left: 256px; /* commence après la marge rouge */
+            top: 0; right: 0;
+            left: 256px;
+            min-height: 100%;
             line-height: 64px;
-            padding: 2px 16px 0 16px;
+            padding: 0 16px 0 16px;
             box-sizing: border-box;
             background: transparent;
             outline: none;
@@ -297,6 +288,7 @@
             -webkit-user-select: text;
             min-height: 192px;
             -webkit-line-break: after-white-space;
+            z-index: 2;
         }
 
         /* Zone d'écriture dans la marge */
@@ -305,7 +297,7 @@
             top: 0; left: 0;
             width: max-content;
             max-width: none;
-            bottom: 0;
+            min-height: 100%;
             padding: 2px 8px 0 8px;
             box-sizing: border-box;
             background: transparent;
@@ -342,7 +334,7 @@
             position: absolute;
             top: 0; left: 0;
             width: 256px;
-            bottom: 0;
+            min-height: 100%;
             cursor: text;
             z-index: 3;
             background: transparent;
@@ -410,7 +402,7 @@
             to   { opacity: 1; }
         }
         .seyes-modal {
-            background: #fffef5;
+            background: #fafcff;
             border-radius: 16px;
             box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10);
             padding: 32px 36px 28px;
@@ -490,7 +482,7 @@
 
         /* ── Modale aide ─────────────────────────────────── */
         .seyes-help-modal {
-            background: #fffef5;
+            background: #fafcff;
             border-radius: 18px;
             box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10);
             padding: 28px 32px 24px;
@@ -593,6 +585,7 @@ function createSeyesWidget() {
         <span class="seyes-title">✏️ Écriture Séyès</span>
         <div class="seyes-toolbar" id="seyes-toolbar-inner"></div>
         <div class="wf-btns" style="margin-left:4px">
+            <button class="seyes-help-btn" data-role="wf-pdf"  title="Exporter / Imprimer" style="width:auto;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">PDF</button>
             <button class="seyes-help-btn" data-role="wf-help" title="Aide">?</button>
             <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
             <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
@@ -815,9 +808,53 @@ function createSeyesWidget() {
     editor.setAttribute('spellcheck', 'true');
 
     // Taille initiale : Normal (36px / 64px line-height)
+    const LH = 64;
+    const pt = _seyesPaddingTop(36, LH);
     editor.style.fontSize   = '36px';
-    editor.style.lineHeight = '64px';
-    editor.style.paddingTop = _seyesPaddingTop(36, 64) + 'px';
+    editor.style.lineHeight = LH + 'px';
+    editor.style.paddingTop = pt + 'px';
+
+    // ── Fond séyès SVG tile ───────────────────────────────────────────────
+    // Deux SVG tiles appliqués sur writingArea :
+    // - svgMarge (sans colonnes) couvre toute la largeur depuis x=0
+    // - svgCols  (avec colonnes) couvre depuis x=256px
+    // offsetY = pt - (LH - 1) place la grande ligne (bas du tile) sur la baseline
+    function _seyesMakeBg() {
+        const il = LH / 4;
+        // Grande ligne en bas du tile, à y = LH - 1
+        const lignes = (withCol) => {
+            const col = withCol
+                ? `<line x1="${LH - 0.5}" y1="0" x2="${LH - 0.5}" y2="${LH}" stroke="#c8d8eb" stroke-width="0.8"/>`
+                : '';
+            return [
+                `<svg xmlns="http://www.w3.org/2000/svg" width="${LH}" height="${LH}">`,
+                `<line x1="0" y1="${il * 1}" x2="${LH}" y2="${il * 1}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+                `<line x1="0" y1="${il * 2}" x2="${LH}" y2="${il * 2}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+                `<line x1="0" y1="${il * 3}" x2="${LH}" y2="${il * 3}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+                `<line x1="0" y1="${LH - 0.5}" x2="${LH}" y2="${LH - 0.5}" stroke="#9aadbe" stroke-width="1"/>`,
+                col,
+                `</svg>`
+            ].join('');
+        };
+
+        const enc = (svg) => 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
+        const urlMarge = enc(lignes(false));
+        const urlCols  = enc(lignes(true));
+        const urlRed   = 'linear-gradient(to right, transparent 254px, #e05050 254px, #e05050 256px, transparent 256px)';
+
+        // offsetY : la grande ligne (y=LH-1 dans le tile) doit coïncider avec
+        // la baseline de la 1ère ligne de texte (y = pt dans writingArea,
+        // car le paddingTop de l'éditeur = pt et la baseline ≈ bas de la zone corps)
+        // On veut : offsetY + (LH - 1) = pt  →  offsetY = pt - LH + 1
+        const offsetY = pt - LH + 170;
+
+        writingArea.style.backgroundImage    = `${urlRed}, ${urlMarge}, ${urlCols}`;
+        writingArea.style.backgroundSize     = `100% 100%, ${LH}px ${LH}px, ${LH}px ${LH}px`;
+        writingArea.style.backgroundRepeat   = 'no-repeat, repeat, repeat';
+        writingArea.style.backgroundPosition = `0 0, 0 ${offsetY}px, 256px ${offsetY}px`;
+        writingArea.style.backgroundAttachment = 'local, local, local';
+    }
+    _seyesMakeBg();
 
     writingArea.appendChild(editor);
 
@@ -941,12 +978,146 @@ function createSeyesWidget() {
     }, { passive: false });
 
     // ── Boutons fenêtre ───────────────────────────────────────────────────
+    const wfPdf   = header.querySelector('[data-role="wf-pdf"]');
     const wfHelp  = header.querySelector('[data-role="wf-help"]');
     const wfMin   = header.querySelector('[data-role="wf-min"]');
     const wfMax   = header.querySelector('[data-role="wf-max"]');
     const wfClose = header.querySelector('[data-role="wf-close"]');
 
     let _isMax = false;
+
+    if (wfPdf) {
+        wfPdf.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            const fontUrl      = new URL('polices/BelleAllureGS-Gros.otf', window.location.href).href;
+            const editorHTML   = editor.innerHTML  || '';
+            const margeHTML    = editorMarge.innerHTML || '';
+            const hasMargeContent = editorMarge.textContent.trim().length > 0;
+
+            // ── Dimensions page A4 à 96dpi ──────────────────────────────
+            // A4 = 210×297mm. Zone imprimable avec marges 15/12mm :
+            //   largeur = 210 - 24 = 186mm = ~703px
+            //   hauteur = 297 - 30 = 252mm = ~953px
+            // Grande ligne séyès = 8mm = ~30.24px → on arrondit à 30px
+            const LINE_H   = 30;   // px — 1 grande ligne (4 interlignes)
+            const IL       = LINE_H / 4; // 7.5px — 1 interligne
+            const PAGE_W   = 703;  // px zone imprimable
+            const PAGE_H   = 953;  // px zone imprimable
+            const MARGE_X  = 128;  // px — largeur marge (≈34mm)
+            const NB_LINES = Math.floor(PAGE_H / LINE_H);
+
+            // ── Génération SVG du fond séyès ─────────────────────────────
+            // On génère un SVG de PAGE_W × PAGE_H avec toutes les lignes
+            let svgLines = '';
+            for (let i = 0; i <= NB_LINES; i++) {
+                const y = i * LINE_H;
+                // Grande ligne (bleue foncée) — toute la largeur
+                svgLines += `<line x1="0" y1="${y}" x2="${PAGE_W}" y2="${y}" stroke="#9aadbe" stroke-width="0.8"/>`;
+                if (i < NB_LINES) {
+                    // 3 interlignes (bleue claire) — toute la largeur (marge incluse)
+                    for (let j = 1; j <= 3; j++) {
+                        const yil = y + j * IL;
+                        svgLines += `<line x1="0" y1="${yil}" x2="${PAGE_W}" y2="${yil}" stroke="#c8d8eb" stroke-width="0.5"/>`;
+                    }
+                }
+            }
+            // Colonnes verticales (après la marge, toutes les LINE_H px)
+            for (let x = MARGE_X + LINE_H; x < PAGE_W; x += LINE_H) {
+                svgLines += `<line x1="${x}" y1="0" x2="${x}" y2="${PAGE_H}" stroke="#c8d8eb" stroke-width="0.5"/>`;
+            }
+            // Ligne rouge de marge
+            svgLines += `<line x1="${MARGE_X}" y1="0" x2="${MARGE_X}" y2="${PAGE_H}" stroke="#e05050" stroke-width="1.2"/>`;
+
+            const bgSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${PAGE_W}" height="${PAGE_H}">${svgLines}</svg>`;
+            const bgSvgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(bgSvg);
+
+            // ── Alignement baseline sur la grande ligne ──────────────────
+            // La première grande ligne est à y=LINE_H (pas y=0).
+            // baseline = top + ascent  →  top = LINE_H - ascent
+            // ascent BelleAllureGS ≈ 0.80 * fontSize
+            const fsPrint  = Math.round(LINE_H * 0.62); // légèrement plus grand que 36/64
+            const ascent   = fsPrint * 1.0;
+            const ptPrint  = Math.round(LINE_H - ascent);  // top du bloc texte
+
+            const printHTML = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Écriture Séyès</title>
+<style>
+    @font-face {
+        font-family: 'BelleAllureGS';
+        src: url('${fontUrl}') format('opentype');
+        font-display: block;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+    html, body { width: ${PAGE_W}px; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page {
+        position: relative;
+        width: ${PAGE_W}px;
+        min-height: ${PAGE_H}px;
+        background-color: #fafcff;
+        background-image: url('${bgSvgUrl}');
+        background-repeat: no-repeat;
+        background-size: ${PAGE_W}px ${PAGE_H}px;
+        background-position: top left;
+    }
+    .print-editor {
+        position: absolute;
+        top: ${ptPrint}px;
+        left: ${MARGE_X + 8}px;
+        right: 0;
+        font-family: 'BelleAllureGS', cursive;
+        font-size: ${fsPrint}px;
+        line-height: ${LINE_H}px;
+        color: #1a1a2e;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    .print-editor div, .print-editor p,
+    .print-marge div, .print-marge p {
+        margin: 0; padding: 0;
+        min-height: ${LINE_H}px;
+        line-height: ${LINE_H}px;
+    }
+    .print-marge {
+        position: absolute;
+        top: ${ptPrint}px;
+        left: 4px;
+        width: ${MARGE_X - 6}px;
+        font-family: 'BelleAllureGS', cursive;
+        font-size: ${fsPrint}px;
+        line-height: ${LINE_H}px;
+        color: #1a1a2e;
+        white-space: nowrap;
+        overflow: visible;
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="print-editor">${editorHTML}</div>
+    ${hasMargeContent ? `<div class="print-marge">${margeHTML}</div>` : ''}
+</div>
+</body>
+</html>`;
+
+            const printWin = window.open('', '_blank', 'width=794,height=1123');
+            if (!printWin) {
+                alert('Le navigateur a bloqué la fenêtre popup. Autorisez les popups pour ce site.');
+                return;
+            }
+            printWin.document.write(printHTML);
+            printWin.document.close();
+            printWin.onload = () => {
+                // Délai pour laisser la police se charger
+                setTimeout(() => { printWin.focus(); printWin.print(); }, 800);
+            };
+        });
+    }
 
     if (wfHelp) {
         wfHelp.addEventListener('click', (e) => {
