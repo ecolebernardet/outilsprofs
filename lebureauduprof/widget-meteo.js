@@ -9,6 +9,12 @@
         .widget[data-type="meteo"] { min-width: unset; background: transparent !important; border: none !important; box-shadow: none !important; }
         .widget[data-type="meteo"] .editor-container { border: none; border-radius: 16px; overflow: hidden; resize: both; }
         .meteo-city-name { text-decoration: underline dotted; }
+        .meteo-forecast { display: flex; gap: 6px; width: 100%; justify-content: space-between; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.25); padding-top: 6px; }
+        .meteo-forecast-day { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+        .meteo-forecast-label { font-size: 10px; opacity: 0.75; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .meteo-forecast-icon { font-size: 20px; line-height: 1; }
+        .meteo-forecast-temps { font-size: 10px; opacity: 0.9; white-space: nowrap; }
+        .meteo-forecast-temps span { opacity: 0.65; }
     `;
     document.head.appendChild(s);
 })();
@@ -18,7 +24,7 @@
     const tpl = document.createElement('template');
     tpl.id = 'template-meteo';
     tpl.innerHTML = `
-        <div class="editor-container meteo-container" style="width:280px;height:200px;background:linear-gradient(135deg,#1a6fa8,#38b6e8);border-radius:16px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;box-sizing:border-box;color:white;overflow:hidden;">
+        <div class="editor-container meteo-container" style="width:280px;height:260px;background:linear-gradient(135deg,#1a6fa8,#38b6e8);border-radius:16px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;box-sizing:border-box;color:white;overflow:hidden;">
             <div class="meteo-city" style="font-size:13px;font-weight:600;opacity:0.85;cursor:pointer;text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:6px;width:100%;" title="Cliquer pour changer de ville">📍 <span class="meteo-city-name">Chargement...</span></div>
             <div class="meteo-icon" style="font-size:52px;line-height:1;margin:4px 0;">⛅</div>
             <div class="meteo-temp" style="font-size:36px;font-weight:800;line-height:1;">--°</div>
@@ -28,6 +34,23 @@
                 <span class="meteo-humidity">💧 --</span>
             </div>
             <div class="meteo-updated" style="font-size:9px;opacity:0.5;margin-top:2px;">--</div>
+            <div class="meteo-forecast">
+                <div class="meteo-forecast-day" data-day="1">
+                    <div class="meteo-forecast-label">--</div>
+                    <div class="meteo-forecast-icon">--</div>
+                    <div class="meteo-forecast-temps">--</div>
+                </div>
+                <div class="meteo-forecast-day" data-day="2">
+                    <div class="meteo-forecast-label">--</div>
+                    <div class="meteo-forecast-icon">--</div>
+                    <div class="meteo-forecast-temps">--</div>
+                </div>
+                <div class="meteo-forecast-day" data-day="3">
+                    <div class="meteo-forecast-label">--</div>
+                    <div class="meteo-forecast-icon">--</div>
+                    <div class="meteo-forecast-temps">--</div>
+                </div>
+            </div>
         </div>`;
     document.body.appendChild(tpl);
 })();
@@ -65,17 +88,34 @@ const WMO_BG = {
     95:'linear-gradient(135deg,#373b44,#4286f4)',96:'linear-gradient(135deg,#373b44,#4286f4)',99:'linear-gradient(135deg,#373b44,#4286f4)',
 };
 
+const JOURS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
 async function fetchMeteo(city) {
     // 1. Géocodage via Open-Meteo geocoding API
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=fr&format=json`);
     const geoData = await geoRes.json();
     if (!geoData.results?.length) throw new Error('Ville introuvable');
     const { latitude, longitude, name, country } = geoData.results[0];
-    // 2. Météo actuelle
-    const metRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&wind_speed_unit=kmh&timezone=auto`);
+    // 2. Météo actuelle + prévisions 4 jours (j0 = aujourd'hui, j1-j3 = prochains jours)
+    const metRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min&wind_speed_unit=kmh&timezone=auto&forecast_days=4`);
     const metData = await metRes.json();
     const c = metData.current;
-    return { name, country, temp: Math.round(c.temperature_2m), code: c.weathercode, wind: Math.round(c.windspeed_10m), humidity: c.relativehumidity_2m };
+    const d = metData.daily;
+    // Prévisions j+1, j+2, j+3
+    const forecast = [1, 2, 3].map(i => ({
+        date: new Date(d.time[i] + 'T12:00:00'),
+        code: d.weathercode[i],
+        tmax: Math.round(d.temperature_2m_max[i]),
+        tmin: Math.round(d.temperature_2m_min[i]),
+    }));
+    return {
+        name, country,
+        temp: Math.round(c.temperature_2m),
+        code: c.weathercode,
+        wind: Math.round(c.windspeed_10m),
+        humidity: c.relativehumidity_2m,
+        forecast
+    };
 }
 
 function initMeteoWidget(widget) {
@@ -87,6 +127,7 @@ function initMeteoWidget(widget) {
     const windEl     = widget.querySelector('.meteo-wind');
     const humEl      = widget.querySelector('.meteo-humidity');
     const updEl      = widget.querySelector('.meteo-updated');
+    const forecastDays = widget.querySelectorAll('.meteo-forecast-day');
 
     // --- MODALE AUTONOME (ne dépend pas de widgets.js) ---
     function askCity(currentCity) {
@@ -116,60 +157,26 @@ function initMeteoWidget(widget) {
         });
     }
 
-    // --- POIGNÉE DE REDIMENSIONNEMENT ---
-    const resizeHandle = document.createElement('div');
-    resizeHandle.style.cssText = 'position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,0.4) 50%);border-radius:0 0 14px 0;opacity:0;transition:opacity 0.2s;z-index:10;';
-    widget.appendChild(resizeHandle);
-    widget.addEventListener('mouseenter', () => resizeHandle.style.opacity = '1');
-    widget.addEventListener('mouseleave', () => resizeHandle.style.opacity = '0');
-
-    resizeHandle.addEventListener('mousedown', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const startX = e.clientX, startY = e.clientY;
-        const startW = container.offsetWidth, startH = container.offsetHeight;
-        document.onmousemove = (ev) => {
-            const newW = Math.max(180, startW + ev.clientX - startX);
-            const newH = Math.max(140, startH + ev.clientY - startY);
-            container.style.width  = newW + 'px';
-            container.style.height = newH + 'px';
-            adaptMeteoFontSizes(container, newW, newH);
-        };
-        document.onmouseup = () => { document.onmousemove = null; saveBoard(); };
-    });
-    resizeHandle.addEventListener('touchstart', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const t0 = e.touches[0];
-        const startX = t0.clientX, startY = t0.clientY;
-        const startW = container.offsetWidth, startH = container.offsetHeight;
-        function onMove(ev) {
-            const t = ev.touches[0];
-            const newW = Math.max(180, startW + t.clientX - startX);
-            const newH = Math.max(140, startH + t.clientY - startY);
-            container.style.width  = newW + 'px';
-            container.style.height = newH + 'px';
-            adaptMeteoFontSizes(container, newW, newH);
-        }
-        function onEnd() {
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend',  onEnd);
-            saveBoard();
-        }
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend',  onEnd);
-    }, { passive: false });
-
     function adaptMeteoFontSizes(c, w, h) {
-        const scale = Math.min(w / 280, h / 200);
+        const scale = Math.min(w / 280, h / 260);
         iconEl.style.fontSize     = Math.round(52 * scale) + 'px';
         tempEl.style.fontSize     = Math.round(36 * scale) + 'px';
         descEl.style.fontSize     = Math.round(13 * scale) + 'px';
         windEl.parentElement.style.fontSize = Math.round(11 * scale) + 'px';
         cityNameEl.style.fontSize = Math.round(13 * scale) + 'px';
         updEl.style.fontSize      = Math.round(9  * scale) + 'px';
+        forecastDays.forEach(day => {
+            day.querySelector('.meteo-forecast-label').style.fontSize = Math.round(10 * scale) + 'px';
+            day.querySelector('.meteo-forecast-icon').style.fontSize  = Math.round(20 * scale) + 'px';
+            day.querySelector('.meteo-forecast-temps').style.fontSize = Math.round(10 * scale) + 'px';
+        });
     }
 
+    let resizeSaveTimer = null;
     new ResizeObserver(() => {
         adaptMeteoFontSizes(container, container.offsetWidth, container.offsetHeight);
+        clearTimeout(resizeSaveTimer);
+        resizeSaveTimer = setTimeout(() => { if (typeof saveBoard === 'function') saveBoard(); }, 400);
     }).observe(container);
 
     // --- VILLE : localStorage en priorité, sinon dataset ---
@@ -187,11 +194,26 @@ function initMeteoWidget(widget) {
         container.style.background = WMO_BG[code] || WMO_BG[2];
         const lightBg = [71,73,75,3];
         container.style.color = lightBg.includes(code) ? '#222' : 'white';
+        // Prévisions 3 jours
+        if (data.forecast) {
+            data.forecast.forEach((f, i) => {
+                const dayEl = forecastDays[i];
+                if (!dayEl) return;
+                dayEl.querySelector('.meteo-forecast-label').textContent = JOURS_FR[f.date.getDay()];
+                dayEl.querySelector('.meteo-forecast-icon').textContent  = WMO_ICONS[f.code] || '🌡️';
+                dayEl.querySelector('.meteo-forecast-temps').innerHTML   = `${f.tmax}° <span>${f.tmin}°</span>`;
+            });
+        }
     }
 
     async function loadCity(c) {
         cityNameEl.textContent = 'Chargement...';
         iconEl.textContent = '⏳'; tempEl.textContent = ''; descEl.textContent = '';
+        forecastDays.forEach(day => {
+            day.querySelector('.meteo-forecast-label').textContent = '--';
+            day.querySelector('.meteo-forecast-icon').textContent  = '--';
+            day.querySelector('.meteo-forecast-temps').textContent = '--';
+        });
         try {
             const data = await fetchMeteo(c);
             widget.dataset.meteoCity = c;
