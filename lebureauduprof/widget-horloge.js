@@ -189,6 +189,31 @@ function createHorlogeWidget() {
         .hrlg-period-btn.hrlg-period-active { background: rgba(99,102,241,.4); color: #fff; }
         body.menu-light .hrlg-period-btn { color: #4338ca; }
         body.menu-light .hrlg-period-btn.hrlg-period-active { background: rgba(67,56,202,.25); color: #1e1b4b; }
+
+        /* ── Resize mode ── */
+        .hrlg-resize-mode-toggle { display: flex; border-radius: 0.4em; overflow: hidden; border: 0.07em solid rgba(165,180,252,.3); flex-shrink: 0; }
+        .hrlg-resize-mode-btn {
+            background: transparent; border: none; color: #a5b4fc;
+            font-size: 0.62em; font-weight: 600; padding: 0.25em 0.55em;
+            cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+        }
+        .hrlg-resize-mode-btn.hrlg-resize-mode-active { background: rgba(99,102,241,.4); color: #fff; }
+        body.menu-light .hrlg-resize-mode-btn { color: #4338ca; }
+        body.menu-light .hrlg-resize-mode-btn.hrlg-resize-mode-active { background: rgba(67,56,202,.25); color: #1e1b4b; }
+
+        /* ── Numéros de minutes sur le cadran ── */
+        .hrlg-number-min { font-family: 'Nunito', sans-serif; font-weight: 700; fill: #60a5fa; font-size: 7px; }
+        body.menu-light .hrlg-number-min { fill: #2563eb; }
+
+        /* ── Boutons numéros minutes / heures ── */
+        .hrlg-toggle-min-nums-btn, .hrlg-toggle-hour-nums-btn {
+            background: rgba(99,102,241,.12); border: 0.07em solid rgba(99,102,241,.35);
+            color: #a5b4fc; font-size: 0.62em; font-weight: 600;
+            padding: 0.35em 0.9em; border-radius: 0.5em; cursor: pointer; white-space: nowrap;
+        }
+        body.menu-light .hrlg-toggle-min-nums-btn, body.menu-light .hrlg-toggle-hour-nums-btn {
+            background: rgba(67,56,202,.08); border-color: rgba(67,56,202,.3); color: #4338ca;
+        }
         `;
         document.head.appendChild(s);
     }
@@ -296,16 +321,23 @@ function createHorlogeWidget() {
                     <button class="hrlg-period-btn" data-period="am">🌅 Matin</button>
                     <button class="hrlg-period-btn" data-period="pm">🌇 Après-midi</button>
                 </div>
+                <span class="hrlg-settings-sep"></span>
+                <div class="hrlg-resize-mode-toggle" title="Mode de redimensionnement">
+                    <button class="hrlg-resize-mode-btn hrlg-resize-mode-active" data-resize-mode="free">↔↕ Libre</button>
+                    <button class="hrlg-resize-mode-btn" data-resize-mode="width">↔ Largeur</button>
+                    <button class="hrlg-resize-mode-btn" data-resize-mode="height">↕ Hauteur</button>
+                </div>
             </div>
             <div class="hrlg-body">
                 <div class="hrlg-clock-wrap">
-                    <svg class="hrlg-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="hrlg-svg" viewBox="-22 -22 244 244" xmlns="http://www.w3.org/2000/svg">
                         <circle class="hrlg-face"   cx="100" cy="100" r="96"/>
                         <circle class="hrlg-border" cx="100" cy="100" r="96"/>
                         <g class="hrlg-ticks-min"></g>
                         <g class="hrlg-ticks-hour"></g>
                         <g class="hrlg-arcs"></g>
                         <g class="hrlg-numbers"></g>
+                        <g class="hrlg-numbers-min"></g>
                         <line class="hrlg-hand hrlg-hand-hour"   x1="100" y1="100" x2="100" y2="46"/>
                         <line class="hrlg-hand hrlg-hand-minute" x1="100" y1="100" x2="100" y2="20"/>
                         <circle class="hrlg-center" cx="100" cy="100" r="4"/>
@@ -319,6 +351,8 @@ function createHorlogeWidget() {
                     </div>
                     <div class="hrlg-controls">
                         <button class="hrlg-toggle-time-btn">👁️ Cacher l'heure</button>
+                        <button class="hrlg-toggle-min-nums-btn" title="Afficher/cacher les numéros des minutes">🔢 Nº min</button>
+                        <button class="hrlg-toggle-hour-nums-btn" title="Afficher/cacher les numéros des heures">🔢 Nº h</button>
                         <button class="hrlg-reset-btn" title="Remettre à 12:00">🔄</button>
                     </div>
                 </div>
@@ -452,9 +486,38 @@ const HRLG_BASE_FS = 14;
 
 function _initHorlogeResize(widget) {
     const cont = widget.querySelector('.hrlg-container');
-    const ec   = widget.querySelector('.hrlg-ec');
-    if (!cont || typeof ResizeObserver === 'undefined') return;
+    if (!cont) return;
 
+    // ── Poignée de resize custom (coin bas-droit) ─────────────────
+    const handle = document.createElement('div');
+    handle.className = 'hrlg-custom-resize-handle';
+    handle.title = 'Redimensionner';
+    handle.innerHTML = '⤢';
+    cont.appendChild(handle);
+
+    // CSS de la poignée (injecté une seule fois)
+    if (!document.getElementById('hrlg-resize-handle-style')) {
+        const rs = document.createElement('style');
+        rs.id = 'hrlg-resize-handle-style';
+        rs.textContent = `
+        .hrlg-custom-resize-handle {
+            position: absolute; bottom: 3px; right: 4px;
+            width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: rgba(165,180,252,.5);
+            cursor: se-resize; user-select: none; z-index: 10;
+            transition: color 0.15s;
+        }
+        .hrlg-custom-resize-handle:hover { color: rgba(165,180,252,.9); }
+        .hrlg-container { position: relative; }
+        `;
+        document.head.appendChild(rs);
+    }
+
+    // ── Mode de resize ─────────────────────────────────────────────
+    let _resizeMode = 'free';
+
+    // ── Scaling ────────────────────────────────────────────────────
     function _applyScale() {
         if (cont.classList.contains('wf-fullboard')) return;
         const w = cont.offsetWidth;
@@ -463,10 +526,70 @@ function _initHorlogeResize(widget) {
         cont.style.fontSize = fs + 'px';
     }
 
-    const ro = new ResizeObserver(_applyScale);
-    ro.observe(cont);
+    if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(_applyScale);
+        ro.observe(cont);
+    }
     requestAnimationFrame(_applyScale);
     widget._hrlgApplyScale = _applyScale;
+
+    // ── Drag resize manuel ─────────────────────────────────────────
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startW = cont.offsetWidth;
+        const startH = cont.offsetHeight;
+
+        // Curseur selon le mode
+        const cursorMap = { free: 'se-resize', width: 'ew-resize', height: 'ns-resize' };
+        document.body.style.cursor = cursorMap[_resizeMode] || 'se-resize';
+
+        function onMove(ev) {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            if (_resizeMode === 'free' || _resizeMode === 'width') {
+                const newW = Math.max(160, startW + dx);
+                cont.style.width = newW + 'px';
+            }
+            if (_resizeMode === 'free' || _resizeMode === 'height') {
+                const newH = Math.max(160, startH + dy);
+                cont.style.height = newH + 'px';
+            }
+            _applyScale();
+        }
+        function onUp() {
+            document.body.style.cursor = '';
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            if (typeof snapshotNow === 'function') snapshotNow();
+            if (typeof saveBoard   === 'function') saveBoard();
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    });
+
+    // Curseur de la poignée selon le mode
+    function _updateHandleCursor() {
+        const cursorMap = { free: 'se-resize', width: 'ew-resize', height: 'ns-resize' };
+        handle.style.cursor = cursorMap[_resizeMode] || 'se-resize';
+    }
+
+    // ── Boutons de mode de resize ──────────────────────────────────
+    widget.querySelectorAll('.hrlg-resize-mode-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _resizeMode = btn.dataset.resizeMode;
+            widget.querySelectorAll('.hrlg-resize-mode-btn').forEach(b => {
+                b.classList.toggle('hrlg-resize-mode-active', b.dataset.resizeMode === _resizeMode);
+            });
+            _updateHandleCursor();
+            // En mode hauteur : libérer la hauteur fixe si elle avait été forcée
+            if (_resizeMode !== 'height') cont.style.height = '';
+        });
+    });
+
+    _updateHandleCursor();
 }
 
 // ── Logique interne ────────────────────────────────────────────────
@@ -510,7 +633,7 @@ function _initHorlogeWidget(widget) {
     }
 
     // état des arcs (depuis state)
-    const state = { hours: 12, minutes: 0, showTime: true, arcs: {}, period: null };
+    const state = { hours: 12, minutes: 0, showTime: true, arcs: {}, period: null, showMinNums: false, showHourNums: true };
 
     widget._hrlgGetData = () => {
         const cont = widget.querySelector('.hrlg-container');
@@ -519,10 +642,12 @@ function _initHorlogeWidget(widget) {
     };
     widget._hrlgSetData = (data) => {
         if (!data) return;
-        if (data.hours    !== undefined) state.hours    = data.hours;
-        if (data.minutes  !== undefined) state.minutes  = data.minutes;
-        if (data.showTime !== undefined) state.showTime = data.showTime;
-        if (data.period   !== undefined) state.period   = data.period;
+        if (data.hours        !== undefined) state.hours        = data.hours;
+        if (data.minutes      !== undefined) state.minutes      = data.minutes;
+        if (data.showTime     !== undefined) state.showTime     = data.showTime;
+        if (data.period       !== undefined) state.period       = data.period;
+        if (data.showMinNums  !== undefined) state.showMinNums  = data.showMinNums;
+        if (data.showHourNums !== undefined) state.showHourNums = data.showHourNums;
         if (data.arcs     && typeof data.arcs === 'object') {
             Object.assign(state.arcs, data.arcs);
             // Synchroniser les checkboxes
@@ -543,7 +668,7 @@ function _initHorlogeWidget(widget) {
 
     _buildClockFace(svg);
 
-    function _render() { _updateHands(); _updateDigital(); _updateToggleBtn(); _updateArcs(); }
+    function _render() { _updateHands(); _updateDigital(); _updateToggleBtn(); _updateArcs(); _updateMinNums(); _updateHourNums(); _updateToggleMinNumsBtn(); _updateToggleHourNumsBtn(); }
 
     function _updateArcs() {
         if (!arcsGroup) return;
@@ -559,6 +684,41 @@ function _initHorlogeWidget(widget) {
             path.setAttribute('stroke-width', '0.5');
             arcsGroup.appendChild(path);
         });
+    }
+
+    function _updateMinNums() {
+        const g = svg.querySelector('.hrlg-numbers-min');
+        if (!g) return;
+        g.innerHTML = '';
+        if (!state.showMinNums) return;
+        [0,5,10,15,20,25,30,35,40,45,50,55].forEach(n => {
+            const a = (n * 6 - 90) * Math.PI / 180;
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            // Rayon 110 = extérieur du cadran (r=96 + marge)
+            t.setAttribute('x', (100 + Math.cos(a) * 110).toFixed(2));
+            t.setAttribute('y', (100 + Math.sin(a) * 110).toFixed(2));
+            t.setAttribute('class', 'hrlg-number-min');
+            t.setAttribute('text-anchor', 'middle');
+            t.setAttribute('dominant-baseline', 'central');
+            t.textContent = String(n).padStart(2, '0');
+            g.appendChild(t);
+        });
+    }
+
+    function _updateHourNums() {
+        const g = svg.querySelector('.hrlg-numbers');
+        if (!g) return;
+        g.style.visibility = state.showHourNums ? 'visible' : 'hidden';
+    }
+
+    function _updateToggleMinNumsBtn() {
+        const btn = widget.querySelector('.hrlg-toggle-min-nums-btn');
+        if (btn) btn.textContent = state.showMinNums ? '🔢 Cacher nº min' : '🔢 Nº min';
+    }
+
+    function _updateToggleHourNumsBtn() {
+        const btn = widget.querySelector('.hrlg-toggle-hour-nums-btn');
+        if (btn) btn.textContent = state.showHourNums ? '🔢 Cacher nº h' : '🔢 Nº h';
     }
 
     function _updateHands() {
@@ -674,6 +834,23 @@ function _initHorlogeWidget(widget) {
         if (typeof snapshotNow === 'function') snapshotNow();
         if (typeof saveBoard   === 'function') saveBoard();
     });
+
+    const toggleMinNumsBtn  = widget.querySelector('.hrlg-toggle-min-nums-btn');
+    const toggleHourNumsBtn = widget.querySelector('.hrlg-toggle-hour-nums-btn');
+    if (toggleMinNumsBtn) {
+        toggleMinNumsBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); state.showMinNums = !state.showMinNums; _render();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            if (typeof saveBoard   === 'function') saveBoard();
+        });
+    }
+    if (toggleHourNumsBtn) {
+        toggleHourNumsBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); state.showHourNums = !state.showHourNums; _render();
+            if (typeof snapshotNow === 'function') snapshotNow();
+            if (typeof saveBoard   === 'function') saveBoard();
+        });
+    }
     resetBtn.addEventListener('click', (e) => {
         e.stopPropagation(); state.hours = 12; state.minutes = 0; _render();
         if (typeof snapshotNow === 'function') snapshotNow();
