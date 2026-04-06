@@ -1319,11 +1319,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="tools-card-name">Équipes équilibrées</div>
                 <div class="tools-card-desc">Créer des équipes équilibrées</div>
             </div>
-            <div class="tools-card" onclick="createWidget('minuteur');toggleToolsPanel()">
-                <div class="tools-card-ico">⏱️</div>
-                <div class="tools-card-name">Minuteur & Chrono</div>
-                <div class="tools-card-desc">Gérer le temps des activités</div>
-            </div>
             <div class="tools-card" onclick="createWidget('sonometre');toggleToolsPanel()">
                 <div class="tools-card-ico">🔊</div>
                 <div class="tools-card-name">Sonomètre</div>
@@ -1338,6 +1333,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="tools-card-ico">📊</div>
                 <div class="tools-card-name">Sondage</div>
                 <div class="tools-card-desc">Créer et voter pour un sondage express</div>
+            </div>
+			<div class="tools-card" onclick="createWidget('minuteur');toggleToolsPanel()">
+                <div class="tools-card-ico">⏱️</div>
+                <div class="tools-card-name">Minuteur & Chrono</div>
+                <div class="tools-card-desc">Gérer le temps des activités</div>
             </div>
 			<div class="tools-card" onclick="createWidget('plan');toggleToolsPanel()">
                 <div class="tools-card-ico">🏫</div>
