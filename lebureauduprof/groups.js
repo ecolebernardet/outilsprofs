@@ -748,6 +748,14 @@ function getSelectionCenter() {
 }
 
 function updateSelectionOverlay() {
+    // Exclure les widgets ancrés de la sélection
+    selectedWidgets = selectedWidgets.filter(w => {
+        if (w.dataset.anchored === 'true') {
+            w.classList.remove('selected');
+            return false;
+        }
+        return true;
+    });
     const has = selectedWidgets.length > 0 || selectedStrokes.length > 0;
     const ctrl = document.getElementById('selection-controls');
     if (!has) {

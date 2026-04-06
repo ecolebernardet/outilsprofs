@@ -226,6 +226,7 @@ function buildBoardState() {
 			imgOpacity: w.dataset.imgOpacity || null,
 			flipX: w.dataset.flipX || null,
 			flipY: w.dataset.flipY || null,
+			anchored: w.dataset.anchored === 'true' || null,
 			transform: w.style.transform || null,
 			pdfId: w.dataset.pdfId || null,
 			pdfName: w.dataset.pdfName || null,
@@ -388,6 +389,11 @@ function restoreBoardFromJSON(json) {
                         const sx = parseFloat(w.flipX || 1), sy = parseFloat(w.flipY || 1);
                         if (sx !== 1 || sy !== 1) flipImg.style.transform = `scale(${sx}, ${sy})`;
                     }
+                    // Restaurer l'état ancré
+                    if (w.anchored && typeof _applyAnchorState === 'function') {
+                        iw.dataset.anchored = 'true';
+                        _applyAnchorState(iw, true);
+                    }
                 }
                 return;
             }
@@ -541,11 +547,7 @@ function restoreBoardFromJSON(json) {
                     sm.style.lineHeight = w.seyesData.lineHeight;
                     sm.style.paddingTop = w.seyesData.paddingTop;
                 }
-                // Restaurer le background-size du fond séyès selon le line-height
-                if (sc && w.seyesData.lineHeight) {
-                    const lh = parseFloat(w.seyesData.lineHeight);
-                    if (!isNaN(lh)) sc.style.backgroundSize = `100% 100%, auto ${lh}px, 100% 100%, ${lh}px auto`;
-                }
+                // (fond séyès géré par CSS sur .seyes-writing-area)
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);

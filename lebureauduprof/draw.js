@@ -1966,6 +1966,8 @@ function onBoardMouseDown(e) {
     const widget = target.closest('.widget, .shape-widget');
 
     if (widget) {
+        // Ne pas sélectionner les images ancrées
+        if (widget.dataset.anchored === 'true') return;
         const gid = widget.dataset.groupId;
         // Membres DOM du groupe (widgets + shape-widgets)
         const domMembers = gid
@@ -2125,6 +2127,8 @@ function onBoardMouseDown(e) {
         const br = board.getBoundingClientRect();
 
         document.querySelectorAll('.widget, .shape-widget').forEach(w => {
+            // Ne pas sélectionner les images ancrées
+            if (w.dataset.anchored === 'true') return;
             const r = w.getBoundingClientRect();
             const wl = r.left - br.left, wt = r.top - br.top;
             if (wl < rx+rw && wl+r.width > rx && wt < ry+rh && wt+r.height > ry) {

@@ -64,11 +64,16 @@
         .widget[data-type="iframe"]:focus-within { border-color: #2bcbba; }
         .widget[data-transparent="true"] { border: none !important; box-shadow: none !important; background: transparent !important; }
         .widget[data-transparent="true"]:hover, .widget[data-transparent="true"]:focus-within { background: rgba(74, 144, 226, 0.05) !important; }
+        /* Widgets ancrés : aucun effet visuel de focus/survol/sélection */
+        .widget[data-anchored="true"]:focus-within,
+        .widget[data-anchored="true"]:focus,
+        .widget[data-anchored="true"]:hover,
+        .widget[data-anchored="true"].selected { border-color: transparent !important; box-shadow: none !important; background: transparent !important; outline: none !important; }
         .widget[data-transparent="true"] .editor-container, .widget[data-transparent="true"] .editor-content { border: none !important; background: transparent !important; }
 
         /* --- CONTRÔLES NATIFS DES WIDGETS --- */
         .widget-header { display: none !important; }
-        .drag-handle, .widget-close-handle, .widget-pin-handle, .widget-rotate-handle, .widget-menu-handle, .widget-back-handle {
+        .drag-handle, .widget-close-handle, .widget-pin-handle, .widget-rotate-handle, .widget-menu-handle, .widget-back-handle, .widget-anchor-handle {
             position: absolute; width: 26px; height: 26px; background: #f8f9fa; border-radius: 6px;
             display: flex; align-items: center; justify-content: center; z-index: 100;
             opacity: 0; transition: opacity 0.2s; border: 1px solid #ddd;
@@ -78,6 +83,7 @@
         .widget-action-bar .widget-close-handle,
         .widget-action-bar .widget-pin-handle,
         .widget-action-bar .widget-back-handle,
+        .widget-action-bar .widget-anchor-handle,
         .widget-action-bar .widget-menu-handle {
             position: static;
             opacity: 1;
@@ -101,15 +107,18 @@
         .widget-close-handle,
         .widget-pin-handle,
         .widget-back-handle,
+        .widget-anchor-handle,
         .widget-menu-handle {
             top: auto !important;
             right: auto !important;
             transform: none !important;
             cursor: pointer;
         }
-        .widget-close-handle  { font-size: 14px; color: #ff5f56; order: 4; }
+        .widget-close-handle  { font-size: 14px; color: #ff5f56; order: 5; }
         .widget-pin-handle    { font-size: 13px; color: #f39c12; order: 2; }
         .widget-back-handle   { font-size: 13px; color: #888;    order: 3; }
+        .widget-anchor-handle { font-size: 13px; color: #888;    order: 4; }
+        .widget[data-anchored="true"] .widget-anchor-handle { background: #FFD230; border-color: #e6bc00; }
         .widget-menu-handle   { font-size: 13px; color: #555;    order: 1; }
 
         /* Conteneur de la barre d'action */
@@ -153,13 +162,15 @@
         #board.is-drawing .widget-back-handle,
         #board.is-drawing .widget-rotate-handle,
         #board.is-drawing .widget-menu-handle,
+        #board.is-drawing .widget-anchor-handle,
         #board.is-erasing .widget-action-bar,
         #board.is-erasing .drag-handle,
         #board.is-erasing .widget-close-handle,
         #board.is-erasing .widget-pin-handle,
         #board.is-erasing .widget-back-handle,
         #board.is-erasing .widget-rotate-handle,
-        #board.is-erasing .widget-menu-handle { opacity: 0 !important; pointer-events: none !important; }
+        #board.is-erasing .widget-menu-handle,
+        #board.is-erasing .widget-anchor-handle { opacity: 0 !important; pointer-events: none !important; }
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .drag-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus .drag-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-close-handle,
@@ -167,6 +178,7 @@
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-back-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-rotate-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-anchor-handle,
         #board:not(.is-drawing):not(.is-erasing) .widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .drag-handle,
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus .drag-handle,
@@ -175,6 +187,7 @@
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-back-handle,
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-rotate-handle,
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus .widget-rotate-handle,
+        #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-anchor-handle,
         #board:not(.is-drawing):not(.is-erasing) .shape-widget:focus-within .widget-menu-handle { opacity: 1; pointer-events: auto; }
         /* En multi-sélection, forcer le masquage des poignées malgré focus-within */
         #board.multi-select .widget.selected .drag-handle,
@@ -200,6 +213,10 @@
         #board.multi-select .shape-widget.selected:focus-within .widget-pin-handle,
         #board.multi-select .shape-widget.selected:focus-within .widget-back-handle,
         #board.multi-select .shape-widget.selected:focus-within .widget-rotate-handle,
+        #board.multi-select .widget.selected .widget-anchor-handle,
+        #board.multi-select .widget.selected:focus-within .widget-anchor-handle,
+        #board.multi-select .shape-widget.selected .widget-anchor-handle,
+        #board.multi-select .shape-widget.selected:focus-within .widget-anchor-handle,
         #board.multi-select .shape-widget.selected:focus-within .widget-menu-handle { opacity: 0 !important; pointer-events: none !important; }
         .widget-close-handle:hover  { color: #ff5f56; background: white; }
         .drag-handle:hover          { color: var(--primary-color); background: white; }

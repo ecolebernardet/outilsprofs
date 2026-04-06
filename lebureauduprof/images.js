@@ -499,6 +499,7 @@ function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
             <div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
             <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
             <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
+            <div class="widget-anchor-handle" onclick="toggleAnchorImage(this.closest('.widget'))" title="Ancrer (rendre insélectionnable)">⚓</div>
             <div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
         </div>
         <div class="widget-ctx-menu"></div>
@@ -578,6 +579,9 @@ function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
     });
 
     widget.addEventListener('mousedown', () => {
+        // Ne pas prendre le focus ni remonter au premier plan si ancré ou en mode dessin
+        if (widget.dataset.anchored === 'true') return;
+        if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
         bringToFront(widget);
         widget.focus();
         if (typeof positionActionBar === 'function') positionActionBar(widget);
@@ -593,6 +597,13 @@ function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
     bringToFront(widget);
     makeDraggable(widget);
     makeDraggableRotate(widget);
+
+    // Restaurer l'état ancré si chargé depuis la sauvegarde
+    if (opts && opts.anchored) {
+        widget.dataset.anchored = 'true';
+        _applyAnchorState(widget, true);
+    }
+
     saveBoard();
     return widget;
 }
@@ -602,6 +613,157 @@ function _applyImgFlip(widget, img) {
     const sy = parseFloat(widget.dataset.flipY || 1);
     img.style.transform = (sx !== 1 || sy !== 1) ? `scale(${sx}, ${sy})` : '';
     saveBoard();
+}
+
+// ── Ancrage d'une image widget (rend le widget insélectionnable) ──────────
+function toggleAnchorImage(widget) {
+    if (!widget) return;
+    const isAnchored = widget.dataset.anchored === 'true';
+    if (isAnchored) {
+        widget.dataset.anchored = 'false';
+        _applyAnchorState(widget, false);
+        // Remettre au premier plan (annuler le sendToBack automatique)
+        if (widget.dataset.background === 'true') {
+            widget.dataset.background = 'false';
+            if (typeof widgetZCounter !== 'undefined') {
+                widgetZCounter++;
+                widget.style.zIndex = widgetZCounter;
+            }
+        }
+    } else {
+        snapshotNow();
+        widget.dataset.anchored = 'true';
+        // Envoyer derrière le canvas de dessin pour pouvoir écrire par-dessus
+        if (widget.dataset.background !== 'true') {
+            widget.style.zIndex = 1;
+            widget.dataset.pinned = 'false';
+            widget.classList.remove('pinned');
+            widget.dataset.background = 'true';
+        }
+        _applyAnchorState(widget, true);
+    }
+    saveBoard();
+}
+
+function _applyAnchorState(widget, anchored) {
+    const anchorBtn = widget.querySelector('.widget-anchor-handle');
+    if (anchored) {
+        // Ne pas mettre pointer-events:none sur le widget entier — ça bloquerait
+        // les événements de dessin. On intercepte uniquement mousedown/touchstart/pointerdown
+        // en phase capture pour stopper le drag, mais SEULEMENT hors mode dessin.
+        if (!widget._anchorBlocker) {
+            widget._anchorBlocker = (e) => {
+                if (e.target && e.target.classList && e.target.classList.contains('anchor-badge')) return;
+                if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
+                e.stopPropagation();
+            };
+        }
+        widget.addEventListener('mousedown',   widget._anchorBlocker, true);
+        widget.addEventListener('touchstart',  widget._anchorBlocker, { capture: true, passive: true });
+        widget.addEventListener('pointerdown', widget._anchorBlocker, true);
+        // Perdre le focus immédiatement si le widget l'obtient (évite le contour bleu)
+        if (!widget._anchorFocusBlocker) {
+            widget._anchorFocusBlocker = () => { widget.blur(); };
+        }
+        widget.addEventListener('focus', widget._anchorFocusBlocker, true);
+        // Supprimer la classe selected si elle est déjà là, et empêcher toute apparence sélectionnée
+        widget.classList.remove('selected');
+        widget.dataset.anchorNoSelect = 'true';
+        // Empêcher le focus natif du navigateur (tabIndex=-1 = non focusable)
+        widget._anchorPrevTabIndex = widget.tabIndex;
+        widget.tabIndex = -1;
+        // MutationObserver : retire immédiatement 'selected' et le style bleu si ajoutés
+        if (!widget._anchorObserver) {
+            widget._anchorObserver = new MutationObserver(() => {
+                if (widget.dataset.anchored !== 'true') return;
+                if (widget.classList.contains('selected')) {
+                    widget.classList.remove('selected');
+                    // Retirer aussi de selectedWidgets si présent
+                    if (typeof selectedWidgets !== 'undefined') {
+                        selectedWidgets = selectedWidgets.filter(w => w !== widget);
+                    }
+                }
+                // Annuler tout outline/border imposé par le focus ou la sélection
+                widget.style.outline = 'none';
+                widget.style.boxShadow = '';
+            });
+            widget._anchorObserver.observe(widget, { attributes: true, attributeFilter: ['class', 'style'] });
+        }
+
+        // Badge visible pour désancrer
+        let badge = widget.querySelector('.anchor-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'anchor-badge';
+            badge.title = 'Image ancrée — cliquer pour désancrer';
+            badge.textContent = '⚓';
+            badge.style.cssText = [
+                'position:absolute',
+                'top:4px',
+                'left:4px',
+                'font-size:14px',
+                'line-height:1',
+                'pointer-events:auto',
+                'cursor:pointer',
+                'z-index:9999',
+                'background:rgba(0,0,0,0.55)',
+                'border-radius:50%',
+                'padding:3px 4px',
+                'color:#f0c040',
+                'text-shadow:0 0 4px #f0a020',
+                'user-select:none'
+            ].join(';');
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                toggleAnchorImage(widget);
+            });
+            widget.appendChild(badge);
+        }
+        if (anchorBtn) {
+            anchorBtn.title = 'Désancrer';
+            anchorBtn.style.color = '#f0a020';
+            anchorBtn.style.textShadow = '0 0 6px #f0a020';
+        }
+    } else {
+        // Retirer les blockers
+        if (widget._anchorBlocker) {
+            widget.removeEventListener('mousedown',   widget._anchorBlocker, true);
+            widget.removeEventListener('touchstart',  widget._anchorBlocker, true);
+            widget.removeEventListener('pointerdown', widget._anchorBlocker, true);
+            widget._anchorBlocker = null;
+        }
+        if (widget._anchorFocusBlocker) {
+            widget.removeEventListener('focus', widget._anchorFocusBlocker, true);
+            widget._anchorFocusBlocker = null;
+        }
+        delete widget.dataset.anchorNoSelect;
+        // Restaurer le tabIndex
+        if (widget._anchorPrevTabIndex !== undefined) {
+            widget.tabIndex = widget._anchorPrevTabIndex;
+            delete widget._anchorPrevTabIndex;
+        }
+        if (widget._anchorObserver) {
+            widget._anchorObserver.disconnect();
+            widget._anchorObserver = null;
+        }
+        widget.style.outline = '';
+        const badge = widget.querySelector('.anchor-badge');
+        if (badge) badge.remove();
+        if (anchorBtn) {
+            anchorBtn.title = 'Ancrer (rendre insélectionnable)';
+            anchorBtn.style.color = '';
+            anchorBtn.style.textShadow = '';
+        }
+    }
+}
+
+
+// Restaurer l'état ancré après chargement du board
+function _restoreAnchoredImages() {
+    document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+        _applyAnchorState(w, true);
+    });
 }
 
 // ── Ouverture / fermeture du panneau ─────────────────────────────────────

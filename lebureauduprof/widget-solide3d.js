@@ -114,15 +114,7 @@ function createSolide3DWidget() {
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .s3d-color-btn {
-            width: 20px; height: 20px;
-            border-radius: 50%;
-            border: 2px solid #2a5470;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s;
-        }
-        .s3d-color-btn:hover { transform: scale(1.2); border-color: #7ec8e3; }
-        .s3d-color-btn.active { border-color: #fff; transform: scale(1.15); }
+
         .s3d-btn {
             background: #162535;
             border: 1px solid #2a5470;
@@ -189,8 +181,7 @@ function createSolide3DWidget() {
         body.menu-light .s3d-hint { color: #8aafcc; }
         body.menu-light .s3d-label { color: #2a7aa8; }
         body.menu-light .s3d-zoom-val { color: #2a7aa8; }
-        body.menu-light .s3d-color-btn { border-color: #b0cce4; }
-        body.menu-light .s3d-color-btn.active { border-color: #1a6a99; }
+
         body.menu-light .s3d-btn {
             background: #e2edf8;
             border-color: #b0cce4;
@@ -288,14 +279,6 @@ function createSolide3DWidget() {
                     <span class="s3d-zoom-val">90%</span>
                 </div>
                 <div class="s3d-controls">
-                    <div class="s3d-ctrl-group">
-                        <span class="s3d-label">Couleur</span>
-                        <div class="s3d-color-btn active" data-color="#1a9ecc" style="background:#1a9ecc"></div>
-                        <div class="s3d-color-btn" data-color="#e84393" style="background:#e84393"></div>
-                        <div class="s3d-color-btn" data-color="#f5a623" style="background:#f5a623"></div>
-                        <div class="s3d-color-btn" data-color="#34c77b" style="background:#34c77b"></div>
-                        <div class="s3d-color-btn" data-color="#a855f7" style="background:#a855f7"></div>
-                    </div>
                     <div class="s3d-ctrl-group">
                         <label class="s3d-toggle">
                             <input type="checkbox" class="s3d-aretes-chk" checked>
@@ -399,11 +382,29 @@ function _initSolide3D(widget) {
     let rotY = 45 * Math.PI / 180;
     let rotZ = 0;
     let zoom = parseInt(widget.querySelector('.s3d-zoom-slider').value) / 100;
-    let faceColor  = '#1a9ecc';
     let showEdges  = true;
     let autoRotate = false;
     let currentShape = 'cube';
     let animId = null;
+
+    // Palette de couleurs par face (une couleur distincte par face, par solide)
+    const FACE_PALETTES = {
+        cube:          ['#1a9ecc','#e26fa7','#f0e117','#34c77b','#a855f7','#f72b2b'],
+        parallelepiped:['#1a9ecc','#e26fa7','#f0e117','#34c77b','#a855f7','#f72b2b'],
+        tetrahedron:   ['#1a9ecc','#e26fa7','#f0e117','#34c77b'],
+        octahedron:    ['#2041d4','#e26fa7','#f0e117','#34c77b','#a855f7','#f72b2b','#fb923c','#22d3ee'],
+        pyramid:       ['#34c77b','#1a9ecc','#e26fa7','#f0e117','#a855f7'],
+        prism3:        ['#2041d4','#34c77b','#e26fa7','#f0e117','#a855f7'],
+        prism6:        ['#2041d4','#34c77b','#e26fa7','#f0e117','#a855f7','#f72b2b','#fb923c','#22d3ee'],
+        cylinder:      ['#1a9ecc'],
+        cone:          ['#e26fa7'],
+    };
+    const ROUND_BASE_COLORS = { cylinder: ['#34c77b','#a855f7'], cone: ['#f5a623'] };
+
+    function getFaceColor(shape, faceIndex) {
+        const pal = FACE_PALETTES[shape] || ['#1a9ecc'];
+        return pal[faceIndex % pal.length];
+    }
 
     function syncCanvasSize() {
         const W = canvasWrap.clientWidth, H = canvasWrap.clientHeight;
@@ -613,36 +614,41 @@ function _initSolide3D(widget) {
 
         // Trier les faces + les bases circulaires par Z moyen
         const items=[];
-        for(const face of faces){
+        for(let fi=0;fi<faces.length;fi++){
+            const face=faces[fi];
             const z=face.idx.reduce((s,i)=>s+T[i][2],0)/face.idx.length;
-            items.push({type:'poly', face, z});
+            items.push({type:'poly', face, z, faceIndex:fi});
         }
-        for(const base of roundBases) items.push({type:'circle', base, z:base.zVal});
+        for(let bi=0;bi<roundBases.length;bi++){
+            const base=roundBases[bi];
+            items.push({type:'circle', base, z:base.zVal, faceIndex:bi});
+        }
         items.sort((a,b)=>a.z-b.z);
 
-        // Passe 1 : remplissage
+        // Passe 1 : remplissage (couleurs unies, sans éclairage)
         for(const item of items){
             if(item.type==='circle'){
                 const {base}=item;
                 if(base.rn[2]<=0) continue;
-                const br=0.2+0.8*Math.max(0,dot(base.rn,L));
                 const pts=circlePolygon(base.yVal, base.R);
+                const baseColors=ROUND_BASE_COLORS[currentShape]||['#34c77b'];
+                const bColor=baseColors[item.faceIndex%baseColors.length];
                 ctx.beginPath();
                 ctx.moveTo(pts[0][0],pts[0][1]);
                 for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
                 ctx.closePath();
-                ctx.fillStyle=shadedColor(faceColor,br);
+                ctx.fillStyle=bColor;
                 ctx.fill();
             } else {
                 const {face}=item;
                 const rn=applyRot(face.n);
                 if(rn[2]<=0) continue;
-                const br=0.2+0.8*Math.max(0,dot(rn,L));
+                const fc=getFaceColor(currentShape,item.faceIndex);
                 ctx.beginPath();
                 ctx.moveTo(P[face.idx[0]][0],P[face.idx[0]][1]);
                 for(let k=1;k<face.idx.length;k++) ctx.lineTo(P[face.idx[k]][0],P[face.idx[k]][1]);
                 ctx.closePath();
-                ctx.fillStyle=shadedColor(faceColor,br);
+                ctx.fillStyle=fc;
                 ctx.fill();
             }
         }
@@ -781,17 +787,6 @@ function _initSolide3D(widget) {
             btn.classList.add('active');
             currentShape = btn.dataset.shape;
             rotX=30*Math.PI/180; rotY=45*Math.PI/180; rotZ=0;
-            if (!autoRotate) draw();
-        });
-    });
-
-    // ── Couleurs ──────────────────────────────────────────────────
-    widget.querySelectorAll('.s3d-color-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.stopPropagation();
-            widget.querySelectorAll('.s3d-color-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            faceColor = btn.dataset.color;
             if (!autoRotate) draw();
         });
     });
