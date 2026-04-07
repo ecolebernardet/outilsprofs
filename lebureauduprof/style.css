@@ -1790,7 +1790,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 }
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 20px;
     padding-top: 10px;
