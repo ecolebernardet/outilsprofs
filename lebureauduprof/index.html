@@ -222,6 +222,8 @@
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
 				<div class="mm-sub-item" onclick="createSeyesWidget();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Écriture Séyès</div>
+				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
+				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
 				</div></div>
 			</div>
 
@@ -238,6 +240,7 @@
 				<div class="mm-sub-item" onclick="createWidget('radar');closeMainMenu()"><span class="mm-ico">📡</span>&nbsp;&nbsp;Radar de Bruit</div>
 				<div class="mm-sub-item" onclick="createSondageWidget();closeMainMenu()"><span class="mm-ico">📊</span>&nbsp;&nbsp;Sondage</div>
 				<div class="mm-sub-item" onclick="createPlanWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Plan de classe</div>
+				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
 				</div></div>
 			</div>
 
@@ -955,6 +958,7 @@
 <script src="widget-heure.js"></script>
 <script src="widget-horloge.js"></script>
 <script src="widget-sondage.js"></script>
+<script src="widget-couleurs.js"></script>
 <script src="widget-solide3d.js"></script>
 <script src="widget-conjugaison.js"></script>
 <script src="widget-deficalme.js"></script>
@@ -1092,6 +1096,14 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-ecriture-seyes6.jpeg" alt="Écriture Seyes" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Écriture Seyes</div>
                 <div class="act-card-desc">Écrire directement sur un lignage Seyes</div>
+            </div>
+        </div>
+		<div class="act-section-label">🎨 Arts & Sciences</div>
+        <div class="act-grid">
+            <div class="act-card" onclick="createCouleursWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico">🎨</div>
+                <div class="act-card-name">Mélange de couleurs</div>
+                <div class="act-card-desc">Mélanger les couleurs primaires pour en créer de nouvelles</div>
             </div>
         </div>
     </div>
@@ -1343,6 +1355,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="tools-card-ico">🏫</div>
                 <div class="tools-card-name">Plan</div>
                 <div class="tools-card-desc">Créer et éditer le plan de la classe</div>
+            </div>
+            <div class="tools-card" onclick="createCouleursWidget();toggleToolsPanel()">
+                <div class="tools-card-ico">🎨</div>
+                <div class="tools-card-name">Mélange de couleurs</div>
+                <div class="tools-card-desc">Mélanger les couleurs primaires pour en créer de nouvelles</div>
             </div>
         </div>
     </div>

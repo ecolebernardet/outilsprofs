@@ -98,6 +98,13 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW)  * 100;
             tP = (w.offsetTop  / curVH) * 100;
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
+        } else if (w.dataset.type === 'couleurs') {
+            const cc = w.querySelector('.clr-container');
+            wP = cc ? (cc.offsetWidth  / curW)  * 100 : 0;
+            hP = cc ? (cc.offsetHeight / curVH) * 100 : 0;
+            lP = (w.offsetLeft / curW)  * 100;
+            tP = (w.offsetTop  / curVH) * 100;
+            Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         } else if (_collapsed) {
             const _savedWpx    = parseFloat(c.dataset.savedW);
             const _savedHpx    = parseFloat(c.dataset.savedH);
@@ -123,7 +130,7 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW) * 100;
             tP = (w.offsetTop  / curVH) * 100;
         }
-        if (w.dataset.type !== 'deficalme' && w.dataset.type !== 'sondage') {
+        if (w.dataset.type !== 'deficalme' && w.dataset.type !== 'sondage' && w.dataset.type !== 'couleurs') {
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         }
         // Données propres aux stickers
@@ -163,6 +170,11 @@ function buildBoardState() {
         let sondageData = null;
         if (w.dataset.type === 'sondage' && typeof w._sndGetData === 'function') {
             sondageData = w._sndGetData();
+        }
+        // Données propres au widget couleurs
+        let clrData = null;
+        if (w.dataset.type === 'couleurs' && typeof w._clrGetData === 'function') {
+            clrData = w._clrGetData();
         }
         // Données propres au widget solide 3D
         let s3dW = 0, s3dH = 0;
@@ -256,6 +268,7 @@ function buildBoardState() {
 			tableauNumData,
 			horlogeData,
 			sondageData,
+			clrData,
 			s3dW, s3dH,
 			seyesData
 		});
@@ -525,6 +538,24 @@ function restoreBoardFromJSON(json) {
                     if (w.sondageData.containerW) sc.style.width  = w.sondageData.containerW + 'px';
                     if (w.sondageData.containerH) sc.style.height = w.sondageData.containerH + 'px';
                 }
+            }
+        } else if (w.type === 'couleurs') {
+            widget = createCouleursWidget();
+            if (w.clrData && typeof widget._clrSetData === 'function') {
+                widget._clrSetData(w.clrData);
+            }
+            const cc = widget.querySelector('.clr-container');
+            if (cc && w.clrData) {
+                if (w.clrData.fullboard) {
+                    cc.classList.add('clr-fullboard');
+                } else {
+                    if (w.clrData.containerW) cc.style.width  = (w.clrData.containerW / (w._refW || 1920)) * curW + 'px';
+                }
+            }
+            // Restaurer dimensions en % si pas de clrData
+            if (!w.clrData && cc) {
+                if (w.widthPercent  > 0) cc.style.width  = (w.widthPercent  / 100) * curW  + 'px';
+                if (w.contentHPercent > 0) cc.style.height = (w.contentHPercent / 100) * curVH + 'px';
             }
         } else if (w.type === 'solide3d') {
             widget = createSolide3DWidget();
