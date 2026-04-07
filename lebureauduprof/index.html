@@ -221,6 +221,7 @@
 				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
+				<div class="mm-sub-item" onclick="createWidget('nature-gramm');closeMainMenu()"><span class="mm-ico">🏷️</span>Nature grammaticale</div>
 				<div class="mm-sub-item" onclick="createSeyesWidget();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Écriture Séyès</div>
 				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
@@ -969,6 +970,7 @@
 <script src="widgets.js"></script>
 <script src="widget-compte-est-bon.js"></script>
 <script src="widget-mots-alpha.js"></script>
+<script src="widget-nature-gramm.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
 <script src="widget-sonometre.js"></script>
 <script src="widget-radar.js"></script>
@@ -1091,6 +1093,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-conjugaison6.jpeg" alt="Conjugaison" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Conjugaison</div>
                 <div class="act-card-desc">Test de conjugaison (présent, imparfait, futur)</div>
+            </div>
+			<div class="act-card" onclick="createWidget('nature-gramm');toggleActivitiesPanel()">
+                <div class="act-card-ico">🏷</div>
+                <div class="act-card-name">Nature grammaticale</div>
+                <div class="act-card-desc">Classer les mots selon leur nature grammaticale</div>
             </div>
 			<div class="act-card" onclick="createSeyesWidget();closeMainMenu()">
                 <div class="act-card-ico"><img src="pics/activites-ecriture-seyes6.jpeg" alt="Écriture Seyes" style="width:100%;height:100%;object-fit:contain;"></div>
