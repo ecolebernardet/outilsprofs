@@ -176,9 +176,12 @@ function applyBackground(value) {
         board.style.backgroundSize  = '';
         board.style.backgroundColor = value;
     } else {
-        board.style.backgroundImage = '';
-        board.style.backgroundSize  = '';
-        board.style.background      = value;
+        board.style.backgroundImage    = '';
+        board.style.backgroundSize     = '';
+        board.style.background         = value;
+        board.style.backgroundSize     = '100% auto';
+        board.style.backgroundPosition = 'top center';
+        board.style.backgroundRepeat   = 'no-repeat';
     }
 }
 
