@@ -23,32 +23,25 @@
     <nav id="help-sidebar" style="width:220px;flex-shrink:0;background:#f4f6f9;border-right:1px solid #e5e8ee;overflow-y:auto;padding:14px 0;">
       <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Vue d'ensemble</div>
       <div class="help-nav" data-s="h-intro"         onclick="helpShow(this)" style="border-left-color:#2B7FFF;background:#e8edf5;color:#2B7FFF;font-weight:700;">🏠 Introduction</div>
-      <div class="help-nav" data-s="h-menu"           onclick="helpShow(this)">＋ Menu principal</div>
-      <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
-      <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Widgets</div>
-      <div class="help-nav" data-s="h-widgets"        onclick="helpShow(this)">📦 Tous les widgets</div>
-      <div class="help-nav" data-s="h-widgets-outils" onclick="helpShow(this)">🛠️ Outils pédagogiques</div>
-      <div class="help-nav" data-s="h-widgets-media"  onclick="helpShow(this)">🎞️ Médias</div>
-      <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
-      <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Manipulation</div>
-      <div class="help-nav" data-s="h-selection"    onclick="helpShow(this)">🖱️ Sélection</div>
-      <div class="help-nav" data-s="h-deplacement"  onclick="helpShow(this)">✥ Déplacement &amp; Resize</div>
-      <div class="help-nav" data-s="h-rotation"     onclick="helpShow(this)">↻ Rotation</div>
-      <div class="help-nav" data-s="h-groupes"      onclick="helpShow(this)">⛓️ Groupes</div>
+      <div class="help-nav" data-s="h-explorer"       onclick="helpShow(this)">🗺️ Explorer le bureau</div>
+      <div class="help-nav" data-s="h-activites"      onclick="helpShow(this)">🎲 Activités</div>
+      <div class="help-nav" data-s="h-outils"         onclick="helpShow(this)">🧰 Outils</div>
+      <div class="help-nav" data-s="h-widgets-panel"  onclick="helpShow(this)">📦 Widgets</div>
+      <div class="help-nav" data-s="h-images"         onclick="helpShow(this)">🖼️ Images</div>
+      <div class="help-nav" data-s="h-stickers"       onclick="helpShow(this)">🤓 Stickers</div>
+      <div class="help-nav" data-s="h-pdf-lib"        onclick="helpShow(this)">📋 Bibliothèque PDF</div>
+      <div class="help-nav" data-s="h-controles"      onclick="helpShow(this)">🎛️ Contrôles des widgets</div>
+      <div class="help-nav" data-s="h-presentation"   onclick="helpShow(this)">📽️ Mode présentation</div>
       <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
       <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Annotation</div>
       <div class="help-nav" data-s="h-texte"        onclick="helpShow(this)">🖊️ Texte &amp; Format</div>
-      <div class="help-nav" data-s="h-formes"       onclick="helpShow(this)">🔲 Formes</div>
-      <div class="help-nav" data-s="h-dessin"       onclick="helpShow(this)">✏️ Dessin libre &amp; Géométrie</div>
-      <div class="help-nav" data-s="h-gomme"        onclick="helpShow(this)">🧽 Gomme</div>
+      <div class="help-nav" data-s="h-dessin"       onclick="helpShow(this)">✏️ Barre de dessin</div>
       <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
       <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Système</div>
       <div class="help-nav" data-s="h-projets"      onclick="helpShow(this)">📁 Projets</div>
       <div class="help-nav" data-s="h-scenes"       onclick="helpShow(this)">🗂️ Tableaux (scènes)</div>
       <div class="help-nav" data-s="h-fond"         onclick="helpShow(this)">🖼️ Fond d'écran</div>
       <div class="help-nav" data-s="h-sauvegarde"   onclick="helpShow(this)">💾 Sauvegarde</div>
-      <div class="help-nav" data-s="h-undoredo"     onclick="helpShow(this)">↩ Annuler / Refaire</div>
-      <div class="help-nav" data-s="h-laser"        onclick="helpShow(this)">🔴 Pointeur laser</div>
       <div class="help-nav" data-s="h-avance"       onclick="helpShow(this)">⚙️ Astuces avancées</div>
     </nav>
 
@@ -59,166 +52,257 @@
       <div id="h-intro" class="help-section" style="display:block;">
         <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🏠 Bienvenue sur Le Bureau du Prof</div>
         <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Le Bureau du Prof est un <strong>tableau de bord interactif</strong> conçu pour les enseignants. Il permet d'afficher simultanément des widgets (heure, date, devoirs, météo, minuteur, sonomètre…), de dessiner librement, d'annoter, d'organiser son travail en projets et tableaux, et de tout sauvegarder.</p>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:18px 0 8px 0;">🗺️ Organisation de l'interface</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:10px;padding:14px 16px;"><div style="font-size:13px;font-weight:700;color:#222;margin-bottom:6px;">＋ Bouton menu (bas-gauche)</div><p style="font-size:12.5px;color:#444;margin:0;">Ouvre le <strong>menu principal</strong> organisé en rubriques : Contenu, Annotation, Système.</p></div>
-          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:10px;padding:14px 16px;"><div style="font-size:13px;font-weight:700;color:#222;margin-bottom:6px;">🖊️ Barre de texte</div><p style="font-size:12.5px;color:#444;margin:0;">Apparaît automatiquement en cliquant dans un widget Texte ou Devoirs. Police, taille, couleur, alignement…</p></div>
-          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:10px;padding:14px 16px;"><div style="font-size:13px;font-weight:700;color:#222;margin-bottom:6px;">📁 Projets &amp; Tableaux</div><p style="font-size:12.5px;color:#444;margin:0;">Un <strong>projet</strong> contient plusieurs <strong>tableaux</strong>. Passez de l'un à l'autre via le menu Fichier.</p></div>
-          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:10px;padding:14px 16px;"><div style="font-size:13px;font-weight:700;color:#222;margin-bottom:6px;">📽️ Mode présentation</div><p style="font-size:12.5px;color:#444;margin:0;">Bouton fixe en bas à droite. Masque toute l'interface pour projeter en plein écran propre.</p></div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
+      </div>
+
+      <!-- EXPLORER LE BUREAU -->
+      <div id="h-explorer" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🗺️ Explorer le bureau</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:18px;">Il existe deux façons d'accéder aux fonctions du bureau, complémentaires et toujours visibles.</p>
+
+        <!-- FAB -->
+        <div style="display:flex;align-items:flex-start;gap:14px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:12px;padding:16px 18px;margin-bottom:14px;">
+          <div style="font-size:2em;flex-shrink:0;line-height:1;">＋</div>
+          <div>
+            <div style="font-size:0.97em;font-weight:700;color:#1a1a2e;margin-bottom:5px;">Le bouton menu (bas à gauche)</div>
+            <p style="font-size:13px;color:#444;line-height:1.6;margin:0;">Ouvre un menu organisé en trois rubriques : <strong>Contenu</strong> (widgets et outils pédagogiques), <strong>Annotation</strong> (dessin, formes, stickers…) et <strong>Système</strong> (fichiers, affichage, aide). Les entrées avec <strong>›</strong> ouvrent un sous-menu au survol.</p>
+          </div>
         </div>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;margin:10px 0;">💡 <strong>Démarrage rapide :</strong> Cliquez sur <strong>＋</strong> en bas à gauche → choisissez un widget → glissez-le par la poignée <strong>✥</strong>.</div>
-        <div style="background:#1a1a2e;border-left:4px solid #8E51FF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#ccc;margin:10px 0;">📽️ <strong>Mode présentation :</strong> Cliquez sur <strong>📽️</strong> en bas à droite. <strong>Échap</strong> pour revenir.</div>
+
+        <!-- ONGLETS -->
+        <div style="display:flex;align-items:flex-start;gap:14px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:12px;padding:16px 18px;margin-bottom:18px;">
+          <div style="font-size:2em;flex-shrink:0;line-height:1;">◀</div>
+          <div>
+            <div style="font-size:0.97em;font-weight:700;color:#1a1a2e;margin-bottom:5px;">Les onglets latéraux (bord gauche du bureau)</div>
+            <p style="font-size:13px;color:#444;line-height:1.6;margin:0 0 10px 0;">8 onglets sont ancrés sur le côté gauche. Cliquer sur l'un d'eux ouvre un <strong>panneau coulissant</strong> depuis la gauche. Cliquer à nouveau (ou sur le bureau) le referme.</p>
+            <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+              <tr><th style="background:#f0f3f9;text-align:left;padding:6px 10px;font-weight:700;border-bottom:2px solid #dde2ea;">Onglet</th><th style="background:#f0f3f9;text-align:left;padding:6px 10px;font-weight:700;border-bottom:2px solid #dde2ea;">Ce qu'il contient</th></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">🎲 <strong>Activités</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Tirage au sort, calcul mental, ordre alphabétique, défi calme…</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">🧰 <strong>Outils</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Minuteur, chrono, sonomètre, radar de bruit, monnaie, OutilsProfs</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">📦 <strong>Widgets</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Heure, date, météo, devoirs, planning, texte</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">🤓 <strong>Stickers</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Emojis déposables sur le bureau</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">🖼️ <strong>Images</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Importer une image locale ou coller depuis le presse-papier</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">📋 <strong>PDF</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Bibliothèque de vos fichiers PDF chargés</td></tr>
+              <tr><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;">📁 <strong>Projets</strong></td><td style="padding:6px 10px;border-bottom:1px solid #eef0f3;color:#444;">Accès rapide à vos projets et tableaux</td></tr>
+              <tr><td style="padding:6px 10px;">📽️ <strong>Présentation</strong></td><td style="padding:6px 10px;color:#444;">Active / quitte le mode présentation (interface masquée)</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Les deux accès sont équivalents — utilisez les onglets pour un accès rapide d'un clic, le bouton <strong>＋</strong> pour naviguer entre toutes les catégories.</div>
       </div>
 
-      <!-- MENU PRINCIPAL -->
-      <div id="h-menu" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">＋ Le menu principal</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Cliquez sur <strong>＋</strong> en bas à gauche. Les entrées avec <strong>›</strong> ouvrent un sous-menu au survol.</p>
-        <div style="font-size:0.97em;font-weight:700;color:#27ae60;margin:10px 0 8px 0;">🟢 Rubrique Contenu</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Entrée</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Ce qu'elle fait</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🛠️ <strong>Outils</strong> ›</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Tirage au sort 🎡 · Minuteur &amp; Chrono ⏱️ · Sonomètre 🔊 · Radar de Bruit 📡 · Monnaie 💶 · Calcul Mental 🧮 · Ordre Alphabétique 🔤 · OutilsProfs · Défi Calme 🧘</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">📦 <strong>Widgets</strong> ›</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Date 📅 · Heure 🕒 · Météo ⛅ · Devoirs 📝 · Planning 📌 · PDF 📄 · Fenêtre Web 💻 · YouTube 🎬</td></tr>
-          <tr><td style="padding:8px 12px;">🖊️ <strong>Texte</strong></td><td style="padding:8px 12px;color:#444;">Crée directement un widget Texte et ouvre son éditeur</td></tr>
-        </table>
-        <div style="font-size:0.97em;font-weight:700;color:#8E51FF;margin:10px 0 8px 0;">🟣 Rubrique Annotation</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Entrée</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Ce qu'elle fait</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">😀 <strong>Stickers</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Ouvre un panneau d'emojis déposables sur le bureau</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🔲 <strong>Formes</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active la barre d'outils formes géométriques (rectangle, ellipse, flèche, ligne…)</td></tr>
-          <tr><td style="padding:8px 12px;">✏️ <strong>Dessin</strong></td><td style="padding:8px 12px;color:#444;">Active la barre de dessin libre (stylo, épaisseur, couleur, gomme)</td></tr>
-        </table>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:10px 0 8px 0;">🔵 Rubrique Système</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Entrée</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Ce qu'elle fait</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🖥️ <strong>Affichage</strong> ›</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Fond d'écran 🖼️ · Pointeur laser 🔴 · Mode clair ☀️</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🗄️ <strong>Fichier</strong> ›</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sauvegarder JSON · Charger JSON · Nouveau projet ✨ · Nouveau brouillon 📝 · Tous mes projets 📁 · Projets favoris ⭐ · Tableaux de ce projet 🗂️ · Effacer le tableau ❌</td></tr>
-          <tr><td style="padding:8px 12px;">↩ ↪ ❓</td><td style="padding:8px 12px;color:#444;">Annuler · Refaire · Aide</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Les sous-menus (›) s'affichent au survol. Cliquez à l'extérieur pour fermer le menu.</div>
+      <!-- ACTIVITÉS -->
+      <div id="h-activites" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🎲 Activités</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">Les activités sont accessibles via l'onglet <strong>🎲 Activités</strong> sur le bord gauche du bureau. Chaque activité s'ouvre comme un widget sur le bureau et possède son propre <strong>bouton d'aide ❓</strong> pour en détailler le fonctionnement.</p>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔢 Mathématiques</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">💶 Monnaie</div><div style="font-size:12px;color:#666;margin-top:2px;">Calculer avec les pièces et les billets</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔟 Tableau de numération</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler le tableau de numération décimale</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🧮 Calcul mental</div><div style="font-size:12px;color:#666;margin-top:2px;">S'entraîner au calcul mental</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔢 Le compte est bon</div><div style="font-size:12px;color:#666;margin-top:2px;">Viser un nombre cible avec les opérations</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🕐 Heures et durées</div><div style="font-size:12px;color:#666;margin-top:2px;">Lire l'heure ou calculer une durée</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🕰️ Horloge interactive</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler les aiguilles pour régler l'heure</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🧊 Solides 3D</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler des solides en 3 dimensions</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📖 Français</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔤 Ordre alphabétique</div><div style="font-size:12px;color:#666;margin-top:2px;">Classer des mots dans l'ordre alphabétique</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">✏️ Conjugaison</div><div style="font-size:12px;color:#666;margin-top:2px;">Test de conjugaison (présent, imparfait, futur)</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🏷️ Nature grammaticale</div><div style="font-size:12px;color:#666;margin-top:2px;">Classer les mots selon leur nature</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📝 Écriture Séyès</div><div style="font-size:12px;color:#666;margin-top:2px;">Écrire directement sur un lignage Séyès</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🎨 Arts & Sciences</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎨 Mélange de couleurs</div><div style="font-size:12px;color:#666;margin-top:2px;">Mélanger les couleurs primaires pour en créer de nouvelles</div></div>
+        </div>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin-bottom:8px;">⬜ Les 3 boutons de chaque activité</div>
+        <p style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Chaque activité affiche trois boutons dans sa barre d'en-tête :</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#f0c040;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Réduire</span> <span style="font-size:12.5px;color:#444;">— réduit l'activité à une mini-barre flottante qu'on peut déplacer. Cliquer dessus la rouvre en plein.</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#3aaa5c;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Plein écran board</span> <span style="font-size:12.5px;color:#444;">— étend l'activité pour occuper tout le bureau, par-dessus les autres widgets.</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#ff5f56;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Fermer</span> <span style="font-size:12.5px;color:#444;">— ferme et supprime l'activité du bureau.</span></div>
+          </div>
+        </div>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 En mode réduit, l'activité reste active en arrière-plan. Vous pouvez continuer à annoter le bureau et la rouvrir d'un clic.</div>
       </div>
 
-      <!-- TOUS LES WIDGETS -->
-      <div id="h-widgets" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">📦 Tous les widgets</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Chaque widget est une fenêtre flottante indépendante : déplaçable, redimensionnable, rotatif, épinglable. Accès via <strong>＋ → Contenu</strong>.</p>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 10px 0;">⚙️ Contrôles communs à tous les widgets</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">
+      <!-- OUTILS -->
+      <div id="h-outils" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🧰 Outils</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">Les outils sont accessibles via l'onglet <strong>🧰 Outils</strong> sur le bord gauche du bureau. Chaque outil s'ouvre comme un widget sur le bureau et possède son propre <strong>bouton d'aide ❓</strong> pour en détailler le fonctionnement.</p>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🚸 Gestion de la classe</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎲 Tirage au sort</div><div style="font-size:12px;color:#666;margin-top:2px;">Tirer au sort un prénom d'élève</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">👥 Équipes équilibrées</div><div style="font-size:12px;color:#666;margin-top:2px;">Créer des équipes équilibrées</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">⏱️ Minuteur & Chrono</div><div style="font-size:12px;color:#666;margin-top:2px;">Gérer le temps des activités</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🏫 Plan de la classe</div><div style="font-size:12px;color:#666;margin-top:2px;">Créer et éditer le plan de la classe</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📊 Sondage</div><div style="font-size:12px;color:#666;margin-top:2px;">Créer et voter pour un sondage express</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📢 Gestion du bruit</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🧘 Défi Calme</div><div style="font-size:12px;color:#666;margin-top:2px;">Rester silencieux pour révéler une image</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📡 Radar de Bruit</div><div style="font-size:12px;color:#666;margin-top:2px;">Visualiser le bruit ambiant en temps réel</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔊 Sonomètre</div><div style="font-size:12px;color:#666;margin-top:2px;">Mesurer et afficher le niveau sonore en dB</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🪛 Outils divers</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:14px;height:14px;object-fit:contain;border-radius:3px;vertical-align:middle;margin-right:4px;">OutilsProfs</div><div style="font-size:12px;color:#666;margin-top:2px;">Accès aux outils pédagogiques outilsprofs.fr</div></div>
+        </div>
+
+        <div style="background:#fff8e1;border-left:4px solid #f0c040;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#7a5c00;">💡 Le Radar de Bruit et le Sonomètre nécessitent l'autorisation d'accès au microphone dans le navigateur.</div>
+      </div>
+
+      <!-- WIDGETS PANEL -->
+      <div id="h-widgets-panel" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">📦 Widgets</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">Les widgets sont accessibles via l'onglet <strong>📦 Widgets</strong> sur le bord gauche du bureau. Chaque widget s'ouvre comme une fenêtre flottante indépendante : déplaçable, redimensionnable et rotatif.</p>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📦 Médias & Info</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📄 PDF</div><div style="font-size:12px;color:#666;margin-top:2px;">Afficher et annoter un document PDF</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">💻 Fenêtre Web</div><div style="font-size:12px;color:#666;margin-top:2px;">Intégrer n'importe quel site web</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎬 YouTube</div><div style="font-size:12px;color:#666;margin-top:2px;">Intégrer une vidéo YouTube</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🕒 Temps & Météo</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📅 Date du jour</div><div style="font-size:12px;color:#666;margin-top:2px;">Affiche la date en temps réel</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🕒 Heure actuelle</div><div style="font-size:12px;color:#666;margin-top:2px;">Affiche l'heure en temps réel</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">⛅ Météo locale</div><div style="font-size:12px;color:#666;margin-top:2px;">Affiche la météo de votre ville</div></div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📋 Organisation & Annotation</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">✍️ Texte</div><div style="font-size:12px;color:#666;margin-top:2px;">Zone de texte libre avec mise en forme</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📝 Devoirs à noter</div><div style="font-size:12px;color:#666;margin-top:2px;">Éditer les devoirs de la classe</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📌 Planning de la journée</div><div style="font-size:12px;color:#666;margin-top:2px;">Afficher le programme horaire</div></div>
+        </div>
+      </div>
+
+      <!-- IMAGES -->
+      <div id="h-images" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🖼️ Images</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">L'onglet <strong>🖼️ Images</strong> ouvre un panneau avec deux façons d'ajouter une image sur le bureau.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Source</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Bibliothèque intégrée</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Collection d'images organisées par catégories : Maths (tableaux, droites numériques, tangram…), Saisons, Monnaie, BD, Animaux, Météo, Cadres, Textures. Cliquez sur une image pour la déposer sur le bureau.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Importer une image</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Bouton pour importer un fichier image depuis votre ordinateur (JPG, PNG, GIF…).</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">Coller (Ctrl+V)</td><td style="padding:8px 12px;color:#444;">Collez une image depuis le presse-papier n'importe où sur le bureau — fonctionne avec les captures d'écran.</td></tr>
+        </table>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Une fois déposée, une image est déplaçable, redimensionnable, pivotable et peut être <strong>ancrée</strong> (⚓) pour annoter par-dessus sans la bouger.</div>
+      </div>
+
+      <!-- STICKERS -->
+      <div id="h-stickers" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🤓 Stickers</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">L'onglet <strong>🤓 Stickers</strong> ouvre un panneau d'emojis déposables sur le bureau. Chaque sticker est déplaçable, redimensionnable et rotatif.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Mode</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🌐 Stickers animés</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Emojis animés Noto (Google). Nécessite une connexion internet. Catégories : Visages, Animaux, Nourriture, Voyages, Activités, Objets, Symboles, Drapeaux.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">📴 Émojis classiques</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Emojis statiques intégrés, disponibles hors-ligne. Catégories : Visages, Animaux, Nourriture, Fêtes, École, Objets, Symboles, Nature, Personnes.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">🔍 Recherche</td><td style="padding:8px 12px;color:#444;">Champ de recherche pour filtrer les emojis dans toutes les catégories à la fois.</td></tr>
+        </table>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Si la connexion internet est absente, le panneau bascule automatiquement en mode classique (badge HORS-LIGNE affiché).</div>
+      </div>
+
+      <!-- BIBLIOTHÈQUE PDF -->
+      <div id="h-pdf-lib" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">📋 Bibliothèque PDF</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">L'onglet <strong>📋 PDF</strong> ouvre la bibliothèque PDF : un gestionnaire de dossiers pour accéder rapidement à vos fichiers PDF locaux sans les importer un par un.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">📂 Choisir un dossier</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sélectionnez un dossier sur votre ordinateur. La bibliothèque liste tous les PDF qu'il contient.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">Double-clic sur un PDF</td><td style="padding:8px 12px;color:#444;">Ouvre le fichier directement dans un widget PDF sur le bureau, prêt à consulter. Le widget PDF dispose d'un bouton <strong>✏️ Annoter</strong> dans sa barre d'outils qui active la barre de dessin en mode annotation PDF pour écrire et surligner directement sur le document.</td></tr>
+        </table>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Le dossier sélectionné est mémorisé entre les sessions. Il suffit de rouvrir la bibliothèque pour retrouver vos fichiers sans re-sélectionner le dossier.</div>
+      </div>
+
+      <!-- CONTRÔLES DES WIDGETS -->
+      <div id="h-controles" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🎛️ Contrôles des widgets</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">Chaque widget dispose de poignées et de boutons communs pour le manipuler sur le bureau.</p>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">↔ Poignées de manipulation</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
           <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Poignée</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Position</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">✥</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Gauche (milieu)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Déplacer par glisser-déposer</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↻</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Droite (milieu)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Faire pivoter — magnétisme aux angles 0°/45°/90°…</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">📌</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Barre d'action (haut)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Épingler au premier plan (fond doré = épinglé)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🔽</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Barre d'action (haut)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Envoyer derrière tous les autres widgets</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">☰</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Barre d'action (haut)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Menu contextuel : dupliquer, fond transparent, couleur de fond, opacité…</td></tr>
-          <tr><td style="padding:8px 12px;font-weight:700;color:#ff5f56;">×</td><td style="padding:8px 12px;color:#444;">Barre d'action (haut droite)</td><td style="padding:8px 12px;color:#444;">Supprimer le widget</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">▲</td><td style="padding:8px 12px;color:#444;">Bas à droite</td><td style="padding:8px 12px;color:#444;">Redimensionner librement (triangle gris au survol)</td></tr>
         </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;margin-bottom:20px;">💡 <strong>Redimensionner :</strong> survolez un widget → triangle gris en bas à droite → glissez.</div>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 10px 0;">📋 Widgets d'information</div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔲 Barre d'action (en haut du widget)</div>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Widget</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description &amp; particularités</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#2B7FFF;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🖊️ Texte</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Zone de saisie libre avec mise en forme riche (police, taille, couleur, gras, italique…). Barre de formatage au clic.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#3BB8DB;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">📝 Devoirs</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Widget texte pré-rempli pour noter les devoirs par classe. Contenu entièrement modifiable.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#679638;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">📅 Date</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Affiche jour, numéro et mois en temps réel. Police auto-adaptative à la taille du widget.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#7CCF35;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🕒 Heure</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Horloge numérique temps réel (h:min:sec). Taille de police auto, fond transparent.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#00AACC;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">⛅ Météo</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Météo réelle de votre ville via Open-Meteo (gratuit). Clic sur la ville pour la changer. Rafraîchissement toutes les 10 min.</td></tr>
-          <tr><td style="padding:8px 12px;white-space:nowrap;"><span style="background:#8E51FF;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">📌 Planning</span></td><td style="padding:8px 12px;color:#444;">Agenda journalier avec lignes horaires. Clic pour éditer. Glisser par ⋮⋮ pour réordonner. Bouton ＋ pour ajouter un créneau.</td></tr>
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Bouton</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">📌</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Épingler au premier plan — le widget reste toujours visible par-dessus les autres (fond doré = épinglé)</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🔽</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Envoyer derrière tous les autres widgets</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">☰</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Menu contextuel : dupliquer, fond transparent, couleur de fond, opacité…</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;color:#ff5f56;">×</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Supprimer le widget</td></tr>
+        </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⬜ Boutons spécifiques aux widgets à contenu (PDF, YouTube, Fenêtre Web…)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#f0c040;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Réduire</span> <span style="font-size:12.5px;color:#444;">— réduit le widget à une mini-barre flottante déplaçable. Cliquer dessus le rouvre.</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#3aaa5c;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Plein écran board</span> <span style="font-size:12.5px;color:#444;">— étend le widget pour occuper tout le bureau, par-dessus les autres éléments.</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#ff5f56;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Fermer</span> <span style="font-size:12.5px;color:#444;">— ferme et supprime le widget du bureau.</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 14px;">
+            <div style="width:28px;height:18px;background:#8E51FF;border-radius:4px;flex-shrink:0;"></div>
+            <div><span style="font-weight:700;font-size:13px;color:#222;">Ancrer</span> <span style="font-size:12.5px;color:#444;">— disponible uniquement sur les <strong>images</strong>. Rend l'image insélectionnable et non déplaçable, pour pouvoir écrire et annoter par-dessus sans risquer de la bouger. Un badge ⚓ apparaît pour désancrer.</span></div>
+          </div>
+        </div>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;margin-top:4px;">⛓️ Grouper, dissocier, fusionner</div>
+        <p style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Ces actions s'appliquent à une <strong>sélection multiple</strong> (Maj+clic ou lasso). Les boutons apparaissent dans la barre de contrôle au-dessus de la sélection.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Effet</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">⊞ Grouper <kbd style="font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 5px;">Ctrl+G</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Lie les éléments sélectionnés. Cliquer sur l'un déplace, redimensionne ou pivote tout le groupe d'un coup.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">⛓️ Dissocier <kbd style="font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 5px;">Ctrl+Maj+G</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Défait le groupe — les éléments redeviennent indépendants.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">🖼️ Fusionner</td><td style="padding:8px 12px;color:#444;">Aplatit définitivement tous les éléments sélectionnés (widgets, dessins, formes) en une seule image PNG. <strong>Opération irréversible.</strong></td></tr>
         </table>
       </div>
 
-      <!-- OUTILS PÉDAGOGIQUES -->
-      <div id="h-widgets-outils" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🛠️ Outils pédagogiques</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Accessibles via <strong>＋ → Contenu → Outils</strong>.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Widget</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description &amp; fonctionnement</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#e67e22;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">⏱️ Minuteur &amp; Chrono</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Minuteur décompte et chronomètre. Saisie directe de la durée. Alerte sonore à la fin.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#e74c3c;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🔊 Sonomètre</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Mesure le niveau sonore en temps réel via le microphone. Affichage en dB avec jauge colorée.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#c0392b;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">📡 Radar de Bruit</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Visualisation radar du bruit ambiant. Représentation graphique circulaire animée.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#27ae60;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🎡 Tirage au Sort</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Roue ou liste pour tirer un élève ou une équipe au sort. Liste configurable.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#2980b9;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">💶 Monnaie</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Manipulation de pièces et billets pour les activités monnaie en cycle 2/3.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#8e44ad;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🧮 Calcul Mental</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Générateur de calculs mentaux paramétrables. Affichage séquentiel des opérations.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#16a085;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🔤 Ordre Alpha.</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Activité pour classer des mots dans l'ordre alphabétique. Mots configurables.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#480eb3;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🧘 Défi Calme</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Outil de gestion du calme en classe avec animations apaisantes. Plein écran disponible.</td></tr>
-          <tr><td style="padding:8px 12px;white-space:nowrap;"><span style="background:#FF692A;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🔧 OutilsProfs</span></td><td style="padding:8px 12px;color:#444;">Ouvre directement outilsprofs.fr dans un widget intégré. Accès micro et caméra autorisés. Plein écran disponible.</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Le sonomètre et le radar de bruit nécessitent l'autorisation d'accès au microphone dans le navigateur.</div>
-      </div>
-
-      <!-- MÉDIAS -->
-      <div id="h-widgets-media" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🎞️ Widgets Médias</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Accessibles via <strong>＋ → Contenu → Widgets</strong>.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Widget</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description &amp; fonctionnement</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#E7180B;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">🎬 YouTube</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Lecteur YouTube intégré. Collez l'URL ou l'ID de la vidéo. Mode audio seul disponible. Plein écran. La vidéo est sauvegardée avec le tableau.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;"><span style="background:#c8a000;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">💻 Fenêtre Web</span></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Navigateur intégré — affichez n'importe quel site web. Saisissez l'URL dans la barre. Plein écran disponible. Certains sites bloquent l'intégration (iFrame).</td></tr>
-          <tr><td style="padding:8px 12px;white-space:nowrap;"><span style="background:#E74C3C;color:white;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;">📄 PDF</span></td><td style="padding:8px 12px;color:#444;">Affiche un fichier PDF local. Navigation par pages. <strong>Le PDF est sauvegardé automatiquement</strong> dans le navigateur (fichiers &lt;5 Mo).</td></tr>
-        </table>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:18px 0 8px 0;">🖼️ Coller une image (Ctrl+V)</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:8px;">Appuyez sur <strong>Ctrl+V</strong> (ou ⌘+V sur Mac) n'importe où sur le bureau pour coller une image depuis le presse-papier. Elle apparaît comme un sticker repositionnable et redimensionnable.</p>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Fonctionne avec des captures d'écran copiées depuis n'importe quel logiciel.</div>
-      </div>
-
-      <!-- SÉLECTION -->
-      <div id="h-selection" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🖱️ Sélection de widgets</div>
+      <!-- MODE PRÉSENTATION -->
+      <div id="h-presentation" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">📽️ Mode présentation</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Le mode présentation masque toute l'interface (boutons, onglets, menus) pour ne laisser visible que le contenu du bureau — idéal pour projeter proprement face aux élèves.</p>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
           <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic simple sur un widget</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Le sélectionne et l'amène au premier plan</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic sur le bureau vide</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Désélectionne tout</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Maj</kbd> + clic</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Ajoute le widget à la sélection (multi-sélection)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Glisser sur le bureau vide</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sélection par lasso (rectangle élastique)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+A</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sélectionne tous les widgets</td></tr>
-          <tr><td style="padding:8px 12px;"><kbd>Suppr</kbd> ou <kbd>Backspace</kbd></td><td style="padding:8px 12px;color:#444;">Supprime les widgets sélectionnés</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Onglet <strong>📽️ Présentation</strong> (bord gauche)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active le mode — affiche "On". Toute l'interface disparaît.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Onglet <strong>📽️ Off</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Quitte le mode et restaure l'interface.</td></tr>
+          <tr><td style="padding:8px 12px;"><kbd>Échap</kbd></td><td style="padding:8px 12px;color:#444;">Quitte le mode présentation en urgence.</td></tr>
         </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 En multi-sélection, vous pouvez déplacer, supprimer ou grouper tous les widgets d'un coup.</div>
-      </div>
-
-      <!-- DÉPLACEMENT & RESIZE -->
-      <div id="h-deplacement" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">✥ Déplacement &amp; Redimensionnement</div>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">Déplacement</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Glisser la poignée <strong>✥</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Déplace le widget librement</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>↑ ↓ ← →</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Déplace de 1 px (widget sélectionné)</td></tr>
-          <tr><td style="padding:8px 12px;"><kbd>Maj</kbd> + <kbd>↑ ↓ ← →</kbd></td><td style="padding:8px 12px;color:#444;">Déplace de 10 px</td></tr>
-        </table>
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:18px 0 8px 0;">Redimensionnement</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:8px;">Survolez le widget → triangle gris en <strong>bas à droite</strong> → glissez pour redimensionner librement.</p>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Les widgets Date et Heure adaptent leur police automatiquement — agrandissez-les pour un affichage vidéoprojecteur lisible.</div>
-      </div>
-
-      <!-- ROTATION -->
-      <div id="h-rotation" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">↻ Rotation</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">La poignée <strong>↻</strong> se trouve à droite (milieu) de chaque widget. Glissez pour faire pivoter.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Comportement</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Détail</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Rotation libre</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Glissez la poignée ↻ dans n'importe quelle direction</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Magnétisme angulaire</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">S'accroche à 0°, 45°, 90°, 135°, 180°… (zone ±5°)</td></tr>
-          <tr><td style="padding:8px 12px;">Remise à zéro</td><td style="padding:8px 12px;color:#444;">Menu contextuel ☰ → <em>Remettre à 0°</em></td></tr>
-        </table>
-      </div>
-
-      <!-- GROUPES -->
-      <div id="h-groupes" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">⛓️ Groupes de widgets</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Regroupez plusieurs widgets pour les déplacer, redimensionner ou supprimer ensemble.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Comment</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Créer un groupe</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sélectionner plusieurs widgets → <kbd>Ctrl+G</kbd> ou ☰ → <em>Grouper</em></td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Dissoudre un groupe</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;"><kbd>Ctrl+Maj+G</kbd> ou ☰ → <em>Dégrouper</em></td></tr>
-          <tr><td style="padding:8px 12px;">Déplacer le groupe</td><td style="padding:8px 12px;color:#444;">Glissez la poignée ✥ de n'importe quel widget du groupe</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Un groupe est sauvegardé et restauré avec le tableau. Utile pour verrouiller une mise en page.</div>
+        <div style="background:#1a1a2e;border-left:4px solid #8E51FF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#ccc;">💡 En mode présentation, les widgets épinglés (📌) restent visibles et interactifs — pratique pour garder un minuteur ou une horloge accessible.</div>
       </div>
 
       <!-- TEXTE & FORMAT -->
       <div id="h-texte" class="help-section">
         <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🖊️ Texte &amp; Formatage</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Cliquez dans un widget Texte ou Devoirs pour entrer en édition. La <strong>barre de formatage</strong> apparaît automatiquement en haut de l'écran.</p>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;"><strong>Double-cliquez</strong> dans un widget Texte ou Devoirs pour entrer en édition. La <strong>barre de formatage</strong> apparaît automatiquement en haut de l'écran.</p>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
           <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Contrôle</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Sélecteur de police</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Changer la police (inclut BelleAllureGS, cursives, sans-serif…)</td></tr>
@@ -233,63 +317,62 @@
         <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Sélectionnez du texte avant de changer la couleur ou la police pour n'affecter que la sélection.</div>
       </div>
 
-      <!-- FORMES -->
-      <div id="h-formes" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🔲 Formes géométriques</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Activez via <strong>＋ → Annotation → Formes</strong>.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Outil</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Fonctionnement</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Rectangle / Ellipse / Ligne / Flèche</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Cliquez puis glissez sur le bureau pour tracer</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Couleur contour &amp; remplissage</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Color pickers dans la barre formes (transparent possible)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Épaisseur du trait</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Slider ou saisie numérique dans la barre</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Modifier une forme</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Cliquez sur la forme → panneau d'édition (couleurs, épaisseur, opacité)</td></tr>
-          <tr><td style="padding:8px 12px;">Supprimer une forme</td><td style="padding:8px 12px;color:#444;">Sélectionnez → <kbd>Suppr</kbd> ou bouton × dans la barre</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Les formes sont déplaçables, redimensionnables et pivotables. Elles se sauvegardent avec le tableau.</div>
-      </div>
-
-      <!-- DESSIN LIBRE -->
+      <!-- BARRE DE DESSIN -->
       <div id="h-dessin" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">✏️ Dessin libre &amp; Géométrie</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Activez via <strong>＋ → Annotation → Dessin</strong>. Tracez librement avec votre souris, stylet ou doigt.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Contrôle</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🎨 Couleur</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Color picker dans la barre de dessin</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Épaisseur</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Slider d'épaisseur du trait (1 à 30 px)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🧽 Gomme</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Bascule en mode gomme (efface les traits)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">🗑️ Tout effacer</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Efface tous les traits d'un coup</td></tr>
-          <tr><td style="padding:8px 12px;">Quitter</td><td style="padding:8px 12px;color:#444;">Re-cliquez sur ✏️ Dessin dans le menu</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 En mode dessin, les widgets ne sont plus interactifs pour éviter les déplacements accidentels.</div>
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">✏️ Barre de dessin</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">La barre de dessin s'ouvre via le bouton <strong>✏️</strong> en bas à gauche du bureau (à côté du bouton ＋). Elle flotte librement et est déplaçable par sa poignée. Elle reste visible en mode dessin et en mode annotation PDF, avec les mêmes outils dans les deux cas.</p>
 
-        <div style="font-size:0.97em;font-weight:700;color:#8E51FF;margin:22px 0 8px 0;">📐 Outils Géométrie</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Disponibles dans la <strong>barre de dessin</strong> via le bouton <strong>📐 Géométrie</strong>. Trois instruments posables sur le tableau, déplaçables et pivotables.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Instrument</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description &amp; utilisation</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;font-weight:700;">📏 Règle</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Règle graduée posée sur le tableau. Glissez-la par le corps pour la déplacer, utilisez la poignée <strong>↻</strong> pour la faire pivoter. Bouton <strong>Tracer</strong> pour dessiner la droite le long de la règle.</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;white-space:nowrap;font-weight:700;">📐 Équerre</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Équerre à angle droit déplaçable et pivotable. Bouton <strong>Tracer</strong> pour dessiner les deux côtés de l'équerre sur le tableau.</td></tr>
-          <tr><td style="padding:8px 12px;white-space:nowrap;font-weight:700;">⭕ Compas</td><td style="padding:8px 12px;color:#444;">Compas avec bras articulés. Slider <strong>Rayon</strong> pour ajuster l'ouverture (20 à 400 px). Cercle fantôme en pointillés pour prévisualiser. Bouton <strong>⭕ Tracer le cercle</strong> pour le dessiner.</td></tr>
-        </table>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action commune</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Comment</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Déplacer l'instrument</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Glisser directement sur le corps de l'instrument</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Faire pivoter</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Poignée <strong>↻</strong> bleue en haut à droite de l'instrument</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Tracer</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Bouton <strong>Tracer</strong> violet sur l'instrument — utilise la couleur et l'épaisseur actives dans la barre de dessin</td></tr>
-          <tr><td style="padding:8px 12px;">Supprimer l'instrument</td><td style="padding:8px 12px;color:#444;">Bouton <strong>×</strong> rouge en haut à gauche de l'instrument</td></tr>
-        </table>
-        <div style="background:#f3eeff;border-left:4px solid #8E51FF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#4a1a8f;">💡 Les tracés produits par les outils géométrie s'intègrent dans les traits de dessin — ils sont sauvegardés avec le tableau et effaçables avec la gomme ou 🗑️.</div>
-      </div>
-
-      <!-- GOMME -->
-      <div id="h-gomme" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🧽 Gomme</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Disponible dans la barre de dessin. Elle n'efface que les <strong>traits de dessin libre</strong>, pas les widgets ni les formes.</p>
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">✏️ Outils de tracé</div>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic sur 🧽</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active la gomme (curseur circulaire)</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Glisser sur un trait</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Efface le trait au passage</td></tr>
-          <tr><td style="padding:8px 12px;">Bouton 🗑️</td><td style="padding:8px 12px;color:#444;">Efface <strong>tous</strong> les traits en une fois</td></tr>
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Outil</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">✏️ Crayon</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Tracé libre à main levée. Le trait suit exactement le mouvement de la souris, du stylet ou du doigt. Épaisseur de 1 à 40 px. Compatible pression stylet pour la sensibilité.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🖍️ Surligneur</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Trait large semi-transparent (effet fluo jaune par défaut). Utilise la même couleur que le crayon mais applique une opacité 40% en mode "multiply" — parfait pour surligner du texte sur un PDF.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Figures géométriques</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Ouvre un sous-menu de formes à tracer en glissant : cercle, ovale, carré, rectangle, losange, parallélogramme, triangles (isocèle, équilatéral, rectangle, quelconque), pentagone, hexagone, octogone, cœur, étoile, flèche, segment. Option fond coloré avec opacité réglable.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">📐 Outils géométriques</td><td style="padding:8px 12px;color:#444;">Ouvre un sous-menu avec 3 instruments posables sur le bureau : <strong>📏 Règle</strong> (graduée, tracé le long de la règle), <strong>📐 Équerre</strong> (angle droit, tracé des deux côtés), <strong>⭕ Compas</strong> (rayon réglable, tracé d'un cercle). Chaque instrument se déplace par glisser et pivote via sa poignée ↻.</td></tr>
         </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🎨 Couleur et épaisseur</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Contrôle</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Color picker</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Swatch de couleur cliquable → ouvre un picker complet (roue chromatique + hex + 9 couleurs prédéfinies en grille). La couleur est partagée entre le crayon, le surligneur et le mode annotation PDF.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Palette rapide</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Grille de 9 couleurs prédéfinies (rouge, violet, rose, noir, orange, vert, vert clair, gris, jaune, bleu, bleu clair, blanc) cliquables directement sans ouvrir le picker.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">Épaisseur − valeur +</td><td style="padding:8px 12px;color:#444;">Deux tailles indépendantes : l'une pour le <strong>trait de dessin</strong> (1–40 px) et l'autre pour la <strong>gomme</strong> (5–80 px). Les boutons − et + permettent un ajustement continu par maintien.</td></tr>
+        </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🧽 Gomme et effacement</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Contrôle</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🧽 Gomme</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Efface les traits de dessin et les formes au passage. La taille (5–80 px) est réglée par les boutons − + à gauche de la gomme. Un cercle en pointillés prévisualise la zone d'effacement. Fonctionne aussi sur les annotations PDF.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Clic droit (ou bouton stylet)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Bascule instantanément entre la gomme et l'outil précédent — pratique avec un stylet pour alterner tracé/effacement sans toucher la barre.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">🗑️ Effacer tout</td><td style="padding:8px 12px;color:#444;">Supprime tous les traits d'un coup. En mode annotation PDF, efface toutes les annotations de la page courante.</td></tr>
+        </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🖱️ Mode sélection et annulation</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Contrôle</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↖ Sélection</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Repasse en mode sélection de widgets sans fermer la barre de dessin. Permet de déplacer des éléments, puis de reprendre le dessin en recliquant sur crayon ou surligneur.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↩ Annuler / ↪ Refaire</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Annule ou rétablit le dernier trait. En mode annotation PDF, n'annule que les annotations PDF (pas les actions du bureau).</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">✖ Fermer</td><td style="padding:8px 12px;color:#444;">Ferme la barre de dessin et repasse en mode sélection normal. Les tracés restent sur le bureau.</td></tr>
+        </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⚙️ Options avancées (engrenage)</div>
+        <p style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Le bouton ⚙️ en bout de barre ouvre un panneau de réglages fins :</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Option</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Lissage (1–20)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Contrôle le lissage du trait stylet. Une valeur basse produit un trait plus lissé et fluide (mieux pour les courbes) ; une valeur haute est plus réactive et fidèle au geste.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Opacité (10–100 %)</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Opacité globale du trait de dessin libre. Permet de faire des traits semi-transparents sans utiliser le surligneur.</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">Reconnaître formes</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Interrupteur on/off. Quand activé, les formes dessinées à main levée (cercle, carré, rectangle, triangle) sont automatiquement converties en formes géométriques parfaites après le tracé.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">Curseur (✛ ⬤ ◎)</td><td style="padding:8px 12px;color:#444;"><strong>✛ Précision</strong> : croix fine, idéale pour un positionnement exact. <strong>⬤ Point</strong> : petit cercle avec l'anneau de taille, neutre. <strong>◎ Taille</strong> (défaut) : disque coloré dont le diamètre correspond à l'épaisseur du trait — pratique pour visualiser le rendu avant de tracer.</td></tr>
+        </table>
+
+        <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📄 Mode annotation PDF</div>
+        <p style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Le bouton <strong>📄</strong> dans la barre de dessin active le mode annotation PDF : la barre s'adapte et permet d'annoter directement sur le widget PDF ouvert. Deux boutons supplémentaires apparaissent :</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Bouton</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Description</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">🤚 Déplacer</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Mode panoramique : glisser pour faire défiler le PDF dans le widget sans dessiner. Pratique sur les PDF zoomés ou multi-pages.</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">Texte</td><td style="padding:8px 12px;color:#444;">Cliquez sur le PDF pour insérer une zone de texte à cet endroit. Un éditeur inline apparaît avec réglage de taille et de couleur. Le texte est déplaçable, pivotable et modifiable par double-clic. Validation par <kbd>Échap</kbd> ou <kbd>Maj+Entrée</kbd>.</td></tr>
+        </table>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 En mode annotation PDF, le crayon, le surligneur, les figures, la gomme et les annulations (↩ ↪) agissent uniquement sur les annotations PDF — pas sur le bureau. Les annotations sont sauvegardées avec le projet et exportables en PDF (bouton 💾 dans la barre du widget PDF).</div>
       </div>
 
       <!-- PROJETS -->
@@ -361,71 +444,38 @@
         <div style="background:#e8f5e9;border-left:4px solid #4caf50;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#2e7d32;">✅ Les PDF sont <strong>sauvegardés automatiquement</strong>. <em>Fichiers &gt;5 Mo : sauvegarde non garantie.</em></div>
       </div>
 
-      <!-- ANNULER / REFAIRE -->
-      <div id="h-undoredo" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">↩ Annuler &amp; Refaire</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Boutons <strong>↩ ↪</strong> dans le menu Système. Historique de <strong>60 états</strong> par session.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+      <!-- ASTUCES AVANCÉES -->
+      <div id="h-avance" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">⚙️ Astuces avancées</div>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">↩ Annuler &amp; Refaire</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Boutons <strong>↩ ↪</strong> dans le menu Système. Historique de <strong>60 états</strong> par session.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
           <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Bouton</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Raccourci</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↩ Annuler</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;"><kbd>Ctrl+Z</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Revient à l'état précédent</td></tr>
           <tr><td style="padding:8px 12px;font-weight:700;">↪ Refaire</td><td style="padding:8px 12px;color:#444;"><kbd>Ctrl+Y</kbd> / <kbd>Ctrl+Maj+Z</kbd></td><td style="padding:8px 12px;color:#444;">Rétablit l'action annulée</td></tr>
         </table>
         <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;margin-bottom:10px;">💡 Les modifications de texte sont enregistrées dans l'historique après 800 ms d'inactivité.</div>
-        <div style="background:#fff8e6;border-left:4px solid #f39c12;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#7a5000;">⚠️ L'historique est perdu si vous fermez ou rechargez la page.</div>
-      </div>
+        <div style="background:#fff8e6;border-left:4px solid #f39c12;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#7a5000;margin-bottom:18px;">⚠️ L'historique est perdu si vous fermez ou rechargez la page.</div>
 
-      <!-- POINTEUR LASER -->
-      <div id="h-laser" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🔴 Pointeur laser</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Activez via <strong>＋ → Système → Affichage → Pointeur laser</strong>. Le curseur est remplacé par un <strong>point rouge lumineux</strong>.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">📋 Dupliquer un widget</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Menu contextuel ☰ → <em>Dupliquer</em>. La copie est placée légèrement décalée et conserve tout le contenu et le style.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🌙 / ☀️ Mode d'affichage du menu</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Le menu principal existe en deux modes, basculables via <strong>＋ → Système → Affichage</strong> : le <strong>mode sombre</strong> (fond noir, par défaut) et le <strong>mode clair</strong> (fond blanc). Le mode clair est plus lisible dans une salle fortement éclairée ou face à un vidéoprojecteur.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🔴 Pointeur laser</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Activez via <strong>＋ → Système → Affichage → Pointeur laser</strong>. Le curseur est remplacé par un <strong>point rouge lumineux</strong>, beaucoup plus visible sur vidéoprojecteur que le curseur système.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
           <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic sur 🔴</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active le pointeur laser</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Re-clic sur 🔴</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Désactive le pointeur</td></tr>
           <tr><td style="padding:8px 12px;"><kbd>Échap</kbd></td><td style="padding:8px 12px;color:#444;">Désactive en urgence</td></tr>
         </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Le point rouge est beaucoup plus visible sur vidéoprojecteur que le curseur système.</div>
-      </div>
-
-      <!-- ASTUCES AVANCÉES -->
-      <div id="h-avance" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">⚙️ Astuces avancées</div>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🖼️ Fond transparent d'un widget</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Menu contextuel ☰ → <em>Fond transparent</em>. Le contenu flotte directement sur le bureau sans cadre. Réversible via ☰ → couleur de fond.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">📋 Dupliquer un widget</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Menu contextuel ☰ → <em>Dupliquer</em>. La copie est placée légèrement décalée et conserve tout le contenu et le style.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">☀️ Mode clair du menu</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;"><strong>＋ → Système → Affichage → Mode clair</strong>. Le menu principal passe en fond blanc — utile en salle lumineuse.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">😀 Stickers (emojis)</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;"><strong>＋ → Annotation → Stickers</strong>. Cliquez sur un emoji pour le déposer. Le sticker est déplaçable, redimensionnable et rotatif.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">⌨️ Tous les raccourcis clavier</div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Raccourci</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+Z</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Annuler</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+Y</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Refaire</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+A</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Sélectionner tous les widgets</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+G</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Grouper la sélection</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+Maj+G</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Dégrouper</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Suppr</kbd> / <kbd>Backspace</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Supprimer les widgets sélectionnés</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>↑ ↓ ← →</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Déplacer de 1 px</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Maj + ↑ ↓ ← →</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Déplacer de 10 px</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;"><kbd>Ctrl+V</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Coller une image depuis le presse-papier</td></tr>
-          <tr><td style="padding:8px 12px;"><kbd>Échap</kbd></td><td style="padding:8px 12px;color:#444;">Désélectionner / Quitter le dessin / Désactiver le laser</td></tr>
-        </table>
       </div>
 
     </div><!-- /contenu -->
   </div><!-- /corps -->
-
-  <!-- PIED -->
-  <div style="padding:14px 28px;border-top:1px solid #e5e8ee;display:flex;justify-content:flex-end;flex-shrink:0;background:#fafbfc;">
-    <button onclick="closeHelpModal()" style="background:#2B7FFF;color:white;border:none;padding:9px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Fermer</button>
-  </div>
 
 </div><!-- /modal -->
 </div><!-- /overlay -->
