@@ -211,13 +211,14 @@
 			<div class="mm-item mm-has-sub" id="activities-menu-btn">
 				<span class="mm-ico">🎲</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
 				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
+				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
+				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
+				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
 				<div class="mm-sub-item" onclick="createHorlogeWidget();closeMainMenu()"><span class="mm-ico">🕰️</span>&nbsp;&nbsp;Horloge interactive</div>
 				<div class="mm-sub-item" onclick="createSolide3DWidget();closeMainMenu()"><span class="mm-ico">🧊</span>&nbsp;&nbsp;Solide 3D</div>
-				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
-				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
+				<div class="mm-sub-item" onclick="lancerTracesGeometriques();closeMainMenu()"><span class="mm-ico">📐</span>&nbsp;&nbsp;Tracés géométriques</div>
 				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
@@ -225,6 +226,7 @@
 				<div class="mm-sub-item" onclick="createSeyesWidget();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Écriture Séyès</div>
 				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
+				
 				</div></div>
 			</div>
 
@@ -1050,15 +1052,15 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     <div id="act-panel-content">
         <div class="act-section-label">🎲 Activités de mathématiques</div>
         <div class="act-grid">
+			<div class="act-card" onclick="createTableauNumWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-tableau-numeration6.png" alt="Tableau de numération" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Tableau de numération</div>
+                <div class="act-card-desc">Manipuler le tableau de numération décimale</div>
+            </div>
             <div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-monnaie6.jpeg" alt="La monnaie" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Monnaie</div>
                 <div class="act-card-desc">Calculer avec les pièces et les billets</div>
-            </div>
-            <div class="act-card" onclick="createTableauNumWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico"><img src="pics/activites-tableau-numeration6.png" alt="Tableau de numération" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Tableau de numération</div>
-                <div class="act-card-desc">Manipuler le tableau de numération décimale</div>
             </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-calcul-mental6.png" alt="Calcul mental" style="width:100%;height:100%;object-fit:contain;"></div>
@@ -1084,6 +1086,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-solides6.jpeg" alt="Solides 3D" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Solides 3D</div>
                 <div class="act-card-desc">Manipuler les solides en 3 dimensions</div>
+            </div>
+			<div class="act-card" onclick="lancerTracesGeometriques();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-traces-geom6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Tracés géométriques</div>
+                <div class="act-card-desc">Utiliser la règle, l'équerre et le compas pour tracer</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
@@ -2033,5 +2040,61 @@ function toggleMediaCollapse(container) {
     });
 })();
 </script>
+<script>
+// ── Tracés géométriques ───────────────────────────────────────────────────
+function lancerTracesGeometriques() {
+    // 1. Ouvrir la toolbar dessin & figures
+    // Délai pour laisser le panneau activités se fermer avant d'ouvrir la toolbar
+    setTimeout(function() {
+        if (typeof openMmPanel === 'function') openMmPanel('draw');
+    }, 200);
+
+    // 2. Spawner les 3 outils dans 3 coins différents du board
+    setTimeout(function() {
+        if (typeof window.geoSpawnTool !== 'function') return;
+        var board = document.getElementById('board');
+        if (!board) return;
+        var bRect = board.getBoundingClientRect();
+        // Utiliser le viewport visible (pas toute la hauteur du board)
+        var VW = bRect.width;
+        var VH = window.innerHeight - bRect.top; // hauteur visible du board
+        var PAD = 60;
+
+        // Dimensions des overlays
+        var regleW  = 840, regleH  = 92;
+        var equerreW= 360, equerreH= 360;
+        var compassW= 460, compassH= 540;
+
+        // Règle : coin haut-gauche
+        window.geoSpawnTool('regle');
+        var ovs = board.querySelectorAll('.geo-tool-overlay');
+        var ov = ovs[ovs.length - 1];
+        if (ov) { ov.style.left = PAD + 'px'; ov.style.top = PAD + 'px'; }
+
+        setTimeout(function() {
+            // Équerre : coin bas-gauche (calé sur le viewport visible)
+            window.geoSpawnTool('equerre');
+            ovs = board.querySelectorAll('.geo-tool-overlay');
+            ov = ovs[ovs.length - 1];
+            if (ov) {
+                ov.style.left = PAD + 'px';
+                ov.style.top  = Math.max(PAD, VH - equerreH - PAD - 80) + 'px'; // -80 pour la toolbar du bas
+            }
+        }, 80);
+
+        setTimeout(function() {
+            // Compas : coin haut-droit
+            window.geoSpawnTool('compas');
+            ovs = board.querySelectorAll('.geo-tool-overlay');
+            ov = ovs[ovs.length - 1];
+            if (ov) {
+                ov.style.left = (VW - compassW - PAD) + 'px';
+                ov.style.top  = PAD + 'px';
+            }
+        }, 160);
+    }, 150);
+}
+</script>
+
 </body>
 </html>
