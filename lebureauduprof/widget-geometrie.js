@@ -262,10 +262,13 @@ function getDrawCanvas() {
 
 function getDrawColor() {
     // Lire la couleur active du crayon (même logique que draw.js)
+    if (window._drawColor) return window._drawColor;
     if (typeof cpickGetValue === 'function') {
         const c = cpickGetValue('draw-color');
         if (c) return c;
     }
+    const swatch = document.querySelector('#cpick-draw-color .cpick-swatch');
+    if (swatch && swatch.style.background) return swatch.style.background;
     const native = document.getElementById('cpick-native-draw-color');
     if (native) return native.value;
     return '#222222';
@@ -434,11 +437,10 @@ window.geoSpawnTool = function (type) {
             overlay.dataset.geoFixed = 'true';
             document.body.appendChild(overlay);
 
-            // Pour le compas : repositionner sa barre de contrôle maintenant
-            // que l'overlay est à sa position finale
-            if (type === 'compas' && typeof overlay._repositionBar === 'function') {
-                overlay._repositionBar();
-            }
+            // Pour le compas : plus de ctrlBar externe à repositionner
+            // if (type === 'compas' && typeof overlay._repositionBar === 'function') {
+            //     overlay._repositionBar();
+            // }
         }
     }
 };
@@ -481,7 +483,9 @@ function makeDraggableGeo(overlay, onDragEnd) {
         if (e.target.classList.contains('geo-rot-handle') ||
             e.target.classList.contains('geo-trace-btn')  ||
             e.target.classList.contains('geo-close-tool') ||
-            e.target.tagName === 'INPUT') return;
+            e.target.tagName === 'INPUT' ||
+            e.target.dataset.nodrag === 'true' ||
+            (e.target.parentElement && e.target.parentElement.dataset.nodrag === 'true')) return;
         e.preventDefault(); e.stopPropagation();
         startGeoDrag(e.clientX, e.clientY);
     });
@@ -489,7 +493,9 @@ function makeDraggableGeo(overlay, onDragEnd) {
         if (e.target.classList.contains('geo-rot-handle') ||
             e.target.classList.contains('geo-trace-btn')  ||
             e.target.classList.contains('geo-close-tool') ||
-            e.target.tagName === 'INPUT') return;
+            e.target.tagName === 'INPUT' ||
+            e.target.dataset.nodrag === 'true' ||
+            (e.target.parentElement && e.target.parentElement.dataset.nodrag === 'true')) return;
         e.preventDefault(); e.stopPropagation();
         startGeoDrag(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: false });
@@ -845,135 +851,19 @@ function spawnCompas(board, cx, cy) {
     const MAX_R = 400, MIN_R = 20;
     let radius = 100;
 
-    // Dimensions de l'overlay (SVG seul, sans barre intégrée)
-    const OVW = 460, OVH = 436;
+    // Dimensions de l'overlay — hauteur augmentée pour la poignée en haut
+    const OVW = 460, OVH = 540;
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - 60}px; width:${OVW}px; height:${OVH}px;`;
-
-    // ── Barre de contrôle FIXE (body-level, toujours visible) ───────────
-    const BAR_W = 560;
-    const ctrlBar = document.createElement('div');
-    ctrlBar.style.cssText = `
-        position:fixed; width:${BAR_W}px; height:44px; z-index:19000;
-        display:flex; align-items:center; justify-content:center; gap:8px;
-        background:rgba(26,26,34,0.96); border-radius:10px;
-        border:1px solid #554466; padding:0 10px; box-sizing:border-box;
-        pointer-events:auto; cursor:default;
-        box-shadow:0 4px 16px rgba(0,0,0,0.5);
-    `;
-
-    // Positionne la barre en fixed en fonction de la position de l'overlay
-    function repositionBar() {
-        const ovLeft = parseFloat(overlay.style.left || 0);
-        const ovTop  = parseFloat(overlay.style.top  || 0);
-        const MARGIN = 8;
-
-        // En mode fixed (overlay sorti du board), ovLeft/ovTop sont déjà en viewport.
-        // En mode normal (overlay dans le board), il faut ajouter bRect.left/top.
-        const isFixed = overlay.style.position === 'fixed' || overlay.dataset.geoFixed === 'true';
-        const bRect   = (!isFixed && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
-
-        const centerX = bRect.left + ovLeft + OVW / 2;
-        let barLeft = centerX - BAR_W / 2;
-        barLeft = Math.max(MARGIN, Math.min(barLeft, window.innerWidth - BAR_W - MARGIN));
-
-        const ovTopVP = bRect.top + ovTop;
-        let barTop = ovTopVP - 52;
-        if (barTop < MARGIN) {
-            barTop = ovTopVP + OVH + 8;
-            if (barTop + 44 > window.innerHeight - MARGIN) barTop = MARGIN;
-        }
-
-        ctrlBar.style.left = barLeft + 'px';
-        ctrlBar.style.top  = barTop  + 'px';
-    }
-
-    // Bouton fermer — tout à gauche de la barre
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'geo-close-tool';
-    closeBtn.textContent = '×';
-    closeBtn.style.cssText = `
-        position:relative; width:24px; height:24px; font-size:14px;
-        border-radius:50%; background:#e74c3c; color:#fff; border:none;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    `;
-    closeBtn.onmousedown = e => e.stopPropagation();
-    closeBtn.onclick     = e => { e.stopPropagation(); overlay.remove(); ctrlBar.remove(); };
-    addTouchClick(closeBtn, () => { overlay.remove(); ctrlBar.remove(); });
-
-    // Poignée rotation — juste à droite du bouton fermer
-    const rotH = document.createElement('div');
-    rotH.className = 'geo-rot-handle';
-    rotH.textContent = '↻';
-    rotH.style.cssText = `
-        position:relative; width:24px; height:24px; font-size:13px;
-        border-radius:50%; background:#6aaee8; color:#fff; border:2px solid #fff;
-        cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-        box-shadow:0 2px 6px rgba(0,0,0,0.4);
-    `;
-
-    // Slider rayon
-    const sliderLabel = document.createElement('span');
-    sliderLabel.textContent = 'Rayon';
-    sliderLabel.style.cssText = 'color:#ccc; font-size:11px; white-space:nowrap; flex-shrink:0;';
-
-    const slider = document.createElement('input');
-    slider.type = 'range'; slider.min = MIN_R; slider.max = MAX_R;
-    slider.value = radius; slider.step = '2';
-    slider.style.cssText = 'width:250px; accent-color:#a78bfa; cursor:pointer; flex-shrink:0;';
-
-    const rVal = document.createElement('span');
-    rVal.textContent = radius + 'px';
-    rVal.style.cssText = 'color:#a78bfa; font-size:11px; font-weight:700; min-width:36px; flex-shrink:0;';
-
-    slider.addEventListener('mousedown', e => e.stopPropagation());
-    slider.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
-
-    slider.addEventListener('input', function () {
-        // Lire la position board de la pointe AVANT de modifier le rayon
-        const ovLeft = parseFloat(overlay.style.left || 0);
-        const ovTop  = parseFloat(overlay.style.top  || 0);
-        const haOld  = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
-        const pivBX  = ovLeft + PIV_X - Math.sin(haOld) * ARM_LEN;
-        const pivBY  = ovTop  + PIV_Y + Math.cos(haOld) * ARM_LEN;
-
-        // Nouveau rayon
-        radius = parseInt(this.value);
-        rVal.textContent = radius + 'px';
-
-        // Nouvelle position de la pointe dans le SVG
-        const haNew = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
-        const newLx = PIV_X - Math.sin(haNew) * ARM_LEN;
-        const newLy = PIV_Y + Math.cos(haNew) * ARM_LEN;
-
-        // Déplacer l'overlay pour que la pointe reste fixe sur le board
-        overlay.style.left = (pivBX - newLx) + 'px';
-        overlay.style.top  = (pivBY - newLy) + 'px';
-
-        updateSvg();
-    });
-
-    // Bouton tracer
-    const traceBtn = document.createElement('button');
-    traceBtn.className = 'geo-trace-btn';
-    traceBtn.textContent = '⭕ Tracer';
-    traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0;';
-
-    ctrlBar.appendChild(closeBtn);
-    ctrlBar.appendChild(rotH);
-    ctrlBar.appendChild(sliderLabel);
-    ctrlBar.appendChild(slider);
-    ctrlBar.appendChild(rVal);
-    ctrlBar.appendChild(traceBtn);
+    overlay.style.cssText = `left:${cx - OVW/2}px; top:${cy - 80}px; width:${OVW}px; height:${OVH}px;`;
 
     // ── SVG compas (occupe tout l'overlay) ───────────────────────────────
     const SVG_W = OVW, SVG_H = OVH;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width',  SVG_W);
     svg.setAttribute('height', SVG_H);
-    svg.style.cssText = `display:block; position:absolute; top:0; left:0; pointer-events:none;`;
+    svg.style.cssText = `display:block; position:absolute; top:0; left:0; pointer-events:all;`;
 
     // Defs : dégradés pour les bras
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -994,13 +884,104 @@ function spawnCompas(board, cx, cy) {
     defs.appendChild(makeArmGrad('grad-arm-right', '#7a9ab8', '#3a5a78'));
     svg.appendChild(defs);
 
-    // Pivot (centre géométrique, en haut au milieu du SVG)
-    const PIV_X = SVG_W / 2, PIV_Y = 30;
-    const ARM_LEN = 200; // bras plus courts
+    // Pivot (centre géométrique) — plus bas pour laisser place à la poignée
+    const PIV_X = SVG_W / 2, PIV_Y = 110;
+    const ARM_LEN = 200;
+
+    // ── Poignée cylindrique (tenue entre 2 doigts) ───────────────────────
+    // Cylindre vertical centré sur PIV_X, de y=GRIP_TOP à y=PIV_Y-14
+    const GRIP_W = 14, GRIP_TOP = 40, GRIP_BOT = PIV_Y - 14;
+    const gripGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const gripGradDef = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gripGradDef.setAttribute('id', 'grad-grip');
+    gripGradDef.setAttribute('x1', '0%'); gripGradDef.setAttribute('y1', '0%');
+    gripGradDef.setAttribute('x2', '100%'); gripGradDef.setAttribute('y2', '0%');
+    const gs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    gs1.setAttribute('offset', '0%'); gs1.setAttribute('stop-color', '#4a5a7a');
+    const gs2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    gs2.setAttribute('offset', '50%'); gs2.setAttribute('stop-color', '#8aaad8');
+    const gs3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    gs3.setAttribute('offset', '100%'); gs3.setAttribute('stop-color', '#3a4a6a');
+    gripGradDef.appendChild(gs1); gripGradDef.appendChild(gs2); gripGradDef.appendChild(gs3);
+    defs.appendChild(gripGradDef);
+
+    // Corps cylindre
+    const gripBody = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    gripBody.setAttribute('x', PIV_X - GRIP_W/2); gripBody.setAttribute('y', GRIP_TOP);
+    gripBody.setAttribute('width', GRIP_W); gripBody.setAttribute('height', GRIP_BOT - GRIP_TOP);
+    gripBody.setAttribute('rx', '4');
+    gripBody.setAttribute('fill', 'url(#grad-grip)');
+    gripBody.setAttribute('stroke', '#2a3a5a'); gripBody.setAttribute('stroke-width', '1');
+    gripGroup.appendChild(gripBody);
+
+    // Stries (rainures) sur la poignée
+    const STRIPE_COUNT = 7;
+    for (let i = 0; i < STRIPE_COUNT; i++) {
+        const sy = GRIP_TOP + 8 + i * ((GRIP_BOT - GRIP_TOP - 16) / (STRIPE_COUNT - 1));
+        const stripe = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        stripe.setAttribute('x1', PIV_X - GRIP_W/2 + 2); stripe.setAttribute('y1', sy);
+        stripe.setAttribute('x2', PIV_X + GRIP_W/2 - 2); stripe.setAttribute('y2', sy);
+        stripe.setAttribute('stroke', 'rgba(0,0,0,0.25)'); stripe.setAttribute('stroke-width', '1.5');
+        gripGroup.appendChild(stripe);
+    }
+
+    // Capuchon haut de la poignée (demi-ellipse)
+    const gripCap = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    gripCap.setAttribute('cx', PIV_X); gripCap.setAttribute('cy', GRIP_TOP);
+    gripCap.setAttribute('rx', GRIP_W/2); gripCap.setAttribute('ry', '4');
+    gripCap.setAttribute('fill', '#6a7a9a');
+    gripCap.setAttribute('stroke', '#2a3a5a'); gripCap.setAttribute('stroke-width', '1');
+    gripGroup.appendChild(gripCap);
+
+    // ── Bouton fermer SVG — en haut de la poignée ────────────────────────
+    const closeSvgGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    closeSvgGroup.setAttribute('data-nodrag', 'true');
+    closeSvgGroup.setAttribute('pointer-events', 'all');
+    closeSvgGroup.style.cursor = 'pointer';
+    const closeSvgBg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    closeSvgBg.setAttribute('cx', PIV_X); closeSvgBg.setAttribute('cy', GRIP_TOP - 16);
+    closeSvgBg.setAttribute('r', '12');
+    closeSvgBg.setAttribute('fill', '#e74c3c');
+    closeSvgBg.setAttribute('stroke', '#fff'); closeSvgBg.setAttribute('stroke-width', '1.5');
+    closeSvgBg.setAttribute('pointer-events', 'all');
+    const closeSvgTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    closeSvgTxt.setAttribute('x', PIV_X); closeSvgTxt.setAttribute('y', GRIP_TOP - 11);
+    closeSvgTxt.setAttribute('text-anchor', 'middle');
+    closeSvgTxt.setAttribute('font-size', '14'); closeSvgTxt.setAttribute('font-weight', 'bold');
+    closeSvgTxt.setAttribute('fill', '#fff');
+    closeSvgTxt.setAttribute('pointer-events', 'none');
+    closeSvgTxt.textContent = '×';
+    closeSvgGroup.appendChild(closeSvgBg);
+    closeSvgGroup.appendChild(closeSvgTxt);
+
+    // ── Bouton tracer SVG — sous la poignée, au-dessus du pivot ─────────
+    const traceSvgGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    traceSvgGroup.setAttribute('data-nodrag', 'true');
+    traceSvgGroup.setAttribute('pointer-events', 'all');
+    traceSvgGroup.style.cursor = 'pointer';
+    const traceSvgBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    traceSvgBg.setAttribute('x', PIV_X - 28); traceSvgBg.setAttribute('y', PIV_Y + 18);
+    traceSvgBg.setAttribute('width', '56'); traceSvgBg.setAttribute('height', '18');
+    traceSvgBg.setAttribute('rx', '5');
+    traceSvgBg.setAttribute('fill', '#a78bfa');
+    traceSvgBg.setAttribute('stroke', '#7c3aed'); traceSvgBg.setAttribute('stroke-width', '1');
+    traceSvgBg.setAttribute('pointer-events', 'all');
+    const traceSvgTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    traceSvgTxt.setAttribute('x', PIV_X); traceSvgTxt.setAttribute('y', PIV_Y + 30);
+    traceSvgTxt.setAttribute('text-anchor', 'middle');
+    traceSvgTxt.setAttribute('font-size', '9'); traceSvgTxt.setAttribute('font-weight', 'bold');
+    traceSvgTxt.setAttribute('fill', '#fff');
+    traceSvgTxt.setAttribute('pointer-events', 'none');
+    traceSvgTxt.textContent = '⭕ Tracer';
+    traceSvgGroup.appendChild(traceSvgBg);
+    traceSvgGroup.appendChild(traceSvgTxt);
 
     // Éléments SVG (créés vides, positionnés par updateSvg)
     // Cercle preview
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    // Arc tracé en cours (feedback visuel pendant le drag)
+    const arcPreview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
     // Bras gauche (pointe) — polygon pour avoir de l'épaisseur variable
     const armLeftPoly  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
@@ -1012,31 +993,87 @@ function spawnCompas(board, cx, cy) {
     const pointeBody  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // corps argenté
     const pointeTip   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // extrémité sombre
 
-    // Mine (crayon) : corps coloré + mine graphite + ligne de couleur
-    const mineGroup  = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    const mineBody   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // corps bois clair
-    const minePaint  = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // capuchon coloré
-    const mineGraphite = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); // mine grise
-    const mineTip    = document.createElementNS('http://www.w3.org/2000/svg', 'circle');   // pointe mine
+    // Mine (feutre/marqueur) : corps cylindrique + cône coloré + halo + pointe cliquable
+    const mineGroup    = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const mineHalo     = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');  // halo diffus sous la pointe
+    const mineBody     = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // corps cylindrique métallique
+    const mineBodyShine= document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // reflet clair sur le corps
+    const mineCollar   = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // collier argenté
+    const mineCone     = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // cône coloré
+    const mineTip      = document.createElementNS('http://www.w3.org/2000/svg', 'circle');   // pointe cliquable
 
     // Pivot visuel (par-dessus tout)
     const pivCircOuter = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     const pivCircInner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
+    // Label rayon (affiché pendant le drag ↔)
+    const radiusLabelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    radiusLabelGroup.setAttribute('pointer-events', 'none');
+    radiusLabelGroup.style.display = 'none';
+    const radiusLabelBg  = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const radiusLabelTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    radiusLabelBg.setAttribute('rx', '5');
+    radiusLabelBg.setAttribute('fill', 'rgba(26,26,34,0.92)');
+    radiusLabelBg.setAttribute('stroke', '#6aaee8'); radiusLabelBg.setAttribute('stroke-width', '1');
+    radiusLabelTxt.setAttribute('text-anchor', 'middle');
+    radiusLabelTxt.setAttribute('font-size', '12'); radiusLabelTxt.setAttribute('font-weight', 'bold');
+    radiusLabelTxt.setAttribute('fill', '#6aaee8');
+    radiusLabelGroup.appendChild(radiusLabelBg);
+    radiusLabelGroup.appendChild(radiusLabelTxt);
+
+    // ── Bouton ↔ sur le bras droit (écarter/resserrer) ────────────────────
+    // Groupe SVG cliquable positionné au milieu du bras droit
+    const spreadBtnGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    spreadBtnGroup.style.cursor = 'pointer';
+    const spreadBtnBg   = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const spreadBtnText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    spreadBtnGroup.appendChild(spreadBtnBg);
+    spreadBtnGroup.appendChild(spreadBtnText);
+
+    // ── Poignée rotation SVG — pile au pivot (jonction des deux bras) ────
+    const rotH = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    rotH.setAttribute('data-nodrag', 'true');
+    rotH.setAttribute('pointer-events', 'all');
+    rotH.style.cursor = 'pointer';
+    const rotHBg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    rotHBg.setAttribute('cx', PIV_X); rotHBg.setAttribute('cy', PIV_Y);
+    rotHBg.setAttribute('r', '13');
+    rotHBg.setAttribute('fill', '#6aaee8');
+    rotHBg.setAttribute('stroke', '#fff'); rotHBg.setAttribute('stroke-width', '2');
+    rotHBg.setAttribute('pointer-events', 'all');
+    const rotHTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    rotHTxt.setAttribute('x', PIV_X); rotHTxt.setAttribute('y', PIV_Y + 5);
+    rotHTxt.setAttribute('text-anchor', 'middle');
+    rotHTxt.setAttribute('font-size', '14');
+    rotHTxt.setAttribute('fill', '#fff');
+    rotHTxt.setAttribute('pointer-events', 'none');
+    rotHTxt.textContent = '↻';
+    rotH.appendChild(rotHBg);
+    rotH.appendChild(rotHTxt);
+
     pointeGroup.appendChild(pointeBody);
     pointeGroup.appendChild(pointeTip);
+    mineGroup.appendChild(mineHalo);
     mineGroup.appendChild(mineBody);
-    mineGroup.appendChild(minePaint);
-    mineGroup.appendChild(mineGraphite);
+    mineGroup.appendChild(mineBodyShine);
+    mineGroup.appendChild(mineCollar);
+    mineGroup.appendChild(mineCone);
     mineGroup.appendChild(mineTip);
 
     svg.appendChild(circle);
+    svg.appendChild(arcPreview);
     svg.appendChild(armLeftPoly);
     svg.appendChild(armRightPoly);
+    svg.appendChild(gripGroup);       // poignée par-dessus les bras
     svg.appendChild(pointeGroup);
     svg.appendChild(mineGroup);
+    svg.appendChild(spreadBtnGroup);
     svg.appendChild(pivCircOuter);
     svg.appendChild(pivCircInner);
+    svg.appendChild(traceSvgGroup);
+    svg.appendChild(rotH);
+    svg.appendChild(closeSvgGroup);
+    svg.appendChild(radiusLabelGroup); // label rayon par-dessus tout
 
     // Helper : calcule le polygon d'un bras épais (trapèze)
     // de (x1,y1) vers (x2,y2), largeur w1 à la base, w2 à l'extrémité
@@ -1076,15 +1113,34 @@ function spawnCompas(board, cx, cy) {
         const rx = PIV_X + Math.sin(halfAngle) * ARM_LEN;
         const ry = PIV_Y + Math.cos(halfAngle) * ARM_LEN;
 
-        // ── Bras gauche (pointe) : acier, épais en haut, fin en bas
-        armLeftPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, lx, ly, 7, 3));
+        // ── Bras gauche (pointe) : s'arrête là où commence le corps argenté (22px avant l'extrémité)
+        const dxL = lx - PIV_X, dyL = ly - PIV_Y;
+        const lenL = Math.hypot(dxL, dyL) || 1;
+        const uxL = dxL / lenL, uyL = dyL / lenL;
+        const armLeftEndX = lx - uxL * 22;
+        const armLeftEndY = ly - uyL * 22;
+        armLeftPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, armLeftEndX, armLeftEndY, 7, 4));
         armLeftPoly.setAttribute('fill', 'url(#grad-arm-left)');
         armLeftPoly.setAttribute('stroke', '#333'); armLeftPoly.setAttribute('stroke-width', '0.5');
 
-        // ── Bras droit (mine) : bleu acier, idem
-        armRightPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, rx, ry, 7, 3));
-        armRightPoly.setAttribute('fill', 'url(#grad-arm-right)');
-        armRightPoly.setAttribute('stroke', '#333'); armRightPoly.setAttribute('stroke-width', '0.5');
+        // (bras droit défini plus bas, après calcul du bodyBase du feutre)
+
+        // ── Bouton ↔ au milieu du bras droit ──────────────────────────────
+        const btnMidX = PIV_X + Math.sin(halfAngle) * (ARM_LEN * 0.48);
+        const btnMidY = PIV_Y + Math.cos(halfAngle) * (ARM_LEN * 0.48);
+        spreadBtnBg.setAttribute('cx', btnMidX); spreadBtnBg.setAttribute('cy', btnMidY);
+        spreadBtnBg.setAttribute('r', '11');
+        spreadBtnBg.setAttribute('fill', '#2a4a6a');
+        spreadBtnBg.setAttribute('stroke', '#6aaee8'); spreadBtnBg.setAttribute('stroke-width', '1.5');
+        spreadBtnText.setAttribute('x', btnMidX); spreadBtnText.setAttribute('y', btnMidY + 4);
+        spreadBtnText.setAttribute('text-anchor', 'middle');
+        spreadBtnText.setAttribute('font-size', '11');
+        spreadBtnText.setAttribute('fill', '#7ab8f5');
+        spreadBtnText.setAttribute('font-family', 'monospace');
+        spreadBtnText.setAttribute('pointer-events', 'none');
+        spreadBtnText.textContent = '↔';
+        spreadBtnGroup.setAttribute('data-nodrag', 'true');
+        spreadBtnBg.setAttribute('pointer-events', 'all');
 
         // ── Pointe métallique (bras gauche) ──
         // Corps argenté : 20px depuis l'extrémité
@@ -1095,22 +1151,75 @@ function spawnCompas(board, cx, cy) {
         pointeTip.setAttribute('points', tipPolygon(PIV_X, PIV_Y, lx, ly, 1.5, 8));
         pointeTip.setAttribute('fill', '#555');
 
-        // ── Mine / Crayon (bras droit) ──
-        // Corps du crayon (bois clair) : 28px depuis l'extrémité, largeur 5
-        mineBody.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 5, 30));
-        mineBody.setAttribute('fill', '#f0c040');
-        mineBody.setAttribute('stroke', '#b88800'); mineBody.setAttribute('stroke-width', '0.5');
-        // Capuchon coloré (haut du crayon) : 6px tout en haut de la partie bois
-        minePaint.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 5, 8));
-        minePaint.setAttribute('fill', '#e05050');
-        // Graphite (mine grise pointue) : 10px depuis l'extrémité, plus étroite
-        mineGraphite.setAttribute('points', tipPolygon(PIV_X, PIV_Y, rx, ry, 2.5, 12));
-        mineGraphite.setAttribute('fill', '#444');
-        // Pointe de la mine (petit cercle rouge-violet à l'extrémité exacte)
+        // ── Feutre / Marqueur (bras droit) ──────────────────────────────────
+        const drawColor = getDrawColor();
+
+        // Vecteur unitaire du bras droit
+        const dxR = rx - PIV_X, dyR = ry - PIV_Y;
+        const lenR = Math.hypot(dxR, dyR) || 1;
+        const uxR = dxR / lenR, uyR = dyR / lenR;
+        const nxR = -uyR, nyR = uxR;
+
+        const BODY_LEN   = 36;
+        const COLLAR_LEN = 6;
+        const CONE_LEN   = 18;
+
+        const tipPt    = { x: rx, y: ry };
+        const coneBase = { x: rx - uxR * CONE_LEN, y: ry - uyR * CONE_LEN };
+        const colBase  = { x: rx - uxR * (CONE_LEN + COLLAR_LEN), y: ry - uyR * (CONE_LEN + COLLAR_LEN) };
+        const bodyBase = { x: rx - uxR * (CONE_LEN + COLLAR_LEN + BODY_LEN), y: ry - uyR * (CONE_LEN + COLLAR_LEN + BODY_LEN) };
+
+        // ── Bras droit : s'arrête à bodyBase (le feutre le recouvre en dessous) ──
+        armRightPoly.setAttribute('points', armPolygon(PIV_X, PIV_Y, bodyBase.x, bodyBase.y, 7, 5.5));
+        armRightPoly.setAttribute('fill', 'url(#grad-arm-right)');
+        armRightPoly.setAttribute('stroke', '#333'); armRightPoly.setAttribute('stroke-width', '0.5');
+
+        // Helper trapèze
+        function trapeze(p1, p2, nx_, ny_, w1, w2) {
+            return [
+                p1.x + nx_ * w1, p1.y + ny_ * w1,
+                p1.x - nx_ * w1, p1.y - ny_ * w1,
+                p2.x - nx_ * w2, p2.y - ny_ * w2,
+                p2.x + nx_ * w2, p2.y + ny_ * w2
+            ].join(' ');
+        }
+
+        // Corps cylindrique gris métallique
+        mineBody.setAttribute('points', trapeze(bodyBase, colBase, nxR, nyR, 5.5, 5.5));
+        mineBody.setAttribute('fill', '#6a6a7e');
+        mineBody.setAttribute('stroke', '#3a3a4a'); mineBody.setAttribute('stroke-width', '0.5');
+
+        mineBodyShine.setAttribute('points', '0,0');
+        mineBodyShine.setAttribute('fill', 'none');
+        mineBodyShine.setAttribute('stroke', 'none');
+
+        // Collier argenté
+        mineCollar.setAttribute('points', trapeze(colBase, coneBase, nxR, nyR, 6.5, 6.5));
+        mineCollar.setAttribute('fill', '#b0b8cc');
+        mineCollar.setAttribute('stroke', '#7a8090'); mineCollar.setAttribute('stroke-width', '0.5');
+
+        // Cône coloré
+        mineCone.setAttribute('points', trapeze(coneBase, tipPt, nxR, nyR, 5.5, 0.5));
+        mineCone.setAttribute('fill', drawColor);
+        mineCone.setAttribute('stroke', 'none');
+
+        // Halo diffus
+        mineHalo.setAttribute('cx', rx); mineHalo.setAttribute('cy', ry);
+        mineHalo.setAttribute('rx', '9'); mineHalo.setAttribute('ry', '5');
+        const haloAngleDeg = Math.atan2(uyR, uxR) * 180 / Math.PI + 90;
+        mineHalo.setAttribute('transform', `rotate(${haloAngleDeg}, ${rx}, ${ry})`);
+        mineHalo.setAttribute('fill', drawColor);
+        mineHalo.setAttribute('opacity', '0.28');
+        mineHalo.setAttribute('stroke', 'none');
+
+        // Pointe cliquable invisible
         mineTip.setAttribute('cx', rx); mineTip.setAttribute('cy', ry);
-        mineTip.setAttribute('r', '3');
-        mineTip.setAttribute('fill', '#a78bfa');
-        mineTip.setAttribute('stroke', '#fff'); mineTip.setAttribute('stroke-width', '1');
+        mineTip.setAttribute('r', '7');
+        mineTip.setAttribute('fill', 'rgba(0,0,0,0)');
+        mineTip.setAttribute('stroke', 'none');
+        mineTip.style.cursor = 'crosshair';
+        mineTip.setAttribute('pointer-events', 'all');
+        mineTip.dataset.nodrag = 'true';
 
         // ── Cercle preview centré sur la pointe ──
         circle.setAttribute('cx', lx); circle.setAttribute('cy', ly);
@@ -1133,12 +1242,19 @@ function spawnCompas(board, cx, cy) {
         // Stocker les coords pour le tracé (dans le repère de l'overlay)
         overlay.dataset.pivX   = lx;
         overlay.dataset.pivY   = ly;
+        overlay.dataset.mineX  = rx;
+        overlay.dataset.mineY  = ry;
         overlay.dataset.radius = radius;
     }
 
-    // ── Bouton tracer ────────────────────────────────────────────────────
-    traceBtn.onclick = function (e) {
-        e.stopPropagation();
+    // ── Bouton fermer SVG ────────────────────────────────────────────────
+    closeSvgBg.addEventListener('mousedown', e => e.stopPropagation());
+    closeSvgGroup.addEventListener('mousedown', e => e.stopPropagation());
+    closeSvgGroup.addEventListener('click', e => { e.stopPropagation(); overlay.remove(); });
+    addTouchClick(closeSvgGroup, () => overlay.remove());
+
+    // ── Bouton tracer SVG ────────────────────────────────────────────────
+    function doTrace() {
         const t    = getOverlayTransform(overlay);
         const pivX = parseFloat(overlay.dataset.pivX || 0);
         const pivY = parseFloat(overlay.dataset.pivY || 0);
@@ -1146,11 +1262,9 @@ function spawnCompas(board, cx, cy) {
         const ox   = parseFloat(overlay.style.left || 0);
         const oy   = parseFloat(overlay.style.top  || 0);
         const worldPiv = rotatePoint(ox + pivX, oy + pivY, t.cx, t.cy, t.angle);
-
         const C = 6;
         const cx_ = worldPiv.x, cy_ = worldPiv.y;
         const steps = Math.max(60, Math.round(2 * Math.PI * r / 3));
-
         const ptsCercle = [];
         for (let i = 0; i <= steps; i++) {
             const a = (i / steps) * 2 * Math.PI;
@@ -1158,25 +1272,325 @@ function spawnCompas(board, cx, cy) {
         }
         const ptsH = [{ x: cx_ - C, y: cy_ }, { x: cx_ + C, y: cy_ }];
         const ptsV = [{ x: cx_, y: cy_ - C }, { x: cx_, y: cy_ + C }];
-
-        // Passe par traceOnCanvas → route automatiquement vers le PDF si mode actif
         traceOnCanvas([ptsCercle, ptsH, ptsV]);
-    };
-    addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
+    }
+    traceSvgGroup.addEventListener('mousedown', e => e.stopPropagation());
+    traceSvgGroup.addEventListener('click', e => { e.stopPropagation(); doTrace(); });
+    addTouchClick(traceSvgGroup, doTrace);
+
+    // ── Bouton ↔ : drag horizontal gauche = réduire, droite = agrandir ──────
+    let _spreadDragging = false;
+    let _spreadStartX   = 0;
+    let _spreadStartR   = 0;
+
+    function _showRadiusLabel() {
+        // Positionner le label entre les deux extrémités (lx,ly) et (rx,ry)
+        const ha  = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+        const lxL = PIV_X - Math.sin(ha) * ARM_LEN;
+        const lyL = PIV_Y + Math.cos(ha) * ARM_LEN;
+        const rxL = PIV_X + Math.sin(ha) * ARM_LEN;
+        const ryL = PIV_Y + Math.cos(ha) * ARM_LEN;
+        const midX = (lxL + rxL) / 2;
+        const midY = (lyL + ryL) / 2 + 18;
+        const txt  = radius + ' px';
+        radiusLabelTxt.textContent = txt;
+        const tw = txt.length * 7 + 12;
+        radiusLabelBg.setAttribute('x', midX - tw/2); radiusLabelBg.setAttribute('y', midY - 14);
+        radiusLabelBg.setAttribute('width', tw); radiusLabelBg.setAttribute('height', 18);
+        radiusLabelTxt.setAttribute('x', midX); radiusLabelTxt.setAttribute('y', midY - 2);
+        radiusLabelGroup.style.display = '';
+    }
+
+    function _startSpreadDrag(clientX) {
+        _spreadDragging = true;
+        _spreadStartX   = clientX;
+        _spreadStartR   = radius;
+        spreadBtnBg.setAttribute('fill', '#1a3a5a');
+        _showRadiusLabel();
+
+        function onMove(ev) {
+            const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+            const dx = cx - _spreadStartX;
+            const newR = Math.max(MIN_R, Math.min(MAX_R, _spreadStartR + Math.round(dx)));
+            if (newR === radius) return;
+
+            const ovLeft = parseFloat(overlay.style.left || 0);
+            const ovTop  = parseFloat(overlay.style.top  || 0);
+            const haOld  = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+            const pivBX  = ovLeft + PIV_X - Math.sin(haOld) * ARM_LEN;
+            const pivBY  = ovTop  + PIV_Y + Math.cos(haOld) * ARM_LEN;
+
+            radius = newR;
+
+            const haNew = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+            const newLx = PIV_X - Math.sin(haNew) * ARM_LEN;
+            const newLy = PIV_Y + Math.cos(haNew) * ARM_LEN;
+
+            overlay.style.left = (pivBX - newLx) + 'px';
+            overlay.style.top  = (pivBY - newLy) + 'px';
+
+            updateSvg();
+            _showRadiusLabel(); // mettre à jour le label
+        }
+        function onEnd() {
+            _spreadDragging = false;
+            spreadBtnBg.setAttribute('fill', '#2a4a6a');
+            radiusLabelGroup.style.display = 'none'; // cacher le label
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }
+
+    spreadBtnGroup.addEventListener('mousedown', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        _startSpreadDrag(e.clientX);
+    });
+    spreadBtnGroup.addEventListener('touchstart', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        _startSpreadDrag(e.touches[0].clientX);
+    }, { passive: false });
+    spreadBtnGroup.addEventListener('contextmenu', function(e) {
+        e.preventDefault(); e.stopPropagation();
+    });
+
+    // ── Tracer un arc depuis la mine (mousedown → drag → mouseup) ────────
+    mineTip.setAttribute('pointer-events', 'all');
+    mineTip.style.cursor = 'crosshair';
+
+    let _arcDrawing = false;
+    let _arcLastAngle = 0;
+    let _arcTotalAngle = 0; // angle accumulé (peut dépasser 2*PI)
+    let _arcOverlayAngleStart = 0; // rotation de l'overlay au début du tracé
+    let _arcCenterWorld = { x: 0, y: 0 };
+
+    function _getMineTipWorldPos() {
+        const t   = getOverlayTransform(overlay);
+        const ox  = parseFloat(overlay.style.left || 0);
+        const oy  = parseFloat(overlay.style.top  || 0);
+        const mx  = parseFloat(overlay.dataset.mineX || 0);
+        const my  = parseFloat(overlay.dataset.mineY || 0);
+        return rotatePoint(ox + mx, oy + my, t.cx, t.cy, t.angle);
+    }
+    function _getPivWorldPos() {
+        const t   = getOverlayTransform(overlay);
+        const ox  = parseFloat(overlay.style.left || 0);
+        const oy  = parseFloat(overlay.style.top  || 0);
+        const px  = parseFloat(overlay.dataset.pivX || 0);
+        const py  = parseFloat(overlay.dataset.pivY || 0);
+        return rotatePoint(ox + px, oy + py, t.cx, t.cy, t.angle);
+    }
+
+    // Convertit une position client en coordonnées board
+    function _clientToBoard(clientX, clientY) {
+        const isFixed = overlay.dataset.geoFixed === 'true' || overlay.style.position === 'fixed';
+        const bRect   = (!isFixed && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
+        return { x: clientX - bRect.left, y: clientY - bRect.top };
+    }
+
+    // Construit un tableau de points pour un arc de centre (cx,cy) rayon r,
+    // de startAngle sur totalAngle radians (peut être positif ou négatif)
+    function _buildArcPoints(cx, cy, r, startAngle, totalAngle) {
+        const steps = Math.max(3, Math.round(Math.abs(r * totalAngle) / 3));
+        const pts = [];
+        for (let i = 0; i <= steps; i++) {
+            const a = startAngle + totalAngle * (i / steps);
+            pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+        }
+        return pts;
+    }
+
+    function _arcToSvgPath(pts) {
+        if (pts.length < 2) return '';
+        const isFixed = overlay.dataset.geoFixed === 'true' || overlay.style.position === 'fixed';
+        const bRect   = (!isFixed && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
+        const ox  = parseFloat(overlay.style.left || 0);
+        const oy  = parseFloat(overlay.style.top  || 0);
+        const t   = getOverlayTransform(overlay);
+        const cx_ = overlay.offsetWidth  / 2;
+        const cy_ = overlay.offsetHeight / 2;
+        // board coords → local overlay coords → inverse rotate → SVG coords
+        const svgPts = pts.map(p => {
+            const lx = p.x - ox - bRect.left;
+            const ly = p.y - oy - bRect.top;
+            const cos = Math.cos(-t.angle), sin = Math.sin(-t.angle);
+            return {
+                x: cos * (lx - cx_) - sin * (ly - cy_) + cx_,
+                y: sin * (lx - cx_) + cos * (ly - cy_) + cy_
+            };
+        });
+        let d = `M ${svgPts[0].x.toFixed(1)} ${svgPts[0].y.toFixed(1)}`;
+        svgPts.slice(1).forEach(p => { d += ` L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`; });
+        return d;
+    }
+
+    // ── Canvas de preview d'arc (coordonnées board, indépendant de la rotation) ──
+    // Créé une seule fois, positionné en absolu sur le board
+    const _arcCanvas = document.createElement('canvas');
+    _arcCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:9600;';
+    _arcCanvas.width  = board.offsetWidth  || window.innerWidth;
+    _arcCanvas.height = board.offsetHeight || window.innerHeight;
+    const _arcCtx = _arcCanvas.getContext('2d');
+
+    function _arcPreviewDraw(piv, r, startAngle, totalAngle) {
+        _arcCtx.clearRect(0, 0, _arcCanvas.width, _arcCanvas.height);
+        if (Math.abs(totalAngle) < 0.01) return;
+        // Dessiner tous les points accumulés depuis le début du geste
+        const steps = Math.max(3, Math.round(Math.abs(r * totalAngle) / 3));
+        _arcCtx.save();
+        _arcCtx.strokeStyle = getDrawColor();
+        _arcCtx.lineWidth   = getDrawSize();
+        _arcCtx.lineCap     = 'round';
+        _arcCtx.lineJoin    = 'round';
+        _arcCtx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+            const a = startAngle + totalAngle * (i / steps);
+            const x = piv.x + Math.cos(a) * r;
+            const y = piv.y + Math.sin(a) * r;
+            if (i === 0) _arcCtx.moveTo(x, y); else _arcCtx.lineTo(x, y);
+        }
+        _arcCtx.stroke();
+        _arcCtx.restore();
+    }
+
+    // Points accumulés au fil du tracé (jamais réduits, même si on revient en arrière)
+    let _arcAccumPts = [];
+
+    function _arcPreviewClear() {
+        _arcCtx.clearRect(0, 0, _arcCanvas.width, _arcCanvas.height);
+    }
+
+    function _arcMouseDown(e) {
+        e.stopPropagation(); e.preventDefault();
+        _arcDrawing    = true;
+        _arcTotalAngle = 0;
+        _arcAccumPts   = [];
+        const mine = _getMineTipWorldPos();
+        const piv  = _getPivWorldPos();
+        _arcCenterWorld = { x: piv.x, y: piv.y };
+        _arcLastAngle   = Math.atan2(mine.y - piv.y, mine.x - piv.x);
+        _arcOverlayAngleStart = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
+
+        // Point de départ
+        _arcAccumPts.push({ x: mine.x, y: mine.y });
+
+        // Masquer le cercle preview SVG pendant le tracé
+        circle.setAttribute('stroke', 'none');
+
+        // Attacher le canvas de preview au board
+        board.appendChild(_arcCanvas);
+
+        document.addEventListener('mousemove', _arcMouseMove);
+        document.addEventListener('mouseup',   _arcMouseUp);
+        document.addEventListener('touchmove',  _arcTouchMove, { passive: false });
+        document.addEventListener('touchend',   _arcTouchEnd);
+    }
+
+    function _arcUpdate(clientX, clientY) {
+        if (!_arcDrawing) return;
+        const piv  = _arcCenterWorld;
+        const r    = parseFloat(overlay.dataset.radius || radius);
+        const board_ = _clientToBoard(clientX, clientY);
+        const curAngle = Math.atan2(board_.y - piv.y, board_.x - piv.x);
+
+        // Delta d'angle normalisé entre -PI et PI (suit le sens de rotation)
+        let delta = curAngle - _arcLastAngle;
+        if (delta >  Math.PI) delta -= 2 * Math.PI;
+        if (delta < -Math.PI) delta += 2 * Math.PI;
+
+        _arcTotalAngle += delta;
+        _arcLastAngle   = curAngle;
+
+        // ── Faire tourner le compas : la mine suit le curseur ────────────
+        const newOverlayAngle = (_arcOverlayAngleStart + _arcTotalAngle) * 180 / Math.PI;
+        overlay.style.transform = `rotate(${newOverlayAngle}deg)`;
+        overlay.dataset.angle   = newOverlayAngle;
+
+        // La pointe reste fixe : recalculer la position de l'overlay
+        const pivX_local = parseFloat(overlay.dataset.pivX || 0);
+        const pivY_local = parseFloat(overlay.dataset.pivY || 0);
+        const angleRad = newOverlayAngle * Math.PI / 180;
+        const cos = Math.cos(angleRad), sin = Math.sin(angleRad);
+        const ow = OVW, oh = OVH;
+        const isFixed = overlay.dataset.geoFixed === 'true' || overlay.style.position === 'fixed';
+        const bRect   = (!isFixed && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
+        const px = piv.x - bRect.left;
+        const py = piv.y - bRect.top;
+        const dx = cos * (pivX_local - ow/2) - sin * (pivY_local - oh/2);
+        const dy = sin * (pivX_local - ow/2) + cos * (pivY_local - oh/2);
+        overlay.style.left = (px - ow/2 - dx) + 'px';
+        overlay.style.top  = (py - oh/2 - dy) + 'px';
+
+        // Preview sur canvas : ajouter le nouveau point et dessiner le segment
+        const newX = piv.x + Math.cos(_arcLastAngle) * r;
+        const newY = piv.y + Math.sin(_arcLastAngle) * r;
+        const prev = _arcAccumPts[_arcAccumPts.length - 1];
+        _arcAccumPts.push({ x: newX, y: newY });
+
+        // Dessiner uniquement le nouveau segment (pas de clearRect → rien ne s'efface)
+        if (prev) {
+            _arcCtx.save();
+            _arcCtx.strokeStyle = getDrawColor();
+            _arcCtx.lineWidth   = getDrawSize();
+            _arcCtx.lineCap     = 'round';
+            _arcCtx.lineJoin    = 'round';
+            _arcCtx.beginPath();
+            _arcCtx.moveTo(prev.x, prev.y);
+            _arcCtx.lineTo(newX, newY);
+            _arcCtx.stroke();
+            _arcCtx.restore();
+        }
+    }
+
+    function _arcMouseMove(e) { _arcUpdate(e.clientX, e.clientY); }
+    function _arcTouchMove(e) { e.preventDefault(); _arcUpdate(e.touches[0].clientX, e.touches[0].clientY); }
+
+    function _arcFinish(clientX, clientY) {
+        if (!_arcDrawing) return;
+        _arcDrawing = false;
+
+        document.removeEventListener('mousemove', _arcMouseMove);
+        document.removeEventListener('mouseup',   _arcMouseUp);
+        document.removeEventListener('touchmove',  _arcTouchMove);
+        document.removeEventListener('touchend',   _arcTouchEnd);
+
+        // Remettre le cercle preview SVG
+        circle.setAttribute('stroke', 'rgba(167,139,250,0.45)');
+        // Nettoyer et retirer le canvas de preview
+        _arcPreviewClear();
+        if (_arcCanvas.parentNode) _arcCanvas.parentNode.removeChild(_arcCanvas);
+
+        // Tracer les points accumulés (fidèles au geste réel, y compris les demi-tours)
+        if (_arcAccumPts.length >= 2) {
+            traceOnCanvas([_arcAccumPts]);
+        }
+        _arcTotalAngle = 0;
+        _arcAccumPts   = [];
+    }
+
+    function _arcMouseUp(e)  { _arcFinish(e.clientX, e.clientY); }
+    function _arcTouchEnd(e) { if (e.changedTouches[0]) _arcFinish(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }
+
+    // Attacher l'événement mousedown sur la mine via le SVG
+    mineTip.addEventListener('mousedown',  _arcMouseDown);
+    mineTip.addEventListener('touchstart', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        _arcMouseDown(e.touches[0]);
+    }, { passive: false });
 
     overlay.appendChild(svg);
     board.appendChild(overlay);
-    document.body.appendChild(ctrlBar);
 
     updateSvg();
-    repositionBar();
+    // Exposer updateSvg pour le refresh couleur depuis cpickDispatch
+    overlay._geoUpdateSvg = updateSvg;
 
-    // Exposer repositionBar sur l'overlay pour que geoSpawnTool puisse le rappeler
-    // après avoir déplacé l'overlay en position:fixed (mode PDF plein écran)
-    overlay._repositionBar = repositionBar;
-
-    // Rebrancher repositionBar après chaque drag
-    makeDraggableGeo(overlay, repositionBar);
+    makeDraggableGeo(overlay, null);
     makeRotatableGeo(overlay, rotH);
 }
 
@@ -1191,5 +1605,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }).observe(drawToolbar, { attributes: true, attributeFilter: ['style'] });
     }
 });
+
+// ── Rafraîchir la couleur du feutre compas à chaque changement de couleur ─
+// On wrappe cpickDispatch (disponible après chargement de color-picker.js)
+(function () {
+    function _patchCpickForGeo() {
+        if (typeof cpickDispatch !== 'function') return;
+        const _orig = cpickDispatch;
+        cpickDispatch = function (id, color) {
+            _orig(id, color);
+            if (id === 'draw-color') {
+                // Mettre à jour tous les compas ouverts
+                document.querySelectorAll('.geo-tool-overlay').forEach(function (ov) {
+                    if (typeof ov._geoUpdateSvg === 'function') ov._geoUpdateSvg();
+                });
+            }
+        };
+    }
+    if (typeof cpickDispatch === 'function') {
+        _patchCpickForGeo();
+    } else {
+        document.addEventListener('DOMContentLoaded', _patchCpickForGeo);
+    }
+})();
 
 })();
