@@ -837,38 +837,47 @@ function createSeyesWidget() {
     // offsetY = pt - (LH - 1) place la grande ligne (bas du tile) sur la baseline
     function _seyesMakeBg() {
         const il = LH / 4;
-        // Grande ligne en bas du tile, à y = LH - 1
-        const lignes = (withCol) => {
-            const col = withCol
-                ? `<line x1="${LH - 0.5}" y1="0" x2="${LH - 0.5}" y2="${LH}" stroke="#c8d8eb" stroke-width="0.8"/>`
-                : '';
-            return [
-                `<svg xmlns="http://www.w3.org/2000/svg" width="${LH}" height="${LH}">`,
-                `<line x1="0" y1="${il * 1}" x2="${LH}" y2="${il * 1}" stroke="#c8d8eb" stroke-width="0.7"/>`,
-                `<line x1="0" y1="${il * 2}" x2="${LH}" y2="${il * 2}" stroke="#c8d8eb" stroke-width="0.7"/>`,
-                `<line x1="0" y1="${il * 3}" x2="${LH}" y2="${il * 3}" stroke="#c8d8eb" stroke-width="0.7"/>`,
-                `<line x1="0" y1="${LH - 0.5}" x2="${LH}" y2="${LH - 0.5}" stroke="#9aadbe" stroke-width="1"/>`,
-                col,
-                `</svg>`
-            ].join('');
-        };
+
+        // Tile SVG 64×64 : lignes horizontales uniquement (pas de colonne)
+        const svgLignes = [
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${LH}" height="${LH}">`,
+            `<line x1="0" y1="${il * 1}" x2="${LH}" y2="${il * 1}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${il * 2}" x2="${LH}" y2="${il * 2}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${il * 3}" x2="${LH}" y2="${il * 3}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${LH - 0.5}" x2="${LH}" y2="${LH - 0.5}" stroke="#9aadbe" stroke-width="1"/>`,
+            `</svg>`
+        ].join('');
+
+        // Tile SVG 64×64 : colonne verticale uniquement (pas de lignes horizontales)
+        const svgCols = [
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${LH}" height="${LH}">`,
+            `<line x1="${LH - 0.5}" y1="0" x2="${LH - 0.5}" y2="${LH}" stroke="#c8d8eb" stroke-width="0.8"/>`,
+            `</svg>`
+        ].join('');
 
         const enc = (svg) => 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
-        const urlMarge = enc(lignes(false));
-        const urlCols  = enc(lignes(true));
-        const urlRed   = 'linear-gradient(to right, transparent 254px, #e05050 254px, #e05050 256px, transparent 256px)';
+        const urlLignes = enc(svgLignes);
+        const urlCols   = enc(svgCols);
 
-        // offsetY : la grande ligne (y=LH-1 dans le tile) doit coïncider avec
-        // la baseline de la 1ère ligne de texte (y = pt dans writingArea,
-        // car le paddingTop de l'éditeur = pt et la baseline ≈ bas de la zone corps)
-        // On veut : offsetY + (LH - 1) = pt  →  offsetY = pt - LH + 1
+        // Ligne rouge de marge
+        const urlRed = 'linear-gradient(to right, transparent 254px, #e05050 254px, #e05050 256px, transparent 256px)';
+        // Masque opaque sur la marge (0→256px) placé AU-DESSUS du tile colonnes
+        // mais EN-DESSOUS du tile lignes → efface les colonnes dans la marge
+        // sans toucher aux lignes horizontales qui sont dans une couche supérieure
+        const urlMaskCols = 'linear-gradient(to right, #fafcff 256px, transparent 256px)';
+
         const offsetY = pt - LH + 170;
 
-        writingArea.style.backgroundImage    = `${urlRed}, ${urlMarge}, ${urlCols}`;
-        writingArea.style.backgroundSize     = `100% 100%, ${LH}px ${LH}px, ${LH}px ${LH}px`;
-        writingArea.style.backgroundRepeat   = 'no-repeat, repeat, repeat';
-        writingArea.style.backgroundPosition = `0 0, 0 ${offsetY}px, 256px ${offsetY}px`;
-        writingArea.style.backgroundAttachment = 'local, local, local';
+        // Ordre des couches (de dessus vers dessous) :
+        // 1. urlRed      – ligne rouge (no-repeat, au-dessus de tout)
+        // 2. urlLignes   – lignes horizontales (repeat partout, marge incluse)
+        // 3. urlMaskCols – masque blanc 0→256px (no-repeat, cache les colonnes dans la marge)
+        // 4. urlCols     – colonnes verticales (repeat depuis x=0)
+        writingArea.style.backgroundImage      = `${urlRed}, ${urlLignes}, ${urlMaskCols}, ${urlCols}`;
+        writingArea.style.backgroundSize       = `100% 100%, ${LH}px ${LH}px, 100% 100%, ${LH}px ${LH}px`;
+        writingArea.style.backgroundRepeat     = 'no-repeat, repeat, no-repeat, repeat';
+        writingArea.style.backgroundPosition   = `0 0, 0 ${offsetY}px, 0 0, 0 ${offsetY}px`;
+        writingArea.style.backgroundAttachment = 'local, local, local, local';
     }
     _seyesMakeBg();
 
