@@ -46,13 +46,13 @@
     </nav>
 
     <!-- CONTENU -->
-    <div style="flex:1;overflow-y:auto;padding:28px 32px;font-family:'Segoe UI',system-ui,sans-serif;">
+    <div style="flex:1;overflow-y:auto;padding:28px 32px;">
 
       <!-- INTRODUCTION -->
       <div id="h-intro" class="help-section" style="display:block;">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🏠 Bienvenue sur Le Bureau du Prof</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Le Bureau du Prof est un <strong>tableau de bord interactif</strong> conçu pour les enseignants. Il permet d'afficher simultanément des widgets (heure, date, devoirs, météo, minuteur, sonomètre…), de dessiner librement, d'annoter, d'organiser son travail en projets et tableaux, et de tout sauvegarder.</p>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
+        <div style="font-size:1.4em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🏠 Bienvenue sur Le Bureau du Prof</div>
+        <p style="font-size:16px;color:#444;line-height:1.65;margin-bottom:10px;">Le Bureau du Prof est un <strong>tableau de bord interactif</strong> conçu pour les enseignants. Il permet d'afficher simultanément des widgets (heure, date, devoirs, météo, minuteur, sonomètre…), de dessiner librement, d'annoter, d'organiser son travail en projets et tableaux, et de tout sauvegarder.</p>
+        <p style="font-size:16px;color:#444;line-height:1.65;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
       </div>
 
       <!-- EXPLORER LE BUREAU -->
@@ -484,6 +484,15 @@
   // ── CSS ────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
+    @font-face {
+      font-family: 'Nunito';
+      src: url('polices/Nunito-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    #help-modal-overlay * {
+      font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif !important;
+    }
     .help-nav {
       display: flex; align-items: center; gap: 8px;
       padding: 9px 18px; cursor: pointer; font-size: 13px;
