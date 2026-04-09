@@ -147,7 +147,7 @@
             height: 100% !important;
             z-index: 9999 !important;
             border-radius: 0 !important;
-            padding-left: 30px !important;
+            padding-left: 52px !important;
         }
 
         /* ── En-tête ── */
