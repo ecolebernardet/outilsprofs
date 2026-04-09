@@ -296,26 +296,27 @@
 					<div class="mm-sub-item mm-has-sub" style="position:relative;">
 						<span class="mm-ico">🖼️</span>&nbsp;&nbsp;Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
 						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
+													
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 6px;">🎨 Couleur personnalisée</div>
+							<div id="board-bg-cpick-inline" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;"></div>
+							<div style="display:flex;gap:6px;align-items:center;">
+								<input type="text" id="board-bg-hex" maxlength="7" placeholder="#rrggbb"
+									style="flex:1;background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:12px;font-family:monospace;padding:4px 8px;outline:none;box-sizing:border-box;"
+									oninput="(function(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){applyBackground(v);saveBg(v);document.getElementById('board-bg-native').value=v;boardBgClearSelected();}})(this.value)">
+								<input type="color" id="board-bg-native" value="#eef2f5" style="display:none;"
+									oninput="(function(v){applyBackground(v);saveBg(v);document.getElementById('board-bg-hex').value=v;boardBgClearSelected();})(this.value)">
+								<button onclick="document.getElementById('board-bg-native').click()"
+									style="background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:11px;padding:4px 8px;cursor:pointer;white-space:nowrap;">Autre…</button>
+							</div>
+														
+							<div style="padding:4px 4px 8px;border-top:1px solid #2e2e3a;margin-top:2px;"></div>
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
 								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
 								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Beige"></div>
 								<div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');closeMainMenu()" title="Bleu nuit"></div>
-
 							</div>
-							<div style="padding:4px 4px 8px;border-top:1px solid #2e2e3a;margin-top:2px;">
-								<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 6px;">🎨 Couleur personnalisée</div>
-								<div id="board-bg-cpick-inline" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;"></div>
-								<div style="display:flex;gap:6px;align-items:center;">
-									<input type="text" id="board-bg-hex" maxlength="7" placeholder="#rrggbb"
-										style="flex:1;background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:12px;font-family:monospace;padding:4px 8px;outline:none;box-sizing:border-box;"
-										oninput="(function(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){applyBackground(v);saveBg(v);document.getElementById('board-bg-native').value=v;boardBgClearSelected();}})(this.value)">
-									<input type="color" id="board-bg-native" value="#eef2f5" style="display:none;"
-										oninput="(function(v){applyBackground(v);saveBg(v);document.getElementById('board-bg-hex').value=v;boardBgClearSelected();})(this.value)">
-									<button onclick="document.getElementById('board-bg-native').click()"
-										style="background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:11px;padding:4px 8px;cursor:pointer;white-space:nowrap;">Autre…</button>
-								</div>
-							</div>
+							
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
 								<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');closeMainMenu()" title="Séyès (jaune paille)"></div>
@@ -323,10 +324,9 @@
 								<div class="bg-thumb bg-thumb-seyes-marge" onclick="applyBackground('seyes-marge');saveBg('seyes-marge');closeMainMenu()" title="Séyès clair avec marge"></div>
 								<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');closeMainMenu()" title="Lignes simples"></div>
 								<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');closeMainMenu()" title="Grands carreaux"></div>
-								<div class="bg-thumb bg-thumb-petits" onclick="applyBackground('petits-carreaux');saveBg('petits-carreaux');closeMainMenu()" title="Petits carreaux"></div>
 								<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');closeMainMenu()" title="Ardoise lignes"></div>
 							</div>
-							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
+							
 							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">👍 Pratiques</div>
 							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
 								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-entiers-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');closeMainMenu()" title="Tableau de numération des entiers CM"></div>
@@ -335,10 +335,19 @@
 								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-masses.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-masses.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-masses.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de masses"></div>
 								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-contenances.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de contenances"></div>
 								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-table-pythagore.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-table-pythagore.jpg)');saveBg('url(fonds/fond-maths-table-pythagore.jpg)');closeMainMenu()" title="Table de Pythagore"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof.jpg)');saveBg('url(fonds/fond-lebureauduprof.jpg)');closeMainMenu()" title="Le Bureau du Prof"></div>
+							</div>
+							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">👍 Divers</div>
+							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
+								<div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof.jpeg)');saveBg('url(fonds/fond-lebureauduprof.jpeg)');closeMainMenu()" title="Le Bureau du Prof"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof2.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof2.jpg)');saveBg('url(fonds/fond-lebureauduprof2.jpg)');closeMainMenu()" title="Le bureau du prof"></div>
 								<div class="bg-thumb" style="background-image:url('images/carte-monde-pays01.png');background-size:cover;background-position:center;" onclick="applyBackground('url(images/carte-monde-pays01.png)');saveBg('url(images/carte-monde-pays01.png)');closeMainMenu()" title="Carte de spays du monde"></div>
 								<div class="bg-thumb" style="background-image:url('fonds/fond-nebuleuse.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-nebuleuse.jpeg)');saveBg('url(fonds/fond-nebuleuse.jpeg)');closeMainMenu()" title="N�buleuse de la t�te de cheval"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-terre.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-terre.jpg)');saveBg('url(fonds/fond-terre.jpg)');closeMainMenu()" title="La Terre dans l'espace"></div>
+								<div class="bg-thumb" style="background-image:url('fonds/fond-couleurs.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-couleurs.jpeg)');saveBg('url(fonds/fond-couleurs.jpeg)');closeMainMenu()" title="Couleurs dégradées"></div>
 							</div>
+							
+							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
+							
 						</div></div>
 					</div>
 					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>&nbsp;&nbsp;Pointeur laser</div>
