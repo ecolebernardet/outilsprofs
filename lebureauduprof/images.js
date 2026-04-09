@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tab = document.createElement('button');
         tab.id = 'image-panel-tab';
         tab.title = 'Images';
-        tab.textContent = '🖼️ Images';
+        tab.innerHTML = '<span class="act-tab-lbl">Images</span><span class="act-tab-ico">🖼️</span>';
         tab.addEventListener('click', toggleImagePanel);
         document.body.appendChild(tab);
     }

@@ -1400,10 +1400,10 @@
 body.presentation-mode #sticker-panel-tab { display: none !important; }
 		#sticker-panel-tab {
 			position: fixed;
-			left: -35px; top: calc(50% - 112px);
+			left: -35px; top: calc(50% - 75px);
 			transform: translateY(-50%) rotate(-90deg);
 			transform-origin: center center;
-			width: 70px; height: 50px;
+			width: 70px; height: 70px;
 			background: #111;
 			border: 1px solid #2e2e3a;
 			border-right: none;
@@ -1586,10 +1586,10 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
 
 #widgets-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 187px);
+    left: -35px; top: calc(50% - 150px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1720,10 +1720,10 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #tools-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 262px);
+    left: -35px; top: calc(50% - 225px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1865,10 +1865,10 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #activities-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 337px);
+    left: -35px; top: calc(50% - 300px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1899,6 +1899,28 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 }
 #activities-panel-tab.act-panel-tab-open { display: none !important; }
 #activities-panel-tab.act-panel-resizing { transition: none !important; }
+#activities-panel-tab .act-tab-ico,
+#activities-panel-tab .act-tab-lbl,
+#sticker-panel-tab .act-tab-ico,
+#sticker-panel-tab .act-tab-lbl,
+#widgets-panel-tab .act-tab-ico,
+#widgets-panel-tab .act-tab-lbl,
+#tools-panel-tab .act-tab-ico,
+#tools-panel-tab .act-tab-lbl,
+#pdf-library-tab .act-tab-ico,
+#pdf-library-tab .act-tab-lbl,
+#projects-panel-tab .act-tab-ico,
+#projects-panel-tab .act-tab-lbl,
+#pres-mode-tab .act-tab-ico,
+#pres-mode-tab .act-tab-lbl,
+#display-panel-tab .act-tab-ico,
+#display-panel-tab .act-tab-lbl,
+#image-panel-tab .act-tab-ico,
+#image-panel-tab .act-tab-lbl {
+    display: block;
+    line-height: 1;
+    white-space: normal;
+}
 
 /* En-tête */
 #act-panel-header {
@@ -2017,10 +2039,10 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 /* Onglet déclencheur sur le bord gauche */
 #pdf-library-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 38px);
+    left: -35px; top: calc(50% + 75px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: var(--pdf-lib-bg);
     border: 1px solid var(--pdf-lib-border);
     border-right: none;
@@ -2183,10 +2205,10 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #projects-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 113px);
+    left: -35px; top: calc(50% + 150px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid rgba(255,255,255,0.1);
     border-right: none;
@@ -2221,10 +2243,10 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* ── Onglet Mode Présentation (8e onglet) ─────────────────────── */
 #pres-mode-tab {
     position: fixed;
-    left: -25px; top: calc(50% + 338px);
+    left: -25px; top: calc(50% + 300px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 50px; height: 50px;
+    width: 50px; height: 70px;
     background: #1a2a3b;
     border: 1px solid rgba(255,120,50,0.35);
     border-right: none;
@@ -2274,10 +2296,10 @@ body.presentation-mode #pres-mode-tab {
 /* ── Onglet Affichage (9e onglet) ─────────────────────── */
 #display-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 188px);
+    left: -35px; top: calc(50% + 225px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2538,7 +2560,7 @@ body.menu-light .disp-inline-btn-active {
 .hist-btn-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .hist-btn {
     display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px;
+    padding: 2px 2px;
     background: #1a1a1a;
     border: 1px solid #2e2e3a;
     border-radius: 10px;
@@ -2546,7 +2568,7 @@ body.menu-light .disp-inline-btn-active {
     color: rgba(255,255,255,0.75);
     font-size: 13px; font-weight: 500;
     transition: background 0.15s, border-color 0.15s;
-    text-align: left; width: 100%;
+    text-align: center; width: 100%;
 }
 .hist-btn:hover { background: #1a3550; border-color: #4a90e2; color: #fff; }
 .hist-btn.hist-btn-danger { border-color: rgba(255,80,80,0.25); color: rgba(255,120,120,0.8); }
@@ -2771,10 +2793,10 @@ body.presentation-mode #image-panel-tab { display: none !important; }
 
 #image-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 37px);
+    left: -35px; top: calc(50% - 0px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 70px; height: 70px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;

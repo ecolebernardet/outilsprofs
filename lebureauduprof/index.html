@@ -662,7 +662,7 @@
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
 <!-- Onglet déclencheur stickers -->
-<button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Stickers &amp; Émojis">🤓 Stickers</button>
+<button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Stickers &amp; Émojis"><span class="act-tab-lbl">Stickers</span><span class="act-tab-ico">🤓</span></button>
 
 <div id="sticker-panel">
 	<!-- Header -->
@@ -933,7 +933,9 @@
         tab.classList.toggle('pres-mode-tab-active', isOn);
         // Mise à jour du contenu texte (état normal, sans hover)
         if (!tab.classList.contains('tab-js-hover')) {
-            tab.innerHTML = isOn ? '📽️ Off' : '📽️ On';
+            tab.innerHTML = isOn
+                ? '<span class="act-tab-lbl">Off</span><span class="act-tab-ico">📽️</span>'
+                : '<span class="act-tab-lbl">Présentation</span><span class="act-tab-ico">📽️</span>';
         }
     }
 
@@ -1047,7 +1049,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord droit -->
-<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF">📋 PDF</button>
+<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF"><span class="act-tab-lbl">PDF</span><span class="act-tab-ico">📋</span></button>
 
 <script src="pdf-library.js"></script>
 
@@ -1136,7 +1138,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="activities-panel-tab" onclick="toggleActivitiesPanel()" title="Activités">🎲 Activités</button>
+<button id="activities-panel-tab" onclick="toggleActivitiesPanel()" title="Activités"><span class="act-tab-lbl">Activités</span><span class="act-tab-ico">🎲</span></button>
 
 <script>
 // ── Panneau Activités ──────────────────────────────────────────────
@@ -1266,7 +1268,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 	</div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="widgets-panel-tab" onclick="toggleWidgetsPanel()" title="Widgets">📦 Widgets</button>
+<button id="widgets-panel-tab" onclick="toggleWidgetsPanel()" title="Widgets"><span class="act-tab-lbl">Widgets</span><span class="act-tab-ico">📦</span></button>
 
 <script>
 // ── Panneau Widgets ──────────────────────────────────────────────
@@ -1393,7 +1395,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 	</div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="tools-panel-tab" onclick="toggleToolsPanel()" title="Outils">🧰 Outils</button>
+<button id="tools-panel-tab" onclick="toggleToolsPanel()" title="Outils"><span class="act-tab-lbl">Outils</span><span class="act-tab-ico">🧰</span></button>
 
 <script>
 // ── Panneau Outils ──────────────────────────────────────────────
@@ -1489,10 +1491,10 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets">📁 Projets</button>
+<button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets"><span class="act-tab-lbl">Projets</span><span class="act-tab-ico">📁</span></button>
 
 <!-- Onglet Mode Présentation (8e onglet) -->
-<button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation">📽️ Présentation</button>
+<button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation"><span class="act-tab-lbl">Présentation</span><span class="act-tab-ico">📽️</span></button>
 
 <!-- ── Panneau Affichage ───────────────────────────────────────── -->
 <div id="display-panel">
@@ -1503,10 +1505,49 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
     <div id="display-panel-content">
 
+		<div class="disp-section-label">↩️ Actions</div>
+        <div class="hist-btn-row" style="flex-direction:row;flex-wrap:nowrap;gap:4px;">
+            <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+                <span class="hist-btn-ico">↩</span>
+                <span style="font-size:11px;line-height:1.2;">Annuler</span>
+            </button>
+            <button class="hist-btn" id="hist-redo-btn" onclick="redoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+                <span class="hist-btn-ico">↪</span>
+                <span style="font-size:11px;line-height:1.2;">Refaire</span>
+            </button>
+            <button class="hist-btn hist-btn-danger" onclick="clearBoard();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+                <span class="hist-btn-ico">🗑️</span>
+                <span style="font-size:11px;line-height:1.2;">Effacer</span>
+            </button>
+            <button class="hist-btn" onclick="openHelpModal();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+                <span class="hist-btn-ico">❓</span>
+                <span style="font-size:11px;line-height:1.2;">Aide</span>
+            </button>
+        </div>
+		
+		<div class="disp-section-label">🎨 Thème</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙 Sombre</button>
+            <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️ Clair</button>
+        </div>
+
+        <div class="disp-section-label">🔴 Pointeur & Présentation</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴<br>Laser</button>
+            <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄<br>format A4 Portrait</button>
+        </div>
+
+        <div class="disp-section-label">📸 Capture du bureau</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" onclick="captureBoard('jpg');toggleDisplayPanel()">🖼️ JPG</button>
+            <button class="disp-inline-btn" onclick="captureBoard('png');toggleDisplayPanel()">🖼️ PNG</button>
+            <button class="disp-inline-btn" onclick="captureBoard('pdf');toggleDisplayPanel()">📄 PDF</button>
+        </div>
+		
         <div class="disp-section-label">🎨 Fond d'écran</div>
 
         <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 4px;">🖼️ Couleurs</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 0px;">
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:0 0 0px;">
             <div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');toggleDisplayPanel()" title="Vieux rose"></div>
             <div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');toggleDisplayPanel()" title="Beige"></div>
             <div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');toggleDisplayPanel()" title="Bleu nuit"></div>
@@ -1514,9 +1555,9 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 			<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');toggleDisplayPanel()" title="Noir"></div>
 			<div class="bg-thumb" style="background-color:#ffffff;" onclick="applyBackground('#ffffff');saveBg('#ffffff');toggleDisplayPanel()" title="Blanc"></div>
 			<div class="bg-thumb" style="background-color:#c0c0c0;" onclick="applyBackground('#c0c0c0');saveBg('#c0c0c0');toggleDisplayPanel()" title="Gris"></div>
-            <div class="bg-thumb" id="cpick-board-bg-swatch" style="background:#2a2a3a;border:1px dashed #555 !important;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;font-size:10px;color:#aaa;" onclick="cpickOpen('board-bg', this)" title="Autre couleur…">
+            <div class="bg-thumb" id="cpick-board-bg-swatch" style="background:#2a2a3a;border:1px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;font-size:10px;color:#aaa;" onclick="cpickOpen('board-bg', this)" title="Autres couleurs…">
                 <span style="font-size:16px;pointer-events:none;">🎨</span>
-                <span style="pointer-events:none;">Autres couleurs<span>
+                <span style="pointer-events:none; text-align: center;">Autres couleurs<span>
             </div>
         </div>
         <!-- popup cpick hors de la grille pour éviter tout conflit de positionnement -->
@@ -1525,7 +1566,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         </div>
 
         <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:0px 4px 4px;border-top:0px solid #2e2e3a;">📏 Réglures</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 10px;">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:0 0 10px;">
             <div class="bg-thumb bg-thumb-seyes"          onclick="applyBackground('seyes');saveBg('seyes');toggleDisplayPanel()"                     title="Séyès (jaune paille)"></div>
             <div class="bg-thumb bg-thumb-seyes-white"    onclick="applyBackground('seyes-white');saveBg('seyes-white');toggleDisplayPanel()"         title="Séyès (blanc)"></div>
             <div class="bg-thumb bg-thumb-seyes-marge"    onclick="applyBackground('seyes-marge');saveBg('seyes-marge');toggleDisplayPanel()"         title="Séyès clair avec marge"></div>
@@ -1535,7 +1576,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         </div>
 
         <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 4px;border-top:0px solid #2e2e3a;">👍 Pratiques</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 10px;">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:0 0 10px;">
             <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-entiers-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');toggleDisplayPanel()" title="Tableau de numération des entiers CM"></div>
             <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-decimaux-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');toggleDisplayPanel()" title="Tableau de numération des décimaux CM"></div>
             <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-longueurs.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');toggleDisplayPanel()" title="Tableau de conversion des mesures de longueurs"></div>
@@ -1557,70 +1598,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <span>Importer</span>
             </div>
         </div>
-
-        <div class="disp-section-label">🎨 Thème</div>
-        <div class="disp-inline-row">
-            <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙 Sombre</button>
-            <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️ Clair</button>
-        </div>
-
-        <div class="disp-section-label">🔴 Pointeur & Présentation</div>
-        <div class="disp-inline-row">
-            <button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴 Laser</button>
-            <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄 A4 Portrait</button>
-        </div>
-
-        <div class="disp-section-label">📸 Capture du bureau</div>
-        <div class="disp-inline-row">
-            <button class="disp-inline-btn" onclick="captureBoard('jpg');toggleDisplayPanel()">🖼️ JPG</button>
-            <button class="disp-inline-btn" onclick="captureBoard('png');toggleDisplayPanel()">🖼️ PNG</button>
-            <button class="disp-inline-btn" onclick="captureBoard('pdf');toggleDisplayPanel()">📄 PDF</button>
-        </div>
-
     </div>
 </div>
-<button id="display-panel-tab" onclick="toggleDisplayPanel()" title="Affichage">🖥️ Écran</button>
+<button id="display-panel-tab" onclick="toggleDisplayPanel()" title="Affichage"><span class="act-tab-lbl">Écran</span><span class="act-tab-ico">🖥️</span></button>
 
-<!-- ── Panneau Historique ─────────────────────────────────────── -->
-<div id="history-panel">
-    <div id="history-panel-resize-handle" title="Redimensionner le panneau"></div>
-    <div id="history-panel-header">
-        <h3>↩️ Historique</h3>
-        <button id="history-panel-close" onclick="toggleHistoryPanel()" title="Fermer">✕</button>
-    </div>
-    <div id="history-panel-content">
 
-        <div class="hist-section-label">↩️ Actions</div>
-        <div class="hist-btn-row">
-            <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()">
-                <span class="hist-btn-ico">↩</span>
-                <span class="hist-btn-label">Annuler<div class="hist-btn-sub">Ctrl + Z</div></span>
-            </button>
-            <button class="hist-btn" id="hist-redo-btn" onclick="redoAction()">
-                <span class="hist-btn-ico">↪</span>
-                <span class="hist-btn-label">Refaire<div class="hist-btn-sub">Ctrl + Y</div></span>
-            </button>
-        </div>
-
-        <div class="hist-section-label">🗑️ Tableau</div>
-        <div class="hist-btn-row">
-            <button class="hist-btn hist-btn-danger" onclick="clearBoard();toggleHistoryPanel()">
-                <span class="hist-btn-ico">🗑️</span>
-                <span class="hist-btn-label">Effacer le tableau<div class="hist-btn-sub">Supprime tous les widgets</div></span>
-            </button>
-        </div>
-
-        <div class="hist-section-label">❓ Aide</div>
-        <div class="hist-btn-row">
-            <button class="hist-btn" onclick="openHelpModal();toggleHistoryPanel()">
-                <span class="hist-btn-ico">❓</span>
-                <span class="hist-btn-label">Aide &amp; raccourcis<div class="hist-btn-sub">Liste des commandes</div></span>
-            </button>
-        </div>
-
-    </div>
-</div>
-<button id="history-panel-tab" onclick="toggleHistoryPanel()" title="Historique">↩️ Historique</button>
 
 <script>
 // ── Panneau Affichage ────────────────────────────────────────────
@@ -2328,7 +2310,6 @@ function toggleMediaCollapse(container) {
         ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Projets'],
         ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
         ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
-        ['history-panel-tab',    'history-panel-tab-open',      '↩️', 'Historique'],
     ];
     let currentHovered = null;
 
@@ -2361,12 +2342,11 @@ function toggleMediaCollapse(container) {
 
     function closeTab(tab, emoji, label) {
         tab.classList.remove('tab-js-hover');
-        // Pour l'onglet présentation, adapter le contenu selon l'état
         if (tab.id === 'pres-mode-tab') {
             var isOn = document.body.classList.contains('presentation-mode');
-            tab.innerHTML = emoji + '\u00a0' + (isOn ? 'Off' : 'On');
+            tab.innerHTML = '<span class="act-tab-lbl">' + (isOn ? 'Off' : 'Présentation') + '</span><span class="act-tab-ico">' + emoji + '</span>';
         } else {
-            tab.innerHTML = emoji + '\u00a0' + label;
+            tab.innerHTML = '<span class="act-tab-lbl">' + label + '</span><span class="act-tab-ico">' + emoji + '</span>';
         }
     }
 
