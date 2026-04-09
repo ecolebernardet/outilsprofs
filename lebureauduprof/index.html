@@ -196,7 +196,7 @@
 	</div>
 
     <!-- Bouton flottant principal -->
-	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal">＋</button>
+	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal" style="display:none;">＋</button>
 	<button id="draw-fab-btn" onclick="openMmPanel('draw')" title="Dessin &amp; Figures">✏️</button>
 	<div id="current-project-name"></div>
 
@@ -1477,8 +1477,10 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </button>
     <!-- Actions export/import -->
     <div id="proj-panel-actions">
-        <button class="proj-panel-action-btn green" onclick="exportAllProjects()" title="Exporter tous les projets">📤 Tout exporter</button>
-        <button class="proj-panel-action-btn green" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Tout importer</button>
+        <button class="proj-panel-action-btn green" onclick="exportConfig();toggleProjectsPanel()" title="Sauvegarder ce projet (JSON)">💾 Sauvegarder</button>
+        <button class="proj-panel-action-btn green" onclick="document.getElementById('import-input').click();toggleProjectsPanel()" title="Charger un projet (JSON)">📂 Charger</button>
+        <button class="proj-panel-action-btn" onclick="exportAllProjects()" title="Exporter tous les projets">📤 Tout exporter</button>
+        <button class="proj-panel-action-btn" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Tout importer</button>
         <button class="proj-panel-action-btn" onclick="openProjectsLibrary()" title="Ouvrir la vue détaillée">⊞ Vue détaillée</button>
     </div>
     <!-- Liste des projets -->
@@ -1491,6 +1493,358 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 
 <!-- Onglet Mode Présentation (8e onglet) -->
 <button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation">📽️ Présentation</button>
+
+<!-- ── Panneau Affichage ───────────────────────────────────────── -->
+<div id="display-panel">
+    <div id="display-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="display-panel-header">
+        <h3>🖥️ Écran</h3>
+        <button id="display-panel-close" onclick="toggleDisplayPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="display-panel-content">
+
+        <div class="disp-section-label">🎨 Fond d'écran</div>
+
+        <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 4px;">🖼️ Couleurs</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 0px;">
+            <div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');toggleDisplayPanel()" title="Vieux rose"></div>
+            <div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');toggleDisplayPanel()" title="Beige"></div>
+            <div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');toggleDisplayPanel()" title="Bleu nuit"></div>
+            <div class="bg-thumb" style="background-color:#7A9684;" onclick="applyBackground('#7A9684');saveBg('#7A9684');toggleDisplayPanel()" title="Vert ardoise"></div>
+			<div class="bg-thumb" style="background-color:#000000;" onclick="applyBackground('#000000');saveBg('#000000');toggleDisplayPanel()" title="Noir"></div>
+			<div class="bg-thumb" style="background-color:#ffffff;" onclick="applyBackground('#ffffff');saveBg('#ffffff');toggleDisplayPanel()" title="Blanc"></div>
+			<div class="bg-thumb" style="background-color:#c0c0c0;" onclick="applyBackground('#c0c0c0');saveBg('#c0c0c0');toggleDisplayPanel()" title="Gris"></div>
+            <div class="bg-thumb" id="cpick-board-bg-swatch" style="background:#2a2a3a;border:1px dashed #555 !important;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;font-size:10px;color:#aaa;" onclick="cpickOpen('board-bg', this)" title="Autre couleur…">
+                <span style="font-size:16px;pointer-events:none;">🎨</span>
+                <span style="pointer-events:none;">Autres couleurs<span>
+            </div>
+        </div>
+        <!-- popup cpick hors de la grille pour éviter tout conflit de positionnement -->
+        <div class="cpick-wrap" id="cpick-board-bg" style="position:static;">
+            <div class="cpick-popup" id="cpick-pop-board-bg"></div>
+        </div>
+
+        <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:0px 4px 4px;border-top:0px solid #2e2e3a;">📏 Réglures</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 10px;">
+            <div class="bg-thumb bg-thumb-seyes"          onclick="applyBackground('seyes');saveBg('seyes');toggleDisplayPanel()"                     title="Séyès (jaune paille)"></div>
+            <div class="bg-thumb bg-thumb-seyes-white"    onclick="applyBackground('seyes-white');saveBg('seyes-white');toggleDisplayPanel()"         title="Séyès (blanc)"></div>
+            <div class="bg-thumb bg-thumb-seyes-marge"    onclick="applyBackground('seyes-marge');saveBg('seyes-marge');toggleDisplayPanel()"         title="Séyès clair avec marge"></div>
+            <div class="bg-thumb bg-thumb-lignes"         onclick="applyBackground('lignes-simples');saveBg('lignes-simples');toggleDisplayPanel()"   title="Lignes simples"></div>
+            <div class="bg-thumb bg-thumb-grands"         onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');toggleDisplayPanel()" title="Grands carreaux"></div>
+            <div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');toggleDisplayPanel()"                 title="Ardoise lignes"></div>
+        </div>
+
+        <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 4px;border-top:0px solid #2e2e3a;">👍 Pratiques</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 10px;">
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-entiers-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');toggleDisplayPanel()" title="Tableau de numération des entiers CM"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-decimaux-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');toggleDisplayPanel()" title="Tableau de numération des décimaux CM"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-longueurs.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');toggleDisplayPanel()" title="Tableau de conversion des mesures de longueurs"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-masses.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-masses.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-masses.jpg)');toggleDisplayPanel()" title="Tableau de conversion des mesures de masses"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-contenances.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');toggleDisplayPanel()" title="Tableau de conversion des mesures de contenances"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-maths-table-pythagore.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-table-pythagore.jpg)');saveBg('url(fonds/fond-maths-table-pythagore.jpg)');toggleDisplayPanel()" title="Table de Pythagore"></div>
+        </div>
+
+        <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 6px;border-top:0px solid #2e2e3a;">👍 Divers</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 10px;">
+            <div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof.jpeg)');saveBg('url(fonds/fond-lebureauduprof.jpeg)');toggleDisplayPanel()" title="Le Bureau du Prof"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof2.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof2.jpg)');saveBg('url(fonds/fond-lebureauduprof2.jpg)');toggleDisplayPanel()" title="Le bureau du prof"></div>
+            <div class="bg-thumb" style="background-image:url('images/carte-monde-pays01.png');background-size:cover;background-position:center;" onclick="applyBackground('url(images/carte-monde-pays01.png)');saveBg('url(images/carte-monde-pays01.png)');toggleDisplayPanel()" title="Carte des pays du monde"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-nebuleuse.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-nebuleuse.jpeg)');saveBg('url(fonds/fond-nebuleuse.jpeg)');toggleDisplayPanel()" title="Nébuleuse de la tête de cheval"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-terre.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-terre.jpg)');saveBg('url(fonds/fond-terre.jpg)');toggleDisplayPanel()" title="La Terre dans l'espace"></div>
+            <div class="bg-thumb" style="background-image:url('fonds/fond-couleurs.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-couleurs.jpeg)');saveBg('url(fonds/fond-couleurs.jpeg)');toggleDisplayPanel()" title="Couleurs dégradées"></div>
+            <div class="bg-thumb" style="background:#2a2a3a;border:1px dashed #555;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;cursor:pointer;font-size:10px;color:#aaa;" onclick="document.getElementById('bg-upload').click();toggleDisplayPanel()" title="Importer une image">
+                <span style="font-size:18px;">📷</span>
+                <span>Importer</span>
+            </div>
+        </div>
+
+        <div class="disp-section-label">🎨 Thème</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙 Sombre</button>
+            <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️ Clair</button>
+        </div>
+
+        <div class="disp-section-label">🔴 Pointeur & Présentation</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴 Laser</button>
+            <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄 A4 Portrait</button>
+        </div>
+
+        <div class="disp-section-label">📸 Capture du bureau</div>
+        <div class="disp-inline-row">
+            <button class="disp-inline-btn" onclick="captureBoard('jpg');toggleDisplayPanel()">🖼️ JPG</button>
+            <button class="disp-inline-btn" onclick="captureBoard('png');toggleDisplayPanel()">🖼️ PNG</button>
+            <button class="disp-inline-btn" onclick="captureBoard('pdf');toggleDisplayPanel()">📄 PDF</button>
+        </div>
+
+    </div>
+</div>
+<button id="display-panel-tab" onclick="toggleDisplayPanel()" title="Affichage">🖥️ Écran</button>
+
+<!-- ── Panneau Historique ─────────────────────────────────────── -->
+<div id="history-panel">
+    <div id="history-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="history-panel-header">
+        <h3>↩️ Historique</h3>
+        <button id="history-panel-close" onclick="toggleHistoryPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="history-panel-content">
+
+        <div class="hist-section-label">↩️ Actions</div>
+        <div class="hist-btn-row">
+            <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()">
+                <span class="hist-btn-ico">↩</span>
+                <span class="hist-btn-label">Annuler<div class="hist-btn-sub">Ctrl + Z</div></span>
+            </button>
+            <button class="hist-btn" id="hist-redo-btn" onclick="redoAction()">
+                <span class="hist-btn-ico">↪</span>
+                <span class="hist-btn-label">Refaire<div class="hist-btn-sub">Ctrl + Y</div></span>
+            </button>
+        </div>
+
+        <div class="hist-section-label">🗑️ Tableau</div>
+        <div class="hist-btn-row">
+            <button class="hist-btn hist-btn-danger" onclick="clearBoard();toggleHistoryPanel()">
+                <span class="hist-btn-ico">🗑️</span>
+                <span class="hist-btn-label">Effacer le tableau<div class="hist-btn-sub">Supprime tous les widgets</div></span>
+            </button>
+        </div>
+
+        <div class="hist-section-label">❓ Aide</div>
+        <div class="hist-btn-row">
+            <button class="hist-btn" onclick="openHelpModal();toggleHistoryPanel()">
+                <span class="hist-btn-ico">❓</span>
+                <span class="hist-btn-label">Aide &amp; raccourcis<div class="hist-btn-sub">Liste des commandes</div></span>
+            </button>
+        </div>
+
+    </div>
+</div>
+<button id="history-panel-tab" onclick="toggleHistoryPanel()" title="Historique">↩️ Historique</button>
+
+<script>
+// ── Panneau Affichage ────────────────────────────────────────────
+(function() {
+    var DISP_W_KEY = 'display-panel-w';
+
+    function _closeDisplayPanel() {
+        var panel = document.getElementById('display-panel');
+        var tab   = document.getElementById('display-panel-tab');
+        if (panel && panel.classList.contains('display-panel-open')) {
+            panel.classList.remove('display-panel-open');
+            if (tab) tab.classList.remove('display-panel-tab-open');
+        }
+    }
+    window._closeDisplayPanel = _closeDisplayPanel;
+
+    function _closeHistoryPanel() {
+        var panel = document.getElementById('history-panel');
+        var tab   = document.getElementById('history-panel-tab');
+        if (panel && panel.classList.contains('history-panel-open')) {
+            panel.classList.remove('history-panel-open');
+            if (tab) tab.classList.remove('history-panel-tab-open');
+        }
+    }
+    window._closeHistoryPanel = _closeHistoryPanel;
+
+    function toggleDisplayPanel() {
+        var panel = document.getElementById('display-panel');
+        var tab   = document.getElementById('display-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('display-panel-open');
+        if (isOpen) {
+            panel.classList.remove('display-panel-open');
+            tab.classList.remove('display-panel-tab-open');
+        } else {
+            _closeHistoryPanel();
+            panel.classList.add('display-panel-open');
+            tab.classList.add('display-panel-tab-open');
+            _updateDispThemeBtns();
+        }
+    }
+    window.toggleDisplayPanel = toggleDisplayPanel;
+
+    // Mise à jour du swatch "Autre couleur" quand cpick board-bg change
+    document.addEventListener('DOMContentLoaded', function() {
+        var origCpickSet = window.cpickSet;
+        if (origCpickSet) {
+            window.cpickSet = function(id, color, closeAfter) {
+                origCpickSet(id, color, closeAfter);
+                if (id === 'board-bg') {
+                    var swatch = document.getElementById('cpick-board-bg-swatch');
+                    if (swatch) swatch.style.background = color;
+                }
+            };
+        }
+    });
+
+    function _updateDispThemeBtns() {
+        var isLight = document.body.classList.contains('menu-light');
+        var darkBtn  = document.getElementById('disp-dark-btn');
+        var lightBtn = document.getElementById('disp-light-btn');
+        if (!darkBtn || !lightBtn) return;
+        darkBtn.classList.toggle('disp-inline-btn-active',  !isLight);
+        lightBtn.classList.toggle('disp-inline-btn-active', isLight);
+    }
+    window._updateDispThemeBtns = _updateDispThemeBtns;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sync thème
+        var orig = window.toggleMenuTheme;
+        if (orig) {
+            window.toggleMenuTheme = function() {
+                orig();
+                _updateDispThemeBtns();
+            };
+        }
+        _updateDispThemeBtns();
+
+        // Resize display-panel
+        var handle = document.getElementById('display-panel-resize-handle');
+        var panel  = document.getElementById('display-panel');
+        var tab    = document.getElementById('display-panel-tab');
+        if (handle && panel) {
+            var savedW = localStorage.getItem(DISP_W_KEY);
+            if (savedW) {
+                var w = parseInt(savedW);
+                panel.style.width = w + 'px';
+                document.documentElement.style.setProperty('--display-panel-w', w + 'px');
+            }
+            var dragging = false, startX = 0, startW = 0;
+            handle.addEventListener('mousedown', function(e) {
+                dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+                panel.classList.add('display-panel-resizing');
+                document.body.style.cursor = 'ew-resize';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+                panel.style.width = w + 'px';
+                document.documentElement.style.setProperty('--display-panel-w', w + 'px');
+            });
+            document.addEventListener('mouseup', function() {
+                if (!dragging) return;
+                dragging = false;
+                panel.classList.remove('display-panel-resizing');
+                document.body.style.cursor = '';
+                localStorage.setItem(DISP_W_KEY, panel.offsetWidth);
+            });
+        }
+
+        // Fermeture croisée : display/history se ferment quand un autre panneau s'ouvre
+        var _origPanels = [
+            'toggleActivitiesPanel','toggleToolsPanel','toggleWidgetsPanel',
+            'toggleProjectsPanel','togglePdfLibrary','toggleImagePanel','toggleStickerPanel'
+        ];
+        _origPanels.forEach(function(fname) {
+            document.addEventListener('DOMContentLoaded', function() {}); // no-op guard
+            var orig = window[fname];
+            if (!orig) return;
+            window[fname] = function() {
+                // Fermer display et history avant d'ouvrir l'autre
+                _closeDisplayPanel();
+                _closeHistoryPanel();
+                orig.apply(this, arguments);
+            };
+        });
+    });
+})();
+
+// ── Fermeture des panneaux au clic sur le board ─────────────────────
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var board = document.getElementById('board');
+        if (!board) return;
+        board.addEventListener('mousedown', function(e) {
+            // Ne pas fermer si le clic vient d'un widget ou d'un élément interactif
+            if (e.target.closest('.widget, #selection-controls, #pres-limit-line')) return;
+
+            var closers = [
+                { panelId: 'display-panel',    openClass: 'display-panel-open',    tabId: 'display-panel-tab',    tabClass: 'display-panel-tab-open' },
+                { panelId: 'history-panel',    openClass: 'history-panel-open',    tabId: 'history-panel-tab',    tabClass: 'history-panel-tab-open' },
+                { panelId: 'activities-panel', openClass: 'act-panel-open',        tabId: 'activities-panel-tab', tabClass: 'act-panel-tab-open' },
+                { panelId: 'tools-panel',      openClass: 'tools-panel-open',      tabId: 'tools-panel-tab',      tabClass: 'tools-panel-tab-open' },
+                { panelId: 'widgets-panel',    openClass: 'widgets-panel-open',    tabId: 'widgets-panel-tab',    tabClass: 'widgets-panel-tab-open' },
+                { panelId: 'projects-panel',   openClass: 'proj-panel-open',       tabId: 'projects-panel-tab',   tabClass: 'proj-panel-tab-open' },
+                { panelId: 'pdf-library-panel',openClass: 'pdf-lib-open',          tabId: 'pdf-library-tab',      tabClass: 'pdf-lib-tab-open' },
+                { panelId: 'image-panel',      openClass: 'active',                tabId: 'image-panel-tab',      tabClass: 'active' },
+            ];
+
+            var closed = false;
+            closers.forEach(function(c) {
+                var panel = document.getElementById(c.panelId);
+                if (panel && panel.classList.contains(c.openClass)) {
+                    panel.classList.remove(c.openClass);
+                    var tab = document.getElementById(c.tabId);
+                    if (tab) tab.classList.remove(c.tabClass);
+                    closed = true;
+                }
+            });
+
+            // Sticker panel (classe différente)
+            var stickerPanel = document.getElementById('sticker-panel');
+            if (stickerPanel && stickerPanel.classList.contains('active')) {
+                if (typeof toggleStickerPanel === 'function') toggleStickerPanel();
+                closed = true;
+            }
+        });
+    });
+})();
+(function() {
+    var HIST_W_KEY = 'history-panel-w';
+
+    function toggleHistoryPanel() {
+        var panel = document.getElementById('history-panel');
+        var tab   = document.getElementById('history-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('history-panel-open');
+        if (isOpen) {
+            panel.classList.remove('history-panel-open');
+            tab.classList.remove('history-panel-tab-open');
+        } else {
+            if (typeof _closeDisplayPanel === 'function') _closeDisplayPanel();
+            panel.classList.add('history-panel-open');
+            tab.classList.add('history-panel-tab-open');
+        }
+    }
+    window.toggleHistoryPanel = toggleHistoryPanel;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Resize history-panel
+        var handle = document.getElementById('history-panel-resize-handle');
+        var panel  = document.getElementById('history-panel');
+        if (handle && panel) {
+            var savedW = localStorage.getItem(HIST_W_KEY);
+            if (savedW) {
+                var w = parseInt(savedW);
+                panel.style.width = w + 'px';
+                document.documentElement.style.setProperty('--history-panel-w', w + 'px');
+            }
+            var dragging = false, startX = 0, startW = 0;
+            handle.addEventListener('mousedown', function(e) {
+                dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+                panel.classList.add('history-panel-resizing');
+                document.body.style.cursor = 'ew-resize';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+                panel.style.width = w + 'px';
+                document.documentElement.style.setProperty('--history-panel-w', w + 'px');
+            });
+            document.addEventListener('mouseup', function() {
+                if (!dragging) return;
+                dragging = false;
+                panel.classList.remove('history-panel-resizing');
+                document.body.style.cursor = '';
+                localStorage.setItem(HIST_W_KEY, panel.offsetWidth);
+            });
+        }
+    });
+})();
+</script>
 
 <script src="projects-panel.js"></script>
 <script>
@@ -1965,14 +2319,16 @@ function toggleMediaCollapse(container) {
 (function() {
     // [id, classe CSS panneau ouvert, emoji, label]
     const TABS = [
-        ['activities-panel-tab', 'act-panel-tab-open',      '🎲', 'Activités'],
-        ['tools-panel-tab',      'tools-panel-tab-open',    '🧰', 'Outils'],
-        ['widgets-panel-tab',    'widgets-panel-tab-open',  '📦', 'Widgets'],
-        ['sticker-panel-tab',    'active',                  '🤓', 'Stickers'],
-        ['image-panel-tab',      'active',                  '🖼️', 'Images'],
-        ['pdf-library-tab',      'pdf-lib-tab-open',        '📋', 'PDF'],
-        ['projects-panel-tab',   'proj-panel-tab-open',     '📁', 'Projets'],
-        ['pres-mode-tab',        '',                        '📽️', 'Présentation'],
+        ['activities-panel-tab', 'act-panel-tab-open',          '🎲', 'Activités'],
+        ['tools-panel-tab',      'tools-panel-tab-open',        '🧰', 'Outils'],
+        ['widgets-panel-tab',    'widgets-panel-tab-open',      '📦', 'Widgets'],
+        ['sticker-panel-tab',    'active',                      '🤓', 'Stickers'],
+        ['image-panel-tab',      'active',                      '🖼️', 'Images'],
+        ['pdf-library-tab',      'pdf-lib-tab-open',            '📋', 'PDF'],
+        ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Projets'],
+        ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
+        ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
+        ['history-panel-tab',    'history-panel-tab-open',      '↩️', 'Historique'],
     ];
     let currentHovered = null;
 
