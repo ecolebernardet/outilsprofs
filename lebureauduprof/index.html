@@ -2309,7 +2309,7 @@ function toggleMediaCollapse(container) {
         ['image-panel-tab',      'active',                      '🖼️', 'Images'],
         ['pdf-library-tab',      'pdf-lib-tab-open',            '📋', 'PDF'],
         ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Projets'],
-        ['pres-mode-tab',        '',                            '📽️', 'On'],
+        ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
         ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
     ];
     let currentHovered = null;
@@ -2332,14 +2332,9 @@ function toggleMediaCollapse(container) {
     }
 
     function openTab(tab, emoji, label) {
-        // Pour l'onglet présentation, adapter le label selon l'état
-        if (tab.id === 'pres-mode-tab') {
-            var isOn = document.body.classList.contains('presentation-mode');
-            label = isOn ? 'Quitter' : 'Mode Présentation';
-        }
-        tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
-        tab.classList.add('tab-js-hover');
-    }
+    tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
+    tab.classList.add('tab-js-hover');
+}
 
     function closeTab(tab, emoji, label) {
         tab.classList.remove('tab-js-hover');
