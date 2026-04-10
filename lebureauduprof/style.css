@@ -1382,10 +1382,11 @@
 		#sticker-panel {
 			display: flex;
 			position: fixed;
-			top: 0; left: calc(-1 * var(--sticker-panel-w));
+			top: 0; left: calc(-10 * var(--sticker-panel-w));
 			width: var(--sticker-panel-w); height: calc(100vh - 90px);
 			background: #111;
 			border-right: 1px solid #2e2e3a;
+			box-shadow: 0px 0px 50px rgba(0,0,0,1);
 			z-index: 9100;
 			flex-direction: column;
 			font-family: 'Segoe UI', system-ui, sans-serif;
@@ -1553,10 +1554,11 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 #widgets-panel {
     display: flex;
     position: fixed;
-    top: 0; left: calc(-1 * var(--widgets-panel-w));
+    top: 0; left: calc(-10 * var(--widgets-panel-w));
     width: var(--widgets-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     flex-direction: column;
     font-family: 'Segoe UI', system-ui, sans-serif;
@@ -1686,10 +1688,11 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
 #tools-panel {
     display: flex;
     position: fixed;
-    top: 0; left: calc(-1 * var(--tools-panel-w));
+    top: 0; left: calc(-10 * var(--tools-panel-w));
     width: var(--tools-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     flex-direction: column;
     font-family: 'Segoe UI', system-ui, sans-serif;
@@ -1832,10 +1835,11 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 #activities-panel {
     display: flex;
     position: fixed;
-    top: 0; left: calc(-1 * var(--act-panel-w));
+    top: 0; left: calc(-10 * var(--act-panel-w));
     width: var(--act-panel-w); height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     flex-direction: column;
     font-family: 'Segoe UI', system-ui, sans-serif;
@@ -2020,11 +2024,12 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 }
 #pdf-library-panel {
     position: fixed;
-    top: 0; left: calc(-1 * var(--pdf-lib-w));
+    top: 0; left: calc(-10 * var(--pdf-lib-w));
     width: var(--pdf-lib-w);
     height: calc(100% - 90px);
     background: var(--pdf-lib-bg);
     border-right: 1px solid var(--pdf-lib-border);
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     display: flex;
     flex-direction: column;
@@ -2185,11 +2190,12 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 
 #projects-panel {
     position: fixed;
-    top: 0; left: calc(-1 * var(--proj-panel-w));
+    top: 0; left: calc(-10 * var(--proj-panel-w));
     width: var(--proj-panel-w);
     height: calc(100% - 90px);
     background: #111;
     border-right: 1px solid rgba(255,255,255,0.1);
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     display: flex;
     flex-direction: column;
@@ -2423,11 +2429,12 @@ body.menu-light #history-panel-tab.history-panel-tab-open { display: none !impor
 }
 #display-panel {
     position: fixed;
-    top: 0; left: calc(-1 * var(--display-panel-w));
+    top: 0; left: calc(-10 * var(--display-panel-w));
     width: var(--display-panel-w);
     height: calc(100% - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     display: flex;
     flex-direction: column;
@@ -2796,10 +2803,11 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
 #image-panel {
     display: flex;
     position: fixed;
-    top: 0; left: calc(-1 * 380px);
+    top: 0; left: calc(-10 * 380px);
     width: 380px; height: calc(100vh - 90px);
     background: #111;
     border-right: 1px solid #2e2e3a;
+	box-shadow: 0px 0px 50px rgba(0,0,0,1);
     z-index: 9100;
     flex-direction: column;
     font-family: 'Segoe UI', system-ui, sans-serif;
