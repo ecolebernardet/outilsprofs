@@ -983,7 +983,7 @@
 		body.menu-light #global-toolbar #widget-bg-opacity-val { color: #333 !important; }
 		body.menu-light #shape-toolbar span[style*="color:#ccc"],
 		body.menu-light #global-toolbar span[style*="color:#ccc"] { color: #555 !important; }
-		body.menu-light #draw-toolbar button[title="Effacer tout"] { background: #fde8e8 !important; border-color: #e8a0a0 !important; color: #c0392b !important; }
+		body.menu-light #draw-toolbar button[title="Effacer tout"] { background: #E4E6EA !important; border-color: ##BBBBBB !important; color: #c0392b !important; }
 		body.menu-light #draw-toolbar button[title="Fermer"],
 		body.menu-light #shape-toolbar button[title="Fermer"] { background: #e8e8ea !important; border-color: #bbb !important; color: #666 !important; }
 		/* ── États actifs des boutons de mode en mode clair ── */
