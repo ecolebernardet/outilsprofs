@@ -1507,34 +1507,30 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 
 		<div class="disp-section-label">↩️ Actions</div>
         <div class="hist-btn-row" style="flex-direction:row;flex-wrap:nowrap;gap:4px;">
-            <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+            <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
                 <span class="hist-btn-ico">↩</span>
                 <span style="font-size:11px;line-height:1.2;">Annuler</span>
             </button>
-            <button class="hist-btn" id="hist-redo-btn" onclick="redoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+            <button class="hist-btn" id="hist-redo-btn" onclick="redoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
                 <span class="hist-btn-ico">↪</span>
                 <span style="font-size:11px;line-height:1.2;">Refaire</span>
             </button>
-            <button class="hist-btn hist-btn-danger" onclick="clearBoard();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+            <button class="hist-btn hist-btn-danger" onclick="clearBoard();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
                 <span class="hist-btn-ico">🗑️</span>
                 <span style="font-size:11px;line-height:1.2;">Effacer</span>
             </button>
-            <button class="hist-btn" onclick="openHelpModal();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;text-align:center;">
+            <button class="hist-btn" onclick="openHelpModal();toggleDisplayPanel()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
                 <span class="hist-btn-ico">❓</span>
                 <span style="font-size:11px;line-height:1.2;">Aide</span>
             </button>
         </div>
 		
-		<div class="disp-section-label">🎨 Thème</div>
+		<div class="disp-section-label">🎨 Thème, pointeur & affichage</div>
         <div class="disp-inline-row">
-            <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙 Sombre</button>
-            <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️ Clair</button>
-        </div>
-
-        <div class="disp-section-label">🔴 Pointeur & Présentation</div>
-        <div class="disp-inline-row">
-            <button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴<br>Laser</button>
-            <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄<br>format A4 Portrait</button>
+            <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️<br>Mode clair</button>
+            <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙<br>Mode sombre</button>
+			<button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴<br>Laser</button>
+            <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄<br>A4 Portrait</button>
         </div>
 
         <div class="disp-section-label">📸 Capture du bureau</div>
