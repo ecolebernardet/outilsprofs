@@ -935,7 +935,7 @@
         if (!tab.classList.contains('tab-js-hover')) {
             tab.innerHTML = isOn
                 ? '<span class="act-tab-lbl">Off</span><span class="act-tab-ico">📽️</span>'
-                : '<span class="act-tab-lbl">Présentation</span><span class="act-tab-ico">📽️</span>';
+                : '<span class="act-tab-lbl">On</span><span class="act-tab-ico">📽️</span>';
         }
     }
 
@@ -1494,7 +1494,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets"><span class="act-tab-lbl">Projets</span><span class="act-tab-ico">📁</span></button>
 
 <!-- Onglet Mode Présentation (8e onglet) -->
-<button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation"><span class="act-tab-lbl">Présentation</span><span class="act-tab-ico">📽️</span></button>
+<button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation"><span class="act-tab-lbl">On</span><span class="act-tab-ico">📽️</span></button>
 
 <!-- ── Panneau Affichage ───────────────────────────────────────── -->
 <div id="display-panel">
@@ -2308,7 +2308,7 @@ function toggleMediaCollapse(container) {
         ['image-panel-tab',      'active',                      '🖼️', 'Images'],
         ['pdf-library-tab',      'pdf-lib-tab-open',            '📋', 'PDF'],
         ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Projets'],
-        ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
+        ['pres-mode-tab',        '',                            '📽️', 'On'],
         ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
     ];
     let currentHovered = null;
@@ -2344,7 +2344,7 @@ function toggleMediaCollapse(container) {
         tab.classList.remove('tab-js-hover');
         if (tab.id === 'pres-mode-tab') {
             var isOn = document.body.classList.contains('presentation-mode');
-            tab.innerHTML = '<span class="act-tab-lbl">' + (isOn ? 'Off' : 'Présentation') + '</span><span class="act-tab-ico">' + emoji + '</span>';
+            tab.innerHTML = '<span class="act-tab-lbl">' + (isOn ? 'Off' : 'On') + '</span><span class="act-tab-ico">' + emoji + '</span>';
         } else {
             tab.innerHTML = '<span class="act-tab-lbl">' + label + '</span><span class="act-tab-ico">' + emoji + '</span>';
         }
