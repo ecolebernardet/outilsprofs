@@ -867,18 +867,32 @@
             tablesWrap.innerHTML = html;
 
             // Toggle "Toutes" via pointerdown (stylet + souris)
-            tablesWrap.querySelector('.calc-all-tables-cb').addEventListener('change', function () {
-                widget.querySelectorAll('.calc-table-cb').forEach(cb => cb.checked = this.checked);
+            const allCb = tablesWrap.querySelector('.calc-all-tables-cb');
+            allCb.addEventListener('change', function () {
+                tablesWrap.querySelectorAll('.calc-table-cb').forEach(cb => cb.checked = this.checked);
             });
-            tablesWrap.querySelectorAll('.calc-table-label, label.calc-table-label').forEach(lbl => {
+            // Pointerdown sur "Toutes"
+            const allLbl = allCb.closest('label') || allCb.parentElement;
+            allLbl.addEventListener('pointerdown', e => {
+                e.stopPropagation();
+                e.preventDefault();
+                allCb.checked = !allCb.checked;
+                allCb.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            allLbl.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+            // Pointerdown sur chaque table individuelle
+            tablesWrap.querySelectorAll('.calc-table-cb').forEach(cb => {
+                const lbl = cb.closest('label') || cb.parentElement;
                 lbl.addEventListener('pointerdown', e => {
                     e.stopPropagation();
                     e.preventDefault();
-                    const cb = lbl.querySelector('input[type="checkbox"]');
-                    if (!cb) return;
                     cb.checked = !cb.checked;
                     cb.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Synchroniser "Toutes"
+                    const allChecked = Array.from(tablesWrap.querySelectorAll('.calc-table-cb')).every(c => c.checked);
+                    allCb.checked = allChecked;
                 });
+                lbl.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
             });
         })();
 
@@ -890,7 +904,9 @@
                 const cb = lbl.querySelector('input[type="checkbox"]');
                 if (!cb) return;
                 cb.checked = !cb.checked;
+                cb.dispatchEvent(new Event('change', { bubbles: true }));
             });
+            lbl.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
         });
 
         // ── Sons ─────────────────────────────────────────────────────────────
