@@ -1663,8 +1663,8 @@ function toggleEraserMode() {
     // Activer visuellement le bouton gomme (même style qu'en mode annotation PDF)
     const eraserBtnE = document.getElementById('eraser-btn');
     if (eraserBtnE) {
-        eraserBtnE.style.setProperty('background',   '#3a1a1a', 'important');
-        eraserBtnE.style.setProperty('border-color', '#e05555', 'important');
+        eraserBtnE.style.setProperty('background',   '#f2bbbb', 'important');
+        eraserBtnE.style.setProperty('border-color', '#d69090', 'important');
         eraserBtnE.style.setProperty('color',        '#fff',    'important');
         eraserBtnE.style.setProperty('box-shadow',   '0 0 8px #e0555588', 'important');
         eraserBtnE.classList.add('btn-mode-active');
@@ -2355,7 +2355,7 @@ function _updatePdfToolBtns() {
     _setBtn('pdf-pan-btn',        tool === 'pan',         '#c8a000');
     _setBtn('draw-free-btn',      tool === 'pen',         '#1a3550');
     _setBtn('draw-highlight-btn', tool === 'highlighter', '#2a2200');
-    _setBtn('eraser-btn',         tool === 'eraser',      '#3a1a1a');
+    _setBtn('eraser-btn',         tool === 'eraser',      '#f2bbbb');
     _setBtn('draw-figures-btn',   tool === 'figure',      '#1a2a4a');
     _setBtn('pdf-text-btn',       tool === 'text',        '#1a3a2a');
 
