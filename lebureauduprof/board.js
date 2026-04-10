@@ -153,7 +153,7 @@ window.onload = () => {
         const btn = document.getElementById('menu-theme-btn');
         if (btn) btn.innerHTML = '<span class="mm-ico">🌙</span><span>&nbsp;&nbsp;Mode sombre</span>';
     }
-    const savedBg = localStorage.getItem('boardBackground');
+    const savedBg = localStorage.getItem('boardBackground') || "url(fonds/fond-lebureauduprof.jpg)";
     if (savedBg && typeof applyBackground === 'function') {
         applyBackground(savedBg);
         if (savedBg.startsWith('#') && savedBg.length === 7) {
@@ -267,6 +267,24 @@ document.addEventListener('keydown', (e) => {
         !e.target.closest('input') &&
         !e.target.closest('textarea')) {
         pasteWidgets();
+    }
+
+    // Ctrl+Z — annuler (undo)
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey &&
+        !e.target.closest('[contenteditable]') &&
+        !e.target.closest('input') &&
+        !e.target.closest('textarea')) {
+        e.preventDefault();
+        if (typeof undoAction === 'function') undoAction();
+    }
+
+    // Ctrl+Y — refaire (redo)
+    if (e.key === 'y' && (e.ctrlKey || e.metaKey) &&
+        !e.target.closest('[contenteditable]') &&
+        !e.target.closest('input') &&
+        !e.target.closest('textarea')) {
+        e.preventDefault();
+        if (typeof redoAction === 'function') redoAction();
     }
 
     // Navigation entre onglets PDF plein écran
