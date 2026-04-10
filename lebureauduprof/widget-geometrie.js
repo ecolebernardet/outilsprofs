@@ -79,13 +79,18 @@ const STYLE = `
 .geo-tool-overlay {
     position: absolute;
     z-index: 9500;
-    cursor: move !important;
+    cursor: move;
     user-select: none;
     touch-action: none;
 }
-.geo-tool-overlay:active { cursor: grabbing !important; }
+.geo-tool-overlay:active { cursor: grabbing; }
 .geo-tool-overlay.geo-selected { filter: drop-shadow(0 0 6px rgba(106,174,232,0.8)); }
-.geo-tool-overlay button { cursor: pointer !important; }
+.geo-tool-overlay button { cursor: pointer; }
+.geo-tool-overlay svg [data-nodrag="true"] { cursor: pointer !important; }
+.geo-tool-overlay svg [data-nodrag="true"] * { cursor: pointer !important; }
+/* Mine du compas : curseur crayon */
+.geo-tool-overlay svg [data-mine="true"],
+.geo-tool-overlay svg [data-mine="true"] * { cursor: crosshair !important; }
 .geo-rot-handle { cursor: pointer !important; }
 
 /* Poignée rotation */
@@ -1072,6 +1077,7 @@ function spawnCompas(board, cx, cy) {
 
     // Mine (feutre/marqueur) : corps cylindrique + cône coloré + halo + pointe cliquable
     const mineGroup    = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    mineGroup.setAttribute('data-mine', 'true');
     const mineHalo     = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');  // halo diffus sous la pointe
     const mineBody     = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // corps cylindrique métallique
     const mineBodyShine= document.createElementNS('http://www.w3.org/2000/svg', 'polygon');  // reflet clair sur le corps
@@ -1442,6 +1448,7 @@ function spawnCompas(board, cx, cy) {
 
     let _arcDrawing = false;
     let _arcLastAngle = 0;
+    let _arcStartAngle = 0; // angle de départ du tracé (pour reconstruire l'arc proprement)
     let _arcTotalAngle = 0; // angle accumulé (peut dépasser 2*PI)
     let _arcOverlayAngleStart = 0; // rotation de l'overlay au début du tracé
     let _arcCenterWorld = { x: 0, y: 0 };
@@ -1542,6 +1549,22 @@ function spawnCompas(board, cx, cy) {
         _arcCtx.clearRect(0, 0, _arcCanvas.width, _arcCanvas.height);
     }
 
+    // Dessine une croix de centre sur le canvas de preview
+    function _arcDrawCenter(piv_) {
+        const C   = 6;
+        const color = getDrawColor();
+        _arcCtx.save();
+        _arcCtx.strokeStyle = color;
+        _arcCtx.lineWidth   = Math.max(1, getDrawSize() * 0.7);
+        _arcCtx.lineCap     = 'round';
+        _arcCtx.globalAlpha = 0.85;
+        _arcCtx.beginPath();
+        _arcCtx.moveTo(piv_.x - C, piv_.y); _arcCtx.lineTo(piv_.x + C, piv_.y);
+        _arcCtx.moveTo(piv_.x, piv_.y - C); _arcCtx.lineTo(piv_.x, piv_.y + C);
+        _arcCtx.stroke();
+        _arcCtx.restore();
+    }
+
     function _arcMouseDown(e) {
         e.stopPropagation(); e.preventDefault();
         _arcDrawing    = true;
@@ -1551,6 +1574,7 @@ function spawnCompas(board, cx, cy) {
         const piv  = _getPivWorldPos();
         _arcCenterWorld = { x: piv.x, y: piv.y };
         _arcLastAngle   = Math.atan2(mine.y - piv.y, mine.x - piv.x);
+        _arcStartAngle  = _arcLastAngle;
         _arcOverlayAngleStart = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
 
         // Point de départ
@@ -1561,6 +1585,9 @@ function spawnCompas(board, cx, cy) {
 
         // Attacher le canvas de preview au board
         board.appendChild(_arcCanvas);
+
+        // Dessiner le centre immédiatement dès le clic
+        _arcDrawCenter({ x: piv.x, y: piv.y });
 
         document.addEventListener('mousemove', _arcMouseMove);
         document.addEventListener('mouseup',   _arcMouseUp);
@@ -1603,25 +1630,35 @@ function spawnCompas(board, cx, cy) {
         overlay.style.left = (px - ow/2 - dx) + 'px';
         overlay.style.top  = (py - oh/2 - dy) + 'px';
 
-        // Preview sur canvas : ajouter le nouveau point et dessiner le segment
-        const newX = piv.x + Math.cos(_arcLastAngle) * r;
-        const newY = piv.y + Math.sin(_arcLastAngle) * r;
-        const prev = _arcAccumPts[_arcAccumPts.length - 1];
-        _arcAccumPts.push({ x: newX, y: newY });
+        // Preview sur canvas : interpoler l'arc entre l'angle précédent et le courant
+        // pour éviter les cordes quand la souris va vite
+        const prevAngle = _arcLastAngle - delta; // angle juste avant ce delta
+        const arcSteps  = Math.max(2, Math.ceil(Math.abs(delta) * r / 4));
+        const prev      = _arcAccumPts[_arcAccumPts.length - 1];
 
-        // Dessiner uniquement le nouveau segment (pas de clearRect → rien ne s'efface)
-        if (prev) {
-            _arcCtx.save();
-            _arcCtx.strokeStyle = getDrawColor();
-            _arcCtx.lineWidth   = getDrawSize();
-            _arcCtx.lineCap     = 'round';
-            _arcCtx.lineJoin    = 'round';
-            _arcCtx.beginPath();
-            _arcCtx.moveTo(prev.x, prev.y);
-            _arcCtx.lineTo(newX, newY);
-            _arcCtx.stroke();
-            _arcCtx.restore();
+        _arcCtx.save();
+        _arcCtx.strokeStyle = getDrawColor();
+        _arcCtx.lineWidth   = getDrawSize();
+        _arcCtx.lineCap     = 'round';
+        _arcCtx.lineJoin    = 'round';
+        _arcCtx.beginPath();
+
+        if (prev) _arcCtx.moveTo(prev.x, prev.y);
+
+        for (let i = 1; i <= arcSteps; i++) {
+            const a  = prevAngle + delta * (i / arcSteps);
+            const px_ = piv.x + Math.cos(a) * r;
+            const py_ = piv.y + Math.sin(a) * r;
+            if (i === 1 && !prev) _arcCtx.moveTo(px_, py_);
+            else _arcCtx.lineTo(px_, py_);
+            if (i === arcSteps) _arcAccumPts.push({ x: px_, y: py_ });
         }
+
+        _arcCtx.stroke();
+        _arcCtx.restore();
+
+        // Redessiner le centre (croix) par-dessus l'arc en cours
+        _arcDrawCenter(_arcCenterWorld);
     }
 
     function _arcMouseMove(e) { _arcUpdate(e.clientX, e.clientY); }
@@ -1642,9 +1679,23 @@ function spawnCompas(board, cx, cy) {
         _arcPreviewClear();
         if (_arcCanvas.parentNode) _arcCanvas.parentNode.removeChild(_arcCanvas);
 
-        // Tracer les points accumulés (fidèles au geste réel, y compris les demi-tours)
-        if (_arcAccumPts.length >= 2) {
-            traceOnCanvas([_arcAccumPts]);
+        // Reconstruire l'arc proprement depuis l'angle de départ jusqu'à l'angle total
+        // (évite les cordes dues aux allers-retours dans _arcAccumPts)
+        if (Math.abs(_arcTotalAngle) > 0.01) {
+            const r_     = parseFloat(overlay.dataset.radius || radius);
+            const piv_   = _arcCenterWorld;
+            const steps  = Math.max(3, Math.round(Math.abs(_arcTotalAngle) * r_ / 3));
+            const arcPts = [];
+            for (let i = 0; i <= steps; i++) {
+                const a = _arcStartAngle + _arcTotalAngle * (i / steps);
+                arcPts.push({ x: piv_.x + Math.cos(a) * r_, y: piv_.y + Math.sin(a) * r_ });
+            }
+            // Ajouter la croix du centre au tracé définitif
+            const C = 6;
+            const cx_ = piv_.x, cy_ = piv_.y;
+            const ptsH = [{ x: cx_ - C, y: cy_ }, { x: cx_ + C, y: cy_ }];
+            const ptsV = [{ x: cx_, y: cy_ - C }, { x: cx_, y: cy_ + C }];
+            traceOnCanvas([arcPts, ptsH, ptsV]);
         }
         _arcTotalAngle = 0;
         _arcAccumPts   = [];
