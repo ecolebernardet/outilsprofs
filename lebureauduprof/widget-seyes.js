@@ -374,8 +374,11 @@
         /* ── État plein écran board ─────────────────────── */
         .seyes-container.wf-fullboard {
             position: fixed !important;
-            inset: 0 !important;
-            width: 100% !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 50px !important;
+            right: 0 !important;
+            width: calc(100% - 50px) !important;
             height: 100% !important;
             z-index: 9999 !important;
             border-radius: 0 !important;
@@ -759,6 +762,56 @@ function createSeyesWidget() {
                 }
             }
             saveBoard();
+        } else if (id === seyesHlCpickId) {
+            // Couleur de surlignage
+            _highlightColor = color;
+            const hlSwatch = hlColorWrap.querySelector('.cpick-swatch');
+            if (hlSwatch) hlSwatch.style.background = color;
+            highlightBtn.querySelector('span').style.backgroundColor = color;
+            if (_seyesSavedSelection && !_seyesSavedSelection.collapsed) {
+                const targetEd = (editorMarge && _seyesSavedSelection.intersectsNode && _seyesSavedSelection.intersectsNode(editorMarge)) ? editorMarge : editor;
+                targetEd.focus();
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                const rangeClone = _seyesSavedSelection.cloneRange();
+                sel.addRange(rangeClone);
+                const span = document.createElement('span');
+                span.style.backgroundColor = color;
+                try {
+                    rangeClone.surroundContents(span);
+                } catch(err) {
+                    document.execCommand('backColor', false, color);
+                }
+            }
+            saveBoard();
+        } else if (id === seyesBdCpickId) {
+            // Couleur d'encadrement
+            _borderColor = color;
+            const bdSwatch = bdColorWrap.querySelector('.cpick-swatch');
+            if (bdSwatch) bdSwatch.style.background = color;
+            borderBtn.querySelector('span').style.borderColor = color;
+            if (_seyesSavedSelection && !_seyesSavedSelection.collapsed) {
+                const targetEd = (editorMarge && _seyesSavedSelection.intersectsNode && _seyesSavedSelection.intersectsNode(editorMarge)) ? editorMarge : editor;
+                targetEd.focus();
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                const rangeClone = _seyesSavedSelection.cloneRange();
+                sel.addRange(rangeClone);
+                const span = document.createElement('span');
+                span.style.border = '2.5px solid ' + color;
+                span.style.borderRadius = '2px';
+                span.style.padding = '0 2px';
+                span.style.boxDecorationBreak = 'clone';
+                span.style.webkitBoxDecorationBreak = 'clone';
+                try {
+                    rangeClone.surroundContents(span);
+                } catch(err) {
+                    const frag = rangeClone.extractContents();
+                    span.appendChild(frag);
+                    rangeClone.insertNode(span);
+                }
+            }
+            saveBoard();
         } else if (typeof _origDispatch === 'function') {
             _origDispatch(id, color);
         }
@@ -768,6 +821,111 @@ function createSeyesWidget() {
     toolbar.appendChild(underlineGroup);
     // Téléporter le popup soulignage vers document.body
     document.body.appendChild(ulColorWrap.querySelector('.cpick-popup'));
+
+    // ── Surlignage ────────────────────────────────────────────────────────
+    let _highlightColor = '#fff176';
+
+    const highlightGroup = document.createElement('div');
+    highlightGroup.style.cssText = 'display:flex;align-items:center;gap:2px;';
+
+    const highlightBtn = document.createElement('button');
+    highlightBtn.className = 'seyes-tool-btn';
+    highlightBtn.title = 'Surligner la sélection';
+    highlightBtn.innerHTML = `<span style="background:#fff176;padding:0 3px;border-radius:2px;">S</span>`;
+    highlightBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const sel = window.getSelection();
+        const savedRange = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+        if (!savedRange || savedRange.collapsed) return;
+        const activeEd = document.activeElement;
+        const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
+        targetEd.focus();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+        const span = document.createElement('span');
+        span.style.backgroundColor = _highlightColor;
+        try {
+            savedRange.surroundContents(span);
+        } catch(err) {
+            document.execCommand('backColor', false, _highlightColor);
+        }
+        saveBoard();
+    });
+    highlightGroup.appendChild(highlightBtn);
+
+    const seyesHlCpickId = 'seyes-hl-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    const hlColorWrap = document.createElement('div');
+    hlColorWrap.className = 'cpick-wrap';
+    hlColorWrap.id = 'cpick-' + seyesHlCpickId;
+    hlColorWrap.title = 'Couleur de surlignage';
+    hlColorWrap.innerHTML = `
+        <div class="cpick-swatch" style="background:#fff176;width:14px;height:14px;border-radius:3px;border:1.5px solid #d0dcea;cursor:pointer;flex-shrink:0;margin-bottom:-1px;"
+             onclick="cpickOpen('${seyesHlCpickId}', this)"></div>
+        <div class="cpick-popup" id="cpick-pop-${seyesHlCpickId}"></div>
+    `;
+    hlColorWrap.addEventListener('mousedown', () => {
+        const sel = window.getSelection();
+        _seyesSavedSelection = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+    });
+    highlightGroup.appendChild(hlColorWrap);
+    toolbar.appendChild(highlightGroup);
+    document.body.appendChild(hlColorWrap.querySelector('.cpick-popup'));
+
+    // ── Encadrement ───────────────────────────────────────────────────────
+    let _borderColor = '#e05050';
+
+    const borderGroup = document.createElement('div');
+    borderGroup.style.cssText = 'display:flex;align-items:center;gap:2px;';
+
+    const borderBtn = document.createElement('button');
+    borderBtn.className = 'seyes-tool-btn';
+    borderBtn.title = 'Encadrer la sélection';
+    borderBtn.innerHTML = `<span style="border:2.5px solid #e05050;padding:0 3px;border-radius:2px;">E</span>`;
+    borderBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const sel = window.getSelection();
+        const savedRange = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+        if (!savedRange || savedRange.collapsed) return;
+        const activeEd = document.activeElement;
+        const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
+        targetEd.focus();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+        const span = document.createElement('span');
+        span.style.border = '2.5px solid ' + _borderColor;
+        span.style.borderRadius = '2px';
+        span.style.padding = '0 2px';
+        span.style.boxDecorationBreak = 'clone';
+        span.style.webkitBoxDecorationBreak = 'clone';
+        try {
+            savedRange.surroundContents(span);
+        } catch(err) {
+            // sélection partielle : on enveloppe quand même
+            const frag = savedRange.extractContents();
+            span.appendChild(frag);
+            savedRange.insertNode(span);
+        }
+        saveBoard();
+    });
+    borderGroup.appendChild(borderBtn);
+
+    const seyesBdCpickId = 'seyes-bd-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    const bdColorWrap = document.createElement('div');
+    bdColorWrap.className = 'cpick-wrap';
+    bdColorWrap.id = 'cpick-' + seyesBdCpickId;
+    bdColorWrap.title = "Couleur d'encadrement";
+    bdColorWrap.innerHTML = `
+        <div class="cpick-swatch" style="background:#e05050;width:14px;height:14px;border-radius:3px;border:1.5px solid #d0dcea;cursor:pointer;flex-shrink:0;margin-bottom:-1px;"
+             onclick="cpickOpen('${seyesBdCpickId}', this)"></div>
+        <div class="cpick-popup" id="cpick-pop-${seyesBdCpickId}"></div>
+    `;
+    bdColorWrap.addEventListener('mousedown', () => {
+        const sel = window.getSelection();
+        _seyesSavedSelection = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+    });
+    borderGroup.appendChild(bdColorWrap);
+    toolbar.appendChild(borderGroup);
+    document.body.appendChild(bdColorWrap.querySelector('.cpick-popup'));
 
     // Séparateur
     const sep4 = document.createElement('div');
@@ -1228,7 +1386,7 @@ function createSeyesWidget() {
             e.stopPropagation();
             if (typeof snapshotNow === 'function') snapshotNow();
             // Nettoyer les popups téléportés dans body
-            [seyesCpickId, seyesUlCpickId].forEach(id => {
+            [seyesCpickId, seyesUlCpickId, seyesHlCpickId, seyesBdCpickId].forEach(id => {
                 const p = document.getElementById('cpick-pop-' + id);
                 if (p) p.remove();
             });
