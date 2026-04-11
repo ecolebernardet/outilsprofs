@@ -198,7 +198,6 @@
     <div class="pg-sep"></div>
 
     <button id="pg-btn-clear" title="Vider la page">🗑️ Vider</button>
-    <button id="pg-btn-png"   title="Exporter en PNG">🖼️ PNG</button>
     <button id="pg-btn-pdf" class="pg-btn-pdf" title="Imprimer / Exporter en PDF">⬇️ PDF</button>
 </div>
 
@@ -226,7 +225,6 @@
     const wrap         = document.getElementById('pg-frame-wrap');
     const loading      = document.getElementById('pg-loading');
     const btnClear     = document.getElementById('pg-btn-clear');
-    const btnPng       = document.getElementById('pg-btn-png');
     const btnPdf       = document.getElementById('pg-btn-pdf');
     const btnZoomIn    = document.getElementById('pg-zoom-in');
     const btnZoomOut   = document.getElementById('pg-zoom-out');
@@ -341,12 +339,6 @@
         toast('\u2705 Page vid\u00e9e');
     });
 
-    // PNG : demander à l'iframe de capturer et renvoyer le dataURL
-    btnPng.addEventListener('click', function() {
-        toast('\u23f3 Capture en cours\u2026', 6000);
-        sendCmd('capture-png');
-    });
-
     // PDF : demander à l'iframe de capturer en canvas, puis imprimer dans une fenêtre propre.
     btnPdf.addEventListener('click', function() {
         toast('⏳ Capture en cours…', 6000);
@@ -369,41 +361,22 @@
             initZoom();
         }
 
-        // Réception du PNG capturé par l'iframe
-        if (ev === 'png-ready' && e.data.dataURL) {
-            var link = document.createElement('a');
-            link.download = 'page-de-garde.png';
-            link.href = e.data.dataURL;
-            link.click();
-            toast('\u2705 PNG export\u00e9 !');
-        }
-
-        if (ev === 'png-error') {
-            toast('\u274c Erreur capture : ' + (e.data.msg || ''));
-        }
-
-        // Réception du canvas pour impression PDF (1 seule page garantie)
+        // Réception du canvas pour génération PDF via jsPDF (1 page garantie)
         if (ev === 'print-ready' && e.data.dataURL) {
-            var w = window.open('', '_blank');
-            if (!w) { toast('❌ Pop-up bloqué — autorisez les pop-ups pour ce site'); return; }
-            w.document.write('<!DOCTYPE html><html><head>'
-                + '<style>'
-                + '@page{size:210mm 297mm;margin:0}'
-                + 'html{margin:0;padding:0;width:210mm;height:297mm;overflow:hidden}'
-                + 'body{margin:0;padding:0;width:210mm;height:297mm;overflow:hidden;'
-                + 'page-break-after:avoid;page-break-inside:avoid}'
-                + 'img{display:block;width:210mm;height:297mm;'
-                + 'max-width:210mm;max-height:297mm;page-break-after:avoid}'
-                + '<\/style><\/head><body>'
-                + '<img src="' + e.data.dataURL + '">'
-                + '<\/body><\/html>');
-            w.document.close();
-            w.focus();
-            setTimeout(function() {
-                w.print();
-                setTimeout(function() { w.close(); }, 1000);
-            }, 500);
-            toast('✅ Impression prête !');
+            function generatePdf(dataURL) {
+                var doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                doc.addImage(dataURL, 'PNG', 0, 0, 210, 297);
+                doc.save('page-de-garde.pdf');
+                toast('✅ PDF exporté !');
+            }
+            if (!window.jspdf) {
+                var s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                s.onload = function() { generatePdf(e.data.dataURL); };
+                document.head.appendChild(s);
+            } else {
+                generatePdf(e.data.dataURL);
+            }
         }
     });
 

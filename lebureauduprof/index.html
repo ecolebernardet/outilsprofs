@@ -2641,18 +2641,27 @@ function lancerTracesGeometriques() {
             // (évite le problème de double/triple page dû aux iframes imbriquées)
             var board = document.getElementById('board');
             function doCapturePrint() {
+                var hideStyle = document.createElement('style');
+                hideStyle.id = '__pg_capture_hide__';
+                hideStyle.textContent = '.anchor-badge,.drag-handle,.widget-action-bar,.widget-rotate-handle,.custom-resize-handle,.flip-h-btn,.flip-v-btn,.resize-lock-btn,.wf-mini-bar,#selection-controls,#pres-limit-line{display:none!important;visibility:hidden!important;opacity:0!important}';
+                document.head.appendChild(hideStyle);
+                board.getBoundingClientRect();
                 window.html2canvas(board, {
                     backgroundColor: '#ffffff',
-                    scale: 2, width: 794, height: 1123,
+                    scale: 1, width: 794, height: 1122,
                     x: 0, y: 0, logging: false, useCORS: true, allowTaint: true
                 }).then(function(canvas) {
+                    var s = document.getElementById('__pg_capture_hide__');
+                    if (s) s.remove();
                     e.source.postMessage({ pgEvent: 'print-ready', dataURL: canvas.toDataURL('image/png') }, '*');
                 }).catch(function(err) {
-                    // Fallback : impression directe
+                    var s = document.getElementById('__pg_capture_hide__');
+                    if (s) s.remove();
                     ensurePrintStyle();
                     setTimeout(function() { window.print(); }, 150);
                 });
             }
+
             if (!window.html2canvas) {
                 var s = document.createElement('script');
                 s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
@@ -2671,33 +2680,6 @@ function lancerTracesGeometriques() {
                 if (typeof saveBoard === 'function') saveBoard();
             }
             e.source.postMessage({ pgEvent: 'cleared' }, '*');
-        }
-
-        if (cmd === 'capture-png') {
-            var src = e.source;
-            var board = document.getElementById('board');
-            if (!board) { src.postMessage({ pgEvent: 'png-error', msg: 'board introuvable' }, '*'); return; }
-
-            function doCapture() {
-                window.html2canvas(board, {
-                    backgroundColor: '#ffffff',
-                    scale: 2, width: 794, height: 1123,
-                    x: 0, y: 0, logging: false, useCORS: true, allowTaint: true
-                }).then(function(canvas) {
-                    src.postMessage({ pgEvent: 'png-ready', dataURL: canvas.toDataURL('image/png') }, '*');
-                }).catch(function(err) {
-                    src.postMessage({ pgEvent: 'png-error', msg: err.message }, '*');
-                });
-            }
-
-            if (!window.html2canvas) {
-                var s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                s.onload = doCapture;
-                document.head.appendChild(s);
-            } else {
-                doCapture();
-            }
         }
 
         if (cmd === 'ping') {
