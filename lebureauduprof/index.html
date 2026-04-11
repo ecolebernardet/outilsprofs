@@ -37,7 +37,106 @@
             border-radius: 0 !important;
         }
 
+        /* ══════════════════════════════════════════════════
+           MODE PAGE DE GARDE  (?mode=pagegarde dans l'URL)
+           Masque tout ce qui n'est pas utile pour créer
+           une page de garde, et force un board A4 blanc.
+        ══════════════════════════════════════════════════ */
+        /* ── MODE PAGE DE GARDE ── */
+        body.mode-pagegarde,
+        html:has(body.mode-pagegarde) {
+            background: #ffffff !important;
+            overflow: hidden !important;
+            width:  794px !important;
+            height: 1123px !important;
+            max-width:  794px !important;
+            max-height: 1123px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Board A4 exact : 794×1123px, fond blanc */
+        body.mode-pagegarde #board {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            transform: none !important;
+            width:  794px !important;
+            height: 1123px !important;
+            min-height: unset !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+            /* Pas de background !important ici : applyBackground() doit pouvoir écrire dessus */
+        }
+        body.mode-pagegarde #board:not([style*="background"]) {
+            background-color: #ffffff;
+        }
+
+        /* Masquer les éléments inutiles en mode page-garde */
+        body.mode-pagegarde #activities-panel,
+        body.mode-pagegarde #activities-panel-tab,
+        body.mode-pagegarde #projects-panel,
+        body.mode-pagegarde #projects-panel-tab,
+        body.mode-pagegarde #pdf-library-panel,
+        body.mode-pagegarde #pdf-library-tab,
+        body.mode-pagegarde #tools-panel,
+        body.mode-pagegarde #tools-panel-tab,
+        body.mode-pagegarde #pres-mode-tab,
+        body.mode-pagegarde #presentation-btn,
+        body.mode-pagegarde #exit-presentation-btn,
+        body.mode-pagegarde #fab-btn,
+        body.mode-pagegarde #current-project-name,
+        body.mode-pagegarde #a4-indicator,
+        body.mode-pagegarde #pres-limit-line {
+            display: none !important;
+        }
+
+        /* Garder visible : stickers, images, widgets, dessin, formes */
+        /* (ils s'affichent normalement) */
+
+        /* Scrollbar sur le body pour faire défiler si la page est plus haute */
+        body.mode-pagegarde::-webkit-scrollbar { width: 8px; }
+        body.mode-pagegarde::-webkit-scrollbar-track { background: #666; }
+        body.mode-pagegarde::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+
+        /* Clé localStorage séparée pour la page de garde */
+        /* (gérée par JS ci-dessous) */
+
     </style>
+
+    <script>
+    // Détecter le mode page-garde DÈS le chargement (avant DOMContentLoaded)
+    (function() {
+        if (window.location.search.indexOf('mode=pagegarde') === -1) return;
+
+        // Appliquer la classe dès que possible
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('mode-pagegarde');
+        });
+
+        // Surcharger les clés localStorage pour isoler les données de la page de garde
+        var PG_PREFIX = 'pagegarde_';
+        var _origGetItem    = Storage.prototype.getItem;
+        var _origSetItem    = Storage.prototype.setItem;
+        var _origRemoveItem = Storage.prototype.removeItem;
+
+        // Clés à isoler (état du bureau)
+        var ISOLATED_KEYS = ['profBoardConfig', 'boardBackground', 'boardBgScale', '_boardScenes', '_scenesCurrentIdx'];
+
+        Storage.prototype.getItem = function(key) {
+            if (ISOLATED_KEYS.indexOf(key) !== -1) key = PG_PREFIX + key;
+            return _origGetItem.call(this, key);
+        };
+        Storage.prototype.setItem = function(key, value) {
+            if (ISOLATED_KEYS.indexOf(key) !== -1) key = PG_PREFIX + key;
+            return _origSetItem.call(this, key, value);
+        };
+        Storage.prototype.removeItem = function(key) {
+            if (ISOLATED_KEYS.indexOf(key) !== -1) key = PG_PREFIX + key;
+            return _origRemoveItem.call(this, key);
+        };
+    })();
+    </script>
 </head>
 <body class="menu-light">
 
@@ -1386,8 +1485,13 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 		</div>
 		<div class="tools-section-label">🪛 Outils divers</div>
         <div class="tools-grid">
+			<div class="tools-card" onclick="createPageGardeWidget();toggleToolsPanel()">
+                <div class="tools-card-ico"><img src="pics/outils-page-garde.jpeg" alt="Page de garde" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="tools-card-name">Page de garde</div>
+                <div class="tools-card-desc">Créer une page de garde de cahier illustrée</div>
+			</div>
 			<div class="tools-card" onclick="createWidget('outilsprofs');toggleToolsPanel()">
-                <div class="tools-card-ico"><img src="pics/outilsprofs-icone.png" alt="OutilsProfs" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="tools-card-ico"><img src="pics/outils-outilsprofs.jpeg" alt="OutilsProfs" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="tools-card-name">OutilsProfs</div>
                 <div class="tools-card-desc">Accès aux outils pédagogiques en ligne</div>
 			</div>
@@ -2433,5 +2537,181 @@ function lancerTracesGeometriques() {
 }
 </script>
 
+<script src="widget-page-garde.js"></script>
+
+<!-- Template vide pour que createWidget('page-garde') ne produise pas "Type inconnu" -->
+<template id="template-page-garde"></template>
+
+<script>
+// Patch restoreBoardFromJSON pour page-garde — s'exécute APRÈS tous les scripts
+(function() {
+    if (typeof restoreBoardFromJSON !== 'function') return;
+    if (restoreBoardFromJSON._wpgPatched) return;
+    const _orig = restoreBoardFromJSON;
+    window.restoreBoardFromJSON = function(json) {
+        var parsed, data, pgWidgets;
+        try {
+            parsed = JSON.parse(json);
+            data = Array.isArray(parsed) ? parsed : (parsed.widgets || []);
+            pgWidgets = data.filter(function(w) { return w.type === 'page-garde'; });
+        } catch(e) { return _orig(json); }
+
+        if (!pgWidgets.length) return _orig(json);
+
+        // Retirer les page-garde, passer le reste à l'original
+        var filtered = Array.isArray(parsed)
+            ? parsed.filter(function(w) { return w.type !== 'page-garde'; })
+            : Object.assign({}, parsed, { widgets: data.filter(function(w) { return w.type !== 'page-garde'; }) });
+        _orig(JSON.stringify(filtered));
+
+        // Recréer les page-garde après un court délai
+        setTimeout(function() {
+            var curW  = window.innerWidth;
+            var curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+            pgWidgets.forEach(function(d) {
+                var w = window.createPageGardeWidget();
+                if (!w) return;
+                w.style.left = ((d.leftPercent  || 0) / 100 * curW)  + 'px';
+                w.style.top  = ((d.topPercent   || 0) / 100 * curVH) + 'px';
+                if (d.pgData && w._wpgRestore) {
+                    try { w._wpgRestore(JSON.parse(d.pgData)); } catch(e) {}
+                }
+            });
+        }, 200);
+    };
+    window.restoreBoardFromJSON._wpgPatched = true;
+})();
+</script>
+
+<script>
+// ── Listener postMessage pour le mode page-garde ──────────────────────────
+// Reçoit les commandes de page-garde.html (parent) et les exécute
+// de l'intérieur de l'iframe, contournant les restrictions cross-origin.
+(function() {
+    if (window.location.search.indexOf('mode=pagegarde') === -1) return;
+
+    // Injecter le style d'impression une seule fois
+    function ensurePrintStyle() {
+        if (document.getElementById('pg-print-style')) return;
+        var ps = document.createElement('style');
+        ps.id = 'pg-print-style';
+        ps.textContent = [
+            '@media print {',
+            '  @page { size: A4 portrait; margin: 0; }',
+            '  html { width: 794px !important; height: 1123px !important;',
+            '    overflow: hidden !important; margin: 0 !important; padding: 0 !important; }',
+            '  body { width: 794px !important; height: 1123px !important;',
+            '    overflow: hidden !important; margin: 0 !important; padding: 0 !important;',
+            '    background: white !important; }',
+            '  body > *:not(#board) { display: none !important; }',
+            '  #toolbar-container, #toolbar-container * { display: none !important; }',
+            '  #sticker-panel-tab, #pdf-library-tab, #activities-panel-tab,',
+            '  #widgets-panel-tab, #tools-panel-tab, #projects-panel-tab,',
+            '  #pres-mode-tab, #display-panel-tab { display: none !important; }',
+            '  #sticker-panel, #pdf-library-panel, #activities-panel,',
+            '  #widgets-panel, #tools-panel, #projects-panel,',
+            '  #display-panel, #shape-edit-panel { display: none !important; }',
+            '  #draw-toolbar, #shape-toolbar, #global-toolbar,',
+            '  #bottom-bar, #a4-indicator { display: none !important; }',
+            '  #board {',
+            '    position: absolute !important; left: 0 !important; top: 0 !important;',
+            '    width: 794px !important; height: 1123px !important;',
+            '    min-height: unset !important; max-height: 1123px !important;',
+            '    margin: 0 !important; background: white !important;',
+            '    overflow: hidden !important; transform: none !important;',
+            '    box-shadow: none !important;',
+            '  }',
+            '  .drag-handle, .widget-action-bar, .widget-rotate-handle,',
+            '  .widget-close-handle, .widget-pin-handle, .widget-back-handle,',
+            '  .widget-menu-handle, .widget-anchor-handle,',
+            '  .custom-resize-handle, .shape-resize-handle,',
+            '  #selection-controls, #pres-limit-line, .wf-mini-bar { display: none !important; }',
+            '  .widget, .shape-widget { border: none !important; box-shadow: none !important; }',
+            '}'
+        ].join('\n');
+        document.head.appendChild(ps);
+    }
+
+    window.addEventListener('message', function(e) {
+        var cmd = e.data && e.data.pgCmd;
+        if (!cmd) return;
+
+        if (cmd === 'print') {
+            // Capturer le board en canvas et l'envoyer au parent pour impression
+            // (évite le problème de double/triple page dû aux iframes imbriquées)
+            var board = document.getElementById('board');
+            function doCapturePrint() {
+                window.html2canvas(board, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, width: 794, height: 1123,
+                    x: 0, y: 0, logging: false, useCORS: true, allowTaint: true
+                }).then(function(canvas) {
+                    e.source.postMessage({ pgEvent: 'print-ready', dataURL: canvas.toDataURL('image/png') }, '*');
+                }).catch(function(err) {
+                    // Fallback : impression directe
+                    ensurePrintStyle();
+                    setTimeout(function() { window.print(); }, 150);
+                });
+            }
+            if (!window.html2canvas) {
+                var s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = doCapturePrint;
+                document.head.appendChild(s);
+            } else {
+                doCapturePrint();
+            }
+        }
+
+        if (cmd === 'clear') {
+            if (typeof clearBoard === 'function') {
+                clearBoard();
+            } else {
+                Array.from(document.querySelectorAll('.widget,.shape-widget')).forEach(function(w){ w.remove(); });
+                if (typeof saveBoard === 'function') saveBoard();
+            }
+            e.source.postMessage({ pgEvent: 'cleared' }, '*');
+        }
+
+        if (cmd === 'capture-png') {
+            var src = e.source;
+            var board = document.getElementById('board');
+            if (!board) { src.postMessage({ pgEvent: 'png-error', msg: 'board introuvable' }, '*'); return; }
+
+            function doCapture() {
+                window.html2canvas(board, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, width: 794, height: 1123,
+                    x: 0, y: 0, logging: false, useCORS: true, allowTaint: true
+                }).then(function(canvas) {
+                    src.postMessage({ pgEvent: 'png-ready', dataURL: canvas.toDataURL('image/png') }, '*');
+                }).catch(function(err) {
+                    src.postMessage({ pgEvent: 'png-error', msg: err.message }, '*');
+                });
+            }
+
+            if (!window.html2canvas) {
+                var s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = doCapture;
+                document.head.appendChild(s);
+            } else {
+                doCapture();
+            }
+        }
+
+        if (cmd === 'ping') {
+            e.source.postMessage({ pgEvent: 'pong' }, '*');
+        }
+    });
+
+    // Signaler au parent que l'iframe est prête
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'pg-ready' }, '*');
+        }
+    });
+})();
+</script>
 </body>
 </html>
