@@ -335,6 +335,7 @@ function insertStickerEmoji(emoji) {
 		</div>
 		<div class="widget-ctx-menu"></div>
 	`;
+	w.dataset.stickerWidget = 'true';
 	w.appendChild(content);
 	w.addEventListener('mousedown', () => {
 		bringToFront(w);
@@ -379,6 +380,7 @@ function insertStickerImage(url, name) {
 		</div>
 		<div class="widget-ctx-menu"></div>
 	`;
+	w.dataset.stickerWidget = 'true';
 	w.appendChild(img);
 	w.addEventListener('mousedown', () => {
 		bringToFront(w);
@@ -406,3 +408,106 @@ document.addEventListener('mousedown', (e) => {
 	const tab = document.getElementById('sticker-panel-tab');
 	if (tab) tab.classList.remove('active');
 });
+
+// ── Menu contextuel clic droit sur stickers ───────────────────────────────
+let _stickerCtxMenu = null;
+
+function _closeStickerContextMenu() {
+	if (_stickerCtxMenu) { _stickerCtxMenu.remove(); _stickerCtxMenu = null; }
+}
+
+function _openStickerContextMenu(widget, clientX, clientY) {
+	_closeStickerContextMenu();
+
+	const isPinned = widget.dataset.pinned === 'true';
+
+	const menu = document.createElement('div');
+	menu.className = 'img-ctx-menu';
+	_stickerCtxMenu = menu;
+
+	const items = [
+		{
+			icon: '📌',
+			label: isPinned ? 'Désépingler' : 'Épingler',
+			action: () => { togglePin(widget); }
+		},
+		{
+			icon: '🔽',
+			label: 'Envoyer derrière',
+			action: () => { sendToBack(widget); }
+		},
+		{ separator: true },
+		{
+			icon: '⧉',
+			label: 'Dupliquer',
+			action: () => { cloneWidget(widget); }
+		},
+		{ separator: true },
+		{
+			icon: '×',
+			label: 'Supprimer',
+			danger: true,
+			action: () => { snapshotNow(); widget.remove(); saveBoard(); }
+		},
+	];
+
+	items.forEach(item => {
+		if (item.separator) {
+			const sep = document.createElement('div');
+			sep.className = 'img-ctx-menu-sep';
+			menu.appendChild(sep);
+			return;
+		}
+		const btn = document.createElement('div');
+		btn.className = 'img-ctx-menu-item' + (item.danger ? ' danger' : '');
+		btn.innerHTML = '<span class="img-ctx-menu-icon">' + item.icon + '</span><span>' + item.label + '</span>';
+		btn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			_closeStickerContextMenu();
+			item.action();
+		});
+		menu.appendChild(btn);
+	});
+
+	document.body.appendChild(menu);
+
+	const mw = 190, mh = menu.offsetHeight || 180;
+	let x = clientX + 4, y = clientY + 4;
+	if (x + mw > window.innerWidth)  x = clientX - mw - 4;
+	if (y + mh > window.innerHeight) y = clientY - mh - 4;
+	menu.style.left = x + 'px';
+	menu.style.top  = y + 'px';
+
+	setTimeout(() => {
+		function onOut(e) {
+			if (menu.contains(e.target)) return;
+			_closeStickerContextMenu();
+			document.removeEventListener('mousedown', onOut);
+			document.removeEventListener('keydown', onKey);
+		}
+		function onKey(e) {
+			if (e.key === 'Escape') {
+				_closeStickerContextMenu();
+				document.removeEventListener('mousedown', onOut);
+				document.removeEventListener('keydown', onKey);
+			}
+		}
+		document.addEventListener('mousedown', onOut);
+		document.addEventListener('keydown', onKey);
+	}, 10);
+}
+
+// Listener global en capture — s'exécute avant _boardDrawContextMenu
+document.addEventListener('contextmenu', (e) => {
+	const widget = e.target && e.target.closest
+		? e.target.closest('.widget[data-sticker-widget="true"]')
+		: null;
+	if (!widget) return;
+	if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
+
+	e.preventDefault();
+	e.stopPropagation();
+	e.stopImmediatePropagation();
+
+	_openStickerContextMenu(widget, e.clientX, e.clientY);
+}, true);

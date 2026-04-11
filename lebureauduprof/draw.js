@@ -282,6 +282,11 @@ function _boardDrawPointerMove(e) {
 
 // contextmenu — fallback si pointer events n'ont pas déclenché le toggle
 function _boardDrawContextMenu(e) {
+    // Laisser les image widgets et stickers gérer leur propre menu contextuel
+    if (e.target && e.target.closest && (
+        e.target.closest('.widget[data-image-widget="true"]') ||
+        e.target.closest('.widget[data-sticker-widget="true"]')
+    )) return;
     if (!isDrawMode && !isEraserMode && !_pdfAnnotMode) return;
     e.preventDefault();
     if (!_rightClickDone) {
@@ -2355,7 +2360,7 @@ function _updatePdfToolBtns() {
     _setBtn('pdf-pan-btn',        tool === 'pan',         '#c8a000');
     _setBtn('draw-free-btn',      tool === 'pen',         '#1a3550');
     _setBtn('draw-highlight-btn', tool === 'highlighter', '#2a2200');
-    _setBtn('eraser-btn',         tool === 'eraser',      '#f2bbbb');
+    _setBtn('eraser-btn',         tool === 'eraser',      '#e4e6ea');
     _setBtn('draw-figures-btn',   tool === 'figure',      '#1a2a4a');
     _setBtn('pdf-text-btn',       tool === 'text',        '#1a3a2a');
 

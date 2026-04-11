@@ -593,6 +593,16 @@ function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
         _openImgOpacityMenu(widget, img, e.clientX, e.clientY);
     });
 
+    // ── Menu clic droit (capture pour passer avant tout listener global) ──
+    widget.addEventListener('contextmenu', (e) => {
+        if (widget.dataset.anchored === 'true') return;
+        if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        _openImgContextMenu(widget, img, e.clientX, e.clientY);
+    }, true);
+
     board.appendChild(widget);
     bringToFront(widget);
     makeDraggable(widget);
@@ -606,6 +616,108 @@ function _doInsertImageWidget(src, label, naturalW, naturalH, opts) {
 
     saveBoard();
     return widget;
+}
+
+// ── Menu contextuel clic droit sur image widget ───────────────────────────
+let _imgCtxMenu = null;
+
+function _closeImgContextMenu() {
+    if (_imgCtxMenu) { _imgCtxMenu.remove(); _imgCtxMenu = null; }
+}
+
+function _openImgContextMenu(widget, img, clientX, clientY) {
+    _closeImgContextMenu();
+    _closeImgOpacityMenu();
+
+    const isPinned   = widget.dataset.pinned === 'true';
+    const isAnchored = widget.dataset.anchored === 'true';
+
+    const menu = document.createElement('div');
+    menu.className = 'img-ctx-menu';
+    _imgCtxMenu = menu;
+
+    const items = [
+        {
+            icon: '📌',
+            label: isPinned ? 'Désépingler' : 'Épingler',
+            action: () => { togglePin(widget); }
+        },
+        {
+            icon: '⚓',
+            label: isAnchored ? 'Désancrer' : 'Ancrer',
+            action: () => { toggleAnchorImage(widget); }
+        },
+        {
+            icon: '🔽',
+            label: 'Envoyer derrière',
+            action: () => { sendToBack(widget); }
+        },
+        { separator: true },
+        {
+            icon: '⧉',
+            label: 'Dupliquer',
+            action: () => { cloneWidget(widget); }
+        },
+        {
+            icon: '☀',
+            label: 'Transparence\u2026',
+            action: () => { _openImgOpacityMenu(widget, img, clientX, clientY); }
+        },
+        { separator: true },
+        {
+            icon: '×',
+            label: 'Supprimer',
+            danger: true,
+            action: () => { snapshotNow(); widget.remove(); saveBoard(); }
+        },
+    ];
+
+    items.forEach(item => {
+        if (item.separator) {
+            const sep = document.createElement('div');
+            sep.className = 'img-ctx-menu-sep';
+            menu.appendChild(sep);
+            return;
+        }
+        const btn = document.createElement('div');
+        btn.className = 'img-ctx-menu-item' + (item.danger ? ' danger' : '');
+        btn.innerHTML = '<span class="img-ctx-menu-icon">' + item.icon + '</span><span>' + item.label + '</span>';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _closeImgContextMenu();
+            item.action();
+        });
+        menu.appendChild(btn);
+    });
+
+    document.body.appendChild(menu);
+
+    // Positionner près du curseur, en restant dans l'écran
+    const mw = 190, mh = menu.offsetHeight || 220;
+    let x = clientX + 4, y = clientY + 4;
+    if (x + mw > window.innerWidth)  x = clientX - mw - 4;
+    if (y + mh > window.innerHeight) y = clientY - mh - 4;
+    menu.style.left = x + 'px';
+    menu.style.top  = y + 'px';
+
+    // Fermer au clic en dehors ou Escape
+    setTimeout(() => {
+        function onOut(e) {
+            if (menu.contains(e.target)) return;
+            _closeImgContextMenu();
+            document.removeEventListener('mousedown', onOut);
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) {
+            if (e.key === 'Escape') {
+                _closeImgContextMenu();
+                document.removeEventListener('mousedown', onOut);
+                document.removeEventListener('keydown', onKey);
+            }
+        }
+        document.addEventListener('mousedown', onOut);
+        document.addEventListener('keydown', onKey);
+    }, 10);
 }
 
 function _applyImgFlip(widget, img) {
@@ -806,6 +918,84 @@ document.addEventListener('mousedown', (e) => {
     if (e.target.closest('#image-panel-tab')) return;
     closeImagePanel();
 });
+
+// ── Injection CSS menu contextuel image ───────────────────────────────────
+(function _injectImgCtxMenuCSS() {
+    if (document.getElementById('img-ctx-menu-style')) return;
+    const style = document.createElement('style');
+    style.id = 'img-ctx-menu-style';
+    style.textContent = `
+        .img-ctx-menu {
+            position: fixed;
+            z-index: 99999;
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.18);
+            padding: 4px 0;
+            min-width: 175px;
+            font-size: 13.5px;
+            user-select: none;
+        }
+        .img-ctx-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            cursor: pointer;
+            color: #222;
+            transition: background .12s;
+            border-radius: 4px;
+            margin: 1px 4px;
+        }
+        .img-ctx-menu-item:hover {
+            background: #f0f4ff;
+        }
+        .img-ctx-menu-item.danger {
+            color: #c0392b;
+        }
+        .img-ctx-menu-item.danger:hover {
+            background: #fff0f0;
+        }
+        .img-ctx-menu-icon {
+            font-size: 15px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .img-ctx-menu-sep {
+            height: 1px;
+            background: #e8e8e8;
+            margin: 4px 10px;
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+// ── Listener contextmenu sur le board ET document, en capture ────────────
+function _handleImageWidgetContextMenu(e) {
+    const widget = e.target && e.target.closest
+        ? e.target.closest('.widget[data-image-widget="true"]')
+        : null;
+    if (!widget) return;
+    if (widget.dataset.anchored === 'true') return;
+    if (typeof isDrawMode !== 'undefined' && (isDrawMode || isEraserMode)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    const img = widget.querySelector('img');
+    _openImgContextMenu(widget, img, e.clientX, e.clientY);
+}
+
+// Sur le board en capture (s'exécute avant _boardDrawContextMenu en bubbling)
+document.addEventListener('DOMContentLoaded', () => {
+    const boardEl = document.getElementById('board');
+    if (boardEl) boardEl.addEventListener('contextmenu', _handleImageWidgetContextMenu, true);
+});
+// Filet de sécurité sur document en capture
+document.addEventListener('contextmenu', _handleImageWidgetContextMenu, true);
 
 // Créer l'onglet déclencheur dès le chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
