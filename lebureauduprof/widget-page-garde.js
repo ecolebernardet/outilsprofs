@@ -240,7 +240,7 @@ window.createPageGardeWidget = function() {
     // Hint
     const hint = document.createElement('span');
     hint.style.cssText = 'font-size:10px;color:#666;flex:1;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-    hint.textContent = 'Bureau A4 — utilisez tous les outils du bureau (dessin, formes, texte, stickers…)';
+    hint.textContent = 'Créer des pages de garde pour les cahiers';
 
     // Boutons macOS
     const btns = document.createElement('div');

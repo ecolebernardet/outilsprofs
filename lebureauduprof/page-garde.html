@@ -48,9 +48,9 @@
         }
 
         #pg-topbar .pg-title {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
-            color: #ccc;
+            color: #fff;
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -82,6 +82,57 @@
         }
         #pg-topbar button.pg-btn-pdf:hover { background: #246b47; }
 
+        #pg-topbar button.pg-btn-save {
+            background: #1a3a5a; border-color: #2a6aaa; color: #7fbfff;
+        }
+        #pg-topbar button.pg-btn-save:hover { background: #1f4a78; }
+
+        #pg-topbar button.pg-btn-load {
+            background: #3a2a5a; border-color: #6a4aaa; color: #c0a0ff;
+        }
+        #pg-topbar button.pg-btn-load:hover { background: #4e3878; }
+
+        /* ── Ligne 2 : barre d'outils ── */
+        #pg-toolbar2 {
+            position: fixed;
+            top: 44px; left: 0; right: 0;
+            height: 36px;
+            background: #222236;
+            border-bottom: 1px solid #3a3a55;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 12px;
+            z-index: 99998;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .pg-tool-btn {
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #2e2e48;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .15s, border-color .15s;
+            font-family: inherit;
+            flex-shrink: 0;
+        }
+        .pg-tool-btn:hover  { background: #3e3e60; border-color: #7a7aaa; color: #fff; }
+        .pg-tool-btn:active { transform: scale(0.96); }
+
+        /* ── Zone de défilement autour de la page A4 ── */
+        #pg-frame-wrap {
+            position: fixed;
+            top: 80px; left: 0; right: 0; bottom: 0;
+            overflow: auto;
+            background: #777;
+            box-sizing: border-box;
+        }
+
         /* Groupe zoom */
         .pg-zoom-group {
             display: flex; align-items: center; gap: 3px; flex-shrink: 0;
@@ -93,15 +144,6 @@
             min-width: 42px; text-align: center;
             font-size: 11px; font-weight: 700; color: #aaa;
             pointer-events: none; flex-shrink: 0;
-        }
-
-        /* ── Zone de défilement autour de la page A4 ── */
-        #pg-frame-wrap {
-            position: fixed;
-            top: 44px; left: 0; right: 0; bottom: 0;
-            overflow: auto;
-            background: #777;
-            box-sizing: border-box;
         }
 
         /* Conteneur intermédiaire dont la taille layout = taille scaled réelle.
@@ -172,6 +214,7 @@
         /* Classe appliquée juste avant window.print() */
         body.pg-printing * { transition: none !important; animation: none !important; }
         body.pg-printing #pg-topbar,
+        body.pg-printing #pg-toolbar2,
         body.pg-printing #pg-loading,
         body.pg-printing .pg-toast { display: none !important; }
         body.pg-printing html,
@@ -182,12 +225,10 @@
 
 <!-- Barre supérieure -->
 <div id="pg-topbar">
-    <span class="pg-title">📄 Page de garde</span>
-
-    <div class="pg-sep"></div>
 
     <!-- Groupe zoom -->
     <div class="pg-zoom-group">
+		<span style="font-size: 11px; color:#aaa;">zoom :</span>
         <button id="pg-zoom-out"   title="Dézoomer (−)">−</button>
         <span   id="pg-zoom-label">100%</span>
         <button id="pg-zoom-in"    title="Zoomer (+)">+</button>
@@ -197,8 +238,27 @@
 
     <div class="pg-sep"></div>
 
-    <button id="pg-btn-clear" title="Vider la page">🗑️ Vider</button>
+	<span style="font-size: 11px; color:#aaa;">sauvegarde & export PDF :</span>
+    <button id="pg-btn-save" class="pg-btn-save" title="Sauvegarder la page de garde en JSON">💾 Sauvegarder</button>
+    <button id="pg-btn-load" class="pg-btn-load" title="Charger une page de garde depuis un fichier JSON">📂 Charger</button>
+    <input type="file" id="pg-file-input" accept=".json" style="display:none">
     <button id="pg-btn-pdf" class="pg-btn-pdf" title="Imprimer / Exporter en PDF">⬇️ PDF</button>
+
+    <div class="pg-sep"></div>
+
+    <button id="pg-btn-clear" title="Vider la page">🗑️ Vider</button>
+
+</div>
+
+<!-- Ligne 2 : outils d'édition -->
+<div id="pg-toolbar2">
+	<span style="font-size: 11px; color:#aaa;">Insérer des éléments : </span>
+	
+    <button id="pg-btn-text"       class="pg-tool-btn" title="Ajouter une zone de texte">🔤 Texte</button>
+    <button id="pg-btn-draw"       class="pg-tool-btn" title="Dessin et figures">✏️ Dessin & figures</button>
+    <button id="pg-btn-image"      class="pg-tool-btn" title="Insérer une image">🖼️ Image</button>
+    <button id="pg-btn-emoji"      class="pg-tool-btn" title="Insérer un émoji">😊 Émoji</button>
+    <button id="pg-btn-background" class="pg-tool-btn" title="Changer le fond de la page">🎨 Fond de page</button>
 </div>
 
 <!-- Chargement -->
@@ -224,8 +284,16 @@
     const sizer        = document.getElementById('pg-scroll-sizer');
     const wrap         = document.getElementById('pg-frame-wrap');
     const loading      = document.getElementById('pg-loading');
-    const btnClear     = document.getElementById('pg-btn-clear');
-    const btnPdf       = document.getElementById('pg-btn-pdf');
+    const btnClear      = document.getElementById('pg-btn-clear');
+    const btnPdf        = document.getElementById('pg-btn-pdf');
+    const btnSave       = document.getElementById('pg-btn-save');
+    const btnLoad       = document.getElementById('pg-btn-load');
+    const btnText       = document.getElementById('pg-btn-text');
+    const btnDraw       = document.getElementById('pg-btn-draw');
+    const btnImage      = document.getElementById('pg-btn-image');
+    const btnEmoji      = document.getElementById('pg-btn-emoji');
+    const btnBackground = document.getElementById('pg-btn-background');
+    const fileInput     = document.getElementById('pg-file-input');
     const btnZoomIn    = document.getElementById('pg-zoom-in');
     const btnZoomOut   = document.getElementById('pg-zoom-out');
     const btnZoomWidth = document.getElementById('pg-zoom-width');
@@ -279,7 +347,7 @@
     }
 
     function initZoom() {
-        applyZoom(calcWidthScale(), 'width');
+        applyZoom(calcFitScale(), 'fit');
     }
 
     btnZoomIn.addEventListener('click', function() {
@@ -333,6 +401,46 @@
         iframe.contentWindow.postMessage(msg, '*');
     }
 
+    // ── Sauvegarder la page de garde en JSON ─────────────────────────────
+    btnSave.addEventListener('click', function() {
+        sendCmd('getState');
+        toast('⏳ Sauvegarde en cours…', 3000);
+    });
+
+    // ── Charger une page de garde depuis un JSON ──────────────────────────
+    btnLoad.addEventListener('click', function() {
+        fileInput.value = '';
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function() {
+        var file = fileInput.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var data = JSON.parse(ev.target.result);
+                if (!data._type || data._type !== 'page-garde-export') {
+                    toast('⚠️ Fichier invalide (pas une page de garde)', 3000);
+                    return;
+                }
+                if (!confirm('Charger cette page de garde ? Le contenu actuel sera remplacé.')) return;
+                sendCmd('setState', { state: data.state });
+                toast('✅ Page de garde chargée !');
+            } catch(err) {
+                toast('⚠️ Erreur de lecture : ' + err.message, 4000);
+            }
+            fileInput.value = '';
+        };
+        reader.readAsText(file);
+    });
+
+    btnText.addEventListener('click',       function() { sendCmd('createText'); });
+    btnDraw.addEventListener('click',       function() { sendCmd('openDraw'); });
+    btnImage.addEventListener('click',      function() { sendCmd('openImages'); });
+    btnEmoji.addEventListener('click',      function() { sendCmd('openEmojis'); });
+    btnBackground.addEventListener('click', function() { sendCmd('openBackground'); });
+
     btnClear.addEventListener('click', function() {
         if (!confirm('Vider toute la page de garde ?')) return;
         sendCmd('clear');
@@ -359,6 +467,27 @@
             loading.classList.add('hidden');
             setTimeout(function() { loading.style.display = 'none'; }, 400);
             initZoom();
+        }
+
+        // Réception de l'état pour export JSON
+        if (ev === 'state-ready') {
+            var state = e.data.state || {};
+            if (Object.keys(state).length === 0) {
+                toast('⚠️ Aucune donnée à sauvegarder', 3000);
+                return;
+            }
+            var exportData = {
+                _type: 'page-garde-export',
+                _version: 1,
+                exportedAt: Date.now(),
+                state: state
+            };
+            var date = new Date().toISOString().split('T')[0];
+            var a = document.createElement('a');
+            a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
+            a.download = 'page-de-garde_' + date + '.json';
+            document.body.appendChild(a); a.click(); a.remove();
+            toast('✅ Page de garde sauvegardée !');
         }
 
         // Réception du canvas pour génération PDF via jsPDF (1 page garantie)

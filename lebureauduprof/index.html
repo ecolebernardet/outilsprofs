@@ -87,8 +87,27 @@
         body.mode-pagegarde #fab-btn,
         body.mode-pagegarde #current-project-name,
         body.mode-pagegarde #a4-indicator,
-        body.mode-pagegarde #pres-limit-line {
+        body.mode-pagegarde #pres-limit-line,
+        body.mode-pagegarde #disp-section-actions,
+        body.mode-pagegarde #disp-row-actions,
+        body.mode-pagegarde #disp-section-theme,
+        body.mode-pagegarde #disp-row-theme,
+        body.mode-pagegarde #disp-section-capture,
+        body.mode-pagegarde #disp-row-capture,
+        body.mode-pagegarde #widgets-panel,
+        body.mode-pagegarde #widgets-panel-tab,
+        body.mode-pagegarde #sticker-panel-tab,
+        body.mode-pagegarde #display-panel-tab,
+        body.mode-pagegarde #image-panel-tab,
+        body.mode-pagegarde #draw-fab-btn,
+        body.mode-pagegarde #sticker-mode-bar,
+        body.mode-pagegarde #sp-animated-section {
             display: none !important;
+        }
+
+        /* En mode page-garde : forcer l'affichage de la section classique dans les stickers */
+        body.mode-pagegarde #sp-classic-section {
+            display: contents !important;
         }
 
         /* Garder visible : stickers, images, widgets, dessin, formes */
@@ -119,6 +138,11 @@
         var _origGetItem    = Storage.prototype.getItem;
         var _origSetItem    = Storage.prototype.setItem;
         var _origRemoveItem = Storage.prototype.removeItem;
+
+        // Exposer les originales pour pouvoir les réutiliser depuis d'autres scripts
+        window._pgOrigGetItem    = function(k) { return _origGetItem.call(localStorage, k); };
+        window._pgOrigSetItem    = function(k, v) { return _origSetItem.call(localStorage, k, v); };
+        window._pgOrigRemoveItem = function(k) { return _origRemoveItem.call(localStorage, k); };
 
         // Clés à isoler (état du bureau)
         var ISOLATED_KEYS = ['profBoardConfig', 'boardBackground', 'boardBgScale', '_boardScenes', '_scenesCurrentIdx'];
@@ -1616,8 +1640,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
     <div id="display-panel-content">
 
-		<div class="disp-section-label">↩️ Actions</div>
-        <div class="hist-btn-row" style="flex-direction:row;flex-wrap:nowrap;gap:4px;">
+		<div class="disp-section-label" id="disp-section-actions">↩️ Actions</div>
+        <div class="hist-btn-row" id="disp-row-actions" style="flex-direction:row;flex-wrap:nowrap;gap:4px;">
             <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
                 <span class="hist-btn-ico">↩</span>
                 <span style="font-size:11px;line-height:1.2;">Annuler</span>
@@ -1636,16 +1660,16 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             </button>
         </div>
 		
-		<div class="disp-section-label">🎨 Thème, pointeur & affichage</div>
-        <div class="disp-inline-row">
+		<div class="disp-section-label" id="disp-section-theme">🎨 Thème, pointeur & affichage</div>
+        <div class="disp-inline-row" id="disp-row-theme">
             <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️<br>Mode clair</button>
             <button class="disp-inline-btn" id="disp-dark-btn" onclick="if(document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode sombre">🌙<br>Mode sombre</button>
 			<button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴<br>Laser</button>
             <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄<br>A4 Portrait</button>
         </div>
 
-        <div class="disp-section-label">📸 Capture du bureau</div>
-        <div class="disp-inline-row">
+        <div class="disp-section-label" id="disp-section-capture">📸 Capture du bureau</div>
+        <div class="disp-inline-row" id="disp-row-capture">
             <button class="disp-inline-btn" onclick="captureBoard('jpg');toggleDisplayPanel()">🖼️ JPG</button>
             <button class="disp-inline-btn" onclick="captureBoard('png');toggleDisplayPanel()">🖼️ PNG</button>
             <button class="disp-inline-btn" onclick="captureBoard('pdf');toggleDisplayPanel()">📄 PDF</button>
@@ -2691,6 +2715,74 @@ function lancerTracesGeometriques() {
 
         if (cmd === 'ping') {
             e.source.postMessage({ pgEvent: 'pong' }, '*');
+        }
+
+        // ── Créer un widget texte directement ────────────────────────────
+        if (cmd === 'createText') {
+            window._nextTextOpenCreate = true;
+            if (typeof createWidget === 'function') createWidget('text');
+        }
+
+        // ── Ouvrir la toolbar dessin & figures ───────────────────────────
+        if (cmd === 'openDraw') {
+            if (typeof openMmPanel === 'function') openMmPanel('draw');
+        }
+
+        // ── Ouvrir le panneau images ─────────────────────────────────────
+        if (cmd === 'openImages') {
+            if (typeof toggleImagePanel === 'function') toggleImagePanel();
+        }
+
+        // ── Ouvrir le panneau stickers/émojis ────────────────────────────
+        if (cmd === 'openEmojis') {
+            if (typeof toggleStickerPanel === 'function') toggleStickerPanel();
+        }
+
+        // ── Ouvrir le panneau fond de page ───────────────────────────────
+        if (cmd === 'openBackground') {
+            if (typeof toggleDisplayPanel === 'function') toggleDisplayPanel();
+        }
+
+        // ── Sauvegarde : collecter toutes les clés pagegarde_ du localStorage ──
+        if (cmd === 'getState') {
+            var state = {};
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.startsWith('pagegarde_')) {
+                        state[k] = window._pgOrigGetItem(k);
+                    }
+                }
+            } catch(err) {}
+            e.source.postMessage({ pgEvent: 'state-ready', state: state }, '*');
+        }
+
+        // ── Chargement : restaurer les clés pagegarde_ et recharger le board ──
+        if (cmd === 'setState' && e.data.state) {
+            try {
+                // Supprimer les anciennes clés pagegarde_
+                var keysToRemove = [];
+                for (var j = 0; j < localStorage.length; j++) {
+                    var kk = localStorage.key(j);
+                    if (kk && kk.startsWith('pagegarde_')) keysToRemove.push(kk);
+                }
+                keysToRemove.forEach(function(k) { window._pgOrigRemoveItem(k); });
+                // Écrire les nouvelles données
+                var newState = e.data.state;
+                Object.keys(newState).forEach(function(k) { window._pgOrigSetItem(k, newState[k]); });
+                // Recharger le board
+                if (typeof restoreBoardFromJSON === 'function') {
+                    var boardJson = window._pgOrigGetItem('pagegarde_profBoardConfig');
+                    if (boardJson) {
+                        if (typeof snapshotNow === 'function') snapshotNow();
+                        Array.from(document.querySelectorAll('.widget,.shape-widget')).forEach(function(w){ w.remove(); });
+                        restoreBoardFromJSON(boardJson);
+                    }
+                }
+                e.source.postMessage({ pgEvent: 'state-applied' }, '*');
+            } catch(err) {
+                e.source.postMessage({ pgEvent: 'state-error', message: err.message }, '*');
+            }
         }
     });
 

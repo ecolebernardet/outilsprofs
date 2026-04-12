@@ -32,6 +32,19 @@ if (!window.IMAGE_CATEGORIES) {
             ]
         },
 		{
+            id: 'ecole',
+            label: 'École',
+            icon: '🏫',
+            images: [
+                { src: 'images/ecole-cahier.jpeg',                label: 'cahier' },
+				{ src: 'images/matiere-scolaire-maths1.jpeg',    label: 'maths' },
+				{ src: 'images/matiere-scolaire-maths3.jpeg',    label: 'maths' },
+				{ src: 'images/matiere-scolaire-maths4.jpeg',    label: 'maths' },
+				{ src: 'images/matiere-scolaire-maths5.jpeg',    label: 'maths' },
+				{ src: 'images/matiere-scolaire-maths6.jpeg',    label: 'maths' },
+            ]
+        },
+		{
             id: 'saisons',
             label: 'Saisons',
             icon: '🌼',
@@ -802,22 +815,26 @@ function _applyAnchorState(widget, anchored) {
             widget._anchorObserver.observe(widget, { attributes: true, attributeFilter: ['class', 'style'] });
         }
 
-        // Badge visible pour désancrer
-        let badge = widget.querySelector('.anchor-badge');
+        // Badge visible pour désancrer — attaché au body en position:fixed
+        // pour être hors du #board et invisible pour html2canvas
+        let badge = document.querySelector('.anchor-badge[data-widget-id="' + widget.dataset.anchorId + '"]');
         if (!badge) {
+            // Donner un id unique au widget si pas encore fait
+            if (!widget.dataset.anchorId) {
+                widget.dataset.anchorId = 'anc_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+            }
             badge = document.createElement('div');
             badge.className = 'anchor-badge';
+            badge.dataset.widgetId = widget.dataset.anchorId;
             badge.title = 'Image ancrée — cliquer pour désancrer';
             badge.textContent = '⚓';
             badge.style.cssText = [
-                'position:absolute',
-                'top:4px',
-                'left:4px',
+                'position:fixed',
                 'font-size:14px',
                 'line-height:1',
                 'pointer-events:auto',
                 'cursor:pointer',
-                'z-index:9999',
+                'z-index:99999',
                 'background:rgba(0,0,0,0.55)',
                 'border-radius:50%',
                 'padding:3px 4px',
@@ -825,12 +842,28 @@ function _applyAnchorState(widget, anchored) {
                 'text-shadow:0 0 4px #f0a020',
                 'user-select:none'
             ].join(';');
+            // Positionner le badge sur le widget
+            function _updateBadgePos() {
+                if (!badge.parentNode) return;
+                var r = widget.getBoundingClientRect();
+                badge.style.left = (r.left + 4) + 'px';
+                badge.style.top  = (r.top  + 4) + 'px';
+            }
             badge.addEventListener('click', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 toggleAnchorImage(widget);
             });
-            widget.appendChild(badge);
+            document.body.appendChild(badge);
+            _updateBadgePos();
+            // Mettre à jour la position quand le board est scrollé/déplacé
+            widget._anchorBadgePosUpdate = _updateBadgePos;
+            var _rafId = null;
+            function _rafUpdate() { _updateBadgePos(); _rafId = requestAnimationFrame(_rafUpdate); }
+            _rafId = requestAnimationFrame(_rafUpdate);
+            badge._stopRaf = function() { cancelAnimationFrame(_rafId); };
+            // Stocker la ref du badge sur le widget pour pouvoir le retrouver
+            widget._anchorBadgeEl = badge;
         }
         if (anchorBtn) {
             anchorBtn.title = 'Désancrer';
@@ -860,8 +893,13 @@ function _applyAnchorState(widget, anchored) {
             widget._anchorObserver = null;
         }
         widget.style.outline = '';
-        const badge = widget.querySelector('.anchor-badge');
-        if (badge) badge.remove();
+        // Badge dans body (position:fixed) — le retrouver via la ref stockée
+        const badge = widget._anchorBadgeEl || document.querySelector('.anchor-badge[data-widget-id="' + (widget.dataset.anchorId||'') + '"]');
+        if (badge) {
+            if (badge._stopRaf) badge._stopRaf();
+            badge.remove();
+        }
+        widget._anchorBadgeEl = null;
         if (anchorBtn) {
             anchorBtn.title = 'Ancrer (rendre insélectionnable)';
             anchorBtn.style.color = '';
