@@ -1383,7 +1383,7 @@
 			display: flex;
 			position: fixed;
 			top: 0; left: calc(-10 * var(--sticker-panel-w));
-			width: var(--sticker-panel-w); height: calc(100vh - 90px);
+			width: var(--sticker-panel-w); height: calc(100vh);
 			background: #111;
 			border-right: 1px solid #2e2e3a;
 			box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -1555,7 +1555,7 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-10 * var(--widgets-panel-w));
-    width: var(--widgets-panel-w); height: calc(100vh - 90px);
+    width: var(--widgets-panel-w); height: calc(100vh);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -1689,7 +1689,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-10 * var(--tools-panel-w));
-    width: var(--tools-panel-w); height: calc(100vh - 90px);
+    width: var(--tools-panel-w); height: calc(100vh);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -1836,7 +1836,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
     display: flex;
     position: fixed;
     top: 0; left: calc(-10 * var(--act-panel-w));
-    width: var(--act-panel-w); height: calc(100vh - 90px);
+    width: var(--act-panel-w); height: calc(100vh);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -2026,7 +2026,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     position: fixed;
     top: 0; left: calc(-10 * var(--pdf-lib-w));
     width: var(--pdf-lib-w);
-    height: calc(100% - 90px);
+    height: calc(100%);
     background: var(--pdf-lib-bg);
     border-right: 1px solid var(--pdf-lib-border);
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -2192,7 +2192,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     position: fixed;
     top: 0; left: calc(-10 * var(--proj-panel-w));
     width: var(--proj-panel-w);
-    height: calc(100% - 90px);
+    height: calc(100%);
     background: #111;
     border-right: 1px solid rgba(255,255,255,0.1);
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -2431,7 +2431,7 @@ body.menu-light #history-panel-tab.history-panel-tab-open { display: none !impor
     position: fixed;
     top: 0; left: calc(-10 * var(--display-panel-w));
     width: var(--display-panel-w);
-    height: calc(100% - 90px);
+    height: calc(100%);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -2804,7 +2804,7 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
     display: flex;
     position: fixed;
     top: 0; left: calc(-10 * 380px);
-    width: 380px; height: calc(100vh - 90px);
+    width: 380px; height: calc(100vh);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
