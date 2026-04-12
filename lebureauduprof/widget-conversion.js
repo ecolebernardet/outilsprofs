@@ -168,7 +168,7 @@
             border-radius: 20px;
             border: 1.5px solid #e5e7eb;
             background: #f9fafb;
-            font-size: 10px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             color: #6b7280;
@@ -208,17 +208,18 @@
         .wconv-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 18px;
             table-layout: fixed;
+			margin-bottom:20px;
         }
         .wconv-table th, .wconv-table td {
             border: 1px solid #d1d5db;
             text-align: center;
             padding: 5px 2px;
-            font-size: 10px;
+            font-size: 23px;
         }
         .wconv-table th { background: #f3f4f6; font-weight: 900; color: #374151; }
-        .wconv-table td { background: #fff; height: 26px; color: #6b7280; }
+        .wconv-table td { background: #fff; height: 50px; color: #6b7280; }
         .wconv-exos-zone {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -232,6 +233,7 @@
             box-sizing: border-box;
             counter-reset: exo-counter;
             gap: 4px 8px;
+			margin-bottom:20px;
         }
         .wconv-exo-row {
             display: flex;
@@ -239,7 +241,7 @@
             gap: 4px;
             font-weight: 700;
             font-size: 12px;
-            padding: 4px 2px;
+            padding: 10px 2px;
             border-bottom: 1px solid #e5e7eb;
             counter-increment: exo-counter;
             flex-wrap: nowrap;
@@ -248,9 +250,9 @@
         .wconv-exo-row::before {
             content: counter(exo-counter) ")";
             min-width: 14px;
-            font-size: 9px;
-            font-weight: 900;
-            color: #9ca3af;
+            font-size: 10px;
+            font-weight: 800;
+            color: #6688cc;
             flex-shrink: 0;
         }
         .wconv-exo-val {
@@ -258,30 +260,32 @@
             text-align: right;
             white-space: nowrap;
             color: #374151;
-            font-size: 18px;
+            font-size: 23px;
             flex-shrink: 1;
+			padding: 0px 0px 0px 10px;
         }
         .wconv-exo-input {
-            width: 52px;
-            min-width: 40px;
+            min-width: 60px;
+            width: 60px;
             background: #fff;
             border: 1.5px solid #d1d5db;
             border-radius: 6px;
-            padding: 3px 5px;
+            padding: 3px 8px;
             text-align: center;
             color: #4a90e2;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 23px;
             outline: none;
-            transition: border-color .15s;
+            transition: border-color .15s, width .1s ease;
             flex-shrink: 0;
             user-select: text;
             -webkit-user-select: text;
+            box-sizing: content-box;
         }
         .wconv-exo-input:focus { border-color: #4a90e2; }
         .wconv-exo-input.correct { border-color: #28a745; background: #f0fff4; color: #1a7a3a; }
         .wconv-exo-input.wrong   { border-color: #dc3545; background: #fff5f5; color: #9c1c28; }
-        .wconv-exo-unit { min-width: 28px; color: #6b7280; font-size: 11px; flex-shrink: 0; }
+        .wconv-exo-unit { min-width: 28px; color: #374151; font-size: 23px; flex-shrink: 0; }
         .wconv-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
         .wconv-btn {
             padding: 5px 12px;
@@ -334,7 +338,7 @@
             border-radius: 0 !important;
             overflow-y: auto;
             padding: 20px 40px !important;
-			padding-left: 50px !important;
+			padding-left: 70px !important;
         }
         .wconv-container.wf-fullboard .wconv-exos-zone { max-height: none; }
         .wconv-resize-handle {
@@ -371,7 +375,10 @@ function _convConvert(value, from, to, type) {
     const power = type === 'aires' ? 2 : 1;
     const diff = (units.indexOf(to) - units.indexOf(from)) * power;
     const num = parseFloat(value.toString().replace(',', '.'));
-    return (num * Math.pow(10, diff)).toLocaleString('fr-FR', { maximumFractionDigits: 5 }).replace(/\s/g, '');
+    const result = num * Math.pow(10, diff);
+    // Assure suffisamment de décimales pour les conversions avec grand écart (ex: cm² → hm²)
+    const maxDec = diff < 0 ? Math.max(5, Math.abs(diff) + 4) : 5;
+    return result.toLocaleString('fr-FR', { maximumFractionDigits: maxDec }).replace(/\s/g, '');
 }
 
 function _convGenExos(type, count, diff) {
@@ -441,7 +448,7 @@ function createConversionWidget(opts) {
     // ── Container ─────────────────────────────────────────────────────────
     const container = document.createElement('div');
     container.className = 'wconv-container';
-    container.style.width = Math.min(720, Math.round(window.innerWidth * 0.60)) + 'px';
+    container.style.width = Math.min(900, Math.round(window.innerWidth * 0.60)) + 'px';
 
     // ── Header ────────────────────────────────────────────────────────────
     const header = document.createElement('div');
@@ -533,7 +540,7 @@ function createConversionWidget(opts) {
 
     // ── Niveau + nb exercices ─────────────────────────────────────────────
     const controlsTop = document.createElement('div');
-    controlsTop.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    controlsTop.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px';
     controlsTop.innerHTML = `
         <div class="wconv-level-btns">
             <button class="wconv-lvl-btn active-facile" data-level="1">🟢 Facile</button>
@@ -606,6 +613,17 @@ function createConversionWidget(opts) {
         tableWrap.innerHTML = _convBuildTable(currentType);
     }
 
+    // ── Auto-resize input selon le contenu ───────────────────────────────
+    function autoResizeInput(inp) {
+        const ghost = document.createElement('span');
+        ghost.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font-size:23px;font-weight:700;font-family:inherit;padding:0 8px;';
+        ghost.textContent = inp.value || inp.placeholder || '?';
+        document.body.appendChild(ghost);
+        const newW = Math.max(60, ghost.offsetWidth + 4);
+        ghost.remove();
+        inp.style.width = newW + 'px';
+    }
+
     function generate() {
         const count = Math.max(2, Math.min(20, parseInt(nbInput.value) || 8));
         currentExos   = _convGenExos(currentType, count, currentDiff);
@@ -623,12 +641,14 @@ function createConversionWidget(opts) {
         exosZone.querySelectorAll('.wconv-exo-input').forEach(inp => {
             inp.addEventListener('mousedown', (e) => e.stopPropagation());
             inp.addEventListener('click',     (e) => { e.stopPropagation(); inp.focus(); });
+            inp.addEventListener('input', () => autoResizeInput(inp));
             inp.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     const next = exosZone.querySelector(`.wconv-exo-input[data-index="${parseInt(inp.dataset.index) + 1}"]`);
                     if (next) next.focus();
                 }
             });
+            autoResizeInput(inp);
         });
         corrBtn.textContent = '👁 Correction';
         corrBtn.classList.remove('revealed');
@@ -649,6 +669,7 @@ function createConversionWidget(opts) {
                 inp.className  = 'wconv-exo-input ' + (isOk ? 'correct' : 'wrong');
                 inp.value      = correct;
                 inp.disabled   = true;
+                autoResizeInput(inp);
             });
             corrBtn.textContent = '🙈 Masquer';
             corrBtn.classList.add('revealed');
@@ -657,6 +678,7 @@ function createConversionWidget(opts) {
             inputs.forEach(inp => {
                 if (inp.dataset.status === 'error') {
                     inp.value = ''; inp.className = 'wconv-exo-input'; inp.disabled = false;
+                    autoResizeInput(inp);
                 }
             });
             corrBtn.textContent = '👁 Correction';
@@ -677,6 +699,19 @@ function createConversionWidget(opts) {
     controlsTop.querySelectorAll('.wconv-lvl-btn').forEach(btn => {
         btn.addEventListener('click', () => { currentDiff = parseInt(btn.dataset.level); updateLevelButtons(); });
     });
+
+    // Correction : On s'assure que l'élément est bien ciblé et on écoute les changements
+    if (nbInput) {
+        ['input', 'change'].forEach(evt => {
+            nbInput.addEventListener(evt, () => {
+                generate();
+            });
+        });
+        
+        // Empêcher la propagation pour éviter que le drag du widget ne s'active
+        nbInput.addEventListener('mousedown', (e) => e.stopPropagation());
+    }
+
     genBtn.addEventListener('click', () => generate());
     corrBtn.addEventListener('click', () => { if (currentExos.length > 0) toggleCorrection(); });
 
