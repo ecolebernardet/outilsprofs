@@ -147,7 +147,7 @@
     }
     .se-grid-2 {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
         margin-bottom: 8px;
     }
@@ -164,6 +164,9 @@
         text-align: center;
         line-height: 1.2;
     }
+    .se-label-ps  { color: #7c3aed; }
+    .se-label-ms  { color: #0891b2; }
+    .se-label-gs  { color: #d97706; }
     .se-label-cp  { color: #db2777; }
     .se-label-ce1 { color: #2563eb; }
     .se-label-ce2 { color: #92400e; }
@@ -207,7 +210,7 @@
     }
     .se-avoid-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 4px;
         margin-top: 6px;
     }
@@ -313,9 +316,12 @@
         font-weight: 800;
         font-size: 10px;
     }
+    .se-badge-ps  { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+    .se-badge-ms  { background: #cffafe; color: #0e7490; border: 1px solid #67e8f9; }
+    .se-badge-gs  { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
     .se-badge-cp  { background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; }
     .se-badge-ce1 { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
-    .se-badge-ce2 { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .se-badge-ce2 { background: #fff7ed; color: #92400e; border: 1px solid #fdba74; }
     .se-badge-cm1 { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
     .se-badge-cm2 { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .se-total-badge {
@@ -422,6 +428,18 @@
                     <div class="se-section-title">Effectifs par niveau</div>
                     <div class="se-grid-3">
                         <div class="se-field">
+                            <span class="se-field-label se-label-ps">PS</span>
+                            <input class="se-input se-ps" type="number" min="0" value="0">
+                        </div>
+                        <div class="se-field">
+                            <span class="se-field-label se-label-ms">MS</span>
+                            <input class="se-input se-ms" type="number" min="0" value="0">
+                        </div>
+                        <div class="se-field">
+                            <span class="se-field-label se-label-gs">GS</span>
+                            <input class="se-input se-gs" type="number" min="0" value="0">
+                        </div>
+                        <div class="se-field">
                             <span class="se-field-label se-label-cp">CP</span>
                             <input class="se-input se-cp" type="number" min="0" value="30">
                         </div>
@@ -457,12 +475,12 @@
                         </div>
                         <div class="se-field">
                             <span class="se-field-label se-label-def" style="text-align:center;line-height:1.3;">Écart max<br>entre niveaux</span>
-                            <input class="se-input se-gap-niv" type="number" min="1" value="1">
+                            <input class="se-input se-gap-niv" type="number" min="1" value="1" >
                         </div>
-                    </div>
-                    <div class="se-field" style="margin-bottom:8px;">
-                        <span class="se-field-label se-label-def" style="margin-bottom:3px;">Écart effectif max entre classes</span>
-                        <input class="se-input se-gap-eff" type="number" min="1" max="20" value="4" style="max-width:80px;">
+						<div class="se-field" style="margin-bottom:8px;">
+							<span class="se-field-label se-label-def" style="margin-bottom:3px;">Écart effectif max<br>entre classes</span>
+							<input class="se-input se-gap-eff" type="number" min="1" max="20" value="4" >
+						</div>
                     </div>
                     <hr class="se-separator">
                     <div class="se-check-group">
@@ -472,12 +490,14 @@
                     <hr class="se-separator">
                     <div class="se-section-title" style="margin-bottom:4px;margin-top:4px;">Éviter ces mélanges</div>
                     <div class="se-avoid-grid">
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="1-2"> CP/CE1</label>
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="2-3"> CE1/CE2</label>
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="3-4"> CE2/CM1</label>
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="4-5"> CM1/CM2</label>
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="1-3"> CP/CE2</label>
-                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="2-4"> CE1/CM1</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="1-2"> PS/MS</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="2-3"> MS/GS</label>
+						<label class="se-check-group"><input type="checkbox" class="se-avoid" value="1-3"> PS/GS</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="3-4"> GS/CP</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="4-5"> CP/CE1</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="5-6"> CE1/CE2</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="6-7"> CE2/CM1</label>
+                        <label class="se-check-group"><input type="checkbox" class="se-avoid" value="7-8"> CM1/CM2</label>
                     </div>
                 </div>
 
@@ -528,7 +548,7 @@
                         });
                         if (!respecteAvoid) return false;
                     }
-                    if (data.limit24 && (niv.id <= 2) && c.total >= 24) return false;
+                    if (data.limit24 && (niv.id === 4 || niv.id === 5) && c.total >= 24) return false;
                     return true;
                 }).sort(() => Math.random() - 0.5);
 
@@ -573,21 +593,21 @@
 
         for (let cl of classes) {
             if (cl.niveaux.size > 1 && cl.eleves.some(e => e.count < 6)) return null;
-            if (data.limit24 && (cl.niveaux.has(1) || cl.niveaux.has(2)) && cl.total > 24) return null;
+            if (data.limit24 && (cl.niveaux.has(4) || cl.niveaux.has(5)) && cl.total > 24) return null;
         }
 
         return classes;
     }
 
     function optimiserEffectifs(classes, data) {
-        const mapNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+        const mapNiveaux = { "PS": 1, "MS": 2, "GS": 3, "CP": 4, "CE1": 5, "CE2": 6, "CM1": 7, "CM2": 8 };
         let modifie = true;
         let iterations = 0;
 
         while (modifie && iterations < 50) {
             modifie = false;
             iterations++;
-            for (let niveauNom of ["CP", "CE1", "CE2", "CM1", "CM2"]) {
+            for (let niveauNom of ["PS", "MS", "GS", "CP", "CE1", "CE2", "CM1", "CM2"]) {
                 const niveauId = mapNiveaux[niveauNom];
                 const classesDoubles = classes.filter(c =>
                     c.niveaux.size > 1 &&
@@ -610,7 +630,7 @@
                             const ecart = classeDouble.total - classeSimple.total;
                             let aDeplacer = Math.min(Math.floor(ecart / 2), eleveDouble.count - 6, 2);
                             if (aDeplacer > 0) {
-                                if (data.limit24 && niveauId <= 2 && classeSimple.total + aDeplacer > 24) {
+                                if (data.limit24 && (niveauId === 4 || niveauId === 5) && classeSimple.total + aDeplacer > 24) {
                                     aDeplacer = Math.max(0, 24 - classeSimple.total);
                                 }
                                 if (aDeplacer > 0) {
@@ -675,7 +695,7 @@
                                         aDeplacer = Math.max(0, elevePlus.count - 6);
                                     }
                                     if (aDeplacer > 0) {
-                                        if (data.limit24 && niveauId <= 2 && classeMoins.total + aDeplacer > 24) {
+                                        if (data.limit24 && (niveauId === 4 || niveauId === 5) && classeMoins.total + aDeplacer > 24) {
                                             aDeplacer = Math.max(0, 24 - classeMoins.total);
                                         }
                                         if (aDeplacer > 0) {
@@ -716,7 +736,7 @@
     }
 
     function renderPropositions(solutions) {
-        const ordreNiveaux = { "CP": 1, "CE1": 2, "CE2": 3, "CM1": 4, "CM2": 5 };
+        const ordreNiveaux = { "PS": 1, "MS": 2, "GS": 3, "CP": 4, "CE1": 5, "CE2": 6, "CM1": 7, "CM2": 8 };
         let html = '';
 
         solutions.forEach((s, idx) => {
@@ -951,6 +971,9 @@
         if (widget.dataset.seFormData) {
             try {
                 const fd = JSON.parse(widget.dataset.seFormData);
+                widget.querySelector('.se-ps').value           = fd.ps  ?? 0;
+                widget.querySelector('.se-ms').value           = fd.ms  ?? 0;
+                widget.querySelector('.se-gs').value           = fd.gs  ?? 0;
                 widget.querySelector('.se-cp').value           = fd.cp  ?? 28;
                 widget.querySelector('.se-ce1').value          = fd.ce1 ?? 31;
                 widget.querySelector('.se-ce2').value          = fd.ce2 ?? 36;
@@ -974,6 +997,9 @@
         // ── Persistance ───────────────────────────────────────────────────
         function persistFormData() {
             widget.dataset.seFormData = JSON.stringify({
+                ps:      parseInt(widget.querySelector('.se-ps').value)         || 0,
+                ms:      parseInt(widget.querySelector('.se-ms').value)         || 0,
+                gs:      parseInt(widget.querySelector('.se-gs').value)         || 0,
                 cp:      parseInt(widget.querySelector('.se-cp').value)         || 0,
                 ce1:     parseInt(widget.querySelector('.se-ce1').value)        || 0,
                 ce2:     parseInt(widget.querySelector('.se-ce2').value)        || 0,
@@ -998,11 +1024,14 @@
             setTimeout(() => {
                 const data = {
                     niveaux: [
-                        { id: 1, nom: "CP",  n: parseInt(widget.querySelector('.se-cp').value)  || 0 },
-                        { id: 2, nom: "CE1", n: parseInt(widget.querySelector('.se-ce1').value) || 0 },
-                        { id: 3, nom: "CE2", n: parseInt(widget.querySelector('.se-ce2').value) || 0 },
-                        { id: 4, nom: "CM1", n: parseInt(widget.querySelector('.se-cm1').value) || 0 },
-                        { id: 5, nom: "CM2", n: parseInt(widget.querySelector('.se-cm2').value) || 0 }
+                        { id: 1, nom: "PS",  n: parseInt(widget.querySelector('.se-ps').value)  || 0 },
+                        { id: 2, nom: "MS",  n: parseInt(widget.querySelector('.se-ms').value)  || 0 },
+                        { id: 3, nom: "GS",  n: parseInt(widget.querySelector('.se-gs').value)  || 0 },
+                        { id: 4, nom: "CP",  n: parseInt(widget.querySelector('.se-cp').value)  || 0 },
+                        { id: 5, nom: "CE1", n: parseInt(widget.querySelector('.se-ce1').value) || 0 },
+                        { id: 6, nom: "CE2", n: parseInt(widget.querySelector('.se-ce2').value) || 0 },
+                        { id: 7, nom: "CM1", n: parseInt(widget.querySelector('.se-cm1').value) || 0 },
+                        { id: 8, nom: "CM2", n: parseInt(widget.querySelector('.se-cm2').value) || 0 }
                     ],
                     nbClasses:   parseInt(widget.querySelector('.se-nb-classes').value) || 1,
                     maxNiv:      parseInt(widget.querySelector('.se-max-niv').value)    || 2,
@@ -1036,6 +1065,9 @@
 
         // ── Réinitialiser formulaire ──────────────────────────────────────
         btnReset.addEventListener('click', () => {
+            widget.querySelector('.se-ps').value         = 0;
+            widget.querySelector('.se-ms').value         = 0;
+            widget.querySelector('.se-gs').value         = 0;
             widget.querySelector('.se-cp').value         = 28;
             widget.querySelector('.se-ce1').value        = 31;
             widget.querySelector('.se-ce2').value        = 36;
