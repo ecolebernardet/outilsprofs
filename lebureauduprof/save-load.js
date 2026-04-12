@@ -239,6 +239,11 @@ function buildBoardState() {
         if (w.dataset.type === 'conversion' && typeof w._convGetData === 'function') {
             convData = w._convGetData();
         }
+        // Données propres au widget fractions
+        let fracData = null;
+        if (w.dataset.type === 'fractions' && typeof w._fracGetData === 'function') {
+            fracData = w._fracGetData();
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -276,7 +281,8 @@ function buildBoardState() {
 			clrData,
 			s3dW, s3dH,
 			seyesData,
-			convData
+			convData,
+			fracData
 		});
     });
     const shapes = [];
@@ -617,6 +623,22 @@ function restoreBoardFromJSON(json) {
             widget = createConversionWidget();
             if (w.convData && typeof widget._convSetData === 'function') {
                 widget._convSetData(w.convData);
+            }
+        } else if (w.type === 'fractions') {
+            widget = createWidget('fractions', '100px', '100px', false);
+            if (w.fracData && typeof widget._fracSetData === 'function') {
+                // _fracSetData est appelé après le requestAnimationFrame d'init
+                const _fracDataToRestore = w.fracData;
+                setTimeout(() => {
+                    if (typeof widget._fracSetData === 'function') {
+                        widget._fracSetData(_fracDataToRestore);
+                    }
+                    // Restaurer dimensions
+                    const fc = widget.querySelector('.frac-container');
+                    if (fc && _fracDataToRestore.containerW) fc.style.width  = (_fracDataToRestore.containerW / (w._refW || 1920)) * curW + 'px';
+                    if (fc && _fracDataToRestore.containerH) fc.style.height = (_fracDataToRestore.containerH / (w._refW || 1920)) * window.innerHeight + 'px';
+                    if (_fracDataToRestore.fullboard && fc) fc.classList.add('wf-fullboard');
+                }, 80);
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);
