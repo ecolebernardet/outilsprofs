@@ -978,7 +978,7 @@ function createSeyesWidget() {
     const editor = document.createElement('div');
     editor.className = 'seyes-editor';
     editor.contentEditable = 'true';
-    editor.dataset.placeholder = 'Écris ici…';
+    editor.dataset.placeholder = 'ou ici…';
     editor.setAttribute('spellcheck', 'true');
 
     // Taille initiale : Normal (36px / 64px line-height)
@@ -1045,7 +1045,7 @@ function createSeyesWidget() {
     const editorMarge = document.createElement('div');
     editorMarge.className = 'seyes-editor-marge';
     editorMarge.contentEditable = 'true';
-    editorMarge.dataset.placeholder = '…';
+    editorMarge.dataset.placeholder = 'ici…';
     editorMarge.setAttribute('spellcheck', 'true');
     editorMarge.style.fontSize   = '36px';
     editorMarge.style.lineHeight = '64px';
