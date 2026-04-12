@@ -234,6 +234,11 @@ function buildBoardState() {
                 items: w._planData ? JSON.stringify(w._planData) : null
             };
         }
+        // Données propres au widget conversion
+        let convData = null;
+        if (w.dataset.type === 'conversion' && typeof w._convGetData === 'function') {
+            convData = w._convGetData();
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -270,7 +275,8 @@ function buildBoardState() {
 			sondageData,
 			clrData,
 			s3dW, s3dH,
-			seyesData
+			seyesData,
+			convData
 		});
     });
     const shapes = [];
@@ -606,6 +612,11 @@ function restoreBoardFromJSON(json) {
                     sm.style.paddingTop = w.seyesData.paddingTop;
                 }
                 // (fond séyès géré par CSS sur .seyes-writing-area)
+            }
+        } else if (w.type === 'conversion') {
+            widget = createConversionWidget();
+            if (w.convData && typeof widget._convSetData === 'function') {
+                widget._convSetData(w.convData);
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);

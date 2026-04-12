@@ -202,7 +202,7 @@
             z-index: 9999 !important;
             border-radius: 0 !important;
             overflow-y: auto;
-            padding-left: 40px !important;
+            padding-left: 50px !important;
         }
         .monnaie-level-badge {
             font-size: 10px;

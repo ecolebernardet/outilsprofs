@@ -336,6 +336,7 @@
 				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
 				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
 				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
+					<div class="mm-sub-item" onclick="createConversionWidget();closeMainMenu()"><span class="mm-ico">📐</span>&nbsp;&nbsp;Conversion</div>
 				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
 				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
 				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
@@ -1095,6 +1096,7 @@
 <script src="images.js"></script>
 <script src="widget-plan.js"></script>
 <script src="widget-monnaie.js"></script>
+<script src="widget-conversion.js"></script>
 <script src="widget-seyes.js"></script>
 <script src="widget-tableau-num.js"></script>
 <script src="widget-heure.js"></script>
@@ -1227,6 +1229,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-traces-geom6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Tracés géométriques</div>
                 <div class="act-card-desc">Utiliser la règle, l'équerre et le compas pour tracer</div>
+            </div>
+            <div class="act-card" onclick="createConversionWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-conversion6.jpeg" alt="Conversion" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Conversion</div>
+                <div class="act-card-desc">S'entraîner aux conversions de mesures</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
