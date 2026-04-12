@@ -337,6 +337,7 @@
 				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>&nbsp;&nbsp;Défi Calme</div>
 				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎲</span>&nbsp;&nbsp;Tirage au Sort</div>
 				<div class="mm-sub-item" onclick="createEquipesWidget();closeMainMenu()"><span class="mm-ico">👥</span>&nbsp;&nbsp;Équipes équilibrées</div>
+				<div class="mm-sub-item" onclick="createStructureEcoleWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Structure École</div>
 				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
 				<div class="mm-sub-item" onclick="createWidget('sonometre');closeMainMenu()"><span class="mm-ico">🔊</span>&nbsp;&nbsp;Sonomètre</div>
 				<div class="mm-sub-item" onclick="createWidget('radar');closeMainMenu()"><span class="mm-ico">📡</span>&nbsp;&nbsp;Radar de Bruit</div>
@@ -1093,6 +1094,7 @@
 <script src="widget-geometrie.js"></script>
 <script src="widget-tirage.js"></script>
 <script src="widget-equipes.js"></script>
+<script src="widget-structure-ecole.js"></script>
 <script src="widget-calcul.js"></script>
 <script src="color-picker.js"></script>
 <script src="toolbar-text.js"></script>
@@ -1485,6 +1487,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 		</div>
 		<div class="tools-section-label">🪛 Outils divers</div>
         <div class="tools-grid">
+			<div class="tools-card" onclick="createStructureEcoleWidget();toggleToolsPanel()">
+                <div class="tools-card-ico" style="font-size:2rem;display:flex;align-items:center;justify-content:center;"><img src="pics/outils-structure-ecole.jpeg" alt="Strcuture école" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="tools-card-name">Structure École</div>
+                <div class="tools-card-desc">Générer des propositions de répartition en classes</div>
+			</div>
 			<div class="tools-card" onclick="createPageGardeWidget();toggleToolsPanel()">
                 <div class="tools-card-ico"><img src="pics/outils-page-garde.jpeg" alt="Page de garde" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="tools-card-name">Page de garde</div>
