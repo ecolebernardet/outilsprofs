@@ -717,21 +717,17 @@
 
 
         // ── Helper tap stylet (pointer-safe) ────────────────────────────
-        // setPointerCapture est indispensable : il "vole" le pointeur au widget
-        // parent dès le pointerdown, empêchant son listener de drag de se déclencher.
-        function makeTap(el, handler, opts) {
-            opts = opts || {};
+        // Déclenche handler sur pointerup si le stylet/doigt n'a pas glissé (< 12px).
+        // Le stopPropagation sur pointerdown suffit car widgets.js vérifie désormais
+        // les classes interactives ng-* avant de lancer le drag.
+        function makeTap(el, handler) {
             el.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
-                e.preventDefault();
-                try { el.setPointerCapture(e.pointerId); } catch(_) {}
-                const sx = e.clientX, sy = e.clientY;
-                const pid = e.pointerId;
+                const sx = e.clientX, sy = e.clientY, pid = e.pointerId;
                 function onUp(eu) {
                     if (eu.pointerId !== pid) return;
                     el.removeEventListener('pointerup',     onUp);
                     el.removeEventListener('pointercancel', onUp);
-                    try { el.releasePointerCapture(eu.pointerId); } catch(_) {}
                     const dx = eu.clientX - sx, dy = eu.clientY - sy;
                     if (Math.sqrt(dx*dx + dy*dy) < 12) {
                         eu.stopPropagation();
@@ -755,14 +751,14 @@
                     activeNatures.delete(key);
                     label.classList.remove('checked');
                 }
-            }, { stop: true });
+            });
         });
 
         // ── Panneau paramètres ───────────────────────────────────────────
         makeTap(paramsBtn, () => {
             const open = paramsPanel.classList.toggle('show');
             paramsBtn.classList.toggle('active', open);
-        }, { stop: true });
+        });
 
         // ── Champ phrase : empêcher le drag du widget de capturer les events ──
         phraseInput.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -777,7 +773,7 @@
             }
             renderCorrectionTokens();
             initGame();
-        }, { stop: true });
+        });
 
         // Empêcher que le click dans le panel ferme la popup aide
         paramsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -865,7 +861,7 @@
                 }
                 makeTap(tok, () => {
                     openPicker(tok, idx);
-                }, { stop: true });
+                });
                 corrTokensZone.appendChild(tok);
             });
         }
@@ -873,7 +869,7 @@
         // ── Aide ─────────────────────────────────────────────────────────
         makeTap(helpBtn, () => {
             helpPopup.classList.toggle('show');
-        }, { stop: true });
+        });
         document.addEventListener('pointerdown', (e) => { if (!helpPopup.contains(e.target) && e.target !== helpBtn) helpPopup.classList.remove('show'); });
 
         // ── Boutons fenêtre ───────────────────────────────────────────────
@@ -895,7 +891,7 @@
                 window._wfMiniBarCollapse(widget, '🏷️ Nature grammaticale', {
                     onExpand: applyFontScale
                 });
-            }, { stop: true });
+            });
         }
         if (wfMax) {
             makeTap(wfMax, () => {
@@ -910,14 +906,14 @@
                     if (_savedH) container.style.height = _savedH;
                 }
                 applyFontScale();
-            }, { stop: true });
+            });
         }
         if (wfClose) {
             makeTap(wfClose, () => {
                 if (typeof snapshotNow === 'function') snapshotNow();
                 widget.remove();
                 if (typeof saveBoard === 'function') saveBoard();
-            }, { stop: true });
+            });
         }
 
         // ── Resize 2D ────────────────────────────────────────────────────
@@ -1131,7 +1127,7 @@
             rmBtn.title = 'Remettre dans la phrase';
             makeTap(rmBtn, () => {
                 removeFromColumn(wordText, nature);
-            }, { stop: true });
+            });
 
             span.appendChild(textNode);
             span.appendChild(rmBtn);

@@ -816,9 +816,13 @@ function makeDraggable(elmnt) {
         elmnt.addEventListener('touchend', () => { elmnt._dragPending = null; });
 
     } else {
+        // Sélecteur d'exclusions commun (souris, tactile, stylet)
+        const _DRAG_EXCLUDE = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider,' +
+            'button,input,select,textarea,label,.ng-params-btn,.ng-help-btn,.ng-nature-check,.ng-params-apply-btn,.ng-btn,.ng-word-token,.ng-placed-word,.ng-rm-btn,.ng-corr-token,.ng-resize-handle,.ng-nature-picker,.wf-btn';
+
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider')) return;
+            if (e.target.closest(_DRAG_EXCLUDE)) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             const container = elmnt.querySelector('.editor-container');
@@ -831,9 +835,21 @@ function makeDraggable(elmnt) {
             startWidgetDrag(e, elmnt);
         });
 
+        // Stylet (pointerType === 'pen') — même logique que mousedown
+        elmnt.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse') return;
+            if (isDrawMode || isEraserMode) return;
+            if (e.target.closest(_DRAG_EXCLUDE)) return;
+            if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
+            if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
+            e.preventDefault();
+            elmnt.focus();
+            startWidgetDrag(e, elmnt);
+        });
+
         elmnt.addEventListener('touchstart', (e) => {
             if (isDrawMode || isEraserMode) return;
-            if (e.target.closest('.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider')) return;
+            if (e.target.closest(_DRAG_EXCLUDE)) return;
             if (e.target.tagName === 'IFRAME' || e.target.tagName === 'EMBED') return;
             if (elmnt.dataset.type === 'pdf' && e.target.closest('.pdf-canvas-wrap')) return;
             elmnt.focus();
