@@ -44,8 +44,7 @@
             expandBtn.title = 'Déplier'; expandBtn.textContent = '▲';
             expandBtn.style.cssText = 'flex-shrink:0;background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;position:relative;z-index:2;';
             expandBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-            expandBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-            expandBtn.addEventListener('click', (e) => {
+            expandBtn.addEventListener('pointerup', (e) => {
                 e.stopPropagation(); e.preventDefault();
                 widget.style.top = widget.dataset.wfMiniSavedTop || widget.style.top;
                 widget.style.left = widget.dataset.wfMiniSavedLeft || widget.style.left;
@@ -716,9 +715,32 @@
             container.style.setProperty('--ng-fs', fs + 'px');
         }
 
+
+        // ── Helper tap stylet (pointer-safe) ────────────────────────────
+        function makeTap(el, handler, opts) {
+            opts = opts || {};
+            el.addEventListener('pointerdown', (e) => {
+                if (opts.stop) { e.stopPropagation(); }
+                const sx = e.clientX, sy = e.clientY;
+                const pid = e.pointerId;
+                function onUp(eu) {
+                    if (eu.pointerId !== pid) return;
+                    el.removeEventListener('pointerup',   onUp);
+                    el.removeEventListener('pointercancel', onUp);
+                    const dx = eu.clientX - sx, dy = eu.clientY - sy;
+                    if (Math.sqrt(dx*dx + dy*dy) < 10) {
+                        if (opts.stop) eu.stopPropagation();
+                        if (opts.prevent) eu.preventDefault();
+                        handler(eu);
+                    }
+                }
+                el.addEventListener('pointerup',    onUp);
+                el.addEventListener('pointercancel', onUp);
+            });
+        }
         // ── Cases à cocher des natures ───────────────────────────────────
         natureChecks.forEach(label => {
-            label.addEventListener('click', () => {
+            makeTap(label, () => {
                 const cb   = label.querySelector('input[type=checkbox]');
                 const key  = label.dataset.nature;
                 cb.checked = !cb.checked;
@@ -729,23 +751,21 @@
                     activeNatures.delete(key);
                     label.classList.remove('checked');
                 }
-            });
+            }, { stop: true });
         });
 
         // ── Panneau paramètres ───────────────────────────────────────────
-        paramsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        makeTap(paramsBtn, () => {
             const open = paramsPanel.classList.toggle('show');
             paramsBtn.classList.toggle('active', open);
-        });
+        }, { stop: true });
 
         // ── Champ phrase : empêcher le drag du widget de capturer les events ──
         phraseInput.addEventListener('pointerdown', (e) => e.stopPropagation());
         phraseInput.style.userSelect = 'text';
         phraseInput.style.pointerEvents = 'auto';
 
-        applyBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        makeTap(applyBtn, () => {
             const txt = phraseInput.value.trim();
             if (txt) {
                 currentPhrase = txt;
@@ -753,10 +773,10 @@
             }
             renderCorrectionTokens();
             initGame();
-        });
+        }, { stop: true });
 
         // Empêcher que le click dans le panel ferme la popup aide
-        paramsPanel.addEventListener('click', (e) => e.stopPropagation());
+        paramsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
 
         // ── Picker de nature ──────────────────────────────────────────────
         function buildPicker() {
@@ -772,9 +792,8 @@
                 btn.className = 'ng-picker-option';
                 btn.dataset.nature = k;
                 btn.textContent = NATURE_DEFS[k].label;
-                btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                btn.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation(); e.preventDefault();
                     if (pickerTarget !== null) {
                         solutionMap[pickerTarget] = k;
                         renderCorrectionTokens();
@@ -788,9 +807,8 @@
             const clearBtn = document.createElement('button');
             clearBtn.className = 'ng-picker-option ng-picker-option-clear';
             clearBtn.textContent = '✕ Effacer';
-            clearBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
-            clearBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+            clearBtn.addEventListener('pointerdown', (e) => {
+                e.stopPropagation(); e.preventDefault();
                 if (pickerTarget !== null) delete solutionMap[pickerTarget];
                 renderCorrectionTokens();
                 closePicker();
@@ -819,8 +837,8 @@
         }
 
         // Fermer picker si clic ailleurs
-        document.addEventListener('click', () => closePicker());
-        naturePicker.addEventListener('click', (e) => e.stopPropagation());
+        document.addEventListener('pointerdown', (e) => { if (!naturePicker.contains(e.target)) closePicker(); });
+        
 
         // ── Rendu des jetons de correction ───────────────────────────────
         function renderCorrectionTokens() {
@@ -841,20 +859,18 @@
                 } else {
                     tok.textContent = text;
                 }
-                tok.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                makeTap(tok, () => {
                     openPicker(tok, idx);
-                });
+                }, { stop: true });
                 corrTokensZone.appendChild(tok);
             });
         }
 
         // ── Aide ─────────────────────────────────────────────────────────
-        helpBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        makeTap(helpBtn, () => {
             helpPopup.classList.toggle('show');
-        });
-        document.addEventListener('click', () => helpPopup.classList.remove('show'));
+        }, { stop: true });
+        document.addEventListener('pointerdown', (e) => { if (!helpPopup.contains(e.target) && e.target !== helpBtn) helpPopup.classList.remove('show'); });
 
         // ── Boutons fenêtre ───────────────────────────────────────────────
         const wfMin   = container.querySelector('[data-role="wf-min"]');
@@ -864,17 +880,21 @@
         let _savedW = null, _savedH = null, _isMax = false;
 
         if (wfMin) {
-            wfMin.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (_isMax) wfMax.click();
+            makeTap(wfMin, () => {
+                if (_isMax) {
+                    _isMax = false;
+                    container.classList.remove('wf-fullboard');
+                    if (_savedW) container.style.width  = _savedW;
+                    if (_savedH) container.style.height = _savedH;
+                    applyFontScale();
+                }
                 window._wfMiniBarCollapse(widget, '🏷️ Nature grammaticale', {
                     onExpand: applyFontScale
                 });
-            });
+            }, { stop: true });
         }
         if (wfMax) {
-            wfMax.addEventListener('click', (e) => {
-                e.stopPropagation();
+            makeTap(wfMax, () => {
                 _isMax = !_isMax;
                 if (_isMax) {
                     _savedW = container.style.width;
@@ -886,15 +906,14 @@
                     if (_savedH) container.style.height = _savedH;
                 }
                 applyFontScale();
-            });
+            }, { stop: true });
         }
         if (wfClose) {
-            wfClose.addEventListener('click', (e) => {
-                e.stopPropagation();
+            makeTap(wfClose, () => {
                 if (typeof snapshotNow === 'function') snapshotNow();
                 widget.remove();
                 if (typeof saveBoard === 'function') saveBoard();
-            });
+            }, { stop: true });
         }
 
         // ── Resize 2D ────────────────────────────────────────────────────
@@ -1106,11 +1125,9 @@
             rmBtn.className = 'ng-rm-btn';
             rmBtn.textContent = '✕';
             rmBtn.title = 'Remettre dans la phrase';
-            rmBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+            makeTap(rmBtn, () => {
                 removeFromColumn(wordText, nature);
-            });
-            rmBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+            }, { stop: true });
 
             span.appendChild(textNode);
             span.appendChild(rmBtn);
@@ -1250,7 +1267,7 @@
         }
 
         // ── Correction ───────────────────────────────────────────────────
-        checkBtn.addEventListener('click', () => {
+        makeTap(checkBtn, () => {
             // Vérifie que tous les mots sont placés
             const nbPlaced = wordTokens.filter(t => t.placed).length;
             if (nbPlaced < wordTokens.length) {
@@ -1336,7 +1353,7 @@
         });
 
         // ── Reset ─────────────────────────────────────────────────────────
-        resetBtn.addEventListener('click', () => {
+        makeTap(resetBtn, () => {
             initGame();
         });
 
