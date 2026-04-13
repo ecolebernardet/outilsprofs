@@ -1593,6 +1593,9 @@ function spawnCompas(board, cx, cy) {
         document.addEventListener('mouseup',   _arcMouseUp);
         document.addEventListener('touchmove',  _arcTouchMove, { passive: false });
         document.addEventListener('touchend',   _arcTouchEnd);
+        document.addEventListener('pointermove', _arcPointerMove);
+        document.addEventListener('pointerup',   _arcPointerUp);
+        document.addEventListener('pointercancel', _arcPointerUp);
     }
 
     function _arcUpdate(clientX, clientY) {
@@ -1663,6 +1666,11 @@ function spawnCompas(board, cx, cy) {
 
     function _arcMouseMove(e) { _arcUpdate(e.clientX, e.clientY); }
     function _arcTouchMove(e) { e.preventDefault(); _arcUpdate(e.touches[0].clientX, e.touches[0].clientY); }
+    function _arcPointerMove(e) {
+        // Éviter la double exécution si l'événement mouse/touch est déjà traité
+        if (e.pointerType === 'mouse') return;
+        _arcUpdate(e.clientX, e.clientY);
+    }
 
     function _arcFinish(clientX, clientY) {
         if (!_arcDrawing) return;
@@ -1672,6 +1680,9 @@ function spawnCompas(board, cx, cy) {
         document.removeEventListener('mouseup',   _arcMouseUp);
         document.removeEventListener('touchmove',  _arcTouchMove);
         document.removeEventListener('touchend',   _arcTouchEnd);
+        document.removeEventListener('pointermove', _arcPointerMove);
+        document.removeEventListener('pointerup',   _arcPointerUp);
+        document.removeEventListener('pointercancel', _arcPointerUp);
 
         // Remettre le cercle preview SVG
         circle.setAttribute('stroke', 'rgba(167,139,250,0.45)');
@@ -1703,12 +1714,22 @@ function spawnCompas(board, cx, cy) {
 
     function _arcMouseUp(e)  { _arcFinish(e.clientX, e.clientY); }
     function _arcTouchEnd(e) { if (e.changedTouches[0]) _arcFinish(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }
+    function _arcPointerUp(e) {
+        if (e.pointerType === 'mouse') return;
+        _arcFinish(e.clientX, e.clientY);
+    }
 
     // Attacher l'événement mousedown sur la mine via le SVG
     mineTip.addEventListener('mousedown',  _arcMouseDown);
     mineTip.addEventListener('touchstart', function(e) {
         e.stopPropagation(); e.preventDefault();
-        _arcMouseDown(e.touches[0]);
+        const t = e.touches[0];
+        _arcMouseDown({ clientX: t.clientX, clientY: t.clientY, stopPropagation: function(){}, preventDefault: function(){} });
+    }, { passive: false });
+    mineTip.addEventListener('pointerdown', function(e) {
+        if (e.pointerType === 'mouse') return; // géré par mousedown
+        e.stopPropagation(); e.preventDefault();
+        _arcMouseDown(e);
     }, { passive: false });
 
     overlay.appendChild(svg);
