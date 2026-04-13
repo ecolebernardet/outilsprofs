@@ -105,6 +105,14 @@
         const s = document.createElement('style');
         s.id = 'widget-ceb-style';
         s.textContent = `
+        /* ── Police chiffres ── */
+        @font-face {
+            font-family: 'MarelleBaton';
+            src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         /* ── Widget transparent ── */
         .widget[data-type="compte-est-bon"] {
             min-width: unset;
@@ -251,6 +259,7 @@
             min-width: calc(90px * var(--ceb-s));
             text-align: center;
             font-variant-numeric: tabular-nums;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
         }
 
         /* ── Plaques tirées ── */
@@ -283,6 +292,7 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.10);
             transition: background .12s, border-color .12s, transform .1s, opacity .15s;
             user-select: none;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
         }
         .ceb-tile:hover:not(.used) { border-color: #4a90e2; background: #eff6ff; }
         .ceb-tile.selected { border-color: #4a90e2; background: #dbeafe; color: #1d4ed8; }
@@ -323,6 +333,7 @@
             background: #f3f4f6;
             border: calc(1.5px * var(--ceb-s)) dashed #d1d5db;
             color: #6b7280;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
         }
         .ceb-op-box.filled {
             background: white;
@@ -376,8 +387,8 @@
             border-radius: calc(8px * var(--ceb-s));
             font-size: calc(13px * var(--ceb-s));
         }
-        .ceb-history-step .step-expr { font-weight: 700; color: #374151; flex: 1; }
-        .ceb-history-step .step-result { font-weight: 800; color: #1d4ed8; min-width: calc(42px * var(--ceb-s)); text-align: right; }
+        .ceb-history-step .step-expr { font-weight: 700; color: #374151; flex: 1; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
+        .ceb-history-step .step-result { font-weight: 800; color: #1d4ed8; min-width: calc(42px * var(--ceb-s)); text-align: right; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
         .ceb-history-step .step-del {
             width: calc(18px * var(--ceb-s)); height: calc(18px * var(--ceb-s)); border-radius: 50%;
             border: none; background: #fee2e2; color: #dc3545;
