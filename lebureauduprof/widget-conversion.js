@@ -203,6 +203,10 @@
             text-align: center;
             outline: none;
             color: #374151;
+            touch-action: auto;
+            pointer-events: auto;
+            -webkit-user-select: text;
+            user-select: text;
         }
         .wconv-table-wrap { overflow-x: auto; }
         .wconv-table {
@@ -709,7 +713,10 @@ function createConversionWidget(opts) {
         });
         
         // Empêcher la propagation pour éviter que le drag du widget ne s'active
-        nbInput.addEventListener('mousedown', (e) => e.stopPropagation());
+        // — mousedown pour souris, pointerdown pour stylet / écran tactile
+        nbInput.addEventListener('mousedown',   (e) => e.stopPropagation());
+        nbInput.addEventListener('pointerdown', (e) => { e.stopPropagation(); nbInput.focus(); });
+        nbInput.addEventListener('touchstart',  (e) => { e.stopPropagation(); nbInput.focus(); }, { passive: true });
     }
 
     genBtn.addEventListener('click', () => generate());
