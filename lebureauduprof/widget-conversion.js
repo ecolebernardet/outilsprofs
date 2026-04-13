@@ -380,9 +380,13 @@ function _convConvert(value, from, to, type) {
     const diff = (units.indexOf(to) - units.indexOf(from)) * power;
     const num = parseFloat(value.toString().replace(',', '.'));
     const result = num * Math.pow(10, diff);
-    // Assure suffisamment de décimales pour les conversions avec grand écart (ex: cm² → hm²)
-    const maxDec = diff < 0 ? Math.max(5, Math.abs(diff) + 4) : 5;
-    return result.toLocaleString('fr-FR', { maximumFractionDigits: maxDec }).replace(/\s/g, '');
+    // Arrondir pour corriger les imprécisions virgule flottante (ex: 19,58 hm² → mm²)
+    // toPrecision(12) élimine les parasites sans tronquer les vrais résultats
+    const inputDecimals = (value.toString().replace(',', '.').split('.')[1] || '').length;
+    const expectedDecimals = Math.max(0, inputDecimals - diff);
+    const rounded = diff >= 0 ? parseFloat(result.toPrecision(12)) : result;
+    const maxDec = diff < 0 ? Math.max(5, Math.abs(diff) + 4) : expectedDecimals;
+    return rounded.toLocaleString('fr-FR', { maximumFractionDigits: maxDec }).replace(/\s/g, '');
 }
 
 function _convGenExos(type, count, diff) {
