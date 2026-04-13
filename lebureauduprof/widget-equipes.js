@@ -146,9 +146,9 @@
         flex-shrink: 1;
         scrollbar-width: thin;
         scrollbar-color: #d1d5db transparent;
-        --pill-fs: 9px;
-        --pill-pad: 4px;
-        --pill-gap: 4px;
+        --pill-fs: 8px;
+        --pill-pad: 2px;
+        --pill-gap: 2px;
     }
     .equipes-level-label {
         font-size: 9px;
@@ -166,9 +166,9 @@
         gap: var(--pill-gap, 4px);
     }
     .equipes-pill {
-        padding: var(--pill-pad, 4px) 2px;
+		padding : 2px;
         border-radius: 6px;
-        font-size: var(--pill-fs, 9px);
+        font-size: var(--pill-fs, 8px);
         font-weight: 700;
         text-align: center;
         cursor: pointer;
@@ -242,7 +242,7 @@
     }
     .equipes-generate-btn {
         display: block;
-        width: 80%;
+        width: 50%;
         margin: 0 auto;
         padding: 7px 16px;
         font-size: 11px;
@@ -289,7 +289,7 @@
     }
     .equipes-team-title {
         font-weight: 900;
-        font-size: 10px;
+        font-size: 12px;
         color: #374151;
         text-transform: uppercase;
         display: block;
@@ -308,7 +308,7 @@
         font-weight: 700;
     }
     .equipes-results-grid.cols-4 .equipes-team-member {
-        font-size: 15px;
+        font-size: 18px;
     }
     .equipes-tag {
         font-size: 8px;
@@ -333,7 +333,7 @@
     .equipes-reset-btn {
         display: block;
         margin: 0 auto;
-        width: 55%;
+        width: 30%;
         min-width: 180px;
         padding: 7px 16px;
         border-radius: 8px;
