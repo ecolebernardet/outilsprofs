@@ -19,7 +19,7 @@
         .calendar-day-name   { font-size: 0.95em; font-weight: 700; color: #333; text-transform: lowercase; line-height: 1.1; }
         .calendar-day-number { font-size: 2.5em; font-weight: 800; color: #2c3e50; line-height: 1em; margin: 0; }
         .calendar-month      { font-size: 1.25em; font-weight: 600; color: #333; line-height: 1.1; }
-        .clock-time { font-weight: 800; color: var(--primary-color); font-family: 'Courier New', monospace; display: flex; align-items: baseline; justify-content: center; width: 100%; gap: 4px; }
+        .clock-time { font-weight: 800; color: var(--primary-color); font-family: 'marelle', monospace; display: flex; align-items: baseline; justify-content: center; width: 100%; gap: 4px; }
         .clock-seconds { font-size: 0.5em; color: #888; margin-left: 0.1em; }
         .icon-transparency { display: inline-block; width: 16px; height: 16px; border: 1px solid #333; background-color: #fff; background-image: linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size: 8px 8px; background-position: 0 0,0 4px,4px -4px,-4px 0px; vertical-align: middle; border-radius: 2px; }
 
@@ -77,7 +77,7 @@
     tplTime.id = 'template-time';
     tplTime.innerHTML = `
         <div class="editor-container" style="width:200px;height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:none;">
-            <div class="clock-time" style="font-size:32px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box;">
+            <div class="clock-time" style="font-family:'marelle';font-size:25px;width:90%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box;">
                 <span class="clock-hm">00:00</span><span class="clock-seconds">00</span>
             </div>
         </div>`;
@@ -170,7 +170,7 @@ function buildAnalogSVG(color) {
         txt.setAttribute('dominant-baseline', 'central');
         txt.setAttribute('font-size', [3,6,9,12].includes(h) ? '8' : '7');
         txt.setAttribute('font-weight', '600');
-        txt.setAttribute('font-family', 'sans-serif');
+        txt.setAttribute('font-family', 'marelle, sans-serif');
         txt.setAttribute('fill', color);
         txt.textContent = h;
         svg.appendChild(txt);
@@ -228,8 +228,12 @@ function initTimeWidget(widget) {
     const resizeObserver = new ResizeObserver(() => {
         const h = container.offsetHeight, w = container.offsetWidth;
         if (clockMode === 'digital') {
-            const sizeByH = Math.floor(h * 0.55);
-            const sizeByW = Math.floor(w * 0.28);
+            // sizeByH : hauteur disponible (avec marge)
+            const sizeByH = Math.floor(h * 0.45);
+            // sizeByW : la largeur doit contenir "HH:MM" (5 chars ~0.6em chacun) + secondes (~0.45em * 2 chars)
+            // soit ~3.9em total → size ≈ w / 3.9, avec padding latéral soustrait
+            const usableW = w - 44; // soustraire padding
+            const sizeByW = Math.floor(usableW / 4.0);
             const size = Math.max(12, Math.min(sizeByH, sizeByW));
             clockTime.style.fontSize = size + 'px';
             const sec = widget.querySelector('.clock-seconds');
