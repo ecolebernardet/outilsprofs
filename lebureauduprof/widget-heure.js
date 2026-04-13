@@ -107,6 +107,12 @@
     const s = document.createElement('style');
     s.id = 'wh-style';
     s.textContent = `
+        @font-face {
+            font-family: 'MarelleBaton';
+            src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         .widget[data-type="heure"] {
             min-width: unset;
             background: transparent !important;
@@ -246,11 +252,13 @@
 
         /* Numéro d'horloge */
         .heure-clock-num {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 900;
             color: #374151;
             line-height: 1;
             flex-shrink: 0;
+			padding-right: 5px;
+            font-family: 'MarelleBaton', sans-serif !important;
         }
 
         /* Cellule lecture */
@@ -299,12 +307,13 @@
             text-align: center;
             transition: border-color .2s, background .2s;
             background: #fff;
+            font-family: 'MarelleBaton', sans-serif !important;
         }
         .heure-input:focus { border-color: #4a90e2; }
         .heure-input.correct { border-color: #28a745 !important; background: #f0fff4; color: #1a7a3a; }
         .heure-input.wrong   { border-color: #dc3545 !important; background: #fff5f5; color: #9c1c28; }
-        .heure-input-sep  { font-size: 20px; font-weight: 900; color: #555; }
-        .heure-input-unit { font-size: 12px; color: #888; font-weight: 600; }
+        .heure-input-sep  { font-size: 20px; font-weight: 900; color: #555; font-family: 'MarelleBaton', sans-serif !important; }
+        .heure-input-unit { font-size: 20px; color: #888; font-weight: 600; font-family: 'MarelleBaton', sans-serif !important; }
 
         /* Feedback global */
         .heure-feedback-bar {
@@ -413,7 +422,7 @@ function _clockSVG(h, m, size) {
         const a = (i * 30 - 90) * Math.PI / 180;
         const tx = cx + (r - size * 0.16) * Math.cos(a);
         const ty = cy + (r - size * 0.16) * Math.sin(a);
-        numbers += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="${(size*0.115).toFixed(1)}" font-weight="800" fill="#111827">${i}</text>`;
+        numbers += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="${(size*0.08).toFixed(1)}" font-weight="800" fill="#111827" font-family="MarelleBaton, sans-serif">${i}</text>`;
     }
     const hA = (hourDeg - 90) * Math.PI / 180;
     const mA = (minDeg  - 90) * Math.PI / 180;
@@ -577,14 +586,14 @@ function createHeureWidget() {
         if (num !== undefined) {
             const numEl = document.createElement('span');
             numEl.className = 'heure-clock-num';
-            numEl.textContent = num + '.';
+            numEl.textContent = num + ')';
             zone.appendChild(numEl);
         }
 
         const hIn = document.createElement('input');
         hIn.className = 'heure-input';
         hIn.type = 'text';
-        hIn.placeholder = isDuree ? '0' : 'hh';
+        hIn.placeholder = isDuree ? 'hh' : 'hh';
         hIn.maxLength = 2;
         hIn.inputMode = 'numeric';
 
@@ -595,7 +604,7 @@ function createHeureWidget() {
         const mIn = document.createElement('input');
         mIn.className = 'heure-input';
         mIn.type = 'text';
-        mIn.placeholder = 'mm';
+        mIn.placeholder = 'min';
         mIn.maxLength = 2;
         mIn.inputMode = 'numeric';
 
