@@ -35,14 +35,45 @@ if (!window.IMAGE_CATEGORIES) {
             label: 'École',
             icon: '🏫',
             images: [
-                { src: 'images/ecole-cahier.jpeg',                               label: 'cahier' },
-				{ src: 'images/ecole-maths1.jpeg',                               label: 'maths' },
-				{ src: 'images/ecole-maths3.jpeg',                               label: 'maths' },
-				{ src: 'images/ecole-maths4.jpeg',                               label: 'maths' },
-				{ src: 'images/ecole-maths5.jpeg',                               label: 'maths' },
-				{ src: 'images/ecole-maths6.jpeg',                               label: 'maths' },
-				{ src: 'images/ecole-equerre.png',                               label: 'Maths (équerre)' },
+				{ src: 'images/ecole-equerre.png',                               label: 'Équerre' },
+				{ src: 'images/ecole-regle.png',                                 label: 'Règle' },
+				{ src: 'images/ecole-regle2.png',                                label: 'Règle' },
+				{ src: 'images/ecole-stylos.png',                                label: 'Stylos' },
+				{ src: 'images/ecole-stylo-noir.png',                            label: 'Stylo noir' },
+				{ src: 'images/ecole-stylo-plume.png',                           label: 'Stylo plume' },
+				{ src: 'images/ecole-crayon-papier.png',                         label: 'Crayon à papier' },
+				{ src: 'images/ecole-gomme.png',                                 label: 'Gomme' },
+				{ src: 'images/ecole-taille-crayon.png',                         label: 'Taille-crayon' },
+                { src: 'images/ecole-cahier.jpeg',                               label: 'Cahier' },
+				{ src: 'images/ecole-maths1.jpeg',                               label: 'Maths' },
+				{ src: 'images/ecole-maths3.jpeg',                               label: 'Maths' },
+				{ src: 'images/ecole-maths4.jpeg',                               label: 'Maths' },
+				{ src: 'images/ecole-maths5.jpeg',                               label: 'Maths' },
+				{ src: 'images/ecole-maths6.jpeg',                               label: 'Maths' },
             ]
+        },
+		{
+            id: 'instruments',
+            id: 'instruments',
+            label: 'Instruments',
+            icon: '🎺',
+            images: [
+                { src: 'images/instruments-guitare-elec.png',             label: 'Guitare électrique' },
+				{ src: 'images/instruments-guitare-elec2.png',            label: 'Guitare électrique' },
+				{ src: 'images/instruments-guitare-classique.png',        label: 'Guitare classique' },
+				{ src: 'images/instruments-basse-elec.png',               label: 'Basse électrique' },
+				{ src: 'images/instruments-violon.png',                   label: 'Violon' },
+				{ src: 'images/instruments-violoncelle.png',              label: 'Violoncelle' },
+				{ src: 'images/instruments-contrebasse.png',              label: 'Contrebasse' },
+			]
+        },
+		{
+            id: 'divers',
+            label: 'Divers',
+            icon: '🪅',
+            images: [
+                { src: 'images/divers-postit.png',    label: 'Post-it' },
+			]
         },
 		{
             id: 'saisons',
