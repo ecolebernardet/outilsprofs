@@ -18,6 +18,9 @@
 //
 // Dépendances : board, findFreePosition(), makeDraggable(),
 //   makeDraggableRotate(), bringToFront(), snapshotNow(), saveBoard()
+//
+// En cas de souci avec la position des mots sur les lignes, régler les valeurs lignes 671, 672 et 683
+//
 // =========================================================================
 
 // ── CSS ───────────────────────────────────────────────────────────────────
@@ -36,6 +39,22 @@
             }
         `;
         document.head.appendChild(ff);
+    }
+
+    // Déclaration de la police MarelleBaton (une seule fois)
+    if (!document.getElementById('marellebaton-face')) {
+        const ff2 = document.createElement('style');
+        ff2.id = 'marellebaton-face';
+        ff2.textContent = `
+            @font-face {
+                font-family: 'MarelleBaton';
+                src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+            }
+        `;
+        document.head.appendChild(ff2);
     }
 
     // Réutiliser les helpers globaux si déjà injectés
@@ -629,11 +648,49 @@ function createSeyesWidget() {
     sep1.className = 'seyes-sep';
     toolbar.appendChild(sep1);
 
-    // Police : label fixe
-    const fontLabel = document.createElement('span');
-    fontLabel.textContent = 'BelleAllureGS';
-    fontLabel.style.cssText = 'font-size:11px;color:#7a9ab0;white-space:nowrap;font-style:italic;';
-    toolbar.appendChild(fontLabel);
+    // Police : sélecteur de police
+    const fontSelect = document.createElement('select');
+    fontSelect.title = 'Choisir la police';
+    fontSelect.style.cssText = 'font-size:11px;color:#4a6580;border:1px solid #d0dcea;border-radius:5px;background:#f0f5fa;padding:2px 4px;cursor:pointer;outline:none;max-width:130px;';
+    [
+        { value: 'BelleAllureGS', label: 'BelleAllureGS' },
+        { value: 'MarelleBaton',  label: 'MarelleBaton'  },
+    ].forEach(({ value, label }) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        fontSelect.appendChild(opt);
+    });
+    fontSelect.addEventListener('mousedown', (e) => e.stopPropagation());
+    fontSelect.addEventListener('change', () => {
+        const chosen = fontSelect.value;
+        if (chosen === 'MarelleBaton') {
+            // MarelleBaton : x-height ratio ≈ 0.55 (plus grand que BelleAllure ~0.45)
+            // → font-size réduit pour que les minuscules ≈ 32px
+            // ascent ratio ≈ 0.87 → paddingTop ajusté en conséquence
+            const fsM = 32;
+            const ascentM = fsM * 0.87;
+            let ptM = Math.round(LH - ascentM + 4);
+            if (ptM < 0) ptM = 0;
+            editor.style.fontFamily      = "'MarelleBaton', cursive";
+            editor.style.fontSize        = fsM + 'px';
+            editor.style.paddingTop      = ptM + 'px';
+            editorMarge.style.fontFamily = "'MarelleBaton', cursive";
+            editorMarge.style.fontSize   = fsM + 'px';
+            editorMarge.style.paddingTop = ptM + 'px';
+        } else {
+            // BelleAllureGS : réglages d'origine (inchangés)
+            const ptB = _seyesPaddingTop(36, LH);
+            editor.style.fontFamily      = "'BelleAllureGS', cursive";
+            editor.style.fontSize        = '36px';
+            editor.style.paddingTop      = ptB + 'px';
+            editorMarge.style.fontFamily = "'BelleAllureGS', cursive";
+            editorMarge.style.fontSize   = '36px';
+            editorMarge.style.paddingTop = ptB + 'px';
+        }
+        saveBoard();
+    });
+    toolbar.appendChild(fontSelect);
 
     // Séparateur
     const sep2 = document.createElement('div');
