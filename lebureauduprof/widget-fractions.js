@@ -236,6 +236,7 @@
             padding: 4px 12px; border-radius: 20px; border: 1.5px solid #d1d5db;
             background: white; font-size: 11px; font-weight: 700; color: #6b7280;
             cursor: pointer; transition: all .15s;
+            touch-action: manipulation;
         }
         .frac-shape-btn.active {
             background: #4a90e2; color: white; border-color: #357abd;
@@ -247,10 +248,11 @@
             display: flex; gap: 5px;
         }
         .frac-count-btn {
-            width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #d1d5db;
+            width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #d1d5db;
             background: white; font-size: 11px; font-weight: 800; color: #6b7280;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all .15s;
+            touch-action: manipulation;
         }
         .frac-count-btn.active {
             background: #6366f1; color: white; border-color: #4f46e5;
@@ -262,9 +264,10 @@
             display: flex; gap: 5px; align-items: center;
         }
         .frac-swatch {
-            width: 20px; height: 20px; border-radius: 50%;
+            width: 28px; height: 28px; border-radius: 50%;
             border: 2px solid transparent; cursor: pointer;
             transition: transform .15s, border-color .1s;
+            touch-action: manipulation;
         }
         .frac-swatch:hover { transform: scale(1.2); }
         .frac-swatch.active { border-color: #374151; transform: scale(1.15); }
@@ -686,8 +689,12 @@
             lbl.innerHTML = `<span class="fn">${num}</span><div class="fb"></div><span class="fd">${den}</span>`;
             figDiv.appendChild(lbl);
 
-            // Click sur une part
-            svgEl.addEventListener('click', (e) => {
+            // Click sur une part (pointerup + click avec dédup pour éviter double déclenchement)
+            let _lastPartEvent = 0;
+            function onPartActivate(e) {
+                const now = Date.now();
+                if (now - _lastPartEvent < 300) return;
+                _lastPartEvent = now;
                 const part = e.target.closest('.frac-part');
                 if (!part) return;
                 const pIdx = parseInt(part.dataset.partIdx);
@@ -700,7 +707,9 @@
                 renderFigure(figIdx);
                 syncInputs(figIdx);
                 if (typeof saveBoard === 'function') saveBoard();
-            });
+            }
+            svgEl.addEventListener('click',     onPartActivate);
+            svgEl.addEventListener('pointerup', onPartActivate);
 
             return figDiv;
         }
@@ -747,10 +756,16 @@
 
             // Empêcher le drag du widget lors de la saisie
             [numInput, denInput].forEach(inp => {
-                inp.addEventListener('mousedown', e => e.stopPropagation());
-                inp.addEventListener('touchstart', e => e.stopPropagation());
+                inp.addEventListener('mousedown',   e => e.stopPropagation());
+                inp.addEventListener('touchstart',  e => e.stopPropagation(), { passive: true });
+                inp.addEventListener('pointerdown', e => {
+                    e.stopPropagation();
+                    // Focus explicite pour stylet (vidéoprojecteur interactif)
+                    inp.focus();
+                });
                 inp.style.userSelect = 'text';
                 inp.style.pointerEvents = 'auto';
+                inp.style.touchAction = 'auto';
             });
 
             // Dénominateur change → reconstruire la figure
@@ -873,18 +888,30 @@
 
         // ── Choix de la forme ──────────────────────────────────────────────
         shapeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+            let _lastShapeEvent = 0;
+            function onShapeActivate(e) {
+                const now = Date.now();
+                if (now - _lastShapeEvent < 300) return;
+                _lastShapeEvent = now;
+                e.stopPropagation();
                 shapeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 shape = btn.dataset.shape;
                 renderAll();
                 if (typeof saveBoard === 'function') saveBoard();
-            });
+            }
+            btn.addEventListener('click',     onShapeActivate);
+            btn.addEventListener('pointerup', onShapeActivate);
         });
 
         // ── Choix du nombre de fractions ───────────────────────────────────
         countBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+            let _lastCountEvent = 0;
+            function onCountActivate(e) {
+                const now = Date.now();
+                if (now - _lastCountEvent < 300) return;
+                _lastCountEvent = now;
+                e.stopPropagation();
                 countBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 const newCount = parseInt(btn.dataset.count);
@@ -896,18 +923,27 @@
                 fracCount = newCount;
                 renderAll();
                 if (typeof saveBoard === 'function') saveBoard();
-            });
+            }
+            btn.addEventListener('click',     onCountActivate);
+            btn.addEventListener('pointerup', onCountActivate);
         });
 
         // ── Choix de la couleur ────────────────────────────────────────────
         swatches.forEach(sw => {
-            sw.addEventListener('click', () => {
+            let _lastSwatchEvent = 0;
+            function onSwatchActivate(e) {
+                const now = Date.now();
+                if (now - _lastSwatchEvent < 300) return;
+                _lastSwatchEvent = now;
+                e.stopPropagation();
                 swatches.forEach(s => s.classList.remove('active'));
                 sw.classList.add('active');
                 fillColor = sw.dataset.color;
                 updateColor();
                 if (typeof saveBoard === 'function') saveBoard();
-            });
+            }
+            sw.addEventListener('click',     onSwatchActivate);
+            sw.addEventListener('pointerup', onSwatchActivate);
         });
 
         // ── Aide ───────────────────────────────────────────────────────────
