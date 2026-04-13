@@ -174,6 +174,24 @@ function createTableauNumWidget() {
         document.head.appendChild(ws);
     }
 
+    // ── Police MarelleBaton pour les chiffres du tableau ──────────
+    if (!document.getElementById('tnum-font-style')) {
+        const fs = document.createElement('style');
+        fs.id = 'tnum-font-style';
+        fs.textContent = `
+    @font-face {
+        font-family: 'MarelleBaton';
+        src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    .tnum-digit {
+        font-family: 'MarelleBaton', sans-serif !important;
+    }
+        `;
+        document.head.appendChild(fs);
+    }
+
     // ── Boutons wf (min / max / close) ────────────────────────────
     const ec      = widget.querySelector('.editor-container');
     const wfMin   = widget.querySelector('[data-role="wf-min"]');
