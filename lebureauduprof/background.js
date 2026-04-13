@@ -353,5 +353,10 @@ window.addEventListener('load', () => {
         if (slider) slider.value = Math.round(savedScale * 100);
         applyBgScale(savedScale);
         _updateRulingPanelVisibility();
+    } else if (!savedBg) {
+        // Première ouverture : aucun fond sauvegardé → appliquer le fond par défaut
+        const DEFAULT_BG = "url(fonds/fond-lebureauduprof-defaut01.jpeg)";
+        applyBackground(DEFAULT_BG);
+        localStorage.setItem('boardBackground', DEFAULT_BG);
     }
 });
