@@ -717,24 +717,28 @@
 
 
         // ── Helper tap stylet (pointer-safe) ────────────────────────────
+        // setPointerCapture est indispensable : il "vole" le pointeur au widget
+        // parent dès le pointerdown, empêchant son listener de drag de se déclencher.
         function makeTap(el, handler, opts) {
             opts = opts || {};
             el.addEventListener('pointerdown', (e) => {
-                if (opts.stop) { e.stopPropagation(); }
+                e.stopPropagation();
+                e.preventDefault();
+                try { el.setPointerCapture(e.pointerId); } catch(_) {}
                 const sx = e.clientX, sy = e.clientY;
                 const pid = e.pointerId;
                 function onUp(eu) {
                     if (eu.pointerId !== pid) return;
-                    el.removeEventListener('pointerup',   onUp);
+                    el.removeEventListener('pointerup',     onUp);
                     el.removeEventListener('pointercancel', onUp);
+                    try { el.releasePointerCapture(eu.pointerId); } catch(_) {}
                     const dx = eu.clientX - sx, dy = eu.clientY - sy;
-                    if (Math.sqrt(dx*dx + dy*dy) < 10) {
-                        if (opts.stop) eu.stopPropagation();
-                        if (opts.prevent) eu.preventDefault();
+                    if (Math.sqrt(dx*dx + dy*dy) < 12) {
+                        eu.stopPropagation();
                         handler(eu);
                     }
                 }
-                el.addEventListener('pointerup',    onUp);
+                el.addEventListener('pointerup',     onUp);
                 el.addEventListener('pointercancel', onUp);
             });
         }
