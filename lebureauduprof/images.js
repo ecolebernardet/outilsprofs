@@ -47,12 +47,9 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/ecole-trousse.png',                               label: 'Trousse' },
 				{ src: 'images/ecole-sac.png',                                   label: 'Sac' },
 				{ src: 'images/ecole-taille-crayon.png',                         label: 'Taille-crayon' },
-                { src: 'images/ecole-cahier.jpeg',                               label: 'Cahier' },
-				{ src: 'images/ecole-maths1.jpeg',                               label: 'Maths' },
-				{ src: 'images/ecole-maths3.jpeg',                               label: 'Maths' },
-				{ src: 'images/ecole-maths4.jpeg',                               label: 'Maths' },
-				{ src: 'images/ecole-maths5.jpeg',                               label: 'Maths' },
-				{ src: 'images/ecole-maths6.jpeg',                               label: 'Maths' },
+				{ src: 'images/ecole-colle.png',                                 label: 'Colle' },
+				{ src: 'images/ecole-classeur.png',                              label: 'Classeur' },
+				{ src: 'images/ecole-cahiers.png',                               label: 'Cahiers' },
             ]
         },
 		{
