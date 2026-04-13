@@ -170,6 +170,7 @@
         .monnaie-container input {
             user-select: text;
             -webkit-user-select: text;
+            font-family: inherit;
         }
 
         /* En-tête */
@@ -318,6 +319,7 @@
             gap: 6px;
         }
         .monnaie-answer-text {
+			font-family: 'Marelle Baton', 'Nunito', sans-serif;
             font-size: 30px;
             font-weight: 800;
             color: #28a745;
@@ -326,12 +328,13 @@
         }
         .monnaie-answer-text.show { opacity: 1; }
         .monnaie-answer-input {
+			font-family: 'Marelle Baton', 'Nunito', sans-serif !important;
             flex: 1;
             max-width: 110px;
             padding: 5px 10px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             outline: none;
             text-align: right;
