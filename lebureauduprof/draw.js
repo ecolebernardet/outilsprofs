@@ -588,7 +588,7 @@ var _segmentEnd   = null;  // conservé pour compat
 var _figureStart  = null;  // point de départ pour tous les modes figure
 var _figureEnd    = null;  // point de relâchement
 
-const FIGURE_MODES = ['segment','carre','rectangle','cercle','ovale','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon','heart','star','arrow'];
+const FIGURE_MODES = ['segment','simple-arrow','carre','rectangle','cercle','ovale','parallelo','losange','triangle','right-triangle','equilateral-triangle','scalene-triangle','pentagon','hexagon','octagon','heart','star','arrow'];
 
 // Construit les points d'une petite croix centrée sur un point (pour le centre du cercle)
 function _buildCrossPoints(center, strokeSize) {
@@ -609,6 +609,25 @@ function _buildFigurePoints(mode, A, B) {
 
     if (mode === 'segment') {
         return [A, B];
+    }
+
+    if (mode === 'simple-arrow') {
+        // Segment de A vers B avec pointe de flèche ouverte en B
+        const len = Math.hypot(dx, dy);
+        const arrowLen = Math.max(12, Math.min(len * 0.3, 40)); // longueur des branches
+        const arrowAngle = Math.PI / 6; // 30°
+        const angle = Math.atan2(dy, dx); // direction du segment
+        // Les deux branches de la pointe
+        const p1 = {
+            x: B.x - arrowLen * Math.cos(angle - arrowAngle),
+            y: B.y - arrowLen * Math.sin(angle - arrowAngle)
+        };
+        const p2 = {
+            x: B.x - arrowLen * Math.cos(angle + arrowAngle),
+            y: B.y - arrowLen * Math.sin(angle + arrowAngle)
+        };
+        // Tracé : A → B (segment), puis retour pour la pointe p1 → B → p2
+        return [A, B, p1, B, p2];
     }
 
     if (mode === 'rectangle') {
