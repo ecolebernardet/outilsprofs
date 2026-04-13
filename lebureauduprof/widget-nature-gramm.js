@@ -44,7 +44,7 @@
             expandBtn.title = 'Déplier'; expandBtn.textContent = '▲';
             expandBtn.style.cssText = 'flex-shrink:0;background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;position:relative;z-index:2;';
             expandBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-            expandBtn.addEventListener('mousedown',   (e) => { e.stopPropagation(); });
+            expandBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
             expandBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); e.preventDefault();
                 widget.style.top = widget.dataset.wfMiniSavedTop || widget.style.top;
@@ -740,8 +740,7 @@
         });
 
         // ── Champ phrase : empêcher le drag du widget de capturer les events ──
-        phraseInput.addEventListener('mousedown',  (e) => e.stopPropagation());
-        phraseInput.addEventListener('touchstart', (e) => e.stopPropagation());
+        phraseInput.addEventListener('pointerdown', (e) => e.stopPropagation());
         phraseInput.style.userSelect = 'text';
         phraseInput.style.pointerEvents = 'auto';
 
@@ -773,7 +772,7 @@
                 btn.className = 'ng-picker-option';
                 btn.dataset.nature = k;
                 btn.textContent = NATURE_DEFS[k].label;
-                btn.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+                btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (pickerTarget !== null) {
@@ -789,7 +788,7 @@
             const clearBtn = document.createElement('button');
             clearBtn.className = 'ng-picker-option ng-picker-option-clear';
             clearBtn.textContent = '✕ Effacer';
-            clearBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+            clearBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
             clearBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (pickerTarget !== null) delete solutionMap[pickerTarget];
@@ -906,41 +905,25 @@
             widget.dataset.contentHPercent = (container.offsetHeight / curVH) * 100;
         }
 
-        resizeHandle.addEventListener('mousedown', (e) => {
+        resizeHandle.addEventListener('pointerdown', (e) => {
             e.preventDefault(); e.stopPropagation();
+            resizeHandle.setPointerCapture(e.pointerId);
             const startX = e.clientX, startY = e.clientY;
             const startW = container.offsetWidth, startH = container.offsetHeight;
-            document.onmousemove = (ev) => {
+            function onMove(ev) {
                 container.style.width  = Math.max(400, startW + ev.clientX - startX) + 'px';
                 container.style.height = Math.max(300, startH + ev.clientY - startY) + 'px';
                 applyFontScale();
-            };
-            document.onmouseup = () => {
-                document.onmousemove = null;
-                saveDimsToDataset();
-                if (typeof saveBoard === 'function') saveBoard();
-            };
-        });
-        resizeHandle.addEventListener('touchstart', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const t0 = e.touches[0];
-            const startX = t0.clientX, startY = t0.clientY;
-            const startW = container.offsetWidth, startH = container.offsetHeight;
-            function onMove(ev) {
-                const t = ev.touches[0];
-                container.style.width  = Math.max(400, startW + t.clientX - startX) + 'px';
-                container.style.height = Math.max(300, startH + t.clientY - startY) + 'px';
-                applyFontScale();
             }
             function onEnd() {
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend',  onEnd);
+                resizeHandle.removeEventListener('pointermove', onMove);
+                resizeHandle.removeEventListener('pointerup',   onEnd);
                 saveDimsToDataset();
                 if (typeof saveBoard === 'function') saveBoard();
             }
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend',  onEnd);
-        }, { passive: false });
+            resizeHandle.addEventListener('pointermove', onMove);
+            resizeHandle.addEventListener('pointerup',   onEnd);
+        });
 
         // ── Initialisation du jeu ─────────────────────────────────────────
         function initGame() {
@@ -992,14 +975,10 @@
                 token.dataset.tokenIdx = wTok.idx;
 
                 if (!wTok.placed) {
-                    token.addEventListener('mousedown', (e) => {
+                    token.addEventListener('pointerdown', (e) => {
                         e.stopPropagation(); e.preventDefault();
                         startDragFromSentence(token, wTok, e.clientX, e.clientY);
                     });
-                    token.addEventListener('touchstart', (e) => {
-                        e.stopPropagation(); e.preventDefault();
-                        startDragFromSentence(token, wTok, e.touches[0].clientX, e.touches[0].clientY);
-                    }, { passive: false });
                 }
                 sentenceZone.appendChild(token);
             });
@@ -1131,22 +1110,17 @@
                 e.stopPropagation();
                 removeFromColumn(wordText, nature);
             });
-            rmBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            rmBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
 
             span.appendChild(textNode);
             span.appendChild(rmBtn);
 
             // Drag depuis la colonne vers une autre colonne
-            span.addEventListener('mousedown', (e) => {
+            span.addEventListener('pointerdown', (e) => {
                 if (e.target === rmBtn) return;
                 e.stopPropagation(); e.preventDefault();
                 startDragFromColumn(span, wordText, nature, e.clientX, e.clientY);
             });
-            span.addEventListener('touchstart', (e) => {
-                if (e.target === rmBtn) return;
-                e.stopPropagation(); e.preventDefault();
-                startDragFromColumn(span, wordText, nature, e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: false });
 
             return span;
         }
@@ -1173,8 +1147,8 @@
             tokenEl.classList.add('is-dragging');
 
             function onMove(e) {
-                const cx = e.touches ? e.touches[0].clientX : e.clientX;
-                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                const cx = e.clientX;
+                const cy = e.clientY;
                 ghost.style.left = cx + 'px'; ghost.style.top = cy + 'px';
                 clearCellHighlights();
                 const el   = document.elementFromPoint(cx, cy);
@@ -1188,8 +1162,8 @@
                 tokenEl.classList.remove('is-dragging');
                 clearCellHighlights();
 
-                const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-                const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                const cx = e.clientX;
+                const cy = e.clientY;
                 const el   = document.elementFromPoint(cx, cy);
                 const cell = el && el.closest('.ng-col-cell');
 
@@ -1204,16 +1178,12 @@
             }
 
             function cleanup(e) {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup',   onUp);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend',  onUp);
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup',   onUp);
             }
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup',   onUp);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend',  onUp);
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup',   onUp);
         }
 
         // ── Drag depuis une colonne vers une autre colonne ───────────────
@@ -1222,8 +1192,8 @@
             placedEl.classList.add('is-dragging');
 
             function onMove(e) {
-                const cx = e.touches ? e.touches[0].clientX : e.clientX;
-                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                const cx = e.clientX;
+                const cy = e.clientY;
                 ghost.style.left = cx + 'px'; ghost.style.top = cy + 'px';
                 clearCellHighlights();
                 const el   = document.elementFromPoint(cx, cy);
@@ -1232,16 +1202,14 @@
             }
 
             function onUp(e) {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup',   onUp);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend',  onUp);
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup',   onUp);
                 ghost.remove();
                 placedEl.classList.remove('is-dragging');
                 clearCellHighlights();
 
-                const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-                const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                const cx = e.clientX;
+                const cy = e.clientY;
                 const el   = document.elementFromPoint(cx, cy);
                 const cell = el && el.closest('.ng-col-cell');
 
@@ -1261,10 +1229,8 @@
                 }
             }
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup',   onUp);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend',  onUp);
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup',   onUp);
         }
 
         // ── Utilitaires drag ─────────────────────────────────────────────
