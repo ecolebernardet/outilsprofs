@@ -114,13 +114,27 @@
         outline: 2px dashed rgba(6,182,212,0.4);
     }
 
+    /* ── Polices personnalisées ── */
+    @font-face {
+        font-family: 'Marelle';
+        src: url('polices/marelle-regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: 'Nunito';
+        src: url('polices/nunito-regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
     /* ── Widget intérieur — layout natif sans scale ── */
     .calc-widget {
         width: 100%;
         height: 100%;
         display: flex;
         flex-direction: column;
-        font-family: 'MDI', 'Inter', 'Segoe UI', system-ui, sans-serif;
+        font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
         box-sizing: border-box;
         background: #ffffff;
         border-radius: 16px;
@@ -297,12 +311,14 @@
         color: #555555;
         transition: all 0.18s;
         user-select: none;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-table-all-frame {
         padding: 0 8px;
         width: auto;
         font-size: 8px;
         text-transform: uppercase;
+		font-family: 'Nunito', sans-serif;
         letter-spacing: 0.05em;
     }
     .calc-table-label input:checked + .calc-table-frame {
@@ -331,6 +347,7 @@
         width: 90px;
         box-sizing: border-box;
         transition: border-color 0.15s;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-field-input:focus { border-color: #06b6d4; }
 
@@ -395,6 +412,7 @@
         outline: none;
         padding: 0;
         -moz-appearance: textfield;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-spinner-val::-webkit-inner-spin-button,
     .calc-spinner-val::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -440,6 +458,7 @@
         color: #d97706;
         letter-spacing: 0.04em;
         font-variant-numeric: tabular-nums;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-timer-value.urgent { color: #dc2626; animation: calc-blink 0.6s infinite alternate; }
     @keyframes calc-blink { from { opacity:1; } to { opacity:0.3; } }
@@ -481,6 +500,7 @@
         white-space: nowrap;
         letter-spacing: -0.02em;
         line-height: 1.1;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-res-text {
         display: none;
@@ -489,6 +509,7 @@
         font-size: 28px;
         white-space: nowrap;
         line-height: 1.1;
+        font-family: 'Marelle', 'Nunito', sans-serif;
     }
     .calc-res-text.visible { display: inline; }
 
