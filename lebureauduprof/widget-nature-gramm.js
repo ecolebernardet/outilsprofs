@@ -1268,9 +1268,19 @@
 
         // ── Correction ───────────────────────────────────────────────────
         makeTap(checkBtn, () => {
-            // Vérifie que tous les mots sont placés
-            const nbPlaced = wordTokens.filter(t => t.placed).length;
-            if (nbPlaced < wordTokens.length) {
+            // Vérifie que tous les mots classables sont placés.
+            // Un mot est "non classable" si le prof lui a assigné une nature désactivée,
+            // ou s'il n'a pas de nature assignée du tout (solutionMap partiel).
+            const hasSolution = Object.keys(solutionMap).length > 0;
+            const classifiableTokens = wordTokens.filter(t => {
+                if (!hasSolution) return true; // sans solutionMap : tous les mots doivent être placés
+                const expectedNat = solutionMap[t.idx];
+                if (!expectedNat) return false; // pas de nature assignée : on ne force pas le placement
+                if (!activeNatures.has(expectedNat)) return false; // nature désactivée : non classable
+                return true;
+            });
+            const nbPlaced = classifiableTokens.filter(t => t.placed).length;
+            if (nbPlaced < classifiableTokens.length) {
                 resultText.textContent = '⚠️ Place tous les mots !';
                 resultText.style.color = '#e67e22';
                 resultText.classList.add('show');
@@ -1278,7 +1288,6 @@
             }
 
             // Vérifie que le prof a défini une solution
-            const hasSolution = Object.keys(solutionMap).length > 0;
             if (!hasSolution) {
                 // Pas de solution définie : validation simple (tous placés = OK)
                 resultText.textContent = '✅ Tous les mots sont classés !';
@@ -1293,6 +1302,7 @@
             // Correction mot par mot grâce à solutionMap
             // Pour chaque token, on vérifie que la nature dans laquelle il est placé
             // correspond à solutionMap[idx].
+            // On ignore les tokens dont la nature attendue est dans une colonne désactivée.
             // On construit un index inversé : wordText → liste d'idx attendus dans chaque nature
             // (gère les mots en double dans la phrase)
 
@@ -1302,6 +1312,8 @@
             wordTokens.forEach(tok => {
                 const expectedNat = solutionMap[tok.idx];
                 if (!expectedNat) return;
+                // Ignorer les tokens dont la nature attendue est désactivée
+                if (!activeNatures.has(expectedNat)) return;
                 if (!expectedInNature[expectedNat][tok.text]) expectedInNature[expectedNat][tok.text] = [];
                 expectedInNature[expectedNat][tok.text].push(tok.idx);
             });
