@@ -259,15 +259,55 @@
     .equipes-generate-btn:active { transform: scale(0.96); }
 
     /* ── Résultats équipes ── */
+    .equipes-results-wrapper {
+        flex: 1;
+        min-height: 0;
+        display: none;
+        position: relative;
+        flex-direction: column;
+    }
     .equipes-results {
         flex: 1;
         overflow-y: auto;
         padding: 8px 10px;
         min-height: 0;
-        scrollbar-width: thin;
-        scrollbar-color: #d1d5db transparent;
-        display: none;
+        scrollbar-width: none;
+        display: block;
     }
+    .equipes-results::-webkit-scrollbar { display: none; }
+
+    /* ── Boutons de défilement tactiles ── */
+    .equipes-scroll-btn {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 44px;
+        height: 28px;
+        border-radius: 20px;
+        border: 1.5px solid #d1d5db;
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 900;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s, background .15s;
+        line-height: 1;
+    }
+    .equipes-scroll-btn.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .equipes-scroll-btn:hover { background: #f0f4ff; border-color: #4a90e2; color: #4a90e2; }
+    .equipes-scroll-btn:active { background: #dbeafe; transform: translateX(-50%) scale(0.95); }
+    .equipes-scroll-up   { top: 4px; }
+    .equipes-scroll-down { bottom: 4px; }
     .equipes-results-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -508,8 +548,12 @@
                 <div class="equipes-selector"></div>
                 <button class="equipes-generate-btn">⚖️ Générer les équipes</button>
             </div>
-            <div class="equipes-results">
-                <div class="equipes-results-grid"></div>
+            <div class="equipes-results-wrapper">
+                <button class="equipes-scroll-btn equipes-scroll-up" title="Défiler vers le haut">▲</button>
+                <div class="equipes-results">
+                    <div class="equipes-results-grid"></div>
+                </div>
+                <button class="equipes-scroll-btn equipes-scroll-down" title="Défiler vers le bas">▼</button>
             </div>
             <div class="equipes-footer">
                 <button class="equipes-reset-btn">⚠️ Effacer les équipes</button>
@@ -562,8 +606,11 @@
         const configPanel   = widget.querySelector('.equipes-config');
         const selector      = widget.querySelector('.equipes-selector');
         const generateBtn   = widget.querySelector('.equipes-generate-btn');
+        const resultsWrapper = widget.querySelector('.equipes-results-wrapper');
         const resultsPanel  = widget.querySelector('.equipes-results');
         const resultsGrid   = widget.querySelector('.equipes-results-grid');
+        const scrollUpBtn   = widget.querySelector('.equipes-scroll-up');
+        const scrollDownBtn = widget.querySelector('.equipes-scroll-down');
         const footer        = widget.querySelector('.equipes-footer');
         const resetBtn      = widget.querySelector('.equipes-reset-btn');
         const modalOverlay  = widget.querySelector('.equipes-modal-overlay');
@@ -839,7 +886,7 @@
             persistData();
             showLoadedState();
             resultsGrid.innerHTML = '';
-            resultsPanel.style.display = 'none';
+            resultsWrapper.style.display = 'none';
             footer.style.display = 'none';
         }
 
@@ -1106,8 +1153,9 @@
                 resultsGrid.appendChild(card);
             });
 
-            resultsPanel.style.display = 'block';
+            resultsWrapper.style.display = 'flex';
             footer.style.display       = 'block';
+            updateScrollButtons();
         }
 
         // ── RàZ équipes ───────────────────────────────────────────────────
@@ -1115,7 +1163,7 @@
             showConfirm('Effacer les équipes ?', 'Les équipes générées seront supprimées.', () => {
                 savedTeams = null;
                 resultsGrid.innerHTML = '';
-                resultsPanel.style.display = 'none';
+                resultsWrapper.style.display = 'none';
                 footer.style.display       = 'none';
                 persistData();
             });
@@ -1149,6 +1197,57 @@
         function closeModal() { modalOverlay.classList.remove('open'); }
         modalOverlay.querySelector('.equipes-modal-cancel').addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+
+        // ── Boutons de défilement tactiles pour equipes-results ───────────
+        const SCROLL_STEP = 120;
+
+        function updateScrollButtons() {
+            if (!resultsPanel || !scrollUpBtn || !scrollDownBtn) return;
+            const canUp   = resultsPanel.scrollTop > 2;
+            const canDown = resultsPanel.scrollTop < resultsPanel.scrollHeight - resultsPanel.clientHeight - 2;
+            scrollUpBtn.classList.toggle('visible', canUp);
+            scrollDownBtn.classList.toggle('visible', canDown);
+        }
+
+        if (resultsPanel) {
+            resultsPanel.addEventListener('scroll', updateScrollButtons);
+        }
+
+        // Scroll au clic (avec répétition maintien appui)
+        function makeScrollHandler(direction) {
+            let interval = null;
+            function doScroll() {
+                resultsPanel.scrollBy({ top: direction * SCROLL_STEP, behavior: 'smooth' });
+            }
+            return {
+                start: (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    doScroll();
+                    interval = setInterval(doScroll, 300);
+                },
+                stop: () => {
+                    clearInterval(interval);
+                    interval = null;
+                    setTimeout(updateScrollButtons, 350);
+                }
+            };
+        }
+
+        if (scrollUpBtn) {
+            const h = makeScrollHandler(-1);
+            scrollUpBtn.addEventListener('pointerdown', h.start);
+            scrollUpBtn.addEventListener('pointerup',   h.stop);
+            scrollUpBtn.addEventListener('pointerleave',h.stop);
+            scrollUpBtn.addEventListener('pointercancel',h.stop);
+        }
+        if (scrollDownBtn) {
+            const h = makeScrollHandler(1);
+            scrollDownBtn.addEventListener('pointerdown', h.start);
+            scrollDownBtn.addEventListener('pointerup',   h.stop);
+            scrollDownBtn.addEventListener('pointerleave',h.stop);
+            scrollDownBtn.addEventListener('pointercancel',h.stop);
+        }
 
         // ── Mise à l'échelle des pills selon la largeur du widget ─────────
         function updatePillScale() {
