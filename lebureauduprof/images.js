@@ -27,7 +27,6 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/maths-droite-numerique-petits-carreaux.jpg',         label: 'Maths (droite numérique - centièmes))' },
 				{ src: 'images/maths-droite-numerique-millimetre.jpg',              label: 'Maths (droite numérique - dixièmes)' },
 				{ src: 'images/maths-graphique.jpg',                                label: 'Maths (graphique)' },
-				{ src: 'images/maths-equerre.png',                                  label: 'Maths (équerre)' },
 				{ src: 'images/maths-tangram-24x24.jpg',                            label: 'Maths (tangram)' },
             ]
         },
@@ -36,12 +35,13 @@ if (!window.IMAGE_CATEGORIES) {
             label: 'École',
             icon: '🏫',
             images: [
-                { src: 'images/ecole-cahier.jpeg',                label: 'cahier' },
-				{ src: 'images/matiere-scolaire-maths1.jpeg',    label: 'maths' },
-				{ src: 'images/matiere-scolaire-maths3.jpeg',    label: 'maths' },
-				{ src: 'images/matiere-scolaire-maths4.jpeg',    label: 'maths' },
-				{ src: 'images/matiere-scolaire-maths5.jpeg',    label: 'maths' },
-				{ src: 'images/matiere-scolaire-maths6.jpeg',    label: 'maths' },
+                { src: 'images/ecole-cahier.jpeg',                               label: 'cahier' },
+				{ src: 'images/ecole-maths1.jpeg',                               label: 'maths' },
+				{ src: 'images/ecole-maths3.jpeg',                               label: 'maths' },
+				{ src: 'images/ecole-maths4.jpeg',                               label: 'maths' },
+				{ src: 'images/ecole-maths5.jpeg',                               label: 'maths' },
+				{ src: 'images/ecole-maths6.jpeg',                               label: 'maths' },
+				{ src: 'images/ecole-equerre.png',                               label: 'Maths (équerre)' },
             ]
         },
 		{
