@@ -121,6 +121,13 @@
             box-shadow: none !important;
         }
 
+        @font-face {
+            font-family: 'MarelleBaton';
+            src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         /* ── Conteneur principal ── */
         .frac-container {
             background: #ffffff;
@@ -353,7 +360,7 @@
             width: 44px; height: 30px;
             border: 1.5px solid #d1d5db; border-radius: 7px;
             text-align: center; font-size: 16px; font-weight: 800;
-            color: #374151; font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #374151; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
             outline: none; transition: border-color .15s;
             background: white;
         }
@@ -372,6 +379,7 @@
         }
         .frac-label-eq {
             font-size: 22px; font-weight: 900; color: #374151;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
             margin: 0 4px;
         }
 
@@ -390,15 +398,16 @@
             font-size: 22px;
             font-weight: 800;
             color: #374151;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
             margin-top: 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             line-height: 1.1;
         }
-        .frac-fig-label .fn { color: #4a90e2; font-size: 22px; }
+        .frac-fig-label .fn { color: #4a90e2; font-size: 22px; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
         .frac-fig-label .fb { width: 24px; height: 2px; background: #374151; margin: 2px 0; }
-        .frac-fig-label .fd { color: #e06c4a; font-size: 22px; }
+        .frac-fig-label .fd { color: #e06c4a; font-size: 22px; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
 
         /* ── Bouton reset / ajouter fraction ── */
         .frac-btn {

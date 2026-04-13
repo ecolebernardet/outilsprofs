@@ -109,6 +109,12 @@
             border: none !important;
             box-shadow: none !important;
         }
+        @font-face {
+            font-family: 'MarelleBaton';
+            src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         .wconv-container {
             background: #ffffff;
             border: 1.5px solid #d1d5db;
@@ -203,6 +209,7 @@
             text-align: center;
             outline: none;
             color: #374151;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif !important;
             touch-action: auto;
             pointer-events: auto;
             -webkit-user-select: text;
@@ -221,6 +228,7 @@
             text-align: center;
             padding: 5px 2px;
             font-size: 23px;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif !important;
         }
         .wconv-table th { background: #f3f4f6; font-weight: 900; color: #374151; }
         .wconv-table td { background: #fff; height: 50px; color: #6b7280; }
@@ -265,6 +273,7 @@
             white-space: nowrap;
             color: #374151;
             font-size: 23px;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif !important;
             flex-shrink: 1;
 			padding: 0px 0px 0px 10px;
         }
@@ -279,6 +288,7 @@
             color: #4a90e2;
             font-weight: 700;
             font-size: 23px;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif !important;
             outline: none;
             transition: border-color .15s, width .1s ease;
             flex-shrink: 0;
@@ -289,7 +299,7 @@
         .wconv-exo-input:focus { border-color: #4a90e2; }
         .wconv-exo-input.correct { border-color: #28a745; background: #f0fff4; color: #1a7a3a; }
         .wconv-exo-input.wrong   { border-color: #dc3545; background: #fff5f5; color: #9c1c28; }
-        .wconv-exo-unit { min-width: 28px; color: #374151; font-size: 23px; flex-shrink: 0; }
+        .wconv-exo-unit { min-width: 28px; color: #374151; font-size: 23px; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif !important; flex-shrink: 0; }
         .wconv-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
         .wconv-btn {
             padding: 5px 12px;
