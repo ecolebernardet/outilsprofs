@@ -9,6 +9,12 @@ function createHorlogeWidget() {
         const s = document.createElement('style');
         s.id = 'hrlg-style';
         s.textContent = `
+        @font-face {
+            font-family: 'MarelleBaton';
+            src: url('polices/MarelleBaton-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         .widget[data-type="horloge"] {
             cursor: move;
             overflow: visible !important;
@@ -120,7 +126,7 @@ function createHorlogeWidget() {
         .hrlg-border { stroke: #4a4a80; stroke-width: 2.5; fill: none; }
         .hrlg-tick-min  { stroke: #3a3a65; stroke-width: 1; stroke-linecap: round; }
         .hrlg-tick-hour { stroke: #6366f1; stroke-width: 2.5; stroke-linecap: round; }
-        .hrlg-number { font-family: 'BelleAllureGS', cursive !important; font-weight: 700; fill: #c7d2fe; }
+        .hrlg-number { font-family: 'MarelleBaton', cursive !important; font-weight: 700; fill: #c7d2fe; }
         .hrlg-hand { stroke-linecap: round; pointer-events: none; }
         .hrlg-hand-hour   { stroke: #ef4444; stroke-width: 5; }
         .hrlg-hand-minute { stroke: #3b82f6; stroke-width: 3; }
@@ -132,11 +138,11 @@ function createHorlogeWidget() {
             border-radius: 0.5em; padding: 0.3em 1em; min-width: 5em; text-align: center;
         }
         .hrlg-time-display {
-            font-family: 'BelleAllureGS', cursive !important;
+            font-family: 'MarelleBaton', cursive !important;
             font-size: 3em; font-weight: 700; color: #a5b4fc;
             letter-spacing: 0.05em; display: block; line-height: 1.2;
         }
-        .hrlg-colon { font-family: 'Nunito', sans-serif !important; font-weight: 700; }
+        .hrlg-colon { font-family: 'MarelleBaton', sans-serif !important; font-weight: 700; }
         .hrlg-controls { display: flex; gap: 0.5em; align-items: center; justify-content: center; }
         .hrlg-toggle-time-btn {
             background: rgba(99,102,241,.12); border: 0.07em solid rgba(99,102,241,.35);
@@ -207,7 +213,7 @@ function createHorlogeWidget() {
 
 
         /* ── Numéros de minutes sur le cadran ── */
-        .hrlg-number-min { font-family: 'Nunito', sans-serif; font-weight: 700; fill: #60a5fa; font-size: 7px; }
+        .hrlg-number-min { font-family: 'MarelleBaton', sans-serif; font-weight: 700; fill: #60a5fa; font-size: 7px; }
         body.menu-light .hrlg-number-min { fill: #2563eb; }
 
         /* ── Boutons numéros minutes / heures ── */
