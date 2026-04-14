@@ -1141,8 +1141,8 @@ function cloneWidget(widget) {
     const y = (widget.offsetTop  + 30) + 'px';
     const rot = getCurrentRotation(widget);
 
-    // Cas sticker image : clonage direct sans passer par createWidget (pas de template)
-    if (widget.dataset.type === 'sticker' && widget.querySelector('img')) {
+    // Cas sticker (image animée ou émoji classique) : clonage direct sans passer par createWidget (pas de template)
+    if (widget.dataset.type === 'sticker' && (widget.querySelector('img') || widget.querySelector('[data-sticker-type="emoji"]'))) {
         const srcImg = widget.querySelector('img');
         // Dupliquer le nœud DOM directement
         const clone = widget.cloneNode(true);
