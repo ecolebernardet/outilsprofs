@@ -223,85 +223,123 @@ async function _exportPdfWithAnnotations(container) {
     const annotLayers = api.getAnnotLayers();
     if (!pdfDoc) { alert('PDF non disponible.'); return; }
 
-    // Charger jsPDF si pas encore chargé
-    if (!window.jspdf) {
+    // Charger pdf-lib si pas encore chargé
+    if (!window.PDFLib) {
         await new Promise((res, rej) => {
             const s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
             s.onload = res; s.onerror = rej;
             document.head.appendChild(s);
         });
     }
-    const { jsPDF } = window.jspdf;
+    const { PDFDocument } = window.PDFLib;
+
+    // Récupérer le PDF original depuis IndexedDB
+    // → les pages sans annotation conservent leurs vecteurs/polices natifs
+    const pdfId = widget.dataset.pdfId;
+    let originalPdfBytes = null;
+    if (pdfId && typeof pdfStorage !== 'undefined') {
+        try {
+            const b64 = await pdfStorage.get(pdfId);
+            if (b64) {
+                const raw = atob(b64.includes(',') ? b64.split(',')[1] : b64);
+                originalPdfBytes = new Uint8Array(raw.length);
+                for (let i = 0; i < raw.length; i++) originalPdfBytes[i] = raw.charCodeAt(i);
+            }
+        } catch(e) {}
+    }
 
     const btn = container.querySelector('.pdf-export-btn');
     if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
 
     try {
-        // Rendre chaque page à 2x pour la qualité
-        const SCALE = 2;
-        let pdf = null;
+        // PDF.js rend à 72 px/pt (scale=1).
+        // SCALE=4 → ~288 dpi sur A4, qualité proche de l'original vectoriel.
+        const SCALE = 4;
+
+        let outDoc;
+        let srcPages = null;
+
+        if (originalPdfBytes) {
+            // Partir du PDF original : les pages sans annotation restent vectorielles
+            outDoc = await PDFDocument.load(originalPdfBytes, { ignoreEncryption: true });
+            srcPages = outDoc.getPages();
+        } else {
+            outDoc = await PDFDocument.create();
+        }
 
         for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-            const page = await pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale: SCALE });
-            const W = viewport.width, H = viewport.height;
+            const layer = annotLayers[pageNum];
+            const hasAnnotations = layer && (
+                (layer.strokes && layer.strokes.length > 0) || layer._snapshot
+            );
 
-            // Canvas PDF
+            // Page sans annotation + PDF original dispo → on la laisse intacte (qualité native)
+            if (!hasAnnotations && srcPages) continue;
+
+            const page     = await pdfDoc.getPage(pageNum);
+            const vp1      = page.getViewport({ scale: 1 });   // dimensions en pt
+            const viewport = page.getViewport({ scale: SCALE });
+            const W = Math.round(viewport.width);
+            const H = Math.round(viewport.height);
+
+            // Rendre la page PDF à haute résolution
             const pdfCanvas = document.createElement('canvas');
             pdfCanvas.width = W; pdfCanvas.height = H;
             const pdfCtx = pdfCanvas.getContext('2d');
+            pdfCtx.fillStyle = '#ffffff';
+            pdfCtx.fillRect(0, 0, W, H);
             await page.render({ canvasContext: pdfCtx, viewport }).promise;
 
-            // Canvas annotation
-            const annotCanvas2 = document.createElement('canvas');
-            annotCanvas2.width = W; annotCanvas2.height = H;
-            const annotCtx = annotCanvas2.getContext('2d');
+            // Dessiner les annotations par-dessus
+            if (hasAnnotations) {
+                const annotCanvas2 = document.createElement('canvas');
+                annotCanvas2.width = W; annotCanvas2.height = H;
+                const annotCtx = annotCanvas2.getContext('2d');
 
-            const layer = annotLayers[pageNum];
-            if (layer) {
-                // Restaurer snapshot si existant
                 if (layer._snapshot) {
-                    // Redimensionner le snapshot au scale SCALE
                     const tmpC = document.createElement('canvas');
                     tmpC.width  = layer._snapshot.width;
                     tmpC.height = layer._snapshot.height;
                     tmpC.getContext('2d').putImageData(layer._snapshot, 0, 0);
                     annotCtx.drawImage(tmpC, 0, 0, W, H);
                 }
-                // Redessiner les strokes à l'échelle SCALE
                 if (layer.strokes) {
                     for (const stroke of layer.strokes) {
                         _drawStrokeScaled(annotCtx, stroke, W, H);
                     }
                 }
+                pdfCtx.drawImage(annotCanvas2, 0, 0);
             }
 
-            // Fusionner les deux canvas
-            const merged = document.createElement('canvas');
-            merged.width = W; merged.height = H;
-            const mCtx = merged.getContext('2d');
-            mCtx.drawImage(pdfCanvas, 0, 0);
-            mCtx.drawImage(annotCanvas2, 0, 0);
+            // PNG sans perte → pas d'artefacts de compression
+            const pngBytes = await new Promise((res, rej) => {
+                pdfCanvas.toBlob(blob => {
+                    if (!blob) { rej(new Error('toBlob échoué page ' + pageNum)); return; }
+                    blob.arrayBuffer().then(res).catch(rej);
+                }, 'image/png');
+            });
 
-            const imgData = merged.toDataURL('image/jpeg', 0.92);
-            const pdfW = viewport.width / SCALE * 0.75; // px → pt (72dpi)
-            const pdfH = viewport.height / SCALE * 0.75;
+            const pngImage = await outDoc.embedPng(pngBytes);
 
-            if (!pdf) {
-                pdf = new jsPDF({
-                    orientation: pdfW > pdfH ? 'landscape' : 'portrait',
-                    unit: 'pt',
-                    format: [pdfW, pdfH]
-                });
+            if (srcPages) {
+                // Remplacer le contenu de la page existante (préserve les métadonnées)
+                const libPage = srcPages[pageNum - 1];
+                libPage.drawImage(pngImage, { x: 0, y: 0, width: vp1.width, height: vp1.height });
             } else {
-                pdf.addPage([pdfW, pdfH], pdfW > pdfH ? 'landscape' : 'portrait');
+                const newPage = outDoc.addPage([vp1.width, vp1.height]);
+                newPage.drawImage(pngImage, { x: 0, y: 0, width: vp1.width, height: vp1.height });
             }
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
         }
 
         const pdfName = (widget.dataset.pdfName || 'document').replace(/\.pdf$/i, '');
-        pdf.save(pdfName + '_annoté.pdf');
+        const outBytes = await outDoc.save();
+        const blob = new Blob([outBytes], { type: 'application/pdf' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = pdfName + '_annoté.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
 
     } catch(err) {
         console.error('[Export PDF]', err);

@@ -212,6 +212,17 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 return annotLayers[p];
             }
 
+            // ── Persistance : clé annotations (déclarée tôt pour la closure _ensurePdfJs) ──
+            // Basée sur container car widget n'est pas encore défini ici
+            var _annotKey = null;
+            var _saveAnnotations = function() {}; // sera redéfinie plus bas
+            (function() {
+                var w = container.closest('.widget');
+                if (w && w.dataset && w.dataset.pdfId) {
+                    _annotKey = w.dataset.pdfId + '_annots';
+                }
+            })();
+
             // ── Rendu PDF ────────────────────────────────────────────────────
             let renderTask = null;
             function fitScale(page) {
@@ -918,6 +929,25 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
             renderPage(currentPage);
 
+            // Restaurer les annotations sauvegardées (après le 1er rendu)
+            if (_annotKey && typeof pdfStorage !== 'undefined' && !container._annotRestored) {
+                container._annotRestored = true;
+                pdfStorage.get(_annotKey).then(raw => {
+                    if (!raw) return;
+                    try {
+                        const saved = JSON.parse(raw);
+                        let changed = false;
+                        for (const [p, layer] of Object.entries(saved)) {
+                            if (layer && Array.isArray(layer.strokes) && layer.strokes.length > 0) {
+                                annotLayers[p] = { strokes: layer.strokes };
+                                changed = true;
+                            }
+                        }
+                        if (changed) redrawAnnotations(currentPage);
+                    } catch(e) {}
+                }).catch(() => {});
+            }
+
             // ── ResizeObserver : maintenir le fit-to-width si zoomScale === null ──
             if (typeof ResizeObserver !== 'undefined') {
                 let _resizeTimer = null;
@@ -943,6 +973,21 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             // ── API publique pour draw.js (mode annotation via draw-toolbar) ──
             // Exposée sur le widget DOM pour que draw.js puisse y accéder.
             const widget = container.closest('.widget');
+
+            // ── Persistance annotations : implémentation réelle de _saveAnnotations ──
+            _saveAnnotations = function() {
+                try {
+                    if (!_annotKey || typeof pdfStorage === 'undefined') return;
+                    var toSave = {};
+                    for (var p in annotLayers) {
+                        if (annotLayers[p] && Array.isArray(annotLayers[p].strokes)) {
+                            toSave[p] = { strokes: annotLayers[p].strokes };
+                        }
+                    }
+                    pdfStorage.set(_annotKey, JSON.stringify(toSave));
+                } catch(e) {}
+            };
+
             if (widget) {
                 widget._pdfAnnotAPI = {
                     // Démarre un trait
@@ -1013,6 +1058,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         }
                         currentStrokeAnnot = null;
                         redrawAnnotations(currentPage);
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Annuler le dernier stroke
                     undo() {
@@ -1028,6 +1074,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             layer.strokes.pop();
                             redrawAnnotations(currentPage);
                         }
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Refaire le dernier stroke annulé
                     redo() {
@@ -1039,6 +1086,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             layer.strokes = layer.redoHistory.pop();
                             redrawAnnotations(currentPage);
                         }
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Effacer toutes les annotations de la page courante
                     clear() {
@@ -1050,6 +1098,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         }
                         layer.strokes = [];
                         redrawAnnotations(currentPage);
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Accès au canvas pour récupérer les coordonnées
                     getAnnotCanvas() { return annotCanvas; },
@@ -1079,6 +1128,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (layer.history.length > 30) layer.history.shift();
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Preview d'une figure en cours de tracé (sans sauvegarder)
                     previewFigure(color, size, pts, fillColor, fillOpacity) {
@@ -1125,6 +1175,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (layer.history.length > 30) layer.history.shift();
                         layer.strokes.push(stroke);
                         redrawAnnotations(currentPage);
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Prévisualisation du cercle gomme
                     previewEraser(px, py, r) {
@@ -1195,6 +1246,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer._snapshot = imgData;
                         // Nettoyer les strokes normaux car le snapshot les inclut
                         layer.strokes = [];
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // Déplacer un stroke texte en temps réel (pendant le drag)
                     // Dessiner un cadre de sélection autour d'un stroke texte
@@ -1283,6 +1335,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         _invalidateSnapshot(); // strokes validés ont changé
+                        try { _saveAnnotations(); } catch(e) {}
                     },
 
                     // Fait pivoter un texte (angle absolu en radians)
@@ -1307,6 +1360,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         _invalidateSnapshot(); // strokes validés ont changé
+                        try { _saveAnnotations(); } catch(e) {}
                     },
                     // px, py : coordonnées canvas pixels ; retourne le stroke trouvé ou null
                     findTextStrokeAt(px, py) {
@@ -1462,6 +1516,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         _invalidateSnapshot(); // strokes validés ont changé
+                        try { _saveAnnotations(); } catch(e) {}
                     },
 
                     // Redimensionne une figure : scaleX/scaleY absolus depuis les pts d'origine
@@ -1534,6 +1589,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         layer.history.push([...layer.strokes]);
                         if (layer.history.length > 30) layer.history.shift();
                         _invalidateSnapshot(); // strokes validés ont changé
+                        try { _saveAnnotations(); } catch(e) {}
                     }
                 };
             }

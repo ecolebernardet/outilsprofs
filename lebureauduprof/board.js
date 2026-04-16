@@ -71,18 +71,44 @@ const pdfStorage = (() => {
 // Nettoyer les PDFs orphelins au démarrage (après chargement des projets)
 async function _cleanOrphanPdfs() {
     try {
+        // Attendre que la restauration des PDFs soit terminée
+        // (évite de supprimer des PDFs dont le widget est en cours de chargement)
+        if (window._pdfRestoring) {
+            await new Promise(resolve => {
+                const poll = setInterval(() => {
+                    if (!window._pdfRestoring) { clearInterval(poll); resolve(); }
+                }, 300);
+                // Sécurité : ne pas attendre plus de 30s
+                setTimeout(() => { clearInterval(poll); resolve(); }, 30000);
+            });
+        }
+        // Délai supplémentaire pour que tous les pdfStorage.set() soient terminés
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // Collecter tous les pdfIds utilisés dans tous les projets
         const usedIds = new Set();
-        // PDFs dans le board courant
+        // PDFs dans le board courant (source la plus fiable — widgets actifs en mémoire)
         document.querySelectorAll('.widget[data-type="pdf"]').forEach(w => {
             if (w.dataset.pdfId) usedIds.add(w.dataset.pdfId);
         });
-        // PDFs dans les scènes sauvegardées (localStorage)
+        // PDFs dans toutes les scènes du localStorage (toutes scènes, pas juste la courante)
         try {
+            // Config courante
             const raw = localStorage.getItem('profBoardConfig');
             if (raw) {
                 const parsed = JSON.parse(raw);
                 (parsed.widgets || []).forEach(w => { if (w.pdfId) usedIds.add(w.pdfId); });
+            }
+            // Métadonnées des scènes (peuvent contenir des configs de scènes non actives)
+            const scenesMeta = localStorage.getItem('scenesMeta') || localStorage.getItem('scenes');
+            if (scenesMeta) {
+                const scenes = JSON.parse(scenesMeta);
+                (Array.isArray(scenes) ? scenes : []).forEach(scene => {
+                    try {
+                        const cfg = typeof scene.config === 'string' ? JSON.parse(scene.config) : scene.config;
+                        (cfg?.widgets || []).forEach(w => { if (w.pdfId) usedIds.add(w.pdfId); });
+                    } catch(e) {}
+                });
             }
         } catch(e) {}
         // PDFs dans tous les projets IndexedDB
@@ -99,7 +125,18 @@ async function _cleanOrphanPdfs() {
                 }
             } catch(e) {}
         }
-        await pdfStorage.purgeOrphans([...usedIds]);
+        // Sécurité finale : re-vérifier les widgets actifs juste avant de purger
+        // (au cas où un PDF aurait été ouvert pendant l'attente ci-dessus)
+        document.querySelectorAll('.widget[data-type="pdf"]').forEach(w => {
+            if (w.dataset.pdfId) usedIds.add(w.dataset.pdfId);
+        });
+        // Protéger aussi les clés d'annotations (pdfId + '_annots')
+        const usedIdsWithAnnots = new Set();
+        usedIds.forEach(id => {
+            usedIdsWithAnnots.add(id);
+            usedIdsWithAnnots.add(id + '_annots');
+        });
+        await pdfStorage.purgeOrphans([...usedIdsWithAnnots]);
     } catch(e) {
         console.warn('[cleanOrphanPdfs]', e);
     }
@@ -203,7 +240,7 @@ window.onload = () => {
     if (typeof loadBoard        === 'function') loadBoard();
     if (typeof initShapeToolbar === 'function') initShapeToolbar();
     // Nettoyer les PDFs orphelins 5s après le démarrage (laisse le temps aux projets de charger)
-    setTimeout(() => _cleanOrphanPdfs(), 5000);
+    setTimeout(() => _cleanOrphanPdfs(), 15000);
     // Nettoyer immédiatement les anciennes clés pdf_* dans localStorage (migration)
     Object.keys(localStorage).filter(k => k.startsWith('pdf_')).forEach(k => localStorage.removeItem(k));
     setTimeout(() => {
