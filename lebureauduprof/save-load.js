@@ -355,26 +355,14 @@ function loadBoard() {
         // localStorage contient une sauvegarde → on la charge, fin de l'histoire
         restoreBoardFromJSON(raw);
     } else {
-        // localStorage vide = première visite → on charge le modèle distant
-        fetch('https://ecolebernardet.github.io/outilsprofs/lebureauduprof/lebureauduprof_TABLEAU-VIDE.json')
-            .then(r => r.json())
-            .then(data => {
-                const json = JSON.stringify(data);
-                localStorage.setItem('profBoardConfig', json); // ← sauvegardé en local dès la 1ère fois
-                if (data.background) {
-                    applyBackground(data.background);
-                    localStorage.setItem('boardBackground', data.background);
-                }
-                restoreBoardFromJSON(json);
-                // Après restauration complète (>50ms pour le contenu HTML), resauvegarder
-                // pour que le localStorage et les scènes reflètent l'état réel avec le contenu
-                setTimeout(() => {
-                    if (!isRestoringState) saveBoard();
-                }, 200);
-            })
-            .catch(err => {
-                console.warn('Impossible de charger le modèle de bienvenue :', err);
-            });
+        // localStorage vide = première visite → tableau vierge avec fond par défaut
+        const defaultBg = 'url(fonds/fond-lebureauduprof-defaut01.jpeg)';
+        const defaultState = { widgets: [], shapes: [], strokes: [], refWidth: 1920, background: defaultBg };
+        const json = JSON.stringify(defaultState);
+        localStorage.setItem('profBoardConfig', json);
+        applyBackground(defaultBg);
+        localStorage.setItem('boardBackground', defaultBg);
+        restoreBoardFromJSON(json);
     }
 }
 
