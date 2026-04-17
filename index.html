@@ -66,17 +66,17 @@
 
 		#grid-menu {
 			display: grid;
-			/* 2 colonnes par défaut (mobile) */
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 15px; /* Espace uniforme sur mobile */
-			justify-items: center; /* Centre les tuiles horizontalement dans leur colonne */
+			/* 3 colonnes sur tous les écrans */
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 12px;
+			justify-items: center;
 			touch-action: none !important;
 			-webkit-user-drag: none;
 		}
 		
         .menu-card { 
-			width: 150px;
-            height: 130px;
+			width: 100%;
+            height: 110px;
             position: relative;
             background: var(--card-bg);
             border-radius: 1.25rem;
@@ -184,11 +184,10 @@
 		
 		@media (min-width: 768px) {
 			#grid-menu {
-				grid-template-columns: repeat(4, minmax(0, 1fr));
-				/* Espacement différencié : 64px vertical (gap-y) et 32px horizontal (gap-x) */
+				grid-template-columns: repeat(3, minmax(0, 1fr));
 				column-gap: 30px;
 				row-gap: 50px;
-				justify-items: center; /* Centre les tuiles sur tablette */
+				justify-items: center;
 			}
 			
 			header {
@@ -231,10 +230,10 @@
 		
 		@media (min-width: 1300px) {
 			#grid-menu {
-				grid-template-columns: repeat(4, minmax(0, 1fr));
+				grid-template-columns: repeat(3, minmax(0, 1fr));
 				column-gap: 50px;
 				row-gap: 50px;
-				justify-items: center; /* Centre les tuiles sur grand écran */
+				justify-items: center;
 			}
 			
 			header {
@@ -444,7 +443,7 @@
                     <span class="tile-subtitle font-semibold">pense-bêtes</span>
                 </a>
             </div>
-            
+
             <div data-id="obs" class="menu-card">
                 <div class="drag-handle">
                     <span></span><span></span><span></span>
@@ -494,6 +493,21 @@
                     <div class="icon-box">🧰</div>
                     <h2 class="font-bold uppercase tracking-wider">Outils</h2>
                     <span class="tile-subtitle font-semibold">gestion de la classe</span>
+                </a>
+            </div>
+
+            <div data-id="bureau" class="menu-card">
+                <div class="drag-handle">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <a href="https://outilsprofs.fr/lebureauduprof" target="_blank" class="flex flex-col items-center text-center">
+                    <div class="icon-box">
+                        <img src="icon.ico" alt="Le bureau du prof" style="width:28px;height:28px;object-fit:contain;">
+                    </div>
+                    <h2 class="font-bold uppercase tracking-wider">Le bureau</h2>
+                    <span class="tile-subtitle font-semibold">du prof</span>
                 </a>
             </div>
         </nav>
@@ -620,7 +634,8 @@
             obs: 'green',
             compt: 'sky',
             gen: 'cyan',
-            outils: 'blue'
+            outils: 'blue',
+            bureau: 'teal'
         };
 
         // Application des couleurs personnalisées
@@ -651,13 +666,10 @@
         function restoreTileOrder() {
             const gridMenu = document.getElementById('grid-menu');
             const savedOrder = JSON.parse(localStorage.getItem('menu_order'));
-            
             if (savedOrder) {
                 savedOrder.forEach(id => {
                     const tile = document.querySelector(`[data-id="${id}"]`);
-                    if (tile) {
-                        gridMenu.appendChild(tile);
-                    }
+                    if (tile) gridMenu.appendChild(tile);
                 });
             }
         }
@@ -671,12 +683,11 @@
                 handle: '.drag-handle',
                 animation: 200,
                 ghostClass: 'opacity-0',
-                forceFallback: true,    
+                forceFallback: true,
                 fallbackOnBody: true,
-                // Configuration spécifique pour différencier clic et drag
-                delay: 150,             
+                delay: 150,
                 delayOnTouchOnly: true, // IMPORTANT : pas de délai à la souris sur PC
-                
+
                 onEnd: function() {
                     const order = Array.from(gridMenu.children).map(child => child.getAttribute('data-id'));
                     localStorage.setItem('menu_order', JSON.stringify(order));
