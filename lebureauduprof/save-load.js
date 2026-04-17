@@ -252,6 +252,14 @@ function buildBoardState() {
                 history: w.dataset.deHistory || '[]'
             };
         }
+        // Données propres au widget calendrier
+        let calData = null;
+        if (w.dataset.type === 'calendrier') {
+            calData = {
+                calId:    w.dataset.calId    || null,
+                calState: w._calState ? JSON.stringify(w._calState) : null
+            };
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -291,7 +299,8 @@ function buildBoardState() {
 			seyesData,
 			convData,
 			fracData,
-			deData
+			deData,
+			calData
 		});
     });
     const shapes = [];
@@ -644,6 +653,19 @@ function restoreBoardFromJSON(json) {
             if (w.deData) {
                 widget.dataset.deFaces   = w.deData.faces   || '6';
                 widget.dataset.deHistory = w.deData.history || '[]';
+            }
+        } else if (w.type === 'calendrier') {
+            // Widget calendrier : créé et initialisé par widget-calendrier.js
+            if (typeof createCalendrierWidget === 'function') {
+                widget = createCalendrierWidget();
+                // Restaurer le calId d'origine (clé IndexedDB)
+                if (w.calData && w.calData.calId) widget.dataset.calId = w.calData.calId;
+                // Restaurer état + événements (IndexedDB prime sur le JSON du board)
+                if (w.calData && w.calData.calState && typeof _calRestoreData === 'function') {
+                    _calRestoreData(widget, w.calData.calState);
+                }
+            } else {
+                widget = createWidget(w.type, '100px', '100px', false);
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);
