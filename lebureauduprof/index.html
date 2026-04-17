@@ -1770,6 +1770,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         </div><!-- fin disp-block-fonds -->
     </div>
 </div>
+</div>
 <button id="display-panel-tab" onclick="toggleDisplayPanel()" title="Affichage"><span class="act-tab-lbl">Écran</span><span class="act-tab-ico">🖥️</span></button>
 
 
@@ -2501,12 +2502,24 @@ function toggleMediaCollapse(container) {
     }
 
     function openTab(tab, emoji, label) {
-    tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
-    tab.classList.add('tab-js-hover');
-}
+        tab.innerHTML = '<span class="tab-emoji">' + emoji + '</span><span class="tab-label">' + label + '</span>';
+        tab.classList.add('tab-js-hover');
+        tab.style.zIndex = '50020';
+        tab.style.opacity = '1';
+        for (const [id] of TABS) {
+            const t = document.getElementById(id);
+            if (t && t !== tab) t.style.pointerEvents = 'none';
+        }
+    }
 
     function closeTab(tab, emoji, label) {
         tab.classList.remove('tab-js-hover');
+        tab.style.zIndex = '';
+        tab.style.opacity = '';
+        for (const [id] of TABS) {
+            const t = document.getElementById(id);
+            if (t) t.style.pointerEvents = '';
+        }
         if (tab.id === 'pres-mode-tab') {
             var isOn = document.body.classList.contains('presentation-mode');
             tab.innerHTML = '<span class="act-tab-lbl">' + (isOn ? 'Off' : 'On') + '</span><span class="act-tab-ico">' + emoji + '</span>';

@@ -2343,7 +2343,10 @@ body.presentation-mode #pres-mode-tab {
     gap: 2px;
 }
 #display-panel-tab.tab-js-hover {
-    background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
+    background: #1a1a1a;
+    color: rgba(255,255,255,0.88);
+    opacity: 1;
+    z-index: 50020;
     width: 200px; height: 100px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
@@ -2353,7 +2356,6 @@ body.presentation-mode #pres-mode-tab {
     transition: width 0.22s cubic-bezier(.4,0,.2,1), height 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.15s, color 0.15s, background 0.15s;
     justify-content: center;
     padding-left: 50px;
-	z-index: 50010;
 }
 #display-panel-tab.display-panel-tab-open { display: none !important; }
 body.presentation-mode #display-panel-tab { display: none !important; }
@@ -2365,6 +2367,8 @@ body.menu-light #display-panel-tab {
 body.menu-light #display-panel-tab.tab-js-hover {
     background: var(--panel-light-bg2);
     color: var(--panel-light-text);
+    opacity: 1;
+    z-index: 50020;
     transition: width 0.22s cubic-bezier(.4,0,.2,1), height 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.15s, color 0.15s, background 0.15s;
     justify-content: center;
     padding-left: 50px;
