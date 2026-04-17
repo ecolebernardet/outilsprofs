@@ -6,7 +6,7 @@
 (function () {
     const style = document.createElement('style');
     style.textContent = `
-        .bg-thumb { width: 100%; height: 50px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
+        .bg-thumb { width: 100%; height: 50px; border-radius: 6px; border: 1px solid #999; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
         .bg-thumb:hover { transform: scale(1.05); border-color: var(--primary-color); }
         .bg-thumb-seyes {
             background-color: #fffef5;

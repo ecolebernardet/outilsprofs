@@ -1670,6 +1670,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
     <div id="display-panel-content">
 
+		<div class="disp-block disp-block-actions">
 		<div class="disp-section-label" id="disp-section-actions">↩️ Actions</div>
         <div class="hist-btn-row" id="disp-row-actions" style="flex-direction:row;flex-wrap:nowrap;gap:4px;">
             <button class="hist-btn" id="hist-undo-btn" onclick="undoAction()" style="flex:1;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:4px 4px;text-align:center;">
@@ -1689,7 +1690,9 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <span style="font-size:11px;line-height:1.2;">Aide</span>
             </button>
         </div>
+		</div>
 		
+		<div class="disp-block disp-block-theme">
 		<div class="disp-section-label" id="disp-section-theme">🎨 Thème, pointeur & affichage</div>
         <div class="disp-inline-row" id="disp-row-theme">
             <button class="disp-inline-btn" id="disp-light-btn" onclick="if(!document.body.classList.contains('menu-light'))toggleMenuTheme()" title="Mode clair">☀️<br>Mode clair</button>
@@ -1697,14 +1700,18 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 			<button class="disp-inline-btn" id="disp-laser-btn" onclick="toggleLaser();toggleDisplayPanel()" title="Pointeur laser">🔴<br>Laser</button>
             <button class="disp-inline-btn" onclick="toggleA4Mode();toggleDisplayPanel()" title="Format A4 Portrait">📄<br>A4 Portrait</button>
         </div>
+		</div>
 
+		<div class="disp-block disp-block-capture">
         <div class="disp-section-label" id="disp-section-capture">📸 Capture du bureau</div>
         <div class="disp-inline-row" id="disp-row-capture">
             <button class="disp-inline-btn" onclick="captureBoard('jpg');toggleDisplayPanel()">🖼️ JPG</button>
             <button class="disp-inline-btn" onclick="captureBoard('png');toggleDisplayPanel()">🖼️ PNG</button>
             <button class="disp-inline-btn" onclick="captureBoard('pdf');toggleDisplayPanel()">📄 PDF</button>
         </div>
+		</div>
 		
+		<div class="disp-block disp-block-fonds">
         <div class="disp-section-label">🎨 Fond d'écran</div>
 
         <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 4px;">🖼️ Couleurs</div>
@@ -1760,7 +1767,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <span style="font-size:18px;">📷</span>
                 <span>Importer</span>
             </div>
-        </div>
+        </div><!-- fin disp-block-fonds -->
     </div>
 </div>
 <button id="display-panel-tab" onclick="toggleDisplayPanel()" title="Affichage"><span class="act-tab-lbl">Écran</span><span class="act-tab-ico">🖥️</span></button>

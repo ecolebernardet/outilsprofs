@@ -2513,7 +2513,7 @@ body.presentation-mode #history-panel { display: none !important; }
 .disp-section-label, .hist-section-label {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1px; color: rgba(255,255,255,0.35);
-    padding: 6px 0px 0px 0px; margin-bottom: 8px;
+    padding: 2px 0px 0px 0px; margin-bottom: 8px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .disp-btn-row {
@@ -2545,7 +2545,7 @@ body.presentation-mode #history-panel { display: none !important; }
 }
 .disp-inline-btn {
     flex: 1;
-    padding: 9px 6px 6px 0px;
+    padding: 9px 3px 6px 3px;
     background: #1a1a1a;
     border: 1px solid #2e2e3a;
     border-radius: 10px;
@@ -3991,3 +3991,35 @@ body.menu-light .tnum-reset-btn {
 }
 body.menu-light .tnum-reset-btn:hover { background: rgba(239,68,68,.15); color: #b91c1c; }
 
+
+/* ══════════════════════════════════════════════
+   BLOCS DISTINCTS DU PANNEAU ÉCRAN
+   ══════════════════════════════════════════════ */
+.disp-block {
+    border-radius: 12px;
+    padding: 10px 10px 6px 10px;
+    margin-bottom: 10px;
+}
+
+/* Mode sombre */
+.disp-block-actions  { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+.disp-block-theme    { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+.disp-block-capture  { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+.disp-block-fonds    { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+/* Teinte légère sur le label de section dans chaque bloc */
+.disp-block-actions .disp-section-label  { color: rgba(255, 255, 255, 0.75);  border-bottom-color: rgba(255, 255, 255, 0.1); }
+.disp-block-theme   .disp-section-label  { color: rgba(255, 255, 255, 0.75);  border-bottom-color: rgba(255, 255, 255, 0.1); }
+.disp-block-capture .disp-section-label  { color: rgba(255, 255, 255, 0.75);  border-bottom-color: rgba(255, 255, 255, 0.1); }
+.disp-block-fonds   .disp-section-label  { color: rgba(255, 255, 255, 0.75); border-bottom-color: rgba(255, 255, 255, 0.1); }
+
+/* Mode clair */
+body.menu-light .disp-block-actions  { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-theme    { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-capture  { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-fonds    { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); }
+
+body.menu-light .disp-block-actions .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-theme   .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-capture .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
+body.menu-light .disp-block-fonds   .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
