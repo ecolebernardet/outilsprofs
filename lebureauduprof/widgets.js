@@ -818,7 +818,8 @@ function makeDraggable(elmnt) {
     } else {
         // Sélecteur d'exclusions commun (souris, tactile, stylet)
         const _DRAG_EXCLUDE = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider,' +
-            'button,input,select,textarea,label,.ng-params-btn,.ng-help-btn,.ng-nature-check,.ng-params-apply-btn,.ng-btn,.ng-word-token,.ng-placed-word,.ng-rm-btn,.ng-corr-token,.ng-resize-handle,.ng-nature-picker,.wf-btn';
+            'button,input,select,textarea,label,.ng-params-btn,.ng-help-btn,.ng-nature-check,.ng-params-apply-btn,.ng-btn,.ng-word-token,.ng-placed-word,.ng-rm-btn,.ng-corr-token,.ng-resize-handle,.ng-nature-picker,.wf-btn,' +
+            '.de-dice-svg,.de-dice-zone,.de-controls,.de-faces-row,.de-history-row,.de-resize-handle';
 
         elmnt.addEventListener('mousedown', (e) => {
             if (isDrawMode || isEraserMode) return;

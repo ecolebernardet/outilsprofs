@@ -244,6 +244,14 @@ function buildBoardState() {
         if (w.dataset.type === 'fractions' && typeof w._fracGetData === 'function') {
             fracData = w._fracGetData();
         }
+        // Données propres au widget dé
+        let deData = null;
+        if (w.dataset.type === 'de') {
+            deData = {
+                faces:   w.dataset.deFaces   || '6',
+                history: w.dataset.deHistory || '[]'
+            };
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -282,7 +290,8 @@ function buildBoardState() {
 			s3dW, s3dH,
 			seyesData,
 			convData,
-			fracData
+			fracData,
+			deData
 		});
     });
     const shapes = [];
@@ -627,6 +636,14 @@ function restoreBoardFromJSON(json) {
                     if (fc && _fracDataToRestore.containerH) fc.style.height = (_fracDataToRestore.containerH / (w._refW || 1920)) * window.innerHeight + 'px';
                     if (_fracDataToRestore.fullboard && fc) fc.classList.add('wf-fullboard');
                 }, 80);
+            }
+        } else if (w.type === 'de') {
+            // Les données deFaces et deHistory sont stockées dans les dataset
+            // initDeWidget les lira automatiquement lors de son initialisation
+            widget = createWidget('de', '100px', '100px', false);
+            if (w.deData) {
+                widget.dataset.deFaces   = w.deData.faces   || '6';
+                widget.dataset.deHistory = w.deData.history || '[]';
             }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);

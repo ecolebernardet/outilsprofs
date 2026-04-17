@@ -385,6 +385,9 @@
 				<div class="mm-sub-item" onclick="createSondageWidget();closeMainMenu()"><span class="mm-ico">📊</span>&nbsp;&nbsp;Sondage</div>
 				<div class="mm-sub-item" onclick="createPlanWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Plan de classe</div>
 				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
+				<div style="height:1px;background:#2e2e38;margin:4px 6px;"></div>
+				<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 10px 2px;">🎲 Outils divers</div>
+				<div class="mm-sub-item" onclick="createWidget('de');closeMainMenu()"><span class="mm-ico">🎲</span>&nbsp;&nbsp;Lancer un dé</div>
 				</div></div>
 			</div>
 
@@ -1131,6 +1134,7 @@
 <script src="widget-compte-est-bon.js"></script>
 <script src="widget-mots-alpha.js"></script>
 <script src="widget-nature-gramm.js"></script>
+<script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
 <script src="widget-sonometre.js"></script>
@@ -1541,8 +1545,13 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 		</div>
 		<div class="tools-section-label">🪛 Outils divers</div>
         <div class="tools-grid">
+			<div class="tools-card" onclick="createWidget('de');toggleToolsPanel()">
+                <div class="tools-card-ico"><img src="pics/outils-de.jpeg" alt="Lancer un dé" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="tools-card-name">Lancer un dé</div>
+                <div class="tools-card-desc">Simuler un dé de 2 à 30 faces</div>
+			</div>
 			<div class="tools-card" onclick="createStructureEcoleWidget();toggleToolsPanel()">
-                <div class="tools-card-ico" style="font-size:2rem;display:flex;align-items:center;justify-content:center;"><img src="pics/outils-structure-ecole.jpeg" alt="Strcuture école" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="tools-card-ico"><img src="pics/outils-structure-ecole.jpeg" alt="Structure école" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="tools-card-name">Structure École</div>
                 <div class="tools-card-desc">Générer des propositions de répartition en classes</div>
 			</div>
