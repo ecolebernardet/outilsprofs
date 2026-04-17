@@ -157,9 +157,6 @@
         .de-container.wf-fullboard .de-title {
             display: block;
         }
-        .de-container.wf-fullboard .de-dice-main-txt {
-            font-size: 90px !important;
-        }
         .de-header {
             display: flex; align-items: center; gap: 8px;
             cursor: move; user-select: none; flex-shrink: 0;
@@ -234,6 +231,13 @@
             55%  { transform: rotate(-9deg)  scale(0.95); }
             75%  { transform: rotate(5deg)   scale(1.03); }
             100% { transform: rotate(0deg)   scale(1); }
+        }
+        .de-dice-main-txt.flash {
+            animation: de-flash 0.15s ease-out;
+        }
+        @keyframes de-flash {
+            0%   { opacity: 0.15; }
+            100% { opacity: 1; }
         }
         .de-result-hint {
             font-size: 11px; color: #9ca3af; text-align: center;
@@ -310,22 +314,48 @@
 
   <!-- Zone principale du dé -->
   <div class="de-dice-zone">
-    <svg class="de-dice-svg" viewBox="0 0 130 130"
+    <svg class="de-dice-svg" viewBox="0 0 160 170"
          xmlns="http://www.w3.org/2000/svg" role="button" aria-label="Lancer le dé">
       <defs>
-        <linearGradient id="de-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <!-- Face frontale -->
+        <linearGradient id="de-front" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%"   stop-color="#818cf8"/>
           <stop offset="100%" stop-color="#6366f1"/>
         </linearGradient>
-        <filter id="de-inner-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#4338ca" flood-opacity="0.4"/>
+        <!-- Face du dessus -->
+        <linearGradient id="de-top" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#a5b4fc"/>
+          <stop offset="100%" stop-color="#c7d2fe"/>
+        </linearGradient>
+        <!-- Face droite -->
+        <linearGradient id="de-right" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#4338ca"/>
+          <stop offset="100%" stop-color="#3730a3"/>
+        </linearGradient>
+        <!-- Ombre portée -->
+        <filter id="de-shadow" x="-15%" y="-10%" width="145%" height="150%">
+          <feDropShadow dx="2" dy="8" stdDeviation="7" flood-color="#1e1b4b" flood-opacity="0.40"/>
         </filter>
       </defs>
-      <!-- Corps du dé -->
-      <rect class="de-dice-bg" x="6" y="6" width="118" height="118" rx="24" ry="24"
-            fill="url(#de-grad)" filter="url(#de-inner-shadow)"/>
-      <!-- Résultat central -->
-      <text class="de-dice-main-txt" x="65" y="65" text-anchor="middle"
+
+      <g filter="url(#de-shadow)">
+        <!-- Face frontale (grande, carrée, angles droits) -->
+        <polygon points="10,35  120,35  120,145  10,145" fill="url(#de-front)"/>
+        <!-- Face du dessus -->
+        <polygon points="10,35  40,10  150,10  120,35" fill="url(#de-top)"/>
+        <!-- Face droite -->
+        <polygon points="120,35  150,10  150,120  120,145" fill="url(#de-right)"/>
+        <!-- Arêtes -->
+        <polygon points="10,35  120,35  120,145  10,145"
+              fill="none" stroke="#3730a3" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="10,35  40,10  150,10  120,35"
+              fill="none" stroke="#3730a3" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="120,35  150,10  150,120  120,145"
+              fill="none" stroke="#3730a3" stroke-width="1.5" stroke-linejoin="round"/>
+      </g>
+
+      <!-- Résultat centré sur la face frontale -->
+      <text class="de-dice-main-txt" x="65" y="92" text-anchor="middle"
             dominant-baseline="central"
             font-family="'Segoe UI',system-ui,sans-serif" font-size="64" font-weight="900"
             fill="white">—</text>
@@ -428,29 +458,56 @@
         });
 
         // ── Lancer le dé ─────────────────────────────────────────────────
+        let _rolling = false;
+
         function roll() {
+            if (_rolling) return;
+            _rolling = true;
+
             const result = Math.floor(Math.random() * nbFaces) + 1;
 
-            // Animation : retirer la classe, attendre 2 frames, la remettre
+            // Animation rotation du dé
             diceSvg.classList.remove('rolling');
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    diceSvg.classList.add('rolling');
-                });
+            requestAnimationFrame(() => requestAnimationFrame(() => diceSvg.classList.add('rolling')));
+
+            resultHint.textContent = '…';
+
+            // Séquence de délais croissants : rapide → lent → résultat
+            // 12 chiffres intermédiaires, intervalles de 60ms→80→110→150→200→résultat
+            const delays = [60, 60, 80, 80, 100, 100, 130, 130, 160, 180, 200, 220, 300];
+            let elapsed = 0;
+
+            delays.forEach((delay, i) => {
+                elapsed += delay;
+                const isFinal = (i === delays.length - 1);
+                // Taille progressive : de 20px (premier) à 42px (avant-dernier), puis saut à 64px pour le résultat
+                const fontSize = isFinal ? 64 : Math.round(20 + (i / (delays.length - 2)) * 22);
+                setTimeout(() => {
+                    if (isFinal) {
+                        diceMainTxt.classList.remove('flash');
+                        void diceMainTxt.getBoundingClientRect();
+                        diceMainTxt.setAttribute('font-size', 64);
+                        diceMainTxt.textContent = result;
+                        diceMainTxt.classList.add('flash');
+                        resultHint.textContent  = `Résultat : ${result}  (sur ${nbFaces})`;
+                        _rolling = false;
+                        history.unshift(result);
+                        if (history.length > 20) history = history.slice(0, 20);
+                        widget.dataset.deHistory = JSON.stringify(history);
+                        renderHistory();
+                        if (typeof saveBoard === 'function') saveBoard();
+                    } else {
+                        let rnd;
+                        do { rnd = Math.floor(Math.random() * nbFaces) + 1; }
+                        while (String(rnd) === diceMainTxt.textContent && nbFaces > 1);
+                        diceMainTxt.classList.remove('flash');
+                        void diceMainTxt.getBoundingClientRect();
+                        diceMainTxt.setAttribute('font-size', fontSize);
+                        diceMainTxt.textContent = rnd;
+                        diceMainTxt.classList.add('flash');
+                    }
+                }, elapsed);
             });
-
-            // Afficher résultat après un court délai (milieu de l'animation)
-            setTimeout(() => {
-                diceMainTxt.textContent = result;
-                resultHint.textContent  = `Résultat : ${result}  (sur ${nbFaces})`;
-            }, 260);
-
-            // Historique
-            history.unshift(result);
-            if (history.length > 20) history = history.slice(0, 20);
-            widget.dataset.deHistory = JSON.stringify(history);
-            renderHistory();
-            if (typeof saveBoard === 'function') saveBoard();
         }
 
         // ── Rendu de l'historique ─────────────────────────────────────────
