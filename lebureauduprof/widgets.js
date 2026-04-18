@@ -703,6 +703,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
 function makeDraggable(elmnt) {
     const handle = elmnt.querySelector('.drag-handle');
     if (handle) {
+        handle.style.cursor = 'move';
         handle.onmousedown = (e) => {
             e.stopPropagation();
             elmnt.focus();
@@ -816,6 +817,11 @@ function makeDraggable(elmnt) {
         elmnt.addEventListener('touchend', () => { elmnt._dragPending = null; });
 
     } else {
+        // Curseur move sur les widgets non-texte (sauf types avec leur propre poignée de déplacement)
+        const _NO_WIDGET_CURSOR = ['youtube', 'iframe', 'pdf', 'outilsprofs'];
+        if (!_NO_WIDGET_CURSOR.includes(elmnt.dataset.type)) {
+            elmnt.style.cursor = 'move';
+        }
         // Sélecteur d'exclusions commun (souris, tactile, stylet)
         const _DRAG_EXCLUDE = '.drag-handle,.widget-close-handle,.widget-pin-handle,.widget-back-handle,.widget-rotate-handle,.widget-menu-handle,.widget-ctx-menu,.widget-action-bar,.custom-resize-handle,.editor-toolbar,.tirage-header,.agenda-time,.agenda-text,.agenda-add-btn,.agenda-row-handle,.agenda-delete-row,.meteo-city,.s3d-canvas,.s3d-resize-handle,.s3d-zoom-slider,' +
             'button,input,select,textarea,label,.ng-params-btn,.ng-help-btn,.ng-nature-check,.ng-params-apply-btn,.ng-btn,.ng-word-token,.ng-placed-word,.ng-rm-btn,.ng-corr-token,.ng-resize-handle,.ng-nature-picker,.wf-btn,' +
@@ -877,6 +883,7 @@ function makeResizableByHandle(elmnt) {
     const handle = document.createElement('div');
     handle.className = 'custom-resize-handle';
     handle.title = 'Redimensionner';
+    handle.style.cursor = 'se-resize';
     // Pas de style inline : le CSS de index.html contrôle l'apparence et la visibilité au survol
 
     // Le widget doit être en position relative pour que absolute fonctionne
@@ -1033,6 +1040,8 @@ function makeDraggableRotate(elmnt) {
     const handle = elmnt.querySelector('.widget-rotate-handle');
     if (!handle) return;
 
+    handle.style.cursor = 'grab';
+
     handle.ondblclick = (e) => {
         e.preventDefault(); e.stopPropagation();
         snapshotNow();
@@ -1082,6 +1091,7 @@ function makeDraggableRotate(elmnt) {
             document.removeEventListener('pointercancel',onPointerEnd);
             document.removeEventListener('touchmove',    onMove);
             document.removeEventListener('touchend',     onEnd);
+            handle.style.cursor = 'grab';
             hideRotationIndicator();
             saveBoard();
         }
@@ -1097,6 +1107,7 @@ function makeDraggableRotate(elmnt) {
 
     handle.onmousedown = (e) => {
         e.preventDefault(); e.stopPropagation();
+        handle.style.cursor = 'grabbing';
         startRotate(e.clientX, e.clientY);
     };
 
