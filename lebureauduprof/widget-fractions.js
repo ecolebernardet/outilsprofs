@@ -951,6 +951,7 @@
                 updateColor();
                 if (typeof saveBoard === 'function') saveBoard();
             }
+            sw.addEventListener('mousedown',  (e) => e.stopPropagation());
             sw.addEventListener('click',     onSwatchActivate);
             sw.addEventListener('pointerup', onSwatchActivate);
         });
