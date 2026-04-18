@@ -3,6 +3,482 @@
 // =========================================================================
 
 // =========================================================================
+// STYLES — injectés dynamiquement (évite de polluer index.html)
+// =========================================================================
+(function _calInjectStyles() {
+    if (document.getElementById('cal-widget-styles')) return; // déjà injecté
+    const style = document.createElement('style');
+    style.id = 'cal-widget-styles';
+    style.textContent = `
+/* ══════════════════════════════════════════════════
+   WIDGET CALENDRIER
+   Toutes les tailles sont en em : un seul font-size
+   sur .cal-container (posé par JS via ResizeObserver)
+   suffit pour tout faire grossir/rétrécir.
+══════════════════════════════════════════════════ */
+
+/* ── Conteneur principal ─────────────────────────── */
+.cal-container {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    border-radius: 0.6em;
+    padding: 0.5em;
+    min-width: 260px;
+    min-height: 220px;
+    overflow: hidden;
+    box-sizing: border-box;
+    user-select: none;
+    background: #ffffff;
+}
+.cal-container.cal-light { background: #ffffff; }
+
+/* ── Header ─────────────────────────────────────── */
+.cal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-bottom: 0.4em;
+}
+.cal-title {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.05em;
+    color: #1a1a3a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cal-nav {
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    color: #444;
+    border-radius: 0.4em;
+    width: 1.9em; height: 1.9em;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: background .15s;
+    flex-shrink: 0;
+}
+.cal-nav:hover { background: #4a90e2; color: #fff; border-color: #4a90e2; }
+.cal-today-btn {
+    background: #eef5ff;
+    border: 1px solid #4a90e2;
+    color: #2a6abf;
+    border-radius: 0.4em;
+    padding: 0.15em 0.5em;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.cal-today-btn:hover { background: #4a90e2; color: #fff; }
+.cal-year-btn {
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    color: #555;
+    border-radius: 0.4em;
+    width: 1.9em; height: 1.9em;
+    font-size: 1em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: background .15s;
+    flex-shrink: 0;
+}
+.cal-year-btn:hover { background: #4a90e2; color: #fff; border-color: #4a90e2; }
+.cal-opts-btn {
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    color: #666;
+    border-radius: 0.4em;
+    width: 1.9em; height: 1.9em;
+    font-size: 1em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: background .15s;
+    flex-shrink: 0;
+}
+.cal-opts-btn:hover { background: #444; color: #fff; border-color: #444; }
+
+/* ── Panneau options ─────────────────────────────── */
+.cal-opts-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    border-radius: 0.5em;
+    padding: 0.4em 0.5em;
+    margin-bottom: 0.4em;
+    align-items: center;
+}
+.cal-opt-check {
+    display: flex; align-items: center; gap: 0.35em;
+    font-size: 0.82em; color: #444; cursor: pointer;
+}
+.cal-opt-check input { accent-color: #4a90e2; cursor: pointer; }
+.cal-opts-sep {
+    width: 1px;
+    background: #ccc;
+    align-self: stretch;
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+.cal-idb-status {
+    background: #f0fff0;
+    border: 1px solid #aaddaa;
+    border-radius: 0.4em;
+    color: #2a7a2a;
+    font-size: 0.72em;
+    padding: 0.12em 0.35em;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background .12s;
+    line-height: 1.4;
+}
+.cal-idb-status:hover { background: #d0f0d0; }
+.cal-export-btn, .cal-import-lbl {
+    background: #eef5ff;
+    border: 1px solid #4a90e2;
+    border-radius: 0.4em;
+    color: #2a6abf;
+    font-size: 0.72em;
+    padding: 0.12em 0.35em;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background .12s;
+    font-family: inherit;
+    display: flex; align-items: center;
+    line-height: 1.4;
+}
+.cal-export-btn:hover, .cal-import-lbl:hover { background: #4a90e2; color: #fff; }
+.cal-school-btn {
+    background: #fff0f2;
+    border: 1px solid #e0909a;
+    border-radius: 0.4em;
+    color: #a04050;
+    font-size: 0.72em;
+    padding: 0.12em 0.4em;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background .12s;
+    font-family: inherit;
+    line-height: 1.4;
+}
+.cal-school-btn:hover { background: #e0909a; color: #fff; }
+
+/* ── Vue annuelle (mini-calendriers) ────────────── */
+.cal-year-panel {
+    margin-bottom: 0.4em;
+    overflow: hidden;
+}
+.cal-year-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 0.35em;
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    border-radius: 0.5em;
+    padding: 0.4em;
+}
+.cal-ym-card {
+    background: #fff;
+    border: 1.5px solid #dde;
+    border-radius: 0.4em;
+    cursor: pointer;
+    padding: 0.25em 0.2em 0.2em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    transition: border-color .12s, box-shadow .12s;
+    overflow: hidden;
+}
+.cal-ym-card:hover { border-color: #4a90e2; box-shadow: 0 2px 6px rgba(74,144,226,0.18); }
+.cal-ym-card.cal-ym-active { border-color: #4a90e2; background: #eef5ff; }
+.cal-ym-card.cal-ym-today:not(.cal-ym-active) { border-color: #9ab8e0; }
+.cym-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.5em;
+    color: #3a3a6a;
+    line-height: 1.2;
+    padding-bottom: 0.15em;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+}
+.cal-ym-card.cal-ym-active .cym-title { color: #1a4a8a; }
+.cym-yr { font-weight: 400; opacity: 0.65; font-size: 0.9em; }
+.cym-grid { display: flex; flex-direction: column; gap: 0; }
+.cym-row { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cym-row span {
+    text-align: center;
+    font-size: 0.3em;
+    line-height: 1.7;
+    border-radius: 0;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+}
+.cym-row span:last-child { border-right: none; }
+.cym-row:last-child span { border-bottom: none; }
+.cym-head span {
+    font-weight: 700;
+    color: #8888bb;
+    font-size: 0.4em;
+    line-height: 1.8;
+    border-bottom: 1px solid #d0d0e8;
+    background: #f6f6fc;
+}
+.cym-empty { visibility: hidden; }
+.cym-row span.cym-school { background: #f5d5d8; color: #a04050; }
+.cym-row span.cym-curday { background: #4a90e2; color: #fff; font-weight: 700; border-radius: 50%; }
+.cym-row span.cym-curday.cym-school { background: #c0607a; color: #fff; }
+
+/* ── Grille principale ───────────────────────────── */
+.cal-grid {
+    display: grid;
+    gap: 0;
+    border: 1px solid #ddd;
+    border-radius: 0.4em;
+    overflow: hidden;
+}
+.cal-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.2em 0.1em;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+.cal-border-r { border-right:  1px solid #ddd; }
+.cal-border-b { border-bottom: 1px solid #ddd; }
+.cal-day-head {
+    font-weight: 700;
+    font-size: 0.82em;
+    color: #6666aa;
+    min-height: 1.4em;
+    justify-content: center;
+    padding: 0.2em 0;
+    border-bottom: 1px solid #c8c8e0;
+    width: 100%;
+    text-align: center;
+}
+.cal-we.cal-day-head { color: #8855bb; }
+.cal-wn-head { min-height: 1.4em; border-bottom: 1px solid #c8c8e0; }
+.cal-wn {
+    font-size: 0.7em;
+    color: #aaa;
+    justify-content: flex-start;
+    padding-top: 0.3em;
+    min-height: 2.2em;
+}
+.cal-day {
+    cursor: pointer;
+    transition: background .12s;
+    min-height: 2.2em;
+    width: 100%;
+}
+.cal-day:hover { background: #e8f0ff; }
+.cal-day-num {
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #222244;
+    line-height: 1.3;
+    padding-top: 0.1em;
+}
+.cal-other-month .cal-day-num { color: #bbb; opacity: 0.25;}
+.cal-today { background: #ddeeff !important; border: 0.1em solid #4a90e2 !important; }
+.cal-today .cal-day-num { color: #1a5abf; font-weight: 800; }
+.cal-we .cal-day-num { color: #8855bb; }
+.cal-selected { background: #cce0ff !important; outline: 1px solid #4a90e2; }
+.cal-event {
+    font-size: 0.4em;
+    border-radius: 0.25em;
+    padding: 0.1em 0.25em;
+    margin-top: 0.1em;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    box-sizing: border-box;
+}
+.cal-grey-col { background: rgba(0,0,0,0.045); }
+
+/* ── Jours vacances / fériés (vieux rose) ────────── */
+.cal-school-day { background: #f5d5d8 !important; }
+.cal-school-day:hover { background: #ebbfc4 !important; }
+.cal-school-day .cal-day-num { color: #a04050 !important; }
+.cal-school-day.cal-today { background: #e8aab2 !important; border-color: #c0607080 !important; }
+.cal-school-day.cal-today .cal-day-num { color: #7a2535 !important; }
+
+/* ── Barre d'événement ──────────────────────────── */
+.cal-event-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    background: #f0f0f8;
+    border: 1px solid #c8c8e0;
+    border-radius: 0.5em;
+    padding: 0.35em 0.55em;
+    margin-top: 0.4em;
+    flex-wrap: wrap;
+}
+.cal-ev-input {
+    flex: 1;
+    min-width: 4em;
+    background: #fff;
+    border: 1px solid #aab;
+    border-radius: 0.35em;
+    color: #222;
+    font-size: 0.85em;
+    padding: 0.2em 0.45em;
+    outline: none;
+    font-family: inherit;
+}
+.cal-ev-input:focus { border-color: #4a90e2; }
+.cal-ev-color {
+    background: #fff;
+    border: 1px solid #aab;
+    border-radius: 0.35em;
+    color: #444;
+    font-size: 0.82em;
+    padding: 0.2em 0.3em;
+    cursor: pointer;
+    font-family: inherit;
+}
+.cal-ev-save, .cal-ev-del, .cal-ev-cancel {
+    background: #e8e8f5;
+    border: 1px solid #c8c8e0;
+    border-radius: 0.35em;
+    color: #444;
+    font-size: 0.95em;
+    width: 1.8em; height: 1.8em;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background .12s;
+}
+.cal-ev-save:hover   { background: #27ae60; color: #fff; border-color: #27ae60; }
+.cal-ev-del:hover    { background: #c0392b; color: #fff; border-color: #c0392b; }
+.cal-ev-cancel:hover { background: #555; color: #fff; }
+
+/* ══════════════════════════════════════════════
+   MODAL DATES SCOLAIRES
+══════════════════════════════════════════════ */
+#cal-school-modal {
+    position: fixed; inset: 0; z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+}
+.csm-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.csm-box {
+    position: relative; z-index: 1;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.28);
+    width: min(640px, 96vw);
+    max-height: 85vh;
+    display: flex; flex-direction: column;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+}
+.csm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px 12px;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    border-bottom: 1px solid #f0c0cc;
+    flex-shrink: 0;
+}
+.csm-title { font-weight: 700; font-size: 1.1em; color: #8c2a3e; }
+.csm-close {
+    background: rgba(255,255,255,0.6); border: 1px solid #e0909a;
+    border-radius: 6px; color: #a04050; width: 28px; height: 28px;
+    cursor: pointer; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s;
+}
+.csm-close:hover { background: #e0909a; color: #fff; }
+.csm-body { overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 18px; }
+.csm-section { display: flex; flex-direction: column; gap: 8px; }
+.csm-section-title {
+    font-weight: 700; font-size: 0.92em; color: #7a3045;
+    padding-bottom: 4px; border-bottom: 1px solid #f0d0d8;
+}
+.csm-vacances-list, .csm-feries-list { display: flex; flex-direction: column; gap: 6px; }
+.csm-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.csm-inp {
+    border: 1px solid #ddd; border-radius: 6px;
+    padding: 5px 8px; font-size: 0.88em; font-family: inherit;
+    outline: none; transition: border-color .12s;
+    background: #fafafa; color: #333;
+}
+.csm-inp:focus { border-color: #e0909a; background: #fff; }
+.csm-inp-label { flex: 1; min-width: 130px; }
+.csm-inp-date  { width: 140px; }
+.csm-arrow { color: #aaa; font-size: 0.9em; flex-shrink: 0; }
+.csm-del {
+    background: none; border: 1px solid transparent;
+    border-radius: 6px; color: #ccc; cursor: pointer;
+    font-size: 1em; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color .12s, background .12s, border-color .12s;
+    flex-shrink: 0;
+}
+.csm-del:hover { color: #c0392b; background: #ffeaea; border-color: #e0a0a0; }
+.csm-add-vac, .csm-add-fer {
+    align-self: flex-start;
+    background: #fff0f2; border: 1px dashed #e0909a;
+    border-radius: 7px; color: #a04050;
+    font-size: 0.82em; font-family: inherit; font-weight: 600;
+    padding: 5px 12px; cursor: pointer;
+    transition: background .12s;
+}
+.csm-add-vac:hover, .csm-add-fer:hover { background: #ffe0e5; }
+.csm-footer {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid #f0d0d8;
+    background: #fdf7f8;
+    flex-shrink: 0;
+}
+.csm-cancel {
+    background: #f5f5f5; border: 1px solid #ddd;
+    border-radius: 7px; color: #666; font-family: inherit;
+    font-size: 0.9em; padding: 7px 18px; cursor: pointer;
+    transition: background .12s;
+}
+.csm-cancel:hover { background: #eee; }
+.csm-save {
+    background: linear-gradient(135deg, #e8909a, #d06070);
+    border: none; border-radius: 7px; color: #fff;
+    font-family: inherit; font-size: 0.9em; font-weight: 700;
+    padding: 7px 22px; cursor: pointer;
+    transition: opacity .12s;
+}
+.csm-save:hover { opacity: .88; }
+`;
+    document.head.appendChild(style);
+})();
+
+
+
+// =========================================================================
 // CAL EVENT STORAGE — IndexedDB (même pattern que pdfStorage dans board.js)
 // DB : 'BureauDuProf_CalEvents'  |  Store : 'events'
 // Clé : calId (string uuid par widget)
@@ -101,6 +577,178 @@ const CALENDRIER_THEMES = {
 const CAL_REF_WIDTH = 320;
 
 // =========================================================================
+// DATES SCOLAIRES PARTAGÉES (vacances + jours fériés)
+// Stockées dans IndexedDB sous la clé spéciale '__schoolDates__'
+// Format : { vacances: [ {label, start, end}, … ], feries: [ {label, date}, … ] }
+// =========================================================================
+const _calSchoolDates = (() => {
+    let _data = { vacances: [], feries: [] };
+    let _listeners = new Set();
+
+    // Calcule l'ensemble des dates YYYY-MM-DD couvertes
+    function _buildSet() {
+        const s = new Set();
+
+        // Construit une Date locale (sans décalage UTC) à partir de 'YYYY-MM-DD'
+        function localDate(str) {
+            const [y, mo, d] = str.split('-').map(Number);
+            return new Date(y, mo - 1, d);
+        }
+        // Formate une Date locale en 'YYYY-MM-DD'
+        function fmtDate(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        for (const v of _data.vacances) {
+            if (!v.start || !v.end) continue;
+            const d   = localDate(v.start);
+            const end = localDate(v.end);
+            while (d <= end) {
+                s.add(fmtDate(d));
+                d.setDate(d.getDate() + 1);
+            }
+        }
+        for (const f of _data.feries) {
+            if (f.date) s.add(f.date); // déjà YYYY-MM-DD, pas de conversion
+        }
+        return s;
+    }
+
+    return {
+        get data()    { return _data; },
+        get dateSet() { return _buildSet(); },
+
+        load() {
+            return calEventStorage.get('__schoolDates__').then(d => {
+                if (d && (Array.isArray(d.vacances) || Array.isArray(d.feries))) {
+                    _data = { vacances: d.vacances || [], feries: d.feries || [] };
+                }
+                return _data;
+            }).catch(() => _data);
+        },
+
+        save(newData) {
+            _data = newData;
+            calEventStorage.set('__schoolDates__', _data);
+            // Redessiner tous les calendriers ouverts
+            document.querySelectorAll('.widget[data-type="calendrier"]').forEach(w => {
+                if (w._calState) _calRender(w);
+            });
+        },
+
+        subscribe(fn)   { _listeners.add(fn); },
+        unsubscribe(fn) { _listeners.delete(fn); }
+    };
+})();
+
+// Charge les dates au démarrage (silencieux)
+_calSchoolDates.load();
+
+// ─── Modal vacances / jours fériés ───────────────────────────────────────
+function _calOpenSchoolDatesModal() {
+    if (document.getElementById('cal-school-modal')) return;
+
+    // Toujours recharger depuis IndexedDB avant d'ouvrir la modal
+    // pour être sûr d'avoir les données les plus récentes
+    _calSchoolDates.load().then(() => {
+        const data = JSON.parse(JSON.stringify(_calSchoolDates.data)); // deep copy fraîche
+
+        const modal = document.createElement('div');
+        modal.id = 'cal-school-modal';
+    modal.innerHTML = `
+      <div class="csm-overlay"></div>
+      <div class="csm-box">
+        <div class="csm-header">
+          <span class="csm-title">🌸 Vacances & Jours fériés</span>
+          <button class="csm-close" title="Fermer">✕</button>
+        </div>
+        <div class="csm-body">
+          <div class="csm-section">
+            <div class="csm-section-title">🏖️ Périodes de vacances</div>
+            <div class="csm-vacances-list"></div>
+            <button class="csm-add-vac">+ Ajouter une période</button>
+          </div>
+          <div class="csm-section">
+            <div class="csm-section-title">🎉 Jours fériés</div>
+            <div class="csm-feries-list"></div>
+            <button class="csm-add-fer">+ Ajouter un jour férié</button>
+          </div>
+        </div>
+        <div class="csm-footer">
+          <button class="csm-cancel">Annuler</button>
+          <button class="csm-save">✓ Enregistrer</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    function renderVac() {
+        const list = modal.querySelector('.csm-vacances-list');
+        list.innerHTML = '';
+        data.vacances.forEach((v, i) => {
+            const row = document.createElement('div');
+            row.className = 'csm-row';
+            row.innerHTML = `
+              <input class="csm-inp csm-inp-label" type="text" placeholder="Nom (ex: Toussaint)" value="${v.label||''}">
+              <input class="csm-inp csm-inp-date" type="date" value="${v.start||''}">
+              <span class="csm-arrow">→</span>
+              <input class="csm-inp csm-inp-date" type="date" value="${v.end||''}">
+              <button class="csm-del" data-i="${i}" title="Supprimer">🗑</button>`;
+            row.querySelector('.csm-inp-label').addEventListener('input', e => { data.vacances[i].label = e.target.value; });
+            row.querySelectorAll('.csm-inp-date')[0].addEventListener('change', e => { data.vacances[i].start = e.target.value; });
+            row.querySelectorAll('.csm-inp-date')[1].addEventListener('change', e => { data.vacances[i].end   = e.target.value; });
+            row.querySelector('.csm-del').addEventListener('click', () => { data.vacances.splice(i, 1); renderVac(); });
+            list.appendChild(row);
+        });
+    }
+
+    function renderFer() {
+        const list = modal.querySelector('.csm-feries-list');
+        list.innerHTML = '';
+        data.feries.forEach((f, i) => {
+            const row = document.createElement('div');
+            row.className = 'csm-row';
+            row.innerHTML = `
+              <input class="csm-inp csm-inp-label" type="text" placeholder="Nom (ex: 1er mai)" value="${f.label||''}">
+              <input class="csm-inp csm-inp-date" type="date" value="${f.date||''}">
+              <button class="csm-del" data-i="${i}" title="Supprimer">🗑</button>`;
+            row.querySelector('.csm-inp-label').addEventListener('input', e => { data.feries[i].label = e.target.value; });
+            row.querySelector('.csm-inp-date').addEventListener('change', e => { data.feries[i].date = e.target.value; });
+            row.querySelector('.csm-del').addEventListener('click', () => { data.feries.splice(i, 1); renderFer(); });
+            list.appendChild(row);
+        });
+    }
+
+    renderVac();
+    renderFer();
+
+    modal.querySelector('.csm-add-vac').addEventListener('click', () => {
+        data.vacances.push({ label: '', start: '', end: '' });
+        renderVac();
+    });
+    modal.querySelector('.csm-add-fer').addEventListener('click', () => {
+        data.feries.push({ label: '', date: '' });
+        renderFer();
+    });
+
+    const close = () => { modal.remove(); };
+    modal.querySelector('.csm-close').addEventListener('click', close);
+    modal.querySelector('.csm-cancel').addEventListener('click', close);
+    modal.querySelector('.csm-overlay').addEventListener('click', close);
+
+    modal.querySelector('.csm-save').addEventListener('click', () => {
+        // Nettoyer les entrées vides
+        data.vacances = data.vacances.filter(v => v.label || v.start || v.end);
+        data.feries   = data.feries.filter(f => f.label || f.date);
+        _calSchoolDates.save(data);
+        close();
+    });
+
+    // Bloquer le drag depuis la modal
+    modal.addEventListener('mousedown', e => e.stopPropagation());
+    }); // fin _calSchoolDates.load().then(...)
+}
+
+// =========================================================================
 // CRÉATION DU WIDGET
 // =========================================================================
 function createCalendrierWidget() {
@@ -112,9 +760,12 @@ function createCalendrierWidget() {
     widget.dataset.calId = _calGenId();   // identifiant unique pour IndexedDB
     widget.tabIndex = 0;
 
-    const p = findFreePosition(320, 400);
-    widget.style.left = p.x + 'px';
-    widget.style.top  = p.y + 'px';
+    const p = findFreePosition(720, 800);
+    widget.style.left   = p.x + 'px';
+    widget.style.top    = p.y + 'px';
+    widget.style.width  = '720px';
+    // Pas de height fixe : le système de resize pilote l'editor-container,
+    // et widget-content (flex-grow:1) s'adapte automatiquement.
 
     widget.innerHTML = `
         <div class="drag-handle" title="Déplacer">✥</div>
@@ -155,15 +806,20 @@ function createCalendrierWidget() {
 
     const now = new Date();
     widget._calState = {
-        year:         now.getFullYear(),
-        month:        now.getMonth(),
-        events:       {},
-        showWeekends: true,
-        showWeekNums: false,
-        darkMode:     false,
+        year:          now.getFullYear(),
+        month:         now.getMonth(),
+        events:        {},
+        showWeekends:  true,
+        showWeekNums:  false,
+        yearPanelOpen: true,
     };
 
     _calRender(widget);
+
+    // Hauteur initiale sur l'editor-container (c'est lui que makeResizableByHandle pilote,
+    // pas le widget lui-même en hauteur)
+    const conInit = widget.querySelector('.cal-container');
+    if (conInit) conInit.style.height = '780px';
 
     // ResizeObserver : font-size proportionnel + barre action compacte
     if (typeof ResizeObserver !== 'undefined') {
@@ -203,11 +859,12 @@ function _calRender(widget) {
     const con = widget.querySelector('.cal-container');
     if (!con) return;
 
-    const { year, month, events, showWeekends, showWeekNums, darkMode } = s;
+    const { year, month, events, showWeekends, showWeekNums } = s;
     const today = new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
-    con.classList.toggle('cal-light', !darkMode);
+    // Toujours en mode clair
+    con.classList.add('cal-light');
 
     const firstDay = new Date(year, month, 1);
     let startDow = firstDay.getDay();
@@ -222,8 +879,52 @@ function _calRender(widget) {
     // Colonnes grisées : Mer=2, Sam=5, Dim=6  (lundi=0)
     const GREY_COLS = new Set(showWeekends ? [2, 5, 6] : [2]);
 
-    const themeIcon  = darkMode ? '☀️' : '🌙';
-    const themeTitle = darkMode ? 'Passer en mode clair' : 'Passer en mode sombre';
+    // Vue annuelle : toujours l'année scolaire EN COURS (basée sur aujourd'hui)
+    // sept→déc : schoolYear = today.year ; jan→août : schoolYear = today.year - 1
+    const schoolYear = today.getMonth() >= 8 ? today.getFullYear() : today.getFullYear() - 1;
+    const yearViewMois   = [8,9,10,11,0,1,2,3,4,5,6,7]; // indices JS
+    const schoolSet      = _calSchoolDates.dateSet;
+
+    // Génère le HTML d'un mini-calendrier pour un mois donné
+    function _miniCal(m, yr) {
+        const isActive  = (m === month && yr === year);
+        const isToday   = (m === today.getMonth() && yr === today.getFullYear());
+        let wrapCls = 'cal-ym-card';
+        if (isActive) wrapCls += ' cal-ym-active';
+        if (isToday)  wrapCls += ' cal-ym-today';
+
+        const dim = new Date(yr, m + 1, 0).getDate();
+        let dow = new Date(yr, m, 1).getDay();
+        dow = dow === 0 ? 6 : dow - 1; // lundi=0
+
+        const JOURS_MINI = ['L','M','M','J','V','S','D'];
+        let grid = '<div class="cym-row cym-head">';
+        JOURS_MINI.forEach(j => { grid += `<span>${j}</span>`; });
+        grid += '</div><div class="cym-row">';
+
+        // cases vides avant le 1er
+        for (let b = 0; b < dow; b++) grid += '<span class="cym-empty"></span>';
+
+        let col = dow;
+        for (let d = 1; d <= dim; d++) {
+            const key = `${yr}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isSchool   = schoolSet.has(key);
+            const isTodayDay = (isToday && d === today.getDate());
+            let cls = '';
+            if (isSchool)   cls += ' cym-school';
+            if (isTodayDay) cls += ' cym-curday';
+            grid += `<span class="${cls.trim()}">${d}</span>`;
+            col++;
+            if (col % 7 === 0 && d < dim) grid += '</div><div class="cym-row">';
+        }
+        grid += '</div>';
+
+        const mLabel = CALENDRIER_MOIS[m].slice(0, 4);
+        return `<div class="${wrapCls}" data-ym-month="${m}" data-ym-year="${yr}">
+            <div class="cym-title">${mLabel} <span class="cym-yr">${yr}</span></div>
+            <div class="cym-grid">${grid}</div>
+        </div>`;
+    }
 
     let html = `
     <div class="cal-header">
@@ -231,12 +932,22 @@ function _calRender(widget) {
         <span class="cal-title">${CALENDRIER_MOIS[month]} ${year}</span>
         <button class="cal-nav cal-next" title="Mois suivant">›</button>
         <button class="cal-today-btn" title="Aujourd'hui">Auj.</button>
-        <button class="cal-theme-btn" title="${themeTitle}">${themeIcon}</button>
+        <button class="cal-year-btn" title="Vue annuelle (sept→août)">📅</button>
         <button class="cal-opts-btn" title="Options">⚙</button>
+    </div>
+    <div class="cal-year-panel" style="display:${s.yearPanelOpen ? 'block' : 'none'};">
+        <div class="cal-year-grid">
+            ${yearViewMois.map(m => {
+                const yr = (m >= 8) ? schoolYear : schoolYear + 1;
+                return _miniCal(m, yr);
+            }).join('')}
+        </div>
     </div>
     <div class="cal-opts-panel" style="display:none;">
         <label class="cal-opt-check"><input type="checkbox" class="cal-cb-we" ${showWeekends?'checked':''}> Week-ends</label>
         <label class="cal-opt-check"><input type="checkbox" class="cal-cb-wn" ${showWeekNums?'checked':''}> N° semaine</label>
+        <div class="cal-opts-sep"></div>
+        <button class="cal-school-btn" title="Gérer les vacances et jours fériés">🌸 Vacances</button>
         <div class="cal-opts-sep"></div>
         <button class="cal-idb-status" title="État de la sauvegarde IndexedDB">💾 …</button>
         <button class="cal-export-btn" title="Exporter les événements en JSON">⬇ JSON</button>
@@ -259,6 +970,7 @@ function _calRender(widget) {
     let cellDay = 1 - startDow;
     const totalCells = Math.ceil((startDow + daysInMonth) / cols) * cols;
     const totalRows  = totalCells / cols;
+    // schoolSet est déjà déclaré plus haut (utilisé aussi par _miniCal)
 
     for (let i = 0; i < totalCells; i++) {
         const row = Math.floor(i / cols);
@@ -296,6 +1008,7 @@ function _calRender(widget) {
             if (isCurrentMonth && cellDay === today.getDate()) cls += ' cal-today';
             if (isWE) cls += ' cal-we';
             const key = `${year}-${String(month+1).padStart(2,'0')}-${String(cellDay).padStart(2,'0')}`;
+            if (schoolSet.has(key)) cls += ' cal-school-day';
             if (events[key]) {
                 const ev = events[key];
                 const th = CALENDRIER_THEMES[ev.color] || CALENDRIER_THEMES.bleu;
@@ -362,27 +1075,30 @@ function _calUpdateIdbStatus(widget, error = false) {
 // =========================================================================
 
 function _calExportJSON(widget) {
-    const s      = widget._calState;
-    const calId  = widget.dataset.calId || 'calendrier';
-    const mois   = CALENDRIER_MOIS[s.month];
+    const s     = widget._calState;
+    const calId = widget.dataset.calId || 'calendrier';
     const events = s.events || {};
     const count  = Object.keys(events).length;
 
-    const payload = {
-        _source:    'Le Bureau du Prof — Widget Calendrier',
-        _calId:     calId,
-        _exportedAt: new Date().toISOString(),
-        _eventCount: count,
-        events
-    };
+    // Recharger depuis IndexedDB avant export pour garantir que les données sont fraîches
+    _calSchoolDates.load().then(schoolDates => {
+        const payload = {
+            _source:      'Le Bureau du Prof — Widget Calendrier',
+            _calId:       calId,
+            _exportedAt:  new Date().toISOString(),
+            _eventCount:  count,
+            events,
+            schoolDates   // vacances + fériés, fraîchement lus depuis IndexedDB
+        };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `calendrier-events-${calId.slice(-8)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `calendrier-events-${calId.slice(-8)}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
 }
 
 function _calImportJSON(widget, file) {
@@ -391,10 +1107,26 @@ function _calImportJSON(widget, file) {
     reader.onload = (e) => {
         try {
             const data = JSON.parse(e.target.result);
-            // Accepter soit { events: {...} } soit directement { "YYYY-MM-DD": {...} }
-            const events = data.events || data;
 
-            // Valider que c'est bien un objet de paires date → { label, color }
+            // Restaurer les dates scolaires si présentes dans le fichier
+            if (data.schoolDates && (Array.isArray(data.schoolDates.vacances) || Array.isArray(data.schoolDates.feries))) {
+                const sd = {
+                    vacances: data.schoolDates.vacances || [],
+                    feries:   data.schoolDates.feries   || []
+                };
+                _calSchoolDates.save(sd);
+            }
+
+            // Extraire les événements (ignorer les clés méta commençant par _)
+            const events = data.events || (() => {
+                const obj = {};
+                for (const [k, v] of Object.entries(data)) {
+                    if (!k.startsWith('_') && k !== 'schoolDates') obj[k] = v;
+                }
+                return obj;
+            })();
+
+            // Valider : toutes les clés doivent être YYYY-MM-DD → { label, color }
             let valid = typeof events === 'object' && events !== null;
             if (valid) {
                 for (const [k, v] of Object.entries(events)) {
@@ -440,10 +1172,25 @@ function _calBindEvents(widget) {
         const now = new Date(); s.year = now.getFullYear(); s.month = now.getMonth();
         _calRender(widget); saveBoard();
     });
-    con.querySelector('.cal-theme-btn').addEventListener('click', (e) => {
+
+    // ── Vue annuelle ──
+    const yearBtn   = con.querySelector('.cal-year-btn');
+    const yearPanel = con.querySelector('.cal-year-panel');
+    yearBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        s.darkMode = !s.darkMode;
-        _calRender(widget); saveBoard();
+        const open = yearPanel.style.display === 'none';
+        yearPanel.style.display = open ? 'block' : 'none';
+        s.yearPanelOpen = open;
+        saveBoard();
+    });
+    con.querySelectorAll('.cal-ym-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            s.month = parseInt(card.dataset.ymMonth);
+            s.year  = parseInt(card.dataset.ymYear);
+            s.yearPanelOpen = true;
+            _calRender(widget); saveBoard();
+        });
     });
 
     // ── Options ──
@@ -458,6 +1205,12 @@ function _calBindEvents(widget) {
     });
     con.querySelector('.cal-cb-wn').addEventListener('change', function(e) {
         e.stopPropagation(); s.showWeekNums = this.checked; _calRender(widget); saveBoard();
+    });
+
+    // ── Bouton vacances / fériés ──
+    con.querySelector('.cal-school-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        _calOpenSchoolDatesModal();
     });
 
     // ── Export JSON ──
@@ -552,28 +1305,30 @@ function _calGetSaveData(widget) {
 }
 
 // Restauration depuis le JSON du board — charge aussi les événements depuis IndexedDB
+// et les dates scolaires (vacances/fériés) depuis IndexedDB avant de rendre
 function _calRestoreData(widget, json) {
     try {
         widget._calState = JSON.parse(json);
-        if (widget._calState.darkMode === undefined) widget._calState.darkMode = false;
+        if (widget._calState.yearPanelOpen === undefined) widget._calState.yearPanelOpen = true;
     } catch(e) {
         const now = new Date();
-        widget._calState = { year: now.getFullYear(), month: now.getMonth(), events: {}, showWeekends: true, showWeekNums: false, darkMode: false };
+        widget._calState = { year: now.getFullYear(), month: now.getMonth(), events: {}, showWeekends: true, showWeekNums: false, yearPanelOpen: true };
     }
 
-    // Tenter de fusionner avec les données IndexedDB (source de vérité des événements)
     const calId = widget.dataset.calId;
-    if (calId) {
-        calEventStorage.get(calId).then(idbEvents => {
-            if (idbEvents && Object.keys(idbEvents).length > 0) {
-                // IndexedDB prime : plus fiable que le JSON du board pour les événements
-                widget._calState.events = idbEvents;
-            }
-            _calRender(widget);
-        }).catch(() => {
-            _calRender(widget);
-        });
-    } else {
+
+    // Charger en parallèle : events du widget + dates scolaires partagées
+    const pEvents      = calId
+        ? calEventStorage.get(calId).catch(() => null)
+        : Promise.resolve(null);
+    const pSchoolDates = _calSchoolDates.load().catch(() => null);
+
+    Promise.all([pEvents, pSchoolDates]).then(([idbEvents]) => {
+        if (idbEvents && Object.keys(idbEvents).length > 0) {
+            // IndexedDB prime pour les événements
+            widget._calState.events = idbEvents;
+        }
+        // _calSchoolDates._data est maintenant à jour (chargé par pSchoolDates)
         _calRender(widget);
-    }
+    });
 }
