@@ -317,7 +317,7 @@
     line-height: 1.3;
     box-sizing: border-box;
 }
-.cal-grey-col { background: rgba(0,0,0,0.045); }
+.cal-grey-col { background: rgba(0,0,0,0.075); }
 
 /* ── Jours vacances / fériés (vieux rose) ────────── */
 .cal-school-day { background: #f5d5d8 !important; }
