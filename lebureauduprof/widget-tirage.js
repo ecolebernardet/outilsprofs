@@ -518,29 +518,134 @@
         const wfClose = widget.querySelector('[data-role="wf-close"]');
         let _isMax = false;
 
+        function tirageCollapse() {
+            const savedW = outer.offsetWidth  || parseFloat(widget.dataset.tirageW) || 600;
+            const savedH = outer.offsetHeight || parseFloat(widget.dataset.tirageH) || 700;
+            widget.dataset.tirageW = savedW;
+            widget.dataset.tirageH = savedH;
+
+            // Sauvegarder la position ORIGINALE avant de déplacer le widget
+            const curW  = window.innerWidth;
+            const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+            widget.dataset.tirageSavedLeft = widget.offsetLeft;
+            widget.dataset.tirageSavedTop  = widget.offsetTop;
+            // Aussi sauvegarder les % pour que buildBoardState les retrouve
+            widget.dataset.leftPercent = (widget.offsetLeft / curW)  * 100;
+            widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+
+            // Cacher le contenu et les poignées
+            outer.style.display = 'none';
+            widget.querySelectorAll('.drag-handle,.widget-action-bar,.widget-rotate-handle,.custom-resize-handle')
+                  .forEach(el => el.style.display = 'none');
+
+            // Dimensionner le widget en mini-barre et le placer en haut à gauche
+            const COLLAPSED_W = 300, COLLAPSED_H = 50, GAP = 10, MARGIN_TOP = 8;
+            const others = Array.from(document.querySelectorAll('.widget')).filter(w =>
+                w !== widget && w.dataset.collapsed === '1'
+            );
+            const occupiedX = others.reduce((maxX, w) => Math.max(maxX, w.offsetLeft + COLLAPSED_W + GAP), MARGIN_TOP);
+            widget.style.top  = MARGIN_TOP + 'px';
+            widget.style.left = occupiedX  + 'px';
+            widget.style.width        = COLLAPSED_W + 'px';
+            widget.style.height       = COLLAPSED_H + 'px';
+            widget.style.overflow     = 'hidden';
+            widget.style.background   = '#2a2a3e';
+            widget.style.borderRadius = '8px';
+            widget.style.border       = 'none';
+            widget.style.padding      = '0';
+            const wc = widget.querySelector('.widget-content');
+            if (wc) { wc.style.padding = '0'; wc.style.background = 'transparent'; wc.style.borderRadius = '0'; }
+            widget.dataset.collapsed = '1';
+
+            // Créer la mini-barre
+            const miniBar = document.createElement('div');
+            miniBar.className = 'tirage-mini-bar';
+            miniBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:' + COLLAPSED_H + 'px;display:flex;align-items:center;padding:0 8px;box-sizing:border-box;background:#2a2a3e;border-radius:8px;cursor:move;user-select:none;gap:6px;z-index:1;';
+
+            const labelEl = document.createElement('span');
+            labelEl.textContent = '🎲 Tirage au Sort';
+            labelEl.style.cssText = 'font-size:11px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;';
+
+            const expandBtn = document.createElement('button');
+            expandBtn.title = 'Déplier';
+            expandBtn.textContent = '▲';
+            expandBtn.style.cssText = 'flex-shrink:0;background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;position:relative;';
+            expandBtn.addEventListener('pointerdown', e => e.stopPropagation());
+            expandBtn.addEventListener('mousedown',   e => e.stopPropagation());
+            expandBtn.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); tirageExpand(); });
+
+            miniBar.appendChild(labelEl);
+            miniBar.appendChild(expandBtn);
+            widget.appendChild(miniBar);
+
+            // Mini-barre draggable
+            miniBar.addEventListener('pointerdown', (e) => {
+                if (e.target === expandBtn || expandBtn.contains(e.target)) return;
+                e.stopPropagation(); e.preventDefault();
+                miniBar.setPointerCapture(e.pointerId);
+                const startX = e.clientX - widget.offsetLeft;
+                const startY = e.clientY - widget.offsetTop;
+                const onMove = ev => { widget.style.left = Math.max(0, ev.clientX - startX) + 'px'; widget.style.top = Math.max(0, ev.clientY - startY) + 'px'; };
+                const onUp   = () => {
+                    miniBar.removeEventListener('pointermove', onMove);
+                    miniBar.removeEventListener('pointerup',   onUp);
+                    const curW = window.innerWidth;
+                    const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+                    widget.dataset.leftPercent = (widget.offsetLeft / curW)  * 100;
+                    widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+                    if (typeof saveBoard === 'function') saveBoard();
+                };
+                miniBar.addEventListener('pointermove', onMove);
+                miniBar.addEventListener('pointerup',   onUp);
+            });
+
+            if (typeof saveBoard === 'function') saveBoard();
+        }
+
+        function tirageExpand() {
+            const savedW    = parseFloat(widget.dataset.tirageW)    || 600;
+            const savedH    = parseFloat(widget.dataset.tirageH)    || 700;
+            const savedLeft = parseFloat(widget.dataset.tirageSavedLeft);
+            const savedTop  = parseFloat(widget.dataset.tirageSavedTop);
+
+            // Supprimer la mini-barre
+            widget.querySelectorAll('.tirage-mini-bar').forEach(el => el.remove());
+
+            // Réinitialiser tous les styles inline du widget (comme une actualisation)
+            widget.removeAttribute('style');
+            widget.style.left = (!isNaN(savedLeft) ? savedLeft : widget.offsetLeft) + 'px';
+            widget.style.top  = (!isNaN(savedTop)  ? savedTop  : widget.offsetTop)  + 'px';
+
+            const wc = widget.querySelector('.widget-content');
+            if (wc) wc.removeAttribute('style');
+
+            widget.dataset.collapsed = '0';
+
+            // Réafficher et redimensionner outer
+            outer.style.display = '';
+            outer.style.width   = savedW + 'px';
+            outer.style.height  = savedH + 'px';
+
+            // Réinjecter le HTML interne et réinitialiser (comme l'actualisation)
+            outer.innerHTML = tirageInnerHTML();
+            initTirageWidget(widget);
+
+            // Mettre à jour les % de position
+            const curW  = window.innerWidth;
+            const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+            widget.dataset.leftPercent = (widget.offsetLeft / curW)  * 100;
+            widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+
+            if (typeof saveBoard === 'function') saveBoard();
+        }
+
+        // Exposer expand sur le widget pour que la mini-barre de restauration puisse l'appeler
+        widget._tirageExpand = tirageExpand;
+
         if (wfMin) {
             wfMin.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
             wfMin.addEventListener('mousedown',   (e) => { e.stopPropagation(); });
-            wfMin.addEventListener('click', (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                // Lire et persister les dimensions dans le dataset AVANT de cacher outer
-                // (buildBoardState utilisera ce dataset même quand outer est display:none)
-                const savedW = outer.offsetWidth  || parseFloat(widget.dataset.tirageW) || 600;
-                const savedH = outer.offsetHeight || parseFloat(widget.dataset.tirageH) || 700;
-                widget.dataset.tirageW = savedW;
-                widget.dataset.tirageH = savedH;
-                outer.style.display = 'none';
-                if (typeof window._wfMiniBarCollapse === 'function') {
-                    window._wfMiniBarCollapse(widget, '🎲 Tirage au Sort', {
-                        onExpand: () => {
-                            outer.style.display = '';
-                            outer.style.width   = savedW + 'px';
-                            outer.style.height  = savedH + 'px';
-                        }
-                    });
-                }
-            });
+            wfMin.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); tirageCollapse(); });
         }
         if (wfMax) {
             wfMax.addEventListener('click', (e) => {
@@ -881,6 +986,39 @@
             body.style.setProperty('--pill-gap', gap);
         }
 
+        // ── Poignée de redimensionnement custom ───────────────────────────
+        if (!widget.querySelector('.custom-resize-handle')) {
+            const handle = document.createElement('div');
+            handle.className = 'custom-resize-handle';
+            handle.title = 'Redimensionner';
+            widget.appendChild(handle);
+
+            handle.addEventListener('pointerdown', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                e.stopPropagation();
+                e.preventDefault();
+                handle.setPointerCapture(e.pointerId);
+                const startX = e.clientX, startY = e.clientY;
+                const startW = outer.offsetWidth,  startH = outer.offsetHeight;
+                const minW = 280, minH = 200;
+
+                function onMove(ev) {
+                    ev.preventDefault();
+                    outer.style.width  = Math.max(minW, startW + ev.clientX - startX) + 'px';
+                    outer.style.height = Math.max(minH, startH + ev.clientY - startY) + 'px';
+                }
+                function onUp() {
+                    handle.removeEventListener('pointermove',   onMove);
+                    handle.removeEventListener('pointerup',     onUp);
+                    handle.removeEventListener('pointercancel', onUp);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
+                handle.addEventListener('pointermove',   onMove);
+                handle.addEventListener('pointerup',     onUp);
+                handle.addEventListener('pointercancel', onUp);
+            });
+        }
+
         // ── Sauvegarder la taille via ResizeObserver ──────────────────────
         if (window.ResizeObserver) {
             const ro = new ResizeObserver(() => {
@@ -946,23 +1084,40 @@
         if (typeof _orig !== 'function') return;
         window.buildBoardState = function () {
             const state = _orig.apply(this, arguments);
+            const curW  = window.innerWidth;
+            const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
             document.querySelectorAll('.widget[data-type="tirage"]').forEach(widget => {
-                const outer = widget.querySelector('.tirage-outer');
+                const outer     = widget.querySelector('.tirage-outer');
+                const collapsed = widget.dataset.collapsed === '1';
                 if (!outer) return;
-                const match = (state.widgets || []).find(w =>
-                    w.type === 'tirage' &&
-                    Math.abs(parseFloat(w.leftPercent) - parseFloat(widget.dataset.leftPercent)) < 0.5
+
+                // Quand réduit, leftPercent/topPercent dans le dataset = position d'ORIGINE (sauvée avant collapse)
+                // save-load.js les a recalculés sur la mini-barre → on les corrige ici
+                if (collapsed) {
+                    const origLeft = parseFloat(widget.dataset.tirageSavedLeft);
+                    const origTop  = parseFloat(widget.dataset.tirageSavedTop);
+                    if (!isNaN(origLeft)) widget.dataset.leftPercent = (origLeft / curW)  * 100;
+                    if (!isNaN(origTop))  widget.dataset.topPercent  = (origTop  / curVH) * 100;
+                }
+
+                const match = (state.widgets || []).find(w => w.type === 'tirage' &&
+                    Math.abs(parseFloat(w.leftPercent) - parseFloat(widget.dataset.leftPercent)) < 1
                 );
                 if (match) {
-                    // Toujours utiliser le dataset (mis à jour avant le collapse)
                     const w = parseFloat(widget.dataset.tirageW) || outer.offsetWidth;
                     const h = parseFloat(widget.dataset.tirageH) || outer.offsetHeight;
                     if (w > 0) match.tirageW = w;
                     if (h > 0) match.tirageH = h;
-                    // Mettre widthPercent/contentHPercent à 0 : save-load.js ne touche pas outer
-                    // (outer n'a plus la classe editor-container, donc ce n'est qu'une sécurité)
                     match.widthPercent    = 0;
                     match.contentHPercent = 0;
+                    // Corriger la position dans le JSON si réduit
+                    if (collapsed) {
+                        match.leftPercent = parseFloat(widget.dataset.leftPercent);
+                        match.topPercent  = parseFloat(widget.dataset.topPercent);
+                    }
+                    match.tirageCollapsed = collapsed;
+                    if (widget.dataset.tirageSavedLeft) match.tirageSavedLeft = widget.dataset.tirageSavedLeft;
+                    if (widget.dataset.tirageSavedTop)  match.tirageSavedTop  = widget.dataset.tirageSavedTop;
                     if (widget.dataset.tirageStudents)  match.tirageStudents  = widget.dataset.tirageStudents;
                     if (widget.dataset.tirageRemaining) match.tirageRemaining = widget.dataset.tirageRemaining;
                 }
@@ -979,53 +1134,114 @@
             const _orig = window.restoreBoardFromJSON;
             if (typeof _orig !== 'function') return;
             window.restoreBoardFromJSON = function (json) {
-                // Pré-parser pour stocker les données tirage par position
-                let tirageData = {};
+                // Pré-parser : stocker les données tirage dans un tableau ordonné
+                let tirageList = [];
                 try {
                     const parsed  = JSON.parse(json);
                     const widgets = Array.isArray(parsed) ? parsed : (parsed.widgets || []);
-                    widgets.forEach(w => {
-                        if (w.type === 'tirage') {
-                            const key = (w.leftPercent || 0).toFixed(1) + '_' + (w.topPercent || 0).toFixed(1);
-                            tirageData[key] = w;
-                        }
-                    });
+                    widgets.forEach(w => { if (w.type === 'tirage') tirageList.push(w); });
                 } catch(e) {}
 
                 _orig.apply(this, arguments);
 
-                // Après restauration, injecter le HTML et initialiser chaque widget tirage
                 setTimeout(() => {
-                    document.querySelectorAll('.widget[data-type="tirage"]').forEach(widget => {
+                    const domWidgets = document.querySelectorAll('.widget[data-type="tirage"]');
+                    domWidgets.forEach((widget, idx) => {
                         let outer = widget.querySelector('.tirage-outer');
-
-                        // Si le moteur de restauration a créé un placeholder vide, le remplacer
                         if (!outer) {
                             outer = document.createElement('div');
                             outer.className = 'tirage-outer';
                             widget.appendChild(outer);
                         }
-
-                        // Injecter le HTML interne si absent
                         if (!outer.querySelector('.tirage-inner')) {
                             outer.innerHTML = tirageInnerHTML();
                         }
 
-                        // Récupérer les données sauvegardées
-                        const key   = (parseFloat(widget.dataset.leftPercent) || 0).toFixed(1) + '_' +
-                                      (parseFloat(widget.dataset.topPercent)  || 0).toFixed(1);
-                        const saved = tirageData[key];
+                        // Correspondance par index d'ordre
+                        const saved = tirageList[idx];
 
                         if (saved) {
                             if (saved.tirageStudents)  widget.dataset.tirageStudents  = saved.tirageStudents;
                             if (saved.tirageRemaining) widget.dataset.tirageRemaining = saved.tirageRemaining;
+                            if (saved.tirageSavedLeft) widget.dataset.tirageSavedLeft = saved.tirageSavedLeft;
+                            if (saved.tirageSavedTop)  widget.dataset.tirageSavedTop  = saved.tirageSavedTop;
                             const w = saved.tirageW || parseFloat(widget.dataset.tirageW);
                             const h = saved.tirageH || parseFloat(widget.dataset.tirageH);
-                            if (w > 0) outer.style.width  = w + 'px';
-                            if (h > 0) outer.style.height = h + 'px';
+                            if (w > 0) { outer.style.width  = w + 'px'; widget.dataset.tirageW = w; }
+                            if (h > 0) { outer.style.height = h + 'px'; widget.dataset.tirageH = h; }
+
+                            // Restaurer position d'origine si le widget était réduit
+                            if (saved.tirageCollapsed) {
+                                const origLeft = parseFloat(saved.tirageSavedLeft);
+                                const origTop  = parseFloat(saved.tirageSavedTop);
+                                if (!isNaN(origLeft)) widget.style.left = origLeft + 'px';
+                                if (!isNaN(origTop))  widget.style.top  = origTop  + 'px';
+                            }
                         }
 
                         initTirageWidget(widget);
+
+                        // Appliquer l'état réduit APRÈS init (qui remet outer visible)
+                        if (saved && saved.tirageCollapsed) {
+                            outer.style.display = 'none';
+                            widget.querySelectorAll('.drag-handle,.widget-action-bar,.widget-rotate-handle,.custom-resize-handle')
+                                  .forEach(el => el.style.display = 'none');
+                            const COLLAPSED_W = 300, COLLAPSED_H = 50, GAP = 10, MARGIN_TOP = 8;
+                            const others = Array.from(document.querySelectorAll('.widget')).filter(w =>
+                                w !== widget && w.dataset.collapsed === '1'
+                            );
+                            const occupiedX = others.reduce((maxX, w) => Math.max(maxX, w.offsetLeft + COLLAPSED_W + GAP), MARGIN_TOP);
+                            widget.style.top  = MARGIN_TOP + 'px';
+                            widget.style.left = occupiedX  + 'px';
+                            widget.style.width = COLLAPSED_W + 'px'; widget.style.height = COLLAPSED_H + 'px';
+                            widget.style.overflow = 'hidden'; widget.style.background = '#2a2a3e';
+                            widget.style.borderRadius = '8px'; widget.style.border = 'none'; widget.style.padding = '0';
+                            const wc = widget.querySelector('.widget-content');
+                            if (wc) { wc.style.padding = '0'; wc.style.background = 'transparent'; wc.style.borderRadius = '0'; }
+                            widget.dataset.collapsed = '1';
+
+                            // Créer la mini-barre
+                            if (!widget.querySelector('.tirage-mini-bar')) {
+                                const miniBar = document.createElement('div');
+                                miniBar.className = 'tirage-mini-bar';
+                                miniBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:' + COLLAPSED_H + 'px;display:flex;align-items:center;padding:0 8px;box-sizing:border-box;background:#2a2a3e;border-radius:8px;cursor:move;user-select:none;gap:6px;z-index:1;';
+                                const labelEl = document.createElement('span');
+                                labelEl.textContent = '🎲 Tirage au Sort';
+                                labelEl.style.cssText = 'font-size:11px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;';
+                                const expandBtn = document.createElement('button');
+                                expandBtn.title = 'Déplier'; expandBtn.textContent = '▲';
+                                expandBtn.style.cssText = 'flex-shrink:0;background:transparent;border:1px solid #555;color:#aaa;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;position:relative;';
+                                expandBtn.addEventListener('pointerdown', e => e.stopPropagation());
+                                expandBtn.addEventListener('mousedown',   e => e.stopPropagation());
+                                expandBtn.addEventListener('click', e => {
+                                    e.stopPropagation(); e.preventDefault();
+                                    if (typeof widget._tirageExpand === 'function') widget._tirageExpand();
+                                });
+                                miniBar.appendChild(labelEl);
+                                miniBar.appendChild(expandBtn);
+                                // Mini-barre draggable
+                                miniBar.addEventListener('pointerdown', (e) => {
+                                    if (e.target === expandBtn || expandBtn.contains(e.target)) return;
+                                    e.stopPropagation(); e.preventDefault();
+                                    miniBar.setPointerCapture(e.pointerId);
+                                    const startX = e.clientX - widget.offsetLeft;
+                                    const startY = e.clientY - widget.offsetTop;
+                                    const onMove = ev => { widget.style.left = Math.max(0, ev.clientX - startX) + 'px'; widget.style.top = Math.max(0, ev.clientY - startY) + 'px'; };
+                                    const onUp   = () => {
+                                        miniBar.removeEventListener('pointermove', onMove);
+                                        miniBar.removeEventListener('pointerup', onUp);
+                                        const curW = window.innerWidth;
+                                        const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
+                                        widget.dataset.leftPercent = (widget.offsetLeft / curW)  * 100;
+                                        widget.dataset.topPercent  = (widget.offsetTop  / curVH) * 100;
+                                        if (typeof saveBoard === 'function') saveBoard();
+                                    };
+                                    miniBar.addEventListener('pointermove', onMove);
+                                    miniBar.addEventListener('pointerup', onUp);
+                                });
+                                widget.appendChild(miniBar);
+                            }
+                        }
                     });
                 }, 150);
             };
