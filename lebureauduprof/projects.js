@@ -204,6 +204,68 @@ async function initCurrentProjectName() {
 
 // =========================================================================
 // MODALE BIBLIOTHÈQUE DE PROJETS
+
+// ── Palette thème (suit body.menu-light comme le menu principal) ──────────
+function _projTheme() {
+    const light = document.body.classList.contains('menu-light');
+    return {
+        light,
+        overlayBg:        light ? 'rgba(0,0,0,0.35)'    : 'rgba(0,0,0,0.7)',
+        modalBg:          light ? '#f0f2f5'              : '#111',
+        modalBorder:      light ? '#ccc'                 : '#2e2e3a',
+        titleColor:       light ? '#1a1a2e'              : '#fff',
+        closeColor:       light ? '#666'                 : '#888',
+        sectionLabel:     light ? '#555'                 : '#888',
+        emptyColor:       light ? '#aaa'                 : '#555',
+        sepColor:         light ? '#ccc'                 : '#2e2e38',
+        exportBtnBg:      light ? '#e8f5ed'              : '#1a3520',
+        exportBtnColor:   light ? '#2a7a42'              : '#6dbf7e',
+        exportBtnBorder:  light ? '#b0d8bc'              : '#2a4a30',
+        draftBg:          light ? '#fffbea'              : '#2a2a1a',
+        draftBorder:      light ? '#e8d87a'              : '#5a5020',
+        draftTitle:       light ? '#7a6000'              : '#f0c040',
+        draftSub:         light ? '#888'                 : '#888',
+        draftBtnBg:       light ? '#fff3c0'              : '#4a3a00',
+        draftBtnColor:    light ? '#7a6000'              : '#f0c040',
+        draftBtnBorder:   light ? '#c8a800'              : '#6a5a10',
+        cardBgNormal:     light ? '#ffffff'              : '#1a1a1a',
+        cardBgActive:     light ? '#ddeeff'              : '#1a3550',
+        cardBorderNorm:   light ? '#d0d4da'              : '#2e2e38',
+        cardBorderAct:    light ? '#4a90e2'              : '#4a90e2',
+        cardNameNorm:     light ? '#1a1a2e'              : '#ddd',
+        cardNameAct:      light ? '#1a5a9a'              : '#7ab8f5',
+        cardMeta:         light ? '#777'                 : '#666',
+        accordionBgNorm:  light ? '#f5f5f5'              : '#222229',
+        accordionBgAct:   light ? '#e8f0fb'              : '#122538',
+        accordionBorderN: light ? '#ddd'                 : '#2e2e38',
+        accordionBorderA: light ? '#b8d0ea'              : '#2a4a6a',
+        btnRenameBg:      light ? '#e4e6ea'              : '#2a2a36',
+        btnRenameColor:   light ? '#555'                 : '#aaa',
+        btnRenameBorder:  light ? '#bbb'                 : '#444',
+        btnDeleteBg:      light ? '#fde8e8'              : '#2a1a1a',
+        btnDeleteBorder:  light ? '#e8a0a0'              : '#3d2020',
+        btnOpenBg:        light ? '#ddeeff'              : '#1a3550',
+        btnOpenColor:     light ? '#1a5a9a'              : '#7ab8f5',
+        btnOpenBorder:    light ? '#a0c8e8'              : '#2a4a6a',
+        btnOpenHoverBg:   light ? '#c8e0f8'              : '#1e3d5e',
+        favBtnBgOn:       light ? '#fffacc'              : '#2a2a10',
+        favBtnColorOn:    light ? '#b08000'              : '#f0c040',
+        favBtnBorderOn:   light ? '#d4a800'              : '#5a5020',
+        favBtnBgOff:      light ? '#f0f2f5'              : '#1a1a1a',
+        favBtnColorOff:   light ? '#aaa'                 : '#555',
+        favBtnBorderOff:  light ? '#ccc'                 : '#3a3a4a',
+        sceneColorAct:    light ? '#1a5a9a'              : '#7ab8f5',
+        sceneColorNorm:   light ? '#777'                 : '#aaa',
+        sceneBgAct:       light ? 'rgba(74,144,226,0.1)' : '#1a3550',
+        sceneHoverBg:     light ? 'rgba(74,144,226,0.08)': '#2e2e3e',
+        sceneIconAct:     '#4a90e2',
+        sceneIconNorm:    light ? '#bbb'                 : '#444',
+        arrowColor:       light ? '#bbb'                 : '#555',
+        favLabelColor:    light ? '#b08000'              : '#f0c040',
+        allLabelColor:    light ? '#555'                 : '#888',
+        scrollbarThumb:   light ? '#ccc'                 : '#444',
+    };
+}
 // =========================================================================
 async function openProjectsLibrary() {
     // Sauvegarder silencieusement pour que currentScene soit à jour dans la liste (sauf brouillon)
@@ -222,10 +284,12 @@ async function openProjectsLibrary() {
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'projects-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:flex;align-items:center;justify-content:center;';
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeProjectsLibrary(); });
         document.body.appendChild(overlay);
     }
+    const t = _projTheme();
+    overlay.style.background = t.overlayBg;
     overlay.innerHTML = _buildLibraryHTML();
     overlay.style.display = 'flex';
     _renderProjectsList();
@@ -244,37 +308,39 @@ function closeProjectsLibrary() {
 }
 
 function _buildLibraryHTML() {
+    const t = _projTheme();
+
     const draftBanner = _isDraft ? `
-        <div style="background:#2a2a1a;border:1px solid #5a5020;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="background:${t.draftBg};border:1px solid ${t.draftBorder};border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
             <span style="font-size:20px;">📝</span>
             <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:700;color:#f0c040;">Brouillon en cours</div>
-                <div style="font-size:11px;color:#888;margin-top:2px;">Non sauvegardé · Sera perdu si vous ouvrez un autre projet</div>
+                <div style="font-size:13px;font-weight:700;color:${t.draftTitle};">Brouillon en cours</div>
+                <div style="font-size:11px;color:${t.draftSub};margin-top:2px;">Non sauvegardé · Sera perdu si vous ouvrez un autre projet</div>
             </div>
-            <button onclick="_projSaveDraft()" style="background:#4a3a00;color:#f0c040;border:1px solid #6a5a10;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
+            <button onclick="_projSaveDraft()" style="background:${t.draftBtnBg};color:${t.draftBtnColor};border:1px solid ${t.draftBtnBorder};border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💾 Enregistrer</button>
         </div>` : '';
 
     return `
-    <div style="background:#1e1e26;border-radius:18px;padding:28px 32px;width:580px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #2e2e3e;">
+    <div style="background:${t.modalBg};border-radius:18px;padding:28px 32px;width:580px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid ${t.modalBorder};">
 
         <!-- En-tête -->
         <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:18px;font-weight:800;color:#fff;">📁 Mes projets</div>
-            <button onclick="closeProjectsLibrary()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" title="Fermer">×</button>
+            <div style="font-size:18px;font-weight:800;color:${t.titleColor};">📁 Mes projets</div>
+            <button onclick="closeProjectsLibrary()" style="background:none;border:none;color:${t.closeColor};font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" title="Fermer">×</button>
         </div>
 
         ${draftBanner}
 
         <!-- Boutons sauvegarde globale -->
         <div style="display:flex;gap:8px;">
-            <button id="proj-export-all-btn" onclick="exportAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Exporter tous les projets en un seul fichier de sauvegarde"><span style=font-size:18px;>📤</span>Tout exporter<br><span style=font-size:9px;>Exporter tous les projets en un seul fichier de sauvegarde</span></button>
-            <button onclick="importAllProjects()" style="flex:1;background:#1a3520;color:#6dbf7e;border:1px solid #2a4a30;border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Restaurer tous les projets depuis une sauvegarde complète"><span style=font-size:18px;>📥</span>Tout importer<br><span style=font-size:9px;>Restaurer tous les projets depuis une sauvegarde complète</span></button>
+            <button id="proj-export-all-btn" onclick="exportAllProjects()" style="flex:1;background:${t.exportBtnBg};color:${t.exportBtnColor};border:1px solid ${t.exportBtnBorder};border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Exporter tous les projets en un seul fichier de sauvegarde"><span style=font-size:18px;>📤</span>Tout exporter<br><span style=font-size:9px;>Exporter tous les projets en un seul fichier de sauvegarde</span></button>
+            <button onclick="importAllProjects()" style="flex:1;background:${t.exportBtnBg};color:${t.exportBtnColor};border:1px solid ${t.exportBtnBorder};border-radius:10px;padding:5px;font-size:12px;font-weight:600;cursor:pointer;" title="Restaurer tous les projets depuis une sauvegarde complète"><span style=font-size:18px;>📥</span>Tout importer<br><span style=font-size:9px;>Restaurer tous les projets depuis une sauvegarde complète</span></button>
         </div>
 
         <!-- Liste des projets -->
-        <div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;">Projets sauvegardés</div>
+        <div style="font-size:11px;color:${t.sectionLabel};font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;">Projets sauvegardés</div>
         <div id="projects-list" style="flex:1;overflow-y:scroll;display:flex;flex-direction:column;gap:6px;min-height:80px;max-height:45vh;padding-right:4px;">
-            <div style="color:#555;font-size:13px;text-align:center;padding:20px;">Chargement...</div>
+            <div style="color:${t.emptyColor};font-size:13px;text-align:center;padding:20px;">Chargement...</div>
         </div>
     </div>`;
 }
@@ -282,13 +348,14 @@ function _buildLibraryHTML() {
 async function _renderProjectsList() {
     const list = document.getElementById('projects-list');
     if (!list) return;
+    const t = _projTheme();
 
     let projects;
     try { projects = await dbGetAll(); }
-    catch(e) { list.innerHTML = '<div style="color:#f66;text-align:center;padding:20px;">Erreur de chargement</div>'; return; }
+    catch(e) { list.innerHTML = `<div style="color:#f66;text-align:center;padding:20px;">Erreur de chargement</div>`; return; }
 
     if (!projects.length) {
-        list.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:20px;">Aucun projet sauvegardé</div>';
+        list.innerHTML = `<div style="color:${t.emptyColor};font-size:13px;text-align:center;padding:20px;">Aucun projet sauvegardé</div>`;
         return;
     }
 
@@ -299,15 +366,15 @@ async function _renderProjectsList() {
     const favProjects = favIds.map(id => projects.find(p => p.id === id)).filter(Boolean);
     if (favProjects.length) {
         const favLabel = document.createElement('div');
-        favLabel.style.cssText = 'font-size:11px;color:#f0c040;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;';
+        favLabel.style.cssText = `font-size:11px;color:${t.favLabelColor};font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;`;
         favLabel.textContent = '⭐ Favoris';
         list.appendChild(favLabel);
         favProjects.forEach(p => _buildProjectRow(p, list, projects));
         const sep = document.createElement('div');
-        sep.style.cssText = 'height:1px;background:#2e2e38;margin:6px 0;';
+        sep.style.cssText = `height:1px;background:${t.sepColor};margin:6px 0;`;
         list.appendChild(sep);
         const allLabel = document.createElement('div');
-        allLabel.style.cssText = 'font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;';
+        allLabel.style.cssText = `font-size:11px;color:${t.allLabelColor};font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 2px 4px;`;
         allLabel.textContent = '📁 Tous les projets';
         list.appendChild(allLabel);
     }
@@ -316,6 +383,7 @@ async function _renderProjectsList() {
 }
 
 function _buildProjectRow(p, list, allProjects) {
+        const t = _projTheme();
         const isCurrent = p.id === getCurrentProjectId();
         const date = new Date(p.updatedAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
         const sceneList = p.scenes || [];
@@ -323,7 +391,7 @@ function _buildProjectRow(p, list, allProjects) {
 
         // Conteneur global du projet (header + accordion)
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = `border-radius:10px;border:1px solid ${isCurrent ? '#4a90e2' : '#2e2e38'};background:${isCurrent ? '#1a3550' : '#28282f'};transition:border-color .15s;`;
+        wrapper.style.cssText = `border-radius:10px;border:1px solid ${isCurrent ? t.cardBorderAct : t.cardBorderNorm};background:${isCurrent ? t.cardBgActive : t.cardBgNormal};transition:border-color .15s;`;
 
         // ── Header du projet ──
         const row = document.createElement('div');
@@ -332,29 +400,29 @@ function _buildProjectRow(p, list, allProjects) {
         // Flèche accordion
         const arrow = document.createElement('span');
         arrow.textContent = '▶';
-        arrow.style.cssText = `font-size:9px;color:#555;transition:transform .2s;flex-shrink:0;user-select:none;`;
+        arrow.style.cssText = `font-size:9px;color:${t.arrowColor};transition:transform .2s;flex-shrink:0;user-select:none;`;
 
         // Infos projet
         const info = document.createElement('div');
         info.style.cssText = `flex:1;min-width:0;`;
         info.innerHTML = `
-            <div style="font-size:13px;font-weight:700;color:${isCurrent ? '#7ab8f5' : '#ddd'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <div style="font-size:13px;font-weight:700;color:${isCurrent ? t.cardNameAct : t.cardNameNorm};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${_escHtml(p.name)}
             </div>
-            <div style="font-size:10px;color:#666;margin-top:2px;">${sceneCount} tableau${sceneCount > 1 ? 'x' : ''} · ${date}</div>
+            <div style="font-size:10px;color:${t.cardMeta};margin-top:2px;">${sceneCount} tableau${sceneCount > 1 ? 'x' : ''} · ${date}</div>
         `;
 
         // Boutons actions
         const btnRename = document.createElement('button');
         btnRename.textContent = '✏️';
         btnRename.title = 'Renommer';
-        btnRename.style.cssText = 'background:#35353f;color:#aaa;border:1px solid #444;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;';
+        btnRename.style.cssText = `background:${t.btnRenameBg};color:${t.btnRenameColor};border:1px solid ${t.btnRenameBorder};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;`;
         btnRename.addEventListener('click', (e) => { e.stopPropagation(); _projRename(p.id, p.name); });
 
         const btnDelete = document.createElement('button');
         btnDelete.textContent = '×';
         btnDelete.title = 'Supprimer';
-        btnDelete.style.cssText = 'background:#2a1a1a;color:#ff6b6b;border:1px solid #3d2020;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;';
+        btnDelete.style.cssText = `background:${t.btnDeleteBg};color:#ff6b6b;border:1px solid ${t.btnDeleteBorder};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;`;
         btnDelete.addEventListener('click', (e) => { e.stopPropagation(); _projDelete(p.id); });
 
         // Bouton favori ⭐
@@ -362,7 +430,7 @@ function _buildProjectRow(p, list, allProjects) {
         const btnFav = document.createElement('button');
         btnFav.textContent = isFav ? '⭐' : '☆';
         btnFav.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
-        btnFav.style.cssText = `background:${isFav ? '#2a2a10' : '#28282f'};color:${isFav ? '#f0c040' : '#555'};border:1px solid ${isFav ? '#5a5020' : '#3a3a4a'};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .15s;`;
+        btnFav.style.cssText = `background:${isFav ? t.favBtnBgOn : t.favBtnBgOff};color:${isFav ? t.favBtnColorOn : t.favBtnColorOff};border:1px solid ${isFav ? t.favBtnBorderOn : t.favBtnBorderOff};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .15s;`;
         btnFav.addEventListener('click', (e) => {
             e.stopPropagation();
             _toggleFavorite(p.id);
@@ -378,9 +446,9 @@ function _buildProjectRow(p, list, allProjects) {
             const btnOpen = document.createElement('button');
             btnOpen.textContent = '📂';
             btnOpen.title = 'Ouvrir ce projet';
-            btnOpen.style.cssText = 'background:#1a3550;color:#7ab8f5;border:1px solid #2a4a6a;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;flex-shrink:0;';
-            btnOpen.onmouseover = () => btnOpen.style.background = '#1e3d5e';
-            btnOpen.onmouseout  = () => btnOpen.style.background = '#1a3550';
+            btnOpen.style.cssText = `background:${t.btnOpenBg};color:${t.btnOpenColor};border:1px solid ${t.btnOpenBorder};border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;flex-shrink:0;`;
+            btnOpen.onmouseover = () => btnOpen.style.background = t.btnOpenHoverBg;
+            btnOpen.onmouseout  = () => btnOpen.style.background = t.btnOpenBg;
             btnOpen.addEventListener('click', (e) => { e.stopPropagation(); _projLoad(p.id); });
             row.appendChild(btnOpen);
         }
@@ -391,47 +459,65 @@ function _buildProjectRow(p, list, allProjects) {
 
         // ── Panneau accordion des scènes ──
         const accordion = document.createElement('div');
-        accordion.style.cssText = `display:none;border-top:1px solid ${isCurrent ? '#2a4a6a' : '#2e2e38'};background:${isCurrent ? '#122538' : '#222229'};padding:6px 8px;border-radius:0 0 10px 10px;`;
+        accordion.style.cssText = `display:none;border-top:1px solid ${isCurrent ? t.accordionBorderA : t.accordionBorderN};background:${isCurrent ? t.accordionBgAct : t.accordionBgNorm};padding:6px 8px;border-radius:0 0 10px 10px;`;
 
         if (sceneList.length === 0) {
-            accordion.innerHTML = `<div style="font-size:11px;color:#555;padding:6px 8px;">Aucun tableau</div>`;
+            accordion.innerHTML = `<div style="font-size:11px;color:${t.emptyColor};padding:6px 8px;">Aucun tableau</div>`;
         } else {
             sceneList.forEach((sc, idx) => {
                 const isCurrentSceneOfCurrentProj = isCurrent && idx === p.currentScene;
                 const scRow = document.createElement('div');
                 scRow.style.cssText = `display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;font-size:11px;
-                    color:${isCurrentSceneOfCurrentProj ? '#7ab8f5' : '#aaa'};
-                    background:${isCurrentSceneOfCurrentProj ? '#1a3550' : 'transparent'};
+                    color:${isCurrentSceneOfCurrentProj ? t.sceneColorAct : t.sceneColorNorm};
+                    background:${isCurrentSceneOfCurrentProj ? t.sceneBgAct : 'transparent'};
                     font-weight:${isCurrentSceneOfCurrentProj ? '700' : '400'};
                     cursor:${isCurrentSceneOfCurrentProj ? 'default' : 'pointer'};
                     transition:background .15s,color .15s;`;
 
                 const icon = document.createElement('span');
                 icon.textContent = isCurrentSceneOfCurrentProj ? '▶' : '○';
-                icon.style.cssText = `font-size:8px;flex-shrink:0;color:${isCurrentSceneOfCurrentProj ? '#4a90e2' : '#444'};transition:color .15s;`;
+                icon.style.cssText = `font-size:8px;flex-shrink:0;color:${isCurrentSceneOfCurrentProj ? t.sceneIconAct : t.sceneIconNorm};transition:color .15s;`;
 
                 const label = document.createElement('span');
                 label.textContent = sc.name || `Tableau ${idx + 1}`;
                 label.style.cssText = `flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
 
+                // Bouton renommer le tableau
+                const btnRenameScene = document.createElement('button');
+                btnRenameScene.textContent = '✏️';
+                btnRenameScene.title = 'Renommer ce tableau';
+                btnRenameScene.style.cssText = `background:${t.btnRenameBg};color:${t.btnRenameColor};border:1px solid ${t.btnRenameBorder};border-radius:5px;width:22px;height:22px;cursor:pointer;font-size:10px;flex-shrink:0;opacity:0;transition:opacity .15s;padding:0;`;
+                btnRenameScene.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    _projRenameScene(p.id, idx, sc.name || `Tableau ${idx + 1}`);
+                });
+
                 if (!isCurrentSceneOfCurrentProj) {
                     scRow.addEventListener('mouseenter', () => {
-                        scRow.style.background = isCurrent ? '#1a3550' : '#2e2e3e';
-                        scRow.style.color = '#fff';
-                        icon.style.color = '#4a90e2';
+                        scRow.style.background = t.sceneHoverBg;
+                        scRow.style.color = t.cardNameNorm;
+                        icon.style.color = t.sceneIconAct;
                         icon.textContent = '▶';
+                        btnRenameScene.style.opacity = '1';
                     });
                     scRow.addEventListener('mouseleave', () => {
                         scRow.style.background = 'transparent';
-                        scRow.style.color = '#aaa';
-                        icon.style.color = '#444';
+                        scRow.style.color = t.sceneColorNorm;
+                        icon.style.color = t.sceneIconNorm;
                         icon.textContent = '○';
+                        btnRenameScene.style.opacity = '0';
                     });
                     scRow.addEventListener('click', () => _projLoadAtScene(p.id, idx));
+                } else {
+                    // Pour le tableau courant, on affiche le bouton renommer en permanence
+                    btnRenameScene.style.opacity = '0.6';
+                    scRow.addEventListener('mouseenter', () => btnRenameScene.style.opacity = '1');
+                    scRow.addEventListener('mouseleave', () => btnRenameScene.style.opacity = '0.6');
                 }
 
                 scRow.appendChild(icon);
                 scRow.appendChild(label);
+                scRow.appendChild(btnRenameScene);
                 accordion.appendChild(scRow);
             });
         }
@@ -442,7 +528,7 @@ function _buildProjectRow(p, list, allProjects) {
             open = !open;
             accordion.style.display = open ? 'block' : 'none';
             arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
-            arrow.style.color = open ? '#4a90e2' : '#555';
+            arrow.style.color = open ? '#4a90e2' : t.arrowColor;
         };
 
         row.addEventListener('click', (e) => {
@@ -457,7 +543,7 @@ function _buildProjectRow(p, list, allProjects) {
                 _projLoad(p.id);
             });
             row.onmouseover = () => wrapper.style.borderColor = '#4a90e2';
-            row.onmouseout  = () => { if (!open) wrapper.style.borderColor = '#2e2e38'; };
+            row.onmouseout  = () => { if (!open) wrapper.style.borderColor = t.cardBorderNorm; };
         } else {
             open = true;
             accordion.style.display = 'block';
@@ -596,6 +682,22 @@ async function _projRename(id, currentName) {
     _renderProjectsList();
 }
 
+async function _projRenameScene(projectId, sceneIndex, currentName) {
+    const newName = prompt('Renommer le tableau :', currentName);
+    if (newName === null || !newName.trim()) return;
+    const p = await dbGet(projectId);
+    if (!p || !p.scenes || sceneIndex >= p.scenes.length) return;
+    p.scenes[sceneIndex].name = newName.trim();
+    p.updatedAt = Date.now();
+    await dbPut(p);
+    // Si c'est le projet courant, mettre à jour la variable globale scenes et la barre
+    if (projectId === getCurrentProjectId()) {
+        scenes[sceneIndex].name = newName.trim();
+        if (typeof renderScenesBar === 'function') renderScenesBar();
+    }
+    _renderProjectsList();
+}
+
 async function _projDelete(id) {
     const p = await dbGet(id);
     if (!p) return;
@@ -684,10 +786,12 @@ function importAllProjects() {
 // ── Scrollbar discrète pour la liste ─────────────────────────────────────
 (function() {
     const s = document.createElement('style');
+    s.id = 'projects-scrollbar-style';
     s.textContent = `
         #projects-list::-webkit-scrollbar { width: 5px; }
         #projects-list::-webkit-scrollbar-track { background: transparent; }
         #projects-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        body.menu-light #projects-list::-webkit-scrollbar-thumb { background: #ccc; }
         #proj-current-name:focus { border-color: #4a90e2 !important; }
     `;
     document.head.appendChild(s);
