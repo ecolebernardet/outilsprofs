@@ -522,14 +522,17 @@
             display: none;
             position: absolute;
             inset: 0;
-            background: rgba(255,255,255,0.18);
+            background: rgba(15, 39, 68, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             border-radius: 14px;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 900;
             color: #ffd700;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
             z-index: 5;
         }
         .lm-paused-overlay.show { display: flex; }
@@ -564,11 +567,6 @@
       <label>⏱ Durée par multiplication :</label>
       <input type="number" class="lm-timer-input" value="15" min="3" max="120" step="1">
       <label>secondes</label>
-    </div>
-    <div class="lm-params-row">
-      <label>Tables de (a × b, a et b de 0 à</label>
-      <input type="number" class="lm-max-input" value="9" min="2" max="12" step="1">
-      <label>)</label>
     </div>
     <div class="lm-params-row">
       <button class="lm-params-apply-btn">✔ Appliquer</button>
@@ -650,7 +648,6 @@
         const paramsBtn   = widget.querySelector('.lm-params-btn');
         const paramsPanel = widget.querySelector('.lm-params-panel');
         const timerInput  = widget.querySelector('.lm-timer-input');
-        const maxInput    = widget.querySelector('.lm-max-input');
         const applyBtn    = widget.querySelector('.lm-params-apply-btn');
         const multDisplay = widget.querySelector('.lm-mult-display');
         const timerWrap   = widget.querySelector('.lm-timer-wrap');
@@ -677,7 +674,6 @@
 
         // ── État ──────────────────────────────────────────────────────────
         let timerDuration = 15;   // secondes
-        let maxFactor     = 9;
         let isRunning     = false;
         let isPaused      = false;
         let timerInterval = null;
@@ -701,7 +697,7 @@
             return byResult; // Map<result, {a, b, result}>
         }
 
-        let pool = buildPool(maxFactor);
+        let pool = buildPool(9);
         totalPossible = pool.size;
 
         // ── Utilitaire tap ─────────────────────────────────────────────────
@@ -807,7 +803,7 @@
             drawnResults.clear();
             drawnHistory = [];
             currentMult  = null;
-            pool = buildPool(maxFactor);
+            pool = buildPool(9);
             totalPossible = pool.size;
             historyList.innerHTML = '';
             multDisplay.innerHTML = '<span class="lm-mult-idle">Appuie sur ▶ Démarrer pour commencer</span>';
@@ -921,7 +917,7 @@
                     if (poolEntry) {
                         html += `<div class="lm-verif-err-item">❌ ${n} → ${poolEntry.a} × ${poolEntry.b} = ${poolEntry.result} — PAS encore sorti !</div>`;
                     } else {
-                        html += `<div class="lm-verif-err-item">❌ ${n} — ce résultat n'existe pas dans les tables (0 à ${maxFactor})</div>`;
+                        html += `<div class="lm-verif-err-item">❌ ${n} — ce résultat n'existe pas dans les tables (0 à 9)</div>`;
                     }
                     hasError = true;
                 }
@@ -958,20 +954,22 @@
         });
         paramsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
         timerInput.addEventListener('pointerdown', (e) => e.stopPropagation());
-        maxInput.addEventListener('pointerdown', (e) => e.stopPropagation());
         timerInput.style.pointerEvents = 'auto';
-        maxInput.style.pointerEvents = 'auto';
         timerInput.style.userSelect = 'text';
-        maxInput.style.userSelect = 'text';
 
-        makeTap(applyBtn, () => {
+        // Utiliser 'click' (et non makeTap) car paramsPanel stoppe les pointerdown,
+        // ce qui empêche makeTap de poser son listener pointerup.
+        applyBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        applyBtn.addEventListener('click', () => {
             const t = parseInt(timerInput.value);
-            const m = parseInt(maxInput.value);
             if (!isNaN(t) && t >= 3) timerDuration = t;
-            if (!isNaN(m) && m >= 2) maxFactor = m;
             timerInput.value = timerDuration;
-            maxInput.value   = maxFactor;
-            resetGame();
+            // Si le jeu est en cours, on repart avec la nouvelle durée
+            // sans réinitialiser — on relance juste le timer depuis la nouvelle valeur
+            if (isRunning && !isPaused) {
+                clearInterval(timerInterval);
+                startTimer(timerDuration);
+            }
             paramsPanel.classList.remove('show');
             paramsBtn.classList.remove('active');
         });
