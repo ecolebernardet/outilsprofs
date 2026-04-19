@@ -763,7 +763,7 @@ function createReproQuadrillageWidget(savedData) {
         const data = getData();
         const date = new Date();
         const ds   = date.getFullYear() + String(date.getMonth()+1).padStart(2,'0') + String(date.getDate()).padStart(2,'0');
-        const name = `outilsprofs_repro_quadrillage_${ds}.json`;
+        const name = `lebureauduprof_repro_quadrillage_${ds}.json`;
         const json = JSON.stringify(data);
         if (window.Android && typeof window.Android.exportTxt === 'function') {
             window.Android.exportTxt(json, name);
@@ -849,7 +849,7 @@ function createReproQuadrillageWidget(savedData) {
 
         const date = new Date();
         const ds   = date.getFullYear() + String(date.getMonth()+1).padStart(2,'0') + String(date.getDate()).padStart(2,'0');
-        const name = `outilsprofs_repro_quadrillage_${ds}.pdf`;
+        const name = `lebureauduprof_repro_quadrillage_${ds}.pdf`;
         if (window.Android && typeof window.Android.savePdfFromBase64 === 'function') {
             window.Android.savePdfFromBase64(pdf.output('datauristring').split(',')[1], name);
         } else {
