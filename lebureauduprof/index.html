@@ -382,6 +382,7 @@
 				<div class="mm-sub-item" onclick="createHorlogeWidget();closeMainMenu()"><span class="mm-ico">🕰️</span>&nbsp;&nbsp;Horloge interactive</div>
 				<div class="mm-sub-item" onclick="createSolide3DWidget();closeMainMenu()"><span class="mm-ico">🧊</span>&nbsp;&nbsp;Solide 3D</div>
 				<div class="mm-sub-item" onclick="lancerTracesGeometriques();closeMainMenu()"><span class="mm-ico">📐</span>&nbsp;&nbsp;Tracés géométriques</div>
+				<div class="mm-sub-item" onclick="createWidget('loto-multi');closeMainMenu()"><span class="mm-ico">✖️</span>&nbsp;&nbsp;Loto des Multiplications</div>
 				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
 				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
 				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
@@ -1159,6 +1160,7 @@
 <script src="widget-compte-est-bon.js"></script>
 <script src="widget-mots-alpha.js"></script>
 <script src="widget-nature-gramm.js"></script>
+<script src="widget-loto-multi.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
@@ -1286,6 +1288,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-fractions6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Fractions</div>
                 <div class="act-card-desc">Manipuler des fractions avec des figures partageables</div>
+            </div>
+            <div class="act-card" onclick="createWidget('loto-multi');toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-loto6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Loto des Multiplications</div>
+                <div class="act-card-desc">Jeu de loto pour mémoriser les tables de multiplication</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
