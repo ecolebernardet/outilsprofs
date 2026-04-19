@@ -1426,6 +1426,7 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 			cursor: pointer;
 			display: flex; align-items: center; justify-content: flex-start;
 			font-size: 11px; color: rgba(255,255,255,0.45);
+			font-weight : 600;
 			transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
 			letter-spacing: 1px;
 			box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -1614,6 +1615,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -1750,6 +1752,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -1897,6 +1900,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 0.5px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -2085,6 +2089,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: var(--pdf-lib-muted);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -2254,6 +2259,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -2293,6 +2299,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 12px; color: rgba(100,170,235,0.65);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(255,255,255,1);
@@ -2347,6 +2354,7 @@ body.presentation-mode #pres-mode-tab {
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
@@ -2864,6 +2872,7 @@ body.presentation-mode #image-panel-tab { display: none !important; }
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-start;
     font-size: 11px; color: rgba(255,255,255,0.45);
+	font-weight : 600;
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);

@@ -1245,11 +1245,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-name">Tableau de numération</div>
                 <div class="act-card-desc">Manipuler le tableau de numération décimale</div>
             </div>
-            <div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico"><img src="pics/activites-monnaie6.jpeg" alt="La monnaie" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Monnaie</div>
-                <div class="act-card-desc">Calculer avec les pièces et les billets</div>
-            </div>
             <div class="act-card" onclick="createWidget('calcul');toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-calcul-mental6.png" alt="Calcul mental" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Calcul mental</div>
@@ -1259,6 +1254,16 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-compteestbon6.jpeg" alt="Le compte est bon" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Le compte est bon</div>
                 <div class="act-card-desc">Viser un nombre cible avec les opérations</div>
+            </div>
+			<div class="act-card" onclick="createWidget('loto-multi');toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-loto6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Loto des Multiplications</div>
+                <div class="act-card-desc">Jeu de loto pour mémoriser les tables de multiplication</div>
+            </div>
+			<div class="act-card" onclick="createMonnaieWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-monnaie6.jpeg" alt="La monnaie" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Monnaie</div>
+                <div class="act-card-desc">Calculer avec les pièces et les billets</div>
             </div>
 			<div class="act-card" onclick="createHeureWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-heure6.jpeg" alt="Heures et durées" style="width:100%;height:100%;object-fit:contain;"></div>
@@ -1270,16 +1275,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-name">Horloge interactive</div>
                 <div class="act-card-desc">Manipuler les aiguilles pour régler l'heure</div>
             </div>
-			<div class="act-card" onclick="createSolide3DWidget();toggleActivitiesPanel()">
-                <div class="act-card-ico"><img src="pics/activites-solides6.jpeg" alt="Solides 3D" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Solides 3D</div>
-                <div class="act-card-desc">Manipuler les solides en 3 dimensions</div>
-            </div>
-			<div class="act-card" onclick="lancerTracesGeometriques();toggleActivitiesPanel()">
-                <div class="act-card-ico"><img src="pics/activites-traces-geom6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Tracés géométriques</div>
-                <div class="act-card-desc">Utiliser la règle, l'équerre et le compas pour tracer</div>
-            </div>
             <div class="act-card" onclick="createConversionWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-conversion6.jpeg" alt="Conversion" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Conversion</div>
@@ -1290,10 +1285,15 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-name">Fractions</div>
                 <div class="act-card-desc">Manipuler des fractions avec des figures partageables</div>
             </div>
-            <div class="act-card" onclick="createWidget('loto-multi');toggleActivitiesPanel()">
-                <div class="act-card-ico"><img src="pics/activites-loto6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Loto des Multiplications</div>
-                <div class="act-card-desc">Jeu de loto pour mémoriser les tables de multiplication</div>
+            <div class="act-card" onclick="createSolide3DWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-solides6.jpeg" alt="Solides 3D" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Solides 3D</div>
+                <div class="act-card-desc">Manipuler les solides en 3 dimensions</div>
+            </div>
+			<div class="act-card" onclick="lancerTracesGeometriques();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-traces-geom6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Tracés géométriques</div>
+                <div class="act-card-desc">Utiliser la règle, l'équerre et le compas pour tracer</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
