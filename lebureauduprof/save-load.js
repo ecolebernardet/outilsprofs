@@ -260,6 +260,11 @@ function buildBoardState() {
                 calState: w._calState ? JSON.stringify(w._calState) : null
             };
         }
+        // Données propres au widget reproduction quadrillage
+        let rqData = null;
+        if (w.dataset.type === 'repro-quadrillage' && typeof w._rqGetData === 'function') {
+            rqData = w._rqGetData();
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -300,7 +305,8 @@ function buildBoardState() {
 			convData,
 			fracData,
 			deData,
-			calData
+			calData,
+			rqData
 		});
     });
     const shapes = [];
@@ -664,6 +670,12 @@ function restoreBoardFromJSON(json) {
                 if (w.calData && w.calData.calState && typeof _calRestoreData === 'function') {
                     _calRestoreData(widget, w.calData.calState);
                 }
+            } else {
+                widget = createWidget(w.type, '100px', '100px', false);
+            }
+        } else if (w.type === 'repro-quadrillage') {
+            if (typeof createReproQuadrillageWidget === 'function') {
+                widget = createReproQuadrillageWidget(w.rqData || null);
             } else {
                 widget = createWidget(w.type, '100px', '100px', false);
             }

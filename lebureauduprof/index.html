@@ -1153,6 +1153,7 @@
 <script src="widget-conjugaison.js"></script>
 <script src="widget-deficalme.js"></script>
 <script src="widget-calendrier.js"></script>
+<script src="widget-repro-quadrillage.js"></script>
 <div id="laser-pointer"></div>
 <script src="pdf-widgets.js"></script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
@@ -1294,6 +1295,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-traces-geom6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Tracés géométriques</div>
                 <div class="act-card-desc">Utiliser la règle, l'équerre et le compas pour tracer</div>
+            </div>
+			<div class="act-card" onclick="createReproQuadrillageWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-repro6.jpeg" alt="Tracés géométriques" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Reproduction quadrillage</div>
+                <div class="act-card-desc">Dessiner un modèle à reproduire sur un quadrillage</div>
             </div>
 		</div>
 		<div class="act-section-label">🎲 Activités de français</div>
