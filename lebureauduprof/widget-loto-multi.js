@@ -242,12 +242,27 @@
             border-radius: 14px;
             border: 1px solid #d1d5db;
             flex-shrink: 0;
-            min-height: 160px;
+            min-height: 200px;
             position: relative;
         }
 
+        @font-face {
+			font-family: 'Marelle';
+            src: url('polices/Marelle-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+		
+		@font-face {
+			font-family: 'Nunito';
+            src: url('polices/Nunito-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         .lm-mult-display {
-            font-size: 72px;
+            font-size: 100px;
+            font-family: 'Marelle', 'Segoe UI', system-ui, sans-serif;
             font-weight: 900;
             color: #ffd700;
             letter-spacing: 2px;
@@ -257,9 +272,9 @@
         }
 
         .lm-mult-idle {
+			font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
             font-size: 18px;
             color: #9ca3af;
-            font-style: italic;
             text-align: center;
         }
 
@@ -267,6 +282,7 @@
         .lm-timer-wrap {
             display: flex;
             align-items: center;
+			padding : 20px 0px 0px 0px;
             gap: 8px;
             width: 100%;
             max-width: 320px;
@@ -407,7 +423,7 @@
 
         /* ── Zone vérification ── */
         .lm-verif-zone {
-            background: #fffbeb;
+            background: #ddd;
             border: 2px solid #f59e0b;
             border-radius: 12px;
             padding: 16px 18px;
@@ -418,7 +434,7 @@
         }
         .lm-verif-zone.show { display: flex; }
         .lm-verif-title {
-            font-size: 14px; font-weight: 800; color: #92400e; letter-spacing: 0.2px;
+            font-size: 20px; font-weight: 800; color: #92400e; letter-spacing: 0.2px;
         }
         .lm-verif-input-row {
             display: flex;
@@ -436,7 +452,7 @@
             border: 2px solid #f59e0b;
             background: #ffffff;
             color: #374151;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 700;
             outline: none;
             min-width: 160px;
@@ -457,7 +473,7 @@
         .lm-btn-check-verif:hover { background: #d97706; }
 
         .lm-verif-result {
-            font-size: 13px;
+            font-size: 18px;
             font-weight: 700;
             line-height: 1.8;
             display: none;
@@ -734,12 +750,13 @@
         // ── Affiche la multiplication courante ──────────────────────────────
         function showMult(mult) {
             currentMult = mult;
+            validateCurrent(); // enregistre immédiatement dès l'affichage
             // Mélange a et b aléatoirement pour l'affichage
             const [a, b] = Math.random() < 0.5 ? [mult.a, mult.b] : [mult.b, mult.a];
             multDisplay.innerHTML = `<span>${a}</span><span style="color:#fff;margin:0 6px">×</span><span>${b}</span>`;
             multDisplay.style.fontSize = '';
             timerWrap.style.display = 'flex';
-            counter.textContent = `${drawnHistory.length + 1} / ${totalPossible} multiplications`;
+            counter.textContent = `${drawnHistory.length} / ${totalPossible} multiplications`;
         }
 
         // ── Démarre le timer pour la multiplication courante ───────────────
@@ -761,13 +778,19 @@
             }, 1000);
         }
 
-        // ── Valide la multiplication courante et passe à la suivante ───────
-        function validateAndNext() {
+        // ── Enregistre la multiplication courante comme sortie ─────────────
+        function validateCurrent() {
             if (!currentMult) return;
-            // Enregistrer dans l'historique
+            if (drawnResults.has(currentMult.result)) return; // déjà enregistrée
             drawnResults.add(currentMult.result);
             drawnHistory.push(currentMult);
             addHistoryItem(currentMult);
+        }
+
+        // ── Valide la multiplication courante et passe à la suivante ───────
+        function validateAndNext() {
+            if (!currentMult) return;
+            validateCurrent(); // enregistre si pas déjà fait
             // Tirer la suivante
             const next = drawNext();
             if (!next) {
@@ -903,7 +926,6 @@
             }
 
             // Pour chaque numéro, vérifier s'il a été tiré
-            const drawnSet = new Set(drawnHistory.map(m => m.result));
             let html = '';
             let hasError = false;
 
@@ -926,7 +948,7 @@
             if (!hasError) {
                 html = '<div style="color:#15803d;font-weight:900;font-size:14px;margin-bottom:6px">🎉 Bravo ! Tous les résultats sont corrects !</div>' + html;
             } else {
-                html = '<div style="color:#dc2626;font-weight:900;font-size:14px;margin-bottom:6px">⚠️ Attention ! Des erreurs ont été détectées :</div>' + html;
+                html = '<div style="color:#dc2626;font-weight:900;font-size:14px;margin-bottom:6px">⚠️ Attention !</div>' + html;
             }
 
             verifResult.innerHTML = html;
