@@ -459,12 +459,13 @@ function _hideReopenBtn() {
 // ── Init ──────────────────────────────────────────────────────────────────
 function _init() {
     const RESIZE_KEY = 'pdfLibraryWidth';
-    const MIN_W = 200, MAX_W = 600, DEFAULT_W = 320;
+    const MIN_W = 200, DEFAULT_W = 320;
 
     // Restaurer la largeur mémorisée
     try {
         const savedW = parseInt(localStorage.getItem(RESIZE_KEY));
-        if (savedW >= MIN_W && savedW <= MAX_W) {
+        const maxW = Math.round(window.innerWidth * 0.5);
+        if (savedW >= MIN_W && savedW <= maxW) {
             document.documentElement.style.setProperty('--pdf-lib-w', savedW + 'px');
         }
     } catch(e) {}
@@ -490,7 +491,8 @@ function _init() {
         document.addEventListener('mousemove', (e) => {
             if (!_dragging) return;
             const dx = e.clientX - _startX; // glisser vers la droite = agrandir
-            const newW = Math.max(MIN_W, Math.min(MAX_W, _startW + dx));
+            const maxW = Math.round(window.innerWidth * 0.5);
+            const newW = Math.max(MIN_W, Math.min(maxW, _startW + dx));
             document.documentElement.style.setProperty('--pdf-lib-w', newW + 'px');
         });
 

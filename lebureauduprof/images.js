@@ -261,6 +261,7 @@ function _buildImagePanel() {
     const panel = document.createElement('div');
     panel.id = 'image-panel';
     panel.innerHTML = `
+        <div id="image-panel-resize-handle" title="Redimensionner le panneau"></div>
         <div id="image-panel-header">
             <h3>🖼️ Images</h3>
             <button id="image-panel-close" title="Fermer">×</button>
@@ -280,6 +281,43 @@ function _buildImagePanel() {
         </div>
     `;
     document.body.appendChild(panel);
+
+    // ── Resize du panneau images ──────────────────────────────────────
+    (function() {
+        const IP_W_KEY = 'image-panel-w';
+        const handle = document.getElementById('image-panel-resize-handle');
+        const tab    = document.getElementById('image-panel-tab');
+        if (!handle) return;
+
+        const savedW = localStorage.getItem(IP_W_KEY);
+        const initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        panel.style.width = initW + 'px';
+        document.documentElement.style.setProperty('--image-panel-w', initW + 'px');
+
+        let dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+            panel.classList.add('image-panel-resizing');
+            if (tab) tab.classList.add('image-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            const maxW = Math.round(window.innerWidth * 0.5);
+            const w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--image-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('image-panel-resizing');
+            if (tab) tab.classList.remove('image-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(IP_W_KEY, panel.offsetWidth);
+        });
+    })();
 
     document.getElementById('image-panel-close').addEventListener('click', closeImagePanel);
 

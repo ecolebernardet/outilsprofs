@@ -1393,6 +1393,19 @@
 			transition: left 0.25s cubic-bezier(.4,0,.2,1);
 		}
 		#sticker-panel.active { left: 0; }
+		#sticker-panel.sticker-panel-resizing { transition: none !important; }
+		#sticker-panel-resize-handle {
+			position: absolute; top: 0; right: 0;
+			width: 6px; height: 100%;
+			cursor: ew-resize; z-index: 10;
+		}
+		#sticker-panel-resize-handle::after {
+			content: ''; position: absolute;
+			top: 50%; right: 1px; transform: translateY(-50%);
+			width: 3px; height: 40px; border-radius: 2px;
+			background: rgba(255,255,255,0.08); transition: background 0.2s;
+		}
+		#sticker-panel-resize-handle:hover::after { background: #f39c12; }
 		body.presentation-mode #sticker-panel,
 		/* ── Styles spans emoji/label dans les onglets latéraux ── */
 .tab-emoji { font-size: 50px; line-height: 1; display: block; text-align: center; }
@@ -1550,7 +1563,7 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 
 
 /* ── Panneau Widgets ──────────────────────────────────────────────────── */
-:root { --widgets-panel-w: 380px; }
+:root { --widgets-panel-w: 50vw; }
 #widgets-panel {
     display: flex;
     position: fixed;
@@ -1684,7 +1697,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
 
 
 /* ── Panneau Outils ──────────────────────────────────────────────────── */
-:root { --tools-panel-w: 380px; }
+:root { --tools-panel-w: 50vw; }
 #tools-panel {
     display: flex;
     position: fixed;
@@ -1831,7 +1844,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 
 /* ── Panneau Activités ────────────────────────────────────────────── */
 
-:root { --act-panel-w: 380px; }
+:root { --act-panel-w: 50vw; }
 #activities-panel {
     display: flex;
     position: fixed;
@@ -2012,7 +2025,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 
 /* ── Panneau PDF Bibliothèque PDF ─────────────────────────────────────────────── */
 :root {
-    --pdf-lib-w: 380px;
+    --pdf-lib-w: 50vw;
     --pdf-lib-bg: #111;
     --pdf-lib-border: rgba(255,255,255,0.1);
     --pdf-lib-hover: rgba(255,255,255,0.06);
@@ -2186,7 +2199,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
 
 
 /* ── Panneau Projets ──────────────────────────────────────── */
-:root { --proj-panel-w: 380px; }
+:root { --proj-panel-w: 50vw; }
 
 #projects-panel {
     position: fixed;
@@ -2428,8 +2441,8 @@ body.menu-light #history-panel-tab.history-panel-tab-open { display: none !impor
 
 /* ── Panneaux Affichage & Historique ───────────────────────── */
 :root {
-    --display-panel-w: 380px;
-    --history-panel-w: 380px;
+    --display-panel-w: 50vw;
+    --history-panel-w: 50vw;
 }
 #display-panel {
     position: fixed;
@@ -2807,8 +2820,8 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
 #image-panel {
     display: flex;
     position: fixed;
-    top: 0; left: calc(-10 * 380px);
-    width: 380px; height: calc(100vh);
+    top: 0; left: calc(-10 * var(--image-panel-w, 380px));
+    width: var(--image-panel-w, 380px); height: calc(100vh);
     background: #111;
     border-right: 1px solid #2e2e3a;
 	box-shadow: 0px 0px 50px rgba(0,0,0,1);
@@ -2820,6 +2833,19 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
 }
 
 #image-panel.active { left: 0; }
+#image-panel.image-panel-resizing { transition: none !important; }
+#image-panel-resize-handle {
+    position: absolute; top: 0; right: 0;
+    width: 6px; height: 100%;
+    cursor: ew-resize; z-index: 10;
+}
+#image-panel-resize-handle::after {
+    content: ''; position: absolute;
+    top: 50%; right: 1px; transform: translateY(-50%);
+    width: 3px; height: 40px; border-radius: 2px;
+    background: rgba(255,255,255,0.08); transition: background 0.2s;
+}
+#image-panel-resize-handle:hover::after { background: #f39c12; }
 
 body.presentation-mode #image-panel,
 body.presentation-mode #image-panel-tab { display: none !important; }

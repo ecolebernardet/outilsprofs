@@ -134,6 +134,46 @@ function toggleStickerPanel() {
 	}
 }
 
+// ── Resize du panneau stickers ────────────────────────────────────────
+(function() {
+    const SP_W_KEY = 'sticker-panel-w';
+    document.addEventListener('DOMContentLoaded', function() {
+        const handle = document.getElementById('sticker-panel-resize-handle');
+        const panel  = document.getElementById('sticker-panel');
+        const tab    = document.getElementById('sticker-panel-tab');
+        if (!handle || !panel) return;
+
+        const savedW = localStorage.getItem(SP_W_KEY);
+        const initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        panel.style.width = initW + 'px';
+        document.documentElement.style.setProperty('--sticker-panel-w', initW + 'px');
+
+        let dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+            panel.classList.add('sticker-panel-resizing');
+            if (tab) tab.classList.add('sticker-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            const maxW = Math.round(window.innerWidth * 0.5);
+            const w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--sticker-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('sticker-panel-resizing');
+            if (tab) tab.classList.remove('sticker-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(SP_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+
 function renderStickerPanel() {
 	const container = document.getElementById('sp-content');
 	if (!container) return;

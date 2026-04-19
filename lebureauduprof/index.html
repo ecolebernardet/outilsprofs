@@ -835,6 +835,7 @@
 <button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Stickers &amp; Émojis"><span class="act-tab-lbl">Stickers</span><span class="act-tab-ico">🤓</span></button>
 
 <div id="sticker-panel">
+	<div id="sticker-panel-resize-handle" title="Redimensionner le panneau"></div>
 	<!-- Header -->
 	<div id="sticker-panel-header">
 		<h3>✨ Stickers &amp; Émojis</h3>
@@ -1358,13 +1359,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         var tab    = document.getElementById('activities-panel-tab');
         if (!handle || !panel) return;
 
-        // Restaurer la largeur sauvegardée
+        // Restaurer la largeur sauvegardée (en px), sinon utiliser 50% de la fenêtre
         var savedW = localStorage.getItem(ACT_W_KEY);
-        if (savedW) {
-            var w = parseInt(savedW);
-            panel.style.width = w + 'px';
-            document.documentElement.style.setProperty('--act-panel-w', w + 'px');
-        }
+        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        panel.style.width = initW + 'px';
+        document.documentElement.style.setProperty('--act-panel-w', initW + 'px');
 
         var dragging = false, startX = 0, startW = 0;
         handle.addEventListener('mousedown', function(e) {
@@ -1377,7 +1376,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging) return;
-            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            var maxW = Math.round(window.innerWidth * 0.5);
+            var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
             panel.style.width = w + 'px';
             document.documentElement.style.setProperty('--act-panel-w', w + 'px');
         });
@@ -1510,7 +1510,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging) return;
-            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            var maxW = Math.round(window.innerWidth * 0.5);
+            var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
             panel.style.width = w + 'px';
             document.documentElement.style.setProperty('--widgets-panel-w', w + 'px');
         });
@@ -1652,7 +1653,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging) return;
-            var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+            var maxW = Math.round(window.innerWidth * 0.5);
+            var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
             panel.style.width = w + 'px';
             document.documentElement.style.setProperty('--tools-panel-w', w + 'px');
         });
@@ -1703,6 +1705,48 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
 <button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets"><span class="act-tab-lbl">Projets</span><span class="act-tab-ico">📁</span></button>
+
+<script>
+// ── Resize du panneau Projets ──────────────────────────────────────────
+(function() {
+    var PROJ_W_KEY = 'proj-panel-w';
+    document.addEventListener('DOMContentLoaded', function() {
+        var handle = document.getElementById('projects-panel-resize-handle');
+        var panel  = document.getElementById('projects-panel');
+        var tab    = document.getElementById('projects-panel-tab');
+        if (!handle || !panel) return;
+
+        var savedW = localStorage.getItem(PROJ_W_KEY);
+        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        panel.style.width = initW + 'px';
+        document.documentElement.style.setProperty('--proj-panel-w', initW + 'px');
+
+        var dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+            panel.classList.add('proj-panel-resizing');
+            if (tab) tab.classList.add('proj-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var maxW = Math.round(window.innerWidth * 0.5);
+            var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--proj-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('proj-panel-resizing');
+            if (tab) tab.classList.remove('proj-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(PROJ_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+</script>
 
 <!-- Onglet Mode Présentation (8e onglet) -->
 <button id="pres-mode-tab" onclick="togglePresentationMode()" title="Mode présentation"><span class="act-tab-lbl">On</span><span class="act-tab-ico">📽️</span></button>
@@ -1918,7 +1962,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             });
             document.addEventListener('mousemove', function(e) {
                 if (!dragging) return;
-                var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+                var maxW = Math.round(window.innerWidth * 0.5);
+                var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
                 panel.style.width = w + 'px';
                 document.documentElement.style.setProperty('--display-panel-w', w + 'px');
             });
@@ -2029,7 +2074,8 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             });
             document.addEventListener('mousemove', function(e) {
                 if (!dragging) return;
-                var w = Math.max(260, Math.min(700, startW + e.clientX - startX));
+                var maxW = Math.round(window.innerWidth * 0.5);
+                var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
                 panel.style.width = w + 'px';
                 document.documentElement.style.setProperty('--history-panel-w', w + 'px');
             });
