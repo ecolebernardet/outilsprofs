@@ -261,6 +261,7 @@ function createSolide3DWidget() {
                             <button class="s3d-shape-btn" data-shape="pyramid">Pyramide</button>
 							<button class="s3d-shape-btn" data-shape="cylinder">Cylindre</button>
                             <button class="s3d-shape-btn" data-shape="cone">Cône</button>
+                            <button class="s3d-shape-btn" data-shape="sphere">Sphère</button>
                         </div>
                     </div>
                     <div class="wf-btns" style="flex-shrink:0;">
@@ -398,6 +399,7 @@ function _initSolide3D(widget) {
         prism6:        ['#2041d4','#34c77b','#e26fa7','#f0e117','#a855f7','#f72b2b','#fb923c','#22d3ee'],
         cylinder:      ['#1a9ecc'],
         cone:          ['#e26fa7'],
+        sphere:        ['#1a9ecc'],
     };
     const ROUND_BASE_COLORS = { cylinder: ['#34c77b','#a855f7'], cone: ['#f5a623'] };
 
@@ -543,6 +545,12 @@ function _initSolide3D(widget) {
             }
             return {vertices:v, faces, isRound:true, R, h, type:'cone'};
         },
+
+        sphere: ()=>{
+            // Rendu par bandes de latitude (isSphere = true)
+            // Pas de géométrie à vertices/faces : tout se dessine dans draw()
+            return {vertices:[], faces:[], isRound:false, isSphere:true};
+        },
     };
 
     // ── Rotation ──────────────────────────────────────────────────
@@ -601,6 +609,65 @@ function _initSolide3D(widget) {
 
         // Pour cylindre/cône : préparer les bases circulaires
         const isRound = shape.isRound || false;
+        const isSphere = shape.isSphere || false;
+
+        // ── Rendu sphère ─────────────────────────────────────────────
+        if(isSphere){
+            const NLat=24, NLon=48;
+            const SPHERE_COLORS=['#1a9ecc','#0e7fa8','#2196c8','#1488b0'];
+            // Dessiner les fuseaux (patches lat×lon) triés par Z
+            const patches=[];
+            for(let lat=0;lat<NLat;lat++){
+                const phi0=Math.PI*(lat/NLat-0.5);
+                const phi1=Math.PI*((lat+1)/NLat-0.5);
+                for(let lon=0;lon<NLon;lon++){
+                    const th0=2*Math.PI*lon/NLon;
+                    const th1=2*Math.PI*(lon+1)/NLon;
+                    // 4 coins du patch
+                    const c=[
+                        [Math.cos(phi0)*Math.cos(th0), Math.sin(phi0), Math.cos(phi0)*Math.sin(th0)],
+                        [Math.cos(phi0)*Math.cos(th1), Math.sin(phi0), Math.cos(phi0)*Math.sin(th1)],
+                        [Math.cos(phi1)*Math.cos(th1), Math.sin(phi1), Math.cos(phi1)*Math.sin(th1)],
+                        [Math.cos(phi1)*Math.cos(th0), Math.sin(phi1), Math.cos(phi1)*Math.sin(th0)],
+                    ];
+                    const tphi=(phi0+phi1)/2, tth=(th0+th1)/2;
+                    const nRaw=[Math.cos(tphi)*Math.cos(tth), Math.sin(tphi), Math.cos(tphi)*Math.sin(tth)];
+                    const nr=applyRot(nRaw);
+                    if(nr[2]<=0) continue; // face cachée
+                    const rpts=c.map(p=>applyRot(p));
+                    const zAvg=rpts.reduce((s,p)=>s+p[2],0)/4;
+                    const pts2d=rpts.map(p=>project(p));
+                    // Éclairage diffus sur la normale
+                    const br=Math.max(0.15, dot(nr, L));
+                    patches.push({pts2d, zAvg, br, lat});
+                }
+            }
+            patches.sort((a,b)=>a.zAvg-b.zAvg);
+            // Passe remplissage
+            for(const {pts2d,br,lat} of patches){
+                const baseHex=SPHERE_COLORS[lat%SPHERE_COLORS.length];
+                ctx.beginPath();
+                ctx.moveTo(pts2d[0][0],pts2d[0][1]);
+                for(let k=1;k<pts2d.length;k++) ctx.lineTo(pts2d[k][0],pts2d[k][1]);
+                ctx.closePath();
+                ctx.fillStyle=shadedColor(baseHex,br);
+                ctx.fill();
+            }
+            // Passe arêtes (méridiens + parallèles)
+            if(showEdges){
+                ctx.strokeStyle=isLight?'rgba(0,0,0,0.18)':'rgba(255,255,255,0.22)';
+                ctx.lineWidth=0.7;
+                ctx.lineCap='round';
+                for(const {pts2d} of patches){
+                    ctx.beginPath();
+                    ctx.moveTo(pts2d[0][0],pts2d[0][1]);
+                    for(let k=1;k<pts2d.length;k++) ctx.lineTo(pts2d[k][0],pts2d[k][1]);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            }
+            return; // rendu terminé pour la sphère
+        }
         let roundBases=[];
         if(isRound){
             const {R,h,type}=shape;
