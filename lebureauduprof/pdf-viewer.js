@@ -68,6 +68,9 @@ function _attachPenSupportToPdfToolbar(container) {
     // Bouton export 💾
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn) _addPenClick(exportBtn, () => exportBtn.click());
+    // Bouton zoom page entière
+    const zoomPageBtn2 = container.querySelector('.pdf-zoom-page');
+    if (zoomPageBtn2) _addPenClick(zoomPageBtn2, () => zoomPageBtn2.click());
     // Boutons nav ◀ ▶ : gérés directement dans reattach() avec _penHandled, pas besoin de _addPenClick ici
     // Bouton "Ouvrir un PDF" label
     const openLabel = container.querySelector('.pdf-placeholder label');
@@ -103,6 +106,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (zoomBar)     zoomBar.style.display = 'flex';
     const zoomFitBtn = container.querySelector('.pdf-zoom-fit');
     if (zoomFitBtn)  zoomFitBtn.style.display = 'inline-flex';
+    const zoomPageBtn = container.querySelector('.pdf-zoom-page');
+    if (zoomPageBtn) zoomPageBtn.style.display = 'inline-flex';
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn)   exportBtn.style.display = 'inline-flex';
     const annotBtn = container.querySelector('.pdf-annot-widget-btn');
@@ -228,6 +233,11 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             function fitScale(page) {
                 const vp0 = page.getViewport({ scale: 1 });
                 return (canvasWrap.clientWidth - 24) / vp0.width;
+            }
+
+            function fitPageScale(page) {
+                const vp0 = page.getViewport({ scale: 1 });
+                return (canvasWrap.clientHeight - 24) / vp0.height;
             }
 
             function renderPage(num) {
@@ -821,6 +831,12 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             reattach('.pdf-zoom-fit', () => {
                 zoomScale = null;
                 renderPage(currentPage);
+            });
+            reattach('.pdf-zoom-page', () => {
+                pdfDoc.getPage(currentPage).then(p => {
+                    zoomScale = fitPageScale(p);
+                    renderPage(currentPage);
+                });
             });
 
             // Zoom molette (Ctrl+molette ou Shift+molette)
