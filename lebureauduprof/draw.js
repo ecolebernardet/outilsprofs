@@ -3151,7 +3151,7 @@ function _pdfAnnotInsertText(e) {
         clientX: screenX, clientY: screenY, color, size, fontSizePx,
         onValidate(text, finalSize, finalColor) {
             if (!text.trim()) return;
-            if (api.addTextStroke) api.addTextStroke(text, finalColor ?? color, finalSize ?? size, pos.x, pos.y - 13);
+            if (api.addTextStroke) api.addTextStroke(text, finalColor ?? color, finalSize ?? size, pos.x + 5 * scaleX, pos.y - 0.01305 * canvas.height);
         }
     });
 }
@@ -3307,7 +3307,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
         font-size: ${fontSizePx}px;
         font-family: 'Segoe UI', sans-serif;
         color: ${color};
-        background: rgba(255,255,255,0.92);
+        background: rgba(255,255,255,0.75);
         border: 1.5px dashed ${color};
         border-radius: 3px;
         outline: none;
@@ -3324,7 +3324,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
         // Recalculer fontSizePx à partir de la même formule que drawStroke
         const canvas = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI && _pdfAnnotWidget._pdfAnnotAPI.getAnnotCanvas();
         const rect = canvas ? canvas.getBoundingClientRect() : { width: 600 };
-        currentFontPx = Math.round((currentSize + 8) * rect.width / 600);
+        currentFontPx = Math.round(6 * Math.pow(1.12, currentSize) * rect.width / 600);
         editor.style.fontSize = currentFontPx + 'px';
         sizeLabel.textContent = currentSize;
     }

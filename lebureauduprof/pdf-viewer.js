@@ -638,8 +638,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     // Éditeur inline positionné au clic
                     const canvasW    = annotCanvas.width;
                     const rect       = annotCanvas.getBoundingClientRect();
-                    const cssScaleX  = rect.width / canvasW;
-                    const fontSizePx = Math.round((size * 4 + 10) * canvasW / 600 * cssScaleX);
+                    const fontSizePx = Math.round(6 * Math.pow(1.12, size) * rect.width / 600);
                     const clientX    = e.touches ? e.touches[0].clientX : e.clientX;
                     const clientY    = e.touches ? e.touches[0].clientY : e.clientY;
 
