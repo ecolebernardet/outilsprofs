@@ -371,22 +371,66 @@ window.addEventListener('load', () => {
     if (savedBg && savedBg.startsWith('url(data:image')) {
         _isPdfWallpaper = true;
         const savedW = parseFloat(localStorage.getItem('boardPdfBgWidth') || '100');
-        _pdfWallpaperWidth = savedW;
         const savedRatio = parseFloat(localStorage.getItem('boardPdfBgRatio'));
         if (savedRatio) window._pdfBgNativeRatio = savedRatio;
-        _applyPdfWallpaperWidth(savedW);
+        _pdfWallpaperWidth = savedW;
+
+        // Réactiver le mode A4 en premier pour que boardH soit correct
+        if (typeof toggleA4Mode === 'function') {
+            if (!document.body.classList.contains('a4-mode')) {
+                toggleA4Mode();
+            }
+        }
+        // Ajuster la hauteur exacte du board pour éviter le décalage de rendu 1px
+        _syncBoardHeightToPdfRatio();
+
+        // Recalculer la position CSS depuis les pixels absolus sauvegardés
+        // (évite le décalage dû au changement de boardH entre sessions)
+        const boardEl = document.getElementById('board');
+        if (boardEl) {
+            const boardW = boardEl.offsetWidth;
+            const boardH = boardEl.offsetHeight;
+            const imgW   = boardW * savedW / 100;
+            const imgH   = imgW * (window._pdfBgNativeRatio || 1);
+
+            const savedOffsetPx = localStorage.getItem('boardPdfBgOffsetPx');
+            if (savedOffsetPx) {
+                const parts = savedOffsetPx.split(',');
+                const offXpx = parseFloat(parts[0]);
+                const offYpx = parseFloat(parts[1]);
+                // Recalculer les pourcentages CSS pour le board actuel
+                const denomX = boardW - imgW;
+                const denomY = boardH - imgH;
+                _pdfBgPosX = denomX !== 0 ? Math.max(0, Math.min(100, (offXpx / denomX) * 100)) : 50;
+                _pdfBgPosY = denomY !== 0 ? Math.max(0, Math.min(100, (offYpx / denomY) * 100)) : 0;
+            } else {
+                // Fallback : utiliser les pourcentages sauvegardés
+                const savedPos = localStorage.getItem('boardPdfBgPos');
+                if (savedPos) {
+                    const parts = savedPos.split(',');
+                    _pdfBgPosX = parseFloat(parts[0]) || 50;
+                    _pdfBgPosY = parseFloat(parts[1]) || 0;
+                }
+            }
+
+            boardEl.style.backgroundSize     = savedW + '% auto';
+            boardEl.style.backgroundPosition = _pdfBgPosX + '% ' + _pdfBgPosY + '%';
+            boardEl.style.backgroundRepeat   = 'no-repeat';
+            boardEl.style.backgroundColor    = '#fff';
+        }
+
         _updatePdfWallpaperPanelVisibility();
         const slider = document.getElementById('pdf-bg-width-slider');
         if (slider) slider.value = savedW;
         const label = document.getElementById('pdf-bg-width-label');
         if (label) label.textContent = Math.round(savedW) + '%';
-        // Initialiser style.width/height sur les shape-widgets après layout
+        // Initialiser style.width/height sur les shape-widgets après restauration
         setTimeout(() => {
             document.querySelectorAll('.shape-widget').forEach(w => {
                 if (!w.style.width)  w.style.width  = w.offsetWidth  + 'px';
                 if (!w.style.height) w.style.height = w.offsetHeight + 'px';
             });
-        }, 300);
+        }, 500);
     }
 });
 
@@ -394,11 +438,65 @@ window.addEventListener('load', () => {
 // SLIDER LARGEUR FOND PDF
 // =========================================================================
 
-var _isPdfWallpaper    = false;  // true quand le fond actif est un PDF capturé
-var _pdfWallpaperWidth = 100;    // largeur en % (100 = pleine largeur)
-var _pdfBgPosX        = 50;     // position X en % (50 = centré)
-var _pdfBgPosY        = 0;      // position Y en % (0 = haut)
-var _pdfPanMode       = false;  // mode panoramique actif
+var _isPdfWallpaper    = (function() {
+    const savedBg = localStorage.getItem('boardBackground');
+    return !!(savedBg && savedBg.startsWith('url(data:image'));
+})();
+// Initialiser depuis localStorage immédiatement pour que _applyPdfWallpaperWidth
+// utilise la bonne valeur de référence dès le premier appel du slider
+var _pdfWallpaperWidth = (function() {
+    const savedBg = localStorage.getItem('boardBackground');
+    if (savedBg && savedBg.startsWith('url(data:image')) {
+        const w = parseFloat(localStorage.getItem('boardPdfBgWidth'));
+        if (w && !isNaN(w)) return w;
+    }
+    return 100;
+})();
+var _pdfBgPosX = (function() {
+    const pos = localStorage.getItem('boardPdfBgPos');
+    if (pos) { const v = parseFloat(pos.split(',')[0]); if (!isNaN(v)) return v; }
+    return 50;
+})();
+var _pdfBgPosY = (function() {
+    const pos = localStorage.getItem('boardPdfBgPos');
+    if (pos) { const v = parseFloat(pos.split(',')[1]); if (!isNaN(v)) return v; }
+    return 0;
+})();
+var _pdfPanMode = false;
+
+// Activer le mode A4 immédiatement si un fond PDF était actif,
+// AVANT que restoreBoardFromJSON soit appelé (board.offsetHeight doit être correct
+// au moment où les shapes sont créées)
+if (_isPdfWallpaper) {
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof toggleA4Mode === 'function') {
+            if (!document.body.classList.contains('a4-mode')) {
+                toggleA4Mode();
+            }
+        }
+        // Ajuster la hauteur du board pour correspondre exactement à l'image PDF
+        // (évite le décalage de rendu dû au débordement de 1px)
+        _syncBoardHeightToPdfRatio();
+    });
+}
+
+/**
+ * Ajuste board.style.height pour correspondre exactement à boardW * bgRatio.
+ * Évite le décalage de rendu CSS quand l'image déborde d'1px.
+ */
+function _syncBoardHeightToPdfRatio() {
+    if (!_isPdfWallpaper) return;
+    const bgRatio = window._pdfBgNativeRatio
+        || parseFloat(localStorage.getItem('boardPdfBgRatio'));
+    if (!bgRatio) return;
+    const board = document.getElementById('board');
+    if (!board) return;
+    const boardW = board.offsetWidth;
+    const exactH = Math.ceil(boardW * bgRatio);
+    if (Math.abs(board.offsetHeight - exactH) <= 2) {
+        board.style.height = exactH + 'px';
+    }
+}
 
 /**
  * Applique la largeur du fond PDF (en %) en conservant la position courante.
@@ -413,6 +511,8 @@ function _applyPdfWallpaperWidth(pct) {
     localStorage.setItem('boardPdfBgWidth', pct);
     const label = document.getElementById('pdf-bg-width-label');
     if (label) label.textContent = Math.round(pct) + '%';
+    // Mettre à jour les offsets en pixels absolus (la taille de l'image a changé)
+    _savePdfBgOffsetPx(board);
     _rescaleDrawStrokes(oldW, pct, _pdfBgPosX, _pdfBgPosY, _pdfBgPosX, _pdfBgPosY);
 }
 
@@ -427,12 +527,29 @@ function _applyPdfBgPosition(x, y) {
     _pdfBgPosY = Math.max(0, Math.min(100, y));
     board.style.backgroundPosition = _pdfBgPosX + '% ' + _pdfBgPosY + '%';
     localStorage.setItem('boardPdfBgPos', _pdfBgPosX + ',' + _pdfBgPosY);
+    _savePdfBgOffsetPx(board);
     _rescaleDrawStrokes(_pdfWallpaperWidth, _pdfWallpaperWidth, oldX, oldY, _pdfBgPosX, _pdfBgPosY);
 }
 
 /**
- * Appelle window.rescaleStrokesForPdfBg (définie dans draw.js)
- * si un fond PDF est actif et que le ratio natif est connu.
+ * Sauvegarde la position du fond en pixels absolus pour un rechargement correct.
+ * Les pourcentages CSS dépendent de boardH qui peut changer (mode A4).
+ */
+function _savePdfBgOffsetPx(board) {
+    if (!board) board = document.getElementById('board');
+    if (!board) return;
+    const boardW = board.offsetWidth;
+    const boardH = board.offsetHeight;
+    const imgW   = boardW * _pdfWallpaperWidth / 100;
+    const bgRatio = window._pdfBgNativeRatio || parseFloat(localStorage.getItem('boardPdfBgRatio')) || 1;
+    const imgH   = imgW * bgRatio;
+    const offXpx = (boardW - imgW) * (_pdfBgPosX / 100);
+    const offYpx = (boardH - imgH) * (_pdfBgPosY / 100);
+    localStorage.setItem('boardPdfBgOffsetPx', offXpx + ',' + offYpx);
+}
+
+/**
+ * Appelle window.rescaleStrokesForPdfBg si un fond PDF est actif.
  */
 function _rescaleDrawStrokes(oldW, newW, oldPosX, oldPosY, newPosX, newPosY) {
     if (!_isPdfWallpaper) return;
@@ -580,14 +697,18 @@ function activatePdfWallpaperSlider(initialWidth) {
     _pdfWallpaperWidth = initialWidth || 100;
     _pdfBgPosX = 50;
     _pdfBgPosY = 0;
+    localStorage.setItem('boardPdfBgPos', '50,0');
     const slider = document.getElementById('pdf-bg-width-slider');
     if (slider) slider.value = _pdfWallpaperWidth;
     const label = document.getElementById('pdf-bg-width-label');
     if (label) label.textContent = Math.round(_pdfWallpaperWidth) + '%';
     if (_pdfPanMode) _togglePdfPanMode();
     _updatePdfWallpaperPanelVisibility();
-    // Initialiser style.width/height sur tous les shape-widgets
-    // pour que le premier cran du slider puisse les lire correctement
+    // Ajuster la hauteur du board pour correspondre exactement à l'image PDF
+    _syncBoardHeightToPdfRatio();
+    // Sauvegarder l'offset initial en pixels absolus
+    _savePdfBgOffsetPx();
+    // Initialiser style.width/height sur les shape-widgets existants
     document.querySelectorAll('.shape-widget').forEach(w => {
         if (!w.style.width)  w.style.width  = w.offsetWidth  + 'px';
         if (!w.style.height) w.style.height = w.offsetHeight + 'px';
