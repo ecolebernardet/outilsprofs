@@ -63,15 +63,57 @@ function openTextToolbar(widget) {
 // BARRE TEXTE GLOBALE
 // =========================================================================
 let isTextPlacementMode = false;
+let _textIgnoreNextBoardClick = false;
+
+const _TEXT_MODE_DISABLED_BTNS = ['draw-free-btn','draw-highlight-btn','eraser-btn','draw-figures-btn','draw-select-btn','pdf-annot-mode-btn'];
+
+function _disableDrawBtns() {
+    _TEXT_MODE_DISABLED_BTNS.forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        b.style.opacity = '0.3';
+        b.style.pointerEvents = 'none';
+        b._textModeDisabled = true;
+        // Intercepter le clic pour sortir du mode texte puis déclencher l'action
+        b._textModeClickHandler = function(e) {
+            e.stopImmediatePropagation();
+            closeGlobalToolbar();
+            setTimeout(() => b.click(), 10);
+        };
+        b.addEventListener('click', b._textModeClickHandler, true);
+        // Rendre cliquable malgré pointerEvents:none via un overlay
+        b.style.pointerEvents = 'auto';
+    });
+}
+
+function _enableDrawBtns() {
+    _TEXT_MODE_DISABLED_BTNS.forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        b.style.opacity = '';
+        b.style.pointerEvents = '';
+        b._textModeDisabled = false;
+        if (b._textModeClickHandler) {
+            b.removeEventListener('click', b._textModeClickHandler, true);
+            b._textModeClickHandler = null;
+        }
+    });
+}
 
 function toggleGlobalToolbar() {
-    // Active le mode placement texte sur le bureau
     const boardEl = document.getElementById('board');
+    const btn = document.getElementById('pdf-text-btn');
     if (!isTextPlacementMode) {
         isTextPlacementMode = true;
-        boardEl.classList.add('cursor-pencil');
-        if (typeof stopDrawing === 'function') stopDrawing();
+        // Stopper le mode dessin sans fermer la toolbar
+        if (typeof stopDrawing_keepToolbar === 'function') stopDrawing_keepToolbar();
+        if (typeof stopEraserMode === 'function') stopEraserMode();
         if (typeof stopShapeToolbar === 'function') stopShapeToolbar();
+        // Appliquer curseur texte après clearDrawCursor
+        setTimeout(() => { boardEl.style.setProperty('cursor', 'text', 'important'); }, 0);
+        // Désactiver les autres boutons
+        _disableDrawBtns();
+        if (btn) { btn.style.setProperty('background', '#7ab8f5', 'important'); btn.style.setProperty('color', '#000', 'important'); btn.style.setProperty('border-color', '#7ab8f5', 'important'); }
     } else {
         closeGlobalToolbar();
     }
@@ -79,44 +121,212 @@ function toggleGlobalToolbar() {
 
 function closeGlobalToolbar() {
     document.getElementById('global-toolbar').style.display = 'none';
-    document.getElementById('board').classList.remove('cursor-pencil');
+    const boardEl = document.getElementById('board');
+    boardEl.style.removeProperty('cursor');
     isTextPlacementMode = false;
-    // Sortir du mode édition sur le widget actif
+    _enableDrawBtns();
+    const btn = document.getElementById('pdf-text-btn');
+    if (btn) { btn.style.removeProperty('background'); btn.style.removeProperty('color'); btn.style.removeProperty('border-color'); btn.style.background = '#2a2a2e'; btn.style.color = '#aaa'; btn.style.borderColor = '#444'; }
     if (currentActiveWidget) {
         const ed = currentActiveWidget.querySelector('.editor-content');
-        if (ed) {
-            ed.contentEditable = 'false';
-            ed.style.cursor = 'grab';
-            ed.style.userSelect = 'none';
-        }
-        currentActiveWidget.style.cursor = 'grab';
+        if (ed) { ed.contentEditable = 'false'; ed.style.cursor = ''; ed.style.userSelect = 'none'; }
+        currentActiveWidget.style.cursor = '';
         currentActiveWidget = null;
     }
 }
 
 document.getElementById('board').addEventListener('click', function(e) {
-    if (isTextPlacementMode && e.target.id === 'board') {
-        const rect = this.getBoundingClientRect();
-        const x = e.clientX - rect.left, y = e.clientY - rect.top;
-        const widget = createWidget('text');
-        widget.style.left = x + 'px'; widget.style.top = y + 'px';
-        const editableArea = widget.querySelector('.editor-content');
-        if (editableArea) setTimeout(() => editableArea.focus(), 10);
-        isTextPlacementMode = false;
-        this.classList.remove('cursor-pencil');
-        window._nextTextOpenCreate = false; // déjà géré ci-dessous
-        const editableArea2 = widget.querySelector('.editor-content');
-        if (editableArea2) {
-            setTimeout(() => {
-                if (widget._enterEditMode) widget._enterEditMode();
-                openTextToolbar(widget);
-            }, 20);
+    if (!isTextPlacementMode) {
+        if (e.target.id === 'board') {
+            const tb = document.getElementById('global-toolbar');
+            if (tb && tb.style.display !== 'none') closeGlobalToolbar();
         }
-        saveBoard();
-    } else if (e.target.id === 'board') {
-        const tb = document.getElementById('global-toolbar');
-        if (tb.style.display === 'block') closeGlobalToolbar();
+        return;
     }
+
+    // Clic dans un widget → ignorer
+    if (e.target.closest('.widget')) return;
+
+    // Clic après blur → ignorer
+    if (_textIgnoreNextBoardClick) {
+        _textIgnoreNextBoardClick = false;
+        return;
+    }
+
+    const rect = this.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const widget = createWidget('text', x + 'px', y + 'px');
+
+    // Supprimer la croix de déplacement
+    const dragHandle = widget.querySelector('.drag-handle');
+    if (dragHandle) dragHandle.remove();
+
+    // Retirer les boutons épingler et envoyer derrière
+    const pinHandle = widget.querySelector('.widget-pin-handle');
+    if (pinHandle) pinHandle.remove();
+    const backHandle = widget.querySelector('.widget-back-handle');
+    if (backHandle) backHandle.remove();
+
+    // Ajouter un bouton d'ancrage qui fusionne le texte dans le canvas de dessin
+    const actionBar = widget.querySelector('.widget-action-bar');
+    if (actionBar) {
+        const anchorHandle = document.createElement('div');
+        anchorHandle.className = 'widget-anchor-handle';
+        anchorHandle.title = 'Ancrer le texte sur le fond (devient un dessin)';
+        anchorHandle.textContent = '⚓';
+        anchorHandle.style.cursor = 'pointer';
+        anchorHandle.onmousedown = function(e) { e.stopPropagation(); e.preventDefault(); };
+        anchorHandle.ontouchstart = function(e) { e.stopPropagation(); };
+        anchorHandle.onclick = function(e) {
+            e.stopPropagation();
+            // Récupérer le texte et les styles du widget
+            const ed = widget.querySelector('.editor-content');
+            if (!ed) return;
+            const text = ed.innerText || '';
+            if (!text.trim()) { widget.remove(); return; }
+
+            // Coordonnées du contenu dans le board
+            const boardEl = document.getElementById('board');
+            const boardRect = boardEl.getBoundingClientRect();
+            const edRect = ed.getBoundingClientRect();
+            const bxCSS = edRect.left - boardRect.left + 10;
+            const byCSS = edRect.top  - boardRect.top + 17;
+
+            // Déterminer le ratio canvas/board pour compenser le DPR ou tout autre scale
+            // On cherche le canvas de dessin actif (fond PDF ou canvas draw normal)
+            let canvasScaleX = 1, canvasScaleY = 1;
+            const activeCanvas = boardEl.querySelector('#_bg-annot-canvas')
+                              || boardEl.querySelector('canvas.draw-canvas')
+                              || boardEl.querySelector('canvas');
+            if (activeCanvas) {
+                const cssW = activeCanvas.offsetWidth  || boardEl.offsetWidth;
+                const cssH = activeCanvas.offsetHeight || boardEl.offsetHeight;
+                if (cssW > 0) canvasScaleX = activeCanvas.width  / cssW;
+                if (cssH > 0) canvasScaleY = activeCanvas.height / cssH;
+            }
+            const bx = bxCSS * canvasScaleX;
+            const by = byCSS * canvasScaleY;
+
+            // Taille et couleur du texte
+            const cs = window.getComputedStyle(ed);
+            const fontSizeCSS = parseFloat(cs.fontSize) || 28;
+            // Appliquer le même ratio que les coordonnées pour que la taille reste cohérente
+            const fontSize = fontSizeCSS * canvasScaleX;
+            const color = cs.color || '#111111';
+            const fontFamily = cs.fontFamily || "'Segoe UI', sans-serif";
+
+            // Ajouter un stroke par caractère pour permettre l'effacement partiel à la gomme
+            if (typeof strokes !== 'undefined' && typeof redrawStrokes === 'function') {
+                if (typeof snapshotNow === 'function') snapshotNow();
+
+                // Canvas temporaire pour mesurer les largeurs de caractères
+                const measCanvas = document.createElement('canvas');
+                const measCtx = measCanvas.getContext('2d');
+                measCtx.font = `${fontSize}px ${fontFamily}`;
+
+                // Traiter le texte ligne par ligne (gestion des retours à la ligne)
+                const lineHeight = fontSize * 1.3;
+                const lines = text.split('\n');
+
+                lines.forEach((line, lineIndex) => {
+                    const lineY = by + lineIndex * lineHeight;
+                    let cursorX = bx;
+
+                    // Un stroke par caractère sur cette ligne
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        const charWidth = measCtx.measureText(char).width;
+
+                        // Ignorer les espaces (pas de stroke, juste avancer le curseur)
+                        if (char !== ' ') {
+                            strokes.push({
+                                type: 'text',
+                                text: char,
+                                x: cursorX,
+                                y: lineY,
+                                size: fontSize,
+                                color,
+                                fontFamily,
+                                points: [{ x: cursorX, y: lineY }, { x: cursorX + charWidth, y: lineY + fontSize }]
+                            });
+                        }
+                        cursorX += charWidth;
+                    }
+                });
+
+                redrawStrokes();
+                if (typeof saveBoard === 'function') saveBoard();
+            }
+            widget.remove();
+        };
+        anchorHandle.insertBefore = undefined; // nettoyage
+        actionBar.insertBefore(anchorHandle, actionBar.firstChild);
+    }
+
+    // Corriger la position : mesurer l'offset réel après rendu
+    setTimeout(() => {
+        const content2 = widget.querySelector('.editor-content');
+        if (content2) {
+            const widgetRect  = widget.getBoundingClientRect();
+            const contentRect = content2.getBoundingClientRect();
+            const boardRect   = document.getElementById('board').getBoundingClientRect();
+            const offsetY = contentRect.top  - boardRect.top  - y;
+            const offsetX = contentRect.left - boardRect.left - x;
+            if (offsetY !== 0) widget.style.top  = (parseFloat(widget.style.top)  - offsetY - 30) + 'px';
+            if (offsetX !== 0) widget.style.left = (parseFloat(widget.style.left) - offsetX) + 'px';
+        }
+    }, 30);
+
+    // Fond transparent automatique
+    widget.style.background = 'transparent';
+    widget.style.boxShadow  = 'none';
+    widget.dataset.bgOpacity = '0';
+    widget.dataset.bgColor   = 'transparent';
+    const container = widget.querySelector('.editor-container');
+    if (container) { container.style.background = 'transparent'; container.style.boxShadow = 'none'; }
+    const content = widget.querySelector('.editor-content');
+    if (content) {
+        content.style.background = 'transparent';
+        // Appliquer la couleur courante de la toolbar draw
+        const drawColor = window._drawColor
+            || (document.querySelector('#cpick-draw-color .cpick-swatch')?.style?.background)
+            || '#111111';
+        content.style.color = drawColor;
+        // Appliquer la taille de texte sélectionnée
+        const fontSize = window._textWidgetSize
+            || parseInt(document.getElementById('text-size-label')?.textContent) || 24;
+        content.style.fontSize = fontSize + 'px';
+    }
+
+    // Rester en mode placement
+    const self = this;
+    setTimeout(() => { self.style.setProperty('cursor', 'text', 'important'); }, 0);
+    window._nextTextOpenCreate = false;
+
+    // Au blur : stopper dessin + supprimer si vide + bloquer prochain clic board
+    if (content) {
+        content.addEventListener('blur', function _onBlur() {
+            content.removeEventListener('blur', _onBlur);
+            if (typeof stopDrawing_keepToolbar === 'function') stopDrawing_keepToolbar();
+            _textIgnoreNextBoardClick = true;
+            setTimeout(() => {
+                const boardEl = document.getElementById('board');
+                if (boardEl && isTextPlacementMode) boardEl.style.setProperty('cursor', 'text', 'important');
+                const txt  = content.innerText || '';
+                const html = content.innerHTML.replace(/<br\s*\/?>/gi, '').trim();
+                if (!txt.trim() && !html) widget.remove();
+                setTimeout(() => { _textIgnoreNextBoardClick = false; }, 400);
+            }, 50);
+        });
+    }
+
+    setTimeout(() => {
+        if (widget._enterEditMode) widget._enterEditMode();
+        openTextToolbar(widget);
+        if (content) content.focus();
+    }, 20);
+    saveBoard();
 });
 
 function formatGlobal(cmd, val=null) {

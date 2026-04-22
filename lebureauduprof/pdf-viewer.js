@@ -68,6 +68,9 @@ function _attachPenSupportToPdfToolbar(container) {
     // Bouton export 💾
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn) _addPenClick(exportBtn, () => exportBtn.click());
+    // Bouton fond d'écran 🖼️
+    const wallpaperBtn = container.querySelector('.pdf-wallpaper-btn');
+    if (wallpaperBtn) _addPenClick(wallpaperBtn, () => wallpaperBtn.click());
     // Bouton zoom page entière
     const zoomPageBtn2 = container.querySelector('.pdf-zoom-page');
     if (zoomPageBtn2) _addPenClick(zoomPageBtn2, () => zoomPageBtn2.click());
@@ -110,6 +113,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (zoomPageBtn) zoomPageBtn.style.display = 'inline-flex';
     const exportBtn = container.querySelector('.pdf-export-btn');
     if (exportBtn)   exportBtn.style.display = 'inline-flex';
+    const wallpaperBtn = container.querySelector('.pdf-wallpaper-btn');
+    if (wallpaperBtn) wallpaperBtn.style.display = 'inline-flex';
     const annotBtn = container.querySelector('.pdf-annot-widget-btn');
     if (annotBtn)    annotBtn.style.display = 'inline-flex';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
@@ -940,6 +945,86 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             });
             reattach('.pdf-next', () => {
                 if (currentPage < totalPages) { currentPage++; renderPage(currentPage); }
+            });
+
+            // ── Bouton "Fond d'écran" : rendu complet de la page courante en haute résolution ──
+            reattach('.pdf-wallpaper-btn', () => {
+                pdfDoc.getPage(currentPage).then(page => {
+                    // Calcul de l'échelle : on cible la hauteur réelle de l'écran en pixels physiques
+                    // pour que la page A4 remplisse exactement le fond sans flou
+                    const dpr = window.devicePixelRatio || 1;
+                    const vp0 = page.getViewport({ scale: 1 });
+                    // Échelle pour que la hauteur de la page == hauteur écran physique
+                    const scaleH = (screen.height * dpr) / vp0.height;
+                    // Échelle pour que la largeur de la page == largeur écran physique
+                    const scaleW = (screen.width  * dpr) / vp0.width;
+                    // On prend le max pour couvrir l'écran dans les deux dimensions (contain = min)
+                    const renderScale = Math.max(scaleH, scaleW);
+
+                    const viewport = page.getViewport({ scale: renderScale });
+
+                    // Canvas offscreen — page complète, indépendant du zoom/scroll du widget
+                    const offCanvas = document.createElement('canvas');
+                    offCanvas.width  = Math.round(viewport.width);
+                    offCanvas.height = Math.round(viewport.height);
+                    const offCtx = offCanvas.getContext('2d');
+
+                    const renderTask2 = page.render({ canvasContext: offCtx, viewport });
+                    renderTask2.promise.then(() => {
+                        // Fusionner les annotations si présentes (rééchantillonnées à la bonne taille)
+                        const layer = getLayer(currentPage);
+                        if (layer && layer.strokes && layer.strokes.length > 0) {
+                            const _origW = annotCanvas.width;
+                            Object.defineProperty(annotCanvas, 'width', { value: offCanvas.width, configurable: true });
+                            for (const stroke of layer.strokes) {
+                                drawStroke(offCtx, stroke);
+                            }
+                            Object.defineProperty(annotCanvas, 'width', { value: _origW, configurable: true });
+                        }
+
+                        // Export en JPEG (meilleure compression, qualité suffisante pour un fond)
+                        const dataUrl = offCanvas.toDataURL('image/jpeg', 0.92);
+                        const bgValue = `url(${dataUrl})`;
+
+                        // Stocker le ratio natif h/w pour que background.js puisse
+                        // calculer la hauteur à n'importe quelle échelle
+                        window._pdfBgNativeRatio = offCanvas.height / offCanvas.width;
+                        localStorage.setItem('boardPdfBgRatio', window._pdfBgNativeRatio);
+
+                        // Appliquer via applyBackground puis forcer 100% largeur (format feuille A4)
+                        const board = document.getElementById('board');
+                        if (typeof applyBackground === 'function') applyBackground(bgValue);
+                        if (board) {
+                            board.style.backgroundSize     = '100% auto';
+                            board.style.backgroundPosition = 'top center';
+                            board.style.backgroundRepeat   = 'no-repeat';
+                            board.style.backgroundColor    = '#fff';
+                        }
+                        // Activer le mode A4 si pas déjà actif
+                        if (typeof toggleA4Mode === 'function') {
+                            if (!document.body.classList.contains('a4-mode')) {
+                                toggleA4Mode();
+                            }
+                        }
+                        if (typeof saveBg === 'function') saveBg(bgValue);
+
+                        // Activer le slider de largeur PDF
+                        if (typeof activatePdfWallpaperSlider === 'function') {
+                            activatePdfWallpaperSlider(100);
+                        }
+
+                        // Feedback visuel
+                        const btn = container.querySelector('.pdf-wallpaper-btn');
+                        if (btn) {
+                            const orig = btn.textContent;
+                            btn.textContent = '✓';
+                            btn.style.color = '#4caf50';
+                            setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1200);
+                        }
+                    }).catch(err => {
+                        console.error('Wallpaper render error:', err);
+                    });
+                });
             });
 
             renderPage(currentPage);

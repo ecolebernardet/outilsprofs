@@ -126,6 +126,8 @@ function _highlightCursorUrl() {
 
 function clearDrawCursor() {
     if (board) {
+        // Ne pas écraser le curseur texte si le mode placement texte est actif
+        if (typeof isTextPlacementMode !== 'undefined' && isTextPlacementMode) return;
         board.style.removeProperty('cursor');
     }
 }
@@ -1073,7 +1075,127 @@ function redrawStrokes(extra = null, extra2 = null) {
     });
 }
 
+/**
+ * Rescale tous les strokes quand le fond PDF change d'échelle ou de position.
+ * Appelée depuis background.js via window.rescaleStrokesForPdfBg().
+ *
+ * Paramètres : état AVANT et APRÈS le changement
+ *   oldW/newW   : largeur du fond en % du board (ex: 100, 80)
+ *   oldPosX/Y   : position background-position en % (ex: 50, 0)
+ *   newPosX/Y   : nouvelle position
+ *   bgRatio     : hauteur/largeur native de l'image (ex: 1.414 pour A4)
+ */
+window.rescaleStrokesForPdfBg = function(oldW, newW, oldPosX, oldPosY, newPosX, newPosY, bgRatio) {
+    if (!board) return;
+    const boardW = board.offsetWidth;
+    const boardH = board.offsetHeight;
+
+    // Zone du fond AVANT (en px canvas)
+    const oldImgW = boardW * oldW / 100;
+    const oldImgH = oldImgW * bgRatio;
+    const oldOffX = (boardW - oldImgW) * (oldPosX / 100);
+    const oldOffY = (boardH - oldImgH) * (oldPosY / 100);
+
+    // Zone du fond APRÈS (en px canvas)
+    const newImgW = boardW * newW / 100;
+    const newImgH = newImgW * bgRatio;
+    const newOffX = (boardW - newImgW) * (newPosX / 100);
+    const newOffY = (boardH - newImgH) * (newPosY / 100);
+
+    // Transforme un point : board coords → fond relatif → nouvelles board coords
+    function transformPt(p) {
+        // 1. Coordonnées relatives au fond (0-1)
+        const rx = (p.x - oldOffX) / oldImgW;
+        const ry = (p.y - oldOffY) / oldImgH;
+        // 2. Nouvelles coordonnées board
+        return {
+            x: rx * newImgW + newOffX,
+            y: ry * newImgH + newOffY
+        };
+    }
+
+    strokes.forEach(s => {
+        if (s.points) {
+            s.points = s.points.map(transformPt);
+        }
+        // Stroke texte ancré
+        if (s.type === 'text') {
+            const np = transformPt({ x: s.x, y: s.y });
+            s.x = np.x;
+            s.y = np.y;
+            // Rescaler la taille de police proportionnellement
+            s.size = s.size * (newImgW / oldImgW);
+            // Mettre à jour points[] factices aussi
+            if (s.points) s.points = s.points.map(transformPt);
+        }
+    });
+
+    // Rescaler aussi les shape-widgets (cercles, rectangles, triangles…)
+    // qui sont des éléments DOM positionnés en px dans le board
+    document.querySelectorAll('.shape-widget').forEach(w => {
+        const wLeft   = parseFloat(w.style.left);
+        const wTop    = parseFloat(w.style.top);
+        // Lire les dimensions depuis le SVG interne (source de vérité pour les shape-widgets)
+        const svg     = w.querySelector('svg');
+        const svgW    = svg ? parseFloat(svg.getAttribute('width'))  : 0;
+        const svgH    = svg ? parseFloat(svg.getAttribute('height')) : 0;
+        const wWidth  = svgW || parseFloat(w.style.width)  || w.offsetWidth;
+        const wHeight = svgH || parseFloat(w.style.height) || w.offsetHeight;
+        if (isNaN(wLeft) || isNaN(wTop) || !wWidth || !wHeight) return;
+
+        // Transformer le coin haut-gauche et le coin bas-droit
+        const np  = transformPt({ x: wLeft,          y: wTop });
+        const nbr = transformPt({ x: wLeft + wWidth,  y: wTop + wHeight });
+        const newW = nbr.x - np.x;
+        const newH = nbr.y - np.y;
+
+        // Mettre à jour la position CSS
+        w.style.left = np.x + 'px';
+        w.style.top  = np.y + 'px';
+
+        // Mettre à jour le SVG (source de vérité pour la taille visuelle)
+        if (svg) {
+            svg.setAttribute('width',   newW);
+            svg.setAttribute('height',  newH);
+            svg.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+            // Reconstruire le contenu SVG si buildShapeSVG est disponible
+            if (typeof buildShapeSVG === 'function') {
+                const shapeId = w.dataset.shapeType;
+                const sc = w.dataset.strokeColor;
+                const fc = w.dataset.fillColor;
+                const fo = parseFloat(w.dataset.fillOpacity) || 0;
+                const sw = parseInt(w.dataset.strokeWidth)   || 4;
+                svg.innerHTML = buildShapeSVG(shapeId, newW, newH, sc, fc, fo, sw);
+            }
+        }
+
+        // Mettre à jour les data-percent pour la cohérence
+        const curW  = board.offsetWidth;
+        const curVH = board.offsetHeight;
+        w.dataset.wPercent = (newW / curW)  * 100;
+        w.dataset.hPercent = (newH / curVH) * 100;
+        w.dataset.leftPercent = (np.x / curW)  * 100;
+        w.dataset.topPercent  = (np.y / curVH) * 100;
+    });
+
+    redrawStrokes();
+};
+
+
 function drawStroke(stroke, highlight = false, ctx = drawCtx) {
+    // Stroke texte ancré (créé depuis un widget texte)
+    if (stroke.type === 'text') {
+        ctx.save();
+        ctx.font = `${stroke.size}px ${stroke.fontFamily || "'Segoe UI', sans-serif"}`;
+        ctx.fillStyle = highlight ? '#4a90e2' : stroke.color;
+        ctx.textBaseline = 'top';
+        const lines = (stroke.text || '').split('\n');
+        lines.forEach((line, i) => {
+            ctx.fillText(line, stroke.x, stroke.y + i * stroke.size * 1.3);
+        });
+        ctx.restore();
+        return;
+    }
     if (!stroke.points || stroke.points.length < 2) return;
     // Tap unique → cercle plein
     if (stroke.dot) {
@@ -1464,6 +1586,27 @@ function toggleSelectMode() {
     if (hlBtnSel) { hlBtnSel.style.borderColor='#444'; hlBtnSel.style.background='#2a2a2e'; hlBtnSel.style.color='#aaa'; hlBtnSel.classList.remove('btn-mode-active'); }
     _setBtnActive('draw-select-btn', true);
 }
+// ── Mode placement texte sur le board depuis la toolbar draw ─────────────
+var _boardTextPlacementActive = false;
+
+function _startBoardTextPlacement() {
+    // Si déjà en mode annotation fond avec outil texte → désactiver
+    if (_pdfAnnotMode && typeof _bgAnnotActive !== 'undefined' && _bgAnnotActive && _pdfAnnotTool === 'text') {
+        if (typeof _toggleBgAnnotMode === 'function') _toggleBgAnnotMode();
+        return;
+    }
+    // Activer le mode annotation sur le fond si pas encore actif
+    if (typeof _toggleBgAnnotMode === 'function') {
+        if (typeof _bgAnnotActive === 'undefined' || !_bgAnnotActive) {
+            _toggleBgAnnotMode();
+        }
+    }
+    // Passer en outil texte
+    if (typeof setPdfAnnotTool === 'function') {
+        setPdfAnnotTool('text');
+    }
+}
+
 function stopDrawing() {
     isDrawMode = false;
     isPainting = false;
@@ -1813,6 +1956,21 @@ function eraseAt(pos) {
 
     const newStrokes = [];
     strokes.forEach(stroke => {
+        // Strokes texte : supprimer si la gomme touche la bounding box du texte
+        if (stroke.type === 'text') {
+            if (!drawCtx) { newStrokes.push(stroke); return; }
+            drawCtx.save();
+            drawCtx.font = `${stroke.size}px ${stroke.fontFamily || "'Segoe UI', sans-serif"}`;
+            const lines = (stroke.text || '').split('\n');
+            const textW = Math.max(...lines.map(l => drawCtx.measureText(l).width));
+            const textH = lines.length * stroke.size * 1.3;
+            drawCtx.restore();
+            const inX = pos.x >= stroke.x - r && pos.x <= stroke.x + textW + r;
+            const inY = pos.y >= stroke.y - r && pos.y <= stroke.y + textH + r;
+            if (inX && inY) return; // supprimer ce stroke texte
+            newStrokes.push(stroke);
+            return;
+        }
         // Densifier à un pas de 4px pour que la gomme puisse couper n'importe où
         const pts = densify(stroke.points, 4);
         let current = [];
@@ -2206,7 +2364,7 @@ var _pdfPrevTool      = 'pen';  // outil mémorisé avant de passer en pan
 
 // Boutons supplémentaires (surligneur, texte, annuler, effacer) affichés
 // uniquement quand le mode est actif.
-var _PDF_EXTRA_BTNS = ['pdf-pan-btn','pdf-text-btn'];
+var _PDF_EXTRA_BTNS = ['pdf-pan-btn'];
 
 function _dtClearAction() {
     if (_pdfAnnotMode) {

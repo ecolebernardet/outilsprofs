@@ -324,12 +324,13 @@ function _updateRulingPanelVisibility() {
     panel.style.display = visible ? 'flex' : 'none';
 }
 
-// Patch applyBackground pour tracker le preset actif et afficher/masquer le panneau
+// Patch unique applyBackground : gère réglures ET fond PDF
 const _origApplyBackground = applyBackground;
 applyBackground = function(value) {
     _origApplyBackground(value);
+
+    // ── Réglures ──
     _currentBgKey = RULING_PRESETS.includes(value) ? value : null;
-    // Restaurer l'échelle sauvegardée
     if (_currentBgKey) {
         const saved = parseFloat(localStorage.getItem('boardBgScale') || '1');
         _bgScaleFactor = saved;
@@ -338,11 +339,18 @@ applyBackground = function(value) {
         applyBgScale(saved);
     }
     _updateRulingPanelVisibility();
+
+    // ── Fond PDF ──
+    if (!value || !value.startsWith('url(data:image')) {
+        _isPdfWallpaper = false;
+        if (typeof _updatePdfWallpaperPanelVisibility === 'function') _updatePdfWallpaperPanelVisibility();
+    }
 };
 
 // Init au chargement
 window.addEventListener('load', () => {
     _initRulingScalePanel();
+    _initPdfWallpaperPanel();
     // Restaurer si un preset réglure était actif
     const savedBg = localStorage.getItem('boardBackground');
     if (RULING_PRESETS.includes(savedBg)) {
@@ -359,4 +367,545 @@ window.addEventListener('load', () => {
         applyBackground(DEFAULT_BG);
         localStorage.setItem('boardBackground', DEFAULT_BG);
     }
+    // Restaurer le slider PDF si un fond PDF était actif
+    if (savedBg && savedBg.startsWith('url(data:image')) {
+        _isPdfWallpaper = true;
+        const savedW = parseFloat(localStorage.getItem('boardPdfBgWidth') || '100');
+        _pdfWallpaperWidth = savedW;
+        const savedRatio = parseFloat(localStorage.getItem('boardPdfBgRatio'));
+        if (savedRatio) window._pdfBgNativeRatio = savedRatio;
+        _applyPdfWallpaperWidth(savedW);
+        _updatePdfWallpaperPanelVisibility();
+        const slider = document.getElementById('pdf-bg-width-slider');
+        if (slider) slider.value = savedW;
+        const label = document.getElementById('pdf-bg-width-label');
+        if (label) label.textContent = Math.round(savedW) + '%';
+        // Initialiser style.width/height sur les shape-widgets après layout
+        setTimeout(() => {
+            document.querySelectorAll('.shape-widget').forEach(w => {
+                if (!w.style.width)  w.style.width  = w.offsetWidth  + 'px';
+                if (!w.style.height) w.style.height = w.offsetHeight + 'px';
+            });
+        }, 300);
+    }
 });
+
+// =========================================================================
+// SLIDER LARGEUR FOND PDF
+// =========================================================================
+
+var _isPdfWallpaper    = false;  // true quand le fond actif est un PDF capturé
+var _pdfWallpaperWidth = 100;    // largeur en % (100 = pleine largeur)
+var _pdfBgPosX        = 50;     // position X en % (50 = centré)
+var _pdfBgPosY        = 0;      // position Y en % (0 = haut)
+var _pdfPanMode       = false;  // mode panoramique actif
+
+/**
+ * Applique la largeur du fond PDF (en %) en conservant la position courante.
+ */
+function _applyPdfWallpaperWidth(pct) {
+    const board = document.getElementById('board');
+    if (!board) return;
+    const oldW = _pdfWallpaperWidth;
+    _pdfWallpaperWidth = pct;
+    board.style.backgroundSize     = pct + '% auto';
+    board.style.backgroundPosition = _pdfBgPosX + '% ' + _pdfBgPosY + '%';
+    localStorage.setItem('boardPdfBgWidth', pct);
+    const label = document.getElementById('pdf-bg-width-label');
+    if (label) label.textContent = Math.round(pct) + '%';
+    _rescaleDrawStrokes(oldW, pct, _pdfBgPosX, _pdfBgPosY, _pdfBgPosX, _pdfBgPosY);
+}
+
+/**
+ * Applique la position du fond PDF.
+ */
+function _applyPdfBgPosition(x, y) {
+    const board = document.getElementById('board');
+    if (!board) return;
+    const oldX = _pdfBgPosX, oldY = _pdfBgPosY;
+    _pdfBgPosX = Math.max(0, Math.min(100, x));
+    _pdfBgPosY = Math.max(0, Math.min(100, y));
+    board.style.backgroundPosition = _pdfBgPosX + '% ' + _pdfBgPosY + '%';
+    localStorage.setItem('boardPdfBgPos', _pdfBgPosX + ',' + _pdfBgPosY);
+    _rescaleDrawStrokes(_pdfWallpaperWidth, _pdfWallpaperWidth, oldX, oldY, _pdfBgPosX, _pdfBgPosY);
+}
+
+/**
+ * Appelle window.rescaleStrokesForPdfBg (définie dans draw.js)
+ * si un fond PDF est actif et que le ratio natif est connu.
+ */
+function _rescaleDrawStrokes(oldW, newW, oldPosX, oldPosY, newPosX, newPosY) {
+    if (!_isPdfWallpaper) return;
+    const bgRatio = window._pdfBgNativeRatio
+        || parseFloat(localStorage.getItem('boardPdfBgRatio'));
+    if (!bgRatio) return;
+    if (typeof window.rescaleStrokesForPdfBg === 'function') {
+        window.rescaleStrokesForPdfBg(oldW, newW, oldPosX, oldPosY, newPosX, newPosY, bgRatio);
+    }
+}
+
+/**
+ * Active / désactive le mode panoramique du fond PDF.
+ */
+function _togglePdfPanMode() {
+    _pdfPanMode = !_pdfPanMode;
+    const btn   = document.getElementById('pdf-pan-btn');
+    const board = document.getElementById('board');
+    if (_pdfPanMode) {
+        if (btn) { btn.style.background = '#7ab8f5'; btn.style.color = '#000'; btn.title = 'Désactiver le panoramique'; }
+        if (board) board.style.cursor = 'grab';
+        _attachPdfPanListeners();
+    } else {
+        if (btn) { btn.style.background = 'rgba(255,255,255,0.12)'; btn.style.color = '#fff'; btn.title = 'Déplacer le fond (panoramique)'; }
+        if (board) board.style.cursor = '';
+        _detachPdfPanListeners();
+    }
+}
+
+// ── Listeners panoramique ──────────────────────────────────────────────────
+var _panDragging = false;
+var _panStartX = 0, _panStartY = 0;
+var _panStartBgX = 50, _panStartBgY = 0;
+
+function _onPanMouseDown(e) {
+    if (!_pdfPanMode) return;
+    if (e.button !== 0) return;
+    // Ne pas interférer si un widget est cliqué
+    if (e.target.closest && e.target.closest('.widget')) return;
+    _panDragging  = true;
+    _panStartX    = e.clientX;
+    _panStartY    = e.clientY;
+    _panStartBgX  = _pdfBgPosX;
+    _panStartBgY  = _pdfBgPosY;
+    document.getElementById('board').style.cursor = 'grabbing';
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function _onPanMouseMove(e) {
+    if (!_panDragging) return;
+    const board = document.getElementById('board');
+    if (!board) return;
+    // Sensibilité : déplacer de 1px souris = déplacer le fond proportionnellement
+    const boardW = board.offsetWidth;
+    const boardH = board.offsetHeight;
+    const dx = e.clientX - _panStartX;
+    const dy = e.clientY - _panStartY;
+    // Convertir px → % de position background (inversé : tirer à droite → fond va à gauche)
+    const newX = _panStartBgX - (dx / boardW) * 100 * (100 / _pdfWallpaperWidth) * 1.2;
+    const newY = _panStartBgY - (dy / boardH) * 100 * 0.3;
+    _applyPdfBgPosition(newX, newY);
+}
+
+function _onPanMouseUp() {
+    if (!_panDragging) return;
+    _panDragging = false;
+    const board = document.getElementById('board');
+    if (board) board.style.cursor = _pdfPanMode ? 'grab' : '';
+}
+
+function _attachPdfPanListeners() {
+    const board = document.getElementById('board');
+    if (!board) return;
+    board.addEventListener('mousedown', _onPanMouseDown, true);
+    window.addEventListener('mousemove', _onPanMouseMove);
+    window.addEventListener('mouseup',   _onPanMouseUp);
+}
+
+function _detachPdfPanListeners() {
+    const board = document.getElementById('board');
+    if (board) board.removeEventListener('mousedown', _onPanMouseDown, true);
+    window.removeEventListener('mousemove', _onPanMouseMove);
+    window.removeEventListener('mouseup',   _onPanMouseUp);
+}
+
+/**
+ * Crée le panneau flottant de largeur + panoramique du fond PDF.
+ */
+function _initPdfWallpaperPanel() {
+    if (document.getElementById('pdf-wallpaper-panel')) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'pdf-wallpaper-panel';
+    panel.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        right: 100px;
+        z-index: 12000;
+        background: rgba(20,20,28,0.35);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 12px;
+        padding: 8px 14px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        opacity: 0.18;
+        transition: opacity 0.25s;
+        pointer-events: auto;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    `;
+    panel.innerHTML = `
+        <span style="font-size:12px;line-height:1;color:#fff;">largeur PDF</span>
+        <input type="range" id="pdf-bg-width-slider" min="20" max="200" value="100" step="5"
+            style="width:90px;cursor:pointer;accent-color:#7ab8f5;">
+        <span id="pdf-bg-width-label" style="color:#fff;font-size:11px;font-weight:600;min-width:34px;text-align:right;">100%</span>
+        <button id="pdf-pan-btn" title="Déplacer le fond (panoramique)"
+            style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:7px;color:#fff;font-size:14px;cursor:pointer;padding:2px 8px;line-height:1.6;transition:background 0.15s;">✋</button>
+    `;
+    panel.addEventListener('mouseenter', () => panel.style.opacity = '1');
+    panel.addEventListener('mouseleave', () => panel.style.opacity = '0.18');
+
+    panel.querySelector('#pdf-bg-width-slider').addEventListener('input', function() {
+        _applyPdfWallpaperWidth(parseInt(this.value));
+    });
+    panel.querySelector('#pdf-pan-btn').addEventListener('click', _togglePdfPanMode);
+
+    document.body.appendChild(panel);
+}
+
+function _updatePdfWallpaperPanelVisibility() {
+    const panel = document.getElementById('pdf-wallpaper-panel');
+    if (!panel) return;
+    panel.style.display = _isPdfWallpaper ? 'flex' : 'none';
+    // Désactiver le pan si on masque le panel
+    if (!_isPdfWallpaper && _pdfPanMode) _togglePdfPanMode();
+}
+
+/**
+ * À appeler depuis pdf-viewer.js après avoir défini un fond PDF.
+ */
+function activatePdfWallpaperSlider(initialWidth) {
+    _isPdfWallpaper    = true;
+    _pdfWallpaperWidth = initialWidth || 100;
+    _pdfBgPosX = 50;
+    _pdfBgPosY = 0;
+    const slider = document.getElementById('pdf-bg-width-slider');
+    if (slider) slider.value = _pdfWallpaperWidth;
+    const label = document.getElementById('pdf-bg-width-label');
+    if (label) label.textContent = Math.round(_pdfWallpaperWidth) + '%';
+    if (_pdfPanMode) _togglePdfPanMode();
+    _updatePdfWallpaperPanelVisibility();
+    // Initialiser style.width/height sur tous les shape-widgets
+    // pour que le premier cran du slider puisse les lire correctement
+    document.querySelectorAll('.shape-widget').forEach(w => {
+        if (!w.style.width)  w.style.width  = w.offsetWidth  + 'px';
+        if (!w.style.height) w.style.height = w.offsetHeight + 'px';
+    });
+}
+
+// (patch applyBackground unique en haut du fichier)
+
+// =========================================================================
+// ANNOTATION SUR LE FOND D'ÉCRAN PDF
+// =========================================================================
+
+var _bgAnnotActive = false;   // mode annotation fond actif
+var _bgAnnotWidget = null;    // faux widget exposé à draw.js
+
+/**
+ * Crée ou récupère le canvas d'annotation superposé au board.
+ */
+function _getBgAnnotCanvas() {
+    const board = document.getElementById('board');
+    if (!board) return null;
+    let canvas = document.getElementById('_bg-annot-canvas');
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = '_bg-annot-canvas';
+        canvas.style.cssText = `
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        `;
+        board.appendChild(canvas);
+    }
+    // Synchroniser la résolution du canvas avec le board
+    const dpr = window.devicePixelRatio || 1;
+    const w = board.offsetWidth;
+    const h = board.offsetHeight;
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+        canvas.width  = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width  = w + 'px';
+        canvas.style.height = h + 'px';
+    }
+    return canvas;
+}
+
+/**
+ * Crée le faux widget avec _pdfAnnotAPI compatible draw.js.
+ */
+function _createBgAnnotWidget() {
+    const board = document.getElementById('board');
+    if (!board) return null;
+
+    // Récupérer ou créer le faux widget conteneur
+    let fakeWidget = document.getElementById('_bg-annot-widget');
+    if (!fakeWidget) {
+        fakeWidget = document.createElement('div');
+        fakeWidget.id = '_bg-annot-widget';
+        fakeWidget.className = 'widget';
+        fakeWidget.style.cssText = `
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: auto;
+            z-index: 4;
+            background: transparent;
+        `;
+        // draw.js cherche .pdf-annot-canvas dans le widget
+        const annotCanvas = _getBgAnnotCanvas();
+        if (annotCanvas) {
+            annotCanvas.classList.add('pdf-annot-canvas');
+            fakeWidget.appendChild(annotCanvas);
+        }
+        board.appendChild(fakeWidget);
+    } else {
+        // Réactiver les pointer-events si le widget existait déjà
+        fakeWidget.style.pointerEvents = 'auto';
+        // Resynchroniser le canvas au cas où le board aurait changé de taille
+        _getBgAnnotCanvas();
+    }
+
+    // Construire l'API compatible _pdfAnnotAPI
+    const annotCanvas = fakeWidget.querySelector('.pdf-annot-canvas');
+    if (!annotCanvas) return null;
+
+    const actx = annotCanvas.getContext('2d');
+    const strokes = [];
+    const history = [];
+
+    function toNorm(px, py) {
+        return { x: px / annotCanvas.width, y: py / annotCanvas.height };
+    }
+    function fromNorm(nx, ny) {
+        return { x: nx * annotCanvas.width, y: ny * annotCanvas.height };
+    }
+
+    function drawStroke(ctx, stroke) {
+        const canvasW = annotCanvas.width;
+        const sizeScaled = stroke.size * canvasW / 600;
+        if (stroke.tool === 'text') {
+            const pos = fromNorm(stroke.nx, stroke.ny);
+            ctx.save();
+            const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * canvasW / 600);
+            ctx.font = `${fontSize}px 'Segoe UI', sans-serif`;
+            ctx.fillStyle = stroke.color;
+            ctx.textBaseline = 'top';
+            if (stroke.rotation) {
+                const lines = (stroke.text || '').split('\n');
+                const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+                const textH = lines.length * fontSize * 1.3;
+                const cx = pos.x + textW / 2, cy = pos.y + textH / 2;
+                ctx.translate(cx, cy); ctx.rotate(stroke.rotation); ctx.translate(-cx, -cy);
+            }
+            (stroke.text || '').split('\n').forEach((line, i) => {
+                const fontSize2 = Math.round(6 * Math.pow(1.12, stroke.size) * canvasW / 600);
+                ctx.fillText(line, pos.x, pos.y + i * fontSize2 * 1.3);
+            });
+            ctx.restore();
+            return;
+        }
+        if (!stroke.pts || stroke.pts.length < 1) return;
+        ctx.save();
+        if (stroke.tool === 'figure') {
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.size * canvasW / 600;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.beginPath();
+            stroke.pts.forEach((p, i) => {
+                const cp = fromNorm(p.x, p.y);
+                i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
+            });
+            if (stroke.fillColor && stroke.fillOpacity > 0) {
+                ctx.save(); ctx.globalAlpha = stroke.fillOpacity;
+                ctx.fillStyle = stroke.fillColor; ctx.fill(); ctx.restore();
+            }
+            ctx.stroke(); ctx.restore(); return;
+        } else if (stroke.tool === 'highlighter') {
+            ctx.globalAlpha = 0.35; ctx.globalCompositeOperation = 'multiply';
+            ctx.lineWidth = sizeScaled * 5;
+        } else if (stroke.tool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = sizeScaled * 2;
+        } else {
+            ctx.lineWidth = sizeScaled;
+        }
+        ctx.strokeStyle = stroke.color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        const p0 = fromNorm(stroke.pts[0].x, stroke.pts[0].y);
+        if (stroke.dot || stroke.pts.length === 1) {
+            ctx.arc(p0.x, p0.y, Math.max(sizeScaled / 2, 1), 0, Math.PI * 2);
+            ctx.fillStyle = stroke.tool === 'eraser' ? 'rgba(0,0,0,1)' : stroke.color;
+            ctx.fill(); ctx.restore(); return;
+        }
+        ctx.moveTo(p0.x, p0.y);
+        if (stroke.pts.length === 2) {
+            const p1 = fromNorm(stroke.pts[1].x, stroke.pts[1].y);
+            ctx.lineTo(p1.x, p1.y);
+        } else {
+            for (let i = 1; i < stroke.pts.length - 1; i++) {
+                const pi  = fromNorm(stroke.pts[i].x,   stroke.pts[i].y);
+                const pi1 = fromNorm(stroke.pts[i+1].x, stroke.pts[i+1].y);
+                const mx = pi.x + (pi1.x - pi.x) * 0.25;
+                const my = pi.y + (pi1.y - pi.y) * 0.25;
+                ctx.quadraticCurveTo(pi.x, pi.y, mx, my);
+            }
+            const last = fromNorm(stroke.pts[stroke.pts.length-1].x, stroke.pts[stroke.pts.length-1].y);
+            ctx.lineTo(last.x, last.y);
+        }
+        ctx.stroke(); ctx.restore();
+    }
+
+    function redraw() {
+        actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+        strokes.forEach(s => drawStroke(actx, s));
+    }
+
+    fakeWidget._pdfAnnotAPI = {
+        startStroke(color, size, tool, px, py) {
+            const norm = toNorm(px, py);
+            fakeWidget._currentStroke = { tool, color, size, pts: [norm] };
+        },
+        continueStroke(color, size, tool, px, py) {
+            if (!fakeWidget._currentStroke) return;
+            const norm = toNorm(px, py);
+            fakeWidget._currentStroke.pts.push(norm);
+            fakeWidget._currentStroke.color = color;
+            fakeWidget._currentStroke.size  = size;
+            fakeWidget._currentStroke.tool  = tool;
+            // Dessin incrémental
+            const pts = fakeWidget._currentStroke.pts;
+            const prev = pts[pts.length - 2];
+            const canvasW = annotCanvas.width;
+            const sizeScaled = size * canvasW / 600;
+            actx.save();
+            if (tool === 'highlighter') {
+                actx.globalAlpha = 0.35; actx.globalCompositeOperation = 'multiply';
+                actx.lineWidth = sizeScaled * 5; actx.lineCap = 'square';
+            } else if (tool === 'eraser') {
+                actx.globalCompositeOperation = 'destination-out';
+                actx.lineWidth = sizeScaled * 2; actx.lineCap = 'round';
+            } else {
+                actx.lineWidth = sizeScaled; actx.lineCap = 'round';
+            }
+            actx.strokeStyle = color; actx.lineJoin = 'round';
+            actx.beginPath();
+            const pPrev = fromNorm(prev.x, prev.y);
+            const pCur  = fromNorm(norm.x, norm.y);
+            actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y);
+            actx.stroke(); actx.restore();
+        },
+        endStroke() {
+            if (!fakeWidget._currentStroke) return;
+            if (fakeWidget._currentStroke.pts.length === 1) fakeWidget._currentStroke.dot = true;
+            history.push([...strokes]);
+            if (history.length > 30) history.shift();
+            strokes.push(fakeWidget._currentStroke);
+            fakeWidget._currentStroke = null;
+            redraw();
+        },
+        undo() {
+            if (history.length > 0) {
+                strokes.length = 0;
+                history.pop().forEach(s => strokes.push(s));
+            } else if (strokes.length > 0) {
+                strokes.pop();
+            }
+            redraw();
+        },
+        redo() {},
+        clear() { history.push([...strokes]); strokes.length = 0; redraw(); },
+        getAnnotCanvas()  { return annotCanvas; },
+        getPdfDoc()       { return null; },
+        getTotalPages()   { return 1; },
+        getAnnotLayers()  { return { 1: { strokes } }; },
+        redrawAnnotations() { redraw(); },
+        drawStrokeOn(ctx, stroke, cw) { drawStroke(ctx, stroke); },
+        addTextStroke(text, color, size, px, py) {
+            const norm = toNorm(px, py);
+            history.push([...strokes]);
+            strokes.push({ tool: 'text', color, size, text, nx: norm.x, ny: norm.y });
+            redraw();
+        },
+        previewFigure(color, size, pts) {
+            redraw();
+            const canvasW = annotCanvas.width;
+            actx.save();
+            actx.strokeStyle = color; actx.lineWidth = size * canvasW / 600;
+            actx.lineCap = 'round'; actx.lineJoin = 'round';
+            actx.setLineDash([6, 4]); actx.globalAlpha = 0.7;
+            actx.beginPath();
+            pts.forEach((p, i) => i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y));
+            actx.stroke(); actx.setLineDash([]); actx.restore();
+        },
+        addFigureStroke(color, size, pts, fillColor, fillOpacity) {
+            const normPts = pts.map(p => toNorm(p.x, p.y));
+            const stroke = { tool: 'figure', color, size, pts: normPts };
+            if (fillColor && fillOpacity > 0) { stroke.fillColor = fillColor; stroke.fillOpacity = fillOpacity; }
+            history.push([...strokes]);
+            strokes.push(stroke);
+            redraw();
+        },
+        previewEraser(px, py, r) {
+            redraw();
+            const canvasW = annotCanvas.width;
+            actx.save();
+            actx.beginPath();
+            actx.arc(px, py, r * canvasW / 600, 0, Math.PI * 2);
+            actx.strokeStyle = 'rgba(80,80,80,0.9)'; actx.lineWidth = 1.5;
+            actx.setLineDash([4, 3]); actx.stroke(); actx.restore();
+        },
+        eraseAt(px, py, r) {
+            const canvasW = annotCanvas.width;
+            actx.save();
+            actx.globalCompositeOperation = 'destination-out';
+            actx.beginPath();
+            actx.arc(px, py, r * canvasW / 600, 0, Math.PI * 2);
+            actx.fill(); actx.restore();
+        },
+        findTextStrokeAt() { return null; },
+        findFigureStrokeAt() { return null; },
+        moveTextStroke() {}, saveTextMove() {}, rotateTextStroke() {},
+        saveTextTransform() {}, updateTextStroke() {}, drawTextSelection() {},
+        startDragFigure() {}, moveFigureStroke() {}, saveFigureMove() {},
+        resizeFigureStroke() {}, rotateFigureStroke() {}, saveFigureTransform() {},
+        startDragText() {}, drawFigureSelection() {},
+    };
+
+    return fakeWidget;
+}
+
+/**
+ * Active / désactive le mode annotation sur le fond d'écran.
+ */
+function _toggleBgAnnotMode() {
+    const btn = document.getElementById('pdf-bg-annot-btn');
+    if (_bgAnnotActive) {
+        // Désactiver
+        _bgAnnotActive = false;
+        if (typeof _stopPdfAnnotMode === 'function') _stopPdfAnnotMode();
+        if (btn) { btn.style.background = 'rgba(255,255,255,0.12)'; btn.style.color = '#fff'; }
+        // Désactiver pointer-events sur le faux widget
+        const fw = document.getElementById('_bg-annot-widget');
+        if (fw) fw.style.pointerEvents = 'none';
+    } else {
+        // Activer
+        _bgAnnotActive = true;
+        if (btn) { btn.style.background = '#7ab8f5'; btn.style.color = '#000'; }
+        _bgAnnotWidget = _createBgAnnotWidget();
+        if (!_bgAnnotWidget) return;
+        // Ouvrir la toolbar draw si pas déjà ouverte
+        const tb = document.getElementById('draw-toolbar');
+        if (tb && (tb.style.display === 'none' || tb.style.display === '')) {
+            if (typeof toggleDrawToolbar === 'function') toggleDrawToolbar();
+        }
+        // Lancer le mode annotation PDF sur le faux widget
+        if (typeof _startPdfAnnotModeOn === 'function') {
+            _startPdfAnnotModeOn(_bgAnnotWidget);
+        }
+    }
+}

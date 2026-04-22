@@ -158,6 +158,8 @@
 
         /* CSS du widget calendrier injecté dynamiquement par widget-calendrier.js */
 
+        #text-size-label { color: #fff; }
+        body.menu-light #text-size-label { color: #000; }
     </style>
 
     <script>
@@ -665,7 +667,14 @@
 				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
 			</div>
 			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
-			<button id="pdf-text-btn" onclick="setPdfAnnotTool('text')" title="Ajouter un texte PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;align-items:center;justify-content:center;padding:0;">Texte</button>
+			<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+				<div style="display:flex;align-items:center;gap:3px;">
+					<button onmousedown="(function(btn){var iv;function step(){var l=document.getElementById('text-size-label');var v=Math.max(8,parseInt(l.textContent)-2);l.textContent=v;window._textWidgetSize=v;}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:16px;height:16px;border-radius:4px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:12px;line-height:1;padding:0;flex-shrink:0;">−</button>
+					<span id="text-size-label" style="font-size:11px;font-weight:700;min-width:24px;text-align:center;cursor:default;border-radius:3px;padding:1px 2px;">28</span>
+					<button onmousedown="(function(btn){var iv;function step(){var l=document.getElementById('text-size-label');var v=Math.min(120,parseInt(l.textContent)+2);l.textContent=v;window._textWidgetSize=v;}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:16px;height:16px;border-radius:4px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:12px;line-height:1;padding:0;flex-shrink:0;">+</button>
+				</div>
+				<button id="pdf-text-btn" onclick="if(typeof _pdfAnnotMode!=='undefined'&&_pdfAnnotMode){setPdfAnnotTool('text');}else{if(typeof toggleGlobalToolbar==='function')toggleGlobalToolbar();}" title="Ajouter un texte — cliquez puis cliquez sur le board" style="display:flex;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;align-items:center;justify-content:center;padding:0;">Texte</button>
+			</div>
 
 			<!-- TAILLE GOMME : − valeur + -->
 			<div class="dt-size-group" style="display:flex;flex-direction:row;align-items:center;gap:3px;width:64px;justify-content:center;">
@@ -1064,6 +1073,7 @@
                     }
                 ">✏️</button>
             <button class="pdf-export-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Télécharger le PDF avec annotations" onclick="_exportPdfWithAnnotations(this.closest('.editor-container'))" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;event.preventDefault();this.click();setTimeout(()=>this._penClick=false,300);}">💾</button>
+            <button class="pdf-wallpaper-btn" style="display:none;padding:1px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f5f5f5;font-size:13px;touch-action:manipulation;line-height:1.8;" title="Définir cette page comme fond d'écran">🖼️</button>
             <div class="wf-btns" style="margin-left:4px;">
                 <button class="wf-btn wf-btn-min"   title="Réduire"      style="touch-action:manipulation;" onpointerdown="if(event.pointerType==='pen'||event.pointerType==='touch'){event.preventDefault();event.stopPropagation();try{this.setPointerCapture(event.pointerId);}catch(e){}}" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;this._penClickTime=Date.now();event.preventDefault();event.stopPropagation();try{this.releasePointerCapture(event.pointerId);}catch(e){}if(this.closest('.editor-container').classList.contains('wf-pdf-fullboard'))togglePdfBoardFullscreen(this.closest('.editor-container'));togglePdfCollapse(this.closest('.editor-container'));setTimeout(()=>this._penClick=false,600);}" onclick="if(this._penClickTime&&Date.now()-this._penClickTime<700)return;if(this.closest('.editor-container').classList.contains('wf-pdf-fullboard'))togglePdfBoardFullscreen(this.closest('.editor-container'));togglePdfCollapse(this.closest('.editor-container'));"></button>
                 <button class="wf-btn wf-btn-max"   title="Plein écran"  style="touch-action:manipulation;" onpointerdown="if(event.pointerType==='pen'||event.pointerType==='touch'){event.preventDefault();event.stopPropagation();try{this.setPointerCapture(event.pointerId);}catch(e){}}" onpointerup="if((event.pointerType==='pen'||event.pointerType==='touch')&&!this._penClick){this._penClick=true;this._penClickTime=Date.now();event.preventDefault();event.stopPropagation();try{this.releasePointerCapture(event.pointerId);}catch(e){}togglePdfBoardFullscreen(this.closest('.editor-container'));setTimeout(()=>this._penClick=false,600);}" onclick="if(this._penClickTime&&Date.now()-this._penClickTime<700)return;togglePdfBoardFullscreen(this.closest('.editor-container'))"></button>
