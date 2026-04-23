@@ -733,8 +733,11 @@
 
 			<div class="dt-sep"></div>
 
-			<!-- SÉLECTION -->
-			<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:64px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+			<!-- SÉLECTION + PANORAMIQUE FOND PDF -->
+			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;width:64px;justify-content:center;flex-shrink:0;">
+				<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+				<button id="bg-pan-btn" onclick="if(typeof _togglePdfPanMode==='function')_togglePdfPanMode()" title="Déplacer le fond PDF (panoramique)" style="display:none;width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">✋</button>
+			</div>
 
 			<div class="dt-sep"></div>
 

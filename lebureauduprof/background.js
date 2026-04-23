@@ -566,34 +566,48 @@ function _rescaleDrawStrokes(oldW, newW, oldPosX, oldPosY, newPosX, newPosY) {
  */
 function _togglePdfPanMode() {
     _pdfPanMode = !_pdfPanMode;
-    const btn   = document.getElementById('pdf-pan-btn');
-    const board = document.getElementById('board');
+    const btn      = document.getElementById('pdf-pan-btn');
+    const bgPanBtn = document.getElementById('bg-pan-btn');
+    const board    = document.getElementById('board');
     if (_pdfPanMode) {
-        if (btn) { btn.style.background = '#7ab8f5'; btn.style.color = '#000'; btn.title = 'Désactiver le panoramique'; }
+        // Désactiver le dessin AVANT de setter le flag
+        if (typeof isDrawMode !== 'undefined' && isDrawMode) {
+            if (typeof toggleSelectMode === 'function') toggleSelectMode();
+        } else if (typeof isEraserMode !== 'undefined' && isEraserMode) {
+            if (typeof stopEraserMode === 'function') stopEraserMode();
+        }
+        window._bgPanModeActive = true;
+        if (typeof _setBtnActive === 'function') _setBtnActive('draw-select-btn', false);
+        if (btn)      { btn.style.background = '#7ab8f5'; btn.style.color = '#000'; btn.title = 'Désactiver le panoramique'; }
+        if (bgPanBtn) { bgPanBtn.style.background = '#1a3550'; bgPanBtn.style.borderColor = '#4a90e2'; bgPanBtn.style.color = '#fff'; bgPanBtn.style.boxShadow = '0 0 0 2px #4a90e255'; bgPanBtn.title = 'Désactiver le panoramique'; }
         if (board) board.style.cursor = 'grab';
         _attachPdfPanListeners();
     } else {
-        if (btn) { btn.style.background = 'rgba(255,255,255,0.12)'; btn.style.color = '#fff'; btn.title = 'Déplacer le fond (panoramique)'; }
+        window._bgPanModeActive = false;
+        if (btn)      { btn.style.background = 'rgba(255,255,255,0.12)'; btn.style.color = '#fff'; btn.title = 'Déplacer le fond (panoramique)'; }
+        if (bgPanBtn) { bgPanBtn.style.background = '#2a2a2e'; bgPanBtn.style.borderColor = '#444'; bgPanBtn.style.color = '#aaa'; bgPanBtn.style.boxShadow = 'none'; bgPanBtn.title = 'Déplacer le fond PDF (panoramique)'; }
         if (board) board.style.cursor = '';
         _detachPdfPanListeners();
+        if (typeof activatePencil === 'function') activatePencil();
     }
 }
 
 // ── Listeners panoramique ──────────────────────────────────────────────────
 var _panDragging = false;
 var _panStartX = 0, _panStartY = 0;
-var _panStartBgX = 50, _panStartBgY = 0;
+var _panStartScrollY = 0;
+var _panStartTranslateX = 0;
+var _boardTranslateX = 0;
 
 function _onPanMouseDown(e) {
     if (!_pdfPanMode) return;
     if (e.button !== 0) return;
-    // Ne pas interférer si un widget est cliqué
     if (e.target.closest && e.target.closest('.widget')) return;
-    _panDragging  = true;
-    _panStartX    = e.clientX;
-    _panStartY    = e.clientY;
-    _panStartBgX  = _pdfBgPosX;
-    _panStartBgY  = _pdfBgPosY;
+    _panDragging        = true;
+    _panStartX          = e.clientX;
+    _panStartY          = e.clientY;
+    _panStartScrollY    = document.body.scrollTop || document.documentElement.scrollTop || 0;
+    _panStartTranslateX = _boardTranslateX;
     document.getElementById('board').style.cursor = 'grabbing';
     e.preventDefault();
     e.stopPropagation();
@@ -603,18 +617,56 @@ function _onPanMouseMove(e) {
     if (!_panDragging) return;
     const board = document.getElementById('board');
     if (!board) return;
-    // Sensibilité : déplacer de 1px souris = déplacer le fond proportionnellement
-    const boardW = board.offsetWidth;
-    const boardH = board.offsetHeight;
     const dx = e.clientX - _panStartX;
     const dy = e.clientY - _panStartY;
-    // Convertir px → % de position background (inversé : tirer à droite → fond va à gauche)
-    const newX = _panStartBgX - (dx / boardW) * 100 * (100 / _pdfWallpaperWidth) * 1.2;
-    const newY = _panStartBgY - (dy / boardH) * 100 * 0.3;
-    _applyPdfBgPosition(newX, newY);
+    // Vertical : scroll de la page
+    const newY = _panStartScrollY - dy;
+    document.body.scrollTop = newY;
+    document.documentElement.scrollTop = newY;
+    // Horizontal : translateX sur le board entier
+    _boardTranslateX = _panStartTranslateX + dx;
+    board.style.transform = _boardTranslateX !== 0
+        ? 'translateX(' + _boardTranslateX + 'px)' : '';
 }
 
 function _onPanMouseUp() {
+    if (!_panDragging) return;
+    _panDragging = false;
+    const board = document.getElementById('board');
+    if (board) board.style.cursor = _pdfPanMode ? 'grab' : '';
+}
+
+function _onPanTouchStart(e) {
+    if (!_pdfPanMode) return;
+    if (e.touches.length !== 1) return;
+    if (e.target.closest && e.target.closest('.widget')) return;
+    _panDragging        = true;
+    _panStartX          = e.touches[0].clientX;
+    _panStartY          = e.touches[0].clientY;
+    _panStartScrollY    = document.body.scrollTop || document.documentElement.scrollTop || 0;
+    _panStartTranslateX = _boardTranslateX;
+    const board = document.getElementById('board');
+    if (board) board.style.cursor = 'grabbing';
+    e.preventDefault();
+}
+
+function _onPanTouchMove(e) {
+    if (!_panDragging) return;
+    if (e.touches.length !== 1) return;
+    const board = document.getElementById('board');
+    if (!board) return;
+    const dx = e.touches[0].clientX - _panStartX;
+    const dy = e.touches[0].clientY - _panStartY;
+    const newY = _panStartScrollY - dy;
+    document.body.scrollTop = newY;
+    document.documentElement.scrollTop = newY;
+    _boardTranslateX = _panStartTranslateX + dx;
+    board.style.transform = _boardTranslateX !== 0
+        ? 'translateX(' + _boardTranslateX + 'px)' : '';
+    e.preventDefault();
+}
+
+function _onPanTouchEnd() {
     if (!_panDragging) return;
     _panDragging = false;
     const board = document.getElementById('board');
@@ -627,11 +679,21 @@ function _attachPdfPanListeners() {
     board.addEventListener('mousedown', _onPanMouseDown, true);
     window.addEventListener('mousemove', _onPanMouseMove);
     window.addEventListener('mouseup',   _onPanMouseUp);
+    board.addEventListener('touchstart', _onPanTouchStart, { capture: true, passive: false });
+    board.addEventListener('touchmove',  _onPanTouchMove,  { capture: true, passive: false });
+    board.addEventListener('touchend',   _onPanTouchEnd,   true);
+    board.addEventListener('touchcancel',_onPanTouchEnd,   true);
 }
 
 function _detachPdfPanListeners() {
     const board = document.getElementById('board');
-    if (board) board.removeEventListener('mousedown', _onPanMouseDown, true);
+    if (board) {
+        board.removeEventListener('mousedown', _onPanMouseDown, true);
+        board.removeEventListener('touchstart', _onPanTouchStart, true);
+        board.removeEventListener('touchmove',  _onPanTouchMove,  true);
+        board.removeEventListener('touchend',   _onPanTouchEnd,   true);
+        board.removeEventListener('touchcancel',_onPanTouchEnd,   true);
+    }
     window.removeEventListener('mousemove', _onPanMouseMove);
     window.removeEventListener('mouseup',   _onPanMouseUp);
 }
@@ -667,8 +729,6 @@ function _initPdfWallpaperPanel() {
         <input type="range" id="pdf-bg-width-slider" min="20" max="200" value="100" step="5"
             style="width:90px;cursor:pointer;accent-color:#7ab8f5;">
         <span id="pdf-bg-width-label" style="color:#fff;font-size:11px;font-weight:600;min-width:34px;text-align:right;">100%</span>
-        <button id="pdf-pan-btn" title="Déplacer le fond (panoramique)"
-            style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:7px;color:#fff;font-size:14px;cursor:pointer;padding:2px 8px;line-height:1.6;transition:background 0.15s;">✋</button>
     `;
     panel.addEventListener('mouseenter', () => panel.style.opacity = '1');
     panel.addEventListener('mouseleave', () => panel.style.opacity = '0.18');
@@ -676,7 +736,6 @@ function _initPdfWallpaperPanel() {
     panel.querySelector('#pdf-bg-width-slider').addEventListener('input', function() {
         _applyPdfWallpaperWidth(parseInt(this.value));
     });
-    panel.querySelector('#pdf-pan-btn').addEventListener('click', _togglePdfPanMode);
 
     document.body.appendChild(panel);
 }
@@ -685,7 +744,8 @@ function _updatePdfWallpaperPanelVisibility() {
     const panel = document.getElementById('pdf-wallpaper-panel');
     if (!panel) return;
     panel.style.display = _isPdfWallpaper ? 'flex' : 'none';
-    // Désactiver le pan si on masque le panel
+    const bgPanBtn = document.getElementById('bg-pan-btn');
+    if (bgPanBtn) bgPanBtn.style.display = _isPdfWallpaper ? 'flex' : 'none';
     if (!_isPdfWallpaper && _pdfPanMode) _togglePdfPanMode();
 }
 

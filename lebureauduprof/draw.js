@@ -6,6 +6,12 @@ var drawCanvasTop = null, drawCtxTop = null; // canvas de premier plan pour stro
 var strokes = [], currentStroke = null;
 
 // ── Helper : active/désactive un bouton de mode (styles inline + classe CSS pour le thème clair) ──
+// Désactive le mode panoramique fond PDF si actif
+function _stopBgPanIfActive() {
+    if (!window._bgPanModeActive) return;
+    if (typeof _togglePdfPanMode === 'function') _togglePdfPanMode();
+}
+
 function _setBtnActive(id, active, colorScheme) {
     const btn = document.getElementById(id);
     if (!btn) return;
@@ -302,6 +308,7 @@ function _boardDrawContextMenu(e) {
 
 function _boardDrawMouseDown(e)  {
     if (e.button === 2) return;
+    if (window._bgPanModeActive) return;
     if (_pdfAnnotMode) return;
     if (isDrawMode)   { startPaint(e); return; }
     if (isEraserMode) { startErase(e); return; }
@@ -313,6 +320,7 @@ function _boardDrawMouseUp(e) {
     if (isDrawMode) endPaint(); else if (isEraserMode) endErase();
 }
 function _boardDrawMouseMove(e)  {
+    if (window._bgPanModeActive) return;
     if (_pdfAnnotMode) return;
     if (isDrawMode)   { if (currentDrawMode === 'free' || currentDrawMode === 'highlight') updateDrawCursor(); paint(e); return; }
     if (isEraserMode) { onEraserMouseMove(e); return; }
@@ -325,6 +333,7 @@ function _boardDrawMouseLeave(e) {
     if (isDrawMode) endPaint(); else if (isEraserMode) { endErase(); redrawStrokes(); }
 }
 function _boardDrawTouchStart(e) {
+    if (window._bgPanModeActive) return;
     if (_pdfAnnotMode) return; // le touch est géré par _pdfAnnotPointerDown en mode PDF
     if (!isDrawMode && !isEraserMode) return;
     e.preventDefault();
@@ -1392,6 +1401,7 @@ function setDrawMode(mode) {
 }
 
 function activatePencil() {
+    _stopBgPanIfActive();
     // En mode annotation PDF : déléguer à setPdfAnnotTool
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
         setPdfAnnotTool('pen');
@@ -1434,6 +1444,7 @@ function activatePencil() {
 }
 
 function activateHighlighter() {
+    _stopBgPanIfActive();
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
         setPdfAnnotTool('highlighter');
         return;
@@ -1511,6 +1522,7 @@ function enableDrawing() {
 }
 
 function toggleFiguresSubmenu() {
+    _stopBgPanIfActive();
     // En mode annotation PDF : activer l'outil figure ET ouvrir le sous-menu
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
         const sub = document.getElementById('figures-submenu');
@@ -1554,6 +1566,7 @@ function toggleFiguresSubmenu() {
 }
 
 function toggleSelectMode() {
+    _stopBgPanIfActive();
     if (!isDrawMode && !isEraserMode) {
         // Déjà en mode sélection → repasser en dessin libre
         initCanvas(); enableDrawing();
@@ -1797,6 +1810,7 @@ function perpendicularDist(pt, lineA, lineB) {
 var isEraserMode = false, isErasing = false;
 
 function toggleEraserMode() {
+    _stopBgPanIfActive();
     if (isEraserMode) { stopEraserMode(); return; }
     // En mode annotation PDF : déléguer à setPdfAnnotTool
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
@@ -2131,6 +2145,7 @@ function initBoardSelection() {
 }
 
 function onBoardMouseDown(e) {
+    if (window._bgPanModeActive) return;
     if (document.body.classList.contains('presentation-mode')) return;
     if (isDrawMode || isEraserMode) return;
     const target = e.target || e.srcElement;
