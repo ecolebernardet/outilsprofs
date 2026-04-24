@@ -106,6 +106,7 @@ function _insertPastedImage(dataUrl, naturalW, naturalH) {
     widget.className = 'widget';
     widget.dataset.type = 'sticker';
     widget.dataset.transparent = 'true';
+    widget.dataset.imageWidget = 'true';
     widget.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:${w}px; height:${h}px; overflow:visible; flex-direction:row;`;
     widget.style.setProperty('--sticker-h', h + 'px');
     widget.tabIndex = 0;
@@ -123,6 +124,7 @@ function _insertPastedImage(dataUrl, naturalW, naturalH) {
             <div class="widget-menu-handle" onclick="toggleCtxMenu(this.closest('.widget,.shape-widget'))" title="Menu">☰</div>
             <div class="widget-pin-handle" onclick="togglePin(this.closest('.widget'))" title="Épingler">📌</div>
             <div class="widget-back-handle" onclick="sendToBack(this.closest('.widget'))" title="Envoyer derrière">🔽</div>
+            <div class="widget-anchor-handle" onclick="toggleAnchorImage(this.closest('.widget'))" title="Ancrer (rendre insélectionnable)">⚓</div>
             <div class="widget-close-handle" onclick="snapshotNow();this.closest('.widget').remove();saveBoard();" title="Fermer">×</div>
         </div>
         <div class="widget-ctx-menu"></div>
@@ -130,6 +132,7 @@ function _insertPastedImage(dataUrl, naturalW, naturalH) {
     widget.appendChild(img);
 
     widget.addEventListener('mousedown', () => {
+        if (widget.dataset.anchored === 'true') return;
         bringToFront(widget);
         widget.focus();
         if (typeof positionActionBar === 'function') positionActionBar(widget);

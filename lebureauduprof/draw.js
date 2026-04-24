@@ -81,13 +81,21 @@ function updateDrawCursor() {
     const isHighlight = (currentDrawMode === 'highlight');
 
     if (style === 'crosshair') {
-        board.style.setProperty('cursor', isHighlight ? _highlightCursorUrl() : 'crosshair', 'important');
+        const cursorVal = isHighlight ? _highlightCursorUrl() : 'crosshair';
+        board.style.setProperty('cursor', cursorVal, 'important');
+        document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+            w.style.setProperty('cursor', cursorVal, 'important');
+        });
         return;
     }
 
     // Surligneur : toujours la croix jaune quelle que soit le style dot/size
     if (isHighlight) {
-        board.style.setProperty('cursor', _highlightCursorUrl(), 'important');
+        const cursorVal = _highlightCursorUrl();
+        board.style.setProperty('cursor', cursorVal, 'important');
+        document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+            w.style.setProperty('cursor', cursorVal, 'important');
+        });
         return;
     }
 
@@ -117,7 +125,12 @@ function updateDrawCursor() {
     }
 
     const b64 = btoa(svg);
-    board.style.setProperty('cursor', `url("data:image/svg+xml;base64,${b64}") ${hotX} ${hotY}, crosshair`, 'important');
+    const cursorVal = `url("data:image/svg+xml;base64,${b64}") ${hotX} ${hotY}, crosshair`;
+    board.style.setProperty('cursor', cursorVal, 'important');
+    // Forcer le curseur sur les widgets ancrés (leur cursor:move primerait sinon)
+    document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+        w.style.setProperty('cursor', cursorVal, 'important');
+    });
 }
 
 // Curseur surligneur : croix jaune (identique au mode annotation PDF)
@@ -135,6 +148,10 @@ function clearDrawCursor() {
         // Ne pas écraser le curseur texte si le mode placement texte est actif
         if (typeof isTextPlacementMode !== 'undefined' && isTextPlacementMode) return;
         board.style.removeProperty('cursor');
+        // Retirer le curseur forcé sur les widgets ancrés
+        document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+            w.style.removeProperty('cursor');
+        });
     }
 }
 
@@ -558,11 +575,20 @@ function endPaint() {
         currentStroke = null; redrawStrokes();
         return;
     }
-    // Tap stylet = 1 seul point → enregistrer comme dot (cercle plein)
-    if (currentStroke.points.length === 1) {
-        currentStroke.dot = true;
-        currentStroke.points.push({ ...currentStroke.points[0] }); // besoin d'au moins 2 pts pour le stockage
-    }
+    // Tap stylet = point unique ou micro-mouvement parasite → enregistrer comme dot (cercle plein)
+    // On considère comme un dot tout geste dont tous les points restent dans un rayon de 4px
+    // autour du premier point. Cela évite qu'un mousemove fantôme empêche le point de s'afficher.
+    (function() {
+        const pts = currentStroke.points;
+        if (pts.length >= 1) {
+            const origin = pts[0];
+            const isDot = pts.every(p => Math.hypot(p.x - origin.x, p.y - origin.y) <= 4);
+            if (isDot) {
+                currentStroke.dot = true;
+                currentStroke.points = [origin, { ...origin }]; // besoin d'au moins 2 pts pour le stockage
+            }
+        }
+    })();
     if (currentStroke.points.length > 1) {
         if (currentDrawMode === 'shape') {
             currentStroke = null;
@@ -1363,10 +1389,17 @@ function setDrawMode(mode) {
     if (board && !_pdfAnnotMode) {
         if (FIGURE_MODES.includes(mode)) {
             board.classList.add('is-segment-mode');
-            board.style.setProperty('cursor', _figureCursorUrl(), 'important');
+            const cursorVal = _figureCursorUrl();
+            board.style.setProperty('cursor', cursorVal, 'important');
+            document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+                w.style.setProperty('cursor', cursorVal, 'important');
+            });
         } else {
             board.classList.remove('is-segment-mode');
             board.style.removeProperty('cursor');
+            document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+                w.style.removeProperty('cursor');
+            });
         }
     }
     // Si on choisit un mode figure alors qu'on était en mode sélection, réactiver le dessin
