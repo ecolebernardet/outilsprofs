@@ -343,6 +343,7 @@ applyBackground = function(value) {
     // ── Fond PDF ──
     if (!value || !value.startsWith('url(data:image')) {
         _isPdfWallpaper = false;
+        _stopBoardHeightGuard();
         if (typeof _updatePdfWallpaperPanelVisibility === 'function') _updatePdfWallpaperPanelVisibility();
     }
 };
@@ -375,14 +376,9 @@ window.addEventListener('load', () => {
         if (savedRatio) window._pdfBgNativeRatio = savedRatio;
         _pdfWallpaperWidth = savedW;
 
-        // Réactiver le mode A4 en premier pour que boardH soit correct
-        if (typeof toggleA4Mode === 'function') {
-            if (!document.body.classList.contains('a4-mode')) {
-                toggleA4Mode();
-            }
-        }
-        // Ajuster la hauteur exacte du board pour éviter le décalage de rendu 1px
-        _syncBoardHeightToPdfRatio();
+        _applyBoardHeightForPdf();
+        setTimeout(() => _applyBoardHeightForPdf(), 100);
+        _startBoardHeightGuard();
 
         // Recalculer la position CSS depuis les pixels absolus sauvegardés
         // (évite le décalage dû au changement de boardH entre sessions)
@@ -464,38 +460,49 @@ var _pdfBgPosY = (function() {
 })();
 var _pdfPanMode = false;
 
-// Activer le mode A4 immédiatement si un fond PDF était actif,
-// AVANT que restoreBoardFromJSON soit appelé (board.offsetHeight doit être correct
-// au moment où les shapes sont créées)
-if (_isPdfWallpaper) {
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof toggleA4Mode === 'function') {
-            if (!document.body.classList.contains('a4-mode')) {
-                toggleA4Mode();
-            }
-        }
-        // Ajuster la hauteur du board pour correspondre exactement à l'image PDF
-        // (évite le décalage de rendu dû au débordement de 1px)
-        _syncBoardHeightToPdfRatio();
-    });
-}
-
-/**
- * Ajuste board.style.height pour correspondre exactement à boardW * bgRatio.
- * Évite le décalage de rendu CSS quand l'image déborde d'1px.
- */
-function _syncBoardHeightToPdfRatio() {
+function _applyBoardHeightForPdf() {
     if (!_isPdfWallpaper) return;
     const bgRatio = window._pdfBgNativeRatio
         || parseFloat(localStorage.getItem('boardPdfBgRatio'));
     if (!bgRatio) return;
     const board = document.getElementById('board');
     if (!board) return;
-    const boardW = board.offsetWidth;
-    const exactH = Math.ceil(boardW * bgRatio);
-    if (Math.abs(board.offsetHeight - exactH) <= 2) {
-        board.style.height = exactH + 'px';
-    }
+    const imgW = board.offsetWidth * _pdfWallpaperWidth / 100;
+    board.style.height = Math.ceil(imgW * bgRatio) + 'px';
+}
+
+var _boardHeightObserver = null;
+function _startBoardHeightGuard() {
+    if (_boardHeightObserver) return;
+    const board = document.getElementById('board');
+    if (!board) return;
+    _boardHeightObserver = new MutationObserver(function() {
+        if (!_isPdfWallpaper) return;
+        const bgRatio = window._pdfBgNativeRatio
+            || parseFloat(localStorage.getItem('boardPdfBgRatio'));
+        if (!bgRatio) return;
+        const expected = Math.ceil(board.offsetWidth * _pdfWallpaperWidth / 100 * bgRatio);
+        if (Math.abs(parseFloat(board.style.height) - expected) > 2) {
+            _boardHeightObserver.disconnect();
+            board.style.height = expected + 'px';
+            _boardHeightObserver.observe(board, { attributes: true, attributeFilter: ['style'] });
+        }
+    });
+    board.style.position = 'absolute';
+    board.style.top = '0';
+    _boardHeightObserver.observe(board, { attributes: true, attributeFilter: ['style'] });
+    if (typeof updatePresLimitLine === 'function') updatePresLimitLine();
+}
+function _stopBoardHeightGuard() {
+    if (_boardHeightObserver) { _boardHeightObserver.disconnect(); _boardHeightObserver = null; }
+    if (typeof updatePresLimitLine === 'function') updatePresLimitLine();
+}
+
+if (_isPdfWallpaper) {
+    document.addEventListener('DOMContentLoaded', function() {
+        _applyBoardHeightForPdf();
+        _startBoardHeightGuard();
+    });
 }
 
 /**
@@ -511,7 +518,26 @@ function _applyPdfWallpaperWidth(pct) {
     localStorage.setItem('boardPdfBgWidth', pct);
     const label = document.getElementById('pdf-bg-width-label');
     if (label) label.textContent = Math.round(pct) + '%';
-    // Mettre à jour les offsets en pixels absolus (la taille de l'image a changé)
+    // Hauteur board = hauteur image zoomée
+    const bgRatio = window._pdfBgNativeRatio
+        || parseFloat(localStorage.getItem('boardPdfBgRatio')) || 1;
+    const imgW = board.offsetWidth * pct / 100;
+    const imgH = Math.ceil(imgW * bgRatio);
+    board.style.height = imgH + 'px';
+    // Resync canvas annotation
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.getElementById('_bg-annot-canvas');
+    if (canvas) {
+        const nw = Math.round(board.offsetWidth * dpr);
+        const nh = Math.round(imgH * dpr);
+        if (canvas.width !== nw || canvas.height !== nh) {
+            canvas.width = nw; canvas.height = nh;
+            canvas.style.width  = board.offsetWidth + 'px';
+            canvas.style.height = imgH + 'px';
+            if (window._bgAnnotWidget && window._bgAnnotWidget._pdfAnnotAPI)
+                window._bgAnnotWidget._pdfAnnotAPI.redrawAnnotations();
+        }
+    }
     _savePdfBgOffsetPx(board);
     _rescaleDrawStrokes(oldW, pct, _pdfBgPosX, _pdfBgPosY, _pdfBgPosX, _pdfBgPosY);
 }
@@ -596,18 +622,35 @@ function _togglePdfPanMode() {
 var _panDragging = false;
 var _panStartX = 0, _panStartY = 0;
 var _panStartScrollY = 0;
-var _panStartTranslateX = 0;
+var _panStartBgPosX = 50;
 var _boardTranslateX = 0;
+
+function _panApplyMove(board, dx, dy) {
+    // Vertical : scroll natif
+    const newY = _panStartScrollY - dy;
+    document.body.scrollTop = newY;
+    document.documentElement.scrollTop = newY;
+    // Horizontal : backgroundPosition (image bouge, annotations restent dans le board)
+    const boardW    = board.offsetWidth;
+    const imgW      = boardW * _pdfWallpaperWidth / 100;
+    const overflowX = imgW - boardW;
+    if (overflowX > 0) {
+        const startOffX = (_panStartBgPosX / 100) * overflowX;
+        const newOffX   = Math.max(0, Math.min(overflowX, startOffX - dx));
+        _pdfBgPosX = (newOffX / overflowX) * 100;
+    }
+    board.style.backgroundPosition = _pdfBgPosX + '% ' + _pdfBgPosY + '%';
+}
 
 function _onPanMouseDown(e) {
     if (!_pdfPanMode) return;
     if (e.button !== 0) return;
     if (e.target.closest && e.target.closest('.widget')) return;
-    _panDragging        = true;
-    _panStartX          = e.clientX;
-    _panStartY          = e.clientY;
-    _panStartScrollY    = document.body.scrollTop || document.documentElement.scrollTop || 0;
-    _panStartTranslateX = _boardTranslateX;
+    _panDragging     = true;
+    _panStartX       = e.clientX;
+    _panStartY       = e.clientY;
+    _panStartScrollY = document.body.scrollTop || document.documentElement.scrollTop || 0;
+    _panStartBgPosX  = _pdfBgPosX;
     document.getElementById('board').style.cursor = 'grabbing';
     e.preventDefault();
     e.stopPropagation();
@@ -617,16 +660,7 @@ function _onPanMouseMove(e) {
     if (!_panDragging) return;
     const board = document.getElementById('board');
     if (!board) return;
-    const dx = e.clientX - _panStartX;
-    const dy = e.clientY - _panStartY;
-    // Vertical : scroll de la page
-    const newY = _panStartScrollY - dy;
-    document.body.scrollTop = newY;
-    document.documentElement.scrollTop = newY;
-    // Horizontal : translateX sur le board entier
-    _boardTranslateX = _panStartTranslateX + dx;
-    board.style.transform = _boardTranslateX !== 0
-        ? 'translateX(' + _boardTranslateX + 'px)' : '';
+    _panApplyMove(board, e.clientX - _panStartX, e.clientY - _panStartY);
 }
 
 function _onPanMouseUp() {
@@ -634,17 +668,19 @@ function _onPanMouseUp() {
     _panDragging = false;
     const board = document.getElementById('board');
     if (board) board.style.cursor = _pdfPanMode ? 'grab' : '';
+    localStorage.setItem('boardPdfBgPos', _pdfBgPosX + ',' + _pdfBgPosY);
+    _savePdfBgOffsetPx(board);
 }
 
 function _onPanTouchStart(e) {
     if (!_pdfPanMode) return;
     if (e.touches.length !== 1) return;
     if (e.target.closest && e.target.closest('.widget')) return;
-    _panDragging        = true;
-    _panStartX          = e.touches[0].clientX;
-    _panStartY          = e.touches[0].clientY;
-    _panStartScrollY    = document.body.scrollTop || document.documentElement.scrollTop || 0;
-    _panStartTranslateX = _boardTranslateX;
+    _panDragging     = true;
+    _panStartX       = e.touches[0].clientX;
+    _panStartY       = e.touches[0].clientY;
+    _panStartScrollY = document.body.scrollTop || document.documentElement.scrollTop || 0;
+    _panStartBgPosX  = _pdfBgPosX;
     const board = document.getElementById('board');
     if (board) board.style.cursor = 'grabbing';
     e.preventDefault();
@@ -655,14 +691,7 @@ function _onPanTouchMove(e) {
     if (e.touches.length !== 1) return;
     const board = document.getElementById('board');
     if (!board) return;
-    const dx = e.touches[0].clientX - _panStartX;
-    const dy = e.touches[0].clientY - _panStartY;
-    const newY = _panStartScrollY - dy;
-    document.body.scrollTop = newY;
-    document.documentElement.scrollTop = newY;
-    _boardTranslateX = _panStartTranslateX + dx;
-    board.style.transform = _boardTranslateX !== 0
-        ? 'translateX(' + _boardTranslateX + 'px)' : '';
+    _panApplyMove(board, e.touches[0].clientX - _panStartX, e.touches[0].clientY - _panStartY);
     e.preventDefault();
 }
 
@@ -671,6 +700,8 @@ function _onPanTouchEnd() {
     _panDragging = false;
     const board = document.getElementById('board');
     if (board) board.style.cursor = _pdfPanMode ? 'grab' : '';
+    localStorage.setItem('boardPdfBgPos', _pdfBgPosX + ',' + _pdfBgPosY);
+    _savePdfBgOffsetPx(board);
 }
 
 function _attachPdfPanListeners() {
@@ -764,8 +795,8 @@ function activatePdfWallpaperSlider(initialWidth) {
     if (label) label.textContent = Math.round(_pdfWallpaperWidth) + '%';
     if (_pdfPanMode) _togglePdfPanMode();
     _updatePdfWallpaperPanelVisibility();
-    // Ajuster la hauteur du board pour correspondre exactement à l'image PDF
-    _syncBoardHeightToPdfRatio();
+    _applyBoardHeightForPdf();
+    _startBoardHeightGuard();
     // Sauvegarder l'offset initial en pixels absolus
     _savePdfBgOffsetPx();
     // Initialiser style.width/height sur les shape-widgets existants
@@ -794,24 +825,20 @@ function _getBgAnnotCanvas() {
     if (!canvas) {
         canvas = document.createElement('canvas');
         canvas.id = '_bg-annot-canvas';
-        canvas.style.cssText = `
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 5;
-        `;
+        canvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:5;';
         board.appendChild(canvas);
     }
-    // Synchroniser la résolution du canvas avec le board
-    const dpr = window.devicePixelRatio || 1;
-    const w = board.offsetWidth;
-    const h = board.offsetHeight;
-    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width  = w * dpr;
-        canvas.height = h * dpr;
-        canvas.style.width  = w + 'px';
-        canvas.style.height = h + 'px';
+    const dpr     = window.devicePixelRatio || 1;
+    const bgRatio = window._pdfBgNativeRatio
+        || parseFloat(localStorage.getItem('boardPdfBgRatio')) || 1;
+    const cssW = board.offsetWidth;
+    const cssH = Math.ceil(cssW * _pdfWallpaperWidth / 100 * bgRatio);
+    canvas.style.width  = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    if (canvas.width  !== Math.round(cssW * dpr) ||
+        canvas.height !== Math.round(cssH * dpr)) {
+        canvas.width  = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
     }
     return canvas;
 }
@@ -828,15 +855,7 @@ function _createBgAnnotWidget() {
     if (!fakeWidget) {
         fakeWidget = document.createElement('div');
         fakeWidget.id = '_bg-annot-widget';
-        fakeWidget.className = 'widget';
-        fakeWidget.style.cssText = `
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: auto;
-            z-index: 4;
-            background: transparent;
-        `;
+        fakeWidget.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:auto;z-index:4;background:transparent;';
         // draw.js cherche .pdf-annot-canvas dans le widget
         const annotCanvas = _getBgAnnotCanvas();
         if (annotCanvas) {

@@ -511,8 +511,16 @@ function _showCopyFeedback(count) {
 function virtualH(w) { return w / RATIO; }
 
 function applyBoardRatio(newW) {
-    // En mode A4, le board est dimensionné par toggleA4Mode — ne pas écraser
     if (document.body.classList.contains('a4-mode')) return;
+    if (typeof _isPdfWallpaper !== 'undefined' && _isPdfWallpaper) {
+        board.style.width    = newW + 'px';
+        board.style.position = 'absolute';
+        board.style.top      = '0';
+        board.style.left     = '0';
+        if (typeof _applyBoardHeightForPdf === 'function') _applyBoardHeightForPdf();
+        updatePresLimitLine();
+        return;
+    }
     const vh = virtualH(newW);
     board.style.width    = newW + 'px';
     board.style.height   = vh + 'px';
@@ -525,6 +533,10 @@ function applyBoardRatio(newW) {
 function updatePresLimitLine() {
     const line = document.getElementById('pres-limit-line');
     if (!line) return;
+    if (typeof _isPdfWallpaper !== 'undefined' && _isPdfWallpaper) {
+        line.style.display = 'none';
+        return;
+    }
     // La limite basse présentation = 100vh de la fenêtre, mesurée depuis le haut du board
     const boardTop = parseFloat(board.style.top) || 0;
     const limitY = window.innerHeight - boardTop;

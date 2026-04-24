@@ -1000,12 +1000,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             board.style.backgroundRepeat   = 'no-repeat';
                             board.style.backgroundColor    = '#fff';
                         }
-                        // Activer le mode A4 si pas déjà actif
-                        if (typeof toggleA4Mode === 'function') {
-                            if (!document.body.classList.contains('a4-mode')) {
-                                toggleA4Mode();
-                            }
-                        }
+                        // La hauteur du board est gérée par _applyBoardHeightForPdf()
                         if (typeof saveBg === 'function') saveBg(bgValue);
 
                         // Activer le slider de largeur PDF
