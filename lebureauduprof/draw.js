@@ -468,25 +468,42 @@ function paint(e) {
     if (n < 2 || !drawCtx) return;
     const prev = _smoothPts[n - 2];
     const cur2 = _smoothPts[n - 1];
-    drawCtx.save();
-    drawCtx.beginPath();
-    drawCtx.lineCap  = 'round';
-    drawCtx.lineJoin = 'round';
+
     if (currentDrawMode === 'highlight') {
+        // Surligneur : redessiner tout le trait depuis le début à chaque point
+        // pour éviter l'accumulation de multiply aux jonctions entre segments
+        redrawStrokes();
+        drawCtx.save();
+        drawCtx.beginPath();
+        drawCtx.lineCap  = 'square';
+        drawCtx.lineJoin = 'round';
         drawCtx.strokeStyle = currentStroke.color;
         drawCtx.lineWidth   = Math.max(currentStroke.size * 6, 24);
         drawCtx.globalAlpha = 0.4;
         drawCtx.globalCompositeOperation = 'multiply';
-        drawCtx.lineCap = 'square';
+        const pts = _smoothPts;
+        drawCtx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length - 1; i++) {
+            const mx = pts[i].x + (pts[i + 1].x - pts[i].x) * 0.25;
+            const my = pts[i].y + (pts[i + 1].y - pts[i].y) * 0.25;
+            drawCtx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+        }
+        drawCtx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+        drawCtx.stroke();
+        drawCtx.restore();
     } else {
+        drawCtx.save();
+        drawCtx.beginPath();
+        drawCtx.lineCap  = 'round';
+        drawCtx.lineJoin = 'round';
         drawCtx.strokeStyle = currentStroke.color;
         drawCtx.lineWidth   = currentStroke.size;
         drawCtx.globalAlpha = (currentStroke.opacity !== undefined ? currentStroke.opacity : 1.0);
+        drawCtx.moveTo(prev.x, prev.y);
+        drawCtx.lineTo(cur2.x, cur2.y);
+        drawCtx.stroke();
+        drawCtx.restore();
     }
-    drawCtx.moveTo(prev.x, prev.y);
-    drawCtx.lineTo(cur2.x, cur2.y);
-    drawCtx.stroke();
-    drawCtx.restore();
 }
 
 function endPaint() {
@@ -2879,7 +2896,7 @@ function _getPdfAnnotPos(e) {
     const rect = _pdfAnnotCanvas.getBoundingClientRect();
     const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
     const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-    // Tenir compte du ratio canvas CSS vs canvas interne (zoom PDF)
+    // Tenir compte du ratio canvas CSS vs canvas interne
     const scaleX = _pdfAnnotCanvas.width  / rect.width;
     const scaleY = _pdfAnnotCanvas.height / rect.height;
     return {
