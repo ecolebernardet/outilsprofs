@@ -133,14 +133,16 @@ function updateDrawCursor() {
     });
 }
 
-// Curseur surligneur : croix jaune (identique au mode annotation PDF)
+// Curseur surligneur : marqueur vertical, hotspot à la pointe
 function _highlightCursorUrl() {
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
-        + '<line x1="10" y1="0" x2="10" y2="20" stroke="#f5c518" stroke-width="2.5"/>'
-        + '<line x1="0" y1="10" x2="20" y2="10" stroke="#f5c518" stroke-width="2.5"/>'
-        + '<circle cx="10" cy="10" r="3" fill="#f5c518"/>'
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">'
+        + '<rect x="11" y="1" width="10" height="6" rx="2" fill="#aaa" stroke="#888" stroke-width="0.8"/>'
+        + '<rect x="11" y="6" width="10" height="17" rx="1" fill="#f5c518" stroke="#c8a010" stroke-width="0.8"/>'
+        + '<rect x="13" y="7" width="3" height="15" rx="1" fill="#fde96a" opacity="0.6"/>'
+        + '<polygon points="11,23 21,23 16,31" fill="#fad84a" stroke="#c8a010" stroke-width="0.8"/>'
+        + '<circle cx="16" cy="31" r="1.5" fill="#c8a010"/>'
         + '</svg>';
-    return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
+    return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 16 31, crosshair';
 }
 
 function clearDrawCursor() {
@@ -1900,8 +1902,55 @@ function toggleEraserMode() {
         eraserBtnE.style.setProperty('box-shadow',   '0 0 8px #e0555588', 'important');
         eraserBtnE.classList.add('btn-mode-active');
     }
+    // Appliquer le curseur gomme SVG sur le board
+    _applyEraserCursor();
     // En mode PDF : désactiver visuellement crayon et surligneur
     if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
+}
+
+// Réactive visuellement le bouton du mode dessin courant sans modifier currentDrawMode
+function _refreshDrawModeBtn(mode) {
+    // Bouton dessin libre
+    const freeBtn = document.getElementById('draw-free-btn');
+    if (freeBtn) {
+        const on = (mode === 'free');
+        freeBtn.style.borderColor = on ? '#4a90e2' : '#444';
+        freeBtn.style.background  = on ? '#1a3550' : '#2a2a2e';
+        freeBtn.style.color       = on ? '#fff'    : '#aaa';
+        freeBtn.classList.toggle('btn-mode-active', on);
+    }
+    // Bouton surligneur
+    const hlBtn = document.getElementById('draw-highlight-btn');
+    if (hlBtn) {
+        const on = (mode === 'highlight');
+        hlBtn.style.borderColor = on ? '#f5c518' : '#444';
+        hlBtn.style.background  = on ? '#2a2200' : '#2a2a2e';
+        hlBtn.style.color       = on ? '#f5c518' : '#aaa';
+        hlBtn.classList.toggle('btn-mode-active', on);
+    }
+    // Boutons figures
+    FIGURE_MODES.forEach(m => {
+        const btn = document.getElementById('draw-mode-' + m + '-btn');
+        if (!btn) return;
+        const on = (mode === m);
+        btn.style.borderColor = on ? '#4a90e2' : '#444';
+        btn.style.background  = on ? '#1a3550' : '#2a2a2e';
+        btn.style.color       = on ? '#fff'    : '#aaa';
+        btn.style.boxShadow   = on ? '0 0 8px rgba(74,144,226,0.7)' : 'none';
+        btn.classList.toggle('btn-mode-active', on);
+    });
+    // Mettre à jour le curseur
+    if (FIGURE_MODES.includes(mode)) {
+        board.classList.add('is-segment-mode');
+        const cursorVal = _figureCursorUrl();
+        board.style.setProperty('cursor', cursorVal, 'important');
+        document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+            w.style.setProperty('cursor', cursorVal, 'important');
+        });
+    } else {
+        board.classList.remove('is-segment-mode');
+        updateDrawCursor();
+    }
 }
 
 function stopEraserMode() {
@@ -1916,6 +1965,8 @@ function stopEraserMode() {
     }
     isDrawMode = true;
     if (typeof _updateEraserBtnInPanel === 'function') _updateEraserBtnInPanel();
+    // Retirer le curseur gomme SVG
+    _clearEraserCursor();
     // Désactiver visuellement le bouton gomme
     const eraserBtnS = document.getElementById('eraser-btn');
     if (eraserBtnS) {
@@ -1930,6 +1981,8 @@ function stopEraserMode() {
     }
     // En mode PDF : réactiver visuellement le bon outil
     if (_pdfAnnotMode && typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
+    // Réactiver visuellement le bouton du mode dessin courant (sans changer le mode)
+    if (!_pdfAnnotMode) _refreshDrawModeBtn(currentDrawMode);
 }
 
 function eTouchStart(e) { e.preventDefault(); snapshotNow(); isErasing = true; eraseAt(getPos(e.touches[0])); }
@@ -1941,7 +1994,7 @@ function onEraserMouseMove(e) {
     if (isErasing) eraseAt(pos);
     else drawEraserPreview(pos, r);
 }
-function onEraserLeave() { endErase(); redrawStrokes(); }
+function onEraserLeave() { endErase(); redrawStrokes(); _clearEraserCursor(); }
 function startErase(e) { if (!isEraserMode) return; snapshotNow(); isErasing = true; eraseAt(getPos(e)); }
 function endErase() { if (!isErasing) return; isErasing = false; saveBoard(); }
 
@@ -2092,21 +2145,51 @@ function eraseAt(pos) {
     }
 }
 
+// Image SVG gomme pré-chargée pour drawEraserPreview (évite le délai async Blob/Image)
+var _eraserSpongeImg = (function() {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="16">'
+        + '<rect x="1" y="2" width="20" height="12" rx="2" fill="#ddd" stroke="#888" stroke-width="1.2"/>'
+        + '<rect x="1" y="2" width="9" height="12" rx="2" fill="#ffb3b3" stroke="#888" stroke-width="1.2"/>'
+        + '<line x1="1" y1="8" x2="21" y2="8" stroke="#aaa" stroke-width="0.8"/>'
+        + '</svg>';
+    const img = new Image();
+    img.src = 'data:image/svg+xml;base64,' + btoa(svg);
+    return img;
+})();
+
 function drawEraserPreview(pos, r) {
     if (!drawCtx) return;
     redrawStrokes();
+    // Masquer le curseur natif pour laisser place au dessin canvas
+    if (board) board.style.setProperty('cursor', 'none', 'important');
     drawCtx.save();
+    // Cercle pointillé (rayon d'effacement)
     drawCtx.beginPath();
     drawCtx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
     drawCtx.strokeStyle = 'rgba(60,60,60,0.7)';
     drawCtx.lineWidth = 1.5;
     drawCtx.setLineDash([4, 3]);
     drawCtx.stroke();
-    drawCtx.beginPath();
-    drawCtx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
-    drawCtx.fillStyle = 'rgba(60,60,60,0.5)';
-    drawCtx.fill();
+    drawCtx.setLineDash([]);
+    // SVG gomme centré
+    if (_eraserSpongeImg.complete) {
+        drawCtx.drawImage(_eraserSpongeImg, pos.x - 11, pos.y - 8);
+    }
     drawCtx.restore();
+}
+
+function _applyEraserCursor() {
+    if (board) board.style.setProperty('cursor', 'none', 'important');
+    document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+        w.style.setProperty('cursor', 'none', 'important');
+    });
+}
+
+function _clearEraserCursor() {
+    if (board) board.style.removeProperty('cursor');
+    document.querySelectorAll('.widget[data-anchored="true"]').forEach(w => {
+        w.style.removeProperty('cursor');
+    });
 }
 
 // =========================================================================
@@ -2497,12 +2580,14 @@ function _pdfCursor(tool) {
         return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") ' + cx + ' ' + cx + ', crosshair';
     }
     if (tool === 'highlighter') {
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
-            + '<line x1="10" y1="0" x2="10" y2="20" stroke="#f5c518" stroke-width="2.5"/>'
-            + '<line x1="0" y1="10" x2="20" y2="10" stroke="#f5c518" stroke-width="2.5"/>'
-            + '<circle cx="10" cy="10" r="3" fill="#f5c518"/>'
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">'
+            + '<rect x="11" y="1" width="10" height="6" rx="2" fill="#aaa" stroke="#888" stroke-width="0.8"/>'
+            + '<rect x="11" y="6" width="10" height="17" rx="1" fill="#f5c518" stroke="#c8a010" stroke-width="0.8"/>'
+            + '<rect x="13" y="7" width="3" height="15" rx="1" fill="#fde96a" opacity="0.6"/>'
+            + '<polygon points="11,23 21,23 16,31" fill="#fad84a" stroke="#c8a010" stroke-width="0.8"/>'
+            + '<circle cx="16" cy="31" r="1.5" fill="#c8a010"/>'
             + '</svg>';
-        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 10 10, crosshair';
+        return 'url("data:image/svg+xml;base64,' + btoa(svg) + '") 16 31, crosshair';
     }
     if (tool === 'eraser') {
         svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="16">'
