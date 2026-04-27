@@ -477,7 +477,7 @@ function paint(e) {
         redrawStrokes();
         drawCtx.save();
         drawCtx.beginPath();
-        drawCtx.lineCap  = 'square';
+        drawCtx.lineCap  = 'butt';
         drawCtx.lineJoin = 'round';
         drawCtx.strokeStyle = currentStroke.color;
         drawCtx.lineWidth   = Math.max(currentStroke.size * 6, 24);
@@ -1285,11 +1285,11 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
         }
     }
 
-    // Mode surligneur : trait très large, semi-transparent, effet fluo
+    // Mode surligneur : trait semi-transparent, effet fluo
     if (stroke.highlight) {
         ctx.save();
         ctx.beginPath();
-        ctx.lineCap = 'square';
+        ctx.lineCap = 'butt';
         ctx.lineJoin = 'round';
         ctx.strokeStyle = stroke.color;
         ctx.lineWidth = Math.max(stroke.size * 6, 24);
