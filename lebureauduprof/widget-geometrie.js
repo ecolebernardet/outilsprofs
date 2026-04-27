@@ -464,24 +464,32 @@ function makeDraggableGeo(overlay, onDragEnd) {
         overlay.style.cursor = 'grabbing';
 
         function onMove(ev) {
+            if (ev.pointerType === 'mouse' && ev.type === 'pointermove') return; // déjà géré par mousemove
             const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
             const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
             overlay.style.left = (cx - bRect.left - startX) + 'px';
             overlay.style.top  = (cy - bRect.top  - startY) + 'px';
             if (onDragEnd) onDragEnd(); // repositionne la barre en temps réel
         }
-        function onEnd() {
+        function onEnd(ev) {
+            if (ev && ev.type === 'pointerup' && ev.pointerType === 'mouse') return; // déjà géré par mouseup
             overlay.style.cursor = 'move';
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup',   onEnd);
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend',  onEnd);
+            document.removeEventListener('mousemove',    onMove);
+            document.removeEventListener('mouseup',      onEnd);
+            document.removeEventListener('touchmove',    onMove);
+            document.removeEventListener('touchend',     onEnd);
+            document.removeEventListener('pointermove',  onMove);
+            document.removeEventListener('pointerup',    onEnd);
+            document.removeEventListener('pointercancel',onEnd);
             if (onDragEnd) onDragEnd();
         }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup',   onEnd);
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend',  onEnd);
+        document.addEventListener('mousemove',    onMove);
+        document.addEventListener('mouseup',      onEnd);
+        document.addEventListener('touchmove',    onMove, { passive: false });
+        document.addEventListener('touchend',     onEnd);
+        document.addEventListener('pointermove',  onMove);
+        document.addEventListener('pointerup',    onEnd);
+        document.addEventListener('pointercancel',onEnd);
     }
 
     overlay.addEventListener('mousedown', function (e) {
@@ -492,6 +500,22 @@ function makeDraggableGeo(overlay, onDragEnd) {
             e.target.dataset.nodrag === 'true' ||
             (e.target.parentElement && e.target.parentElement.dataset.nodrag === 'true')) return;
         e.preventDefault(); e.stopPropagation();
+        startGeoDrag(e.clientX, e.clientY);
+    });
+    // Stylet/touch : démarrer le drag et bloquer draw.js sur le corps de l'outil
+    overlay.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse') return; // déjà géré par mousedown
+        // Laisser les éléments avec leurs propres listeners gérer l'event
+        if (e.target && e.target.dataset && e.target.dataset.nodrag === 'true') return;
+        if (e.target && e.target.parentElement && e.target.parentElement.dataset &&
+            e.target.parentElement.dataset.nodrag === 'true') return;
+        if (e.target && (e.target.classList.contains('geo-rot-handle') ||
+            e.target.classList.contains('geo-trace-btn')  ||
+            e.target.classList.contains('geo-close-tool') ||
+            e.target.tagName === 'INPUT')) return;
+        // Corps de l'outil : démarrer le drag et bloquer draw.js
+        e.stopPropagation();
+        e.preventDefault();
         startGeoDrag(e.clientX, e.clientY);
     });
     overlay.addEventListener('touchstart', function (e) {
@@ -1331,13 +1355,37 @@ function spawnCompas(board, cx, cy) {
     }
 
     // ── Bouton fermer SVG ────────────────────────────────────────────────
-    closeSvgBg.addEventListener('mousedown', e => e.stopPropagation());
-    closeSvgGroup.addEventListener('mousedown', e => e.stopPropagation());
+    closeSvgBg.addEventListener('mousedown',   e => { e.stopPropagation(); e.preventDefault(); });
+    closeSvgBg.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); });
+    closeSvgGroup.addEventListener('mousedown',   e => { e.stopPropagation(); e.preventDefault(); });
+    closeSvgGroup.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); });
+    closeSvgGroup.addEventListener('pointerup',   e => { e.stopPropagation(); e.preventDefault(); });
     closeSvgGroup.addEventListener('click', e => { e.stopPropagation(); overlay.remove(); });
     addTouchClick(closeSvgGroup, () => overlay.remove());
+    // Support stylet : pointerup sur le bouton fermer
+    closeSvgGroup.addEventListener('pointerup', function(e) {
+        if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+            e.stopPropagation(); e.preventDefault();
+            overlay.remove();
+        }
+    });
 
     // ── Bouton tracer SVG ────────────────────────────────────────────────
+    // Annule tout stroke crayon en cours dans draw.js pour éviter qu'un
+    // pointerdown stylet sur ce bouton ne génère un trait fantôme.
+    function _cancelDrawStroke() {
+        if (typeof isPainting !== 'undefined' && isPainting) {
+            isPainting = false;
+        }
+        if (typeof currentStroke !== 'undefined' && currentStroke) {
+            currentStroke = null;
+        }
+    }
+
     function doTrace() {
+        // Annuler le stroke draw.js potentiellement déclenché par le pointerdown stylet
+        _cancelDrawStroke();
+
         const t    = getOverlayTransform(overlay);
         const pivX = parseFloat(overlay.dataset.pivX || 0);
         const pivY = parseFloat(overlay.dataset.pivY || 0);
@@ -1357,9 +1405,20 @@ function spawnCompas(board, cx, cy) {
         const ptsV = [{ x: cx_, y: cy_ - C }, { x: cx_, y: cy_ + C }];
         traceOnCanvas([ptsCercle, ptsH, ptsV]);
     }
-    traceSvgGroup.addEventListener('mousedown', e => e.stopPropagation());
+    // Bloquer mousedown ET pointerdown pour que draw.js ne démarre pas de stroke
+    traceSvgGroup.addEventListener('mousedown',  e => { e.stopPropagation(); e.preventDefault(); });
+    traceSvgGroup.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); });
+    // Bloquer pointerup pour éviter qu'un stroke fantôme soit finalisé dans draw.js
+    traceSvgGroup.addEventListener('pointerup',  e => { e.stopPropagation(); e.preventDefault(); });
     traceSvgGroup.addEventListener('click', e => { e.stopPropagation(); doTrace(); });
     addTouchClick(traceSvgGroup, doTrace);
+    // Support stylet : pointerup sur le groupe SVG déclenche doTrace
+    traceSvgGroup.addEventListener('pointerup', function(e) {
+        if (e.pointerType === 'pen' || e.pointerType === 'touch') {
+            e.stopPropagation(); e.preventDefault();
+            doTrace();
+        }
+    });
 
     // ── Bouton ↔ : drag horizontal gauche = réduire, droite = agrandir ──────
     let _spreadDragging = false;
