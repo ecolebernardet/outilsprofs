@@ -30,6 +30,7 @@
       <div class="help-nav" data-s="h-images"         onclick="helpShow(this)">🖼️ Images</div>
       <div class="help-nav" data-s="h-stickers"       onclick="helpShow(this)">🤓 Stickers</div>
       <div class="help-nav" data-s="h-pdf-lib"        onclick="helpShow(this)">📋 Bibliothèque PDF</div>
+      <div class="help-nav" data-s="h-ecran"          onclick="helpShow(this)">🖥️ Écran</div>
       <div class="help-nav" data-s="h-controles"      onclick="helpShow(this)">🎛️ Contrôles des widgets</div>
       <div class="help-nav" data-s="h-presentation"   onclick="helpShow(this)">📽️ Mode présentation</div>
       <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
@@ -40,9 +41,9 @@
       <div style="padding:4px 16px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#999;">Système</div>
       <div class="help-nav" data-s="h-projets"      onclick="helpShow(this)">📁 Projets</div>
       <div class="help-nav" data-s="h-scenes"       onclick="helpShow(this)">🗂️ Tableaux (scènes)</div>
-      <div class="help-nav" data-s="h-fond"         onclick="helpShow(this)">🖼️ Fond d'écran</div>
       <div class="help-nav" data-s="h-sauvegarde"   onclick="helpShow(this)">💾 Sauvegarde</div>
-      <div class="help-nav" data-s="h-avance"       onclick="helpShow(this)">⚙️ Astuces avancées</div>
+      <div style="height:1px;background:#e0e4ea;margin:8px 18px;"></div>
+      <div class="help-nav" data-s="h-apropos"      onclick="helpShow(this)">ℹ️ À propos</div>
     </nav>
 
     <!-- CONTENU -->
@@ -51,8 +52,9 @@
       <!-- INTRODUCTION -->
       <div id="h-intro" class="help-section" style="display:block;">
         <div style="font-size:1.4em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🏠 Bienvenue sur Le Bureau du Prof</div>
-        <p style="font-size:16px;color:#444;line-height:1.65;margin-bottom:10px;">Le Bureau du Prof est un <strong>tableau de bord interactif</strong> conçu pour les enseignants. Il permet d'afficher simultanément des widgets (heure, date, devoirs, météo, minuteur, sonomètre…), de dessiner librement, d'annoter, d'organiser son travail en projets et tableaux, et de tout sauvegarder.</p>
-        <p style="font-size:16px;color:#444;line-height:1.65;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
+        <p style="font-size:16px;color:#444;line-height:1.65;margin-bottom:10px;">Le Bureau du Prof est un <strong>tableau de bord interactif</strong> conçu pour les enseignants.<br>Il permet d'afficher simultanément des widgets (heure, date, devoirs, météo…), des activités (la monnaie, le calcul mental, la conjugaison, l'écriture seyes...) ou des outils (le plan de la classe, le tirage au sort, la création d'équipes équilibrées...).<br>Le Bureau du Prof permet aussi de dessiner librement, d'annoter des PDF, d'organiser son travail en projets et tableaux, et de tout sauvegarder.<br>Il est particulièrement utile pour les enseignants qui utilisent un <strong>TBI</strong> ou un <strong>VPI</strong> au quotidien.</p>
+        <p style="font-size:16px;color:#444;line-height:1.65;margin-bottom:16px;">Le tableau respecte un <strong>format 16:9</strong> et s'adapte automatiquement à la taille de votre écran ou vidéoprojecteur.</p>
+        <img src="pics/le-bureau-du-prof5.jpeg" alt="Aperçu du Bureau du Prof" style="width:80%;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,0.13);display:block; margin: 0 auto;">
       </div>
 
       <!-- EXPLORER LE BUREAU -->
@@ -232,6 +234,53 @@
           <tr><td style="padding:8px 12px;font-weight:700;">Double-clic sur un PDF</td><td style="padding:8px 12px;color:#444;">Ouvre le fichier directement dans un widget PDF sur le bureau, prêt à consulter. Le widget PDF dispose d'un bouton <strong>✏️ Annoter</strong> dans sa barre d'outils qui active la barre de dessin en mode annotation PDF pour écrire et surligner directement sur le document.</td></tr>
         </table>
         <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;">💡 Le dossier sélectionné est mémorisé entre les sessions. Il suffit de rouvrir la bibliothèque pour retrouver vos fichiers sans re-sélectionner le dossier.</div>
+      </div>
+
+      <!-- ÉCRAN -->
+      <div id="h-ecran" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🖥️ Écran</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:16px;">L'onglet <strong>🖥️ Écran</strong> regroupe les options d'affichage et les raccourcis d'historique pour personnaliser le bureau selon vos besoins.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">↩ Annuler &amp; Refaire</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Le panneau Écran expose les boutons d'historique pour annuler ou rétablir vos dernières actions sur le bureau.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Bouton</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Raccourci clavier</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↩ Annuler</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;"><kbd>Ctrl+Z</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Revient à l'état précédent du bureau</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:700;">↪ Refaire</td><td style="padding:8px 12px;color:#444;"><kbd>Ctrl+Y</kbd></td><td style="padding:8px 12px;color:#444;">Rétablit l'action annulée</td></tr>
+        </table>
+        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;margin-bottom:18px;">💡 L'historique conserve jusqu'à <strong>60 états</strong> par session. Il est perdu si vous fermez ou rechargez la page. Les raccourcis clavier ne fonctionnent pas quand le curseur est dans un champ de texte.</div>
+
+		<div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🗑️ Effacer le bureau</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Le bouton <strong>Effacer</strong> supprime en un clic l'ensemble des widgets, tracés et formes présents sur le tableau courant. Une confirmation est demandée avant de procéder. Cette action est enregistrée dans l'historique et peut être annulée avec <kbd>Ctrl+Z</kbd>.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">❓ Aide</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:4px;">Ouvre cette modale d'aide complète. Vous pouvez aussi y accéder à tout moment via <strong>＋ → Système → Aide</strong>.</p>
+		
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🌙 / ☀️ Mode d'affichage du menu</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Basculez entre le <strong>mode sombre</strong> (fond noir, par défaut) et le <strong>mode clair</strong> (fond blanc) pour adapter la lisibilité du menu à votre salle ou votre vidéoprojecteur.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🔴 Pointeur laser</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Remplace le curseur système par un point rouge lumineux, beaucoup plus visible sur vidéoprojecteur.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic sur 🔴 dans le panneau</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active le pointeur laser</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Re-clic sur 🔴</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Désactive le pointeur</td></tr>
+          <tr><td style="padding:8px 12px;"><kbd>Échap</kbd></td><td style="padding:8px 12px;color:#444;">Désactive en urgence</td></tr>
+        </table>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">📄 Format A4 Portrait</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Active un mode où le bureau prend les proportions d'une page A4 portrait, pratique pour préparer un document à imprimer ou à projeter en format page.</p>
+
+        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🖼️ Fond d'écran</div>
+        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Permet de choisir le fond du tableau courant. Chaque tableau conserve son propre fond.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px;">
+          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Type de fond</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Options disponibles</th></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Couleur unie</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Palette de couleurs prédéfinies + saisie hex + sélecteur natif</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Réglures</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Séyès (paille, blanc, avec marge) · Lignes simples · Grands carreaux · Petits carreaux · Ardoise</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Échelle du fond</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Slider pour ajuster la taille de la réglure</td></tr>
+          <tr><td style="padding:8px 12px;">Aucun fond</td><td style="padding:8px 12px;color:#444;">Fond noir par défaut</td></tr>
+        </table>
+       
       </div>
 
       <!-- CONTRÔLES DES WIDGETS -->
@@ -414,19 +463,6 @@
         </div>
       </div>
 
-      <!-- FOND D'ÉCRAN -->
-      <div id="h-fond" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">🖼️ Fond d'écran</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Accédez via <strong>＋ → Système → Affichage → Fond d'écran</strong>. Chaque tableau a son propre fond.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Type de fond</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Options disponibles</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Couleur unie</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Palette de couleurs prédéfinies + saisie hex + sélecteur natif</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Réglures</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Séyès (paille, blanc, avec marge) · Lignes simples · Grands carreaux · Petits carreaux · Ardoise</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Échelle du fond</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Slider pour ajuster la taille de la réglure</td></tr>
-          <tr><td style="padding:8px 12px;">Aucun fond</td><td style="padding:8px 12px;color:#444;">Fond noir par défaut</td></tr>
-        </table>
-      </div>
-
       <!-- SAUVEGARDE -->
       <div id="h-sauvegarde" class="help-section">
         <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">💾 Sauvegarde</div>
@@ -444,36 +480,13 @@
         <div style="background:#e8f5e9;border-left:4px solid #4caf50;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#2e7d32;">✅ Les PDF sont <strong>sauvegardés automatiquement</strong>. <em>Fichiers &gt;5 Mo : sauvegarde non garantie.</em></div>
       </div>
 
-      <!-- ASTUCES AVANCÉES -->
-      <div id="h-avance" class="help-section">
-        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">⚙️ Astuces avancées</div>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">↩ Annuler &amp; Refaire</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Boutons <strong>↩ ↪</strong> dans le menu Système. Historique de <strong>60 états</strong> par session.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Bouton</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Raccourci</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;font-weight:700;">↩ Annuler</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;"><kbd>Ctrl+Z</kbd></td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Revient à l'état précédent</td></tr>
-          <tr><td style="padding:8px 12px;font-weight:700;">↪ Refaire</td><td style="padding:8px 12px;color:#444;"><kbd>Ctrl+Y</kbd> / <kbd>Ctrl+Maj+Z</kbd></td><td style="padding:8px 12px;color:#444;">Rétablit l'action annulée</td></tr>
-        </table>
-        <div style="background:#eef7ff;border-left:4px solid #2B7FFF;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#1a4d8f;margin-bottom:10px;">💡 Les modifications de texte sont enregistrées dans l'historique après 800 ms d'inactivité.</div>
-        <div style="background:#fff8e6;border-left:4px solid #f39c12;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#7a5000;margin-bottom:18px;">⚠️ L'historique est perdu si vous fermez ou rechargez la page.</div>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">📋 Dupliquer un widget</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Menu contextuel ☰ → <em>Dupliquer</em>. La copie est placée légèrement décalée et conserve tout le contenu et le style.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🌙 / ☀️ Mode d'affichage du menu</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:14px;">Le menu principal existe en deux modes, basculables via <strong>＋ → Système → Affichage</strong> : le <strong>mode sombre</strong> (fond noir, par défaut) et le <strong>mode clair</strong> (fond blanc). Le mode clair est plus lisible dans une salle fortement éclairée ou face à un vidéoprojecteur.</p>
-
-        <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin:0 0 8px 0;">🔴 Pointeur laser</div>
-        <p style="font-size:13.5px;color:#444;line-height:1.65;margin-bottom:10px;">Activez via <strong>＋ → Système → Affichage → Pointeur laser</strong>. Le curseur est remplacé par un <strong>point rouge lumineux</strong>, beaucoup plus visible sur vidéoprojecteur que le curseur système.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;">
-          <tr><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Action</th><th style="background:#f0f3f9;text-align:left;padding:8px 12px;font-weight:700;border-bottom:2px solid #dde2ea;">Résultat</th></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Clic sur 🔴</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Active le pointeur laser</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;">Re-clic sur 🔴</td><td style="padding:8px 12px;border-bottom:1px solid #eef0f3;color:#444;">Désactive le pointeur</td></tr>
-          <tr><td style="padding:8px 12px;"><kbd>Échap</kbd></td><td style="padding:8px 12px;color:#444;">Désactive en urgence</td></tr>
-        </table>
+      <!-- À PROPOS -->
+      <div id="h-apropos" class="help-section">
+        <div style="font-size:1.15em;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e5e8ee;">ℹ️ À propos</div>
+        <p style="font-size:14px;color:#444;line-height:1.8;">Le bureau du Prof 🤓 Nicolas Bernardet 🤓 Chambéry 🤓 Savoie</p>
       </div>
 
+     
     </div><!-- /contenu -->
   </div><!-- /corps -->
 
