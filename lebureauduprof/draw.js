@@ -472,27 +472,10 @@ function paint(e) {
     const cur2 = _smoothPts[n - 1];
 
     if (currentDrawMode === 'highlight') {
-        // Surligneur : redessiner tout le trait depuis le début à chaque point
-        // pour éviter l'accumulation de multiply aux jonctions entre segments
-        redrawStrokes();
-        drawCtx.save();
-        drawCtx.beginPath();
-        drawCtx.lineCap  = 'butt';
-        drawCtx.lineJoin = 'round';
-        drawCtx.strokeStyle = currentStroke.color;
-        drawCtx.lineWidth   = Math.max(currentStroke.size * 6, 24);
-        drawCtx.globalAlpha = 0.4;
-        drawCtx.globalCompositeOperation = 'multiply';
-        const pts = _smoothPts;
-        drawCtx.moveTo(pts[0].x, pts[0].y);
-        for (let i = 1; i < pts.length - 1; i++) {
-            const mx = pts[i].x + (pts[i + 1].x - pts[i].x) * 0.25;
-            const my = pts[i].y + (pts[i + 1].y - pts[i].y) * 0.25;
-            drawCtx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
-        }
-        drawCtx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-        drawCtx.stroke();
-        drawCtx.restore();
+        if (!drawCtxTop) return;
+        drawCtxTop.clearRect(0, 0, drawCanvasTop.width, drawCanvasTop.height);
+        if (_smoothPts.length < 2) return;
+        _drawHighlightPath(drawCtxTop, _smoothPts, Math.max(currentStroke.size * 6, 24), currentStroke.color);
     } else {
         drawCtx.save();
         drawCtx.beginPath();
@@ -514,6 +497,10 @@ function endPaint() {
     // Annuler tout RAF en attente
     if (_paintRafId) { cancelAnimationFrame(_paintRafId); _paintRafId = null; }
     _paintPendingPos = null;
+    // Vider l'overlay surligneur (drawCtxTop) si utilisé pendant le dessin
+    if (currentStroke.highlight && drawCtxTop && drawCanvasTop) {
+        drawCtxTop.clearRect(0, 0, drawCanvasTop.width, drawCanvasTop.height);
+    }
     // Remplacer les points bruts par les points lissés pour que le trait final soit propre
     if (_smoothPts.length >= 2 && !FIGURE_MODES.includes(currentDrawMode)) {
         currentStroke.points = [..._smoothPts];
@@ -1236,6 +1223,57 @@ window.rescaleStrokesForPdfBg = function(oldW, newW, oldPosX, oldPosY, newPosX, 
 };
 
 
+// Dessine le surligneur : stroke épais butt, en ignorant les points parasites
+// du début et de la fin (micro-mouvements avant/après la direction principale).
+function _drawHighlightPath(ctx, pts, lw, color) {
+    if (pts.length < 2) return;
+    const half = lw / 2;
+
+    // Trouver le premier point où le déplacement cumulé dépasse un demi-rayon
+    // → on "saute" les micro-mouvements initiaux parasites
+    function skipStart(pts, threshold) {
+        let cum = 0;
+        for (let i = 1; i < pts.length; i++) {
+            cum += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+            if (cum >= threshold) return i - 1; // on commence un segment avant
+        }
+        return 0;
+    }
+    function skipEnd(pts, threshold) {
+        let cum = 0;
+        for (let i = pts.length - 2; i >= 0; i--) {
+            cum += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+            if (cum >= threshold) return i + 1;
+        }
+        return pts.length - 1;
+    }
+
+    const threshold = half * 0.5; // seuil = quart de l'épaisseur
+    const si = skipStart(pts, threshold);
+    const ei = skipEnd(pts, threshold);
+
+    // Ancrer le début sur le premier point brut (position exacte du clic),
+    // mais orienter la coupe selon la direction du segment stable
+    const startPt = pts[0];
+    const endPt   = pts[pts.length - 1];
+    const stablePts = [startPt, ...pts.slice(si + 1, ei), endPt];
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineCap  = 'butt';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = lw;
+    ctx.globalAlpha = 0.4;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.moveTo(stablePts[0].x, stablePts[0].y);
+    for (let i = 1; i < stablePts.length; i++) {
+        ctx.lineTo(stablePts[i].x, stablePts[i].y);
+    }
+    ctx.stroke();
+    ctx.restore();
+}
+
 function drawStroke(stroke, highlight = false, ctx = drawCtx) {
     // Stroke texte ancré (créé depuis un widget texte)
     if (stroke.type === 'text') {
@@ -1287,16 +1325,7 @@ function drawStroke(stroke, highlight = false, ctx = drawCtx) {
 
     // Mode surligneur : trait semi-transparent, effet fluo
     if (stroke.highlight) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineCap = 'butt';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = stroke.color;
-        ctx.lineWidth = Math.max(stroke.size * 6, 24);
-        ctx.globalAlpha = 0.4;
-        ctx.globalCompositeOperation = 'multiply';
-        bezierPath(stroke.points);
-        ctx.stroke();
+        _drawHighlightPath(ctx, stroke.points, Math.max(stroke.size * 6, 24), stroke.color);
         ctx.restore();
         return;
     }
