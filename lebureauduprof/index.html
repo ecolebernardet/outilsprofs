@@ -10,13 +10,13 @@
     <meta name="keywords" content="bureau du prof, tableau blanc numérique, outil enseignant, classe numérique, pédagogie, école, activités interactives, VPI, TBI, école, ressources pédagogiques, ">
     <meta name="author" content="Nicolas BERNARDET - Le Bureau du Prof">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://outilsprofs.fr/lebureauduprof">
+    <link rel="canonical" href="https://outilsprofs.fr/lebureauduprof/">
 
     <!-- Open Graph (partage réseaux sociaux + aperçu Google) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Le Bureau du Prof">
     <meta property="og:description" content="Un espace numérique interactif pour les enseignants : tableau blanc, stickers, activités, widgets et outils pédagogiques.">
-    <meta property="og:url" content="https://outilsprofs.fr/lebureauduprof">
+    <meta property="og:url" content="https://outilsprofs.fr/lebureauduprof/">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="Le Bureau du Prof">
 
@@ -1169,6 +1169,7 @@
 <script src="widget-deficalme.js"></script>
 <script src="widget-calendrier.js"></script>
 <script src="widget-repro-quadrillage.js"></script>
+<script src="widget-motsmeles.js"></script>
 <div id="laser-pointer"></div>
 <script src="pdf-widgets.js"></script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
@@ -1338,6 +1339,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-ecriture-seyes6.jpeg" alt="Écriture Seyes" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Écriture Seyes</div>
                 <div class="act-card-desc">Écrire directement sur un lignage Seyes</div>
+            </div>
+            <div class="act-card" onclick="createMotsMelesWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-motsmeles6.jpeg" alt="Mots mêlés" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Mots Mêlés</div>
+                <div class="act-card-desc">Générer et jouer à une grille interactive de mots mêlés</div>
             </div>
         </div>
 		<div class="act-section-label">🎨 Arts & Sciences</div>

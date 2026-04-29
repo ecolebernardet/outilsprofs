@@ -265,6 +265,11 @@ function buildBoardState() {
         if (w.dataset.type === 'repro-quadrillage' && typeof w._rqGetData === 'function') {
             rqData = w._rqGetData();
         }
+        // Données propres au widget mots mêlés
+        let mmData = null;
+        if (w.dataset.type === 'motsmeles' && typeof w._mmGetData === 'function') {
+            mmData = w._mmGetData();
+        }
         widgets.push({
 			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -306,7 +311,8 @@ function buildBoardState() {
 			fracData,
 			deData,
 			calData,
-			rqData
+			rqData,
+			mmData
 		});
     });
     const shapes = [];
@@ -676,6 +682,12 @@ function restoreBoardFromJSON(json) {
         } else if (w.type === 'repro-quadrillage') {
             if (typeof createReproQuadrillageWidget === 'function') {
                 widget = createReproQuadrillageWidget(w.rqData || null);
+            } else {
+                widget = createWidget(w.type, '100px', '100px', false);
+            }
+        } else if (w.type === 'motsmeles') {
+            if (typeof createMotsMelesWidget === 'function') {
+                widget = createMotsMelesWidget(w.mmData || null);
             } else {
                 widget = createWidget(w.type, '100px', '100px', false);
             }
