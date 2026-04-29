@@ -212,6 +212,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             const totalPages = pdfDoc.numPages;
             let zoomScale = null; // null = fit-to-width
             const ZOOM_STEP = 0.2, ZOOM_MIN = 0.3, ZOOM_MAX = 5;
+            let _currentRenderScale = 1; // scale effectif du dernier renderPage (mis à jour à chaque rendu)
 
             // Annotations : restaurer les couches existantes si ce PDF a déjà été affiché
             // (évite de perdre les annotations lors d'un rechargement/switch)
@@ -249,6 +250,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 _invalidateSnapshot(); // le canvas va être redimensionné → snapshot obsolète
                 pdfDoc.getPage(num).then(page => {
                     const scale = zoomScale ?? fitScale(page);
+                    _currentRenderScale = scale;
                     const dpr = window.devicePixelRatio || 1;
                     const viewport = page.getViewport({ scale: scale * dpr });
                     // Taille physique du canvas (haute résolution)
@@ -548,9 +550,43 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     ctx.restore();
                     return;
                 } else if (stroke.tool === 'highlighter') {
+                    // Rendu final : même logique que le mode libre (butt + skipStart/skipEnd)
+                    const lw = sizeScaled * 8 * _currentRenderScale;
+                    const half = lw / 2;
+                    const threshold = half * 0.5;
+                    const pxPts = stroke.pts.map(p => fromNorm(p.x, p.y));
+                    function _hlSkipStart(ps, thr) {
+                        let cum = 0;
+                        for (let i = 1; i < ps.length; i++) {
+                            cum += Math.hypot(ps[i].x - ps[i-1].x, ps[i].y - ps[i-1].y);
+                            if (cum >= thr) return i - 1;
+                        }
+                        return 0;
+                    }
+                    function _hlSkipEnd(ps, thr) {
+                        let cum = 0;
+                        for (let i = ps.length - 2; i >= 0; i--) {
+                            cum += Math.hypot(ps[i+1].x - ps[i].x, ps[i+1].y - ps[i].y);
+                            if (cum >= thr) return i + 1;
+                        }
+                        return ps.length - 1;
+                    }
+                    const si = _hlSkipStart(pxPts, threshold);
+                    const ei = _hlSkipEnd(pxPts, threshold);
+                    const stablePts = [pxPts[0], ...pxPts.slice(si + 1, ei), pxPts[pxPts.length - 1]];
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.lineCap  = 'butt';
+                    ctx.lineJoin = 'round';
+                    ctx.strokeStyle = stroke.color;
+                    ctx.lineWidth   = lw;
                     ctx.globalAlpha = 0.35;
                     ctx.globalCompositeOperation = 'multiply';
-                    ctx.lineWidth = sizeScaled * 5;
+                    ctx.moveTo(stablePts[0].x, stablePts[0].y);
+                    for (let i = 1; i < stablePts.length; i++) ctx.lineTo(stablePts[i].x, stablePts[i].y);
+                    ctx.stroke();
+                    ctx.restore();
+                    return;
                 } else if (stroke.tool === 'eraser') {
                     ctx.globalCompositeOperation = 'destination-out';
                     ctx.lineWidth = sizeScaled * 2; // size = rayon → diameter
@@ -624,6 +660,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 if (e.button !== undefined && e.button !== 0) return;
                 // Ne dessiner que si le mode annotation PDF est actif
                 if (!window._pdfAnnotMode) return;
+                // En mode annotation PDF, draw.js gère tout via api.startStroke/continueStroke
+                // → ce handler local causerait un double dessin, on le désactive
+                if (typeof _pdfAnnotTool !== 'undefined') return;
                 e.preventDefault();
                 const color = window._drawColor
                     || (typeof cpickGetValue === 'function' ? cpickGetValue('draw-color') : null)
@@ -679,6 +718,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             function onPointerMove(e) {
                 if (!isDrawing || !currentStrokeAnnot) return;
                 if (!window._pdfAnnotMode) return;
+                // En mode annotation PDF, draw.js gère tout via api.continueStroke
+                if (typeof _pdfAnnotTool !== 'undefined') return;
                 e.preventDefault();
                 const px   = getCanvasPx(e);
                 const norm = toNorm(px.x, px.y);
@@ -702,32 +743,83 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 const canvasW = annotCanvas.width;
                 const displayW = annotCanvas.getBoundingClientRect().width || 600;
                 const sizeScaled = currentStrokeAnnot.size * canvasW / displayW;
-                const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
-                const cur  = fromNorm(pts[pts.length - 1].x, pts[pts.length - 1].y);
 
-                actx.save();
                 if (currentStrokeAnnot.tool === 'highlighter') {
-                    actx.globalAlpha = 0.35;
-                    actx.globalCompositeOperation = 'multiply';
-                    actx.lineWidth = sizeScaled * 5;
-                } else if (currentStrokeAnnot.tool === 'eraser') {
-                    actx.globalCompositeOperation = 'destination-out';
-                    actx.lineWidth = sizeScaled * 2;
+                    // Même logique que le mode libre : restaurer le snapshot puis
+                    // redessiner le chemin complet — évite l'accumulation de couches
+                    // semi-transparentes et corrige le débordement gauche/droite.
+                    if (_annotSnapshot) actx.putImageData(_annotSnapshot, 0, 0);
+                    else actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+
+                    if (pts.length >= 2) {
+                        const pxPts = pts.map(p => fromNorm(p.x, p.y));
+                        const lw = sizeScaled * 8 * _currentRenderScale;
+                        const half = lw / 2;
+                        const threshold = half * 0.5;
+
+                        // Sauter les micro-mouvements parasites en début/fin
+                        function _skipStart(ps, thr) {
+                            let cum = 0;
+                            for (let i = 1; i < ps.length; i++) {
+                                cum += Math.hypot(ps[i].x - ps[i-1].x, ps[i].y - ps[i-1].y);
+                                if (cum >= thr) return i - 1;
+                            }
+                            return 0;
+                        }
+                        function _skipEnd(ps, thr) {
+                            let cum = 0;
+                            for (let i = ps.length - 2; i >= 0; i--) {
+                                cum += Math.hypot(ps[i+1].x - ps[i].x, ps[i+1].y - ps[i].y);
+                                if (cum >= thr) return i + 1;
+                            }
+                            return ps.length - 1;
+                        }
+
+                        const si = _skipStart(pxPts, threshold);
+                        const ei = _skipEnd(pxPts, threshold);
+                        const stablePts = [pxPts[0], ...pxPts.slice(si + 1, ei), pxPts[pxPts.length - 1]];
+
+                        actx.save();
+                        actx.beginPath();
+                        actx.lineCap  = 'butt';
+                        actx.lineJoin = 'round';
+                        actx.strokeStyle = currentStrokeAnnot.color;
+                        actx.lineWidth   = lw;
+                        actx.globalAlpha = 0.35;
+                        actx.globalCompositeOperation = 'multiply';
+                        actx.moveTo(stablePts[0].x, stablePts[0].y);
+                        for (let i = 1; i < stablePts.length; i++) {
+                            actx.lineTo(stablePts[i].x, stablePts[i].y);
+                        }
+                        actx.stroke();
+                        actx.restore();
+                    }
                 } else {
-                    actx.lineWidth = sizeScaled;
+                    const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
+                    const cur  = fromNorm(pts[pts.length - 1].x, pts[pts.length - 1].y);
+
+                    actx.save();
+                    if (currentStrokeAnnot.tool === 'eraser') {
+                        actx.globalCompositeOperation = 'destination-out';
+                        actx.lineWidth = sizeScaled * 2;
+                    } else {
+                        actx.lineWidth = sizeScaled;
+                    }
+                    actx.strokeStyle = currentStrokeAnnot.color;
+                    actx.lineCap = 'round';
+                    actx.lineJoin = 'round';
+                    actx.beginPath();
+                    actx.moveTo(prev.x, prev.y);
+                    actx.lineTo(cur.x, cur.y);
+                    actx.stroke();
+                    actx.restore();
                 }
-                actx.strokeStyle = currentStrokeAnnot.color;
-                actx.lineCap = 'round';
-                actx.lineJoin = 'round';
-                actx.beginPath();
-                actx.moveTo(prev.x, prev.y);
-                actx.lineTo(cur.x, cur.y);
-                actx.stroke();
-                actx.restore();
             }
 
             function onPointerUp(e) {
                 if (!isDrawing) return;
+                // En mode annotation PDF, draw.js gère la fin du trait via api.endStroke
+                if (window._pdfAnnotMode && typeof _pdfAnnotTool !== 'undefined') return;
                 isDrawing = false;
                 if (currentStrokeAnnot && currentStrokeAnnot.pts.length > 0) {
                     getLayer(currentPage).strokes.push(currentStrokeAnnot);
@@ -1145,32 +1237,74 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const displayW   = annotCanvas.getBoundingClientRect().width || 600;
                         const sizeScaled = size * canvasW / displayW;
 
-                        // Dessin incrémental : on ne trace que le nouveau segment
-                        // entre l'avant-dernier et le dernier point — zéro putImageData,
-                        // zéro boucle sur tous les points → latence identique au board.
-                        actx.save();
                         if (tool === 'highlighter') {
-                            actx.globalAlpha = 0.35;
-                            actx.globalCompositeOperation = 'multiply';
-                            actx.lineWidth = sizeScaled * 5;
-                            actx.lineCap   = 'square';
-                        } else if (tool === 'eraser') {
-                            actx.globalCompositeOperation = 'destination-out';
-                            actx.lineWidth = sizeScaled * 2;
-                            actx.lineCap   = 'round';
+                            // Surligneur : restaurer le snapshot puis redessiner le chemin
+                            // complet en une seule passe — évite l'accumulation de couches
+                            // semi-transparentes (même logique que le mode libre draw.js).
+                            if (_annotSnapshot) actx.putImageData(_annotSnapshot, 0, 0);
+                            else actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+
+                            if (pts.length >= 2) {
+                                const pxPts = pts.map(p => fromNorm(p.x, p.y));
+                                const lw = sizeScaled * 8 * _currentRenderScale;
+                                const half = lw / 2;
+                                const threshold = half * 0.5;
+
+                                function _hlSkipS(ps, thr) {
+                                    let cum = 0;
+                                    for (let i = 1; i < ps.length; i++) {
+                                        cum += Math.hypot(ps[i].x - ps[i-1].x, ps[i].y - ps[i-1].y);
+                                        if (cum >= thr) return i - 1;
+                                    }
+                                    return 0;
+                                }
+                                function _hlSkipE(ps, thr) {
+                                    let cum = 0;
+                                    for (let i = ps.length - 2; i >= 0; i--) {
+                                        cum += Math.hypot(ps[i+1].x - ps[i].x, ps[i+1].y - ps[i].y);
+                                        if (cum >= thr) return i + 1;
+                                    }
+                                    return ps.length - 1;
+                                }
+
+                                const si = _hlSkipS(pxPts, threshold);
+                                const ei = _hlSkipE(pxPts, threshold);
+                                const stablePts = [pxPts[0], ...pxPts.slice(si + 1, ei), pxPts[pxPts.length - 1]];
+
+                                actx.save();
+                                actx.beginPath();
+                                actx.lineCap  = 'butt';
+                                actx.lineJoin = 'round';
+                                actx.strokeStyle = color;
+                                actx.lineWidth   = lw;
+                                actx.globalAlpha = 0.35;
+                                actx.globalCompositeOperation = 'multiply';
+                                actx.moveTo(stablePts[0].x, stablePts[0].y);
+                                for (let i = 1; i < stablePts.length; i++) actx.lineTo(stablePts[i].x, stablePts[i].y);
+                                actx.stroke();
+                                actx.restore();
+                            }
                         } else {
-                            actx.lineWidth = sizeScaled;
-                            actx.lineCap   = 'round';
+                            // Dessin incrémental pour pen/eraser : on ne trace que le nouveau segment
+                            actx.save();
+                            if (tool === 'eraser') {
+                                actx.globalCompositeOperation = 'destination-out';
+                                actx.lineWidth = sizeScaled * 2;
+                                actx.lineCap   = 'round';
+                            } else {
+                                actx.lineWidth = sizeScaled;
+                                actx.lineCap   = 'round';
+                            }
+                            actx.strokeStyle = color;
+                            actx.lineJoin    = 'round';
+                            actx.beginPath();
+                            const pPrev = fromNorm(prev.x, prev.y);
+                            const pCur  = fromNorm(norm.x, norm.y);
+                            actx.moveTo(pPrev.x, pPrev.y);
+                            actx.lineTo(pCur.x,  pCur.y);
+                            actx.stroke();
+                            actx.restore();
                         }
-                        actx.strokeStyle = color;
-                        actx.lineJoin    = 'round';
-                        actx.beginPath();
-                        const pPrev = fromNorm(prev.x, prev.y);
-                        const pCur  = fromNorm(norm.x, norm.y);
-                        actx.moveTo(pPrev.x, pPrev.y);
-                        actx.lineTo(pCur.x,  pCur.y);
-                        actx.stroke();
-                        actx.restore();
                     },
                     // Termine le trait et le sauvegarde dans annotLayers
                     endStroke() {

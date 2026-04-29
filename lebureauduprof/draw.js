@@ -1368,7 +1368,11 @@ function setDrawMode(mode) {
     // Désactiver la gomme si elle est active
     if (isEraserMode) stopEraserMode();
     // Recliqué sur le mode déjà actif → retour en dessin libre
-    if (mode === currentDrawMode && mode !== 'free') mode = 'free';
+    // (pas en mode annotation PDF où on reste sur la figure choisie)
+    if (mode === currentDrawMode && mode !== 'free'
+        && !(typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode && FIGURE_MODES.includes(mode))) {
+        mode = 'free';
+    }
     currentDrawMode = mode;
     // Bouton dessin libre — styles inline directs pour cohérence
     const freeBtn = document.getElementById('draw-free-btn');
@@ -1478,6 +1482,10 @@ function setDrawMode(mode) {
         if (figSub) figSub.classList.remove('open');
         _setBtnActive('draw-figures-btn', false, 'figures');
         if (typeof closeGeoSubmenu === 'function') closeGeoSubmenu();
+    }
+    // En mode annotation PDF avec un mode figure : mettre à jour les sous-boutons
+    if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode && FIGURE_MODES.includes(mode)) {
+        if (typeof _updatePdfToolBtns === 'function') _updatePdfToolBtns();
     }
 }
 
@@ -1602,24 +1610,39 @@ function enableDrawing() {
     _setBtnActive('draw-figures-btn', false, 'figures');
 }
 
-function toggleFiguresSubmenu() {
+function toggleFiguresSubmenu(fromMainBtn) {
+    // Détecter automatiquement si appelé depuis le bouton principal ou un sous-bouton
+    // (sans modifier le HTML : on inspecte l'event global si fromMainBtn non fourni)
+    if (fromMainBtn === undefined && typeof event !== 'undefined' && event && event.currentTarget) {
+        fromMainBtn = (event.currentTarget.id === 'draw-figures-btn');
+    }
     _stopBgPanIfActive();
-    // En mode annotation PDF : activer l'outil figure ET ouvrir le sous-menu
+    // En mode annotation PDF : activer l'outil figure ET ouvrir/fermer le sous-menu
     if (typeof _pdfAnnotMode !== 'undefined' && _pdfAnnotMode) {
         const sub = document.getElementById('figures-submenu');
         const isOpen = sub && sub.classList.contains('open');
-        if (!isOpen) {
+        if (isOpen && !fromMainBtn) {
+            // Appelé depuis un bouton du sous-menu → ne pas fermer
+            return;
+        }
+        if (isOpen) {
+            // Appelé depuis le bouton principal figures → fermer, mais garder le bouton actif
+            sub.classList.remove('open');
+            sub.style.display = 'none';
+            _updatePdfToolBtns(); // maintient le bouton figures coloré
+        } else {
             setPdfAnnotTool('figure');
             // Sélectionner automatiquement le segment si aucun mode figure n'est actif
             if (!FIGURE_MODES.includes(currentDrawMode) || currentDrawMode === 'free') {
                 setDrawMode('segment');
             }
-        }
-        if (!sub) return;
-        sub.classList.toggle('open');
-        sub.style.display = sub.classList.contains('open') ? 'flex' : 'none';
-        if (sub.classList.contains('open') && typeof _positionSubmenuNextToDrawbar === 'function') {
-            requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+            if (!sub) return;
+            sub.classList.add('open');
+            sub.style.display = 'flex';
+            if (typeof _positionSubmenuNextToDrawbar === 'function') {
+                requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+            }
+            _updatePdfToolBtns(); // colore le bon sous-bouton figure
         }
         return;
     }
@@ -2640,9 +2663,15 @@ function setPdfAnnotTool(tool) {
     if (!_pdfAnnotMode) return;
 
     // Bascule : recliqué sur le même outil → retour au crayon
-    if (_pdfAnnotTool === tool) tool = 'pen';
+    // (sauf pour 'figure' qui est géré par toggleFiguresSubmenu)
+    if (_pdfAnnotTool === tool && tool !== 'figure') tool = 'pen';
 
     _pdfAnnotTool = tool;
+
+    // Désélectionner toute figure sélectionnée au changement d'outil
+    _pdfFigSelectedIndex  = -1;
+    _pdfFigLastClickTime  = 0;
+    _pdfFigLastClickIndex = -1;
 
     // Gérer isEraserMode manuellement (sans appeler stopEraserMode qui
     // déclenche _updatePdfToolBtns trop tôt avec le mauvais outil)
@@ -2716,9 +2745,33 @@ function _updatePdfToolBtns() {
     _setBtn('pdf-pan-btn',        tool === 'pan',         '#c8a000');
     _setBtn('draw-free-btn',      tool === 'pen',         '#1a3550');
     _setBtn('draw-highlight-btn', tool === 'highlighter', '#2a2200');
-    _setBtn('eraser-btn',         tool === 'eraser',      '#e4e6ea');
+    _setBtn('eraser-btn',         tool === 'eraser',      '#c0392b');
     _setBtn('draw-figures-btn',   tool === 'figure',      '#1a2a4a');
     _setBtn('pdf-text-btn',       tool === 'text',        '#1a3a2a');
+
+    // Mettre à jour les boutons du sous-menu figures (figure active = currentDrawMode)
+    FIGURE_MODES.forEach(m => {
+        const btn = document.getElementById('draw-mode-' + m + '-btn');
+        if (!btn) return;
+        const isActive = (tool === 'figure') && (m === currentDrawMode);
+        if (isActive) {
+            btn.style.setProperty('background',   '#1a3550', 'important');
+            btn.style.setProperty('border-color', '#4a90e2', 'important');
+            btn.style.setProperty('color',        '#fff',    'important');
+            btn.style.setProperty('box-shadow',   '0 0 8px rgba(74,144,226,0.7)', 'important');
+            btn.querySelectorAll('svg *').forEach(el => el.style.setProperty('stroke', '#7ab8f5', 'important'));
+        } else {
+            btn.style.removeProperty('background');
+            btn.style.removeProperty('border-color');
+            btn.style.removeProperty('color');
+            btn.style.removeProperty('box-shadow');
+            btn.style.background  = '#2a2a2e';
+            btn.style.borderColor = '#444';
+            btn.style.color       = '#aaa';
+            btn.style.boxShadow   = 'none';
+            btn.querySelectorAll('svg *').forEach(el => el.style.removeProperty('stroke'));
+        }
+    });
 
     // Curseur sur le widget cible (sauf la toolbar qui garde son curseur grab)
     const cursor = _pdfCursor(tool);
@@ -2904,14 +2957,14 @@ function _startPdfAnnotMode() {
     const wrapAtStart = target.querySelector('.pdf-canvas-wrap');
     if (wrapAtStart) wrapAtStart.style.cursor = '';
 
-    // Taille de gomme par défaut à 10 en mode annotation PDF (seulement à la première activation)
+    // Taille de gomme par défaut à 15 en mode annotation PDF (seulement à la première activation)
     if (!_switching) {
         const _es = document.getElementById('eraser-size');
         const _esl = document.getElementById('eraser-size-label');
         const _esl2 = document.getElementById('eraser-size-shapes-label');
-        if (_es) { _es.value = 10; _es.dispatchEvent(new Event('input')); }
-        if (_esl) _esl.textContent = '10';
-        if (_esl2) _esl2.textContent = '10';
+        if (_es) { _es.value = 15; _es.dispatchEvent(new Event('input')); }
+        if (_esl) _esl.textContent = '15';
+        if (_esl2) _esl2.textContent = '15';
         _showPdfAnnotToast('✏️ Mode annotation PDF actif — cliquez sur le PDF pour annoter');
     }
 
@@ -3095,6 +3148,11 @@ var _pdfPanLastX = null;
 var _pdfFigureStart = null; // point de départ pour les figures PDF
 var _pdfDragText = null;    // { index, stroke, startPos } lors d'un drag de texte
 var _pdfDragFigure = null;  // { index, stroke, startPos, startNx, startNy } lors d'un drag de figure
+// Tracking double-clic pour la sélection de figures (simple clic = nouveau trait)
+var _pdfFigLastClickTime  = 0;
+var _pdfFigLastClickPos   = null;
+var _pdfFigLastClickIndex = -1;
+var _pdfFigSelectedIndex  = -1; // index de la figure actuellement sélectionnée (-1 = aucune)
 // ── Snap magnétique sur les angles cardinaux (0°, 90°, 180°, 270°) ────────
 const _SNAP_ANGLES_RAD = [0, Math.PI/2, Math.PI, 3*Math.PI/2, 2*Math.PI];
 const _SNAP_THRESHOLD  = 5 * Math.PI / 180; // ±5°
@@ -3232,32 +3290,59 @@ function _pdfAnnotStartStroke(e) {
 
     const pos = _getPdfAnnotPos(e);
 
-    // Mode figure : si un clic tombe sur une figure existante → préparer le drag
+    // Mode figure : sélection uniquement sur double-clic (évite de sélectionner
+    // accidentellement la figure qu'on vient de tracer quand on enchaîne les traits)
     if (FIGURE_MODES.includes(currentDrawMode) && tool !== 'eraser') {
         const found = api.findFigureStrokeAt ? api.findFigureStrokeAt(pos.x, pos.y) : null;
         if (found) {
-            // Clic sur une figure existante → démarrer le drag (pas de nouvelle figure)
-            const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-            const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-            _pdfDragFigure = {
-                index: found.index,
-                stroke: found.stroke,
-                startPos: pos,
-                startClientX: clientX,
-                startClientY: clientY,
-                moved: false
-            };
-            _pdfAnnotPainting = true;
-            // Préparer le snapshot sans la figure (optimisation gros PDF)
-            if (api.startDragFigure) api.startDragFigure(found.index);
-            api.drawFigureSelection(found.index);
-            if (_pdfAnnotEvTarget) {
-                _pdfAnnotEvTarget.style.setProperty('cursor', 'grab', 'important');
-                _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', 'grab', 'important'));
+            const now = Date.now();
+            const dx = pos.x - (_pdfFigLastClickPos ? _pdfFigLastClickPos.x : Infinity);
+            const dy = pos.y - (_pdfFigLastClickPos ? _pdfFigLastClickPos.y : Infinity);
+            const isDoubleClick = (now - _pdfFigLastClickTime < 350)
+                && Math.hypot(dx, dy) < 20
+                && _pdfFigLastClickIndex === found.index;
+            // Aussi accepter un clic sur une figure déjà sélectionnée (pour la déplacer)
+            const isAlreadySelected = _pdfFigSelectedIndex === found.index;
+
+            _pdfFigLastClickTime  = now;
+            _pdfFigLastClickPos   = pos;
+            _pdfFigLastClickIndex = found.index;
+
+            if (isDoubleClick || isAlreadySelected) {
+                // Double-clic (ou clic sur figure déjà sélectionnée) → déplacer
+                if (isDoubleClick) _pdfFigLastClickTime = 0; // reset pour éviter triple-clic
+                _pdfFigSelectedIndex = found.index; // mémoriser la sélection
+                const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+                _pdfDragFigure = {
+                    index: found.index,
+                    stroke: found.stroke,
+                    startPos: pos,
+                    startClientX: clientX,
+                    startClientY: clientY,
+                    moved: false
+                };
+                _pdfAnnotPainting = true;
+                if (api.startDragFigure) api.startDragFigure(found.index);
+                api.drawFigureSelection(found.index);
+                if (_pdfAnnotEvTarget) {
+                    _pdfAnnotEvTarget.style.setProperty('cursor', 'grab', 'important');
+                    _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => el.style.setProperty('cursor', 'grab', 'important'));
+                }
+                return;
+            } else {
+                // Premier clic sur figure non sélectionnée : ignorer et dessiner un nouveau trait
+                _pdfFigSelectedIndex = -1;
+                _pdfFigureStart = pos;
+                _pdfAnnotPainting = true;
+                return;
             }
-            return;
         }
-        // Pas de figure sous le curseur → dessiner une nouvelle figure
+        // Pas de figure sous le curseur → dessiner une nouvelle figure + désélectionner
+        _pdfFigLastClickTime  = 0;
+        _pdfFigLastClickPos   = null;
+        _pdfFigLastClickIndex = -1;
+        _pdfFigSelectedIndex  = -1;
         _pdfFigureStart = pos;
         _pdfAnnotPainting = true;
         return;
@@ -3412,15 +3497,17 @@ function _pdfAnnotEndStroke(e) {
     // Fin du drag figure
     if (_pdfDragFigure) {
         if (_pdfDragFigure.moved) {
-            // Drag terminé → sauvegarder dans l'historique
+            // Drag terminé → sauvegarder dans l'historique, garder la sélection active
             const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
             if (api && api.saveFigureMove) api.saveFigureMove(_pdfDragFigure.index);
-            // Redessiner proprement sans le cadre de sélection
-            if (api && api.redrawAnnotations) api.redrawAnnotations();
+            // Redessiner avec le cadre de sélection (figure reste sélectionnée)
+            if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfDragFigure.index);
+            _pdfFigSelectedIndex = _pdfDragFigure.index;
         } else {
-            // Pas de mouvement → simple clic, afficher juste le cadre de sélection
+            // Pas de mouvement → afficher le cadre de sélection, rester sélectionné
             const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
             if (api && api.drawFigureSelection) api.drawFigureSelection(_pdfDragFigure.index);
+            _pdfFigSelectedIndex = _pdfDragFigure.index;
         }
         _pdfDragFigure = null;
         // Restaurer le curseur figure (croix+figure) sur le widget et tous ses enfants
@@ -3450,6 +3537,7 @@ function _pdfAnnotEndStroke(e) {
         const pos = _getPdfAnnotPos(e);
         const pts = _buildFigurePoints(currentDrawMode, _pdfFigureStart, pos);
         _pdfFigureStart = null;
+        _pdfFigSelectedIndex = -1; // désélectionner après avoir dessiné un nouveau trait
         if (pts && pts.length >= 2) {
             const fill = _getFigFillOpts();
             api.addFigureStroke(
@@ -3857,14 +3945,14 @@ function _pdfAnnotMouseMove(e)  {
             if (_pdfAnnotCanvas) _pdfAnnotCanvas.style.setProperty('cursor', cur, 'important');
         }
     }
-    // Curseur adaptatif en mode figure : 4-flèches au survol d'une figure existante
+    // Curseur adaptatif en mode figure : grab uniquement sur figure déjà sélectionnée
     if (!_pdfAnnotPainting && _pdfAnnotEffectiveTool() === 'figure' && _pdfAnnotEvTarget) {
         const api = _pdfAnnotWidget && _pdfAnnotWidget._pdfAnnotAPI;
         if (api && api.findFigureStrokeAt) {
             const pos = _getPdfAnnotPos(e);
             const found = api.findFigureStrokeAt(pos.x, pos.y);
-            const cur = found ? 'move' : _pdfCursor('figure');
-            // Appliquer sur le widget, le canvas et tous leurs enfants
+            // Move uniquement si la figure est déjà sélectionnée (double-clic préalable)
+            const cur = (found && _pdfFigSelectedIndex === found.index) ? 'grab' : _pdfCursor('figure');
             _pdfAnnotEvTarget.style.setProperty('cursor', cur, 'important');
             _pdfAnnotEvTarget.querySelectorAll('*').forEach(el => {
                 if (!el.closest('.editor-toolbar')) {
