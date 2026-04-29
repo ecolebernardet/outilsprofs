@@ -165,12 +165,13 @@
             user-select: none;
         }
         .mm-title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 800;
             color: #374151;
             letter-spacing: 0.3px;
             pointer-events: none;
             flex: 1;
+			margin-bottom: 20px;
         }
 
         /* ── Zone de configuration ── */
@@ -180,20 +181,20 @@
             gap: 8px;
         }
         .mm-field-label {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             color: #6b7280;
             letter-spacing: 0.4px;
-			margin-top: 15px;
-            margin-bottom: 10px;
+			margin-top: 40px;
+            margin-bottom: 15px;
         }
         .mm-input {
             width: 100%;
             border: 1.5px solid #d1d5db;
             border-radius: 8px;
             padding: 6px 9px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
             color: #374151;
             background: #f9fafb;
@@ -332,7 +333,7 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: flex-end;
-			margin-top: 40px;
+			margin-top: 60px;
         }
         .mm-action-btn {
             padding: 5px 11px;
@@ -425,7 +426,7 @@
         .mm-container:hover .mm-resize-handle { opacity: 1; }
 
         /* ── Thème selector ── */
-        .mm-theme-select { font-size: 11px; }
+        .mm-theme-select { font-size: 13px; }
 
         /* ── Victoire ── */
         .mm-victory-banner {
@@ -456,10 +457,17 @@ const MM_THEMES = {
     pays: "France, Italie, Espagne, Belgique, Suisse, Monaco, Allemagne, Canada, Japon, Bresil, Maroc",
     sports: "Football, Basket, Tennis, Judo, Natation, Rugby, Karate, Escrime, Boxe, Danse, Yoga, Ski",
     musique: "Piano, Guitare, Violon, Flute, Trompette, Batterie, Harpe, Saxophone, Tambour",
-    espace: "Soleil, Lune, Terre, Mars, Jupiter, Saturne, Planete, Etoile, Galaxie, Comete, Fusee",
+    espace: "Soleil, Lune, Terre, Mars, Jupiter, Saturne, Planete, Etoile, Galaxie, Comete, Fusee, Astronaute",
     couleurs: "Rouge, Bleu, Vert, Jaune, Orange, Violet, Marron, Rose, Blanc, Noir, Gris, Beige",
+    voiture: "Volant, Roue, Vitesse, Pedale, Frein, Porte, Siege, Coffre, Moteur, Embrayage",
+    cuisine: "Poêle, Casserole, Couteau, Four, Mixeur, Tablier, Recette, Assiette, Cuillere, Fourchette",
     metiers: "Docteur, Pompier, Policier, Boulanger, Avocat, Pilote, Facteur, Artiste, Juge, Marin",
-    meteo: "Soleil, Nuage, Pluie, Orage, Eclair, Tempete, Brouillard, Neige, Ouragan"
+    vetements: "Pantalon, Chemise, Robe, Jupe, Veste, Bonnet, Echarpe, Gants, Chaussette, Chaussure",
+    maison: "Cuisine, Salon, Chambre, Jardin, Fenetre, Escalier, Toiture, Garage, Balcon, Entree",
+    meteo: "Soleil, Nuage, Pluie, Orage, Eclair, Tempete, Brouillard, Neige, Ouragan, Arcenciel",
+    insectes: "Abeille, Fourmi, Mouche, Papillon, Grillon, Cafard, Cigale, Guêpe, Libellule, Luciole",
+    ocean: "Baleine, Requin, Dauphin, Tortue, Pieuvre, Corail, Algue, Meduse, Crevette, Etoile",
+    geometrie: "Carre, Cercle, Triangle, Losange, Ovale, Cube, Sphere, Pyramide, Angle, Droite"
 };
 
 const MM_DIFFICULTY_DIRECTIONS = {
@@ -583,7 +591,6 @@ function createMotsMelesWidget(savedData) {
         <div>
             <div class="mm-field-label">Thématique rapide</div>
             <select class="mm-input mm-theme-select mm-theme-selector">
-                <option value="">-- Choisir un thème --</option>
                 <option value="animaux">🐾 Animaux</option>
                 <option value="ecole">🏫 École</option>
                 <option value="corps">👤 Corps Humain</option>
@@ -594,8 +601,15 @@ function createMotsMelesWidget(savedData) {
                 <option value="musique">🎸 Instruments</option>
                 <option value="espace">🚀 Espace</option>
                 <option value="couleurs">🎨 Couleurs</option>
+                <option value="voiture">🚗 Voiture</option>
+                <option value="cuisine">🍳 Cuisine</option>
                 <option value="metiers">👷 Métiers</option>
+                <option value="vetements">👕 Vêtements</option>
+                <option value="maison">🏠 Maison</option>
                 <option value="meteo">☁️ Météo</option>
+                <option value="insectes">🐝 Insectes</option>
+                <option value="ocean">🌊 Océan</option>
+                <option value="geometrie">📐 Géométrie</option>
             </select>
         </div>
         <div>
