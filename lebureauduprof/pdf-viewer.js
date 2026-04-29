@@ -495,7 +495,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
             function drawStroke(ctx, stroke) {
                 // Épaisseur proportionnelle à la taille courante du canvas
                 const canvasW = annotCanvas.width;
-                const sizeScaled = stroke.size * canvasW / 600; // 600 = référence arbitraire
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const sizeScaled = stroke.size * canvasW / displayW; // normalisé par la largeur d'affichage CSS
 
                 if (stroke.tool === 'text') {
                     const pos = fromNorm(stroke.nx, stroke.ny);
@@ -527,7 +528,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 ctx.save();
                 if (stroke.tool === 'figure') {
                     ctx.strokeStyle = stroke.color;
-                    ctx.lineWidth = stroke.size * canvasW / 600;
+                    ctx.lineWidth = stroke.size * canvasW / displayW;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
                     ctx.beginPath();
@@ -699,7 +700,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 // Dessin temps réel : convertir les 2 derniers points en pixels courants
                 const pts = currentStrokeAnnot.pts;
                 const canvasW = annotCanvas.width;
-                const sizeScaled = currentStrokeAnnot.size * canvasW / 600;
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const sizeScaled = currentStrokeAnnot.size * canvasW / displayW;
                 const prev = fromNorm(pts[pts.length - 2].x, pts[pts.length - 2].y);
                 const cur  = fromNorm(pts[pts.length - 1].x, pts[pts.length - 1].y);
 
@@ -820,18 +822,52 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 });
             }
 
-            reattach('.pdf-zoom-in',  () => {
-                pdfDoc.getPage(currentPage).then(p => {
-                    const base = zoomScale ?? fitScale(p);
-                    applyZoom(base + ZOOM_STEP);
-                });
-            });
-            reattach('.pdf-zoom-out', () => {
-                pdfDoc.getPage(currentPage).then(p => {
-                    const base = zoomScale ?? fitScale(p);
-                    applyZoom(base - ZOOM_STEP);
-                });
-            });
+            // Zoom continu : démarre au pointerdown, accélère après quelques steps, s'arrête au pointerup
+            function _attachContinuousZoom(sel, direction) {
+                const el = container.querySelector(sel);
+                if (!el) return;
+                const clone = el.cloneNode(true);
+                el.parentNode.replaceChild(clone, el);
+
+                let _holdTimeout = null;
+                let _active = false;
+                let _stepCount = 0;
+
+                function _doZoom() {
+                    if (!_active) return;
+                    pdfDoc.getPage(currentPage).then(p => {
+                        if (!_active) return;
+                        const base = zoomScale ?? fitScale(p);
+                        applyZoom(base + direction * ZOOM_STEP);
+                        _stepCount++;
+                        // Accélérer progressivement
+                        const delay = _stepCount > 10 ? 40 : _stepCount > 5 ? 70 : 120;
+                        _holdTimeout = setTimeout(_doZoom, delay);
+                    });
+                }
+
+                function _start(e) {
+                    e.preventDefault();
+                    if (_active) return;
+                    _active = true;
+                    _stepCount = 0;
+                    _doZoom();
+                }
+
+                function _stop() {
+                    _active = false;
+                    if (_holdTimeout) { clearTimeout(_holdTimeout); _holdTimeout = null; }
+                }
+
+                clone.addEventListener('pointerdown', _start);
+                clone.addEventListener('pointerup',    _stop);
+                clone.addEventListener('pointerleave', _stop);
+                clone.addEventListener('pointercancel', _stop);
+                clone.addEventListener('click', e => e.stopImmediatePropagation());
+            }
+
+            _attachContinuousZoom('.pdf-zoom-in',  +1);
+            _attachContinuousZoom('.pdf-zoom-out', -1);
             reattach('.pdf-zoom-fit', () => {
                 zoomScale = null;
                 renderPage(currentPage);
@@ -1106,7 +1142,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         currentStrokeAnnot.tool  = tool;
 
                         const canvasW    = annotCanvas.width;
-                        const sizeScaled = size * canvasW / 600;
+                        const displayW   = annotCanvas.getBoundingClientRect().width || 600;
+                        const sizeScaled = size * canvasW / displayW;
 
                         // Dessin incrémental : on ne trace que le nouveau segment
                         // entre l'avant-dernier et le dernier point — zéro putImageData,
@@ -1229,7 +1266,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     previewFigure(color, size, pts, fillColor, fillOpacity) {
                         redrawAnnotations(currentPage);
                         const canvasW = annotCanvas.width;
-                        const sizeScaled = size * canvasW / 600;
+                        const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                        const sizeScaled = size * canvasW / displayW;
                         actx.save();
                         actx.strokeStyle = color;
                         actx.lineWidth = sizeScaled;
@@ -1303,7 +1341,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         }
                         // Dessiner le cercle preview
                         const canvasW = annotCanvas.width;
-                        const rScaled = r * canvasW / 600;
+                        const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                        const rScaled = r * canvasW / displayW;
                         actx.save();
                         actx.globalCompositeOperation = 'source-over';
                         actx.beginPath();
@@ -1325,7 +1364,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     // Effacement direct pixel par pixel (en temps réel)
                     eraseAt(px, py, r) {
                         const canvasW = annotCanvas.width;
-                        const rScaled = r * canvasW / 600;
+                        const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                        const rScaled = r * canvasW / displayW;
                         actx.save();
                         actx.globalCompositeOperation = 'destination-out';
                         actx.beginPath();
