@@ -858,7 +858,8 @@ function createMotsMelesWidget(savedData) {
             cell.dataset.sol = obj.isSolution ? 'true' : 'false';
             cell.dataset.idx = idx;
             cell.style.cssText = `width:${_cellSize}px;height:${_cellSize}px;font-size:${fontSize}px;`;
-            cell.addEventListener('click', (e) => { e.stopPropagation(); toggleCell(cell); });
+            cell.addEventListener('click',     (e) => { e.stopPropagation(); toggleCell(cell); });
+            cell.addEventListener('pointerup', (e) => { e.stopPropagation(); });
             gridEl.appendChild(cell);
         });
 
@@ -1351,29 +1352,60 @@ function createMotsMelesWidget(savedData) {
     }
 
     // ── Événements ────────────────────────────────────────────────────────
-    generateBtn.addEventListener('click', (e) => { e.stopPropagation(); generateGrid(); });
-    saveJsonBtn.addEventListener('click', (e) => { e.stopPropagation(); exportJSON(); });
+
+    // Helper : bloquer la propagation sur tous les types d'événements ponctuels
+    // (souris, stylet, touch) pour éviter le déclenchement du drag du widget
+    function _stopAll(el) {
+        ['mousedown','pointerdown','touchstart'].forEach(evt =>
+            el.addEventListener(evt, e => { e.stopPropagation(); }, { passive: false })
+        );
+    }
+
+    // Helper : déclencher une action au tap/clic stylet
+    // On utilise pointerup + click pour couvrir tous les cas
+    function _onTap(el, fn) {
+        el.addEventListener('click',     (e) => { e.stopPropagation(); fn(e); });
+        el.addEventListener('pointerup', (e) => { e.stopPropagation(); });
+    }
+
+    _stopAll(generateBtn);
+    _onTap(generateBtn, () => generateGrid());
+
+    _stopAll(saveJsonBtn);
+    _onTap(saveJsonBtn, () => exportJSON());
+
     fileInput.addEventListener('change', importJSON);
-    // empêcher mousedown sur le label de propager (drag)
-    setupActions.querySelector('.mm-btn-load-json').addEventListener('mousedown', e => e.stopPropagation());
-    backBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setupZone.style.display  = '';
+    // empêcher le drag sur le label Charger JSON
+    _stopAll(setupActions.querySelector('.mm-btn-load-json'));
+
+    _stopAll(backBtn);
+    _onTap(backBtn, () => {
+        setupZone.style.display    = '';
         setupActions.style.display = '';
-        gameZone.style.display   = 'none';
+        gameZone.style.display     = 'none';
         autoSave();
     });
-    revealBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleReveal(); });
-    shuffleBtn.addEventListener('click', (e) => { e.stopPropagation(); generateGrid(); });
-    pdfBtn.addEventListener('click', (e) => { e.stopPropagation(); exportPDF(); });
 
-    [titleInput, wordsInput, sizeInput, diffSelect].forEach(el => {
-        el.addEventListener('mousedown', e => e.stopPropagation());
-        el.addEventListener('click',     e => e.stopPropagation());
+    _stopAll(revealBtn);
+    _onTap(revealBtn, () => toggleReveal());
+
+    _stopAll(shuffleBtn);
+    _onTap(shuffleBtn, () => generateGrid());
+
+    _stopAll(pdfBtn);
+    _onTap(pdfBtn, () => exportPDF());
+
+    // Champs de saisie : bloquer la propagation + autoriser focus au stylet
+    [titleInput, wordsInput, sizeInput, diffSelect, themeSelector].forEach(el => {
+        ['mousedown','pointerdown','touchstart','click'].forEach(evt =>
+            el.addEventListener(evt, e => { e.stopPropagation(); }, { passive: false })
+        );
+        // S'assurer que le focus fonctionne avec le stylet
+        el.addEventListener('pointerup', (e) => { e.stopPropagation(); el.focus(); });
     });
-    themeSelector.addEventListener('mousedown', e => e.stopPropagation());
 
     // Aide
+    _stopAll(helpBtn);
     helpBtn.addEventListener('click', (e) => { e.stopPropagation(); helpPopup.classList.toggle('show'); });
     document.addEventListener('click', () => helpPopup.classList.remove('show'));
 
@@ -1455,13 +1487,15 @@ function createMotsMelesWidget(savedData) {
         document.addEventListener('touchend',  onEnd);
     }, { passive: false });
 
-    // Focus / bringToFront
-    widget.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    // Focus / bringToFront (souris + stylet)
+    function _widgetActivate(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'LABEL') return;
         bringToFront(widget);
         widget.focus();
         if (typeof positionActionBar === 'function') positionActionBar(widget);
-    });
+    }
+    widget.addEventListener('mousedown',   _widgetActivate);
+    widget.addEventListener('pointerdown', _widgetActivate);
 
     // ── Rafraîchir la mise en page des cellules après resize ─────────────
     function refreshGridLayout() {
