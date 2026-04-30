@@ -3834,6 +3834,7 @@ function _showPdfInlineTextEditor({ clientX, clientY, color, size, fontSizePx, i
 // Permet de bloquer le mousedown synthétique que le navigateur génère ensuite,
 // qui causerait un double-démarrage du trait.
 var _pdfLastPointerWasPen = false;
+var _pdfLastStrokeStartTime = 0; // timestamp du dernier _pdfAnnotStartStroke (déduplique touch+pointer)
 
 function _pdfAnnotMouseDown(e)  {
     // Le navigateur génère un mousedown synthétique après chaque pointerdown stylet/touch.
@@ -3863,6 +3864,7 @@ function _pdfAnnotPointerDown(e) {
         if (_annotBtnIds.some(id => e.target.id === id || (e.target.closest && e.target.closest('#'+id)))) return;
         e.preventDefault();
         _pdfLastPointerWasPen = true;
+        _pdfLastStrokeStartTime = Date.now();
         _pdfAnnotStartStroke(e);
     }
 }
@@ -3982,8 +3984,14 @@ function _pdfAnnotMouseLeave(e) {
 }
 
 function _pdfAnnotTouchStart(e) {
+    // touchstart et pointerdown se déclenchent tous les deux pour le même tap stylet/touch.
+    // On ignore touchstart si pointerdown a déjà traité ce tap (même instant ±50ms).
+    if (Date.now() - _pdfLastStrokeStartTime < 50) return;
     e.preventDefault();
-    if (e.touches.length === 1) _pdfAnnotStartStroke(e.touches[0]);
+    if (e.touches.length === 1) {
+        _pdfLastStrokeStartTime = Date.now();
+        _pdfAnnotStartStroke(e.touches[0]);
+    }
 }
 function _pdfAnnotTouchMove(e) {
     e.preventDefault();
