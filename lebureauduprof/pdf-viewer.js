@@ -551,7 +551,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     return;
                 } else if (stroke.tool === 'highlighter') {
                     // Rendu final : même logique que le mode libre (butt + skipStart/skipEnd)
-                    const lw = sizeScaled * 8 * _currentRenderScale;
+                    const lw = sizeScaled * 3 * _currentRenderScale;
                     const half = lw / 2;
                     const threshold = half * 0.5;
                     const pxPts = stroke.pts.map(p => fromNorm(p.x, p.y));
@@ -753,7 +753,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
                     if (pts.length >= 2) {
                         const pxPts = pts.map(p => fromNorm(p.x, p.y));
-                        const lw = sizeScaled * 8 * _currentRenderScale;
+                        const lw = sizeScaled * 3 * _currentRenderScale;
                         const half = lw / 2;
                         const threshold = half * 0.5;
 
@@ -1238,51 +1238,48 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         const sizeScaled = size * canvasW / displayW;
 
                         if (tool === 'highlighter') {
-                            // Surligneur : restaurer le snapshot puis redessiner le chemin
-                            // complet en une seule passe — évite l'accumulation de couches
-                            // semi-transparentes (même logique que le mode libre draw.js).
-                            if (_annotSnapshot) actx.putImageData(_annotSnapshot, 0, 0);
-                            else actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
-
+                            // Surligneur : dessin incrémental (comme le crayon) pour minimiser
+                            // la latence sur stylet/vidéoprojecteur interactif.
+                            // On utilise globalCompositeOperation='source-atop' sur un canvas
+                            // temporaire pour éviter l'accumulation de semi-transparence.
+                            // Tous les 20 points on repart du snapshot pour corriger les artefacts.
                             if (pts.length >= 2) {
-                                const pxPts = pts.map(p => fromNorm(p.x, p.y));
-                                const lw = sizeScaled * 8 * _currentRenderScale;
-                                const half = lw / 2;
-                                const threshold = half * 0.5;
-
-                                function _hlSkipS(ps, thr) {
-                                    let cum = 0;
-                                    for (let i = 1; i < ps.length; i++) {
-                                        cum += Math.hypot(ps[i].x - ps[i-1].x, ps[i].y - ps[i-1].y);
-                                        if (cum >= thr) return i - 1;
-                                    }
-                                    return 0;
+                                const lw = sizeScaled * 3 * _currentRenderScale;
+                                // Toutes les 20 pts : redessiner depuis le snapshot pour nettoyer
+                                // (très rare, minimise la latence tout en gardant un rendu propre)
+                                if (pts.length % 20 === 0) {
+                                    if (_annotSnapshot) actx.putImageData(_annotSnapshot, 0, 0);
+                                    else actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                                    const pxPts = pts.map(p => fromNorm(p.x, p.y));
+                                    actx.save();
+                                    actx.beginPath();
+                                    actx.lineCap  = 'butt';
+                                    actx.lineJoin = 'round';
+                                    actx.strokeStyle = color;
+                                    actx.lineWidth   = lw;
+                                    actx.globalAlpha = 0.35;
+                                    actx.globalCompositeOperation = 'multiply';
+                                    actx.moveTo(pxPts[0].x, pxPts[0].y);
+                                    for (let i = 1; i < pxPts.length; i++) actx.lineTo(pxPts[i].x, pxPts[i].y);
+                                    actx.stroke();
+                                    actx.restore();
+                                } else {
+                                    // Dessin incrémental : seulement le nouveau segment
+                                    const pPrev = fromNorm(prev.x, prev.y);
+                                    const pCur  = fromNorm(norm.x, norm.y);
+                                    actx.save();
+                                    actx.beginPath();
+                                    actx.lineCap  = 'round';
+                                    actx.lineJoin = 'round';
+                                    actx.strokeStyle = color;
+                                    actx.lineWidth   = lw;
+                                    actx.globalAlpha = 0.35;
+                                    actx.globalCompositeOperation = 'multiply';
+                                    actx.moveTo(pPrev.x, pPrev.y);
+                                    actx.lineTo(pCur.x, pCur.y);
+                                    actx.stroke();
+                                    actx.restore();
                                 }
-                                function _hlSkipE(ps, thr) {
-                                    let cum = 0;
-                                    for (let i = ps.length - 2; i >= 0; i--) {
-                                        cum += Math.hypot(ps[i+1].x - ps[i].x, ps[i+1].y - ps[i].y);
-                                        if (cum >= thr) return i + 1;
-                                    }
-                                    return ps.length - 1;
-                                }
-
-                                const si = _hlSkipS(pxPts, threshold);
-                                const ei = _hlSkipE(pxPts, threshold);
-                                const stablePts = [pxPts[0], ...pxPts.slice(si + 1, ei), pxPts[pxPts.length - 1]];
-
-                                actx.save();
-                                actx.beginPath();
-                                actx.lineCap  = 'butt';
-                                actx.lineJoin = 'round';
-                                actx.strokeStyle = color;
-                                actx.lineWidth   = lw;
-                                actx.globalAlpha = 0.35;
-                                actx.globalCompositeOperation = 'multiply';
-                                actx.moveTo(stablePts[0].x, stablePts[0].y);
-                                for (let i = 1; i < stablePts.length; i++) actx.lineTo(stablePts[i].x, stablePts[i].y);
-                                actx.stroke();
-                                actx.restore();
                             }
                         } else {
                             // Dessin incrémental pour pen/eraser : on ne trace que le nouveau segment
