@@ -131,21 +131,15 @@ function _buildProjPanelRow(p, list) {
     const actions = document.createElement('div');
     actions.className = 'proj-panel-item-actions';
 
-    const btnOpen = document.createElement('button');
-    btnOpen.className = 'proj-panel-btn proj-panel-btn-open';
-    btnOpen.textContent = '📂';
-    btnOpen.title = isCurrent ? 'Tableau ouvert' : 'Ouvrir ce tableau';
-    btnOpen.style.opacity = isCurrent ? '0.35' : '1';
-    btnOpen.style.cursor  = isCurrent ? 'default' : 'pointer';
-    btnOpen.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        if (!isCurrent) {
+    // Clic sur le nom/date pour ouvrir le tableau
+    if (!isCurrent) {
+        info.style.cursor = 'pointer';
+        info.addEventListener('click', async (e) => {
+            e.stopPropagation();
             await _projLoad(p.id);
-            // Forcer un re-render immédiat du panneau avec le nouvel ID courant
             _renderProjPanelList();
-        }
-    });
-    actions.appendChild(btnOpen);
+        });
+    }
 
     const btnRename = document.createElement('button');
     btnRename.className = 'proj-panel-btn';
@@ -169,13 +163,6 @@ function _buildProjPanelRow(p, list) {
     header.appendChild(grip);
     header.appendChild(info);
     header.appendChild(actions);
-
-    if (!isCurrent) {
-        header.addEventListener('dblclick', (e) => {
-            if (e.target.closest('.proj-panel-btn')) return;
-            _projLoad(p.id);
-        });
-    }
 
     row.appendChild(header);
     list.appendChild(row);

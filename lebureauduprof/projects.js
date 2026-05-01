@@ -400,7 +400,7 @@ async function exportAllProjects() {
     const date = new Date().toISOString().split('T')[0];
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
-    a.download = `lebureauduprof_TOUS-LES-PROJETS_${date}.json`;
+    a.download = `lebureauduprof_TOUS-LES-TABLEAUX_${date}.json`;
     document.body.appendChild(a); a.click(); a.remove();
     const btn = document.getElementById('proj-export-all-btn');
     if (btn) { const orig = btn.textContent; btn.textContent = '✅ Exporté !'; setTimeout(() => btn.textContent = orig, 2000); }

@@ -1730,10 +1730,10 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </button>
     <!-- Actions export/import -->
     <div id="proj-panel-actions">
-        <button class="proj-panel-action-btn green" onclick="exportConfig();toggleProjectsPanel()" title="Sauvegarder ce projet (JSON)">💾 Sauvegarder</button>
-        <button class="proj-panel-action-btn green" onclick="document.getElementById('import-input').click();toggleProjectsPanel()" title="Charger un projet (JSON)">📂 Charger</button>
-        <button class="proj-panel-action-btn" onclick="exportAllProjects()" title="Exporter tous les projets">📤 Tout exporter</button>
-        <button class="proj-panel-action-btn" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Tout importer</button>
+        <button class="proj-panel-action-btn green" onclick="exportConfig();toggleProjectsPanel()" title="Sauvegarder ce tableau (JSON)">💾 Sauvegarder<br>un tableau</button>
+        <button class="proj-panel-action-btn green" onclick="document.getElementById('import-input').click();toggleProjectsPanel()" title="Charger un tableau (JSON)">📂 Charger<br>un tableau</button>
+        <button class="proj-panel-action-btn" onclick="exportAllProjects()" title="Exporter tous les tableaux">📤 Exporter<br>tous les tableaux</button>
+        <button class="proj-panel-action-btn" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Importer<br>tous les tableaux</button>
     </div>
     <!-- Liste des projets -->
     <div id="proj-panel-list">
@@ -2607,7 +2607,7 @@ function toggleMediaCollapse(container) {
         ['sticker-panel-tab',    'active',                      '🤓', 'Stickers'],
         ['image-panel-tab',      'active',                      '🖼️', 'Images'],
         ['pdf-library-tab',      'pdf-lib-tab-open',            '📋', 'PDF'],
-        ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Projets'],
+        ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Tableaux'],
         ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
         ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
     ];

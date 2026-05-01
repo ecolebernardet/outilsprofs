@@ -2702,7 +2702,7 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
 
 .proj-panel-item-header {
     display: flex; align-items: center; gap: 6px;
-    padding: 8px 10px; cursor: pointer;
+    padding: 5px 10px; cursor: pointer;
 }
 .proj-panel-arrow {
     font-size: 8px; color: rgba(255,255,255,0.3);
@@ -2717,7 +2717,7 @@ body.menu-light .disp-section-label, body.menu-light .hist-section-label {
 }
 .proj-panel-item-current .proj-panel-item-name { color: #7ab8f5; }
 .proj-panel-item-meta {
-    font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px;
+    font-size: 8px; color: rgba(255,255,255,0.35); margin-top: 1px;
 }
 
 /* Boutons d'actions de la carte */
