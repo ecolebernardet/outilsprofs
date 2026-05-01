@@ -204,6 +204,28 @@
 </head>
 <body class="menu-light">
 
+<script>
+// ── État initial forcé uniquement à la première ouverture (pas au F5) ────
+// Board vide + fond tableau vert à la première ouverture d'une session
+(function() {
+    if (window.location.search.indexOf('mode=pagegarde') !== -1) return;
+    try {
+        // sessionStorage est vidé à la fermeture de l'onglet, pas au F5
+        if (sessionStorage.getItem('_bureauSessionStarted')) return;
+        sessionStorage.setItem('_bureauSessionStarted', '1');
+        // Board vide
+        localStorage.setItem('profBoardConfig', JSON.stringify({ widgets: [] }));
+        // Fond tableau vert
+        localStorage.setItem('boardBackground', 'url(fonds/fond-tableau-vert.jpeg)');
+        // Une seule scène vierge
+        localStorage.setItem('profScenes', JSON.stringify({
+            scenes: [{ id: Date.now(), name: 'Tableau 1', config: JSON.stringify({ widgets: [] }), background: 'url(fonds/fond-tableau-vert.jpeg)' }],
+            currentScene: 0
+        }));
+    } catch(e) {}
+})();
+</script>
+
 <div id="a4-indicator">📄 Mode A4 Portrait</div>
 <div id="board">
 <div id="pres-limit-line"></div>
