@@ -1,27 +1,23 @@
 // =========================================================================
 // PANNEAU LATÉRAL PROJETS — Le Bureau du Prof
-// Panneau gauche sur le modèle de la bibliothèque PDF
+// VERSION SIMPLIFIÉE : 1 projet = 1 tableau, pas d'accordion de scènes
 // =========================================================================
 
 (function() {
 
-// ── Helpers DOM ───────────────────────────────────────────────────────────
-function _panel()  { return document.getElementById('projects-panel'); }
-function _list()   { return document.getElementById('proj-panel-list'); }
+function _panel() { return document.getElementById('projects-panel'); }
+function _list()  { return document.getElementById('proj-panel-list'); }
 
-// ── Ouverture / fermeture du panneau ─────────────────────────────────────
+// ── Ouverture / fermeture ─────────────────────────────────────────────────
 function toggleProjectsPanel() {
     const panel = _panel();
     if (!panel) return;
     const open = panel.classList.toggle('proj-panel-open');
     try { localStorage.setItem('projectsPanelOpen', open ? '1' : '0'); } catch(e) {}
-    // Mettre à jour l'onglet déclencheur
     const tab = document.getElementById('projects-panel-tab');
     if (tab) tab.classList.toggle('proj-panel-tab-open', open);
-    // Mettre à jour le bouton menu si présent
     const menuBtn = document.getElementById('projects-library-menu-btn');
     if (menuBtn) menuBtn.classList.toggle('btn-mode-active', open);
-    // Rafraîchir la liste à l'ouverture
     if (open) _renderProjPanelList();
 }
 window.toggleProjectsPanel = toggleProjectsPanel;
@@ -30,7 +26,7 @@ window.refreshProjectsPanel = function() {
     if (panel && panel.classList.contains('proj-panel-open')) _renderProjPanelList();
 };
 
-// ── Rendu de la liste des projets ─────────────────────────────────────────
+// ── Rendu de la liste ─────────────────────────────────────────────────────
 async function _renderProjPanelList() {
     const list = _list();
     if (!list) return;
@@ -44,148 +40,135 @@ async function _renderProjPanelList() {
     }
 
     if (!projects.length) {
-        list.innerHTML = '<div class="proj-panel-empty">Aucun projet sauvegardé</div>';
+        list.innerHTML = '<div class="proj-panel-empty">Aucun tableau sauvegardé</div>';
         return;
     }
 
     list.innerHTML = '';
 
-    // ── Section favoris ──
-    const favIds = _getFavoriteIds();
-    const favProjects = favIds.map(id => projects.find(p => p.id === id)).filter(Boolean);
-
-    if (favProjects.length) {
-        const favLabel = document.createElement('div');
-        favLabel.className = 'proj-panel-section-label proj-panel-section-fav';
-        favLabel.textContent = '⭐ Favoris';
-        list.appendChild(favLabel);
-        favProjects.forEach(p => _buildProjPanelRow(p, list));
-
-        const sep = document.createElement('div');
-        sep.className = 'proj-panel-sep';
-        list.appendChild(sep);
-
-        const allLabel = document.createElement('div');
-        allLabel.className = 'proj-panel-section-label';
-        allLabel.textContent = '📁 Tous les projets';
-        list.appendChild(allLabel);
-    }
-
     projects.forEach(p => _buildProjPanelRow(p, list));
+
+    // ── Drag & drop pour réorganiser ──
+    _initPanelDragDrop(list, projects);
+}
+
+function _initPanelDragDrop(list, projects) {
+    let dragId = null;
+
+    const rows = () => [...list.querySelectorAll('[data-proj-id]')];
+
+    list.addEventListener('dragstart', (e) => {
+        const row = e.target.closest('[data-proj-id]');
+        if (!row) return;
+        dragId = row.dataset.projId;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => row.style.opacity = '0.4', 0);
+    });
+    list.addEventListener('dragend', () => {
+        rows().forEach(r => { r.style.opacity = ''; r.style.borderTop = ''; r.style.borderBottom = ''; });
+        dragId = null;
+    });
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const row = e.target.closest('[data-proj-id]');
+        if (!row || !dragId || row.dataset.projId === dragId) return;
+        rows().forEach(r => { r.style.borderTop = ''; r.style.borderBottom = ''; });
+        const rect = row.getBoundingClientRect();
+        if ((e.clientY - rect.top) > rect.height / 2) row.style.borderBottom = '2px solid #4a90e2';
+        else                                           row.style.borderTop    = '2px solid #4a90e2';
+    });
+    list.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const row = e.target.closest('[data-proj-id]');
+        if (!row || !dragId || row.dataset.projId === dragId) return;
+
+        const dragIdx = projects.findIndex(p => p.id === dragId);
+        const overIdx = projects.findIndex(p => p.id === row.dataset.projId);
+        if (dragIdx === -1 || overIdx === -1) return;
+
+        const rect = row.getBoundingClientRect();
+        const insertAfter = (e.clientY - rect.top) > rect.height / 2;
+        const targetIdx = insertAfter ? overIdx + 1 : overIdx;
+        const moved = projects.splice(dragIdx, 1)[0];
+        const insertIdx = dragIdx < targetIdx ? targetIdx - 1 : targetIdx;
+        projects.splice(Math.max(0, Math.min(insertIdx, projects.length)), 0, moved);
+
+        await _saveProjectsOrder(projects);
+        _renderProjPanelList();
+    });
 }
 
 function _buildProjPanelRow(p, list) {
     const isCurrent = p.id === getCurrentProjectId();
-    const sceneList = p.scenes || [];
-    const sceneCount = sceneList.length;
     const date = new Date(p.updatedAt).toLocaleDateString('fr-FR', {
         day: '2-digit', month: 'short', year: 'numeric'
     });
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'proj-panel-item-wrap' + (isCurrent ? ' proj-panel-item-current' : '');
+    const row = document.createElement('div');
+    row.className = 'proj-panel-item-wrap' + (isCurrent ? ' proj-panel-item-current' : '');
+    row.dataset.projId = p.id;
+    row.draggable = true;
 
-    // ── Header du projet ──
     const header = document.createElement('div');
     header.className = 'proj-panel-item-header';
 
-    const arrow = document.createElement('span');
-    arrow.className = 'proj-panel-arrow';
-    arrow.textContent = '▶';
+    // Poignée drag
+    const grip = document.createElement('div');
+    grip.textContent = '⠿';
+    grip.title = 'Réorganiser';
+    grip.style.cssText = 'color:#555;font-size:14px;cursor:grab;flex-shrink:0;width:14px;text-align:center;user-select:none;transition:color .15s;margin-right:2px;';
+    grip.onmouseover = () => grip.style.color = '#4a90e2';
+    grip.onmouseout  = () => grip.style.color = '#555';
+    grip.addEventListener('click', e => e.stopPropagation());
 
     const info = document.createElement('div');
     info.className = 'proj-panel-item-info';
     info.innerHTML = `
         <div class="proj-panel-item-name">${_escHtmlPanel(p.name)}</div>
-        <div class="proj-panel-item-meta">${sceneCount} tableau${sceneCount > 1 ? 'x' : ''} · ${date}</div>
+        <div class="proj-panel-item-meta">${date}</div>
     `;
 
-    // Boutons d'action
     const actions = document.createElement('div');
     actions.className = 'proj-panel-item-actions';
 
-    if (!isCurrent) {
-        const btnOpen = document.createElement('button');
-        btnOpen.className = 'proj-panel-btn proj-panel-btn-open';
-        btnOpen.textContent = '📂';
-        btnOpen.title = 'Ouvrir ce projet';
-        btnOpen.addEventListener('click', (e) => { e.stopPropagation(); _projLoad(p.id); });
-        actions.appendChild(btnOpen);
-    }
+    const btnOpen = document.createElement('button');
+    btnOpen.className = 'proj-panel-btn proj-panel-btn-open';
+    btnOpen.textContent = '📂';
+    btnOpen.title = isCurrent ? 'Tableau ouvert' : 'Ouvrir ce tableau';
+    btnOpen.style.opacity = isCurrent ? '0.35' : '1';
+    btnOpen.style.cursor  = isCurrent ? 'default' : 'pointer';
+    btnOpen.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!isCurrent) {
+            await _projLoad(p.id);
+            // Forcer un re-render immédiat du panneau avec le nouvel ID courant
+            _renderProjPanelList();
+        }
+    });
+    actions.appendChild(btnOpen);
 
     const btnRename = document.createElement('button');
     btnRename.className = 'proj-panel-btn';
     btnRename.textContent = '✏️';
-    btnRename.title = 'Renommer';
-    btnRename.addEventListener('click', (e) => { e.stopPropagation(); _projRename(p.id, p.name); });
-
-    const isFav = _isFavorite(p.id);
-    const btnFav = document.createElement('button');
-    btnFav.className = 'proj-panel-btn' + (isFav ? ' proj-panel-btn-fav-active' : '');
-    btnFav.textContent = isFav ? '⭐' : '☆';
-    btnFav.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
-    btnFav.addEventListener('click', (e) => {
+    btnRename.title = 'Renommer ce tableau';
+    btnRename.addEventListener('click', async (e) => {
         e.stopPropagation();
-        _toggleFavorite(p.id);
+        await _projRename(p.id, p.name);
         _renderProjPanelList();
-        refreshFavoritesMenu();
     });
 
     const btnDelete = document.createElement('button');
     btnDelete.className = 'proj-panel-btn proj-panel-btn-delete';
     btnDelete.textContent = '×';
-    btnDelete.title = 'Supprimer';
+    btnDelete.title = 'Supprimer ce tableau';
     btnDelete.addEventListener('click', (e) => { e.stopPropagation(); _projDelete(p.id).then(() => _renderProjPanelList()); });
 
     actions.appendChild(btnRename);
-    actions.appendChild(btnFav);
     actions.appendChild(btnDelete);
 
-    header.appendChild(arrow);
+    header.appendChild(grip);
     header.appendChild(info);
     header.appendChild(actions);
-
-    // ── Accordion scènes ──
-    const accordion = document.createElement('div');
-    accordion.className = 'proj-panel-accordion';
-
-    if (!sceneList.length) {
-        accordion.innerHTML = '<div class="proj-panel-empty" style="padding:6px 12px;">Aucun tableau</div>';
-    } else {
-        sceneList.forEach((sc, idx) => {
-            const isCurrentScene = isCurrent && idx === p.currentScene;
-            const scRow = document.createElement('div');
-            scRow.className = 'proj-panel-scene' + (isCurrentScene ? ' proj-panel-scene-active' : '');
-
-            const scIcon = document.createElement('span');
-            scIcon.className = 'proj-panel-scene-icon';
-            scIcon.textContent = isCurrentScene ? '▶' : '○';
-
-            const scLabel = document.createElement('span');
-            scLabel.className = 'proj-panel-scene-label';
-            scLabel.textContent = sc.name || `Tableau ${idx + 1}`;
-
-            scRow.appendChild(scIcon);
-            scRow.appendChild(scLabel);
-
-            if (!isCurrentScene) {
-                scRow.addEventListener('click', () => {
-                    _projLoadAtScene(p.id, idx);
-                });
-            }
-            accordion.appendChild(scRow);
-        });
-    }
-
-    // ── Toggle accordion ──
-    let open = false;
-    header.addEventListener('click', (e) => {
-        if (e.target.closest('.proj-panel-btn')) return;
-        open = !open;
-        accordion.classList.toggle('proj-panel-accordion-open', open);
-        arrow.style.transform = open ? 'rotate(90deg)' : '';
-        arrow.style.color = open ? '#4a90e2' : '';
-    });
 
     if (!isCurrent) {
         header.addEventListener('dblclick', (e) => {
@@ -194,9 +177,8 @@ function _buildProjPanelRow(p, list) {
         });
     }
 
-    wrapper.appendChild(header);
-    wrapper.appendChild(accordion);
-    list.appendChild(wrapper);
+    row.appendChild(header);
+    list.appendChild(row);
 }
 
 function _escHtmlPanel(str) {
@@ -208,7 +190,6 @@ function _init() {
     const RESIZE_KEY = 'projectsPanelWidth';
     const MIN_W = 220, MAX_W = 560, DEFAULT_W = 300;
 
-    // Restaurer la largeur
     try {
         const savedW = parseInt(localStorage.getItem(RESIZE_KEY));
         if (savedW >= MIN_W && savedW <= MAX_W) {
@@ -216,30 +197,24 @@ function _init() {
         }
     } catch(e) {}
 
-    // Logique drag de la poignée de resize
     const handle = document.getElementById('projects-panel-resize-handle');
     const panel  = _panel();
     const tab    = document.getElementById('projects-panel-tab');
     if (handle && panel) {
         let _startX = 0, _startW = 0, _dragging = false;
-
         handle.addEventListener('mousedown', (e) => {
             e.preventDefault();
-            _dragging = true;
-            _startX = e.clientX;
-            _startW = panel.offsetWidth;
+            _dragging = true; _startX = e.clientX; _startW = panel.offsetWidth;
             panel.classList.add('proj-panel-resizing');
             document.body.style.userSelect = 'none';
             document.body.style.cursor = 'ew-resize';
         });
-
         document.addEventListener('mousemove', (e) => {
             if (!_dragging) return;
             const dx = e.clientX - _startX;
             const newW = Math.max(MIN_W, Math.min(MAX_W, _startW + dx));
             document.documentElement.style.setProperty('--proj-panel-w', newW + 'px');
         });
-
         document.addEventListener('mouseup', () => {
             if (!_dragging) return;
             _dragging = false;
@@ -250,7 +225,6 @@ function _init() {
         });
     }
 
-    // Restaurer l'état ouvert/fermé
     try {
         if (localStorage.getItem('projectsPanelOpen') === '1') {
             if (panel) panel.classList.add('proj-panel-open');
@@ -266,7 +240,6 @@ document.addEventListener('pointerdown', (e) => {
     const tab   = document.getElementById('projects-panel-tab');
     if (!panel || !panel.classList.contains('proj-panel-open')) return;
     if (panel.contains(e.target) || (tab && tab.contains(e.target))) return;
-    // Ne pas fermer si on clique sur un dialog/overlay (ex: modale projets)
     if (e.target.closest('#projects-overlay')) return;
     panel.classList.remove('proj-panel-open');
     if (tab) tab.classList.remove('proj-panel-tab-open');

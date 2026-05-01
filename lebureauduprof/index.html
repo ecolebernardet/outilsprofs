@@ -582,34 +582,15 @@
 					
 					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
 					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
-					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau projet</div>
+					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau tableau</div>
 					<div class="mm-sub-item" onclick="newDraftProject();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Nouveau brouillon</div>
 					
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
 					
-					<div class="mm-sub-item" onclick="openProjectsLibrary();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Tous mes projets</div>
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">⭐</span>&nbsp;&nbsp;Projets favoris<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-favorites"><div class="mm-sub-inner" style="min-width:200px;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">⭐ Projets favoris</div>
-							<div id="sub-favorites-list"><div style="color:#555;font-size:12px;padding:6px 12px;font-style:italic;">Aucun favori</div></div>
-						</div></div>
-					</div>
+					<div class="mm-sub-item" onclick="toggleProjectsPanel();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes tableaux</div>
 					
 					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-										
-					<!-- TABLEAUX -->
-					<div id="sub-fichier-tableaux-label" style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 4px;">🗂️ Projet</div>
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🗂️</span>&nbsp;&nbsp;<span id="scenes-menu-project-label">Tableaux de ce projet</span><span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-scenes"><div class="mm-sub-inner" style="min-width:220px;max-height:60vh;overflow-y:auto;overflow-x:hidden;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🗂️ Mes tableaux</div>
-							<div id="scenes-menu-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;"></div>
-							<button id="scene-add-btn" onclick="addScene()" style="width:100%;padding:8px;background:#28282f;color:#aaa;border:1px dashed #3a3a4a;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;" onmouseover="this.style.background='#35353f';this.style.color='#e8e8f0'" onmouseout="this.style.background='#28282f';this.style.color='#aaa'">＋ Nouveau tableau</button>
-						</div></div>
-					</div>
-					
-					
+
 					</div></div>
 			</div>
 
@@ -1170,6 +1151,7 @@
 <script src="groups.js"></script>
 <script src="widget-datetime.js"></script>
 <script src="widget-meteo.js"></script>
+
 <script src="scenes.js"></script>
 <script src="projects.js"></script>
 <script src="shapes.js"></script>
@@ -1729,7 +1711,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <div id="projects-panel">
     <div id="projects-panel-resize-handle" title="Redimensionner le panneau"></div>
     <div id="proj-panel-header">
-        <span>📁 Mes projets</span>
+        <span>📁 Mes tableaux</span>
         <button id="proj-panel-close" onclick="toggleProjectsPanel()" title="Fermer">✕</button>
     </div>
     <!-- Brouillon banner -->
@@ -1743,7 +1725,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
     <!-- Bouton nouveau projet -->
     <button id="proj-panel-new-btn" onclick="_projNewProject()">
-        <span style="font-size:15px;">＋</span> Nouveau projet
+        <span style="font-size:15px;">＋</span> Nouveau tableau
     </button>
     <!-- Actions export/import -->
     <div id="proj-panel-actions">
@@ -1751,7 +1733,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         <button class="proj-panel-action-btn green" onclick="document.getElementById('import-input').click();toggleProjectsPanel()" title="Charger un projet (JSON)">📂 Charger</button>
         <button class="proj-panel-action-btn" onclick="exportAllProjects()" title="Exporter tous les projets">📤 Tout exporter</button>
         <button class="proj-panel-action-btn" onclick="importAllProjects()" title="Importer une sauvegarde complète">📥 Tout importer</button>
-        <button class="proj-panel-action-btn" onclick="openProjectsLibrary()" title="Ouvrir la vue détaillée">⊞ Vue détaillée</button>
     </div>
     <!-- Liste des projets -->
     <div id="proj-panel-list">
@@ -1759,7 +1740,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     </div>
 </div>
 <!-- Onglet déclencheur sur le bord gauche -->
-<button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes projets"><span class="act-tab-lbl">Projets</span><span class="act-tab-ico">📁</span></button>
+<button id="projects-panel-tab" onclick="toggleProjectsPanel()" title="Mes tableaux"><span class="act-tab-lbl">Tableaux</span><span class="act-tab-ico">📁</span></button>
 
 <script>
 // ── Resize du panneau Projets ──────────────────────────────────────────

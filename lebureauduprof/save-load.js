@@ -961,13 +961,41 @@ function importConfig(event) {
                 event.target.value = ''; return;
             }
 
-            // ── Ancien format multi-scènes (compatibilité) ────────────────
+            // ── Ancien format multi-scènes → éclater en projets séparés ──
             if (data.scenes && Array.isArray(data.scenes)) {
-                scenes       = data.scenes;
-                currentScene = data.currentScene || 0;
-                saveScenesMeta();
-                loadScene(currentScene);
-                renderScenesBar();
+                const sceneList = data.scenes;
+                const baseName  = 'Projet importé';
+                if (sceneList.length === 1) {
+                    // Une seule scène : charger directement
+                    scenes = [sceneList[0]];
+                    currentScene = 0;
+                    saveScenesMeta();
+                    loadScene(0);
+                } else {
+                    // Plusieurs scènes → créer un projet par scène
+                    const curId = getCurrentProjectId();
+                    if (curId) {
+                        try { const cur = await dbGet(curId); await saveProjectToDB(cur?.name || 'Sans titre'); } catch(err) {}
+                    }
+                    let firstId = null;
+                    for (let i = 0; i < sceneList.length; i++) {
+                        const sc = sceneList[i];
+                        const newId = 'proj_' + Date.now() + '_' + i;
+                        if (!firstId) firstId = newId;
+                        await dbPut({
+                            id: newId,
+                            name: baseName + (sceneList.length > 1 ? ' — ' + (sc.name || 'Tableau ' + (i + 1)) : ''),
+                            scenes: [{ id: sc.id || Date.now(), name: sc.name || 'Tableau 1', config: sc.config || null, background: sc.background || 'none' }],
+                            currentScene: 0,
+                            updatedAt: Date.now() + i,
+                        });
+                    }
+                    if (firstId) {
+                        const project = await loadProjectFromDB(firstId);
+                        if (project) _updateProjectTitle(project.name);
+                    }
+                    alert(`✅ ${sceneList.length} tableaux importés comme projets séparés.`);
+                }
                 event.target.value = ''; return;
             }
 
@@ -979,7 +1007,7 @@ function importConfig(event) {
             saveBg(data.background || 'none');
             const json = JSON.stringify(data);
             localStorage.setItem('profBoardConfig', json);
-            scenes[currentScene].config = json;
+            scenes[0].config = json;
             saveScenesMeta();
             restoreBoardFromJSON(json);
             event.target.value = '';
