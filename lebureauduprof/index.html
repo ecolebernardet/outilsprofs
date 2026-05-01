@@ -1749,7 +1749,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         if (!handle || !panel) return;
 
         var savedW = localStorage.getItem(PROJ_W_KEY);
-        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.3);
         panel.style.width = initW + 'px';
         document.documentElement.style.setProperty('--proj-panel-w', initW + 'px');
 

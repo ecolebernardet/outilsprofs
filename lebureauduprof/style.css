@@ -1378,7 +1378,7 @@
 
 /* ── Panneau stickers ────────────────────────────────────────────── */
 
-		:root { --sticker-panel-w: 380px; }
+		:root { --sticker-panel-w: 30vw; }
 		#sticker-panel {
 			display: flex;
 			position: fixed;
