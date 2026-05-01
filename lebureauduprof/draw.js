@@ -546,6 +546,10 @@ function endPaint() {
                 // Bounding box des points pour positionner/dimensionner le widget
                 let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
                 pts.forEach(p=>{if(p.x<minX)minX=p.x;if(p.y<minY)minY=p.y;if(p.x>maxX)maxX=p.x;if(p.y>maxY)maxY=p.y;});
+                // Expand bbox by sw/2 on each side so the widget matches the preview
+                // (stroke is centered on the path, so half overflows outside the point coords)
+                const _swHalf = strokeSize / 2;
+                minX -= _swHalf; minY -= _swHalf; maxX += _swHalf; maxY += _swHalf;
                 const bw = Math.max(4, maxX - minX);
                 const bh = Math.max(4, maxY - minY);
                 const modeToShape = {
