@@ -245,7 +245,7 @@
         gap: 6px;
         overflow: hidden;
         transition: max-height 0.3s ease, opacity 0.3s ease;
-        max-height: 120px;
+        max-height: 150px;
         opacity: 1;
     }
     .radar-controls.hidden {
@@ -402,6 +402,11 @@
               +           '<input type="range" class="radar-slider radar-seuil-slider" min="10" max="100" step="5" value="75">'
               +           '<span class="radar-slider-val radar-seuil-val">75%</span>'
               +         '</div>'
+              +         '<div class="radar-slider-row">'
+              +           '<span class="radar-slider-label" title="Lisse les bruits courts (règle, éternuement…)">Lissage</span>'
+              +           '<input type="range" class="radar-slider radar-smooth-slider" min="0" max="10" step="1" value="4">'
+              +           '<span class="radar-slider-val radar-smooth-val">4</span>'
+              +         '</div>'
               +       '</div>'
               +       '<div class="radar-no-mic">⚠️ Microphone refusé</div>'
               +     '</div>'
@@ -426,6 +431,8 @@
             var flashEl        = widget.querySelector('.radar-alert-flash');
             var toggleBtn      = widget.querySelector('.radar-toggle-controls');
             var controlsEl     = widget.querySelector('.radar-controls');
+            var smoothSlider   = widget.querySelector('.radar-smooth-slider');
+            var smoothVal      = widget.querySelector('.radar-smooth-val');
 
             // ── Dimensions de référence ──
             var REF_W = 340, REF_H = 420;
@@ -492,6 +499,28 @@
             var sensitivity   = 1.5;
             var threshold     = 75;
 
+            // ── Lissage anti-pics courts ──
+            // smoothingStrength : 0 = désactivé, 1-10 = force croissante
+            var smoothingStrength = 4;
+            // Buffer circulaire pour moyenne glissante
+            var BUFFER_MAX = 30;          // taille max du buffer (frames)
+            var sampleBuffer = [];
+            // Durée minimale de dépassement avant alerte (en frames ~43ms chacune)
+            // smoothingStrength 0→0 frames, 10→~15 frames (~650ms)
+            var sustainFrames = 0;        // nb frames consécutives au-dessus du seuil
+            var sustainRequired = 0;      // nb frames requis avant déclenchement
+
+            function updateSmoothingParams() {
+                // bufferSize : de 1 (pas de lissage) à 20 frames
+                var bufSize = smoothingStrength === 0 ? 1 : Math.round(2 + smoothingStrength * 1.8);
+                // frames requises au-dessus du seuil : 0 à ~15
+                sustainRequired = smoothingStrength === 0 ? 0 : Math.round(smoothingStrength * 1.4);
+                // tronquer le buffer si on réduit la taille
+                if (sampleBuffer.length > bufSize) sampleBuffer = sampleBuffer.slice(-bufSize);
+                return bufSize;
+            }
+            updateSmoothingParams();
+
             // Seuil → taille du cercle pointillé
             function applyThreshold(val) {
                 threshold = parseInt(val);
@@ -533,23 +562,56 @@
             }
 
             function render(value) {
-                var target = Math.min(value * sensitivity, 100);
-                smoothedLevel += (target - smoothedLevel) * 0.15;
+                var raw = Math.min(value * sensitivity, 100);
 
+                if (smoothingStrength === 0) {
+                    // Mode direct : comportement original
+                    smoothedLevel += (raw - smoothedLevel) * 0.15;
+                    blob.style.transform = 'scale(' + (smoothedLevel / 100) + ')';
+                    if (smoothedLevel > threshold) {
+                        blob.classList.add('is-alerting');
+                        flashEl.classList.add('active');
+                        if (canTrigger) { alertsCount++; alertCount.textContent = alertsCount; playAlert(); canTrigger = false; }
+                    } else {
+                        blob.classList.remove('is-alerting'); flashEl.classList.remove('active');
+                        if (smoothedLevel < threshold - 5) canTrigger = true;
+                    }
+                    return;
+                }
+
+                // ── Mode lissage : séparer le niveau ambiant soutenu des pics courts ──
+
+                // 1. Buffer circulaire de valeurs brutes
+                var bufSize = updateSmoothingParams();
+                sampleBuffer.push(raw);
+                if (sampleBuffer.length > bufSize) sampleBuffer.shift();
+
+                // 2. Percentile bas = niveau ambiant (ignore les pics hauts)
+                //    Plus le lissage est fort, plus on prend bas dans le tableau trié
+                var sorted = sampleBuffer.slice().sort(function(a, b){ return a - b; });
+                var pctIdx = Math.floor(sorted.length * Math.max(0.2, 0.8 - smoothingStrength * 0.06));
+                var ambientLevel = sorted[pctIdx] || 0;
+
+                // 3. Lissage exponentiel très lent sur ce niveau ambiant
+                var upAlpha   = Math.max(0.03, 0.12 - smoothingStrength * 0.008);
+                var downAlpha = Math.max(0.01, 0.06 - smoothingStrength * 0.004);
+                var alpha = ambientLevel > smoothedLevel ? upAlpha : downAlpha;
+                smoothedLevel += (ambientLevel - smoothedLevel) * alpha;
+
+                // 4. Blob = niveau ambiant uniquement (les pics courts n'y apparaissent pas)
                 blob.style.transform = 'scale(' + (smoothedLevel / 100) + ')';
 
+                // 5. Alerte si le niveau ambiant depasse le seuil de facon soutenue
                 if (smoothedLevel > threshold) {
                     blob.classList.add('is-alerting');
                     flashEl.classList.add('active');
-                    if (canTrigger) {
-                        alertsCount++;
-                        alertCount.textContent = alertsCount;
-                        playAlert();
-                        canTrigger = false;
+                    sustainFrames++;
+                    if (canTrigger && sustainFrames >= sustainRequired) {
+                        alertsCount++; alertCount.textContent = alertsCount; playAlert(); canTrigger = false;
                     }
                 } else {
-                    blob.classList.remove('is-alerting');
-                    flashEl.classList.remove('active');
+                    blob.classList.remove('is-alerting'); flashEl.classList.remove('active');
+                    sustainFrames = 0;
                     if (smoothedLevel < threshold - 5) canTrigger = true;
                 }
             }
@@ -592,6 +654,8 @@
                 scriptProcessor = null;
                 isListening = false;
                 smoothedLevel = 0;
+                sampleBuffer = [];
+                sustainFrames = 0;
                 blob.style.transform = 'scale(0)';
                 blob.classList.remove('is-alerting');
                 flashEl.classList.remove('active');
@@ -626,6 +690,14 @@
 
             seuilSlider.addEventListener('input', function () {
                 applyThreshold(this.value);
+            });
+
+            smoothSlider.addEventListener('input', function () {
+                smoothingStrength = parseInt(this.value);
+                smoothVal.textContent = smoothingStrength;
+                sampleBuffer = [];
+                sustainFrames = 0;
+                updateSmoothingParams();
             });
 
             // ── Toggle contrôles ──
