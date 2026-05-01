@@ -926,13 +926,12 @@ function importConfig(event) {
 
                 let targetId;
                 if (existing) {
-                    const choice = confirm(
-                        `Un projet nommé "${p.name}" existe déjà.\n\n` +
-                        `OK → Remplacer le projet existant\n` +
-                        `Annuler → Importer comme nouveau projet (copie)`
+                    const choice = await modalConfirm(
+                        'Tableau déjà existant',
+                        `Un tableau nommé "${p.name}" existe déjà.\n\nConfirmer pour remplacer, Annuler pour importer comme copie.`
                     );
                     if (choice) {
-                        targetId = existing.id; // Écraser en conservant l'ID
+                        targetId = existing.id;
                     } else {
                         targetId = 'proj_' + Date.now();
                         p.name = p.name + ' (copie)';
@@ -957,7 +956,7 @@ function importConfig(event) {
 
             // ── Format "tout exporter" reçu par erreur ────────────────────
             if (data._type === 'prof-bureau-all-projects') {
-                alert('Ce fichier contient tous vos projets.\n\nUtilisez "Tout importer" dans "Mes projets" pour le restaurer.');
+                await modalAlert('Import impossible', 'Ce fichier contient tous vos tableaux.\n\nUtilisez "Tout importer" dans le panneau Tableaux pour le restaurer.', 'warning');
                 event.target.value = ''; return;
             }
 
@@ -994,7 +993,7 @@ function importConfig(event) {
                         const project = await loadProjectFromDB(firstId);
                         if (project) _updateProjectTitle(project.name);
                     }
-                    alert(`✅ ${sceneList.length} tableaux importés comme projets séparés.`);
+                    await modalAlert('Import réussi', `${sceneList.length} tableaux importés avec succès.`, 'success');
                 }
                 event.target.value = ''; return;
             }

@@ -285,7 +285,7 @@ async function saveCurrentProject() {
 }
 
 async function _projSaveDraft() {
-    const name = prompt('Donner un nom à ce projet :', 'Nouveau projet');
+    const name = await modalPrompt('Enregistrer le brouillon', 'Donnez un nom à ce tableau :', 'Nouveau tableau');
     if (name === null) return;
     const finalName = name.trim() || 'Nouveau projet';
     _isDraft = false;
@@ -328,7 +328,7 @@ async function _projLoad(id) {
 }
 
 async function _projNewProject() {
-    const name = prompt('Nom du nouveau tableau :', 'Nouveau tableau');
+    const name = await modalPrompt('Nouveau tableau', 'Nom du nouveau tableau :', 'Nouveau tableau');
     if (name === null) return;
     const finalName = name.trim() || 'Nouveau tableau';
     await newProject(finalName);
@@ -339,7 +339,7 @@ async function _projNewProject() {
 }
 
 async function _projRename(id, currentName) {
-    const newName = prompt('Renommer le tableau :', currentName);
+    const newName = await modalPrompt('Renommer le tableau', 'Nouveau nom :', currentName);
     if (newName === null || !newName.trim()) return;
     const p = await dbGet(id);
     if (!p) return;
@@ -352,7 +352,7 @@ async function _projRename(id, currentName) {
 async function _projDelete(id) {
     const p = await dbGet(id);
     if (!p) return;
-    if (!confirm(`Supprimer le projet "${p.name}" ?`)) return;
+    if (!await modalConfirm('Supprimer ce tableau', `Voulez-vous vraiment supprimer "${p.name}" ?\n\nCette action est irréversible.`, { danger: true })) return;
     await dbDelete(id);
     if (id === getCurrentProjectId()) {
         setCurrentProjectId(null);
@@ -389,7 +389,7 @@ async function exportAllProjects() {
         try { const cur = await dbGet(curId); await saveProjectToDB(cur?.name || 'Sans titre'); } catch(e) {}
     }
     const allProjects = await dbGetAll();
-    if (!allProjects.length) { alert('Aucun projet à exporter.'); return; }
+    if (!allProjects.length) { await modalAlert('Export', 'Aucun tableau à exporter.', 'warning'); return; }
     const exportData = {
         _type: 'prof-bureau-all-projects',
         _version: 1,
@@ -415,18 +415,22 @@ async function importAllProjects() {
         try {
             const data = JSON.parse(text);
             if (data._type !== 'prof-bureau-all-projects' || !Array.isArray(data.projects)) {
-                alert('Ce fichier ne contient pas une sauvegarde complète.\n\nPour importer un seul projet, utilisez "Importer JSON" dans le menu Fichier.');
+                await modalAlert('Import impossible', 'Ce fichier ne contient pas une sauvegarde complète.\n\nPour importer un seul tableau, utilisez "Charger un projet (JSON)" dans le menu Fichier.', 'warning');
                 return;
             }
             const count = data.projects.length;
-            if (!confirm(`Ce fichier contient ${count} projet${count > 1 ? 's' : ''}.\n\nAttention : cela va remplacer tous vos projets actuels.\n\nContinuer ?`)) return;
+            const ok = await modalConfirm(
+                'Importer tous les tableaux',
+                `Ce fichier contient ${count} tableau${count > 1 ? 'x' : ''}.\n\nAttention : cela va remplacer tous vos tableaux actuels.`,
+                { danger: true }
+            );
+            if (!ok) return;
             const db = await dbOpen();
             await new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readwrite');
                 const req = tx.objectStore(STORE_NAME).clear();
                 req.onsuccess = resolve; req.onerror = reject;
             });
-            // Normaliser chaque projet à 1 scène max à l'import
             for (const p of data.projects) {
                 if (p.scenes && p.scenes.length > 1) p.scenes = [p.scenes[0]];
                 p.currentScene = 0;
@@ -437,10 +441,10 @@ async function importAllProjects() {
                 const project = await loadProjectFromDB(restoredCurId);
                 if (project) _updateProjectTitle(project.name);
             }
-            _renderProjectsList();
-            alert(`✅ ${count} projet${count > 1 ? 's' : ''} restauré${count > 1 ? 's' : ''} avec succès !`);
+            if (typeof refreshProjectsPanel === 'function') refreshProjectsPanel();
+            await modalAlert('Import réussi', `${count} tableau${count > 1 ? 'x' : ''} restauré${count > 1 ? 's' : ''} avec succès !`, 'success');
         } catch(err) {
-            alert('Erreur lors de l\'importation : ' + err.message);
+            await modalAlert('Erreur d\'importation', err.message, 'error');
         }
     };
     input.click();
