@@ -290,7 +290,7 @@ function _buildImagePanel() {
         if (!handle) return;
 
         const savedW = localStorage.getItem(IP_W_KEY);
-        const initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        const initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.3);
         panel.style.width = initW + 'px';
         document.documentElement.style.setProperty('--image-panel-w', initW + 'px');
 

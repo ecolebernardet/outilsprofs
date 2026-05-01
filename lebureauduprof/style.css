@@ -2029,7 +2029,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 
 /* ── Panneau PDF Bibliothèque PDF ─────────────────────────────────────────────── */
 :root {
-    --pdf-lib-w: 40vw;
+    --pdf-lib-w: 30vw;
     --pdf-lib-bg: #111;
     --pdf-lib-border: rgba(255,255,255,0.1);
     --pdf-lib-hover: rgba(255,255,255,0.06);
