@@ -551,7 +551,9 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     return;
                 } else if (stroke.tool === 'highlighter') {
                     // Rendu final : même logique que le mode libre (butt + skipStart/skipEnd)
-                    const lw = sizeScaled * 3 * _currentRenderScale;
+                    // Math.max(..., 24 * ratio) reproduit le minimum 24px CSS du mode libre
+                    const _hlRatio = canvasW / displayW;
+                    const lw = Math.max(sizeScaled * 6, 24 * _hlRatio);
                     const half = lw / 2;
                     const threshold = half * 0.5;
                     const pxPts = stroke.pts.map(p => fromNorm(p.x, p.y));
@@ -753,7 +755,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
                     if (pts.length >= 2) {
                         const pxPts = pts.map(p => fromNorm(p.x, p.y));
-                        const lw = sizeScaled * 3 * _currentRenderScale;
+                        const lw = Math.max(sizeScaled * 6, 24 * (canvasW / displayW));
                         const half = lw / 2;
                         const threshold = half * 0.5;
 
@@ -1244,7 +1246,7 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                             // temporaire pour éviter l'accumulation de semi-transparence.
                             // Tous les 20 points on repart du snapshot pour corriger les artefacts.
                             if (pts.length >= 2) {
-                                const lw = sizeScaled * 3 * _currentRenderScale;
+                                const lw = Math.max(sizeScaled * 6, 24 * (canvasW / displayW));
                                 // Toutes les 20 pts : redessiner depuis le snapshot pour nettoyer
                                 // (très rare, minimise la latence tout en gardant un rendu propre)
                                 if (pts.length % 20 === 0) {

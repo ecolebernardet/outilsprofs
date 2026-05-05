@@ -4045,6 +4045,206 @@ function _showPdfAnnotToast(msg) {
     toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTO-CLICK ANNOTATION : bascule entre mode dessin libre et mode annotation
+// PDF au premier clic sur le widget PDF (ou sur le board).
+// Le survol prépare silencieusement la cible ; le clic valide la bascule.
+// Aller sur la toolbar draw NE déclenche pas de bascule.
+// ═══════════════════════════════════════════════════════════════════════════
+
+(function() {
+    // true = la bascule auto est active (désactivable si besoin)
+    window._autoAnnotHoverEnabled = true;
+
+    // Widget PDF actuellement survolé (null si aucun)
+    var _pendingPdfWidget = null;
+
+    // Indique si la souris est au-dessus du board (hors widget PDF)
+    var _pendingBoard = false;
+
+    // Indique si la bascule auto est en cours (évite la récursion)
+    var _autoSwitching = false;
+
+    // Mémorise le mode dessin libre avant une bascule vers PDF
+    var _savedDrawMode = 'free';
+    var _savedIsEraser = false;
+
+    // ── Vérifie si la draw-toolbar est actuellement ouverte ──────────────
+    function _isDrawToolbarOpen() {
+        const tb = document.getElementById('draw-toolbar');
+        if (!tb) return false;
+        return tb.style.display !== 'none' && tb.style.display !== '';
+    }
+
+    // ── Bascule vers le mode annotation PDF sur un widget donné ──────────
+    function _switchToPdfAnnot(pdfWidget) {
+        if (_autoSwitching) return;
+        // Déjà en annotation sur CE widget → rien à faire
+        if (_pdfAnnotMode && _pdfAnnotWidget === pdfWidget) return;
+
+        _autoSwitching = true;
+        _savedDrawMode = (typeof currentDrawMode !== 'undefined') ? currentDrawMode : 'free';
+        _savedIsEraser = !!isEraserMode;
+        _startPdfAnnotModeOn(pdfWidget);
+        _autoSwitching = false;
+    }
+
+    // ── Retour en mode dessin libre sur le board ──────────────────────────
+    function _switchToFreeDrawing() {
+        if (_autoSwitching) return;
+        if (!_pdfAnnotMode) return;
+
+        _autoSwitching = true;
+        _stopPdfAnnotMode();
+
+        if (_savedIsEraser) {
+            if (!isEraserMode) toggleEraserMode();
+        } else {
+            isDrawMode = true;
+            if (drawCanvas) drawCanvas.classList.remove('inactive');
+            board.classList.add('is-drawing');
+            if (typeof setDrawMode === 'function' && _savedDrawMode) {
+                setDrawMode(_savedDrawMode);
+            }
+            updateDrawCursor();
+        }
+        _autoSwitching = false;
+    }
+
+    // ── Listener mousedown global : décide si on bascule ─────────────────
+    function _onGlobalMouseDown(e) {
+        if (!window._autoAnnotHoverEnabled) return;
+        if (!_isDrawToolbarOpen()) return;
+        // Clic sur la draw-toolbar ou ses enfants → ignorer complètement
+        if (e.target && e.target.closest && e.target.closest('#draw-toolbar')) return;
+
+        var switched = false;
+
+        if (_pendingPdfWidget) {
+            // Clic sur un widget PDF survolé → passer en mode annotation PDF
+            const wrap = _pendingPdfWidget.querySelector('.pdf-canvas-wrap');
+            if (wrap && wrap.style.display !== 'none') {
+                // Ne basculer que si on N'est pas déjà en annotation sur ce widget
+                if (!_pdfAnnotMode || _pdfAnnotWidget !== _pendingPdfWidget) {
+                    _switchToPdfAnnot(_pendingPdfWidget);
+                    switched = true;
+                }
+            }
+        } else if (_pendingBoard) {
+            // Clic sur le board (hors widget PDF) → revenir en mode dessin libre
+            if (_pdfAnnotMode) {
+                _switchToFreeDrawing();
+                switched = true;
+            }
+        }
+
+        // Si une bascule a eu lieu, avaler l'événement pour qu'aucun handler
+        // de dessin ne reçoive ce clic et ne trace un point parasite.
+        if (switched) {
+            e.stopPropagation();
+            e.preventDefault();
+            // Avaler aussi le mouseup correspondant
+            document.addEventListener('mouseup', function _suppressMouseUp(ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                document.removeEventListener('mouseup', _suppressMouseUp, true);
+            }, true);
+        }
+    }
+
+    // ── Attache les listeners mouseenter/mouseleave sur un widget PDF ─────
+    function _attachHoverToPdfWidget(widget) {
+        if (widget._autoAnnotHoverAttached) return;
+        widget._autoAnnotHoverAttached = true;
+
+        widget.addEventListener('mouseenter', function() {
+            _pendingPdfWidget = widget;
+            _pendingBoard = false;
+        });
+
+        widget.addEventListener('mouseleave', function(e) {
+            // Si on entre dans la toolbar, on neutralise les deux flags
+            const related = e.relatedTarget;
+            if (related && related.closest && related.closest('#draw-toolbar')) {
+                _pendingPdfWidget = null;
+                _pendingBoard = false;
+                return;
+            }
+            if (_pendingPdfWidget === widget) _pendingPdfWidget = null;
+        });
+    }
+
+    // ── Listeners sur le board (hors widgets PDF) ─────────────────────────
+    function _attachBoardListeners() {
+        const b = document.getElementById('board');
+        if (!b) return;
+
+        b.addEventListener('mouseenter', function(e) {
+            // Entrer dans le board mais pas dans un widget PDF
+            if (e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]')) return;
+            _pendingBoard = true;
+            _pendingPdfWidget = null;
+        });
+
+        // Délégation : quand la souris est sur le board mais pas sur un PDF
+        b.addEventListener('mousemove', function(e) {
+            const onPdf = e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]');
+            if (!onPdf) {
+                _pendingBoard = true;
+                _pendingPdfWidget = null;
+            }
+        });
+
+        b.addEventListener('mouseleave', function(e) {
+            const related = e.relatedTarget;
+            if (related && related.closest && related.closest('#draw-toolbar')) {
+                _pendingBoard = false;
+                _pendingPdfWidget = null;
+                return;
+            }
+            _pendingBoard = false;
+        });
+    }
+
+    // ── Attache les listeners sur tous les widgets PDF existants ──────────
+    function _attachToAllPdfWidgets() {
+        document.querySelectorAll('.widget[data-type="pdf"]').forEach(_attachHoverToPdfWidget);
+    }
+
+    // ── Observe les nouveaux widgets PDF ajoutés dynamiquement ───────────
+    function _observeNewWidgets() {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType !== 1) return;
+                    if (node.matches && node.matches('.widget[data-type="pdf"]')) {
+                        _attachHoverToPdfWidget(node);
+                    }
+                    if (node.querySelectorAll) {
+                        node.querySelectorAll('.widget[data-type="pdf"]').forEach(_attachHoverToPdfWidget);
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ── Initialisation ────────────────────────────────────────────────────
+    function _init() {
+        _attachToAllPdfWidgets();
+        _attachBoardListeners();
+        _observeNewWidgets();
+        // Listener global mousedown (capture) pour intercepter avant tout handler
+        document.addEventListener('mousedown', _onGlobalMouseDown, true);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _init);
+    } else {
+        _init();
+    }
+})();
+
 // ── Rafraîchissement curseur lors d'un changement de couleur ─────────────
 // cpickDispatch (color-picker.js) met à jour window._drawColor pour 'draw-color'.
 // On le wrappe pour rafraîchir le curseur board ET le curseur PDF pen.
