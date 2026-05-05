@@ -58,6 +58,11 @@
                 transparent 0%, transparent calc(100% - 1px), rgba(255,255,255,0.15) calc(100% - 1px), rgba(255,255,255,0.15) 100%);
             background-size: auto 16px;
         }
+        .bg-thumb-papier-pointe {
+            background-color: #ffffff;
+            background-image: radial-gradient(circle, #888 1.5px, transparent 1.5px);
+            background-size: 10px 10px;
+        }
         .bg-thumb-seyes-marge {
             background-color: #fffef5;
             background-image:
@@ -151,6 +156,12 @@ const PRESET_BACKGROUNDS = {
         backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0%, transparent calc(100% - 1px), rgba(255,255,255,0.15) calc(100% - 1px), rgba(255,255,255,0.15) 100%)',
         backgroundSize: 'auto 32px',
     },
+    // Papier pointé
+    'papier-pointe': {
+        backgroundColor: '#ffffff',
+        backgroundImage: 'radial-gradient(circle, #6a8aaa 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
+    },
 };
 
 /**
@@ -221,7 +232,7 @@ var _currentBgKey  = null;  // clé du preset actif
 var _bgScaleFactor = 1.0;   // facteur d'échelle courant (0.5 → 2.0)
 
 // Liste des presets "réglures" (ceux qui ont un slider d'échelle)
-const RULING_PRESETS = ['seyes', 'seyes-white', 'seyes-marge', 'lignes-simples', 'grands-carreaux', 'petits-carreaux', 'ardoise'];
+const RULING_PRESETS = ['seyes', 'seyes-white', 'seyes-marge', 'lignes-simples', 'grands-carreaux', 'petits-carreaux', 'ardoise', 'papier-pointe'];
 
 /**
  * Applique le facteur d'échelle en scalant uniquement les px de backgroundSize.
