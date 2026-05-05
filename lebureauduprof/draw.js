@@ -1594,6 +1594,7 @@ function toggleDrawToolbar() {
         tb.style.bottom = 'auto';
         tb.style.right  = 'auto';
         tb.style.display = 'block';
+        tb.style.borderColor = '#4a90e2'; // mode board par défaut
         // Positionner à droite, centré verticalement
         requestAnimationFrame(function() {
             const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
@@ -2914,9 +2915,7 @@ function _startPdfAnnotMode() {
     const api0 = target._pdfAnnotAPI;
     if (api0 && api0.detachNativeEvents) api0.detachNativeEvents();
 
-    // Mettre à jour le bouton
-    const btn = document.getElementById('pdf-annot-mode-btn');
-    if (btn) btn.classList.add('pdf-annot-active');
+    // (le bouton pdf-annot-mode-btn est désormais le toggle auto-bascule, pas un indicateur de mode)
 
     // Afficher les boutons extras
     _showPdfExtraBtns(true);
@@ -2974,6 +2973,7 @@ function _startPdfAnnotMode() {
 
     // Forcer le bon curseur sur tous les enfants du nouveau widget
     _updatePdfToolBtns();
+    _updateDrawModeIndicator(true);
 }
 
 function _stopPdfAnnotMode() {
@@ -3010,9 +3010,7 @@ function _stopPdfAnnotMode() {
     isDrawMode = true; // toggleSelectMode attend isDrawMode=true pour basculer
     toggleSelectMode();
 
-    // Bouton
-    const btn = document.getElementById('pdf-annot-mode-btn');
-    if (btn) btn.classList.remove('pdf-annot-active');
+    // (indicateur de mode géré par _updateDrawModeIndicator)
 
     // Réinitialiser le bouton main (pan)
     const panBtn = document.getElementById('pdf-pan-btn');
@@ -3046,6 +3044,7 @@ function _stopPdfAnnotMode() {
     if (selBtnStop) selBtnStop.style.display = '';
     const geoBtnStop = document.getElementById('geo-draw-btn');
     if (geoBtnStop) { geoBtnStop.style.display = ''; geoBtnStop.title = 'Outils géométriques'; }
+    _updateDrawModeIndicator(false);
 }
 
 // Variante de stopDrawing qui ne cache pas la toolbar (pour basculer depuis draw mode)
@@ -4029,6 +4028,22 @@ redoAction = function() {
     _origRedoAction();
 };
 
+
+function _updateDrawModeIndicator(isPdf) {
+    const dot   = document.getElementById('draw-mode-indicator-dot');
+    const label = document.getElementById('draw-mode-indicator-label');
+    const tb    = document.getElementById('draw-toolbar');
+    if (isPdf) {
+        if (dot)   dot.style.background = '#c8a000';
+        if (label) { label.style.color = '#c8b84a'; label.textContent = 'PDF'; }
+        if (tb)    tb.style.setProperty('border-color', '#c8a000', 'important');
+    } else {
+        if (dot)   dot.style.background = '#4a90e2';
+        if (label) { label.style.color = '#6a9fd8'; label.textContent = 'Board'; }
+        if (tb)    tb.style.setProperty('border-color', '#4a90e2', 'important');
+    }
+}
+
 // ── Toast d'information ───────────────────────────────────────────────────
 
 function _showPdfAnnotToast(msg) {
@@ -4117,6 +4132,8 @@ function _showPdfAnnotToast(msg) {
         if (!_isDrawToolbarOpen()) return;
         // Clic sur la draw-toolbar ou ses enfants → ignorer complètement
         if (e.target && e.target.closest && e.target.closest('#draw-toolbar')) return;
+        // Clic sur la barre titre d'un widget (réduire, fermer, plein écran…) → ignorer
+        if (e.target && e.target.closest && e.target.closest('.editor-toolbar')) return;
 
         var switched = false;
 
@@ -4222,6 +4239,16 @@ function _showPdfAnnotToast(msg) {
                     }
                     if (node.querySelectorAll) {
                         node.querySelectorAll('.widget[data-type="pdf"]').forEach(_attachHoverToPdfWidget);
+                    }
+                });
+                // Widget PDF supprimé (bouton fermer) → repasser en mode board si c'était la cible annotée
+                mutation.removedNodes.forEach(function(node) {
+                    if (node.nodeType !== 1) return;
+                    const wasAnnotTarget = (_pdfAnnotMode && _pdfAnnotWidget && (
+                        node === _pdfAnnotWidget || node.contains && node.contains(_pdfAnnotWidget)
+                    ));
+                    if (wasAnnotTarget) {
+                        _switchToFreeDrawing();
                     }
                 });
             });

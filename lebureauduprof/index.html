@@ -658,20 +658,18 @@
 	</div>
 
 	<!-- Barre outils DESSIN -->
-	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:5px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border:1px solid #444;overflow:visible;box-sizing:border-box;">
+	<div id="draw-toolbar" style="display:none;position:fixed;bottom:20px;left:140px;background:#1F1F21;border-radius:14px;padding:5px 8px;box-shadow:0 4px 24px rgba(0,0,0,0.45);z-index:13000;border-width:1px;border-style:solid;border-color:#4a90e2;overflow:visible;box-sizing:border-box;transition:border-color .3s;">
+		<!-- Indicateur de mode : Board ou Annotation PDF -->
+		<div id="draw-mode-indicator" style="position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;display:flex;align-items:center;gap:4px;background:#1a1a1e;border:1px solid #333;border-radius:20px;padding:2px 8px 2px 6px;font-size:10px;font-weight:600;letter-spacing:.03em;pointer-events:none;transition:background .25s,border-color .25s;">
+			<span id="draw-mode-indicator-dot" style="width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .25s;background:#4a90e2;"></span>
+			<span id="draw-mode-indicator-label" style="color:#6a9fd8;transition:color .25s;">Board</span>
+		</div>
 		<div id="draw-toolbar-inner" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0;">
 
 			<!-- FERMER -->
 			<button onclick="stopDrawing()" title="Fermer" style="background:#2a2a36;color:#555;border:1px solid #333;width:20px;height:20px;border-radius:8px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✖</button>
 			
-			<!-- EFFACER TOUT + ANNOTATION PDF sur la même ligne -->
-			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;justify-content:center;width:64px;flex-wrap:wrap;">
-				<!-- EFFACER TOUT — efface les annotations PDF si mode actif, sinon efface le board -->
-				<button id="dt-clear-btn" onclick="_dtClearAction()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:1px solid #5a2020;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
-				<!-- ANNOTATION PDF -->
-				<button id="pdf-annot-mode-btn" onclick="togglePdfAnnotMode()" title="Annoter un widget PDF" style="background:#2a2a2e;color:#aaa;border:2px solid #444;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">📄</button>
-			</div>
-			<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;background:#2a2a2e;color:#aaa;border:2px solid #444;width:64px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;"><span style="font-family:sans-serif;line-height:1;display:block;">🤚</span></button>
+
 			<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
 				<div style="display:flex;align-items:center;gap:3px;">
 					<button onmousedown="(function(btn){var iv;function step(){var l=document.getElementById('text-size-label');var v=Math.max(8,parseInt(l.textContent)-2);l.textContent=v;window._textWidgetSize=v;}step();iv=setInterval(step,120);btn._iv=iv;})(this)" onmouseup="clearInterval(this._iv)" onmouseleave="clearInterval(this._iv)" style="width:16px;height:16px;border-radius:4px;border:1px solid #555;background:#2a2a2e;color:#ccc;cursor:pointer;font-size:12px;line-height:1;padding:0;flex-shrink:0;">−</button>
@@ -738,18 +736,22 @@
 
 			<div class="dt-sep"></div>
 
-			<!-- SÉLECTION + PANORAMIQUE FOND PDF -->
+			<!-- SÉLECTION (board) / PANORAMIQUE PDF (mode PDF) — même emplacement -->
 			<div style="display:flex;flex-direction:row;gap:4px;align-items:center;width:64px;justify-content:center;flex-shrink:0;">
-				<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+				<button id="draw-select-btn" onclick="toggleSelectMode()" style="width:64px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;" title="Repasser en mode sélection"><svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="1,1 1,10 4,7.5 6,12 7.5,11.3 5.5,6.3 9.5,6.3" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/></svg></button>
+				<button id="pdf-pan-btn" onclick="setPdfAnnotTool('pan')" title="Déplacer / scroller le PDF" style="display:none;width:64px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">🤚</button>
 				<button id="bg-pan-btn" onclick="if(typeof _togglePdfPanMode==='function')_togglePdfPanMode()" title="Déplacer le fond PDF (panoramique)" style="display:none;width:30px;height:30px;border-radius:8px;border:2px solid #444;background:#2a2a2e;color:#aaa;cursor:pointer;font-size:16px;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;">✋</button>
 			</div>
 
 			<div class="dt-sep"></div>
 
-			<!-- UNDO / REDO côte à côte -->
-			<div class="dt-undoredo" style="display:flex;flex-direction:row;gap:4px;width:64px;justify-content:center;">
-				<button onclick="undoAction()" title="Annuler" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↩</button>
-				<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
+			<!-- UNDO / REDO + EFFACER TOUT empilés -->
+			<div style="display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;">
+				<div class="dt-undoredo" style="display:flex;flex-direction:row;gap:4px;width:64px;justify-content:center;">
+					<button onclick="undoAction()" title="Annuler" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↩</button>
+					<button onclick="redoAction()" title="Refaire" style="background:#2a2a36;color:#aaa;border:1px solid #444;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">↪</button>
+				</div>
+				<button id="dt-clear-btn" onclick="_dtClearAction()" title="Effacer tout" style="background:#3d1515;color:#ff6b6b;border:1px solid #5a2020;width:64px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;">🗑️</button>
 			</div>
 
 			<!-- HANDLE + ENGRENAGE sur la même ligne -->
