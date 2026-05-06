@@ -4134,6 +4134,16 @@ function _showPdfAnnotToast(msg) {
         if (e.target && e.target.closest && e.target.closest('#draw-toolbar')) return;
         // Clic sur la barre titre d'un widget (réduire, fermer, plein écran…) → ignorer
         if (e.target && e.target.closest && e.target.closest('.editor-toolbar')) return;
+        // Clic sur les UI flottantes (sous-menus, outils géo, toasts…) → ignorer
+        if (e.target && e.target.closest && (
+            e.target.closest('#geo-submenu')        ||
+            e.target.closest('#figures-submenu')    ||
+            e.target.closest('.geo-tool-overlay')   ||
+            e.target.closest('.geo-toolbar')        ||
+            e.target.closest('#geo-toolbar')        ||
+            e.target.closest('#pdf-annot-toast')    ||
+            e.target.closest('.draw-submenu')
+        )) return;
 
         var switched = false;
 
@@ -4197,16 +4207,18 @@ function _showPdfAnnotToast(msg) {
         if (!b) return;
 
         b.addEventListener('mouseenter', function(e) {
-            // Entrer dans le board mais pas dans un widget PDF
+            // Entrer dans le board mais pas dans un widget PDF ni une UI flottante
             if (e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]')) return;
+            if (e.target && e.target.closest && e.target.closest('.geo-tool-overlay')) return;
             _pendingBoard = true;
             _pendingPdfWidget = null;
         });
 
-        // Délégation : quand la souris est sur le board mais pas sur un PDF
+        // Délégation : quand la souris est sur le board mais pas sur un PDF ni une UI flottante
         b.addEventListener('mousemove', function(e) {
             const onPdf = e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]');
-            if (!onPdf) {
+            const onGeo = e.target && e.target.closest && e.target.closest('.geo-tool-overlay');
+            if (!onPdf && !onGeo) {
                 _pendingBoard = true;
                 _pendingPdfWidget = null;
             }
