@@ -631,111 +631,125 @@ function rotatePoint(px, py, cx, cy, angle) {
 
 // ── RÈGLE ─────────────────────────────────────────────────────────────────
 function spawnRegle(board, cx, cy) {
-    const PAD   = 20;          // espace avant le 0 et après le 20cm/760px
-    const CM_W  = 800;         // longueur utile = 20cm × 40px/cm
-    const W     = CM_W + 2 * PAD; // largeur totale = 840px
-    const H     = 60;
-    const BTN_H = 32;
+    const PAD    = 20;    // espace avant le 0 et après la fin
+    const CM_UNIT = 40;   // px par cm
+    const TENTH   = CM_UNIT / 10;
+    const H       = 60;
+    const BTN_H   = 32;
     const TOTAL_H = H + BTN_H;
+    const MIN_CM_W = 80;  // longueur utile minimale (2cm)
+    const MAX_CM_W = 2000;
+
+    // Longueur utile courante (mutable)
+    let cmW = 800; // 20cm par défaut
+
+    // Largeur totale = longueur utile + 2 paddings
+    function totalW() { return cmW + 2 * PAD; }
 
     const overlay = document.createElement('div');
     overlay.className = 'geo-tool-overlay';
     overlay.dataset.angle = '0';
-    overlay.style.cssText = `left:${cx - W/2}px; top:${cy - TOTAL_H/2}px; width:${W}px; height:${TOTAL_H}px;`;
+    overlay.style.cssText = `left:${cx - totalW()/2}px; top:${cy - TOTAL_H/2}px; width:${totalW()}px; height:${TOTAL_H}px;`;
 
     // ── SVG règle ──
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', W);
+    svg.setAttribute('width', totalW());
     svg.setAttribute('height', H);
     svg.style.cssText = 'display:block; position:absolute; top:0; left:0; pointer-events:none;';
 
-    // Fond unique jaune
+    // Fond
     const rectBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rectBg.setAttribute('x', 0); rectBg.setAttribute('y', 0);
-    rectBg.setAttribute('width', W); rectBg.setAttribute('height', H);
+    rectBg.setAttribute('width', totalW()); rectBg.setAttribute('height', H);
     rectBg.setAttribute('rx', 4);
     rectBg.setAttribute('fill', 'rgba(255,245,180,0.95)');
     rectBg.setAttribute('stroke', '#b8860b'); rectBg.setAttribute('stroke-width', '1.5');
     svg.appendChild(rectBg);
 
-    // ── Groupe graduations CM ─────────────────────────────────────────────
-    const grpCm = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    const CM_UNIT = 40;
-    const TENTH = CM_UNIT / 10;
-    const CM_W_GRAD = CM_W; // 800px = 20cm
-    for (let t10 = 0; t10 <= CM_W_GRAD / TENTH; t10++) {
-        const x = PAD + t10 * TENTH;
-        const isUnit = t10 % 10 === 0;
-        const isHalf = t10 % 5  === 0 && !isUnit;
-        const tickH  = isUnit ? 22 : (isHalf ? 13 : 7);
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x); line.setAttribute('y1', 0);
-        line.setAttribute('x2', x); line.setAttribute('y2', tickH);
-        line.setAttribute('stroke', '#7a5c00');
-        line.setAttribute('stroke-width', isUnit ? '1.5' : '0.6');
-        grpCm.appendChild(line);
-        if (isUnit) {
-            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            txt.setAttribute('x', x);
-            txt.setAttribute('y', 36);
-            txt.setAttribute('text-anchor', 'middle');
-            txt.setAttribute('font-size', '10');
-            txt.setAttribute('fill', '#7a5c00');
-            txt.setAttribute('font-family', 'monospace');
-            txt.textContent = t10 / 10;
-            grpCm.appendChild(txt);
-        }
-    }
-    const lblCm = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lblCm.setAttribute('x', W - 4); lblCm.setAttribute('y', 12);
-    lblCm.setAttribute('text-anchor', 'end');
-    lblCm.setAttribute('font-size', '9'); lblCm.setAttribute('font-weight', 'bold');
-    lblCm.setAttribute('fill', '#7a5c00'); lblCm.setAttribute('font-family', 'monospace');
-    lblCm.textContent = 'cm';
-    grpCm.appendChild(lblCm);
+    // Groupes graduations (reconstruits au resize)
+    let grpCm = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    let grpPx = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.appendChild(grpCm);
-
-    // ── Groupe graduations PX ─────────────────────────────────────────────
-    const grpPx = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    grpPx.style.display = 'none';
-    const PX_W = CM_W;
-    for (let i = 0; i * 10 <= PX_W; i++) {
-        const pxVal = i * 10;
-        const x     = PAD + pxVal;
-        const is100 = pxVal % 100 === 0;
-        const is50  = pxVal % 50  === 0 && !is100;
-        const tickH = is100 ? 22 : (is50 ? 13 : 7);
-        const line  = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x); line.setAttribute('y1', 0);
-        line.setAttribute('x2', x); line.setAttribute('y2', tickH);
-        line.setAttribute('stroke', '#1a4a7a');
-        line.setAttribute('stroke-width', is100 ? '1.5' : (is50 ? '0.9' : '0.5'));
-        grpPx.appendChild(line);
-        if (is100) {
-            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            txt.setAttribute('x', x);
-            txt.setAttribute('y', 36);
-            txt.setAttribute('text-anchor', 'middle');
-            txt.setAttribute('font-size', '10');
-            txt.setAttribute('fill', '#1a4a7a');
-            txt.setAttribute('font-family', 'monospace');
-            txt.textContent = pxVal;
-            grpPx.appendChild(txt);
-        }
-    }
-    const lblPx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lblPx.setAttribute('x', W - 4); lblPx.setAttribute('y', 12);
-    lblPx.setAttribute('text-anchor', 'end');
-    lblPx.setAttribute('font-size', '9'); lblPx.setAttribute('font-weight', 'bold');
-    lblPx.setAttribute('fill', '#1a4a7a'); lblPx.setAttribute('font-family', 'monospace');
-    lblPx.textContent = 'px';
-    grpPx.appendChild(lblPx);
     svg.appendChild(grpPx);
 
-    // ── Bande de boutons intégrée SOUS la règle ───────────────────────────
+    let _regleMode = 'cm';
+
+    function buildGradCm(w) {
+        while (grpCm.firstChild) grpCm.removeChild(grpCm.firstChild);
+        for (let t10 = 0; t10 <= w / TENTH; t10++) {
+            const x = PAD + t10 * TENTH;
+            if (x > PAD + w + 1) break;
+            const isUnit = t10 % 10 === 0;
+            const isHalf = t10 % 5  === 0 && !isUnit;
+            const tickH  = isUnit ? 22 : (isHalf ? 13 : 7);
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x); line.setAttribute('y1', 0);
+            line.setAttribute('x2', x); line.setAttribute('y2', tickH);
+            line.setAttribute('stroke', '#7a5c00');
+            line.setAttribute('stroke-width', isUnit ? '1.5' : '0.6');
+            grpCm.appendChild(line);
+            if (isUnit) {
+                const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                txt.setAttribute('x', x); txt.setAttribute('y', 36);
+                txt.setAttribute('text-anchor', 'middle');
+                txt.setAttribute('font-size', '10'); txt.setAttribute('fill', '#7a5c00');
+                txt.setAttribute('font-family', 'monospace');
+                txt.textContent = t10 / 10;
+                grpCm.appendChild(txt);
+            }
+        }
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', PAD + w - 4); lbl.setAttribute('y', 12);
+        lbl.setAttribute('text-anchor', 'end');
+        lbl.setAttribute('font-size', '9'); lbl.setAttribute('font-weight', 'bold');
+        lbl.setAttribute('fill', '#7a5c00'); lbl.setAttribute('font-family', 'monospace');
+        lbl.textContent = 'cm';
+        grpCm.appendChild(lbl);
+    }
+
+    function buildGradPx(w) {
+        while (grpPx.firstChild) grpPx.removeChild(grpPx.firstChild);
+        for (let i = 0; i * 10 <= w; i++) {
+            const pxVal = i * 10;
+            const x     = PAD + pxVal;
+            if (x > PAD + w + 1) break;
+            const is100 = pxVal % 100 === 0;
+            const is50  = pxVal % 50  === 0 && !is100;
+            const tickH = is100 ? 22 : (is50 ? 13 : 7);
+            const line  = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x); line.setAttribute('y1', 0);
+            line.setAttribute('x2', x); line.setAttribute('y2', tickH);
+            line.setAttribute('stroke', '#1a4a7a');
+            line.setAttribute('stroke-width', is100 ? '1.5' : (is50 ? '0.9' : '0.5'));
+            grpPx.appendChild(line);
+            if (is100) {
+                const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                txt.setAttribute('x', x); txt.setAttribute('y', 36);
+                txt.setAttribute('text-anchor', 'middle');
+                txt.setAttribute('font-size', '10'); txt.setAttribute('fill', '#1a4a7a');
+                txt.setAttribute('font-family', 'monospace');
+                txt.textContent = pxVal;
+                grpPx.appendChild(txt);
+            }
+        }
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', PAD + w - 4); lbl.setAttribute('y', 12);
+        lbl.setAttribute('text-anchor', 'end');
+        lbl.setAttribute('font-size', '9'); lbl.setAttribute('font-weight', 'bold');
+        lbl.setAttribute('fill', '#1a4a7a'); lbl.setAttribute('font-family', 'monospace');
+        lbl.textContent = 'px';
+        grpPx.appendChild(lbl);
+    }
+
+    // Construire les graduations initiales
+    buildGradCm(cmW);
+    buildGradPx(cmW);
+    grpPx.style.display = 'none';
+
+    // ── Bande de boutons SOUS la règle ───────────────────────────────────
     const btnBar = document.createElement('div');
     btnBar.style.cssText = `
-        position:absolute; top:${H}px; left:0; width:${W}px; height:${BTN_H}px;
+        position:absolute; top:${H}px; left:0; width:${totalW()}px; height:${BTN_H}px;
         display:flex; align-items:center; justify-content:center; gap:8px;
         background:rgba(26,26,34,0.82); border-radius:0 0 8px 8px;
         border:1px solid #554466; border-top:none;
@@ -768,14 +782,15 @@ function spawnRegle(board, cx, cy) {
     traceBtn.className = 'geo-trace-btn';
     traceBtn.textContent = '✏️ Tracer la ligne';
     traceBtn.style.cssText = 'position:relative; cursor:pointer !important; flex-shrink:0; font-size:11px; padding:3px 8px;';
+    traceBtn.onmousedown = e => e.stopPropagation();
     traceBtn.onclick = function (e) {
         e.stopPropagation();
         const t = getOverlayTransform(overlay);
         const ox = parseFloat(overlay.style.left || 0);
         const oy = parseFloat(overlay.style.top  || 0);
-        // Tracer de 0cm (x=PAD) à 20cm (x=PAD+CM_W)
-        const p1 = rotatePoint(ox + PAD,        oy, t.cx, t.cy, t.angle);
-        const p2 = rotatePoint(ox + PAD + CM_W, oy, t.cx, t.cy, t.angle);
+        // Le bord traceur est le bord supérieur de la règle (y = oy)
+        const p1 = rotatePoint(ox + PAD,       oy, t.cx, t.cy, t.angle);
+        const p2 = rotatePoint(ox + PAD + cmW, oy, t.cx, t.cy, t.angle);
         const pts = [];
         const steps = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
         for (let i = 0; i <= steps; i++) {
@@ -787,7 +802,6 @@ function spawnRegle(board, cx, cy) {
     addTouchClick(traceBtn, function() { traceBtn.onclick({ stopPropagation: ()=>{} }); });
 
     // Bouton toggle cm ↔ px
-    let _regleMode = 'cm';
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'geo-trace-btn';
     toggleBtn.textContent = 'px';
@@ -815,8 +829,95 @@ function spawnRegle(board, cx, cy) {
     btnBar.appendChild(toggleBtn);
     btnBar.appendChild(traceBtn);
 
+    // ── Poignée de redimensionnement (droite) ─────────────────────────────
+    // Positionnée au centre-droit de la partie règle (SVG), en dehors du btnBar
+    const resizeHandle = document.createElement('div');
+    resizeHandle.title = 'Redimensionner la règle';
+    resizeHandle.style.cssText = `
+        position:absolute;
+        right:-10px; top:${H/2 - 14}px;
+        width:20px; height:28px;
+        background:#f0c040;
+        border:2px solid #b8860b;
+        border-radius:5px;
+        cursor:ew-resize;
+        z-index:5;
+        display:flex; align-items:center; justify-content:center;
+        font-size:11px; color:#7a5c00; font-weight:bold;
+        box-shadow:0 2px 6px rgba(0,0,0,0.35);
+        user-select:none; touch-action:none;
+    `;
+    resizeHandle.textContent = '⟺';
+
+    // ── Fonction de mise à jour globale du layout au resize ───────────────
+    function applyResize(newCmW) {
+        cmW = Math.max(MIN_CM_W, Math.min(MAX_CM_W, newCmW));
+        const W = totalW();
+        // Overlay
+        overlay.style.width = W + 'px';
+        // SVG
+        svg.setAttribute('width', W);
+        rectBg.setAttribute('width', W);
+        // Reconstruire les graduations
+        buildGradCm(cmW);
+        buildGradPx(cmW);
+        // Réappliquer la visibilité du mode courant
+        grpCm.style.display = _regleMode === 'cm' ? '' : 'none';
+        grpPx.style.display = _regleMode === 'px' ? '' : 'none';
+        // Barre de boutons
+        btnBar.style.width = W + 'px';
+    }
+
+    // ── Drag resize (mouse) ───────────────────────────────────────────────
+    resizeHandle.addEventListener('mousedown', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        const startX   = e.clientX;
+        const startCmW = cmW;
+        // Tenir compte de la rotation de l'overlay pour projeter le déplacement
+        const angleRad = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
+
+        function onMove(ev) {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            // Projeter dx/dy sur l'axe de la règle (direction = angle courant)
+            const projected = dx * Math.cos(angleRad) + dy * Math.sin(angleRad);
+            applyResize(startCmW + projected);
+        }
+        const startY = e.clientY;
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', function up() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', up);
+        });
+    });
+
+    // ── Drag resize (touch) ───────────────────────────────────────────────
+    resizeHandle.addEventListener('touchstart', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        const t0       = e.touches[0];
+        const startX   = t0.clientX;
+        const startY   = t0.clientY;
+        const startCmW = cmW;
+        const angleRad = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
+
+        function onMove(ev) {
+            ev.preventDefault();
+            const t = ev.touches[0];
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+            const projected = dx * Math.cos(angleRad) + dy * Math.sin(angleRad);
+            applyResize(startCmW + projected);
+        }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', function up() {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', up);
+        });
+    }, { passive: false });
+
     overlay.appendChild(svg);
     overlay.appendChild(btnBar);
+    overlay.appendChild(resizeHandle);
     board.appendChild(overlay);
 
     makeDraggableGeo(overlay, null);
