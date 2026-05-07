@@ -4228,11 +4228,19 @@ function _showPdfAnnotToast(msg) {
         if (switched) {
             e.stopPropagation();
             e.preventDefault();
-            document.addEventListener('pointerup', function _suppressPointerUp(ev) {
+            // Avaler pointermove + pointerup pour qu'aucun trait ne soit tracé
+            function _suppressPointerMove(ev) {
                 ev.stopPropagation();
                 ev.preventDefault();
-                document.removeEventListener('pointerup', _suppressPointerUp, true);
-            }, true);
+            }
+            function _suppressPointerUp(ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                document.removeEventListener('pointermove', _suppressPointerMove, true);
+                document.removeEventListener('pointerup',  _suppressPointerUp,   true);
+            }
+            document.addEventListener('pointermove', _suppressPointerMove, true);
+            document.addEventListener('pointerup',   _suppressPointerUp,   true);
         }
     }
 
