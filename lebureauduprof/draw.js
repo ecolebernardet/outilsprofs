@@ -4179,17 +4179,74 @@ function _showPdfAnnotToast(msg) {
         }
     }
 
-    // ── Attache les listeners mouseenter/mouseleave sur un widget PDF ─────
+    // ── Listener pointerdown global : même logique pour stylet/touch ──────
+    function _onGlobalPointerDown(e) {
+        // Ignorer les événements souris (déjà gérés par _onGlobalMouseDown)
+        if (e.pointerType === 'mouse') return;
+        if (!window._autoAnnotHoverEnabled) return;
+        if (!_isDrawToolbarOpen()) return;
+        // Mêmes exclusions que mousedown
+        if (e.target && e.target.closest && e.target.closest('#draw-toolbar')) return;
+        if (e.target && e.target.closest && e.target.closest('.editor-toolbar')) return;
+        if (e.target && e.target.closest && (
+            e.target.closest('#geo-submenu')        ||
+            e.target.closest('#figures-submenu')    ||
+            e.target.closest('.geo-tool-overlay')   ||
+            e.target.closest('.geo-toolbar')        ||
+            e.target.closest('#geo-toolbar')        ||
+            e.target.closest('#pdf-annot-toast')    ||
+            e.target.closest('.draw-submenu')
+        )) return;
+
+        // Pour le stylet, détecter la cible directement (pas de survol préalable)
+        const onPdfWidget = e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]');
+        if (onPdfWidget) {
+            _pendingPdfWidget = onPdfWidget;
+            _pendingBoard = false;
+        } else {
+            _pendingPdfWidget = null;
+            _pendingBoard = true;
+        }
+
+        var switched = false;
+
+        if (_pendingPdfWidget) {
+            const wrap = _pendingPdfWidget.querySelector('.pdf-canvas-wrap');
+            if (wrap && wrap.style.display !== 'none') {
+                if (!_pdfAnnotMode || _pdfAnnotWidget !== _pendingPdfWidget) {
+                    _switchToPdfAnnot(_pendingPdfWidget);
+                    switched = true;
+                }
+            }
+        } else if (_pendingBoard) {
+            if (_pdfAnnotMode) {
+                _switchToFreeDrawing();
+                switched = true;
+            }
+        }
+
+        if (switched) {
+            e.stopPropagation();
+            e.preventDefault();
+            document.addEventListener('pointerup', function _suppressPointerUp(ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                document.removeEventListener('pointerup', _suppressPointerUp, true);
+            }, true);
+        }
+    }
+
+    // ── Attache les listeners sur un widget PDF (pointer = souris + stylet + touch) ─
     function _attachHoverToPdfWidget(widget) {
         if (widget._autoAnnotHoverAttached) return;
         widget._autoAnnotHoverAttached = true;
 
-        widget.addEventListener('mouseenter', function() {
+        widget.addEventListener('pointerenter', function() {
             _pendingPdfWidget = widget;
             _pendingBoard = false;
         });
 
-        widget.addEventListener('mouseleave', function(e) {
+        widget.addEventListener('pointerleave', function(e) {
             // Si on entre dans la toolbar, on neutralise les deux flags
             const related = e.relatedTarget;
             if (related && related.closest && related.closest('#draw-toolbar')) {
@@ -4206,7 +4263,7 @@ function _showPdfAnnotToast(msg) {
         const b = document.getElementById('board');
         if (!b) return;
 
-        b.addEventListener('mouseenter', function(e) {
+        b.addEventListener('pointerenter', function(e) {
             // Entrer dans le board mais pas dans un widget PDF ni une UI flottante
             if (e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]')) return;
             if (e.target && e.target.closest && e.target.closest('.geo-tool-overlay')) return;
@@ -4214,8 +4271,8 @@ function _showPdfAnnotToast(msg) {
             _pendingPdfWidget = null;
         });
 
-        // Délégation : quand la souris est sur le board mais pas sur un PDF ni une UI flottante
-        b.addEventListener('mousemove', function(e) {
+        // Délégation pointermove : quand le stylet/souris est sur le board
+        b.addEventListener('pointermove', function(e) {
             const onPdf = e.target && e.target.closest && e.target.closest('.widget[data-type="pdf"]');
             const onGeo = e.target && e.target.closest && e.target.closest('.geo-tool-overlay');
             if (!onPdf && !onGeo) {
@@ -4224,7 +4281,7 @@ function _showPdfAnnotToast(msg) {
             }
         });
 
-        b.addEventListener('mouseleave', function(e) {
+        b.addEventListener('pointerleave', function(e) {
             const related = e.relatedTarget;
             if (related && related.closest && related.closest('#draw-toolbar')) {
                 _pendingBoard = false;
@@ -4273,8 +4330,9 @@ function _showPdfAnnotToast(msg) {
         _attachToAllPdfWidgets();
         _attachBoardListeners();
         _observeNewWidgets();
-        // Listener global mousedown (capture) pour intercepter avant tout handler
-        document.addEventListener('mousedown', _onGlobalMouseDown, true);
+        // Listener global en capture : mousedown (souris) + pointerdown (stylet/touch)
+        document.addEventListener('mousedown',   _onGlobalMouseDown, true);
+        document.addEventListener('pointerdown', _onGlobalPointerDown, true);
     }
 
     if (document.readyState === 'loading') {
