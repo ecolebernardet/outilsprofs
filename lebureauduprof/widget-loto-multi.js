@@ -134,9 +134,9 @@
             position: relative;
             user-select: none;
             overflow: hidden;
-            width: 600px;
-            min-width: 380px;
-            min-height: 400px;
+            width: 1000px;
+            min-width: 500px;
+            min-height: 800px;
         }
 
         .lm-container.wf-fullboard {
@@ -473,7 +473,7 @@
         .lm-btn-check-verif:hover { background: #d97706; }
 
         .lm-verif-result {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             line-height: 1.8;
             display: none;
@@ -483,7 +483,11 @@
             border: 1px solid #e5e7eb;
         }
         .lm-verif-result.show { display: block; }
-
+        .lm-verif-items-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 12px;
+        }
         .lm-verif-ok-item {
             color: #15803d;
         }
@@ -945,13 +949,11 @@
                 }
             });
 
-            if (!hasError) {
-                html = '<div style="color:#15803d;font-weight:900;font-size:14px;margin-bottom:6px">🎉 Bravo ! Tous les résultats sont corrects !</div>' + html;
-            } else {
-                html = '<div style="color:#dc2626;font-weight:900;font-size:14px;margin-bottom:6px">⚠️ Attention !</div>' + html;
-            }
+            const header = !hasError
+                ? '<div style="color:#15803d;font-weight:900;font-size:14px;margin-bottom:6px">🎉 Bravo ! Tous les résultats sont corrects !</div>'
+                : '<div style="color:#dc2626;font-weight:900;font-size:14px;margin-bottom:6px">⚠️ Attention !</div>';
 
-            verifResult.innerHTML = html;
+            verifResult.innerHTML = header + '<div class="lm-verif-items-grid">' + html + '</div>';
             verifResult.classList.add('show');
             btnContinue.classList.add('show');
         });
