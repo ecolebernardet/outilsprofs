@@ -1,8 +1,9 @@
 // =========================================================================
 // WIDGET HEURE — Le Bureau du Prof
-// 8 horloges à lire OU 8 calculs de durées
+// 8 horloges à lire OU 6 calculs de durées
 // 3 niveaux de précision : facile / moyen / difficile
 // L'utilisateur choisit le mode (lecture / durée) via des boutons bascule
+// Choix de la période : matin / après-midi
 //
 // Dépendances : board, findFreePosition(), makeDraggable(),
 //   makeDraggableRotate(), bringToFront(), snapshotNow(), saveBoard()
@@ -227,6 +228,29 @@
         .heure-mode-btn.active-lecture { background: #4a90e2; color: white; }
         .heure-mode-btn.active-duree   { background: #7c3aed; color: white; }
 
+        /* Bascule matin / après-midi */
+        .heure-period-btns {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid #d1d5db;
+            flex-shrink: 0;
+        }
+        .heure-period-btn {
+            padding: 4px 11px;
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #f5f5f5;
+            color: #666;
+            transition: background .15s, color .15s;
+            white-space: nowrap;
+        }
+        .heure-period-btn + .heure-period-btn { border-left: 1.5px solid #d1d5db; }
+        .heure-period-btn.active-matin  { background: #f59e0b; color: white; }
+        .heure-period-btn.active-aprem  { background: #6366f1; color: white; }
+
         .heure-level-btns { display: flex; gap: 4px; margin-left: auto; }
         .heure-lvl-btn {
             padding: 4px 9px; border-radius: 6px; border: 1px solid #ddd;
@@ -238,7 +262,7 @@
         .heure-lvl-btn.active-moyen     { background: #fff3cd; color: #8a5c00; border-color: #ffd97a; }
         .heure-lvl-btn.active-difficile { background: #f8d7da; color: #842029; border-color: #f5a8ae; }
 
-        /* Grille 4 colonnes */
+        /* Grille */
         .heure-clocks-zone {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -248,6 +272,9 @@
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             box-sizing: border-box;
+        }
+        .heure-clocks-zone.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
         }
 
         /* Numéro d'horloge */
@@ -376,32 +403,71 @@ const HEURE_NIVEAUX = {
     difficile: { label: 'Difficile', precisions: ['5min'] }
 };
 
-function _randomHeureNiv(precisions) {
+function _randomHeureNiv(precisions, period) {
     const prec = precisions[Math.floor(Math.random() * precisions.length)];
-    const h = Math.floor(Math.random() * 12) + 1;
+    // Heure de base sur le cadran (1-12)
+    const hBase = Math.floor(Math.random() * 12) + 1;
     let m = 0;
     if (prec === 'demie') m = [0, 30][Math.floor(Math.random() * 2)];
     if (prec === 'quart') m = [0, 15, 30, 45][Math.floor(Math.random() * 4)];
     if (prec === '5min')  m = Math.floor(Math.random() * 12) * 5;
+
+    // Calcul de l'heure réelle selon la période
+    let h;
+    if (period === 'matin') {
+        // 0h à 11h : hBase 12 → 0h, hBase 1-11 → 1h-11h
+        h = hBase === 12 ? 0 : hBase;
+    } else {
+        // après-midi : 12h à 23h : hBase 12 → 12h, hBase 1-11 → 13h-23h
+        h = hBase === 12 ? 12 : hBase + 12;
+    }
     return { h, m };
 }
 
-function _genLecture(niveauKey) {
+function _genLecture(niveauKey, period) {
     const { precisions } = HEURE_NIVEAUX[niveauKey];
-    return { mode: 'lecture', clocks: Array.from({ length: 8 }, () => _randomHeureNiv(precisions)) };
+
+    // Construire le pool de toutes les heures possibles selon le niveau
+    const hBases = [1,2,3,4,5,6,7,8,9,10,11,12];
+    let mValues;
+    if (precisions.includes('5min'))        mValues = [0,5,10,15,20,25,30,35,40,45,50,55];
+    else if (precisions.includes('quart'))  mValues = [0,15,30,45];
+    else                                    mValues = [0,30]; // facile : pile et demie
+
+    const pool = [];
+    for (const hBase of hBases) {
+        for (const m of mValues) {
+            const h = period === 'matin'
+                ? (hBase === 12 ? 0 : hBase)
+                : (hBase === 12 ? 12 : hBase + 12);
+            pool.push({ h, m });
+        }
+    }
+
+    // Mélanger (Fisher-Yates) et prendre les 8 premiers
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    return { mode: 'lecture', clocks: pool.slice(0, 8) };
 }
 
-function _genDuree(niveauKey) {
+function _genDuree(niveauKey, period) {
     const { precisions } = HEURE_NIVEAUX[niveauKey];
     const step = precisions.includes('5min') ? 5 : precisions.includes('quart') ? 15 : 30;
     const pairs = [];
-    for (let i = 0; i < 8; i++) {
-        const start = _randomHeureNiv(precisions);
+    for (let i = 0; i < 6; i++) {
+        const start = _randomHeureNiv(precisions, period);
         const minSteps = Math.max(1, Math.floor(15 / step));
         const maxSteps = Math.floor(240 / step);
         const durationMin = (minSteps + Math.floor(Math.random() * (maxSteps - minSteps + 1))) * step;
-        const totalM2 = (start.h * 60 + start.m + durationMin) % 720;
-        pairs.push({ start, end: { h: Math.floor(totalM2 / 60) || 12, m: totalM2 % 60 }, durationMin });
+        // Calcul heure de fin sur cadran 12h (les durées restent toujours en relatif)
+        const startCadran = ((start.h % 12) || 12);
+        const totalM2 = (startCadran * 60 + start.m + durationMin) % 720;
+        const endCadran = Math.floor(totalM2 / 60) || 12;
+        const endM = totalM2 % 60;
+        pairs.push({ start, end: { h: endCadran, m: endM }, durationMin });
     }
     return { mode: 'duree', pairs };
 }
@@ -490,6 +556,10 @@ function createHeureWidget() {
             <button class="heure-mode-btn active-lecture" data-mode="lecture">🕐 Lire l'heure</button>
             <button class="heure-mode-btn" data-mode="duree">⏱ Durée</button>
         </div>
+        <div class="heure-period-btns">
+            <button class="heure-period-btn active-matin" data-period="matin">🌅 Matin</button>
+            <button class="heure-period-btn" data-period="aprem">🌇 Après-midi</button>
+        </div>
         <button class="heure-btn heure-btn-answer">👁 Voir les réponses</button>
         <button class="heure-btn heure-btn-check">✓ Vérifier</button>
         <div class="heure-level-btns">
@@ -542,7 +612,7 @@ function createHeureWidget() {
         </div>
         <div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;font-size:10px;color:#666;">
             <b>🕐 Lire l'heure</b> : 8 horloges indépendantes<br>
-            <b>⏱ Durée</b> : 8 paires d'horloges, trouver le temps écoulé
+            <b>⏱ Durée</b> : 6 paires d'horloges, trouver le temps écoulé
         </div>
     `;
     container.appendChild(helpPopup);
@@ -557,6 +627,7 @@ function createHeureWidget() {
     // ── État interne ──────────────────────────────────────────────────────
     let currentLevel    = 'facile';
     let currentMode     = 'lecture';
+    let currentPeriod   = 'matin'; // 'matin' | 'aprem'
     let currentExercice = null;
     let answerRevealed  = false;
     let inputRefs       = []; // { hInput, mInput, ansH, ansM }
@@ -566,8 +637,9 @@ function createHeureWidget() {
         const zw = clocksZone.offsetWidth  || (container.offsetWidth - 32);
         const zh = clocksZone.offsetHeight || 300;
 
-        // Depuis la largeur : 4 colonnes, gap 10px, padding 12px×2
-        const cellW  = (zw - 10 * 3 - 24) / 4;
+        // Depuis la largeur : 4 colonnes (lecture) ou 3 colonnes (durée), gap 10px, padding 12px×2
+        const nbCols = nbPerCell === 2 ? 3 : 4;
+        const cellW  = (zw - 10 * (nbCols - 1) - 24) / nbCols;
         const clockW = nbPerCell === 2 ? Math.floor((cellW - 20) / 2) : cellW;
 
         // Depuis la hauteur : 2 lignes, gap 12px, padding 12px×2
@@ -593,7 +665,7 @@ function createHeureWidget() {
         const hIn = document.createElement('input');
         hIn.className = 'heure-input';
         hIn.type = 'text';
-        hIn.placeholder = isDuree ? 'hh' : 'hh';
+        hIn.placeholder = isDuree ? '...' : '...';
         hIn.maxLength = 2;
         hIn.inputMode = 'numeric';
 
@@ -604,7 +676,7 @@ function createHeureWidget() {
         const mIn = document.createElement('input');
         mIn.className = 'heure-input';
         mIn.type = 'text';
-        mIn.placeholder = 'min';
+        mIn.placeholder = '...';
         mIn.maxLength = 2;
         mIn.inputMode = 'numeric';
 
@@ -612,7 +684,7 @@ function createHeureWidget() {
         if (isDuree) {
             const unit = document.createElement('span');
             unit.className = 'heure-input-unit';
-            unit.textContent = 'min';
+            unit.textContent = '';
             zone.appendChild(unit);
         }
 
@@ -655,7 +727,9 @@ function createHeureWidget() {
         clocksZone.innerHTML = '';
 
         if (ex.mode === 'lecture') {
-            header.querySelector('.heure-title').textContent = '🕐 Quelle heure est-il ?';
+            clocksZone.classList.remove('cols-3');
+            const periodLabel = currentPeriod === 'matin' ? ' (matin)' : ' (après-midi)';
+            header.querySelector('.heure-title').textContent = '🕐 Quelle heure est-il ?' + periodLabel;
             const size = computeClockSize(1);
 
             ex.clocks.forEach((clock, i) => {
@@ -667,6 +741,7 @@ function createHeureWidget() {
             });
 
         } else {
+            clocksZone.classList.add('cols-3');
             header.querySelector('.heure-title').textContent = '⏱ Combien de temps s\'est écoulé ?';
             const size = computeClockSize(2);
 
@@ -706,8 +781,8 @@ function createHeureWidget() {
     // ── Nouvel exercice ───────────────────────────────────────────────────
     function newExercice() {
         const ex = currentMode === 'lecture'
-            ? _genLecture(currentLevel)
-            : _genDuree(currentLevel);
+            ? _genLecture(currentLevel, currentPeriod)
+            : _genDuree(currentLevel, currentPeriod);
         renderExercice(ex);
         saveBoard();
     }
@@ -732,6 +807,17 @@ function createHeureWidget() {
         container.querySelectorAll('.heure-mode-btn').forEach(btn => {
             btn.className = 'heure-mode-btn';
             if (btn.dataset.mode === mode) btn.classList.add('active-' + mode);
+        });
+        newExercice();
+    }
+
+    // ── Changer de période (matin / après-midi) ───────────────────────────
+    function setPeriod(period) {
+        currentPeriod = period;
+        widget.dataset.heurePeriod = period;
+        container.querySelectorAll('.heure-period-btn').forEach(btn => {
+            btn.className = 'heure-period-btn';
+            if (btn.dataset.period === period) btn.classList.add('active-' + period);
         });
         newExercice();
     }
@@ -805,6 +891,9 @@ function createHeureWidget() {
     });
     controls.querySelectorAll('.heure-mode-btn').forEach(btn => {
         btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+    controls.querySelectorAll('.heure-period-btn').forEach(btn => {
+        btn.addEventListener('click', () => setPeriod(btn.dataset.period));
     });
 
     // ── Resize 2D avec re-render proportionnel des horloges ──────────────
@@ -884,8 +973,9 @@ function createHeureWidget() {
 
     requestAnimationFrame(() => requestAnimationFrame(() => setLevel('facile')));
 
-    widget._setLevel = setLevel;
-    widget._setMode  = setMode;
+    widget._setLevel  = setLevel;
+    widget._setMode   = setMode;
+    widget._setPeriod = setPeriod;
 
     saveBoard();
     return widget;
