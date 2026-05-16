@@ -265,6 +265,11 @@ function buildBoardState() {
         if (w.dataset.type === 'repro-quadrillage' && typeof w._rqGetData === 'function') {
             rqData = w._rqGetData();
         }
+        // Données propres au widget symétrie axiale
+        let saData = null;
+        if (w.dataset.type === 'symetrie-axiale' && typeof w._saGetData === 'function') {
+            saData = w._saGetData();
+        }
         // Données propres au widget mots mêlés
         let mmData = null;
         if (w.dataset.type === 'motsmeles' && typeof w._mmGetData === 'function') {
@@ -312,6 +317,7 @@ function buildBoardState() {
 			deData,
 			calData,
 			rqData,
+			saData,
 			mmData
 		});
     });
@@ -682,6 +688,12 @@ function restoreBoardFromJSON(json) {
         } else if (w.type === 'repro-quadrillage') {
             if (typeof createReproQuadrillageWidget === 'function') {
                 widget = createReproQuadrillageWidget(w.rqData || null);
+            } else {
+                widget = createWidget(w.type, '100px', '100px', false);
+            }
+        } else if (w.type === 'symetrie-axiale') {
+            if (typeof createSymetrieAxialeWidget === 'function') {
+                widget = createSymetrieAxialeWidget(w.saData || null);
             } else {
                 widget = createWidget(w.type, '100px', '100px', false);
             }
