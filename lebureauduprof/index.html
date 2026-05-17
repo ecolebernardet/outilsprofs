@@ -50,9 +50,7 @@
             font-style: normal;
         }
 
-        body, button, input, select, textarea,
-        .mm-item, .mm-sub-item, .mm-section-label,
-        .mm-sub, .mm-sub-inner, .mm-ico, .mm-arrow {
+        body, button, input, select, textarea {
             font-family: 'Nunito', sans-serif !important;
         }
 
@@ -120,7 +118,6 @@
         body.mode-pagegarde #pres-mode-tab,
         body.mode-pagegarde #presentation-btn,
         body.mode-pagegarde #exit-presentation-btn,
-        body.mode-pagegarde #fab-btn,
         body.mode-pagegarde #current-project-name,
         body.mode-pagegarde #a4-indicator,
         body.mode-pagegarde #pres-limit-line,
@@ -382,229 +379,12 @@
 		</div>
 	</div>
 
-    <!-- Bouton flottant principal -->
-	<button id="fab-btn" onclick="toggleMainMenu()" title="Menu principal" style="display:none;">＋</button>
 	<button id="draw-fab-btn" onclick="openMmPanel('draw')" title="Dessin &amp; Figures">✏️</button>
 	<div id="current-project-name"></div>
 
-	<!-- Menu vertical -->
-	<div id="main-menu">
-
-		<!-- ══ RUBRIQUE C : Contenu ══ -->
-		<div class="mm-section mm-section-c">
-			<div class="mm-section-label">Contenu</div>
-
-			<!-- Activités -->
-			<div class="mm-item mm-has-sub" id="activities-menu-btn">
-				<span class="mm-ico">🎲</span>&nbsp;&nbsp;Activités<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-activites"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createTableauNumWidget();closeMainMenu()"><span class="mm-ico">🔟</span>&nbsp;&nbsp;Tableau de numération</div>
-				<div class="mm-sub-item" onclick="createMonnaieWidget();closeMainMenu()"><span class="mm-ico">💶</span>&nbsp;&nbsp;Monnaie</div>
-					<div class="mm-sub-item" onclick="createConversionWidget();closeMainMenu()"><span class="mm-ico">📐</span>&nbsp;&nbsp;Conversion</div>
-				<div class="mm-sub-item" onclick="createWidget('calcul');closeMainMenu()"><span class="mm-ico">🧮</span>&nbsp;&nbsp;Calcul Mental</div>
-				<div class="mm-sub-item" onclick="createCompteEstBonWidget();closeMainMenu()"><span class="mm-ico">🔢</span>&nbsp;&nbsp;Le Compte est Bon</div>
-				<div class="mm-sub-item" onclick="createHeureWidget();closeMainMenu()"><span class="mm-ico">🕐</span>&nbsp;&nbsp;Heure</div>
-				<div class="mm-sub-item" onclick="createHorlogeWidget();closeMainMenu()"><span class="mm-ico">🕰️</span>&nbsp;&nbsp;Horloge interactive</div>
-				<div class="mm-sub-item" onclick="createSolide3DWidget();closeMainMenu()"><span class="mm-ico">🧊</span>&nbsp;&nbsp;Solide 3D</div>
-				<div class="mm-sub-item" onclick="lancerTracesGeometriques();closeMainMenu()"><span class="mm-ico">📐</span>&nbsp;&nbsp;Tracés géométriques</div>
-				<div class="mm-sub-item" onclick="createWidget('loto-multi');closeMainMenu()"><span class="mm-ico">✖️</span>&nbsp;&nbsp;Loto des Multiplications</div>
-				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
-				<div class="mm-sub-item" onclick="createWidget('mots-alpha');closeMainMenu()"><span class="mm-ico">🔤</span>&nbsp;&nbsp;Ordre Alphabétique</div>
-				<div class="mm-sub-item" onclick="createConjugaisonWidget();closeMainMenu()"><span class="mm-ico">✏️</span>&nbsp;&nbsp;Conjugaison</div>
-				<div class="mm-sub-item" onclick="createWidget('nature-gramm');closeMainMenu()"><span class="mm-ico">🏷️</span>Nature grammaticale</div>
-				<div class="mm-sub-item" onclick="createSeyesWidget();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Écriture Séyès</div>
-				<div style="height:1px;background:#2e2e38;margin:2px 6px 0;"></div>
-				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
-				
-				</div></div>
-			</div>
-
-			<!-- Outils -->
-			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🧰</span>&nbsp;&nbsp;Outils<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-outils"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createWidget('outilsprofs');closeMainMenu()"><span class="mm-ico"><img src="https://outilsprofs.fr/outilsprofs_icone.png" style="width:18px;height:18px;object-fit:contain;border-radius:4px;vertical-align:middle;"></span>&nbsp;&nbsp;OutilsProfs</div>
-				<div class="mm-sub-item" onclick="createDeficalmeWidget();closeMainMenu()"><span class="mm-ico">🧘</span>&nbsp;&nbsp;Défi Calme</div>
-				<div class="mm-sub-item" onclick="createTirageWidget();closeMainMenu()"><span class="mm-ico">🎲</span>&nbsp;&nbsp;Tirage au Sort</div>
-				<div class="mm-sub-item" onclick="createEquipesWidget();closeMainMenu()"><span class="mm-ico">👥</span>&nbsp;&nbsp;Équipes équilibrées</div>
-				<div class="mm-sub-item" onclick="createStructureEcoleWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Structure École</div>
-				<div class="mm-sub-item" onclick="createWidget('minuteur');closeMainMenu()"><span class="mm-ico">⏱️</span>&nbsp;&nbsp;Minuteur & Chrono</div>
-				<div class="mm-sub-item" onclick="createWidget('sonometre');closeMainMenu()"><span class="mm-ico">🔊</span>&nbsp;&nbsp;Sonomètre</div>
-				<div class="mm-sub-item" onclick="createWidget('radar');closeMainMenu()"><span class="mm-ico">📡</span>&nbsp;&nbsp;Radar de Bruit</div>
-				<div class="mm-sub-item" onclick="createSondageWidget();closeMainMenu()"><span class="mm-ico">📊</span>&nbsp;&nbsp;Sondage</div>
-				<div class="mm-sub-item" onclick="createPlanWidget();closeMainMenu()"><span class="mm-ico">🏫</span>&nbsp;&nbsp;Plan de classe</div>
-				<div class="mm-sub-item" onclick="createCouleursWidget();closeMainMenu()"><span class="mm-ico">🎨</span>&nbsp;&nbsp;Mélange de couleurs</div>
-				<div style="height:1px;background:#2e2e38;margin:4px 6px;"></div>
-				<div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 10px 2px;">🎲 Outils divers</div>
-				<div class="mm-sub-item" onclick="createWidget('de');closeMainMenu()"><span class="mm-ico">🎲</span>&nbsp;&nbsp;Lancer un dé</div>
-				</div></div>
-			</div>
-
-			<!-- Widgets -->
-			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">📦</span>&nbsp;&nbsp;Widgets<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-widgets"><div class="mm-sub-inner">
-				<div class="mm-sub-item" onclick="createWidget('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;PDF</div>
-				<div class="mm-sub-item" onclick="createWidget('iframe');closeMainMenu()"><span class="mm-ico">💻</span>&nbsp;&nbsp;Fenêtre Web</div>
-				<div class="mm-sub-item" onclick="createWidget('youtube');closeMainMenu()"><span class="mm-ico">🎬</span>&nbsp;&nbsp;YouTube</div>
-				<div class="mm-sub-item" onclick="createWidget('date');closeMainMenu()"><span class="mm-ico">📅</span>&nbsp;&nbsp;Date du jour</div>
-				<div class="mm-sub-item" onclick="createWidget('time');closeMainMenu()"><span class="mm-ico">🕒</span>&nbsp;&nbsp;Heure actuelle</div>
-				<div class="mm-sub-item" onclick="createWidget('meteo');closeMainMenu()"><span class="mm-ico">⛅</span>&nbsp;&nbsp;Météo</div>
-				<div class="mm-sub-item" onclick="createWidget('text');closeMainMenu()"><span class="mm-ico">️️✍️</span>&nbsp;&nbsp;Texte</div>
-				<div class="mm-sub-item" onclick="createWidget('homework');closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Devoirs à noter</div>
-				<div class="mm-sub-item" onclick="createWidget('agenda');closeMainMenu()"><span class="mm-ico">📌</span>&nbsp;&nbsp;Planning de la journée</div>
-				<div class="mm-sub-item" onclick="createCalendrierWidget();closeMainMenu()"><span class="mm-ico">🗓️</span>&nbsp;&nbsp;Calendrier du mois</div>
-				</div></div>
-			</div>
-
-		</div>
-
-		<!-- ══ RUBRIQUE B : Annotation ══ -->
-		<div class="mm-section mm-section-b"><div class="mm-section-label">Annotation</div>
-
-			<!-- Texte -->
-			<div class="mm-item" onclick="window._nextTextOpenCreate=true;createWidget('text');closeMainMenu()">
-				<span class="mm-ico">️✍️</span>&nbsp;&nbsp;Texte</div>
-
-			<!-- Image -->
-			<div class="mm-item" onclick="toggleImagePanel();closeMainMenu()">
-				<span class="mm-ico">🖼️</span>&nbsp;&nbsp;Image</div>
-
-			<!-- Stickers -->
-			<div class="mm-item" id="sticker-btn" onclick="toggleStickerPanel()">
-				<span class="mm-ico">🤓</span>&nbsp;&nbsp;Stickers</div>
-
-
-			<!-- Dessin -->
-
-		</div>
-
-		<!-- ══ RUBRIQUE A : Système ══ -->
-		<div class="mm-section mm-section-a">
-			<div class="mm-section-label">Système</div>
-
-			<!-- Affichage (flyout) -->
-			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🖥️</span>&nbsp;&nbsp;Affichage<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-affichage"><div class="mm-sub-inner">
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">🖼️</span>&nbsp;&nbsp;Fond d'écran<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-fond"><div class="mm-sub-inner" style="min-width:200px;">
-													
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 4px 6px;">🎨 Couleur personnalisée</div>
-							<div id="board-bg-cpick-inline" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;"></div>
-							<div style="display:flex;gap:6px;align-items:center;">
-								<input type="text" id="board-bg-hex" maxlength="7" placeholder="#rrggbb"
-									style="flex:1;background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:12px;font-family:monospace;padding:4px 8px;outline:none;box-sizing:border-box;"
-									oninput="(function(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){applyBackground(v);saveBg(v);document.getElementById('board-bg-native').value=v;boardBgClearSelected();}})(this.value)">
-								<input type="color" id="board-bg-native" value="#eef2f5" style="display:none;"
-									oninput="(function(v){applyBackground(v);saveBg(v);document.getElementById('board-bg-hex').value=v;boardBgClearSelected();})(this.value)">
-								<button onclick="document.getElementById('board-bg-native').click()"
-									style="background:#28282f;border:1px solid #3a3a4a;border-radius:6px;color:#e8e8f0;font-size:11px;padding:4px 8px;cursor:pointer;white-space:nowrap;">Autre…</button>
-							</div>
-														
-							<div style="padding:4px 4px 8px;border-top:1px solid #2e2e3a;margin-top:2px;"></div>
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">🖼️ Couleurs</div>
-							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb" style="background-color:#BAA09B;" onclick="applyBackground('#BAA09B');saveBg('#BAA09B');closeMainMenu()" title="Vieux rose"></div>
-								<div class="bg-thumb" style="background-color:#d8c3a8;" onclick="applyBackground('#d8c3a8');saveBg('#d8c3a8');closeMainMenu()" title="Beige"></div>
-								<div class="bg-thumb" style="background-color:#274a61;" onclick="applyBackground('#274a61');saveBg('#274a61');closeMainMenu()" title="Bleu nuit"></div>
-							</div>
-							
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">📏 Réglures</div>
-							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb bg-thumb-seyes" onclick="applyBackground('seyes');saveBg('seyes');closeMainMenu()" title="Séyès (jaune paille)"></div>
-								<div class="bg-thumb bg-thumb-seyes-white" onclick="applyBackground('seyes-white');saveBg('seyes-white');closeMainMenu()" title="Séyès (blanc)"></div>
-								<div class="bg-thumb bg-thumb-seyes-marge" onclick="applyBackground('seyes-marge');saveBg('seyes-marge');closeMainMenu()" title="Séyès clair avec marge"></div>
-								<div class="bg-thumb bg-thumb-lignes" onclick="applyBackground('lignes-simples');saveBg('lignes-simples');closeMainMenu()" title="Lignes simples"></div>
-								<div class="bg-thumb bg-thumb-grands" onclick="applyBackground('grands-carreaux');saveBg('grands-carreaux');closeMainMenu()" title="Grands carreaux"></div>
-								<div class="bg-thumb bg-thumb-ardoise-lignes" onclick="applyBackground('ardoise');saveBg('ardoise');closeMainMenu()" title="Ardoise lignes"></div>
-								<div class="bg-thumb bg-thumb-papier-pointe" onclick="applyBackground('papier-pointe');saveBg('papier-pointe');closeMainMenu()" title="Papier pointé"></div>
-							</div>
-							
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">👍 Pratiques</div>
-							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-entiers-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-entiers-cm.jpg)');closeMainMenu()" title="Tableau de numération des entiers CM"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-numeration-decimaux-cm.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');saveBg('url(fonds/fond-maths-tableau-numeration-decimaux-cm.jpg)');closeMainMenu()" title="Tableau de numération des décimaux CM"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-longueurs.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-longueurs.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de longueurs"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-masses.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-masses.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-masses.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de masses"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-tableau-conversion-contenances.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');saveBg('url(fonds/fond-maths-tableau-conversion-contenances.jpg)');closeMainMenu()" title="Tableau de conversion des mesures de contenances"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-maths-table-pythagore.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-maths-table-pythagore.jpg)');saveBg('url(fonds/fond-maths-table-pythagore.jpg)');closeMainMenu()" title="Table de Pythagore"></div>
-							</div>
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 6px;border-top:1px solid #2e2e3a;margin-top:2px;">👍 Divers</div>
-							<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 4px 8px;">
-								<div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof.jpeg)');saveBg('url(fonds/fond-lebureauduprof.jpeg)');closeMainMenu()" title="Le Bureau du Prof"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-lebureauduprof2.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-lebureauduprof2.jpg)');saveBg('url(fonds/fond-lebureauduprof2.jpg)');closeMainMenu()" title="Le bureau du prof"></div>
-								<div class="bg-thumb" style="background-image:url('images/carte-monde-pays01.png');background-size:cover;background-position:center;" onclick="applyBackground('url(images/carte-monde-pays01.png)');saveBg('url(images/carte-monde-pays01.png)');closeMainMenu()" title="Carte de spays du monde"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-nebuleuse.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-nebuleuse.jpeg)');saveBg('url(fonds/fond-nebuleuse.jpeg)');closeMainMenu()" title="N�buleuse de la t�te de cheval"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-terre.jpg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-terre.jpg)');saveBg('url(fonds/fond-terre.jpg)');closeMainMenu()" title="La Terre dans l'espace"></div>
-								<div class="bg-thumb" style="background-image:url('fonds/fond-couleurs.jpeg');background-size:cover;background-position:center;" onclick="applyBackground('url(fonds/fond-couleurs.jpeg)');saveBg('url(fonds/fond-couleurs.jpeg)');closeMainMenu()" title="Couleurs dégradées"></div>
-							</div>
-							
-							<button onclick="document.getElementById('bg-upload').click();closeMainMenu()" style="width:100%;padding:7px;background:#8e44ad;color:white;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;">📷 Importer image</button>
-							
-						</div></div>
-					</div>
-					<div class="mm-sub-item" id="laser-btn" onclick="toggleLaser()"><span class="mm-ico">🔴</span>&nbsp;&nbsp;Pointeur laser</div>
-					<div class="mm-sub-item" id="menu-theme-btn" onclick="toggleMenuTheme()"><span class="mm-ico">🌙</span>&nbsp;&nbsp;Mode sombre</div>
-					<div class="mm-sub-item" id="a4-mode-btn" onclick="toggleA4Mode();closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Format A4 Portrait</div>
-					<div class="mm-sub-item" id="presentation-menu-btn" onclick="togglePresentationMode();closeMainMenu()"><span class="mm-ico">📽️</span>&nbsp;&nbsp;Mode présentation</div>
-				</div></div>
-			</div>
-
-			<!-- Fichier (flyout) -->
-			<div class="mm-item mm-has-sub">
-				<span class="mm-ico">🗄️</span>&nbsp;&nbsp;Fichier<span class="mm-arrow">›</span>
-				<div class="mm-sub" id="sub-fichier"><div class="mm-sub-inner">
-
-					
-					<input type="file" id="import-input" style="display:none" accept=".json" onchange="importConfig(event)">
-					<input type="file" id="yt-lib-import-input" style="display:none" accept=".json" onchange="ytImportLibraryFromInput(event)">
-
-
-					
-					<!-- PROJETS -->
-					
-					<div class="mm-sub-item" id="pdf-library-menu-btn" onclick="togglePdfLibrary();closeMainMenu()"><span class="mm-ico">📚</span>&nbsp;&nbsp;Bibliothèque PDF</div>
-					
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-					
-					<div class="mm-sub-item mm-has-sub" style="position:relative;">
-						<span class="mm-ico">📸</span>&nbsp;&nbsp;Capture du bureau<span class="mm-arrow" style="margin-left:auto;font-size:10px;color:#666;">›</span>
-						<div class="mm-sub" id="sub-capture"><div class="mm-sub-inner" style="min-width:180px;">
-							<div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 8px;">📸 Capture du bureau</div>
-							<div class="mm-sub-item" onclick="captureBoard('jpg');closeMainMenu()"><span class="mm-ico">🖼️</span>&nbsp;&nbsp;Enregistrer en JPG</div>
-							<div class="mm-sub-item" onclick="captureBoard('png');closeMainMenu()"><span class="mm-ico">🖼️</span>&nbsp;&nbsp;Enregistrer en PNG</div>
-							<div class="mm-sub-item" onclick="captureBoard('pdf');closeMainMenu()"><span class="mm-ico">📄</span>&nbsp;&nbsp;Enregistrer en PDF</div>
-						</div></div>
-					</div>
-					
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-					
-					<div class="mm-sub-item" onclick="exportConfig();closeMainMenu()"><span class="mm-ico">💾</span>&nbsp;&nbsp;Sauvegarder ce projet (JSON)</div>
-					<div class="mm-sub-item" onclick="document.getElementById('import-input').click();closeMainMenu()"><span class="mm-ico">📂</span>&nbsp;&nbsp;Charger un projet (JSON)</div>
-					<div class="mm-sub-item" onclick="_projNewProject();closeMainMenu()"><span class="mm-ico">✨</span>&nbsp;&nbsp;Nouveau tableau</div>
-					<div class="mm-sub-item" onclick="newDraftProject();closeMainMenu()"><span class="mm-ico">📝</span>&nbsp;&nbsp;Nouveau brouillon</div>
-					
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-					
-					<div class="mm-sub-item" onclick="toggleProjectsPanel();closeMainMenu()"><span class="mm-ico">📁</span>&nbsp;&nbsp;Mes tableaux</div>
-					
-					<div style="height:1px;background:#2e2e38;margin:6px 0;"></div>
-
-					</div></div>
-			</div>
-
-			<!-- Undo / Redo / Effacer / Aide -->
-			<div style="display:flex;gap:6px;padding:2px 0;">
-				<button id="undo-btn" class="undo-btn" onclick="undoAction()" title="Annuler" style="flex:2;border-radius:10px;">↩</button>
-				<button id="redo-btn" class="redo-btn" onclick="redoAction()" title="Refaire" style="flex:2;border-radius:10px;">↪</button>
-				<button class="tool-btn" onclick="clearBoard()" title="Effacer le tableau" style="font-size:14px;padding:8px 10px;border:1.5px solid #ff6b6b;">🗑️</button>
-				<button class="tool-btn" onclick="openHelpModal()" title="Aide" style="font-size:11px;padding:6px 7px;">❓</button>
-			</div>
-		</div>
-
-	</div><!-- #main-menu -->
+	<!-- Stubs cachés : fab-btn et main-menu supprimés visuellement mais encore référencés par board.js -->
+	<button id="fab-btn" style="display:none!important;pointer-events:none;"></button>
+	<div id="main-menu" style="display:none!important;pointer-events:none;"></div>
 
 	<!-- Sous-menu FIGURES GÉOMÉTRIQUES (au-dessus de la barre dessin) -->
 	<div id="figures-submenu" style="position:fixed;display:none;flex-direction:column;align-items:center;gap:6px;background:#1F1F21;border-radius:12px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,0.45);z-index:13001;border:1px solid #4a90e2;">
@@ -848,6 +628,16 @@
 
 	<!-- bg-submenu intégré dans sous-menu Affichage -->
 </div><!-- fin #toolbar-container -->
+
+<!-- Stubs de compatibilité JS : éléments/fonctions référencés par les scripts externes mais supprimés avec l'ancien menu -->
+<div id="sticker-btn" style="display:none;" onclick="toggleStickerPanel()"></div>
+<script>
+// closeMainMenu() était défini dans board.js et appelé par stickers.js, widgets.js, etc.
+// L'ancien menu ayant été supprimé, on fournit un stub vide pour éviter les erreurs JS.
+if (typeof closeMainMenu === 'undefined') {
+    window.closeMainMenu = function() {};
+}
+</script>
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
 <!-- Onglet déclencheur stickers -->
@@ -1350,7 +1140,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-name">Nature grammaticale</div>
                 <div class="act-card-desc">Classer les mots selon leur nature grammaticale</div>
             </div>
-			<div class="act-card" onclick="createSeyesWidget();closeMainMenu()">
+			<div class="act-card" onclick="createSeyesWidget();toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-ecriture-seyes6.jpeg" alt="Écriture Seyes" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Écriture Seyes</div>
                 <div class="act-card-desc">Écrire directement sur un lignage Seyes</div>
