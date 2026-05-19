@@ -166,7 +166,17 @@ function ytRemoveFromLib(index, btn) {
 let _ytImportBtn = null;
 function ytImportLibrary(btn) {
     _ytImportBtn = btn;
-    document.getElementById('yt-lib-import-input').click();
+    let input = document.getElementById('yt-lib-import-input');
+    if (!input) {
+        input = document.createElement('input');
+        input.type = 'file';
+        input.id = 'yt-lib-import-input';
+        input.accept = '.json';
+        input.style.display = 'none';
+        input.addEventListener('change', ytImportLibraryFromInput);
+        document.body.appendChild(input);
+    }
+    input.click();
 }
 function ytImportLibraryFromInput(event) {
     const file = event.target.files[0];
