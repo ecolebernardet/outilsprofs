@@ -328,7 +328,7 @@
         }
         .ng-table th {
             padding: 6px 8px;
-            font-size: 11px; font-weight: 800;
+            font-size: 14px; font-weight: 800;
             text-align: center;
             border-radius: 6px 6px 0 0;
             position: sticky; top: 0; z-index: 2;
@@ -711,7 +711,7 @@
         // ── Taille de police ─────────────────────────────────────────────
         function applyFontScale() {
             const w  = container.offsetWidth || 800;
-            const fs = Math.max(9, Math.min(20, Math.round(13 * w / 700)));
+            const fs = Math.max(12, Math.min(28, Math.round(13 * w / 700)));
             container.style.setProperty('--ng-fs', fs + 'px');
         }
 
@@ -740,9 +740,11 @@
         }
         // ── Cases à cocher des natures ───────────────────────────────────
         natureChecks.forEach(label => {
-            makeTap(label, () => {
-                const cb   = label.querySelector('input[type=checkbox]');
-                const key  = label.dataset.nature;
+            label.addEventListener('pointerdown', (e) => e.stopPropagation());
+            label.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const cb  = label.querySelector('input[type=checkbox]');
+                const key = label.dataset.nature;
                 cb.checked = !cb.checked;
                 if (cb.checked) {
                     activeNatures.add(key);
@@ -1055,7 +1057,7 @@
                 const th  = document.createElement('th');
                 th.textContent = def.label;
                 th.className   = 'ng-col-' + k;
-                th.style.cssText = 'padding:8px 6px; border:1.5px solid #e5e7eb; font-size:11px; font-weight:800; text-align:center;';
+                th.style.cssText = 'padding:8px 6px; border:1.5px solid #e5e7eb; font-size:18px; font-weight:800; text-align:center;';
                 // Couleurs inline selon nature
                 const colors = {
                     det:   { bg:'#e0f0ff', color:'#1565c0', border:'#90caf9' },
