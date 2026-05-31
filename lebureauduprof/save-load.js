@@ -932,6 +932,13 @@ function importConfig(event) {
             if (data._type === 'prof-bureau-single-project' && data.project) {
                 const p = data.project;
 
+                // Sauvegarder le projet courant EN PREMIER, avant toute modale
+                // (évite qu'une sauvegarde auto ne corrompe la config pendant les await)
+                const curId = getCurrentProjectId();
+                if (curId) {
+                    try { const cur = await dbGet(curId); await saveProjectToDB(cur?.name || 'Sans titre'); } catch(err) {}
+                }
+
                 // Chercher un projet existant avec le même nom
                 const allProjects = await dbGetAll();
                 const existing = allProjects.find(proj => proj.name === p.name);
@@ -952,14 +959,13 @@ function importConfig(event) {
                     targetId = 'proj_' + Date.now();
                 }
 
-                // Sauvegarder le projet courant silencieusement
-                const curId = getCurrentProjectId();
-                if (curId) {
-                    try { const cur = await dbGet(curId); await saveProjectToDB(cur?.name || 'Sans titre'); } catch(err) {}
-                }
-
+                // Bloquer les sauvegardes auto pendant l'écriture en DB
+                // pour éviter que saveBoard() écrase la config importée
+                isRestoringState = true;
                 const imported = { ...p, id: targetId, updatedAt: Date.now() };
                 await dbPut(imported);
+                isRestoringState = false;
+
                 const project = await loadProjectFromDB(targetId);
                 if (project) _updateProjectTitle(project.name);
                 event.target.value = '';

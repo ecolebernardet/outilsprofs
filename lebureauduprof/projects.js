@@ -169,7 +169,10 @@ async function migrateScenesToProjects() {
 
 // ── Sauvegarder le projet courant en DB ──────────────────────────────────
 async function saveProjectToDB(name) {
-    saveCurrentSceneData();
+    // Ne pas capturer l'état du board si une restauration est en cours
+    if (typeof isRestoringState === 'undefined' || !isRestoringState) {
+        saveCurrentSceneData();
+    }
     if (_isDraft) return null;
     let id = getCurrentProjectId();
     if (!id) return null;
@@ -299,6 +302,8 @@ async function _projSaveDraft() {
 
 // ── Sauvegarder silencieusement sans changer l'ordre (updatedAt préservé) ─
 async function _saveProjectSilent(id) {
+    // Ne pas sauvegarder si une restauration est en cours (board potentiellement vide/incomplet)
+    if (typeof isRestoringState !== 'undefined' && isRestoringState) return;
     saveCurrentSceneData();
     if (_isDraft || !id) return;
     const existing = await dbGet(id);
@@ -313,6 +318,17 @@ async function _projLoad(id) {
     if (!_isDraft) {
         const curId = getCurrentProjectId();
         if (curId) {
+            // Attendre que la restauration en cours soit terminée avant de sauvegarder
+            await new Promise(resolve => {
+                if (typeof isRestoringState === 'undefined' || !isRestoringState) { resolve(); return; }
+                let tries = 0;
+                const poll = setInterval(() => {
+                    tries++;
+                    if ((typeof isRestoringState === 'undefined' || !isRestoringState) || tries > 40) {
+                        clearInterval(poll); resolve();
+                    }
+                }, 75);
+            });
             try { await _saveProjectSilent(curId); } catch(e) {}
         }
     }
