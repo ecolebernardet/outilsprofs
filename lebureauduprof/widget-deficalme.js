@@ -528,11 +528,11 @@ function createDeficalmeWidget() {
     const sensSlider = document.createElement('input');
     sensSlider.type = 'range';
     sensSlider.className = 'dc-slider';
-    sensSlider.min = 1; sensSlider.max = 100; sensSlider.value = 45;
+    sensSlider.min = 1; sensSlider.max = 100; sensSlider.value = 40;
 
     const sensVal = document.createElement('span');
     sensVal.className = 'dc-sens-val';
-    sensVal.textContent = '45';
+    sensVal.textContent = '40';
 
     row2.appendChild(sensLabel);
     row2.appendChild(sensSlider);
