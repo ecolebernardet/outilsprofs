@@ -29,6 +29,9 @@ const CPICK_COLORS = [
 // État courant par picker id
 const _cpickValues = {};
 
+// Valeurs par défaut pour certains pickers
+_cpickValues['fig-fill-color'] = '#ffffff';
+
 function cpickInit(id, initialValue) {
     _cpickValues[id] = initialValue || '#000000';
     const pop = document.getElementById('cpick-pop-' + id);

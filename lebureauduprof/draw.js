@@ -820,6 +820,23 @@ function figFillToggle() {
     const swatch  = document.getElementById('fig-fill-swatch');
     if (row)    row.style.display    = enabled ? 'flex' : 'none';
     if (swatch) swatch.style.opacity = enabled ? '1'   : '0.4';
+    // Forcer la valeur du slider après affichage (corrige le bug de rendu
+    // sur les sliders qui étaient dans un display:none au chargement)
+    if (enabled && row) {
+        const slider = document.getElementById('fig-fill-opacity');
+        const label  = document.getElementById('fig-fill-opacity-val');
+        if (slider) {
+            // Forcer à 100 si jamais initialisé (attribut value HTML pas encore appliqué)
+            if (!slider._initialized) {
+                slider.value = 100;
+                slider._initialized = true;
+                if (label) label.textContent = '100%';
+            } else {
+                // Réassigner pour forcer le navigateur à repositionner le curseur
+                slider.value = slider.value;
+            }
+        }
+    }
 }
 
 // Retourne { enabled, color, opacity } depuis les contrôles du sous-menu
@@ -827,9 +844,9 @@ function _getFigFillOpts() {
     const enabled = document.getElementById('fig-fill-enabled')?.checked ?? false;
     const color   = (typeof cpickGetValue === 'function' ? cpickGetValue('fig-fill-color') : null)
                     || document.querySelector('#cpick-fig-fill-color .cpick-swatch')?.style?.background
-                    || '#4a90e2';
+                    || '#ffffff';
     const opacity = enabled
-        ? (parseInt(document.getElementById('fig-fill-opacity')?.value ?? 40) / 100)
+        ? (parseInt(document.getElementById('fig-fill-opacity')?.value ?? 100) / 100)
         : 0;
     return { enabled, color, opacity };
 }
@@ -1648,6 +1665,19 @@ function toggleFiguresSubmenu(fromMainBtn) {
                 requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
             }
             _updatePdfToolBtns(); // colore le bon sous-bouton figure
+            // Initialiser la couleur de fond et l'opacité par défaut, afficher le slider
+            const fillSwatch = document.querySelector('#cpick-fig-fill-color .cpick-swatch');
+            if (fillSwatch && !fillSwatch.style.background) {
+                fillSwatch.style.background = '#ffffff';
+                if (typeof cpickDispatch === 'function') cpickDispatch('fig-fill-color', '#ffffff');
+            }
+            const fillOpacitySlider = document.getElementById('fig-fill-opacity');
+            if (fillOpacitySlider && (!fillOpacitySlider.value || fillOpacitySlider.value == '0')) {
+                fillOpacitySlider.value = 100;
+                const fillOpacityVal = document.getElementById('fig-fill-opacity-val');
+                if (fillOpacityVal) fillOpacityVal.textContent = '100%';
+            }
+            figFillToggle();
         }
         return;
     }
@@ -1666,6 +1696,21 @@ function toggleFiguresSubmenu(fromMainBtn) {
     // Repositionner à côté de la draw-toolbar
     if (sub.classList.contains('open') && typeof _positionSubmenuNextToDrawbar === 'function') {
         requestAnimationFrame(function() { _positionSubmenuNextToDrawbar(sub); });
+    }
+    // À l'ouverture : synchroniser l'affichage du slider d'opacité et initialiser la couleur par défaut
+    if (sub.classList.contains('open')) {
+        const fillSwatch = document.querySelector('#cpick-fig-fill-color .cpick-swatch');
+        if (fillSwatch && !fillSwatch.style.background) {
+            fillSwatch.style.background = '#ffffff';
+            if (typeof cpickDispatch === 'function') cpickDispatch('fig-fill-color', '#ffffff');
+        }
+        const fillOpacitySlider = document.getElementById('fig-fill-opacity');
+        if (fillOpacitySlider && (!fillOpacitySlider.value || fillOpacitySlider.value == '0')) {
+            fillOpacitySlider.value = 100;
+            const fillOpacityVal = document.getElementById('fig-fill-opacity-val');
+            if (fillOpacityVal) fillOpacityVal.textContent = '100%';
+        }
+        figFillToggle();
     }
     if (btn) {
         // Le bouton reste actif (surbrillance) si le sous-menu est ouvert OU si un mode figure est actif
