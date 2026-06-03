@@ -610,6 +610,11 @@ function createSeyesWidget() {
             <button class="seyes-help-btn" data-role="wf-pdf"  title="Exporter / Imprimer" style="width:auto;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">PDF</button>
             <button class="seyes-help-btn" data-role="wf-save" title="Sauvegarder en JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">💾</button>
             <button class="seyes-help-btn" data-role="wf-load" title="Charger une sauvegarde JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">📂</button>
+            <div style="display:flex;align-items:center;gap:2px;margin:0 2px;background:#eef5fb;border:1.5px solid #c8d8eb;border-radius:8px;padding:0 4px;height:20px;">
+                <button class="seyes-help-btn" data-role="wf-zoom-out" title="Réduire (Ctrl + −)" style="width:16px;height:16px;border:none;background:transparent;font-size:14px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">−</button>
+                <span data-role="wf-zoom-label" style="font-size:10px;font-weight:800;color:#4a7a9b;min-width:28px;text-align:center;user-select:none;">100%</span>
+                <button class="seyes-help-btn" data-role="wf-zoom-in"  title="Agrandir (Ctrl + +)" style="width:16px;height:16px;border:none;background:transparent;font-size:14px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">+</button>
+            </div>
             <button class="seyes-help-btn" data-role="wf-help" title="Aide">?</button>
             <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
             <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
@@ -1220,13 +1225,75 @@ function createSeyesWidget() {
     }, { passive: false });
 
     // ── Boutons fenêtre ───────────────────────────────────────────────────
-    const wfPdf   = header.querySelector('[data-role="wf-pdf"]');
-    const wfSave  = header.querySelector('[data-role="wf-save"]');
-    const wfLoad  = header.querySelector('[data-role="wf-load"]');
-    const wfHelp  = header.querySelector('[data-role="wf-help"]');
-    const wfMin   = header.querySelector('[data-role="wf-min"]');
-    const wfMax   = header.querySelector('[data-role="wf-max"]');
-    const wfClose = header.querySelector('[data-role="wf-close"]');
+    const wfPdf      = header.querySelector('[data-role="wf-pdf"]');
+    const wfSave     = header.querySelector('[data-role="wf-save"]');
+    const wfLoad     = header.querySelector('[data-role="wf-load"]');
+    const wfZoomOut  = header.querySelector('[data-role="wf-zoom-out"]');
+    const wfZoomIn   = header.querySelector('[data-role="wf-zoom-in"]');
+    const wfZoomLbl  = header.querySelector('[data-role="wf-zoom-label"]');
+    const wfHelp     = header.querySelector('[data-role="wf-help"]');
+    const wfMin      = header.querySelector('[data-role="wf-min"]');
+    const wfMax      = header.querySelector('[data-role="wf-max"]');
+    const wfClose    = header.querySelector('[data-role="wf-close"]');
+
+    // ── Zoom ─────────────────────────────────────────────────────────────
+    const ZOOM_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0];
+    let _zoomIdx = 5; // 1.0 par défaut
+
+    function _applyZoom() {
+        const z = ZOOM_STEPS[_zoomIdx];
+        writingArea.style.transform       = `scale(${z})`;
+        writingArea.style.transformOrigin = 'top left';
+        // Compenser la place prise/libérée par le scale pour que le conteneur
+        // se comporte comme si writingArea avait vraiment cette taille
+        const naturalW = writingArea.offsetWidth;
+        const naturalH = writingArea.offsetHeight;
+        writingArea.style.marginRight  = `${naturalW  * (z - 1)}px`;
+        writingArea.style.marginBottom = `${naturalH  * (z - 1)}px`;
+        wfZoomLbl.textContent = Math.round(z * 100) + '%';
+        wfZoomOut.disabled = (_zoomIdx === 0);
+        wfZoomIn.disabled  = (_zoomIdx === ZOOM_STEPS.length - 1);
+        wfZoomOut.style.opacity = wfZoomOut.disabled ? '0.35' : '1';
+        wfZoomIn.style.opacity  = wfZoomIn.disabled  ? '0.35' : '1';
+    }
+
+    if (wfZoomOut) {
+        wfZoomOut.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_zoomIdx > 0) { _zoomIdx--; _applyZoom(); }
+        });
+    }
+    if (wfZoomIn) {
+        wfZoomIn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_zoomIdx < ZOOM_STEPS.length - 1) { _zoomIdx++; _applyZoom(); }
+        });
+    }
+
+    // Raccourcis clavier Ctrl+= / Ctrl++ / Ctrl+-
+    container.addEventListener('keydown', (e) => {
+        if (!e.ctrlKey && !e.metaKey) return;
+        if (e.key === '+' || e.key === '=' || e.key === 'ArrowUp') {
+            e.preventDefault(); e.stopPropagation();
+            if (_zoomIdx < ZOOM_STEPS.length - 1) { _zoomIdx++; _applyZoom(); }
+        } else if (e.key === '-' || e.key === 'ArrowDown') {
+            e.preventDefault(); e.stopPropagation();
+            if (_zoomIdx > 0) { _zoomIdx--; _applyZoom(); }
+        } else if (e.key === '0') {
+            e.preventDefault(); e.stopPropagation();
+            _zoomIdx = 5; _applyZoom();
+        }
+    });
+
+    // Double-clic sur le label pour reset à 100%
+    if (wfZoomLbl) {
+        wfZoomLbl.title = 'Double-clic pour revenir à 100%';
+        wfZoomLbl.style.cursor = 'pointer';
+        wfZoomLbl.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            _zoomIdx = 5; _applyZoom();
+        });
+    }
 
     let _isMax = false;
 
