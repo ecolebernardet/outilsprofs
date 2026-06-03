@@ -608,6 +608,8 @@ function createSeyesWidget() {
         <div class="seyes-toolbar" id="seyes-toolbar-inner"></div>
         <div class="wf-btns" style="margin-left:4px">
             <button class="seyes-help-btn" data-role="wf-pdf"  title="Exporter / Imprimer" style="width:auto;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">PDF</button>
+            <button class="seyes-help-btn" data-role="wf-save" title="Sauvegarder en JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">💾</button>
+            <button class="seyes-help-btn" data-role="wf-load" title="Charger une sauvegarde JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">📂</button>
             <button class="seyes-help-btn" data-role="wf-help" title="Aide">?</button>
             <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
             <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
@@ -1219,6 +1221,8 @@ function createSeyesWidget() {
 
     // ── Boutons fenêtre ───────────────────────────────────────────────────
     const wfPdf   = header.querySelector('[data-role="wf-pdf"]');
+    const wfSave  = header.querySelector('[data-role="wf-save"]');
+    const wfLoad  = header.querySelector('[data-role="wf-load"]');
     const wfHelp  = header.querySelector('[data-role="wf-help"]');
     const wfMin   = header.querySelector('[data-role="wf-min"]');
     const wfMax   = header.querySelector('[data-role="wf-max"]');
@@ -1356,6 +1360,155 @@ function createSeyesWidget() {
                 // Délai pour laisser la police se charger
                 setTimeout(() => { printWin.focus(); printWin.print(); }, 800);
             };
+        });
+    }
+
+    if (wfSave) {
+        wfSave.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Récupérer le contenu des deux zones
+            const editorHTML    = editor.innerHTML  || '';
+            const margeHTML     = editorMarge.innerHTML || '';
+            const editorText    = editor.innerText   || '';
+            const margeText     = editorMarge.innerText || '';
+            const chosenFont    = fontSelect ? fontSelect.value : 'BelleAllureGS';
+
+            // Construire l'objet JSON
+            const data = {
+                _type:    'widget-seyes',
+                _version: '1.0',
+                date:     new Date().toISOString(),
+                police:   chosenFont,
+                contenu: {
+                    principal: {
+                        html:  editorHTML,
+                        texte: editorText
+                    },
+                    marge: {
+                        html:  margeHTML,
+                        texte: margeText
+                    }
+                }
+            };
+
+            // Générer le nom de fichier avec date/heure
+            const now   = new Date();
+            const pad   = n => String(n).padStart(2, '0');
+            const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+            const fileName = `seyes_${stamp}.json`;
+
+            // Télécharger le fichier
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Feedback visuel bref sur le bouton
+            const origText = wfSave.textContent;
+            wfSave.textContent = '✓';
+            wfSave.style.color = '#28c840';
+            setTimeout(() => {
+                wfSave.textContent = origText;
+                wfSave.style.color = '';
+            }, 1200);
+        });
+    }
+
+    if (wfLoad) {
+        wfLoad.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Si du contenu existe, demander confirmation avant d'écraser
+            const hasContent = (editor.textContent.trim().length > 0) || (editorMarge.textContent.trim().length > 0);
+
+            const doLoad = () => {
+                const fileInput = document.createElement('input');
+                fileInput.type   = 'file';
+                fileInput.accept = '.json,application/json';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+
+                fileInput.addEventListener('change', () => {
+                    const file = fileInput.files[0];
+                    if (!file) { document.body.removeChild(fileInput); return; }
+
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const data = JSON.parse(ev.target.result);
+
+                            // Vérifier que c'est bien un fichier seyes
+                            if (data._type !== 'widget-seyes') {
+                                alert('Ce fichier ne semble pas être une sauvegarde Seyes valide.');
+                                return;
+                            }
+
+                            // Restaurer le contenu principal
+                            editor.innerHTML = data.contenu?.principal?.html || '';
+
+                            // Restaurer le contenu de la marge
+                            editorMarge.innerHTML = data.contenu?.marge?.html || '';
+
+                            // Restaurer la police si disponible
+                            if (data.police && fontSelect) {
+                                const opt = Array.from(fontSelect.options).find(o => o.value === data.police);
+                                if (opt) {
+                                    fontSelect.value = data.police;
+                                    fontSelect.dispatchEvent(new Event('change'));
+                                }
+                            }
+
+                            saveBoard();
+
+                            // Feedback visuel bref
+                            const origText = wfLoad.textContent;
+                            wfLoad.textContent = '✓';
+                            wfLoad.style.color = '#28c840';
+                            setTimeout(() => {
+                                wfLoad.textContent = origText;
+                                wfLoad.style.color = '';
+                            }, 1200);
+
+                        } catch (err) {
+                            alert('Impossible de lire le fichier JSON : ' + err.message);
+                        }
+                    };
+                    reader.readAsText(file, 'utf-8');
+                    document.body.removeChild(fileInput);
+                });
+
+                fileInput.click();
+            };
+
+            if (hasContent) {
+                // Modale de confirmation avant écrasement
+                const overlay = document.createElement('div');
+                overlay.className = 'seyes-modal-overlay';
+                overlay.innerHTML = `
+                    <div class="seyes-modal">
+                        <div class="seyes-modal-icon">📂</div>
+                        <div class="seyes-modal-title">Charger une sauvegarde ?</div>
+                        <div class="seyes-modal-body">Le contenu actuel sera remplacé par la sauvegarde choisie. Cette action est irréversible.</div>
+                        <div class="seyes-modal-btns">
+                            <button class="seyes-modal-btn seyes-modal-btn-cancel">Annuler</button>
+                            <button class="seyes-modal-btn seyes-modal-btn-confirm" style="background:#4a7a9b;">Charger</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                overlay.querySelector('.seyes-modal-btn-cancel').addEventListener('click', () => overlay.remove());
+                overlay.querySelector('.seyes-modal-btn-confirm').addEventListener('click', () => { overlay.remove(); doLoad(); });
+                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
+                overlay.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') overlay.remove(); });
+            } else {
+                doLoad();
+            }
         });
     }
 
