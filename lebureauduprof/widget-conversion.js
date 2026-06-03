@@ -234,10 +234,9 @@
         .wconv-table td { background: #fff; height: 50px; color: #6b7280; }
         .wconv-exos-zone {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             overflow-y: auto;
             min-height: 80px;
-            max-height: 340px;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             background: #f8f9fa;
@@ -634,10 +633,12 @@ function createConversionWidget(opts) {
     // ── Auto-resize input selon le contenu ───────────────────────────────
     function autoResizeInput(inp) {
         const ghost = document.createElement('span');
-        ghost.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font-size:23px;font-weight:700;font-family:inherit;padding:0 8px;';
+        const computedFont = window.getComputedStyle(inp).font;
+        ghost.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font-size:23px;font-weight:700;padding:0 8px;';
+        ghost.style.font = computedFont || "700 23px 'MarelleBaton', 'Segoe UI', system-ui, sans-serif";
         ghost.textContent = inp.value || inp.placeholder || '?';
         document.body.appendChild(ghost);
-        const newW = Math.max(60, ghost.offsetWidth + 4);
+        const newW = Math.max(60, ghost.offsetWidth + 12);
         ghost.remove();
         inp.style.width = newW + 'px';
     }
@@ -668,6 +669,7 @@ function createConversionWidget(opts) {
             });
             autoResizeInput(inp);
         });
+        exosZone.style.maxHeight = '';
         corrBtn.textContent = '👁 Correction';
         corrBtn.classList.remove('revealed');
         corrBtn.style.display = '';
@@ -687,7 +689,9 @@ function createConversionWidget(opts) {
                 inp.className  = 'wconv-exo-input ' + (isOk ? 'correct' : 'wrong');
                 inp.value      = correct;
                 inp.disabled   = true;
-                autoResizeInput(inp);
+            });
+            requestAnimationFrame(() => {
+                inputs.forEach(inp => autoResizeInput(inp));
             });
             corrBtn.textContent = '🙈 Masquer';
             corrBtn.classList.add('revealed');
