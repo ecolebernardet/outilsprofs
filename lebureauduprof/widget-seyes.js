@@ -598,7 +598,8 @@ function createSeyesWidget() {
 
     const widget = document.createElement('div');
     widget.className = 'widget';
-    widget.dataset.type = 'seyes';
+    widget.dataset.type    = 'pdf';      // permet la détection par draw.js (_attachHoverToPdfWidget)
+    widget.dataset.subtype = 'seyes';    // identifie le widget comme seyes pour les autres systèmes
     widget.dataset.transparent = 'true';
     widget.style.cssText = `left:${pos.x}px; top:${pos.y}px; overflow:visible; flex-direction:row;`;
     widget.tabIndex = 0;
@@ -1294,6 +1295,450 @@ function createSeyesWidget() {
 
     widget.appendChild(container);
 
+    // ── Canvas d'annotation draw.js ───────────────────────────────────────
+    // Le canvas est dans writingArea (suit le scroll naturellement).
+    // Pas de transform ni de synchronisation complexe : writingArea n'est
+    // plus zoomée par transform:scale, le contenu est zoomé directement
+    // (font-size, line-height, fond SVG). Le canvas reste à taille naturelle.
+
+    // Faux pdf-canvas-wrap (toujours display:block) pour satisfaire _findActivePdfWidget.
+    const _seyesFakeWrap = document.createElement('div');
+    _seyesFakeWrap.className = 'pdf-canvas-wrap';
+    _seyesFakeWrap.style.cssText = 'display:block;position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:3;';
+
+    // Proxy scrollLeft / scrollTop → redirige vers writingArea.
+    Object.defineProperty(_seyesFakeWrap, 'scrollLeft', {
+        get: () => writingArea.scrollLeft,
+        set: (v) => { writingArea.scrollLeft = v; },
+        configurable: true
+    });
+    Object.defineProperty(_seyesFakeWrap, 'scrollTop', {
+        get: () => writingArea.scrollTop,
+        set: (v) => { writingArea.scrollTop = v; },
+        configurable: true
+    });
+
+    const annotCanvas = document.createElement('canvas');
+    annotCanvas.className = 'pdf-annot-canvas';
+    annotCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:10;touch-action:none;display:block;';
+
+    // Overlay transparent qui capte TOUS les events quand le mode annotation est actif.
+    const _seyesAnnotOverlay = document.createElement('div');
+    _seyesAnnotOverlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;z-index:20;pointer-events:none;touch-action:none;cursor:inherit;';
+
+    _seyesFakeWrap.appendChild(annotCanvas);
+    _seyesFakeWrap.appendChild(_seyesAnnotOverlay);
+    writingArea.appendChild(_seyesFakeWrap);
+
+    let _seyesCurrentZoom = 1.0;
+
+    function _seyesSyncCanvas() {
+        const w = writingArea.offsetWidth;
+        const h = writingArea.scrollHeight;
+        if (w === 0 || h === 0) return;
+        _seyesFakeWrap.style.height     = h + 'px';
+        _seyesAnnotOverlay.style.height = h + 'px';
+        annotCanvas.style.height        = h + 'px';
+        const dpr  = window.devicePixelRatio || 1;
+        const newW = Math.round(w * dpr);
+        const newH = Math.round(h * dpr);
+        if (annotCanvas.width !== newW || annotCanvas.height !== newH) {
+            annotCanvas.width  = newW;
+            annotCanvas.height = newH;
+            _seyesRedrawAnnotations();
+        }
+    }
+
+    function _seyesResizeAnnotCanvas() { _seyesSyncCanvas(); }
+
+    // ── Données d'annotation (strokes normalisés 0→1) ─────────────────────
+    const _seyesAnnotLayer = { strokes: [], history: [], redoHistory: [] };
+    let   _seyesIsDrawing  = false;
+    let   _seyesCurStroke  = null;
+    let   _seyesSnapshot   = null; // ImageData snapshot des strokes validés
+
+    const actx = annotCanvas.getContext('2d');
+
+    // Coordonnées normalisées relatives au contenu à zoom=1
+    // → une annotation tracée sur un mot reste sur ce mot quel que soit le zoom
+    function _seyesContentW() { return writingArea.offsetWidth  / _seyesCurrentZoom; }
+    function _seyesContentH() { return writingArea.scrollHeight / _seyesCurrentZoom; }
+
+    function _seyesToNorm(px, py) {
+        // px/py sont en pixels canvas (depuis getBoundingClientRect du canvas)
+        // On ramène d'abord en pixels contenu zoomé, puis en pixels zoom=1
+        const dpr = window.devicePixelRatio || 1;
+        const cw = writingArea.offsetWidth;
+        const ch = writingArea.scrollHeight;
+        return {
+            x: (px / dpr) / cw,
+            y: (py / dpr) / ch
+        };
+    }
+    function _seyesFromNorm(nx, ny) {
+        const dpr = window.devicePixelRatio || 1;
+        const cw = writingArea.offsetWidth;
+        const ch = writingArea.scrollHeight;
+        return {
+            x: nx * cw * dpr,
+            y: ny * ch * dpr
+        };
+    }
+
+    function _seyesBuildSnapshot() {
+        _seyesSnapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+    }
+
+    function _seyesInvalidateSnapshot() {
+        _seyesSnapshot = null;
+    }
+
+    function _seyesDrawStroke(ctx, stroke) {
+        const cw = annotCanvas.width;
+        const ch = annotCanvas.height;
+        const displayW = annotCanvas.getBoundingClientRect().width  || cw;
+        const sizeScaled = stroke.size * cw / displayW;
+
+        if (stroke.tool === 'text') {
+            const pos = _seyesFromNorm(stroke.nx, stroke.ny);
+            const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * cw / 600);
+            ctx.save();
+            ctx.font      = `${fontSize}px 'Segoe UI', sans-serif`;
+            ctx.fillStyle = stroke.color;
+            ctx.globalAlpha = 1;
+            const lines = (stroke.text || '').split('\n');
+            if (stroke.rotation) {
+                const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+                const textH = lines.length * fontSize * 1.3;
+                ctx.translate(pos.x + textW/2, pos.y + textH/2);
+                ctx.rotate(stroke.rotation);
+                ctx.translate(-(pos.x + textW/2), -(pos.y + textH/2));
+            }
+            lines.forEach((line, i) => ctx.fillText(line, pos.x, pos.y + (i + 1) * fontSize * 1.3));
+            ctx.restore();
+            return;
+        }
+
+        if (stroke.tool === 'figure') {
+            if (!stroke.pts || stroke.pts.length < 2) return;
+            const pxPts = stroke.pts.map(p => _seyesFromNorm(p.x, p.y));
+            ctx.save();
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth   = sizeScaled;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+            if (stroke.fillColor && stroke.fillOpacity > 0) {
+                ctx.globalAlpha = stroke.fillOpacity;
+                ctx.fillStyle   = stroke.fillColor;
+                ctx.fill();
+            }
+            ctx.restore();
+            return;
+        }
+
+        if (!stroke.pts || stroke.pts.length === 0) return;
+        const pxPts = stroke.pts.map(p => _seyesFromNorm(p.x, p.y));
+        ctx.save();
+
+        if (stroke.dot) {
+            ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.35 : 1;
+            ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
+            const r = Math.max(1, sizeScaled / 2);
+            ctx.beginPath();
+            ctx.arc(pxPts[0].x, pxPts[0].y, r, 0, Math.PI * 2);
+            ctx.fillStyle = stroke.color;
+            ctx.fill();
+        } else if (stroke.tool === 'highlighter') {
+            const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+            ctx.globalAlpha = 0.35;
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth   = lw;
+            ctx.lineCap     = 'butt';
+            ctx.lineJoin    = 'round';
+            ctx.beginPath();
+            pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+        } else if (stroke.tool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = sizeScaled * 2;
+            ctx.lineCap   = 'round';
+            ctx.lineJoin  = 'round';
+            ctx.beginPath();
+            pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+        } else {
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth   = sizeScaled;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+            ctx.beginPath();
+            pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function _seyesRedrawAnnotations() {
+        actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+        if (_seyesAnnotLayer._snapshot) {
+            actx.putImageData(_seyesAnnotLayer._snapshot, 0, 0);
+        } else {
+            _seyesAnnotLayer.strokes.forEach(s => _seyesDrawStroke(actx, s));
+        }
+    }
+
+    // ── _pdfAnnotAPI : interface attendue par draw.js ──────────────────────
+    widget._pdfAnnotAPI = {
+        startStroke(color, size, tool, px, py) {
+            const norm = _seyesToNorm(px, py);
+            _seyesCurStroke = { tool, color, size, pts: [norm] };
+            _seyesIsDrawing = true;
+            _seyesBuildSnapshot();
+        },
+        continueStroke(color, size, tool, px, py) {
+            if (!_seyesIsDrawing || !_seyesCurStroke) return;
+            const norm = _seyesToNorm(px, py);
+            const pts  = _seyesCurStroke.pts;
+            const prev = pts[pts.length - 1];
+            pts.push(norm);
+            _seyesCurStroke.color = color;
+            _seyesCurStroke.size  = size;
+            _seyesCurStroke.tool  = tool;
+
+            const cw      = annotCanvas.width;
+            const displayW = annotCanvas.getBoundingClientRect().width || 600;
+            const sizeScaled = size * cw / displayW;
+            const pPrev = _seyesFromNorm(prev.x, prev.y);
+            const pCur  = _seyesFromNorm(norm.x,  norm.y);
+
+            actx.save();
+            if (tool === 'highlighter') {
+                if (pts.length % 20 === 0) {
+                    if (_seyesSnapshot) actx.putImageData(_seyesSnapshot, 0, 0);
+                    else actx.clearRect(0, 0, cw, annotCanvas.height);
+                    const pxPts = pts.map(p => _seyesFromNorm(p.x, p.y));
+                    const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+                    actx.globalAlpha = 0.35;
+                    actx.globalCompositeOperation = 'multiply';
+                    actx.strokeStyle = color; actx.lineWidth = lw;
+                    actx.lineCap = 'butt'; actx.lineJoin = 'round';
+                    actx.beginPath();
+                    pxPts.forEach((p, i) => i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y));
+                    actx.stroke();
+                } else {
+                    const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+                    actx.globalAlpha = 0.35; actx.globalCompositeOperation = 'multiply';
+                    actx.strokeStyle = color; actx.lineWidth = lw;
+                    actx.lineCap = 'round'; actx.lineJoin = 'round';
+                    actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+                }
+            } else if (tool === 'eraser') {
+                actx.globalCompositeOperation = 'destination-out';
+                actx.lineWidth = sizeScaled * 2; actx.lineCap = 'round';
+                actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+            } else {
+                actx.strokeStyle = color; actx.lineWidth = sizeScaled;
+                actx.lineCap = 'round'; actx.lineJoin = 'round';
+                actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+            }
+            actx.restore();
+        },
+        endStroke() {
+            if (!_seyesIsDrawing || !_seyesCurStroke) return;
+            _seyesIsDrawing = false;
+            if (_seyesCurStroke.pts.length === 1) _seyesCurStroke.dot = true;
+            _seyesAnnotLayer.redoHistory = [];
+            _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            if (_seyesAnnotLayer.history.length > 30) _seyesAnnotLayer.history.shift();
+            _seyesAnnotLayer.strokes.push(_seyesCurStroke);
+            _seyesCurStroke = null;
+            _seyesRedrawAnnotations();
+            _seyesInvalidateSnapshot();
+        },
+        undo() {
+            if (_seyesAnnotLayer.history.length > 0) {
+                _seyesAnnotLayer.redoHistory.push([..._seyesAnnotLayer.strokes]);
+                _seyesAnnotLayer.strokes = _seyesAnnotLayer.history.pop();
+            } else if (_seyesAnnotLayer.strokes.length > 0) {
+                _seyesAnnotLayer.redoHistory.push([..._seyesAnnotLayer.strokes]);
+                _seyesAnnotLayer.strokes.pop();
+            }
+            _seyesAnnotLayer._snapshot = null;
+            _seyesRedrawAnnotations();
+        },
+        redo() {
+            if (_seyesAnnotLayer.redoHistory.length > 0) {
+                _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+                _seyesAnnotLayer.strokes = _seyesAnnotLayer.redoHistory.pop();
+                _seyesAnnotLayer._snapshot = null;
+                _seyesRedrawAnnotations();
+            }
+        },
+        clear() {
+            if (_seyesAnnotLayer.strokes.length > 0) {
+                _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            }
+            _seyesAnnotLayer.strokes = [];
+            _seyesAnnotLayer._snapshot = null;
+            _seyesAnnotLayer.redoHistory = [];
+            _seyesRedrawAnnotations();
+        },
+        getAnnotCanvas()  { return annotCanvas; },
+        getPdfDoc()       { return null; },
+        getTotalPages()   { return 1; },
+        getAnnotLayers()  { return { 1: _seyesAnnotLayer }; },
+        drawStrokeOn(ctx, stroke, cw) { _seyesDrawStroke(ctx, stroke); },
+        addTextStroke(text, color, size, px, py) {
+            const norm = _seyesToNorm(px, py);
+            const stroke = { tool: 'text', color, size, text, nx: norm.x, ny: norm.y };
+            _seyesAnnotLayer.redoHistory = [];
+            _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            if (_seyesAnnotLayer.history.length > 30) _seyesAnnotLayer.history.shift();
+            _seyesAnnotLayer.strokes.push(stroke);
+            _seyesRedrawAnnotations();
+        },
+        previewFigure(color, size, pts, fillColor, fillOpacity) {
+            _seyesRedrawAnnotations();
+            const cw = annotCanvas.width;
+            const displayW = annotCanvas.getBoundingClientRect().width || 600;
+            const sizeScaled = size * cw / displayW;
+            actx.save();
+            actx.strokeStyle = color; actx.lineWidth = sizeScaled;
+            actx.lineCap = 'round'; actx.lineJoin = 'round';
+            actx.setLineDash([6, 4]); actx.globalAlpha = 0.7;
+            actx.beginPath();
+            pts.forEach((p, i) => i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y));
+            if (fillColor && fillOpacity > 0) {
+                actx.save(); actx.globalAlpha = fillOpacity * 0.7;
+                actx.fillStyle = fillColor; actx.setLineDash([]); actx.fill(); actx.restore();
+                actx.setLineDash([6, 4]);
+            }
+            actx.stroke(); actx.setLineDash([]); actx.restore();
+        },
+        addFigureStroke(color, size, pts, fillColor, fillOpacity) {
+            const normPts = pts.map(p => _seyesToNorm(p.x, p.y));
+            const stroke = { tool: 'figure', color, size, pts: normPts };
+            if (fillColor && fillOpacity > 0) { stroke.fillColor = fillColor; stroke.fillOpacity = fillOpacity; }
+            _seyesAnnotLayer.redoHistory = [];
+            _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            if (_seyesAnnotLayer.history.length > 30) _seyesAnnotLayer.history.shift();
+            _seyesAnnotLayer.strokes.push(stroke);
+            _seyesRedrawAnnotations(); _seyesInvalidateSnapshot();
+        },
+        previewEraser(px, py, r) {
+            if (_seyesSnapshot) actx.putImageData(_seyesSnapshot, 0, 0);
+            else _seyesRedrawAnnotations();
+            const cw = annotCanvas.width;
+            const displayW = annotCanvas.getBoundingClientRect().width || 600;
+            const rScaled = r * cw / displayW;
+            actx.save();
+            actx.globalCompositeOperation = 'source-over';
+            actx.beginPath(); actx.arc(px, py, rScaled, 0, Math.PI * 2);
+            actx.strokeStyle = 'rgba(80,80,80,0.9)'; actx.lineWidth = 1.5;
+            actx.setLineDash([4, 3]); actx.stroke();
+            actx.beginPath(); actx.arc(px, py, 2, 0, Math.PI * 2);
+            actx.fillStyle = 'rgba(80,80,80,0.7)'; actx.fill();
+            actx.setLineDash([]); actx.restore();
+        },
+        eraseAt(px, py, r) {
+            const cw = annotCanvas.width;
+            const displayW = annotCanvas.getBoundingClientRect().width || 600;
+            const rScaled = r * cw / displayW;
+            actx.save(); actx.globalCompositeOperation = 'destination-out';
+            actx.beginPath(); actx.arc(px, py, rScaled, 0, Math.PI * 2);
+            actx.fill(); actx.restore();
+        },
+        saveEraserSnapshot() {
+            const imgData = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+            _seyesAnnotLayer._snapshot = imgData;
+            _seyesAnnotLayer.strokes = [];
+        },
+        redrawAnnotations() { _seyesRedrawAnnotations(); },
+        drawTextSelection(index) {
+            const s = _seyesAnnotLayer.strokes[index];
+            if (!s || s.tool !== 'text') return;
+            if (_seyesSnapshot) actx.putImageData(_seyesSnapshot, 0, 0);
+            else _seyesRedrawAnnotations();
+            _seyesDrawStroke(actx, s);
+        },
+        moveTextStroke(index, px, py) {
+            const norm = _seyesToNorm(px, py);
+            if (!_seyesAnnotLayer.strokes[index]) return;
+            _seyesAnnotLayer.strokes[index] = { ..._seyesAnnotLayer.strokes[index], nx: norm.x, ny: norm.y };
+            if (_seyesSnapshot) { actx.putImageData(_seyesSnapshot, 0, 0); _seyesDrawStroke(actx, _seyesAnnotLayer.strokes[index]); }
+            else _seyesRedrawAnnotations();
+        },
+        saveTextMove(index) {
+            if (!_seyesAnnotLayer.strokes[index]) return;
+            _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            if (_seyesAnnotLayer.history.length > 30) _seyesAnnotLayer.history.shift();
+            _seyesInvalidateSnapshot();
+        },
+        rotateTextStroke(index, angle) {
+            if (!_seyesAnnotLayer.strokes[index]) return;
+            _seyesAnnotLayer.strokes[index] = { ..._seyesAnnotLayer.strokes[index], rotation: angle };
+            if (_seyesSnapshot) { actx.putImageData(_seyesSnapshot, 0, 0); _seyesDrawStroke(actx, _seyesAnnotLayer.strokes[index]); }
+            else _seyesRedrawAnnotations();
+        },
+        saveTextTransform(index) {
+            if (!_seyesAnnotLayer.strokes[index]) return;
+            _seyesAnnotLayer.history.push([..._seyesAnnotLayer.strokes]);
+            if (_seyesAnnotLayer.history.length > 30) _seyesAnnotLayer.history.shift();
+            _seyesInvalidateSnapshot();
+        },
+        detachNativeEvents() {},  // rien à détacher côté seyes
+    };
+
+    // Dimensionner le canvas au premier rendu puis à chaque resize/contenu
+    requestAnimationFrame(() => _seyesResizeAnnotCanvas());
+    const _seyesResizeObs = new ResizeObserver(() => _seyesResizeAnnotCanvas());
+    _seyesResizeObs.observe(writingArea);
+    _seyesResizeObs.observe(editor);       // l'éditeur grandit quand on tape
+    _seyesResizeObs.observe(editorMarge);  // idem pour la marge
+
+    // ── Activation / désactivation du mode annotation ─────────────────────
+    // draw.js ajoute la classe 'pdf-annot-target' sur le widget quand il active
+    // l'annotation. On surveille ce changement pour :
+    //   - activer l'overlay (capte les events, bloque les contenteditable)
+    //   - désactiver les contenteditable (sinon ils volent le focus et les events)
+    //   - inverser à la désactivation
+    function _seyesEnterAnnotMode() {
+        // Overlay capture tous les events
+        _seyesAnnotOverlay.style.pointerEvents = 'auto';
+        // Désactiver les éditeurs de texte
+        editor.contentEditable      = 'false';
+        editorMarge.contentEditable = 'false';
+        editor.style.pointerEvents      = 'none';
+        editorMarge.style.pointerEvents = 'none';
+        margeCatcher.style.pointerEvents = 'none';
+        // Désactiver aussi le footer pour éviter les conflits
+        footer.style.pointerEvents = 'none';
+    }
+    function _seyesLeaveAnnotMode() {
+        _seyesAnnotOverlay.style.pointerEvents = 'none';
+        editor.contentEditable      = 'true';
+        editorMarge.contentEditable = 'true';
+        editor.style.pointerEvents      = '';
+        editorMarge.style.pointerEvents = '';
+        margeCatcher.style.pointerEvents = '';
+        footer.style.pointerEvents = '';
+    }
+
+    const _seyesAnnotObserver = new MutationObserver(() => {
+        if (widget.classList.contains('pdf-annot-target')) {
+            _seyesEnterAnnotMode();
+        } else {
+            _seyesLeaveAnnotMode();
+        }
+    });
+    _seyesAnnotObserver.observe(widget, { attributes: true, attributeFilter: ['class'] });
+
     // ── Interactions éditeur ──────────────────────────────────────────────
 
     // Éditeur principal (zone après la marge)
@@ -1406,19 +1851,85 @@ function createSeyesWidget() {
 
     function _applyZoom() {
         const z = ZOOM_STEPS[_zoomIdx];
-        writingArea.style.transform       = `scale(${z})`;
-        writingArea.style.transformOrigin = 'top left';
-        // Compenser la place prise/libérée par le scale pour que le conteneur
-        // se comporte comme si writingArea avait vraiment cette taille
-        const naturalW = writingArea.offsetWidth;
-        const naturalH = writingArea.offsetHeight;
-        writingArea.style.marginRight  = `${naturalW  * (z - 1)}px`;
-        writingArea.style.marginBottom = `${naturalH  * (z - 1)}px`;
+
+        // ── Zoom du contenu (pas de transform sur writingArea) ────────────
+        // On scale font-size, line-height, paddingTop, marge et fond SVG.
+        // writingArea reste à taille naturelle → le canvas d'annotation
+        // n'est jamais affecté par un transform et reste parfaitement aligné.
+
+        const lhZ  = Math.round(LH * z);           // line-height zoomé
+        const il   = lhZ / 4;                       // interligne zoomé
+        const margeZ = Math.round(256 * z);         // largeur marge zoomée
+
+        // Police courante
+        const isMarelle = (fontSelect.value === 'MarelleBaton');
+        let fsZ, ptZ;
+        if (isMarelle) {
+            fsZ = Math.round(32 * z);
+            const ascentM = fsZ * 0.87;
+            ptZ = Math.max(0, Math.round(lhZ - ascentM + 4));
+        } else {
+            fsZ = Math.round(36 * z);
+            ptZ = _seyesPaddingTop(fsZ, lhZ);
+        }
+
+        // Appliquer sur les éditeurs
+        editor.style.fontSize   = fsZ + 'px';
+        editor.style.lineHeight = lhZ + 'px';
+        editor.style.paddingTop = ptZ + 'px';
+        editor.style.left       = margeZ + 'px';
+        editor.style.textUnderlineOffset = Math.round(16 * z) + 'px';
+
+        editorMarge.style.fontSize   = fsZ + 'px';
+        editorMarge.style.lineHeight = lhZ + 'px';
+        editorMarge.style.paddingTop = ptZ + 'px';
+
+        // Largeur du catcher de marge
+        margeCatcher.style.width = margeZ + 'px';
+
+        // Mettre à jour le fond SVG avec les nouvelles dimensions
+        const svgLignes = [
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${lhZ}" height="${lhZ}">`,
+            `<line x1="0" y1="${il*1}" x2="${lhZ}" y2="${il*1}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${il*2}" x2="${lhZ}" y2="${il*2}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${il*3}" x2="${lhZ}" y2="${il*3}" stroke="#c8d8eb" stroke-width="0.7"/>`,
+            `<line x1="0" y1="${lhZ-0.5}" x2="${lhZ}" y2="${lhZ-0.5}" stroke="#9aadbe" stroke-width="1"/>`,
+            `</svg>`
+        ].join('');
+        const svgCols = [
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${lhZ}" height="${lhZ}">`,
+            `<line x1="${lhZ-0.5}" y1="0" x2="${lhZ-0.5}" y2="${lhZ}" stroke="#c8d8eb" stroke-width="0.8"/>`,
+            `</svg>`
+        ].join('');
+        const enc = (svg) => 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
+        const urlLignes   = enc(svgLignes);
+        const urlCols     = enc(svgCols);
+        const mL = margeZ - 2;
+        const mR = margeZ;
+        const urlRed      = `linear-gradient(to right, transparent ${mL}px, #e05050 ${mL}px, #e05050 ${mR}px, transparent ${mR}px)`;
+        const urlMaskCols = `linear-gradient(to right, #fafcff ${mR}px, transparent ${mR}px)`;
+        const offsetY     = ptZ - lhZ + Math.round(170 * z);
+        writingArea.style.backgroundImage      = `${urlRed}, ${urlLignes}, ${urlMaskCols}, ${urlCols}`;
+        writingArea.style.backgroundSize       = `100% 100%, ${lhZ}px ${lhZ}px, 100% 100%, ${lhZ}px ${lhZ}px`;
+        writingArea.style.backgroundRepeat     = 'no-repeat, repeat, no-repeat, repeat';
+        writingArea.style.backgroundPosition   = `0 0, 0 ${offsetY}px, 0 0, 0 ${offsetY}px`;
+
+        // Supprimer tout transform résiduel sur writingArea
+        writingArea.style.transform  = '';
+        writingArea.style.marginRight  = '';
+        writingArea.style.marginBottom = '';
+
         wfZoomLbl.textContent = Math.round(z * 100) + '%';
         wfZoomOut.disabled = (_zoomIdx === 0);
         wfZoomIn.disabled  = (_zoomIdx === ZOOM_STEPS.length - 1);
         wfZoomOut.style.opacity = wfZoomOut.disabled ? '0.35' : '1';
         wfZoomIn.style.opacity  = wfZoomIn.disabled  ? '0.35' : '1';
+
+        // Le canvas n'a pas besoin d'être resynchronisé (pas de transform)
+        // mais on force un redraw pour que les annotations suivent le zoom du contenu
+        _seyesCurrentZoom = z;
+        _seyesResizeAnnotCanvas();
+        _seyesRedrawAnnotations();
     }
 
     if (wfZoomOut) {

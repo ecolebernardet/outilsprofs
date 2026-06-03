@@ -206,7 +206,7 @@ function buildBoardState() {
         }
         // Données propres au widget écriture séyès
         let seyesData = null;
-        if (w.dataset.type === 'seyes') {
+        if (w.dataset.type === 'seyes' || w.dataset.subtype === 'seyes') {
             const sc = w.querySelector('.seyes-container');
             const se = w.querySelector('.seyes-editor');
             const wa = w.querySelector('.seyes-writing-area');
@@ -276,7 +276,7 @@ function buildBoardState() {
             mmData = w._mmGetData();
         }
         widgets.push({
-			type: w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
+			type: w.dataset.subtype === 'seyes' ? 'seyes' : w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
 			transparent: w.dataset.transparent === "true",
 			bgColor: w.dataset.bgColor || "#ffffff",
