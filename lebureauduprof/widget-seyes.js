@@ -231,14 +231,28 @@
             flex-shrink: 0;
         }
 
-        /* ── Barre d'outils texte ────────────────────────── */
+        /* ── Barre d'outils texte (pied du widget) ───────── */
         .seyes-toolbar {
             display: flex;
             align-items: center;
             gap: 4px;
-            flex: 1;
             flex-wrap: wrap;
             justify-content: center;
+        }
+
+        /* ── Pied de page / barre d'outils ──────────────── */
+        .seyes-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 5px 10px;
+            background: rgba(255,254,245,0.95);
+            border-top: 1px solid #d4e4f0;
+            flex-shrink: 0;
+            z-index: 2;
+            flex-wrap: wrap;
+            user-select: none;
         }
 
         .seyes-tool-btn {
@@ -308,6 +322,8 @@
             min-height: 192px;
             -webkit-line-break: after-white-space;
             z-index: 2;
+            text-underline-offset: 16px;
+            text-decoration-skip-ink: none;
         }
 
         /* Zone d'écriture dans la marge */
@@ -334,6 +350,8 @@
             -webkit-user-select: none;
             pointer-events: none;
             z-index: 2;
+            text-underline-offset: 16px;
+            text-decoration-skip-ink: none;
         }
         .seyes-editor-marge.active {
             pointer-events: auto;
@@ -401,10 +419,13 @@
             height: 100% !important;
             z-index: 9999 !important;
             border-radius: 0 !important;
-            overflow-y: auto;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
         }
-        .seyes-container.wf-fullboard .seyes-writing-area { flex: 1; min-height: unset; }
+        .seyes-container.wf-fullboard .seyes-writing-area { flex: 1; min-height: unset; overflow-y: auto; }
         .seyes-container.wf-fullboard .seyes-editor { min-height: unset; }
+        .seyes-container.wf-fullboard .seyes-footer { flex-shrink: 0; }
 
         /* ── Modale confirmation effacement ─────────────── */
         .seyes-modal-overlay {
@@ -510,6 +531,8 @@
             padding: 28px 32px 24px;
             width: 460px;
             max-width: calc(100vw - 32px);
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -605,16 +628,10 @@ function createSeyesWidget() {
     header.className = 'seyes-header';
     header.innerHTML = `
         <span class="seyes-title">✏️ Écriture Seyes</span>
-        <div class="seyes-toolbar" id="seyes-toolbar-inner"></div>
-        <div class="wf-btns" style="margin-left:4px">
+        <div class="wf-btns" style="margin-left:auto">
             <button class="seyes-help-btn" data-role="wf-pdf"  title="Exporter / Imprimer" style="width:auto;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">PDF</button>
             <button class="seyes-help-btn" data-role="wf-save" title="Sauvegarder en JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">💾</button>
             <button class="seyes-help-btn" data-role="wf-load" title="Charger une sauvegarde JSON" style="width:auto;padding:0 6px;border-radius:6px;font-size:13px;font-weight:800;letter-spacing:0.3px;border-color:#c8d8eb;">📂</button>
-            <div style="display:flex;align-items:center;gap:2px;margin:0 2px;background:#eef5fb;border:1.5px solid #c8d8eb;border-radius:8px;padding:0 4px;height:20px;">
-                <button class="seyes-help-btn" data-role="wf-zoom-out" title="Réduire (Ctrl + −)" style="width:16px;height:16px;border:none;background:transparent;font-size:14px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">−</button>
-                <span data-role="wf-zoom-label" style="font-size:10px;font-weight:800;color:#4a7a9b;min-width:28px;text-align:center;user-select:none;">100%</span>
-                <button class="seyes-help-btn" data-role="wf-zoom-in"  title="Agrandir (Ctrl + +)" style="width:16px;height:16px;border:none;background:transparent;font-size:14px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">+</button>
-            </div>
             <button class="seyes-help-btn" data-role="wf-help" title="Aide">?</button>
             <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
             <button class="wf-btn wf-btn-max"   data-role="wf-max"   title="Plein écran"></button>
@@ -623,7 +640,31 @@ function createSeyesWidget() {
     `;
     container.appendChild(header);
 
-    const toolbar = header.querySelector('#seyes-toolbar-inner');
+    // ── Pied de page (barre d'outils) ────────────────────────────────────
+    const footer = document.createElement('div');
+    footer.className = 'seyes-footer';
+    // Le footer sera ajouté au container après writingArea (voir plus bas)
+
+    const toolbar = document.createElement('div');
+    toolbar.id = 'seyes-toolbar-inner';
+    toolbar.className = 'seyes-toolbar';
+
+    // Zoom — placé en premier dans la toolbar
+    const zoomGroup = document.createElement('div');
+    zoomGroup.style.cssText = 'display:flex;align-items:center;gap:2px;background:#eef5fb;border:1.5px solid #c8d8eb;border-radius:8px;padding:0 4px;height:22px;flex-shrink:0;';
+    zoomGroup.innerHTML = `
+        <button data-role="wf-zoom-out" title="Réduire (Ctrl + −)" style="width:18px;height:18px;border:none;background:transparent;font-size:15px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;">−</button>
+        <span data-role="wf-zoom-label" style="font-size:10px;font-weight:800;color:#4a7a9b;min-width:30px;text-align:center;user-select:none;">100%</span>
+        <button data-role="wf-zoom-in"  title="Agrandir (Ctrl + +)" style="width:18px;height:18px;border:none;background:transparent;font-size:15px;font-weight:900;color:#4a7a9b;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;">+</button>
+    `;
+    toolbar.appendChild(zoomGroup);
+
+    // Séparateur après zoom
+    const sep0 = document.createElement('div');
+    sep0.className = 'seyes-sep';
+    toolbar.appendChild(sep0);
+
+    footer.appendChild(toolbar);
 
     // ── Barre d'outils ────────────────────────────────────────────────────
     // Couleur du texte via cpick
@@ -730,6 +771,26 @@ function createSeyesWidget() {
     const underlineGroup = document.createElement('div');
     underlineGroup.style.cssText = 'display:flex;align-items:center;gap:2px;';
 
+    // ── Helper générique : retirer un style sur tous les spans d'un range ──
+    const _removeStyleFromRange = (range, testFn, cleanFn) => {
+        const ancestor = range.commonAncestorContainer;
+        const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+        const spans = Array.from(root.querySelectorAll('[style]'));
+        spans.forEach(sp => {
+            if (!range.intersectsNode(sp)) return;
+            if (!testFn(sp)) return;
+            cleanFn(sp);
+            // Si le span n'a plus aucun style utile, on l'aplatit
+            const remaining = (sp.getAttribute('style') || '')
+                .split(';').map(s => s.trim()).filter(s => s && !s.endsWith(':'));
+            if (!remaining.length) {
+                const parent = sp.parentNode;
+                while (sp.firstChild) parent.insertBefore(sp.firstChild, sp);
+                parent.removeChild(sp);
+            }
+        });
+    };
+
     const underlineBtn = document.createElement('button');
     underlineBtn.className = 'seyes-tool-btn';
     underlineBtn.title = 'Souligné (Ctrl+U)';
@@ -738,26 +799,42 @@ function createSeyesWidget() {
         e.preventDefault(); e.stopPropagation();
         const activeEd = document.activeElement;
         const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
-        // Sauvegarder la sélection
         const sel = window.getSelection();
         const savedRange = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+
+        targetEd.focus();
+        if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+
         if (!savedRange || savedRange.collapsed) {
-            // Pas de sélection : basculer le soulignage standard
-            targetEd.focus();
+            // Pas de sélection : toggle via execCommand
             document.execCommand('underline', false, null);
         } else {
-            // Sélection : appliquer un span avec text-decoration-color
-            targetEd.focus();
-            sel.removeAllRanges();
-            sel.addRange(savedRange);
-            const span = document.createElement('span');
-            span.style.textDecoration = 'underline';
-            span.style.textDecorationColor = _underlineColor;
-            try {
-                savedRange.surroundContents(span);
-            } catch(err) {
-                // surroundContents échoue si la sélection coupe des balises
-                document.execCommand('underline', false, null);
+            const alreadyUnderlined = document.queryCommandState('underline');
+            if (alreadyUnderlined) {
+                // Retirer : nettoyer les spans custom
+                _removeStyleFromRange(
+                    savedRange,
+                    sp => (sp.style.textDecoration || '').includes('underline'),
+                    sp => {
+                        sp.style.textDecoration      = (sp.style.textDecoration || '').replace(/\bunderline\b/g, '').trim();
+                        sp.style.textDecorationColor = '';
+                        sp.style.textUnderlineOffset = '';
+                    }
+                );
+                // Retirer aussi les <u> natifs
+                sel.removeAllRanges(); sel.addRange(savedRange);
+                if (document.queryCommandState('underline')) document.execCommand('underline', false, null);
+                if (document.queryCommandState('underline')) document.execCommand('underline', false, null);
+            } else {
+                // Appliquer avec décalage d'un interligne (16px)
+                sel.removeAllRanges(); sel.addRange(savedRange);
+                const span = document.createElement('span');
+                span.style.textDecoration          = 'underline';
+                span.style.textDecorationColor     = _underlineColor;
+                span.style.textUnderlineOffset     = '16px';
+                span.style.textDecorationSkipInk   = 'none';
+                try { savedRange.surroundContents(span); }
+                catch(_) { document.execCommand('underline', false, null); }
             }
         }
         saveBoard();
@@ -817,8 +894,10 @@ function createSeyesWidget() {
                 const rangeClone = _seyesSavedSelection.cloneRange();
                 sel.addRange(rangeClone);
                 const span = document.createElement('span');
-                span.style.textDecoration = 'underline';
-                span.style.textDecorationColor = color;
+                span.style.textDecoration        = 'underline';
+                span.style.textDecorationColor   = color;
+                span.style.textUnderlineOffset   = '16px';
+                span.style.textDecorationSkipInk = 'none';
                 try {
                     rangeClone.surroundContents(span);
                 } catch(err) {
@@ -883,6 +962,11 @@ function createSeyesWidget() {
 
     underlineGroup.appendChild(ulColorWrap);
     toolbar.appendChild(underlineGroup);
+
+    // Séparateur
+    const sep3a = document.createElement('div');
+    sep3a.className = 'seyes-sep';
+    toolbar.appendChild(sep3a);
     // Téléporter le popup soulignage vers document.body
     document.body.appendChild(ulColorWrap.querySelector('.cpick-popup'));
 
@@ -904,14 +988,31 @@ function createSeyesWidget() {
         const activeEd = document.activeElement;
         const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
         targetEd.focus();
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-        const span = document.createElement('span');
-        span.style.backgroundColor = _highlightColor;
-        try {
-            savedRange.surroundContents(span);
-        } catch(err) {
-            document.execCommand('backColor', false, _highlightColor);
+
+        // Détecter si la sélection est déjà surlignée
+        const ancestor = savedRange.commonAncestorContainer;
+        const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+        const hlSpans = Array.from(root.querySelectorAll('[style]'))
+            .filter(sp => savedRange.intersectsNode(sp) && (sp.style.backgroundColor || '').trim());
+        const alreadyHighlighted = hlSpans.length > 0;
+
+        if (alreadyHighlighted) {
+            // Retirer le surlignage
+            _removeStyleFromRange(
+                savedRange,
+                sp => !!(sp.style.backgroundColor || '').trim(),
+                sp => { sp.style.backgroundColor = ''; }
+            );
+            // Retirer aussi les backColor natifs du navigateur
+            sel.removeAllRanges(); sel.addRange(savedRange);
+            document.execCommand('backColor', false, 'transparent');
+        } else {
+            // Appliquer le surlignage
+            sel.removeAllRanges(); sel.addRange(savedRange);
+            const span = document.createElement('span');
+            span.style.backgroundColor = _highlightColor;
+            try { savedRange.surroundContents(span); }
+            catch(_) { document.execCommand('backColor', false, _highlightColor); }
         }
         saveBoard();
     });
@@ -933,6 +1034,11 @@ function createSeyesWidget() {
     });
     highlightGroup.appendChild(hlColorWrap);
     toolbar.appendChild(highlightGroup);
+
+    // Séparateur
+    const sep3b = document.createElement('div');
+    sep3b.className = 'seyes-sep';
+    toolbar.appendChild(sep3b);
     document.body.appendChild(hlColorWrap.querySelector('.cpick-popup'));
 
     // ── Encadrement ───────────────────────────────────────────────────────
@@ -953,21 +1059,42 @@ function createSeyesWidget() {
         const activeEd = document.activeElement;
         const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
         targetEd.focus();
-        sel.removeAllRanges();
-        sel.addRange(savedRange);
-        const span = document.createElement('span');
-        span.style.border = '2.5px solid ' + _borderColor;
-        span.style.borderRadius = '2px';
-        span.style.padding = '0 2px';
-        span.style.boxDecorationBreak = 'clone';
-        span.style.webkitBoxDecorationBreak = 'clone';
-        try {
-            savedRange.surroundContents(span);
-        } catch(err) {
-            // sélection partielle : on enveloppe quand même
-            const frag = savedRange.extractContents();
-            span.appendChild(frag);
-            savedRange.insertNode(span);
+
+        // Détecter si la sélection est déjà encadrée
+        const ancestor = savedRange.commonAncestorContainer;
+        const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+        const bdSpans = Array.from(root.querySelectorAll('[style]'))
+            .filter(sp => savedRange.intersectsNode(sp) && (sp.style.border || '').trim());
+        const alreadyBordered = bdSpans.length > 0;
+
+        if (alreadyBordered) {
+            // Retirer l'encadrement
+            _removeStyleFromRange(
+                savedRange,
+                sp => !!(sp.style.border || '').trim(),
+                sp => {
+                    sp.style.border          = '';
+                    sp.style.borderRadius    = '';
+                    sp.style.padding         = '';
+                    sp.style.boxDecorationBreak = '';
+                    sp.style.webkitBoxDecorationBreak = '';
+                }
+            );
+        } else {
+            // Appliquer l'encadrement
+            sel.removeAllRanges(); sel.addRange(savedRange);
+            const span = document.createElement('span');
+            span.style.border = '2.5px solid ' + _borderColor;
+            span.style.borderRadius = '2px';
+            span.style.padding = '0 2px';
+            span.style.boxDecorationBreak = 'clone';
+            span.style.webkitBoxDecorationBreak = 'clone';
+            try { savedRange.surroundContents(span); }
+            catch(_) {
+                const frag = savedRange.extractContents();
+                span.appendChild(frag);
+                savedRange.insertNode(span);
+            }
         }
         saveBoard();
     });
@@ -995,6 +1122,40 @@ function createSeyesWidget() {
     const sep4 = document.createElement('div');
     sep4.className = 'seyes-sep';
     toolbar.appendChild(sep4);
+
+    // Annuler / Refaire
+    const undoBtn = document.createElement('button');
+    undoBtn.className = 'seyes-tool-btn';
+    undoBtn.title = 'Annuler (Ctrl+Z)';
+    undoBtn.innerHTML = '↩';
+    undoBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const activeEd = document.activeElement;
+        const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
+        targetEd.focus();
+        document.execCommand('undo', false, null);
+        saveBoard();
+    });
+    toolbar.appendChild(undoBtn);
+
+    const redoBtn = document.createElement('button');
+    redoBtn.className = 'seyes-tool-btn';
+    redoBtn.title = 'Refaire (Ctrl+Y)';
+    redoBtn.innerHTML = '↪';
+    redoBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const activeEd = document.activeElement;
+        const targetEd = (activeEd === editorMarge || editorMarge.contains(activeEd)) ? editorMarge : editor;
+        targetEd.focus();
+        document.execCommand('redo', false, null);
+        saveBoard();
+    });
+    toolbar.appendChild(redoBtn);
+
+    // Séparateur
+    const sep5 = document.createElement('div');
+    sep5.className = 'seyes-sep';
+    toolbar.appendChild(sep5);
 
     // Effacer tout
     const clearBtn = document.createElement('button');
@@ -1128,6 +1289,9 @@ function createSeyesWidget() {
     resizeHandle.className = 'seyes-resize-handle';
     container.appendChild(resizeHandle);
 
+    // ── Footer (barre d'outils) ──────────────────────────────────────────
+    container.appendChild(footer);
+
     widget.appendChild(container);
 
     // ── Interactions éditeur ──────────────────────────────────────────────
@@ -1228,9 +1392,9 @@ function createSeyesWidget() {
     const wfPdf      = header.querySelector('[data-role="wf-pdf"]');
     const wfSave     = header.querySelector('[data-role="wf-save"]');
     const wfLoad     = header.querySelector('[data-role="wf-load"]');
-    const wfZoomOut  = header.querySelector('[data-role="wf-zoom-out"]');
-    const wfZoomIn   = header.querySelector('[data-role="wf-zoom-in"]');
-    const wfZoomLbl  = header.querySelector('[data-role="wf-zoom-label"]');
+    const wfZoomOut  = toolbar.querySelector('[data-role="wf-zoom-out"]');
+    const wfZoomIn   = toolbar.querySelector('[data-role="wf-zoom-in"]');
+    const wfZoomLbl  = toolbar.querySelector('[data-role="wf-zoom-label"]');
     const wfHelp     = header.querySelector('[data-role="wf-help"]');
     const wfMin      = header.querySelector('[data-role="wf-min"]');
     const wfMax      = header.querySelector('[data-role="wf-max"]');
@@ -1269,21 +1433,6 @@ function createSeyesWidget() {
             if (_zoomIdx < ZOOM_STEPS.length - 1) { _zoomIdx++; _applyZoom(); }
         });
     }
-
-    // Raccourcis clavier Ctrl+= / Ctrl++ / Ctrl+-
-    container.addEventListener('keydown', (e) => {
-        if (!e.ctrlKey && !e.metaKey) return;
-        if (e.key === '+' || e.key === '=' || e.key === 'ArrowUp') {
-            e.preventDefault(); e.stopPropagation();
-            if (_zoomIdx < ZOOM_STEPS.length - 1) { _zoomIdx++; _applyZoom(); }
-        } else if (e.key === '-' || e.key === 'ArrowDown') {
-            e.preventDefault(); e.stopPropagation();
-            if (_zoomIdx > 0) { _zoomIdx--; _applyZoom(); }
-        } else if (e.key === '0') {
-            e.preventDefault(); e.stopPropagation();
-            _zoomIdx = 5; _applyZoom();
-        }
-    });
 
     // Double-clic sur le label pour reset à 100%
     if (wfZoomLbl) {
@@ -1491,91 +1640,62 @@ function createSeyesWidget() {
         wfLoad.addEventListener('click', (e) => {
             e.stopPropagation();
 
-            // Si du contenu existe, demander confirmation avant d'écraser
-            const hasContent = (editor.textContent.trim().length > 0) || (editorMarge.textContent.trim().length > 0);
+            const fileInput = document.createElement('input');
+            fileInput.type   = 'file';
+            fileInput.accept = '.json,application/json';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
 
-            const doLoad = () => {
-                const fileInput = document.createElement('input');
-                fileInput.type   = 'file';
-                fileInput.accept = '.json,application/json';
-                fileInput.style.display = 'none';
-                document.body.appendChild(fileInput);
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) { document.body.removeChild(fileInput); return; }
 
-                fileInput.addEventListener('change', () => {
-                    const file = fileInput.files[0];
-                    if (!file) { document.body.removeChild(fileInput); return; }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
 
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        try {
-                            const data = JSON.parse(ev.target.result);
-
-                            // Vérifier que c'est bien un fichier seyes
-                            if (data._type !== 'widget-seyes') {
-                                alert('Ce fichier ne semble pas être une sauvegarde Seyes valide.');
-                                return;
-                            }
-
-                            // Restaurer le contenu principal
-                            editor.innerHTML = data.contenu?.principal?.html || '';
-
-                            // Restaurer le contenu de la marge
-                            editorMarge.innerHTML = data.contenu?.marge?.html || '';
-
-                            // Restaurer la police si disponible
-                            if (data.police && fontSelect) {
-                                const opt = Array.from(fontSelect.options).find(o => o.value === data.police);
-                                if (opt) {
-                                    fontSelect.value = data.police;
-                                    fontSelect.dispatchEvent(new Event('change'));
-                                }
-                            }
-
-                            saveBoard();
-
-                            // Feedback visuel bref
-                            const origText = wfLoad.textContent;
-                            wfLoad.textContent = '✓';
-                            wfLoad.style.color = '#28c840';
-                            setTimeout(() => {
-                                wfLoad.textContent = origText;
-                                wfLoad.style.color = '';
-                            }, 1200);
-
-                        } catch (err) {
-                            alert('Impossible de lire le fichier JSON : ' + err.message);
+                        // Vérifier que c'est bien un fichier seyes
+                        if (data._type !== 'widget-seyes') {
+                            alert('Ce fichier ne semble pas être une sauvegarde Seyes valide.');
+                            return;
                         }
-                    };
-                    reader.readAsText(file, 'utf-8');
-                    document.body.removeChild(fileInput);
-                });
 
-                fileInput.click();
-            };
+                        // Restaurer le contenu principal
+                        editor.innerHTML = data.contenu?.principal?.html || '';
 
-            if (hasContent) {
-                // Modale de confirmation avant écrasement
-                const overlay = document.createElement('div');
-                overlay.className = 'seyes-modal-overlay';
-                overlay.innerHTML = `
-                    <div class="seyes-modal">
-                        <div class="seyes-modal-icon">📂</div>
-                        <div class="seyes-modal-title">Charger une sauvegarde ?</div>
-                        <div class="seyes-modal-body">Le contenu actuel sera remplacé par la sauvegarde choisie. Cette action est irréversible.</div>
-                        <div class="seyes-modal-btns">
-                            <button class="seyes-modal-btn seyes-modal-btn-cancel">Annuler</button>
-                            <button class="seyes-modal-btn seyes-modal-btn-confirm" style="background:#4a7a9b;">Charger</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(overlay);
-                overlay.querySelector('.seyes-modal-btn-cancel').addEventListener('click', () => overlay.remove());
-                overlay.querySelector('.seyes-modal-btn-confirm').addEventListener('click', () => { overlay.remove(); doLoad(); });
-                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
-                overlay.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') overlay.remove(); });
-            } else {
-                doLoad();
-            }
+                        // Restaurer le contenu de la marge
+                        editorMarge.innerHTML = data.contenu?.marge?.html || '';
+
+                        // Restaurer la police si disponible
+                        if (data.police && fontSelect) {
+                            const opt = Array.from(fontSelect.options).find(o => o.value === data.police);
+                            if (opt) {
+                                fontSelect.value = data.police;
+                                fontSelect.dispatchEvent(new Event('change'));
+                            }
+                        }
+
+                        saveBoard();
+
+                        // Feedback visuel bref
+                        const origText = wfLoad.textContent;
+                        wfLoad.textContent = '✓';
+                        wfLoad.style.color = '#28c840';
+                        setTimeout(() => {
+                            wfLoad.textContent = origText;
+                            wfLoad.style.color = '';
+                        }, 1200);
+
+                    } catch (err) {
+                        alert('Impossible de lire le fichier JSON : ' + err.message);
+                    }
+                };
+                reader.readAsText(file, 'utf-8');
+                document.body.removeChild(fileInput);
+            });
+
+            fileInput.click();
         });
     }
 
@@ -1595,15 +1715,29 @@ function createSeyesWidget() {
 
                     <div class="seyes-help-section">
                         <div class="seyes-help-section-title">Écrire dans la marge</div>
-                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🖊️</span><span>Par défaut, le curseur se place après la ligne rouge. Pour écrire <strong>dans la marge</strong> (date, numéro…), cliquez à gauche de la ligne rouge : la zone marge s'active. Le texte déborde naturellement vers la droite si besoin.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🖊️</span><span>Par défaut, le curseur se place après la ligne rouge. Pour écrire <strong>dans la marge</strong> (date, numéro…), cliquez à gauche de la ligne rouge : la zone marge s'active.</span></div>
                         <div class="seyes-help-row"><span class="seyes-help-row-icon">↩️</span><span>Pour revenir à l'écriture principale, cliquez à droite de la ligne rouge.</span></div>
                     </div>
 
                     <div class="seyes-help-section">
-                        <div class="seyes-help-section-title">Mise en forme</div>
-                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🎨</span><span>Sélectionnez un mot et cliquez sur le <strong>swatch couleur</strong> pour colorier uniquement ce mot. Sans sélection, cela change la couleur de tout l'éditeur.</span></div>
-                        <div class="seyes-help-row"><span class="seyes-help-row-icon"><span style="text-decoration:underline;font-size:13px;">S</span></span><span>Le petit carré à côté du <u>S</u> permet de choisir la couleur du soulignage indépendamment de la couleur du texte.</span></div>
-                        <div class="seyes-help-row"><span class="seyes-help-row-icon">⌨️</span><span><strong>Ctrl+B</strong> gras · <strong>Ctrl+I</strong> italique · <strong>Ctrl+U</strong> souligné</span></div>
+                        <div class="seyes-help-section-title">Mise en forme (barre du bas)</div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🎨</span><span>Le <strong>rond de couleur</strong> colorie le mot sélectionné. Sans sélection, il change la couleur de tout l'éditeur. Le sélecteur de police permet de basculer entre BelleAllureGS et MarelleBaton.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon"><strong>G I</strong></span><span><strong>Ctrl+B</strong> gras · <strong>Ctrl+I</strong> italique · <strong>Ctrl+U</strong> souligné. Le petit carré à côté du <u>S</u> souligné règle la couleur du trait indépendamment.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon"><span style="background:#fff176;padding:0 2px;border-radius:2px;font-size:12px;">S</span></span><span>Surligner la sélection. Cliquer à nouveau sur le bouton avec le même texte sélectionné <strong>retire</strong> le surlignage. Même logique pour le soulignage et l'encadrement.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">↩ ↪</span><span><strong>Annuler</strong> (aussi Ctrl+Z) et <strong>Refaire</strong> (aussi Ctrl+Y) les dernières actions.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🗑️</span><span>Efface tout le texte (avec confirmation).</span></div>
+                    </div>
+
+                    <div class="seyes-help-section">
+                        <div class="seyes-help-section-title">Zoom</div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">🔍</span><span>Les boutons <strong>−</strong> et <strong>+</strong> (début de la barre du bas) agrandissent ou réduisent l'affichage de 50 % à 200 %. Double-clic sur le pourcentage remet à 100 %. Le zoom n'affecte pas l'export PDF.</span></div>
+                    </div>
+
+                    <div class="seyes-help-section">
+                        <div class="seyes-help-section-title">Sauvegarde et chargement</div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">💾</span><span>Sauvegarde le contenu (texte, marge, mise en forme, police) dans un fichier <strong>.json</strong> horodaté sur votre ordinateur.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">📂</span><span>Charge un fichier .json précédemment sauvegardé. Le contenu actuel est remplacé.</span></div>
+                        <div class="seyes-help-row"><span class="seyes-help-row-icon">PDF</span><span>Ouvre une fenêtre d'impression avec le fond Seyes et le texte mis en page au format A4.</span></div>
                     </div>
 
                     <div class="seyes-help-section">
@@ -1677,6 +1811,9 @@ function createSeyesWidget() {
         if (e.target.closest('.seyes-toolbar, .wf-btns, .cpick-wrap, .cpick-popup')) return;
         bringToFront(widget);
     });
+
+    // ── Footer : empêcher le drag du widget ───────────────────────────────
+    footer.addEventListener('mousedown', (e) => { e.stopPropagation(); });
 
     // ── Focus widget ──────────────────────────────────────────────────────
     widget.addEventListener('mousedown', (e) => {
