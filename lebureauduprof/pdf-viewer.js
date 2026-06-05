@@ -71,6 +71,9 @@ function _attachPenSupportToPdfToolbar(container) {
     // Bouton fond d'écran 🖼️
     const wallpaperBtn = container.querySelector('.pdf-wallpaper-btn');
     if (wallpaperBtn) _addPenClick(wallpaperBtn, () => wallpaperBtn.click());
+    // Bouton coller image 🖼️➕
+    const pasteImgBtn = container.querySelector('.pdf-paste-img-btn');
+    if (pasteImgBtn) _addPenClick(pasteImgBtn, () => pasteImgBtn.click());
     // Bouton zoom page entière
     const zoomPageBtn2 = container.querySelector('.pdf-zoom-page');
     if (zoomPageBtn2) _addPenClick(zoomPageBtn2, () => zoomPageBtn2.click());
@@ -117,6 +120,8 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
     if (wallpaperBtn) wallpaperBtn.style.display = 'inline-flex';
     const annotBtn = container.querySelector('.pdf-annot-widget-btn');
     if (annotBtn)    annotBtn.style.display = 'inline-flex';
+    const pasteImgBtn2 = container.querySelector('.pdf-paste-img-btn');
+    if (pasteImgBtn2) pasteImgBtn2.style.display = 'inline-flex';
     if (nameSpan && filename) { nameSpan.textContent = filename; nameSpan.title = filename; }
     // Support stylet VPI sur tous les boutons de la toolbar PDF
     _attachPenSupportToPdfToolbar(container.closest('.editor-container') || container);
@@ -461,7 +466,107 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 );
             }
 
-            // Affiche les 2 boutons overlay pour un texte sélectionné
+            // Affiche les boutons overlay pour une image sélectionnée
+            // bbox : { x, y, w, h } en pixels canvas
+            function _showAnnotImageHandles(index, bbox) {
+                _removeAnnotFigureHandles();
+                const { x, y, w, h } = bbox;
+
+                // ✕ haut-droit : supprimer
+                _makeAnnotHandle('_annot-delete-btn', x + w, y,
+                    '#ff4757', 'Supprimer l\'image', '✕',
+                    null,
+                    () => {
+                        const layer2 = getLayer(currentPage);
+                        if (!layer2.history) layer2.history = [];
+                        layer2.history.push([...layer2.strokes]);
+                        if (layer2.history.length > 30) layer2.history.shift();
+                        layer2.strokes.splice(index, 1);
+                        _removeAnnotFigureHandles();
+                        redrawAnnotations(currentPage);
+                        try { _saveAnnotations(); } catch(e) {}
+                    }
+                );
+
+                // ⤡ bas-droit : redimensionner
+                _makeAnnotHandle('_annot-resize-btn', x + w, y + h,
+                    '#27ae60', 'Redimensionner l\'image', '⤡',
+                    (e) => {
+                        // Drag resize
+                        const layer2 = getLayer(currentPage);
+                        const s = layer2.strokes[index];
+                        if (!s || s.tool !== 'image') return;
+                        const startPx = { x: e.clientX, y: e.clientY };
+                        const origNW  = s.nw;
+                        const origNH  = s.nh;
+                        const origX   = fromNorm(s.nx, s.ny);
+
+                        function onResizeMove(em) {
+                            const rect = annotCanvas.getBoundingClientRect();
+                            const scaleX = annotCanvas.width  / rect.width;
+                            const scaleY = annotCanvas.height / rect.height;
+                            const dx = (em.clientX - startPx.x) * scaleX;
+                            const dy = (em.clientY - startPx.y) * scaleY;
+                            // Taille minimum 20px canvas
+                            const newW = Math.max(20, origX.x + (origNW * annotCanvas.width) - origX.x + dx);
+                            const newH = Math.max(20, origX.y + (origNH * annotCanvas.width) - origX.y + dy);
+                            layer2.strokes[index] = { ...s, nw: newW / annotCanvas.width, nh: newH / annotCanvas.width };
+                            s.nw = layer2.strokes[index].nw;
+                            s.nh = layer2.strokes[index].nh;
+                            if (_annotSnapshot) {
+                                actx.putImageData(_annotSnapshot, 0, 0);
+                                drawStroke(actx, layer2.strokes[index]);
+                            } else {
+                                redrawAnnotations(currentPage);
+                            }
+                            // Mettre à jour la poignée resize
+                            const np = fromNorm(layer2.strokes[index].nx, layer2.strokes[index].ny);
+                            const nw2 = layer2.strokes[index].nw * annotCanvas.width;
+                            const nh2 = layer2.strokes[index].nh * annotCanvas.width;
+                            const resBtn = document.getElementById('_annot-resize-btn');
+                            if (resBtn) {
+                                const rectC = annotCanvas.getBoundingClientRect();
+                                const sxC = rectC.width / annotCanvas.width;
+                                const syC = rectC.height / annotCanvas.height;
+                                resBtn.style.left = (rectC.left + (np.x + nw2) * sxC - 10) + 'px';
+                                resBtn.style.top  = (rectC.top  + (np.y + nh2) * syC - 10) + 'px';
+                            }
+                        }
+                        function onResizeUp() {
+                            document.removeEventListener('pointermove', onResizeMove);
+                            document.removeEventListener('pointerup',   onResizeUp);
+                            const layer3 = getLayer(currentPage);
+                            if (!layer3.history) layer3.history = [];
+                            layer3.history.push([...layer3.strokes]);
+                            if (layer3.history.length > 30) layer3.history.shift();
+                            _invalidateSnapshot();
+                            redrawAnnotations(currentPage);
+                            try { _saveAnnotations(); } catch(e) {}
+                        }
+                        document.addEventListener('pointermove', onResizeMove);
+                        document.addEventListener('pointerup',   onResizeUp);
+                    },
+                    null
+                );
+            }
+
+            // Trouve une image sous le curseur (px, py en pixels canvas)
+            function _findImageStrokeAt(px, py) {
+                const layer = getLayer(currentPage);
+                const HIT_PAD = 6;
+                for (let i = layer.strokes.length - 1; i >= 0; i--) {
+                    const s = layer.strokes[i];
+                    if (s.tool !== 'image') continue;
+                    const pos = fromNorm(s.nx, s.ny);
+                    const pw  = s.nw * annotCanvas.width;
+                    const ph  = s.nh * annotCanvas.width;
+                    if (px >= pos.x - HIT_PAD && px <= pos.x + pw + HIT_PAD &&
+                        py >= pos.y - HIT_PAD && py <= pos.y + ph + HIT_PAD) {
+                        return { index: i, stroke: s };
+                    }
+                }
+                return null;
+            }
             // opts : { _deleteAt: {px,py}, _rotateAt: {px,py} } en pixels canvas
             function _showAnnotTextHandles(index, opts) {
                 _removeAnnotFigureHandles();
@@ -499,6 +604,49 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                 const canvasW = annotCanvas.width;
                 const displayW = annotCanvas.getBoundingClientRect().width || 600;
                 const sizeScaled = stroke.size * canvasW / displayW; // normalisé par la largeur d'affichage CSS
+
+                // ── Image collée ──────────────────────────────────────────────────────
+                if (stroke.tool === 'image') {
+                    if (!stroke.src) return;
+                    // Récupérer (ou créer) l'objet Image mis en cache sur le stroke
+                    if (!stroke._img) {
+                        const img = new Image();
+                        img.src = stroke.src;
+                        stroke._img = img;
+                    }
+                    const img = stroke._img;
+                    const pos = fromNorm(stroke.nx, stroke.ny);
+                    // nw/nh : dimensions normalisées (relatives à la largeur du canvas à scale=1)
+                    const pw = stroke.nw * canvasW;
+                    const ph = stroke.nh * canvasW;
+                    const drawIt = () => {
+                        ctx.save();
+                        ctx.drawImage(img, pos.x, pos.y, pw, ph);
+                        // Cadre de sélection si demandé
+                        if (stroke._selected) {
+                            ctx.strokeStyle = '#4a90e2';
+                            ctx.lineWidth   = 2 * canvasW / 600;
+                            ctx.setLineDash([5, 3]);
+                            ctx.strokeRect(pos.x - 2, pos.y - 2, pw + 4, ph + 4);
+                            ctx.setLineDash([]);
+                            const r = 5 * canvasW / 600;
+                            ctx.fillStyle = '#4a90e2';
+                            [[pos.x-2,pos.y-2],[pos.x+pw+2,pos.y-2],[pos.x-2,pos.y+ph+2],[pos.x+pw+2,pos.y+ph+2]].forEach(([bx,by]) => {
+                                ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI*2); ctx.fill();
+                            });
+                        }
+                        ctx.restore();
+                    };
+                    if (img.complete && img.naturalWidth > 0) {
+                        drawIt();
+                    } else {
+                        img.onload = () => {
+                            // Redessiner la page une fois l'image chargée
+                            redrawAnnotations(currentPage);
+                        };
+                    }
+                    return;
+                }
 
                 if (stroke.tool === 'text') {
                     const pos = fromNorm(stroke.nx, stroke.ny);
@@ -1154,6 +1302,174 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
 
             renderPage(currentPage);
 
+            // ── Collage d'image sur le PDF ────────────────────────────────────────
+            // Insère une image (base64) au centre du canvas visible
+            function _insertImageOnPdf(dataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    // Taille par défaut : 1/3 de la largeur du canvas, ratio conservé
+                    const defaultW = annotCanvas.width / 3;
+                    const ratio    = img.naturalHeight / img.naturalWidth;
+                    const defaultH = defaultW * ratio;
+                    // Centrer dans la zone visible du canvasWrap
+                    const wrapRect   = canvasWrap.getBoundingClientRect();
+                    const canvasRect = annotCanvas.getBoundingClientRect();
+                    const scaleX = annotCanvas.width  / canvasRect.width;
+                    const scaleY = annotCanvas.height / canvasRect.height;
+                    const visLeft   = Math.max(0, (wrapRect.left  - canvasRect.left)  * scaleX);
+                    const visTop    = Math.max(0, (wrapRect.top   - canvasRect.top)   * scaleY);
+                    const visRight  = Math.min(annotCanvas.width,  (wrapRect.right  - canvasRect.left) * scaleX);
+                    const visBottom = Math.min(annotCanvas.height, (wrapRect.bottom - canvasRect.top)  * scaleY);
+                    const cx = (visLeft + visRight)  / 2;
+                    const cy = (visTop  + visBottom) / 2;
+                    const px = cx - defaultW / 2;
+                    const py = cy - defaultH / 2;
+                    const norm = toNorm(px, py);
+                    const stroke = {
+                        tool: 'image',
+                        src:  dataUrl,
+                        nx:   norm.x,
+                        ny:   norm.y,
+                        nw:   defaultW / annotCanvas.width,
+                        nh:   defaultH / annotCanvas.width,
+                        size: 1, color: 'transparent'
+                    };
+                    const layer = getLayer(currentPage);
+                    if (!layer.history) layer.history = [];
+                    layer.redoHistory = [];
+                    layer.history.push([...layer.strokes]);
+                    if (layer.history.length > 30) layer.history.shift();
+                    layer.strokes.push(stroke);
+                    _invalidateSnapshot();
+                    redrawAnnotations(currentPage);
+                    try { _saveAnnotations(); } catch(e) {}
+                };
+                img.src = dataUrl;
+            }
+
+            // Bouton "Coller image" dans la toolbar
+            const pasteImgBtnEl = container.querySelector('.pdf-paste-img-btn');
+            if (pasteImgBtnEl && !pasteImgBtnEl._imgSetup) {
+                pasteImgBtnEl._imgSetup = true;
+                const fileInput = document.createElement('input');
+                fileInput.type   = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.style.display = 'none';
+                container.appendChild(fileInput);
+                fileInput.addEventListener('change', () => {
+                    const file = fileInput.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => _insertImageOnPdf(ev.target.result);
+                    reader.readAsDataURL(file);
+                    fileInput.value = '';
+                });
+                pasteImgBtnEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    fileInput.click();
+                });
+            }
+
+            // Ctrl+V (presse-papiers) sur le canvasWrap
+            function _handlePasteEvent(e) {
+                const c = canvasWrap.closest('.editor-container');
+                if (c && c.classList.contains('pdf-fs-hidden')) return;
+                const items = (e.clipboardData || window.clipboardData)?.items;
+                if (!items) return;
+                for (const item of items) {
+                    if (item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const blob   = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => _insertImageOnPdf(ev.target.result);
+                        reader.readAsDataURL(blob);
+                        break;
+                    }
+                }
+            }
+            canvasWrap.addEventListener('paste', _handlePasteEvent);
+            // Ctrl+V global (si le focus est dans le widget)
+            container.addEventListener('paste', _handlePasteEvent);
+
+            // ── Sélection / déplacement / resize d'image (clic sur annotCanvas) ───
+            let _imgDragIndex   = -1;
+            let _imgDragStartPx = null;
+            let _imgDragOrigNorm = null;
+
+            annotCanvas.addEventListener('pointerdown', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                // Ne gérer que si le mode annotation est actif
+                if (!window._pdfAnnotMode) return;
+                const px  = getCanvasPx(e);
+                const hit = _findImageStrokeAt(px.x, px.y);
+                const layer = getLayer(currentPage);
+                if (!hit) {
+                    if (_imgDragIndex >= 0) {
+                        if (layer.strokes[_imgDragIndex]) layer.strokes[_imgDragIndex]._selected = false;
+                        _imgDragIndex   = -1;
+                        _removeAnnotFigureHandles();
+                        redrawAnnotations(currentPage);
+                    }
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                layer.strokes.forEach(s => { if (s.tool === 'image') s._selected = false; });
+                hit.stroke._selected = true;
+                _imgDragIndex     = hit.index;
+                _imgDragStartPx   = px;
+                _imgDragOrigNorm  = { nx: hit.stroke.nx, ny: hit.stroke.ny };
+                // Snapshot sans l'image draggée
+                actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+                if (layer._snapshot) actx.putImageData(layer._snapshot, 0, 0);
+                layer.strokes.forEach((s, i) => { if (i !== _imgDragIndex) drawStroke(actx, s); });
+                _annotSnapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+                drawStroke(actx, hit.stroke);
+                const pos = fromNorm(hit.stroke.nx, hit.stroke.ny);
+                const pw  = hit.stroke.nw * annotCanvas.width;
+                const ph  = hit.stroke.nh * annotCanvas.width;
+                _showAnnotImageHandles(_imgDragIndex, { x: pos.x, y: pos.y, w: pw, h: ph });
+            }, { capture: true });
+
+            annotCanvas.addEventListener('pointermove', (e) => {
+                if (_imgDragIndex < 0 || !_imgDragStartPx) return;
+                const px  = getCanvasPx(e);
+                const dx  = (px.x - _imgDragStartPx.x) / annotCanvas.width;
+                const dy  = (px.y - _imgDragStartPx.y) / annotCanvas.height;
+                const layer = getLayer(currentPage);
+                const s   = layer.strokes[_imgDragIndex];
+                if (!s) return;
+                s.nx = _imgDragOrigNorm.nx + dx;
+                s.ny = _imgDragOrigNorm.ny + dy;
+                if (_annotSnapshot) { actx.putImageData(_annotSnapshot, 0, 0); drawStroke(actx, s); }
+                // Déplacer les boutons overlay
+                const pos = fromNorm(s.nx, s.ny);
+                const pw  = s.nw * annotCanvas.width;
+                const ph  = s.nh * annotCanvas.width;
+                const rect = annotCanvas.getBoundingClientRect();
+                const sx = rect.width  / annotCanvas.width;
+                const sy = rect.height / annotCanvas.height;
+                const moveBtn = (id, cpx, cpy) => {
+                    const btn = document.getElementById(id);
+                    if (btn) { btn.style.left = (rect.left + cpx * sx - 10) + 'px'; btn.style.top = (rect.top + cpy * sy - 10) + 'px'; }
+                };
+                moveBtn('_annot-delete-btn', pos.x + pw, pos.y);
+                moveBtn('_annot-resize-btn', pos.x + pw, pos.y + ph);
+            }, { capture: true });
+
+            annotCanvas.addEventListener('pointerup', (e) => {
+                if (_imgDragIndex < 0) return;
+                const layer = getLayer(currentPage);
+                if (!layer.history) layer.history = [];
+                layer.history.push([...layer.strokes]);
+                if (layer.history.length > 30) layer.history.shift();
+                _invalidateSnapshot();
+                _imgDragIndex   = -1;
+                _imgDragStartPx = null;
+                redrawAnnotations(currentPage);
+                try { _saveAnnotations(); } catch(_) {}
+            }, { capture: true });
+
             // Restaurer les annotations sauvegardées (après le 1er rendu)
             if (_annotKey && typeof pdfStorage !== 'undefined' && !container._annotRestored) {
                 container._annotRestored = true;
@@ -1206,7 +1522,14 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                     var toSave = {};
                     for (var p in annotLayers) {
                         if (annotLayers[p] && Array.isArray(annotLayers[p].strokes)) {
-                            toSave[p] = { strokes: annotLayers[p].strokes };
+                            // Nettoyer les propriétés non-sérialisables des strokes image
+                            toSave[p] = {
+                                strokes: annotLayers[p].strokes.map(s => {
+                                    if (s.tool !== 'image') return s;
+                                    const { _img, _selected, ...clean } = s;
+                                    return clean;
+                                })
+                            };
                         }
                     }
                     pdfStorage.set(_annotKey, JSON.stringify(toSave));
@@ -1457,9 +1780,10 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         // Si effacement en cours, redessiner le trait d'effacement accumulé
                         if (isDrawing && currentStrokeAnnot && currentStrokeAnnot.tool === 'eraser' && currentStrokeAnnot.pts.length > 1) {
                             const canvasW2 = annotCanvas.width;
+                            const displayW2 = annotCanvas.getBoundingClientRect().width || 600;
                             actx.save();
                             actx.globalCompositeOperation = 'destination-out';
-                            actx.lineWidth = currentStrokeAnnot.size * canvasW2 / 600 * 2;
+                            actx.lineWidth = currentStrokeAnnot.size * canvasW2 / displayW2 * 2;
                             actx.lineCap = 'round';
                             actx.lineJoin = 'round';
                             actx.beginPath();
@@ -1858,6 +2182,16 @@ function _showPdfInWidget(container, base64OrUrl, filename) {
                         if (layer.history.length > 30) layer.history.shift();
                         _invalidateSnapshot(); // strokes validés ont changé
                         try { _saveAnnotations(); } catch(e) {}
+                    },
+
+                    // Ajouter une image collée (dataUrl) à la position normalisée
+                    addImageStroke(dataUrl) {
+                        _insertImageOnPdf(dataUrl);
+                    },
+
+                    // Trouver une image sous le curseur (px, py pixels canvas)
+                    findImageStrokeAt(px, py) {
+                        return _findImageStrokeAt(px, py);
                     }
                 };
             }
