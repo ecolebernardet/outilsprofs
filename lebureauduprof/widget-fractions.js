@@ -488,16 +488,6 @@
         <button class="frac-count-btn" data-count="4">4</button>
       </div>
     </div>
-    <div class="frac-params-row">
-      <label>Couleur :</label>
-      <div class="frac-color-swatches">
-        <div class="frac-swatch active" data-color="#3b82f6" style="background:#3b82f6" title="Bleu"></div>
-        <div class="frac-swatch" data-color="#ef4444" style="background:#ef4444" title="Rouge"></div>
-        <div class="frac-swatch" data-color="#22c55e" style="background:#22c55e" title="Vert"></div>
-        <div class="frac-swatch" data-color="#ec4899" style="background:#ec4899" title="Rose"></div>
-        <div class="frac-swatch" data-color="#e3d72d" style="background:#e3d72d" title="Jaune"></div>
-      </div>
-    </div>
   </div>
 
   <!-- Zone principale -->
@@ -535,7 +525,6 @@
         const resizeHandle = widget.querySelector('.frac-resize-handle');
         const shapeBtns   = widget.querySelectorAll('.frac-shape-btn');
         const countBtns   = widget.querySelectorAll('.frac-count-btn');
-        const swatches    = widget.querySelectorAll('.frac-swatch');
 
         // ── État ──────────────────────────────────────────────────────────
         let shape      = 'rect';    // 'rect' | 'circle'
@@ -545,7 +534,7 @@
         let fractions  = [];
 
         function defaultFrac() {
-            return { num: 1, den: 4, colored: new Set([0]) };
+            return { num: 1, den: 4, colored: new Set([0]), cols: 4, rows: 1, color: fillColor };
         }
 
         function initFractions() {
@@ -555,14 +544,16 @@
         }
 
         // ── Rendu SVG rectangle ────────────────────────────────────────────
-        // Rectangle unique avec bordure + lignes de séparation intérieures
+        // Grille cols × rows — den = cols * rows, parts numérotées ligne par ligne
         function buildRectSVG(frac, figIdx, scale) {
             scale = scale || 1;
             const W = Math.round(220 * scale), H = Math.round(140 * scale);
             const MARGIN = 2;
             const RW = W - MARGIN * 2, RH = H - MARGIN * 2;
-            const den = Math.max(1, frac.den);
-            const partW = RW / den;
+            const cols = Math.max(1, frac.cols || 1);
+            const rows = Math.max(1, frac.rows || 1);
+            const partW = RW / cols;
+            const partH = RH / rows;
             const ns = 'http://www.w3.org/2000/svg';
             const svg = document.createElementNS(ns, 'svg');
             svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -583,27 +574,39 @@
             const g = document.createElementNS(ns, 'g');
             g.setAttribute('clip-path', `url(#${clipId})`);
 
-            for (let i = 0; i < den; i++) {
-                const zone = document.createElementNS(ns, 'rect');
-                zone.setAttribute('x', MARGIN + i * partW);
-                zone.setAttribute('y', MARGIN);
-                zone.setAttribute('width', partW);
-                zone.setAttribute('height', RH);
-                zone.setAttribute('fill', frac.colored.has(i) ? fillColor : '#f3f4f6');
-                zone.classList.add('frac-part');
-                zone.dataset.partIdx = i;
-                zone.dataset.figIdx  = figIdx;
-                g.appendChild(zone);
+            // Parts : numérotées de gauche à droite, de haut en bas
+            let partIdx = 0;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const zone = document.createElementNS(ns, 'rect');
+                    zone.setAttribute('x', MARGIN + c * partW);
+                    zone.setAttribute('y', MARGIN + r * partH);
+                    zone.setAttribute('width', partW);
+                    zone.setAttribute('height', partH);
+                    zone.setAttribute('fill', frac.colored.has(partIdx) ? (frac.color || fillColor) : '#f3f4f6');
+                    zone.classList.add('frac-part');
+                    zone.dataset.partIdx = partIdx;
+                    zone.dataset.figIdx  = figIdx;
+                    g.appendChild(zone);
+                    partIdx++;
+                }
             }
 
-            for (let i = 1; i < den; i++) {
+            // Traits verticaux intérieurs
+            for (let c = 1; c < cols; c++) {
                 const line = document.createElementNS(ns, 'line');
-                line.setAttribute('x1', MARGIN + i * partW);
-                line.setAttribute('y1', MARGIN);
-                line.setAttribute('x2', MARGIN + i * partW);
-                line.setAttribute('y2', MARGIN + RH);
-                line.setAttribute('stroke', '#9ca3af');
-                line.setAttribute('stroke-width', '1.2');
+                line.setAttribute('x1', MARGIN + c * partW); line.setAttribute('y1', MARGIN);
+                line.setAttribute('x2', MARGIN + c * partW); line.setAttribute('y2', MARGIN + RH);
+                line.setAttribute('stroke', '#9ca3af'); line.setAttribute('stroke-width', '1.2');
+                line.style.pointerEvents = 'none';
+                g.appendChild(line);
+            }
+            // Traits horizontaux intérieurs
+            for (let r = 1; r < rows; r++) {
+                const line = document.createElementNS(ns, 'line');
+                line.setAttribute('x1', MARGIN);           line.setAttribute('y1', MARGIN + r * partH);
+                line.setAttribute('x2', MARGIN + RW);      line.setAttribute('y2', MARGIN + r * partH);
+                line.setAttribute('stroke', '#9ca3af'); line.setAttribute('stroke-width', '1.2');
                 line.style.pointerEvents = 'none';
                 g.appendChild(line);
             }
@@ -623,6 +626,17 @@
             return svg;
         }
 
+        // ── Synchronise den = cols * rows, préserve les parts coloriées ──────
+        function syncDenFromGrid(frac, figIdx) {
+            const newDen = frac.cols * frac.rows;
+            // Garder uniquement les parts qui existent encore
+            const newColored = new Set();
+            frac.colored.forEach(i => { if (i < newDen) newColored.add(i); });
+            frac.colored = newColored;
+            frac.den = newDen;
+            frac.num = frac.colored.size;
+        }
+
         // ── Rendu SVG cercle (camembert) ───────────────────────────────────
         function buildCircleSVG(frac, figIdx, scale) {
             scale = scale || 1;
@@ -638,7 +652,7 @@
                 const circle = document.createElementNS(ns, 'circle');
                 circle.setAttribute('cx', CX); circle.setAttribute('cy', CY); circle.setAttribute('r', R);
                 const colored = frac.colored.has(0);
-                circle.setAttribute('fill', colored ? fillColor : '#f3f4f6');
+                circle.setAttribute('fill', colored ? (frac.color || fillColor) : '#f3f4f6');
                 circle.setAttribute('stroke', '#d1d5db');
                 circle.setAttribute('stroke-width', '1.5');
                 circle.classList.add('frac-part');
@@ -662,7 +676,7 @@
                 const path = document.createElementNS(ns, 'path');
                 path.setAttribute('d', d);
                 const colored = frac.colored.has(i);
-                path.setAttribute('fill', colored ? fillColor : '#f3f4f6');
+                path.setAttribute('fill', colored ? (frac.color || fillColor) : '#f3f4f6');
                 path.setAttribute('stroke', '#374151');
                 path.setAttribute('stroke-width', '2');
                 path.classList.add('frac-part');
@@ -686,6 +700,110 @@
             const figDiv = document.createElement('div');
             figDiv.className = 'frac-figure';
             figDiv.dataset.figIdx = figIdx;
+
+            // Helper : bande de swatches couleur pour une fraction
+            function makeSwatches() {
+                const COLORS = ['#3b82f6','#ef4444','#22c55e','#ec4899','#e3d72d'];
+                const swatchWrap = document.createElement('div');
+                swatchWrap.style.cssText = 'display:flex;gap:4px;align-items:center;justify-content:center;margin-bottom:4px;';
+                COLORS.forEach(c => {
+                    const sw = document.createElement('div');
+                    sw.style.cssText = `width:16px;height:16px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${(frac.color||fillColor)===c ? '#374151' : 'transparent'};transition:transform .15s,border-color .1s;flex-shrink:0;`;
+                    let _lastSw = 0;
+                    function onSwClick(e) {
+                        const now = Date.now();
+                        if (now - _lastSw < 300) return;
+                        _lastSw = now;
+                        e.stopPropagation();
+                        frac.color = c;
+                        renderFigure(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    }
+                    sw.addEventListener('mousedown',   e => e.stopPropagation());
+                    sw.addEventListener('pointerdown', e => e.stopPropagation());
+                    sw.addEventListener('click',     onSwClick);
+                    sw.addEventListener('pointerup', onSwClick);
+                    swatchWrap.appendChild(sw);
+                });
+                return swatchWrap;
+            }
+
+            // Contrôles AU-DESSUS du SVG
+            if (shape === 'rect') {
+                // 1) Swatches couleur
+                figDiv.appendChild(makeSwatches());
+
+                // 2) Contrôles lignes/colonnes
+                const gridCtrl = document.createElement('div');
+                gridCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:4px;justify-content:center;flex-wrap:wrap;';
+
+                function makeAxisCtrl(label, getValue, onMinus, onPlus) {
+                    const wrap = document.createElement('div');
+                    wrap.style.cssText = 'display:flex;align-items:center;gap:3px;';
+                    const lbl = document.createElement('span');
+                    lbl.style.cssText = 'font-size:10px;color:#6b7280;font-weight:700;';
+                    lbl.textContent = label;
+                    const btnM = document.createElement('button');
+                    btnM.textContent = '−';
+                    btnM.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
+                    const valEl = document.createElement('span');
+                    valEl.style.cssText = 'font-size:11px;font-weight:800;color:#374151;min-width:14px;text-align:center;';
+                    valEl.textContent = getValue();
+                    const btnP = document.createElement('button');
+                    btnP.textContent = '+';
+                    btnP.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
+
+                    function guardedClick(fn) {
+                        let _last = 0;
+                        return function(e) {
+                            const now = Date.now();
+                            if (now - _last < 300) return;
+                            _last = now;
+                            e.stopPropagation();
+                            fn();
+                            valEl.textContent = getValue();
+                            syncDenFromGrid(frac, figIdx);
+                            renderFigure(figIdx);
+                            syncInputs(figIdx);
+                            if (typeof saveBoard === 'function') saveBoard();
+                        };
+                    }
+                    [btnM, btnP].forEach(b => {
+                        b.addEventListener('mousedown',   e => e.stopPropagation());
+                        b.addEventListener('pointerdown', e => e.stopPropagation());
+                    });
+                    btnM.addEventListener('click',     guardedClick(onMinus));
+                    btnM.addEventListener('pointerup', guardedClick(onMinus));
+                    btnP.addEventListener('click',     guardedClick(onPlus));
+                    btnP.addEventListener('pointerup', guardedClick(onPlus));
+
+                    wrap.appendChild(lbl); wrap.appendChild(btnM); wrap.appendChild(valEl); wrap.appendChild(btnP);
+                    return wrap;
+                }
+
+                const rowCtrl = makeAxisCtrl('lignes',
+                    () => frac.rows,
+                    () => { if (frac.rows > 1) frac.rows--; },
+                    () => { if (frac.cols * frac.rows < 24) frac.rows++; }
+                );
+                const colCtrl = makeAxisCtrl('colonnes',
+                    () => frac.cols,
+                    () => { if (frac.cols > 1) frac.cols--; },
+                    () => { if (frac.cols * frac.rows < 24) frac.cols++; }
+                );
+
+                gridCtrl.appendChild(rowCtrl);
+                const sep = document.createElement('span');
+                sep.textContent = '×';
+                sep.style.cssText = 'font-size:11px;color:#9ca3af;font-weight:700;';
+                gridCtrl.appendChild(sep);
+                gridCtrl.appendChild(colCtrl);
+                figDiv.appendChild(gridCtrl);
+
+            } else if (shape === 'circle') {
+                // Swatches couleur au-dessus du cercle
+                figDiv.appendChild(makeSwatches());
+            }
 
             const svgEl = shape === 'rect' ? buildRectSVG(frac, figIdx, 1) : buildCircleSVG(frac, figIdx, 1);
             figDiv.appendChild(svgEl);
@@ -782,6 +900,15 @@
                 let d = parseInt(denInput.value) || 1;
                 d = Math.max(1, Math.min(24, d));
                 frac.den = d;
+                // Adapter cols/rows : on garde rows, on ajuste cols (ou l'inverse si rows > 1)
+                if (frac.rows === 1) {
+                    frac.cols = d;
+                } else if (frac.cols === 1) {
+                    frac.rows = d;
+                } else {
+                    // grille mixte : on réinitialise en colonnes pures
+                    frac.cols = d; frac.rows = 1;
+                }
                 // Reconstruire les colored en gardant au max frac.den parts
                 const newColored = new Set();
                 let count = 0;
@@ -848,7 +975,7 @@
             mainZone.innerHTML = '';
             // Adapter le nombre de colonnes au nombre de fractions
             mainZone.style.setProperty('--frac-cols', fractions.length);
-            const innerW = fractions.length === 1 ? '40%' : fractions.length === 2 ? '60%' : '85%';
+            const innerW = fractions.length === 1 ? '55%' : fractions.length === 2 ? '90%' : '95%';
             mainZone.style.setProperty('--frac-inner-w', innerW);
             fractions.forEach((frac, i) => {
                 const col = document.createElement('div');
@@ -883,7 +1010,7 @@
                 const pIdx   = parseInt(part.dataset.partIdx);
                 const frac   = fractions[figIdx];
                 if (frac && frac.colored.has(pIdx)) {
-                    part.setAttribute('fill', fillColor);
+                    part.setAttribute('fill', frac.color || fillColor);
                 }
             });
         }
@@ -935,25 +1062,6 @@
             }
             btn.addEventListener('click',     onCountActivate);
             btn.addEventListener('pointerup', onCountActivate);
-        });
-
-        // ── Choix de la couleur ────────────────────────────────────────────
-        swatches.forEach(sw => {
-            let _lastSwatchEvent = 0;
-            function onSwatchActivate(e) {
-                const now = Date.now();
-                if (now - _lastSwatchEvent < 300) return;
-                _lastSwatchEvent = now;
-                e.stopPropagation();
-                swatches.forEach(s => s.classList.remove('active'));
-                sw.classList.add('active');
-                fillColor = sw.dataset.color;
-                updateColor();
-                if (typeof saveBoard === 'function') saveBoard();
-            }
-            sw.addEventListener('mousedown',  (e) => e.stopPropagation());
-            sw.addEventListener('click',     onSwatchActivate);
-            sw.addEventListener('pointerup', onSwatchActivate);
         });
 
         // ── Aide ───────────────────────────────────────────────────────────
@@ -1026,7 +1134,11 @@
                 fractions: fractions.map(f => ({
                     num: f.num,
                     den: f.den,
-                    colored: Array.from(f.colored)
+                    colored: Array.from(f.colored),
+                    splitDir: f.splitDir || 'v',
+                    cols: f.cols || 1,
+                    rows: f.rows || 1,
+                    color: f.color || fillColor
                 })),
                 containerW: container.offsetWidth,
                 containerH: container.offsetHeight,
@@ -1058,7 +1170,11 @@
                 fractions = data.fractions.map(f => ({
                     num: f.num,
                     den: f.den,
-                    colored: new Set(f.colored || [])
+                    colored: new Set(f.colored || []),
+                    splitDir: f.splitDir || 'v',
+                    cols: f.cols || f.den || 1,
+                    rows: f.rows || 1,
+                    color: f.color || fillColor
                 }));
                 fracCount = fractions.length;
                 countBtns.forEach(b => {
