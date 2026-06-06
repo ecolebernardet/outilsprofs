@@ -24,9 +24,10 @@ if (!window.IMAGE_CATEGORIES) {
 				{ src: 'images/maths-tableau-conversion-masses.jpg',                label: 'Maths (tableau de conversion des mesures de masses)' },
                 { src: 'images/maths-tableau-numeration-decimaux.jpg',              label: 'Maths (tableau de numération des nombres décimaux)' },
 				{ src: 'images/maths-tableau-numeration-entiers.jpg',               label: 'Maths (tableau de numération des nombres entiers)' },
-				{ src: 'images/maths-droite-numerique-petits-carreaux.jpg',         label: 'Maths (droite numérique - centièmes))' },
+				{ src: 'images/maths-droite-numerique-petits-carreaux.jpg',         label: 'Maths (droite numérique - centièmes)' },
 				{ src: 'images/maths-droite-numerique-millimetre.jpg',              label: 'Maths (droite numérique - dixièmes)' },
 				{ src: 'images/maths-graphique.jpg',                                label: 'Maths (graphique)' },
+				{ src: 'images/maths-tableau-proportionnalite.jpg',                 label: 'Maths (tableau de proportionnalité)' },
 				{ src: 'images/maths-tangram-24x24.jpg',                            label: 'Maths (tangram)' },
             ]
         },
