@@ -502,7 +502,7 @@ function createDeficalmeWidget() {
 
     const timeVal = document.createElement('span');
     timeVal.className = 'dc-time-val';
-    timeVal.textContent = '1:00';
+    timeVal.textContent = '10:00';
 
     const timePlus = document.createElement('button');
     timePlus.className = 'dc-time-btn';
@@ -631,7 +631,7 @@ function createDeficalmeWidget() {
     let progress = 0;
     let lastTime = 0;
     let currentMode = 'pixels';
-    let totalSeconds = 60;
+    let totalSeconds = 600;
     let pixelsOrder = [];
 
     // Audio
