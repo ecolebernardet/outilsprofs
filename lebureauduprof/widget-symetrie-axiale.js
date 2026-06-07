@@ -1151,8 +1151,8 @@ function createSymetrieAxialeWidget(savedData) {
         const dataModel = await new Promise(resolve => {
             const clone = svg.cloneNode(true);
             // Couleurs grille imprimables
-            clone.querySelectorAll('.sa-grid-line').forEach(l => l.setAttribute('stroke', '#d1d5db'));
-            clone.querySelectorAll('.sa-grid-main').forEach(l => l.setAttribute('stroke', '#9ca3af'));
+            clone.querySelectorAll('.sa-grid-line').forEach(l => l.setAttribute('stroke', '#b0b8c4'));
+            clone.querySelectorAll('.sa-grid-main').forEach(l => l.setAttribute('stroke', '#6b7280'));
             // Supprimer uniquement : aide visuelle et symétrique calculé — l'axe est conservé
             clone.querySelectorAll('#sa-help-layer, .sa-sym-shape').forEach(el => el.remove());
             // Inliner les styles de l'axe (les classes CSS ne sont pas lues lors du rendu canvas)
