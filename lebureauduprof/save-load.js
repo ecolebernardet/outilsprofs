@@ -105,6 +105,13 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW)  * 100;
             tP = (w.offsetTop  / curVH) * 100;
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
+        } else if (w.dataset.type === 'musique-clavier') {
+            const mk = w.querySelector('.mk-container');
+            wP = mk ? (mk.offsetWidth  / curW)  * 100 : 0;
+            hP = mk ? (mk.offsetHeight / curVH) * 100 : 0;
+            lP = (w.offsetLeft / curW)  * 100;
+            tP = (w.offsetTop  / curVH) * 100;
+            Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         } else if (_collapsed) {
             const _savedWpx    = parseFloat(c.dataset.savedW);
             const _savedHpx    = parseFloat(c.dataset.savedH);
@@ -130,7 +137,7 @@ function buildBoardState() {
             lP = (w.offsetLeft / curW) * 100;
             tP = (w.offsetTop  / curVH) * 100;
         }
-        if (w.dataset.type !== 'deficalme' && w.dataset.type !== 'sondage' && w.dataset.type !== 'couleurs') {
+        if (w.dataset.type !== 'deficalme' && w.dataset.type !== 'sondage' && w.dataset.type !== 'couleurs' && w.dataset.type !== 'musique-clavier') {
             Object.assign(w.dataset, { widthPercent: wP, contentHPercent: hP, leftPercent: lP, topPercent: tP });
         }
         // Données propres aux stickers
@@ -703,6 +710,9 @@ function restoreBoardFromJSON(json) {
             } else {
                 widget = createWidget(w.type, '100px', '100px', false);
             }
+        } else if (w.type === 'musique-clavier') {
+            widget = createWidget('musique-clavier', '100px', '100px', false);
+            // Les dimensions sont restaurées via widthPercent/contentHPercent et l'init du widget
         } else {
             widget = createWidget(w.type, '100px', '100px', false);
         }
