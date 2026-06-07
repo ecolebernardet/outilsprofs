@@ -814,8 +814,8 @@ function createReproQuadrillageWidget(savedData) {
             svg.querySelectorAll('.rq-line-group').forEach(g => g.style.display = hideShapes ? 'none' : '');
             const clone = svg.cloneNode(true);
             // Forcer les couleurs de grille pour l'impression
-            clone.querySelectorAll('.rq-grid-line').forEach(l => l.setAttribute('stroke', '#e5e7eb'));
-            clone.querySelectorAll('.rq-grid-main').forEach(l => l.setAttribute('stroke', '#9ca3af'));
+            clone.querySelectorAll('.rq-grid-line').forEach(l => l.setAttribute('stroke', '#b0b8c4'));
+            clone.querySelectorAll('.rq-grid-main').forEach(l => l.setAttribute('stroke', '#6b7280'));
             const xml = new XMLSerializer().serializeToString(clone);
             const img = new Image();
             return new Promise(resolve => {
