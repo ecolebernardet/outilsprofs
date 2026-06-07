@@ -107,7 +107,13 @@
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔢 Le compte est bon</div><div style="font-size:12px;color:#666;margin-top:2px;">Viser un nombre cible avec les opérations</div></div>
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🕐 Heures et durées</div><div style="font-size:12px;color:#666;margin-top:2px;">Lire l'heure ou calculer une durée</div></div>
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🕰️ Horloge interactive</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler les aiguilles pour régler l'heure</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📐 Conversion</div><div style="font-size:12px;color:#666;margin-top:2px;">S'entraîner aux conversions de mesures</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🍕 Fractions</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler des fractions avec des figures partageables</div></div>
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🧊 Solides 3D</div><div style="font-size:12px;color:#666;margin-top:2px;">Manipuler des solides en 3 dimensions</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎰 Loto des multiplications</div><div style="font-size:12px;color:#666;margin-top:2px;">Jeu de loto pour mémoriser les tables de multiplication</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📏 Tracés géométriques</div><div style="font-size:12px;color:#666;margin-top:2px;">Utiliser la règle, l'équerre et le compas pour tracer</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔲 Reproduction quadrillage</div><div style="font-size:12px;color:#666;margin-top:2px;">Dessiner un modèle à reproduire sur un quadrillage</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔁 Symétrie axiale</div><div style="font-size:12px;color:#666;margin-top:2px;">Dessiner une figure et son symétrique par rapport à un axe</div></div>
         </div>
 
         <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📖 Français</div>
@@ -116,11 +122,13 @@
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">✏️ Conjugaison</div><div style="font-size:12px;color:#666;margin-top:2px;">Test de conjugaison (présent, imparfait, futur)</div></div>
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🏷️ Nature grammaticale</div><div style="font-size:12px;color:#666;margin-top:2px;">Classer les mots selon leur nature</div></div>
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">📝 Écriture Séyès</div><div style="font-size:12px;color:#666;margin-top:2px;">Écrire directement sur un lignage Séyès</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🔍 Mots mêlés</div><div style="font-size:12px;color:#666;margin-top:2px;">Générer et jouer à une grille interactive de mots mêlés</div></div>
         </div>
 
         <div style="font-size:0.9em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🎨 Arts & Sciences</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
           <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎨 Mélange de couleurs</div><div style="font-size:12px;color:#666;margin-top:2px;">Mélanger les couleurs primaires pour en créer de nouvelles</div></div>
+          <div style="background:#f8f9fb;border:1px solid #e5e8ee;border-radius:8px;padding:10px 12px;"><div style="font-weight:700;font-size:13px;color:#222;">🎹 Clavier de piano</div><div style="font-size:12px;color:#666;margin-top:2px;">Jouer les notes sur 3 octaves pour découvrir les sons</div></div>
         </div>
 
         <div style="font-size:0.97em;font-weight:700;color:#2B7FFF;margin-bottom:8px;">⬜ Les 3 boutons de chaque activité</div>
