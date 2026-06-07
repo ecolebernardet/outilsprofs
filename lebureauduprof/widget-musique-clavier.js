@@ -223,9 +223,9 @@
             font-weight: 600;
         }
         .mk-note-solfege {
-            font-size: 18px;
-            font-weight: 700;
-            color: #b0b0d0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
             min-width: 40px;
             text-align: left;
         }
@@ -528,8 +528,8 @@
             osc.onended = () => { delete activeNodes[noteId]; };
 
             // ── Affichage ──
-            noteNameEl.textContent = noteName;
-            noteSolEl.textContent  = SOLFEGE[noteName] || '';
+            noteNameEl.textContent = SOLFEGE[noteName] || noteName;
+            noteSolEl.textContent  = noteName;
             noteOctEl.textContent  = 'Octave ' + octave;
 
             // Ping visuel
@@ -580,7 +580,7 @@
                     key.dataset.octave = oct;
                     const lbl = document.createElement('span');
                     lbl.className = 'mk-key-label';
-                    lbl.textContent = (note === 'C') ? note + oct : note;
+                    lbl.textContent = (note === 'C') ? SOLFEGE[note] + oct : SOLFEGE[note];
                     key.appendChild(lbl);
                     wrap.appendChild(key);
                 });
@@ -593,7 +593,7 @@
                 key.dataset.octave = 6;
                 const lbl = document.createElement('span');
                 lbl.className = 'mk-key-label';
-                lbl.textContent = 'C6';
+                lbl.textContent = 'Do6';
                 key.appendChild(lbl);
                 wrap.appendChild(key);
             }
@@ -618,7 +618,7 @@
                         key.style.height = (wrap.offsetHeight * 0.62 || 80) + 'px';
                         const lbl = document.createElement('span');
                         lbl.className = 'mk-key-label';
-                        lbl.textContent = BLACK_NAMES[bi];
+                        lbl.textContent = SOLFEGE[BLACK_NAMES[bi]] || BLACK_NAMES[bi];
                         key.appendChild(lbl);
                         wrap.appendChild(key);
                     });
@@ -795,7 +795,7 @@
 
                     const lbl = document.createElement('span');
                     lbl.className = 'mk-key-label';
-                    lbl.textContent = BLACK_NAMES[bi];
+                    lbl.textContent = SOLFEGE[BLACK_NAMES[bi]] || BLACK_NAMES[bi];
                     key.appendChild(lbl);
                     wrap.appendChild(key);
                 });
