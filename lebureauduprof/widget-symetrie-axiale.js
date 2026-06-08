@@ -271,19 +271,41 @@
             letter-spacing: 0.4px;
             white-space: nowrap;
         }
-        .sa-gridsize-input {
-            width: 38px;
-            border: 1.5px solid #d1d5db;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 2px 4px;
-            outline: none;
-            background: #fff;
-            color: #374151;
+        /* Boutons +/− pour stylet */
+        .sa-gridsize-stepper {
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
-        .sa-gridsize-input:focus { border-color: #3b82f6; }
+        .sa-gridsize-btn {
+            width: 26px; height: 26px;
+            border-radius: 6px;
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            color: #374151;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1;
+            transition: background .12s, transform .1s;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .sa-gridsize-btn:hover { background: #e5e7eb; }
+        .sa-gridsize-btn:active { transform: scale(0.9); background: #d1d5db; }
+        .sa-gridsize-val {
+            min-width: 30px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #374151;
+            user-select: none;
+        }
+        /* Champ caché conservé pour compatibilité JS */
+        .sa-gridsize-input {
+            display: none;
+        }
 
         /* ── Zone SVG double ── */
         .sa-svg-zone {
@@ -652,7 +674,12 @@ function createSymetrieAxialeWidget(savedData) {
         <div class="sa-toolbar-sep"></div>
         <div class="sa-gridsize-wrap">
             <span class="sa-gridsize-label">Carreaux :</span>
-            <input type="number" class="sa-gridsize-input" value="10" min="5" max="20" title="Nombre de carreaux">
+            <div class="sa-gridsize-stepper">
+                <button class="sa-gridsize-btn" data-step="-2" title="Moins de carreaux">−</button>
+                <span class="sa-gridsize-val">10</span>
+                <button class="sa-gridsize-btn" data-step="2" title="Plus de carreaux">+</button>
+            </div>
+            <input type="number" class="sa-gridsize-input" value="10" min="6" max="20" step="2" title="Nombre de carreaux">
         </div>
     `;
     container.appendChild(toolbar);
@@ -1067,7 +1094,10 @@ function createSymetrieAxialeWidget(savedData) {
 
     function setData(data) {
         if (!data) return;
-        if (data.gridSize) gridSizeInput.value = data.gridSize;
+        if (data.gridSize) {
+            gridSizeInput.value = data.gridSize;
+            if (gridSizeVal) gridSizeVal.textContent = data.gridSize;
+        }
         if (data.svgW) svg.style.width  = data.svgW + 'px';
         if (data.svgH) svg.style.height = data.svgH + 'px';
         else if (data.svgW) svg.style.height = data.svgW + 'px';
@@ -1271,16 +1301,53 @@ function createSymetrieAxialeWidget(savedData) {
     });
 
     // Taille grille
-    gridSizeInput.addEventListener('change', () => {
+    const gridSizeVal = toolbar.querySelector('.sa-gridsize-val');
+    function applyGridSize() {
+        if (gridSizeVal) gridSizeVal.textContent = gridSizeInput.value;
         svg.querySelectorAll('.sa-grid-el, #sa-help-layer, #sa-axis-layer, .sa-sym-shape').forEach(g => g.remove());
         undoStack = []; redoStack = [];
         lastPoint = null; fillPoints = [];
         initGrid(gridSizeInput.value);
         updateSymButton();
         autoSave();
+    }
+    gridSizeInput.addEventListener('change', applyGridSize);
+    gridSizeInput.addEventListener('mousedown',   e => e.stopPropagation());
+    gridSizeInput.addEventListener('click',       e => e.stopPropagation());
+    // Compatibilité stylet / vidéoprojecteur interactif
+    gridSizeInput.addEventListener('pointerdown', e => e.stopPropagation());
+    gridSizeInput.addEventListener('touchstart',  e => e.stopPropagation(), { passive: true });
+    // Sur certains stylets, 'change' ne se déclenche pas si le focus reste dans le champ ;
+    // on écoute aussi 'input' avec un debounce pour appliquer dès que la valeur change.
+    let _gridSizeDebounce = null;
+    gridSizeInput.addEventListener('input', () => {
+        clearTimeout(_gridSizeDebounce);
+        _gridSizeDebounce = setTimeout(applyGridSize, 600);
     });
-    gridSizeInput.addEventListener('mousedown', e => e.stopPropagation());
-    gridSizeInput.addEventListener('click',     e => e.stopPropagation());
+    // Boutons +/− (stylet-friendly)
+    toolbar.querySelectorAll('.sa-gridsize-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); e.preventDefault();
+            if (btn._saStepDone) { btn._saStepDone = false; return; }
+            const step = parseInt(btn.dataset.step) || 0;
+            const min  = parseInt(gridSizeInput.min) || 6;
+            const max  = parseInt(gridSizeInput.max) || 20;
+            const cur  = parseInt(gridSizeInput.value) || 10;
+            const next = Math.min(max, Math.max(min, cur + step));
+            if (next !== cur) { gridSizeInput.value = next; applyGridSize(); }
+        });
+        btn.addEventListener('pointerup', (e) => {
+            e.stopPropagation();
+            const step = parseInt(btn.dataset.step) || 0;
+            const min  = parseInt(gridSizeInput.min) || 6;
+            const max  = parseInt(gridSizeInput.max) || 20;
+            const cur  = parseInt(gridSizeInput.value) || 10;
+            const next = Math.min(max, Math.max(min, cur + step));
+            if (next !== cur) { gridSizeInput.value = next; applyGridSize(); btn._saStepDone = true; }
+        });
+        btn.addEventListener('pointerdown', e => e.stopPropagation());
+        btn.addEventListener('mousedown',   e => e.stopPropagation());
+    });
 
     // SVG interactions
     svg.addEventListener('pointerdown', (e) => { e.preventDefault(); handlePointerDown(e); });
