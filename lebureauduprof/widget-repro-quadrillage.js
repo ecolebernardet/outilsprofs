@@ -231,19 +231,41 @@
             letter-spacing: 0.4px;
             white-space: nowrap;
         }
-        .rq-gridsize-input {
-            width: 38px;
-            border: 1.5px solid #d1d5db;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 2px 4px;
-            outline: none;
-            background: #fff;
-            color: #374151;
+        /* Boutons +/− pour stylet */
+        .rq-gridsize-stepper {
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
-        .rq-gridsize-input:focus { border-color: #3b82f6; }
+        .rq-gridsize-btn {
+            width: 26px; height: 26px;
+            border-radius: 6px;
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            color: #374151;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1;
+            transition: background .12s, transform .1s;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .rq-gridsize-btn:hover { background: #e5e7eb; }
+        .rq-gridsize-btn:active { transform: scale(0.9); background: #d1d5db; }
+        .rq-gridsize-val {
+            min-width: 30px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #374151;
+            user-select: none;
+        }
+        /* Champ caché conservé pour compatibilité JS */
+        .rq-gridsize-input {
+            display: none;
+        }
 
         /* ── Zone SVG grille ── */
         .rq-svg-zone {
@@ -469,7 +491,12 @@ function createReproQuadrillageWidget(savedData) {
         <div class="rq-toolbar-sep"></div>
         <div class="rq-gridsize-wrap">
             <span class="rq-gridsize-label">Carreaux :</span>
-            <input type="number" class="rq-gridsize-input" value="10" min="5" max="20" title="Nombre de carreaux">
+            <div class="rq-gridsize-stepper">
+                <button class="rq-gridsize-btn" data-step="-1" title="Moins de carreaux">−</button>
+                <span class="rq-gridsize-val">10</span>
+                <button class="rq-gridsize-btn" data-step="1" title="Plus de carreaux">+</button>
+            </div>
+            <input type="number" class="rq-gridsize-input" value="10" min="5" max="20" step="1" title="Nombre de carreaux">
         </div>
     `;
     container.appendChild(toolbar);
@@ -745,7 +772,10 @@ function createReproQuadrillageWidget(savedData) {
     // ── Appliquer les données restaurées ─────────────────────────────────
     function setData(data) {
         if (!data) return;
-        if (data.gridSize) gridSizeInput.value = data.gridSize;
+        if (data.gridSize) {
+            gridSizeInput.value = data.gridSize;
+            if (gridSizeVal) gridSizeVal.textContent = data.gridSize;
+        }
         if (data.svgW) { svg.style.width = data.svgW + 'px'; svg.style.height = data.svgW + 'px'; }
         initGrid(gridSizeInput.value);
         if (data.shapes && data.shapes.length) {
@@ -874,15 +904,49 @@ function createReproQuadrillageWidget(savedData) {
     toolbar.querySelector('#rq-clear-btn').addEventListener('click', (e) => { e.stopPropagation(); clearGrid(); });
 
     // Taille grille
-    gridSizeInput.addEventListener('change', () => {
+    const gridSizeVal = toolbar.querySelector('.rq-gridsize-val');
+    function applyGridSize() {
+        if (gridSizeVal) gridSizeVal.textContent = gridSizeInput.value;
         svg.querySelectorAll('.rq-line-group').forEach(g => svg.removeChild(g));
         undoStack = []; redoStack = [];
         lastPoint = null; fillPoints = [];
         initGrid(gridSizeInput.value);
         autoSave();
+    }
+    gridSizeInput.addEventListener('change', applyGridSize);
+    gridSizeInput.addEventListener('mousedown',   e => e.stopPropagation());
+    gridSizeInput.addEventListener('click',       e => e.stopPropagation());
+    gridSizeInput.addEventListener('pointerdown', e => e.stopPropagation());
+    gridSizeInput.addEventListener('touchstart',  e => e.stopPropagation(), { passive: true });
+    let _gridSizeDebounce = null;
+    gridSizeInput.addEventListener('input', () => {
+        clearTimeout(_gridSizeDebounce);
+        _gridSizeDebounce = setTimeout(applyGridSize, 600);
     });
-    gridSizeInput.addEventListener('mousedown', e => e.stopPropagation());
-    gridSizeInput.addEventListener('click',     e => e.stopPropagation());
+    // Boutons +/− (stylet-friendly)
+    toolbar.querySelectorAll('.rq-gridsize-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); e.preventDefault();
+            if (btn._rqStepDone) { btn._rqStepDone = false; return; }
+            const step = parseInt(btn.dataset.step) || 0;
+            const min  = parseInt(gridSizeInput.min) || 5;
+            const max  = parseInt(gridSizeInput.max) || 20;
+            const cur  = parseInt(gridSizeInput.value) || 10;
+            const next = Math.min(max, Math.max(min, cur + step));
+            if (next !== cur) { gridSizeInput.value = next; applyGridSize(); }
+        });
+        btn.addEventListener('pointerup', (e) => {
+            e.stopPropagation();
+            const step = parseInt(btn.dataset.step) || 0;
+            const min  = parseInt(gridSizeInput.min) || 5;
+            const max  = parseInt(gridSizeInput.max) || 20;
+            const cur  = parseInt(gridSizeInput.value) || 10;
+            const next = Math.min(max, Math.max(min, cur + step));
+            if (next !== cur) { gridSizeInput.value = next; applyGridSize(); btn._rqStepDone = true; }
+        });
+        btn.addEventListener('pointerdown', e => e.stopPropagation());
+        btn.addEventListener('mousedown',   e => e.stopPropagation());
+    });
 
     // SVG interactions
     svg.addEventListener('pointerdown', (e) => { e.preventDefault(); handlePointerDown(e); });
