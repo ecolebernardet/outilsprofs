@@ -357,15 +357,39 @@
             gap: 2px;
         }
         .frac-num-input, .frac-den-input {
-            width: 44px; height: 30px;
-            border: 1.5px solid #d1d5db; border-radius: 7px;
-            text-align: center; font-size: 16px; font-weight: 800;
-            color: #374151; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
-            outline: none; transition: border-color .15s;
-            background: white;
+            display: none;
         }
-        .frac-num-input:focus { border-color: #4a90e2; }
-        .frac-den-input:focus { border-color: #e06c4a; }
+        /* Stepper numérateur / dénominateur */
+        .frac-stepper {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .frac-step-btn {
+            width: 26px; height: 26px;
+            border-radius: 6px;
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            font-size: 16px; font-weight: 900;
+            color: #374151; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1;
+            transition: background .12s, transform .1s;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .frac-step-btn:hover  { background: #e5e7eb; }
+        .frac-step-btn:active { transform: scale(0.9); background: #d1d5db; }
+        .frac-step-val {
+            min-width: 28px;
+            text-align: center;
+            font-size: 16px; font-weight: 800;
+            color: #374151;
+            user-select: none;
+            font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
+        }
+        .frac-step-val.num { color: #4a90e2; }
+        .frac-step-val.den { color: #e06c4a; }
         .frac-bar {
             width: 44px; height: 2px; background: #374151; border-radius: 1px;
         }
@@ -409,7 +433,26 @@
         .frac-fig-label .fb { width: 24px; height: 2px; background: #374151; margin: 2px 0; }
         .frac-fig-label .fd { color: #e06c4a; font-size: 22px; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
 
-        /* ── Bouton reset / ajouter fraction ── */
+        /* ── Bouton œil pour cacher/montrer la fraction ── */
+        .frac-label-wrap {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+        }
+        .frac-eye-btn {
+            width: 20px; height: 20px;
+            border: none; background: none;
+            cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.4; border-radius: 4px;
+            transition: opacity .15s;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            padding: 0;
+        }
+        .frac-eye-btn:hover { opacity: 1; }
+        .frac-eye-btn.hidden { opacity: 0.25; }
         .frac-btn {
             padding: 5px 12px; border-radius: 8px; border: none;
             font-size: 11px; font-weight: 700; cursor: pointer;
@@ -530,6 +573,7 @@
         let shape      = 'rect';    // 'rect' | 'circle'
         let fracCount  = 1;         // nombre de fractions affichées
         let fillColor  = '#3b82f6'; // couleur de remplissage
+        let showLabel  = true;      // afficher la fraction sous la forme
         // fractions[i] = { num: number, den: number, colored: Set<partIndex> }
         let fractions  = [];
 
@@ -729,6 +773,62 @@
             }
 
             // Contrôles AU-DESSUS du SVG
+            // Helper générique stepper +/− (partagé rect et circle)
+            function makeAxisCtrl(label, getValue, onMinus, onPlus, skipSync) {
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'display:flex;align-items:center;gap:3px;';
+                const lbl = document.createElement('span');
+                lbl.style.cssText = 'font-size:10px;color:#6b7280;font-weight:700;';
+                lbl.textContent = label;
+                const btnM = document.createElement('button');
+                btnM.textContent = '−';
+                btnM.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;touch-action:manipulation;';
+                const valEl = document.createElement('span');
+                valEl.style.cssText = 'font-size:11px;font-weight:800;color:#374151;min-width:14px;text-align:center;';
+                valEl.textContent = getValue();
+                const btnP = document.createElement('button');
+                btnP.textContent = '+';
+                btnP.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;touch-action:manipulation;';
+
+                function makeStepHandler(fn) {
+                    return {
+                        onPointerUp: function(e) {
+                            e.stopPropagation();
+                            fn();
+                            valEl.textContent = getValue();
+                            if (!skipSync) syncDenFromGrid(frac, figIdx);
+                            renderFigure(figIdx);
+                            syncInputs(figIdx);
+                            if (typeof saveBoard === 'function') saveBoard();
+                            this._done = true;
+                        },
+                        onClick: function(e) {
+                            e.stopPropagation(); e.preventDefault();
+                            if (this._done) { this._done = false; return; }
+                            fn();
+                            valEl.textContent = getValue();
+                            if (!skipSync) syncDenFromGrid(frac, figIdx);
+                            renderFigure(figIdx);
+                            syncInputs(figIdx);
+                            if (typeof saveBoard === 'function') saveBoard();
+                        }
+                    };
+                }
+                const handlerM = makeStepHandler(onMinus);
+                const handlerP = makeStepHandler(onPlus);
+                [btnM, btnP].forEach(b => {
+                    b.addEventListener('mousedown',   e => e.stopPropagation());
+                    b.addEventListener('pointerdown', e => e.stopPropagation());
+                });
+                btnM.addEventListener('pointerup', (e) => handlerM.onPointerUp(e));
+                btnM.addEventListener('click',     (e) => handlerM.onClick(e));
+                btnP.addEventListener('pointerup', (e) => handlerP.onPointerUp(e));
+                btnP.addEventListener('click',     (e) => handlerP.onClick(e));
+
+                wrap.appendChild(lbl); wrap.appendChild(btnM); wrap.appendChild(valEl); wrap.appendChild(btnP);
+                return wrap;
+            }
+
             if (shape === 'rect') {
                 // 1) Swatches couleur
                 figDiv.appendChild(makeSwatches());
@@ -737,59 +837,15 @@
                 const gridCtrl = document.createElement('div');
                 gridCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:4px;justify-content:center;flex-wrap:wrap;';
 
-                function makeAxisCtrl(label, getValue, onMinus, onPlus) {
-                    const wrap = document.createElement('div');
-                    wrap.style.cssText = 'display:flex;align-items:center;gap:3px;';
-                    const lbl = document.createElement('span');
-                    lbl.style.cssText = 'font-size:10px;color:#6b7280;font-weight:700;';
-                    lbl.textContent = label;
-                    const btnM = document.createElement('button');
-                    btnM.textContent = '−';
-                    btnM.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
-                    const valEl = document.createElement('span');
-                    valEl.style.cssText = 'font-size:11px;font-weight:800;color:#374151;min-width:14px;text-align:center;';
-                    valEl.textContent = getValue();
-                    const btnP = document.createElement('button');
-                    btnP.textContent = '+';
-                    btnP.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
-
-                    function guardedClick(fn) {
-                        let _last = 0;
-                        return function(e) {
-                            const now = Date.now();
-                            if (now - _last < 300) return;
-                            _last = now;
-                            e.stopPropagation();
-                            fn();
-                            valEl.textContent = getValue();
-                            syncDenFromGrid(frac, figIdx);
-                            renderFigure(figIdx);
-                            syncInputs(figIdx);
-                            if (typeof saveBoard === 'function') saveBoard();
-                        };
-                    }
-                    [btnM, btnP].forEach(b => {
-                        b.addEventListener('mousedown',   e => e.stopPropagation());
-                        b.addEventListener('pointerdown', e => e.stopPropagation());
-                    });
-                    btnM.addEventListener('click',     guardedClick(onMinus));
-                    btnM.addEventListener('pointerup', guardedClick(onMinus));
-                    btnP.addEventListener('click',     guardedClick(onPlus));
-                    btnP.addEventListener('pointerup', guardedClick(onPlus));
-
-                    wrap.appendChild(lbl); wrap.appendChild(btnM); wrap.appendChild(valEl); wrap.appendChild(btnP);
-                    return wrap;
-                }
-
                 const rowCtrl = makeAxisCtrl('lignes',
                     () => frac.rows,
                     () => { if (frac.rows > 1) frac.rows--; },
-                    () => { if (frac.cols * frac.rows < 24) frac.rows++; }
+                    () => { if (frac.rows < 8) frac.rows++; }
                 );
                 const colCtrl = makeAxisCtrl('colonnes',
                     () => frac.cols,
                     () => { if (frac.cols > 1) frac.cols--; },
-                    () => { if (frac.cols * frac.rows < 24) frac.cols++; }
+                    () => { if (frac.cols < 8) frac.cols++; }
                 );
 
                 gridCtrl.appendChild(rowCtrl);
@@ -803,18 +859,63 @@
             } else if (shape === 'circle') {
                 // Swatches couleur au-dessus du cercle
                 figDiv.appendChild(makeSwatches());
+
+                // Sélecteur nombre de parts
+                const circleCtrl = document.createElement('div');
+                circleCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:4px;justify-content:center;';
+                const partsCtrl = makeAxisCtrl('parts',
+                    () => frac.den,
+                    () => {
+                        if (frac.den > 1) {
+                            frac.den--;
+                            frac.num = Math.min(frac.num, frac.den);
+                            const nc = new Set(); for (let i = 0; i < frac.num; i++) nc.add(i);
+                            frac.colored = nc;
+                        }
+                    },
+                    () => { if (frac.den < 32) frac.den++; },
+                    true // skipSync : den géré directement, pas via cols×rows
+                );
+                circleCtrl.appendChild(partsCtrl);
+                figDiv.appendChild(circleCtrl);
             }
 
             const svgEl = shape === 'rect' ? buildRectSVG(frac, figIdx, 1) : buildCircleSVG(frac, figIdx, 1);
             figDiv.appendChild(svgEl);
 
-            // Label fraction sous la figure
+            // Label fraction sous la figure + bouton œil
+            const lblWrap = document.createElement('div');
+            lblWrap.className = 'frac-label-wrap';
+
+            const eyeBtn = document.createElement('button');
+            eyeBtn.className = 'frac-eye-btn' + (showLabel ? '' : ' hidden');
+            eyeBtn.title = showLabel ? 'Cacher la fraction' : 'Afficher la fraction';
+            eyeBtn.textContent = '👁';
+
             const lbl = document.createElement('div');
             lbl.className = 'frac-fig-label';
             const num = Math.max(0, Math.min(frac.num, frac.den));
             const den = Math.max(1, frac.den);
             lbl.innerHTML = `<span class="fn">${num}</span><div class="fb"></div><span class="fd">${den}</span>`;
-            figDiv.appendChild(lbl);
+            lbl.style.visibility = showLabel ? '' : 'hidden';
+
+            let _eyeDone = false;
+            function toggleLabel(e) {
+                e.stopPropagation(); e.preventDefault();
+                const visible = lbl.style.visibility !== 'hidden';
+                lbl.style.visibility = visible ? 'hidden' : '';
+                eyeBtn.classList.toggle('hidden', visible);
+                eyeBtn.title = visible ? 'Afficher la fraction' : 'Cacher la fraction';
+                if (typeof saveBoard === 'function') saveBoard();
+            }
+            eyeBtn.addEventListener('pointerup', (e) => { toggleLabel(e); _eyeDone = true; });
+            eyeBtn.addEventListener('click',     (e) => { if (_eyeDone) { _eyeDone = false; return; } toggleLabel(e); });
+            eyeBtn.addEventListener('pointerdown', e => e.stopPropagation());
+            eyeBtn.addEventListener('mousedown',   e => e.stopPropagation());
+
+            lblWrap.appendChild(eyeBtn);
+            lblWrap.appendChild(lbl);
+            figDiv.appendChild(lblWrap);
 
             // Click sur une part (pointerup + click avec dédup pour éviter double déclenchement)
             let _lastPartEvent = 0;
@@ -850,94 +951,127 @@
             const notation = document.createElement('div');
             notation.className = 'frac-notation';
 
-            // Label numérateur
-            const lblNum = document.createElement('div');
-            lblNum.className = 'frac-label-num';
-            lblNum.textContent = 'Numérateur';
-
+            // Inputs cachés (conservés pour compatibilité syncInputs)
             const numInput = document.createElement('input');
             numInput.type = 'number'; numInput.min = 0;
             numInput.className = 'frac-num-input';
             numInput.value = frac.num;
-            numInput.title = 'Numérateur : nombre de parts coloriées';
+
+            const denInput = document.createElement('input');
+            denInput.type = 'number'; denInput.min = 1; denInput.max = 64;
+            denInput.className = 'frac-den-input';
+            denInput.value = frac.den;
+
+            // Helper stepper
+            function makeStepperFrac(labelClass, getVal, onMinus, onPlus) {
+                const lblEl = document.createElement('div');
+                lblEl.className = labelClass === 'num' ? 'frac-label-num' : 'frac-label-den';
+                lblEl.textContent = labelClass === 'num' ? 'Numérateur' : 'Dénominateur';
+
+                const stepWrap = document.createElement('div');
+                stepWrap.className = 'frac-stepper';
+
+                const btnM = document.createElement('button');
+                btnM.className = 'frac-step-btn';
+                btnM.textContent = '−';
+
+                const valEl = document.createElement('span');
+                valEl.className = 'frac-step-val ' + labelClass;
+                valEl.textContent = getVal();
+
+                const btnP = document.createElement('button');
+                btnP.className = 'frac-step-btn';
+                btnP.textContent = '+';
+
+                const handlerM = {
+                    onPointerUp(e) {
+                        e.stopPropagation(); onMinus();
+                        valEl.textContent = getVal(); this._done = true;
+                        renderFigure(figIdx); syncInputs(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    },
+                    onClick(e) {
+                        e.stopPropagation(); e.preventDefault();
+                        if (this._done) { this._done = false; return; }
+                        onMinus(); valEl.textContent = getVal();
+                        renderFigure(figIdx); syncInputs(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    }
+                };
+                const handlerP = {
+                    onPointerUp(e) {
+                        e.stopPropagation(); onPlus();
+                        valEl.textContent = getVal(); this._done = true;
+                        renderFigure(figIdx); syncInputs(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    },
+                    onClick(e) {
+                        e.stopPropagation(); e.preventDefault();
+                        if (this._done) { this._done = false; return; }
+                        onPlus(); valEl.textContent = getVal();
+                        renderFigure(figIdx); syncInputs(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    }
+                };
+
+                [btnM, btnP].forEach(b => {
+                    b.addEventListener('mousedown',   e => e.stopPropagation());
+                    b.addEventListener('pointerdown', e => e.stopPropagation());
+                });
+                btnM.addEventListener('pointerup', (e) => handlerM.onPointerUp(e));
+                btnM.addEventListener('click',     (e) => handlerM.onClick(e));
+                btnP.addEventListener('pointerup', (e) => handlerP.onPointerUp(e));
+                btnP.addEventListener('click',     (e) => handlerP.onClick(e));
+
+                stepWrap.appendChild(btnM);
+                stepWrap.appendChild(valEl);
+                stepWrap.appendChild(btnP);
+                return { lblEl, stepWrap };
+            }
 
             const bar = document.createElement('div');
             bar.className = 'frac-bar';
 
-            const denInput = document.createElement('input');
-            denInput.type = 'number'; denInput.min = 1; denInput.max = 24;
-            denInput.className = 'frac-den-input';
-            denInput.value = frac.den;
-            denInput.title = 'Dénominateur : nombre total de parts (max 24)';
+            // Numérateur
+            const sNum = makeStepperFrac('num',
+                () => frac.num,
+                () => { frac.num = Math.max(0, frac.num - 1); frac.colored = new Set(); for (let i = 0; i < frac.num; i++) frac.colored.add(i); numInput.value = frac.num; },
+                () => { frac.num = Math.min(frac.den, frac.num + 1); frac.colored = new Set(); for (let i = 0; i < frac.num; i++) frac.colored.add(i); numInput.value = frac.num; }
+            );
 
-            const lblDen = document.createElement('div');
-            lblDen.className = 'frac-label-den';
-            lblDen.textContent = 'Dénominateur';
+            // Dénominateur
+            const sDen = makeStepperFrac('den',
+                () => frac.den,
+                () => {
+                    if (frac.den <= 1) return;
+                    frac.den--;
+                    frac.cols = frac.rows === 1 ? frac.den : frac.cols;
+                    frac.rows = frac.cols === 1 ? frac.den : frac.rows;
+                    if (frac.rows === 1) frac.cols = frac.den;
+                    frac.num = Math.min(frac.num, frac.den);
+                    const nc = new Set(); let ct = 0;
+                    for (let i = 0; i < frac.den; i++) { if (frac.colored.has(i) && ct < frac.den) { nc.add(i); ct++; } }
+                    frac.colored = nc;
+                    denInput.value = frac.den; numInput.value = frac.num;
+                },
+                () => {
+                    if (frac.den >= 64) return;
+                    frac.den++;
+                    if (frac.rows === 1) frac.cols = frac.den;
+                    else if (frac.cols === 1) frac.rows = frac.den;
+                    else { frac.cols = frac.den; frac.rows = 1; }
+                    denInput.value = frac.den;
+                }
+            );
 
-            notation.appendChild(lblNum);
+            notation.appendChild(sNum.lblEl);
+            notation.appendChild(sNum.stepWrap);
             notation.appendChild(numInput);
             notation.appendChild(bar);
+            notation.appendChild(sDen.stepWrap);
             notation.appendChild(denInput);
-            notation.appendChild(lblDen);
+            notation.appendChild(sDen.lblEl);
             wrap.appendChild(notation);
-
-            // Empêcher le drag du widget lors de la saisie
-            [numInput, denInput].forEach(inp => {
-                inp.addEventListener('mousedown',   e => e.stopPropagation());
-                inp.addEventListener('touchstart',  e => e.stopPropagation(), { passive: true });
-                inp.addEventListener('pointerdown', e => {
-                    e.stopPropagation();
-                    // Focus explicite pour stylet (vidéoprojecteur interactif)
-                    inp.focus();
-                });
-                inp.style.userSelect = 'text';
-                inp.style.pointerEvents = 'auto';
-                inp.style.touchAction = 'auto';
-            });
-
-            // Dénominateur change → reconstruire la figure
-            denInput.addEventListener('input', () => {
-                let d = parseInt(denInput.value) || 1;
-                d = Math.max(1, Math.min(24, d));
-                frac.den = d;
-                // Adapter cols/rows : on garde rows, on ajuste cols (ou l'inverse si rows > 1)
-                if (frac.rows === 1) {
-                    frac.cols = d;
-                } else if (frac.cols === 1) {
-                    frac.rows = d;
-                } else {
-                    // grille mixte : on réinitialise en colonnes pures
-                    frac.cols = d; frac.rows = 1;
-                }
-                // Reconstruire les colored en gardant au max frac.den parts
-                const newColored = new Set();
-                let count = 0;
-                for (let i = 0; i < d; i++) {
-                    if (frac.colored.has(i) && count < d) {
-                        newColored.add(i);
-                        count++;
-                    }
-                }
-                frac.colored = newColored;
-                frac.num = Math.min(frac.num, d);
-                renderFigure(figIdx);
-                syncInputs(figIdx);
-                if (typeof saveBoard === 'function') saveBoard();
-            });
-
-            // Numérateur change → colorier les N premières parts
-            numInput.addEventListener('input', () => {
-                let n = parseInt(numInput.value);
-                if (isNaN(n)) return;
-                n = Math.max(0, Math.min(n, frac.den));
-                frac.num = n;
-                // Colorier les n premières parts
-                frac.colored = new Set();
-                for (let i = 0; i < n; i++) frac.colored.add(i);
-                renderFigure(figIdx);
-                if (typeof saveBoard === 'function') saveBoard();
-            });
-
             return wrap;
         }
 
@@ -957,11 +1091,6 @@
             const frac = fractions[figIdx];
             const col = mainZone.querySelector('.frac-col[data-col-idx="' + figIdx + '"]');
             if (!col) return;
-            const ni = col.querySelector('.frac-num-input');
-            const di = col.querySelector('.frac-den-input');
-            if (ni) ni.value = frac.num;
-            if (di) di.value = frac.den;
-            // Mettre à jour le label sous la figure aussi
             const lbl = col.querySelector('.frac-fig-label');
             if (lbl) {
                 const num = Math.max(0, Math.min(frac.num, frac.den));
@@ -973,7 +1102,6 @@
         // ── Rendu complet — N colonnes selon le nombre de fractions actives ──
         function renderAll() {
             mainZone.innerHTML = '';
-            // Adapter le nombre de colonnes au nombre de fractions
             mainZone.style.setProperty('--frac-cols', fractions.length);
             const innerW = fractions.length === 1 ? '55%' : fractions.length === 2 ? '90%' : '95%';
             mainZone.style.setProperty('--frac-inner-w', innerW);
@@ -984,14 +1112,6 @@
 
                 const inner = document.createElement('div');
                 inner.className = 'frac-inner';
-
-                const ctrl = buildControls(frac, i);
-                inner.appendChild(ctrl);
-
-                const eq = document.createElement('div');
-                eq.className = 'frac-label-eq';
-                eq.textContent = '=';
-                inner.appendChild(eq);
 
                 const figZone = document.createElement('div');
                 figZone.className = 'frac-figures';
@@ -1033,6 +1153,30 @@
                 shapeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 shape = btn.dataset.shape;
+                // Passage vers cercle : plafonner den à 32
+                if (shape === 'circle') {
+                    fractions.forEach(f => {
+                        if (f.den > 32) {
+                            f.den = 32;
+                            f.num = Math.min(f.num, 32);
+                            const nc = new Set();
+                            for (let i = 0; i < f.num; i++) nc.add(i);
+                            f.colored = nc;
+                        }
+                    });
+                }
+                // Passage vers rectangle : plafonner cols et rows à 8
+                if (shape === 'rect') {
+                    fractions.forEach(f => {
+                        f.cols = Math.min(f.cols || f.den, 8);
+                        f.rows = Math.min(f.rows || 1, 8);
+                        f.den  = f.cols * f.rows;
+                        f.num  = Math.min(f.num, f.den);
+                        const nc = new Set();
+                        for (let i = 0; i < f.num; i++) nc.add(i);
+                        f.colored = nc;
+                    });
+                }
                 renderAll();
                 if (typeof saveBoard === 'function') saveBoard();
             }
@@ -1131,6 +1275,7 @@
                 shape,
                 fracCount,
                 fillColor,
+                showLabel,
                 fractions: fractions.map(f => ({
                     num: f.num,
                     den: f.den,
@@ -1165,6 +1310,9 @@
                 swatches.forEach(s => {
                     s.classList.toggle('active', s.dataset.color === fillColor);
                 });
+            }
+            if (typeof data.showLabel === 'boolean') {
+                showLabel = data.showLabel;
             }
             if (data.fractions && Array.isArray(data.fractions)) {
                 fractions = data.fractions.map(f => ({
