@@ -228,9 +228,10 @@
             font-size: 10px; font-weight: 800; text-transform: uppercase;
             padding: 2px 8px; border-radius: 20px; letter-spacing: 0.4px;
         }
-        .conj-badge.present  { background: #cffafe; color: #0e7490; }
-        .conj-badge.imparfait { background: #f3e8ff; color: #7e22ce; }
-        .conj-badge.futur    { background: #ffedd5; color: #c2410c; }
+        .conj-badge.present        { background: #cffafe; color: #0e7490; }
+        .conj-badge.imparfait      { background: #f3e8ff; color: #7e22ce; }
+        .conj-badge.futur          { background: #ffedd5; color: #c2410c; }
+        .conj-badge.passe-compose  { background: #dcfce7; color: #15803d; }
         .conj-line {
             display: flex; align-items: center; gap: 8px;
         }
@@ -265,64 +266,139 @@
 })();
 
 // ── Données conjugaison (reprises de gene_conjugaison.html) ───────────────
-const CONJ_PRONOMS = ["Je", "Tu", "Il/Elle", "Nous", "Vous", "Ils/Elles"];
+const CONJ_PRONOMS = ["Je", "Tu", "Il", "Nous", "Vous", "Ils"];
+// Variantes féminines pour l'index 2 et 5
+const CONJ_PRONOMS_F = { 2: "Elle", 5: "Elles" };
 
 const CONJ_VERBES = {
-    "être":      { present: ["suis","es","est","sommes","êtes","sont"], imparfait: ["étais","étais","était","étions","étiez","étaient"], futur: ["serai","seras","sera","serons","serez","seront"] },
-    "avoir":     { present: ["ai","as","a","avons","avez","ont"], imparfait: ["avais","avais","avait","avions","aviez","avaient"], futur: ["aurai","auras","aura","aurons","aurez","auront"] },
-    "aller":     { present: ["vais","vas","va","allons","allez","vont"], imparfait: ["allais","allais","allait","allions","alliez","allaient"], futur: ["irai","iras","ira","irons","irez","iront"] },
-    "faire":     { present: ["fais","fais","fait","faisons","faites","font"], imparfait: ["faisais","faisais","faisait","faisions","faisiez","faisaient"], futur: ["ferai","feras","fera","ferons","ferez","feront"] },
-    "dire":      { present: ["dis","dis","dit","disons","dites","disent"], imparfait: ["disais","disais","disait","disions","disiez","disaient"], futur: ["dirai","diras","dira","dirons","direz","diront"] },
-    "voir":      { present: ["vois","vois","voit","voyons","voyez","voient"], imparfait: ["voyais","voyais","voyait","voyions","voyiez","voyaient"], futur: ["verrai","verras","verra","verrons","verrez","verront"] },
-    "venir":     { present: ["viens","viens","vient","venons","venez","viennent"], imparfait: ["venais","venais","venait","venions","veniez","venaient"], futur: ["viendrai","viendras","viendra","viendrons","viendrez","viendront"] },
-    "tenir":     { present: ["tiens","tiens","tient","tenons","tenez","tiennent"], imparfait: ["tenais","tenais","tenait","tenions","teniez","tenaient"], futur: ["tiendrai","tiendras","tiendra","tiendrons","tiendrez","tiendront"] },
-    "prendre":   { present: ["prends","prends","prend","prenons","prenez","prennent"], imparfait: ["prenais","prenais","prenait","prenions","preniez","prenaient"], futur: ["prendrai","prendras","prendra","prendrons","prendrez","prendront"] },
-    "pouvoir":   { present: ["peux","peux","peut","pouvons","pouvez","peuvent"], imparfait: ["pouvais","pouvais","pouvait","pouvions","pouviez","pouvaient"], futur: ["pourrai","pourras","pourra","pourrons","pourrez","pourront"] },
-    "vouloir":   { present: ["veux","veux","veut","voulons","voulez","veulent"], imparfait: ["voulais","voulais","voulait","voulions","vouliez","voulaient"], futur: ["voudrai","voudras","voudra","voudrons","voudrez","voudront"] },
-    "savoir":    { present: ["sais","sais","sait","savons","savez","savent"], imparfait: ["savais","savais","savait","savions","saviez","savaient"], futur: ["saurai","sauras","saura","saurons","saurez","sauront"] },
-    "devoir":    { present: ["dois","dois","doit","devons","devez","doivent"], imparfait: ["devais","devais","devait","devions","deviez","devaient"], futur: ["devrai","devras","devra","devrons","devrez","devront"] },
-    "mettre":    { present: ["mets","mets","met","mettons","mettez","mettent"], imparfait: ["mettais","mettais","mettait","mettions","mettiez","mettaient"], futur: ["mettrai","mettras","mettra","mettrons","mettrez","mettront"] },
-    "partir":    { present: ["pars","pars","part","partons","partez","partent"], imparfait: ["partais","partais","partait","partions","partiez","partaient"], futur: ["partirai","partiras","partira","partirons","partirez","partiront"] },
-    "sortir":    { present: ["sors","sors","sort","sortons","sortez","sortent"], imparfait: ["sortais","sortais","sortait","sortions","sortiez","sortaient"], futur: ["sortirai","sortiras","sortira","sortirons","sortirez","sortiront"] },
-    "dormir":    { present: ["dors","dors","dort","dormons","dormez","dorment"], imparfait: ["dormais","dormais","dormait","dormions","dormiez","dormaient"], futur: ["dormirai","dormiras","dormira","dormirons","dormirez","dormiront"] },
-    "lire":      { present: ["lis","lis","lit","lisons","lisez","lisent"], imparfait: ["lisais","lisais","lisait","lisions","lisiez","lisaient"], futur: ["lirai","liras","lira","lirons","lirez","liront"] },
-    "écrire":    { present: ["écris","écris","écrit","écrivons","écrivez","écrivent"], imparfait: ["écrivais","écrivais","écrivait","écrivions","écriviez","écrivaient"], futur: ["écrirai","écriras","écrira","écrirons","écrirez","écriront"] },
-    "croire":    { present: ["crois","crois","croit","croyons","croyez","croient"], imparfait: ["croyais","croyais","croyait","croyions","croyiez","croyaient"], futur: ["croirai","croiras","croira","croirons","croirez","croiront"] },
-    "connaître": { present: ["connais","connais","connaît","connaissons","connaissez","connaissent"], imparfait: ["connaissais","connaissais","connaissait","connaissions","connaissiez","connaissaient"], futur: ["connaîtrai","connaîtras","connaîtra","connaîtrons","connaîtrez","connaîtront"] },
-    "vivre":     { present: ["vis","vis","vit","vivons","vivez","vivent"], imparfait: ["vivais","vivais","vivait","vivions","viviez","vivaient"], futur: ["vivrai","vivras","vivra","vivrons","vivrez","vivront"] },
-    "boire":     { present: ["bois","bois","boit","buvons","buvez","boivent"], imparfait: ["buvais","buvais","buvait","buvions","buviez","buvaient"], futur: ["boirai","boiras","boira","boirons","boirez","boiront"] },
-    "recevoir":  { present: ["reçois","reçois","reçoit","recevons","recevez","reçoivent"], imparfait: ["recevais","recevais","recevait","recevions","receviez","recevaient"], futur: ["recevrai","recevras","recevra","recevrons","recevrez","recevront"] },
-    "entendre":  { present: ["entends","entends","entend","entendons","entendez","entendent"], imparfait: ["entendais","entendais","entendait","entendions","entendiez","entendaient"], futur: ["entendrai","entendras","entendra","entendrons","entendrez","entendront"] },
-    "ouvrir":    { present: ["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], imparfait: ["ouvrais","ouvrais","ouvrait","ouvrions","ouvriez","ouvraient"], futur: ["ouvrirai","ouvriras","ouvrira","ouvrirons","ouvrirez","ouvriront"] },
-    "offrir":    { present: ["offre","offres","offre","offrons","offrez","offrent"], imparfait: ["offrais","offrais","offrait","offrions","offriez","offraient"], futur: ["offrirai","offriras","offrira","offrirons","offrirez","offriront"] },
-    "mourir":    { present: ["meurs","meurs","meurt","mourons","mourez","meurent"], imparfait: ["mourais","mourais","mourait","mourions","mouriez","mouraient"], futur: ["mourrai","mourras","mourra","mourrons","mourrez","mourront"] },
-    "rejoindre": { present: ["rejoins","rejoins","rejoint","rejoignons","rejoignez","rejoignent"], imparfait: ["rejoignais","rejoignais","rejoignait","rejoignions","rejoigniez","rejoignaient"], futur: ["rejoindrai","rejoindras","rejoindra","rejoindrons","rejoindrez","rejoindront"] },
-    "revenir":   { present: ["reviens","reviens","revient","revenons","revenez","reviennent"], imparfait: ["revenais","revenais","revenait","revenions","reveniez","revenaient"], futur: ["reviendrai","reviendras","reviendra","reviendrons","reviendrez","reviendront"] },
-    "devenir":   { present: ["deviens","deviens","devient","devenons","devenez","deviennent"], imparfait: ["devenais","devenais","devenait","devenions","deveniez","devenaient"], futur: ["deviendrai","deviendras","deviendra","deviendrons","deviendrez","deviendront"] },
-    "rire":      { present: ["ris","ris","rit","rions","riez","rient"], imparfait: ["riais","riais","riait","riions","riiez","riaient"], futur: ["rirai","riras","rira","rirons","rirez","riront"] },
-    "valoir":    { present: ["vaux","vaux","vaut","valons","valez","valent"], imparfait: ["valais","valais","valait","valions","valiez","valaient"], futur: ["vaudrai","voudras","vaudra","vaudrons","vaudrez","vaudront"] },
-    "falloir":   { present: ["—","—","faut","—","—","—"], imparfait: ["—","—","fallait","—","—","—"], futur: ["—","—","faudra","—","—","—"] },
-    "pleuvoir":  { present: ["—","—","pleut","—","—","—"], imparfait: ["—","—","pleuvait","—","—","—"], futur: ["—","—","pleuvra","—","—","—"] }
+    "être":      { present: ["suis","es","est","sommes","êtes","sont"], imparfait: ["étais","étais","était","étions","étiez","étaient"], futur: ["serai","seras","sera","serons","serez","seront"], "passe-compose": ["ai été","as été","a été","avons été","avez été","ont été"] },
+    "avoir":     { present: ["ai","as","a","avons","avez","ont"], imparfait: ["avais","avais","avait","avions","aviez","avaient"], futur: ["aurai","auras","aura","aurons","aurez","auront"], "passe-compose": ["ai eu","as eu","a eu","avons eu","avez eu","ont eu"] },
+    "aller":     { present: ["vais","vas","va","allons","allez","vont"], imparfait: ["allais","allais","allait","allions","alliez","allaient"], futur: ["irai","iras","ira","irons","irez","iront"], "passe-compose": ["suis allé(e)","es allé(e)","est allé(e)","sommes allé(e)s","êtes allé(e)(s)","sont allé(e)s"] },
+    "faire":     { present: ["fais","fais","fait","faisons","faites","font"], imparfait: ["faisais","faisais","faisait","faisions","faisiez","faisaient"], futur: ["ferai","feras","fera","ferons","ferez","feront"], "passe-compose": ["ai fait","as fait","a fait","avons fait","avez fait","ont fait"] },
+    "dire":      { present: ["dis","dis","dit","disons","dites","disent"], imparfait: ["disais","disais","disait","disions","disiez","disaient"], futur: ["dirai","diras","dira","dirons","direz","diront"], "passe-compose": ["ai dit","as dit","a dit","avons dit","avez dit","ont dit"] },
+    "voir":      { present: ["vois","vois","voit","voyons","voyez","voient"], imparfait: ["voyais","voyais","voyait","voyions","voyiez","voyaient"], futur: ["verrai","verras","verra","verrons","verrez","verront"], "passe-compose": ["ai vu","as vu","a vu","avons vu","avez vu","ont vu"] },
+    "venir":     { present: ["viens","viens","vient","venons","venez","viennent"], imparfait: ["venais","venais","venait","venions","veniez","venaient"], futur: ["viendrai","viendras","viendra","viendrons","viendrez","viendront"], "passe-compose": ["suis venu(e)","es venu(e)","est venu(e)","sommes venu(e)s","êtes venu(e)(s)","sont venu(e)s"] },
+    "tenir":     { present: ["tiens","tiens","tient","tenons","tenez","tiennent"], imparfait: ["tenais","tenais","tenait","tenions","teniez","tenaient"], futur: ["tiendrai","tiendras","tiendra","tiendrons","tiendrez","tiendront"], "passe-compose": ["ai tenu","as tenu","a tenu","avons tenu","avez tenu","ont tenu"] },
+    "prendre":   { present: ["prends","prends","prend","prenons","prenez","prennent"], imparfait: ["prenais","prenais","prenait","prenions","preniez","prenaient"], futur: ["prendrai","prendras","prendra","prendrons","prendrez","prendront"], "passe-compose": ["ai pris","as pris","a pris","avons pris","avez pris","ont pris"] },
+    "pouvoir":   { present: ["peux","peux","peut","pouvons","pouvez","peuvent"], imparfait: ["pouvais","pouvais","pouvait","pouvions","pouviez","pouvaient"], futur: ["pourrai","pourras","pourra","pourrons","pourrez","pourront"], "passe-compose": ["ai pu","as pu","a pu","avons pu","avez pu","ont pu"] },
+    "vouloir":   { present: ["veux","veux","veut","voulons","voulez","veulent"], imparfait: ["voulais","voulais","voulait","voulions","vouliez","voulaient"], futur: ["voudrai","voudras","voudra","voudrons","voudrez","voudront"], "passe-compose": ["ai voulu","as voulu","a voulu","avons voulu","avez voulu","ont voulu"] },
+    "savoir":    { present: ["sais","sais","sait","savons","savez","savent"], imparfait: ["savais","savais","savait","savions","saviez","savaient"], futur: ["saurai","sauras","saura","saurons","saurez","sauront"], "passe-compose": ["ai su","as su","a su","avons su","avez su","ont su"] },
+    "devoir":    { present: ["dois","dois","doit","devons","devez","doivent"], imparfait: ["devais","devais","devait","devions","deviez","devaient"], futur: ["devrai","devras","devra","devrons","devrez","devront"], "passe-compose": ["ai dû","as dû","a dû","avons dû","avez dû","ont dû"] },
+    "mettre":    { present: ["mets","mets","met","mettons","mettez","mettent"], imparfait: ["mettais","mettais","mettait","mettions","mettiez","mettaient"], futur: ["mettrai","mettras","mettra","mettrons","mettrez","mettront"], "passe-compose": ["ai mis","as mis","a mis","avons mis","avez mis","ont mis"] },
+    "partir":    { present: ["pars","pars","part","partons","partez","partent"], imparfait: ["partais","partais","partait","partions","partiez","partaient"], futur: ["partirai","partiras","partira","partirons","partirez","partiront"], "passe-compose": ["suis parti(e)","es parti(e)","est parti(e)","sommes parti(e)s","êtes parti(e)(s)","sont parti(e)s"] },
+    "sortir":    { present: ["sors","sors","sort","sortons","sortez","sortent"], imparfait: ["sortais","sortais","sortait","sortions","sortiez","sortaient"], futur: ["sortirai","sortiras","sortira","sortirons","sortirez","sortiront"], "passe-compose": ["suis sorti(e)","es sorti(e)","est sorti(e)","sommes sorti(e)s","êtes sorti(e)(s)","sont sorti(e)s"] },
+    "dormir":    { present: ["dors","dors","dort","dormons","dormez","dorment"], imparfait: ["dormais","dormais","dormait","dormions","dormiez","dormaient"], futur: ["dormirai","dormiras","dormira","dormirons","dormirez","dormiront"], "passe-compose": ["ai dormi","as dormi","a dormi","avons dormi","avez dormi","ont dormi"] },
+    "lire":      { present: ["lis","lis","lit","lisons","lisez","lisent"], imparfait: ["lisais","lisais","lisait","lisions","lisiez","lisaient"], futur: ["lirai","liras","lira","lirons","lirez","liront"], "passe-compose": ["ai lu","as lu","a lu","avons lu","avez lu","ont lu"] },
+    "écrire":    { present: ["écris","écris","écrit","écrivons","écrivez","écrivent"], imparfait: ["écrivais","écrivais","écrivait","écrivions","écriviez","écrivaient"], futur: ["écrirai","écriras","écrira","écrirons","écrirez","écriront"], "passe-compose": ["ai écrit","as écrit","a écrit","avons écrit","avez écrit","ont écrit"] },
+    "croire":    { present: ["crois","crois","croit","croyons","croyez","croient"], imparfait: ["croyais","croyais","croyait","croyions","croyiez","croyaient"], futur: ["croirai","croiras","croira","croirons","croirez","croiront"], "passe-compose": ["ai cru","as cru","a cru","avons cru","avez cru","ont cru"] },
+    "connaître": { present: ["connais","connais","connaît","connaissons","connaissez","connaissent"], imparfait: ["connaissais","connaissais","connaissait","connaissions","connaissiez","connaissaient"], futur: ["connaîtrai","connaîtras","connaîtra","connaîtrons","connaîtrez","connaîtront"], "passe-compose": ["ai connu","as connu","a connu","avons connu","avez connu","ont connu"] },
+    "vivre":     { present: ["vis","vis","vit","vivons","vivez","vivent"], imparfait: ["vivais","vivais","vivait","vivions","viviez","vivaient"], futur: ["vivrai","vivras","vivra","vivrons","vivrez","vivront"], "passe-compose": ["ai vécu","as vécu","a vécu","avons vécu","avez vécu","ont vécu"] },
+    "boire":     { present: ["bois","bois","boit","buvons","buvez","boivent"], imparfait: ["buvais","buvais","buvait","buvions","buviez","buvaient"], futur: ["boirai","boiras","boira","boirons","boirez","boiront"], "passe-compose": ["ai bu","as bu","a bu","avons bu","avez bu","ont bu"] },
+    "recevoir":  { present: ["reçois","reçois","reçoit","recevons","recevez","reçoivent"], imparfait: ["recevais","recevais","recevait","recevions","receviez","recevaient"], futur: ["recevrai","recevras","recevra","recevrons","recevrez","recevront"], "passe-compose": ["ai reçu","as reçu","a reçu","avons reçu","avez reçu","ont reçu"] },
+    "entendre":  { present: ["entends","entends","entend","entendons","entendez","entendent"], imparfait: ["entendais","entendais","entendait","entendions","entendiez","entendaient"], futur: ["entendrai","entendras","entendra","entendrons","entendrez","entendront"], "passe-compose": ["ai entendu","as entendu","a entendu","avons entendu","avez entendu","ont entendu"] },
+    "ouvrir":    { present: ["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], imparfait: ["ouvrais","ouvrais","ouvrait","ouvrions","ouvriez","ouvraient"], futur: ["ouvrirai","ouvriras","ouvrira","ouvrirons","ouvrirez","ouvriront"], "passe-compose": ["ai ouvert","as ouvert","a ouvert","avons ouvert","avez ouvert","ont ouvert"] },
+    "offrir":    { present: ["offre","offres","offre","offrons","offrez","offrent"], imparfait: ["offrais","offrais","offrait","offrions","offriez","offraient"], futur: ["offrirai","offriras","offrira","offrirons","offrirez","offriront"], "passe-compose": ["ai offert","as offert","a offert","avons offert","avez offert","ont offert"] },
+    "mourir":    { present: ["meurs","meurs","meurt","mourons","mourez","meurent"], imparfait: ["mourais","mourais","mourait","mourions","mouriez","mouraient"], futur: ["mourrai","mourras","mourra","mourrons","mourrez","mourront"], "passe-compose": ["suis mort(e)","es mort(e)","est mort(e)","sommes mort(e)s","êtes mort(e)(s)","sont mort(e)s"] },
+    "rejoindre": { present: ["rejoins","rejoins","rejoint","rejoignons","rejoignez","rejoignent"], imparfait: ["rejoignais","rejoignais","rejoignait","rejoignions","rejoigniez","rejoignaient"], futur: ["rejoindrai","rejoindras","rejoindra","rejoindrons","rejoindrez","rejoindront"], "passe-compose": ["ai rejoint","as rejoint","a rejoint","avons rejoint","avez rejoint","ont rejoint"] },
+    "revenir":   { present: ["reviens","reviens","revient","revenons","revenez","reviennent"], imparfait: ["revenais","revenais","revenait","revenions","reveniez","revenaient"], futur: ["reviendrai","reviendras","reviendra","reviendrons","reviendrez","reviendront"], "passe-compose": ["suis revenu(e)","es revenu(e)","est revenu(e)","sommes revenu(e)s","êtes revenu(e)(s)","sont revenu(e)s"] },
+    "devenir":   { present: ["deviens","deviens","devient","devenons","devenez","deviennent"], imparfait: ["devenais","devenais","devenait","devenions","deveniez","devenaient"], futur: ["deviendrai","deviendras","deviendra","deviendrons","deviendrez","deviendront"], "passe-compose": ["suis devenu(e)","es devenu(e)","est devenu(e)","sommes devenu(e)s","êtes devenu(e)(s)","sont devenu(e)s"] },
+    "rire":      { present: ["ris","ris","rit","rions","riez","rient"], imparfait: ["riais","riais","riait","riions","riiez","riaient"], futur: ["rirai","riras","rira","rirons","rirez","riront"], "passe-compose": ["ai ri","as ri","a ri","avons ri","avez ri","ont ri"] },
+    "valoir":    { present: ["vaux","vaux","vaut","valons","valez","valent"], imparfait: ["valais","valais","valait","valions","valiez","valaient"], futur: ["vaudrai","voudras","vaudra","vaudrons","vaudrez","vaudront"], "passe-compose": ["ai valu","as valu","a valu","avons valu","avez valu","ont valu"] },
+    "falloir":   { present: ["—","—","faut","—","—","—"], imparfait: ["—","—","fallait","—","—","—"], futur: ["—","—","faudra","—","—","—"], "passe-compose": ["—","—","a fallu","—","—","—"] },
+    "pleuvoir":  { present: ["—","—","pleut","—","—","—"], imparfait: ["—","—","pleuvait","—","—","—"], futur: ["—","—","pleuvra","—","—","—"], "passe-compose": ["—","—","a plu","—","—","—"] },
+    "finir":     { present: ["finis","finis","finit","finissons","finissez","finissent"], imparfait: ["finissais","finissais","finissait","finissions","finissiez","finissaient"], futur: ["finirai","finiras","finira","finirons","finirez","finiront"], "passe-compose": ["ai fini","as fini","a fini","avons fini","avez fini","ont fini"] },
+    "choisir":   { present: ["choisis","choisis","choisit","choisissons","choisissez","choisissent"], imparfait: ["choisissais","choisissais","choisissait","choisissions","choisissiez","choisissaient"], futur: ["choisirai","choisiras","choisira","choisirons","choisirez","choisiront"], "passe-compose": ["ai choisi","as choisi","a choisi","avons choisi","avez choisi","ont choisi"] },
+    "grandir":   { present: ["grandis","grandis","grandit","grandissons","grandissez","grandissent"], imparfait: ["grandissais","grandissais","grandissait","grandissions","grandissiez","grandissaient"], futur: ["grandirai","grandiras","grandira","grandirons","grandirez","grandiront"], "passe-compose": ["ai grandi","as grandi","a grandi","avons grandi","avez grandi","ont grandi"] },
+    "réussir":   { present: ["réussis","réussis","réussit","réussissons","réussissez","réussissent"], imparfait: ["réussissais","réussissais","réussissait","réussissions","réussissiez","réussissaient"], futur: ["réussirai","réussiras","réussira","réussirons","réussirez","réussiront"], "passe-compose": ["ai réussi","as réussi","a réussi","avons réussi","avez réussi","ont réussi"] },
+    "remplir":   { present: ["remplis","remplis","remplit","remplissons","remplissez","remplissent"], imparfait: ["remplissais","remplissais","remplissait","remplissions","remplissiez","remplissaient"], futur: ["remplirai","rempliras","remplira","remplirons","remplirez","rempliront"], "passe-compose": ["ai rempli","as rempli","a rempli","avons rempli","avez rempli","ont rempli"] }
 };
 
 const CONJ_TERMINAISONS = {
     er: {
-        present:   ["e","es","e","ons","ez","ent"],
-        imparfait: ["ais","ais","ait","ions","iez","aient"],
-        futur:     ["ai","as","a","ons","ez","ont"]
+        present:        ["e","es","e","ons","ez","ent"],
+        imparfait:      ["ais","ais","ait","ions","iez","aient"],
+        futur:          ["ai","as","a","ons","ez","ont"],
+        "passe-compose": ["ai","as","a","avons","avez","ont"] // participe en -é ajouté dans _conjObtenir
     },
     ir: {
-        present:   ["is","is","it","issons","issez","issent"],
-        imparfait: ["issais","issais","issait","issions","issiez","issaient"],
-        futur:     ["ai","as","a","ons","ez","ont"]
+        present:        ["is","is","it","issons","issez","issent"],
+        imparfait:      ["issais","issais","issait","issions","issiez","issaient"],
+        futur:          ["ai","as","a","ons","ez","ont"],
+        "passe-compose": ["ai","as","a","avons","avez","ont"] // participe en -i ajouté dans _conjObtenir
     }
 };
 
+// ── Adapte un participe passé (auxiliaire être) au féminin ───────────────
+function _adapterFeminin(forme, pIdx) {
+    // Forme stockée en masculin avec marqueurs : "suis allé(e)", "sommes allé(e)s", "êtes allé(e)(s)"
+    // pIdx 2 = elle (singulier), pIdx 5 = elles (pluriel)
+    return forme
+        .replace(/\(e\)\(s\)/g, 'es')  // êtes allé(e)(s) → êtes allées
+        .replace(/\(e\)s/g,    'es')   // sont allé(e)s   → sont allées
+        .replace(/\(e\)/g,     'e');   // est allé(e)     → est allée
+}
+
 // ── Logique de conjugaison ────────────────────────────────────────────────
-function _conjObtenir(verbe, pronom, temps) {
+function _conjObtenir(verbe, pronom, temps, genre) {
     const v = verbe.toLowerCase().trim();
-    const pIdx = CONJ_PRONOMS.indexOf(pronom);
-    if (CONJ_VERBES[v]) return CONJ_VERBES[v][temps][pIdx];
+    // Résoudre pIdx : "Elle" → 2, "Elles" → 5, sinon chercher dans CONJ_PRONOMS
+    let pIdx = CONJ_PRONOMS.indexOf(pronom);
+    if (pIdx === -1) {
+        if (pronom === "Elle")   pIdx = 2;
+        else if (pronom === "Elles") pIdx = 5;
+        else return "?";
+    }
+
+    if (CONJ_VERBES[v]) {
+        const forme = CONJ_VERBES[v][temps][pIdx];
+        if (temps === "passe-compose") {
+            if (genre === 'f' && (pIdx === 2 || pIdx === 5)) return _adapterFeminin(forme, pIdx);
+            // masculin (ou pronoms je/tu/nous/vous) : retirer les marqueurs féminins
+            return forme.replace(/\(e\)\(s\)/g,'').replace(/\(e\)s/g,'s').replace(/\(e\)/g,'');
+        }
+        return forme;
+    }
+
+    if (temps === "passe-compose") {
+        // Auxiliaires être (verbes de mouvement/état non listés dans CONJ_VERBES)
+        const VERBES_ETRE = new Set([
+            "arriver","partir","entrer","rentrer","sortir","monter","descendre",
+            "naître","mourir","tomber","rester","retourner","passer","aller",
+            "venir","revenir","devenir","intervenir","parvenir","survenir"
+        ]);
+        const auxEtre = ["suis","es","est","sommes","êtes","sont"];
+        const useEtre = VERBES_ETRE.has(v);
+
+        if (v.endsWith("er")) {
+            const participe = v.slice(0, -2) + "é";
+            if (useEtre) {
+                const formeM = auxEtre[pIdx] + " " + participe;
+                if (pIdx === 2 || pIdx === 5) {
+                    return genre === 'f'
+                        ? auxEtre[pIdx] + " " + participe + "e" + (pIdx === 5 ? "s" : "")
+                        : auxEtre[pIdx] + " " + participe + (pIdx === 5 ? "s" : "");
+                }
+                return formeM;
+            }
+            return CONJ_TERMINAISONS.er["passe-compose"][pIdx] + " " + participe;
+        }
+        if (v.endsWith("ir")) {
+            const participe = v.slice(0, -1); // finit en -i
+            if (useEtre) {
+                const formeBase = auxEtre[pIdx] + " " + participe;
+                if (pIdx === 2 || pIdx === 5) {
+                    return genre === 'f'
+                        ? auxEtre[pIdx] + " " + participe + "e" + (pIdx === 5 ? "s" : "")
+                        : auxEtre[pIdx] + " " + participe + (pIdx === 5 ? "s" : "");
+                }
+                return formeBase;
+            }
+            // Verbes ir réguliers (finir, choisir, grandir…) → toujours avoir
+            return CONJ_TERMINAISONS.er["passe-compose"][pIdx] + " " + participe;
+        }
+        // Verbe non reconnu
+        return "?";
+    }
 
     if (v.endsWith("er")) {
         const term = CONJ_TERMINAISONS.er[temps][pIdx];
@@ -355,8 +431,16 @@ function _conjGenerer(verbesText, tempsCoches) {
     verbs.forEach(v => {
         tempsCoches.forEach(t => {
             const cle = `${v}|${t}`;
-            combos[cle] = CONJ_PRONOMS.map((p, i) => ({ verbe: v, pronom: p, temps: t, pIdx: i }))
-                .sort(() => Math.random() - 0.5);
+            combos[cle] = CONJ_PRONOMS.map((p, i) => {
+                // Pour les index 2 et 5, tirer au sort masculin ou féminin
+                let pronom = p;
+                let genre = 'm';
+                if (i === 2 || i === 5) {
+                    genre = Math.random() < 0.5 ? 'm' : 'f';
+                    pronom = genre === 'f' ? CONJ_PRONOMS_F[i] : p;
+                }
+                return { verbe: v, pronom, temps: t, pIdx: i, genre };
+            }).sort(() => Math.random() - 0.5);
         });
     });
 
@@ -443,6 +527,7 @@ function createConjugaisonWidget() {
                 <label class="conj-temps-label"><input type="checkbox" value="present" checked> Présent</label>
                 <label class="conj-temps-label"><input type="checkbox" value="imparfait"> Imparfait</label>
                 <label class="conj-temps-label"><input type="checkbox" value="futur"> Futur simple</label>
+                <label class="conj-temps-label"><input type="checkbox" value="passe-compose"> Passé composé</label>
             </div>
         </div>
     `;
@@ -496,7 +581,7 @@ function createConjugaisonWidget() {
             card.innerHTML = `
                 <div class="conj-q-top">
                     <span class="conj-q-num">${i + 1})</span>
-                    <span class="conj-badge ${q.temps}">${q.temps === 'present' ? 'Présent' : q.temps === 'imparfait' ? 'Imparfait' : 'Futur'}</span>
+                    <span class="conj-badge ${q.temps}">${q.temps === 'present' ? 'Présent' : q.temps === 'imparfait' ? 'Imparfait' : q.temps === 'futur' ? 'Futur' : 'Passé composé'}</span>
                 </div>
                 <div class="conj-line">
                     <span class="conj-pronom">${q.pronom}</span>
@@ -522,7 +607,7 @@ function createConjugaisonWidget() {
         if (!corrVisible) {
             grid.querySelectorAll('.conj-answer-input').forEach(inp => {
                 const q = questions[inp.dataset.index];
-                const attendu = _conjObtenir(q.verbe, q.pronom, q.temps);
+                const attendu = _conjObtenir(q.verbe, q.pronom, q.temps, q.genre);
                 const saisi = inp.value.trim();
                 sauvegardes[inp.dataset.index] = saisi;
                 const ok = saisi.toLowerCase() === attendu.toLowerCase();
