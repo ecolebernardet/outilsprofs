@@ -210,7 +210,7 @@
         .conj-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 20px;
             overflow-y: auto;
         }
         .conj-q-card {
@@ -222,10 +222,10 @@
             margin-bottom: 8px;
         }
         .conj-q-num {
-            font-size: 11px; font-weight: 800; color: #9ca3af;
+            font-size: 15px; font-weight: 800; color: #9ca3af;
         }
         .conj-badge {
-            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            font-size: 14px; font-weight: 800; text-transform: uppercase;
             padding: 2px 8px; border-radius: 20px; letter-spacing: 0.4px;
         }
         .conj-badge.present        { background: #cffafe; color: #0e7490; }
@@ -236,13 +236,13 @@
             display: flex; align-items: center; gap: 8px;
         }
         .conj-pronom {
-            font-size: 24px; font-weight: 700; color: #374151;
+            font-size: 30px; font-weight: 700; color: #374151;
             min-width: 90px; flex-shrink: 0;
         }
         .conj-answer-input {
             flex: 1; background: transparent;
             border: none; border-bottom: 2px solid #d1d5db;
-            outline: none; font-size: 24px; font-weight: 700;
+            outline: none; font-size: 30px; font-weight: 700;
             color: #4a90e2; text-align: center; padding: 2px 4px;
             font-family: 'Segoe UI', system-ui, sans-serif;
             transition: border-color .2s, color .2s;
@@ -352,9 +352,16 @@ function _conjObtenir(verbe, pronom, temps, genre) {
     if (CONJ_VERBES[v]) {
         const forme = CONJ_VERBES[v][temps][pIdx];
         if (temps === "passe-compose") {
-            if (genre === 'f' && (pIdx === 2 || pIdx === 5)) return _adapterFeminin(forme, pIdx);
-            // masculin (ou pronoms je/tu/nous/vous) : retirer les marqueurs féminins
-            return forme.replace(/\(e\)\(s\)/g,'').replace(/\(e\)s/g,'s').replace(/\(e\)/g,'');
+            // Féminin : développer tous les marqueurs au féminin
+            if (genre === 'f') return _adapterFeminin(forme, pIdx);
+            // Masculin pluriel (nous=3, vous=4, ils=5) : garder le -s
+            const estPluriel = pIdx >= 3;
+            if (estPluriel) {
+                return forme.replace(/\(e\)\(s\)/g,'s').replace(/\(e\)s/g,'s').replace(/\(e\)/g,'');
+            } else {
+                // Masculin singulier : tout retirer
+                return forme.replace(/\(e\)\(s\)/g,'').replace(/\(e\)s/g,'').replace(/\(e\)/g,'');
+            }
         }
         return forme;
     }
@@ -362,36 +369,35 @@ function _conjObtenir(verbe, pronom, temps, genre) {
     if (temps === "passe-compose") {
         // Auxiliaires être (verbes de mouvement/état non listés dans CONJ_VERBES)
         const VERBES_ETRE = new Set([
-            "arriver","partir","entrer","rentrer","sortir","monter","descendre",
-            "naître","mourir","tomber","rester","retourner","passer","aller",
+            "arriver","partir","entrer","rentrer","sortir","monter","remonter","descendre","resdecendre",
+            "naître","mourir","tomber","retomber","rester","retourner","passer","aller",
             "venir","revenir","devenir","intervenir","parvenir","survenir"
         ]);
         const auxEtre = ["suis","es","est","sommes","êtes","sont"];
         const useEtre = VERBES_ETRE.has(v);
 
+        // Participes passés irréguliers pour les verbes en -ir non listés dans CONJ_VERBES
+        const PARTICIPES_IRREG_IR = {
+            "parvenir": "parvenu", "survenir": "survenu", "intervenir": "intervenu",
+        };
+
+        // Accord du participe passé avec être :
+        // pluriel pour nous(3), vous(4), ils(5)/elles(5) ; singulier pour je(0), tu(1), il/elle(2)
+        const estPluriel = pIdx >= 3;
+
         if (v.endsWith("er")) {
             const participe = v.slice(0, -2) + "é";
             if (useEtre) {
-                const formeM = auxEtre[pIdx] + " " + participe;
-                if (pIdx === 2 || pIdx === 5) {
-                    return genre === 'f'
-                        ? auxEtre[pIdx] + " " + participe + "e" + (pIdx === 5 ? "s" : "")
-                        : auxEtre[pIdx] + " " + participe + (pIdx === 5 ? "s" : "");
-                }
-                return formeM;
+                const accord = (genre === 'f' ? "e" : "") + (estPluriel ? "s" : "");
+                return auxEtre[pIdx] + " " + participe + accord;
             }
             return CONJ_TERMINAISONS.er["passe-compose"][pIdx] + " " + participe;
         }
         if (v.endsWith("ir")) {
-            const participe = v.slice(0, -1); // finit en -i
+            const participe = PARTICIPES_IRREG_IR[v] || v.slice(0, -1); // irrégulier ou -i par défaut
             if (useEtre) {
-                const formeBase = auxEtre[pIdx] + " " + participe;
-                if (pIdx === 2 || pIdx === 5) {
-                    return genre === 'f'
-                        ? auxEtre[pIdx] + " " + participe + "e" + (pIdx === 5 ? "s" : "")
-                        : auxEtre[pIdx] + " " + participe + (pIdx === 5 ? "s" : "");
-                }
-                return formeBase;
+                const accord = (genre === 'f' ? "e" : "") + (estPluriel ? "s" : "");
+                return auxEtre[pIdx] + " " + participe + accord;
             }
             // Verbes ir réguliers (finir, choisir, grandir…) → toujours avoir
             return CONJ_TERMINAISONS.er["passe-compose"][pIdx] + " " + participe;
@@ -427,42 +433,41 @@ function _conjGenerer(verbesText, tempsCoches) {
     if (!verbs.length || !tempsCoches.length) return null;
 
     const NB = 10;
-    const combos = {};
-    verbs.forEach(v => {
-        tempsCoches.forEach(t => {
-            const cle = `${v}|${t}`;
-            combos[cle] = CONJ_PRONOMS.map((p, i) => {
-                // Pour les index 2 et 5, tirer au sort masculin ou féminin
-                let pronom = p;
-                let genre = 'm';
-                if (i === 2 || i === 5) {
-                    genre = Math.random() < 0.5 ? 'm' : 'f';
-                    pronom = genre === 'f' ? CONJ_PRONOMS_F[i] : p;
-                }
-                return { verbe: v, pronom, temps: t, pIdx: i, genre };
-            }).sort(() => Math.random() - 0.5);
-        });
-    });
+    const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
 
-    const nbV = verbs.length, nbT = tempsCoches.length;
-    const seq = [];
-    for (let s = 0; s < nbV * 6; s++) {
-        const vi = Math.floor(s / nbT) % nbV;
-        const ti = s % nbT;
-        seq.push(`${verbs[vi]}|${tempsCoches[ti]}`);
+    // Répète les items en passes mélangées jusqu'à n éléments (round-robin équilibré)
+    function buildRoundRobin(items, n) {
+        const result = [];
+        while (result.length < n) result.push(...shuffle(items));
+        return result.slice(0, n);
     }
-    const idx = {};
-    Object.keys(combos).forEach(c => { idx[c] = 0; });
 
+    // ── Plans équilibrés indépendants pour verbes, temps et pronoms ───────────
+    const verbPlan  = shuffle(buildRoundRobin(verbs,       NB));
+    const tempsPlan = shuffle(buildRoundRobin(tempsCoches, NB));
+
+    // Les 6 pIdx de pronoms ; on les inclut dans le round-robin
+    const pIdxList  = [0, 1, 2, 3, 4, 5];
+    const pronPlan  = shuffle(buildRoundRobin(pIdxList,    NB));
+
+    // ── Assembler les 10 questions ────────────────────────────────────────────
     const pool = [];
-    let tour = 0;
-    while (pool.length < NB && tour < seq.length * 20) {
-        const cle = seq[tour % seq.length];
-        if (combos[cle] && idx[cle] < combos[cle].length) {
-            pool.push(combos[cle][idx[cle]++]);
+    for (let i = 0; i < NB; i++) {
+        const v    = verbPlan[i];
+        const t    = tempsPlan[i];
+        const pIdx = pronPlan[i];
+
+        // Résoudre le pronom (il/elle aléatoire pour pIdx 2 et 5)
+        let pronom = CONJ_PRONOMS[pIdx];
+        let genre  = 'm';
+        if (pIdx === 2 || pIdx === 5) {
+            genre  = Math.random() < 0.5 ? 'm' : 'f';
+            pronom = genre === 'f' ? CONJ_PRONOMS_F[pIdx] : pronom;
         }
-        tour++;
+
+        pool.push({ verbe: v, pronom, temps: t, pIdx, genre });
     }
+
     return pool;
 }
 
