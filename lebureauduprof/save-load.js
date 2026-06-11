@@ -282,6 +282,11 @@ function buildBoardState() {
         if (w.dataset.type === 'motsmeles' && typeof w._mmGetData === 'function') {
             mmData = w._mmGetData();
         }
+        // Données propres au widget droite numérique
+        let dnData = null;
+        if (w.dataset.type === 'droite-num' && typeof w._dnGetData === 'function') {
+            dnData = w._dnGetData();
+        }
         widgets.push({
 			type: w.dataset.subtype === 'seyes' ? 'seyes' : w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -325,7 +330,8 @@ function buildBoardState() {
 			calData,
 			rqData,
 			saData,
-			mmData
+			mmData,
+			dnData
 		});
     });
     const shapes = [];
@@ -709,6 +715,27 @@ function restoreBoardFromJSON(json) {
                 widget = createMotsMelesWidget(w.mmData || null);
             } else {
                 widget = createWidget(w.type, '100px', '100px', false);
+            }
+        } else if (w.type === 'droite-num') {
+            // Passer dnData via initDroiteNumWidget(widget, savedData) grâce au hook
+            // On crée d'abord un widget fantôme pour récupérer la référence,
+            // puis on y pose _dnPendingData avant que le hook appelle initDroiteNumWidget.
+            // Comme createWidget est synchrone et appelle initDroiteNumWidget en interne,
+            // on pose la donnée sur window._dnNextPendingData et le hook la consomme.
+            if (w.dnData) window._dnNextPendingData = w.dnData;
+            widget = createWidget('droite-num', '100px', '100px', false);
+            window._dnNextPendingData = null;
+            // Restaurer dimensions après le rAF d'init (120ms pour laisser le rAF se terminer)
+            if (w.dnData) {
+                const _dnDataToRestore = w.dnData;
+                setTimeout(() => {
+                    const dn = widget.querySelector('.dn-container');
+                    if (dn && !_dnDataToRestore.fullboard) {
+                        if (_dnDataToRestore.containerW) dn.style.width  = (_dnDataToRestore.containerW / (w._refW || 1920)) * curW + 'px';
+                        if (_dnDataToRestore.containerH) dn.style.height = _dnDataToRestore.containerH + 'px';
+                    }
+                    if (dn && _dnDataToRestore.fullboard) dn.classList.add('wf-fullboard');
+                }, 120);
             }
         } else if (w.type === 'musique-clavier') {
             widget = createWidget('musique-clavier', '100px', '100px', false);

@@ -979,6 +979,7 @@ if (typeof closeMainMenu === 'undefined') {
 <script src="widget-repro-quadrillage.js"></script>
 <script src="widget-symetrie-axiale.js"></script>
 <script src="widget-motsmeles.js"></script>
+<script src="widget-droite-num.js"></script>
 <div id="laser-pointer"></div>
 <script src="pdf-widgets.js"></script>
 <button id="presentation-btn" onclick="togglePresentationMode()" title="Mode présentation">📽️</button>
@@ -1107,6 +1108,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-conversion6.jpeg" alt="Conversion" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Conversion</div>
                 <div class="act-card-desc">S'entraîner aux conversions de mesures</div>
+            </div>
+            <div class="act-card" onclick="createWidget('droite-num');toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-droite-num6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Droite numérique</div>
+                <div class="act-card-desc">Placer des entiers, décimaux ou fractions sur une droite graduée</div>
             </div>
             <div class="act-card" onclick="createWidget('fractions');toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-fractions6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
