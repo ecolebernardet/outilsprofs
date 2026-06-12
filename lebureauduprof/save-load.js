@@ -284,11 +284,11 @@ function buildBoardState() {
         }
         // Données propres au widget droite numérique
         let dnData = null;
-        if (w.dataset.type === 'droite-num' && typeof w._dnGetData === 'function') {
+        if ((w.dataset.type === 'droite-num' || w.dataset.subtype === 'droite-num') && typeof w._dnGetData === 'function') {
             dnData = w._dnGetData();
         }
         widgets.push({
-			type: w.dataset.subtype === 'seyes' ? 'seyes' : w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
+			type: w.dataset.subtype === 'seyes' ? 'seyes' : w.dataset.subtype === 'droite-num' ? 'droite-num' : w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
 			transparent: w.dataset.transparent === "true",
 			bgColor: w.dataset.bgColor || "#ffffff",

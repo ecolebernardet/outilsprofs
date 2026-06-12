@@ -134,7 +134,7 @@
             position: relative;
             user-select: none;
             overflow: hidden;
-            width: 820px;
+            width: 1000px;
             min-width: 400px;
             min-height: 240px;
         }
@@ -408,7 +408,8 @@
     // =========================================================================
     window.initDroiteNumWidget = function(widget, savedData) {
         if (!widget) return;
-        widget.dataset.type = 'droite-num';
+        widget.dataset.type    = 'pdf';         // détection par draw.js (_attachHoverToPdfWidget)
+        widget.dataset.subtype = 'droite-num';  // identifie le widget pour les autres systèmes
 
         // ── Vider le contenu par défaut du widget ──────────────────────────
         const wContent = widget.querySelector('.widget-content');
@@ -487,7 +488,7 @@
             return i;
         };
 
-        const inputMin = mkInput('number', -10);
+        const inputMin = mkInput('number', 0);
         const inputMax = mkInput('number', 10);
         const inputPas = mkInput('number', 1, 0.01, 100, 0.01);
         inputPas.style.width = '60px';
@@ -604,10 +605,386 @@
         else widget.appendChild(container);
 
         // =========================================================================
+        // CANVAS D'ANNOTATION DRAW.JS
+        // =========================================================================
+        // Faux pdf-canvas-wrap (toujours display:block) pour satisfaire _findActivePdfWidget.
+        const _dnFakeWrap = document.createElement('div');
+        _dnFakeWrap.className = 'pdf-canvas-wrap';
+        _dnFakeWrap.style.cssText = 'display:block;position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50;overflow:visible;';
+
+        const annotCanvas = document.createElement('canvas');
+        annotCanvas.className = 'pdf-annot-canvas';
+        annotCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:51;touch-action:none;display:block;border-radius:16px;';
+
+        // Overlay transparent qui capte TOUS les events quand le mode annotation est actif.
+        const _dnAnnotOverlay = document.createElement('div');
+        _dnAnnotOverlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:52;pointer-events:none;touch-action:none;cursor:inherit;';
+
+        _dnFakeWrap.appendChild(annotCanvas);
+        _dnFakeWrap.appendChild(_dnAnnotOverlay);
+        // Placer dans wContent/widget, par-dessus le container.
+        if (wContent) wContent.appendChild(_dnFakeWrap);
+        else widget.appendChild(_dnFakeWrap);
+
+        let _dnSyncLocked = false;  // bloque le resize canvas pendant un trait actif
+
+        function _dnSyncAnnotCanvas() {
+            if (_dnSyncLocked) return;
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
+            if (w === 0 || h === 0) return;
+            const dpr  = window.devicePixelRatio || 1;
+            const newW = Math.round(w * dpr);
+            const newH = Math.round(h * dpr);
+            if (annotCanvas.width === newW && annotCanvas.height === newH) return;
+            // Sauvegarder le contenu avant redimensionnement
+            let saved = null;
+            if (annotCanvas.width > 0 && annotCanvas.height > 0) {
+                try { saved = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height); } catch(e) {}
+            }
+            annotCanvas.width  = newW;
+            annotCanvas.height = newH;
+            if (saved && saved.width > 0 && saved.height > 0) {
+                const tmp = document.createElement('canvas');
+                tmp.width = saved.width; tmp.height = saved.height;
+                tmp.getContext('2d').putImageData(saved, 0, 0);
+                actx.drawImage(tmp, 0, 0, saved.width, saved.height, 0, 0, newW, newH);
+            } else {
+                _dnRedrawAnnotations();
+            }
+        }
+
+        // Données d'annotation (strokes normalisés 0->1)
+        const _dnAnnotLayer = { strokes: [], history: [], redoHistory: [] };
+        let   _dnIsDrawing  = false;
+        let   _dnCurStroke  = null;
+
+        const actx = annotCanvas.getContext('2d');
+
+
+
+        function _dnToNorm(px, py) {
+            const dpr = window.devicePixelRatio || 1;
+            const cw = annotCanvas.width;
+            const ch = annotCanvas.height;
+            return { x: px / cw, y: py / ch };
+        }
+        function _dnFromNorm(nx, ny) {
+            return { x: nx * annotCanvas.width, y: ny * annotCanvas.height };
+        }
+
+        function _dnBuildSnapshot() {
+            _dnAnnotLayer._snapshot = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+        }
+        function _dnInvalidateSnapshot() { _dnAnnotLayer._snapshot = null; }
+
+        function _dnDrawStroke(ctx, stroke) {
+            const cw = annotCanvas.width;
+            const displayW = annotCanvas.getBoundingClientRect().width || cw;
+            const sizeScaled = stroke.size * cw / displayW;
+            if (stroke.tool === 'text') {
+                const pos = _dnFromNorm(stroke.nx, stroke.ny);
+                const fontSize = Math.round(6 * Math.pow(1.12, stroke.size) * cw / 600);
+                ctx.save();
+                ctx.font = fontSize + 'px \'Segoe UI\', sans-serif';
+                ctx.fillStyle = stroke.color; ctx.globalAlpha = 1;
+                const lines = (stroke.text || '').split('\n');
+                if (stroke.rotation) {
+                    const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+                    const textH = lines.length * fontSize * 1.3;
+                    ctx.translate(pos.x + textW/2, pos.y + textH/2);
+                    ctx.rotate(stroke.rotation);
+                    ctx.translate(-(pos.x + textW/2), -(pos.y + textH/2));
+                }
+                lines.forEach((line, i) => ctx.fillText(line, pos.x, pos.y + (i + 1) * fontSize * 1.3));
+                ctx.restore(); return;
+            }
+            if (stroke.tool === 'figure') {
+                if (!stroke.pts || stroke.pts.length < 2) return;
+                const pxPts = stroke.pts.map(p => _dnFromNorm(p.x, p.y));
+                ctx.save();
+                ctx.strokeStyle = stroke.color; ctx.lineWidth = sizeScaled;
+                ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 1;
+                ctx.beginPath();
+                pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+                if (stroke.fillColor && stroke.fillOpacity > 0) {
+                    ctx.globalAlpha = stroke.fillOpacity; ctx.fillStyle = stroke.fillColor; ctx.fill();
+                }
+                ctx.restore(); return;
+            }
+            if (!stroke.pts || stroke.pts.length === 0) return;
+            const pxPts = stroke.pts.map(p => _dnFromNorm(p.x, p.y));
+            ctx.save();
+            if (stroke.dot) {
+                ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.35 : 1;
+                ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
+                const r = Math.max(1, sizeScaled / 2);
+                ctx.beginPath(); ctx.arc(pxPts[0].x, pxPts[0].y, r, 0, Math.PI * 2);
+                ctx.fillStyle = stroke.color; ctx.fill();
+            } else if (stroke.tool === 'highlighter') {
+                const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+                ctx.globalAlpha = 0.35; ctx.globalCompositeOperation = 'multiply';
+                ctx.strokeStyle = stroke.color; ctx.lineWidth = lw;
+                ctx.lineCap = 'butt'; ctx.lineJoin = 'round';
+                ctx.beginPath();
+                pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+            } else if (stroke.tool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = sizeScaled * 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.beginPath();
+                pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+            } else {
+                ctx.globalAlpha = 1; ctx.strokeStyle = stroke.color;
+                ctx.lineWidth = sizeScaled; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.beginPath();
+                pxPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function _dnRedrawAnnotations() {
+            actx.clearRect(0, 0, annotCanvas.width, annotCanvas.height);
+            if (_dnAnnotLayer._snapshot) {
+                actx.putImageData(_dnAnnotLayer._snapshot, 0, 0);
+            } else {
+                _dnAnnotLayer.strokes.forEach(s => _dnDrawStroke(actx, s));
+            }
+        }
+
+        // _pdfAnnotAPI : interface attendue par draw.js
+        widget._pdfAnnotAPI = {
+            startStroke(color, size, tool, px, py) {
+                _dnSyncLocked = true;  // bloquer tout resize pendant le trait
+                const norm = _dnToNorm(px, py);
+                _dnCurStroke = { tool, color, size, pts: [norm] };
+                _dnIsDrawing = true;
+                _dnBuildSnapshot();
+            },
+            continueStroke(color, size, tool, px, py) {
+                if (!_dnIsDrawing || !_dnCurStroke) return;
+                const norm = _dnToNorm(px, py);
+                const pts  = _dnCurStroke.pts;
+                const prev = pts[pts.length - 1];
+                pts.push(norm);
+                _dnCurStroke.color = color; _dnCurStroke.size = size; _dnCurStroke.tool = tool;
+                const cw = annotCanvas.width;
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const sizeScaled = size * cw / displayW;
+                const pPrev = _dnFromNorm(prev.x, prev.y);
+                const pCur  = _dnFromNorm(norm.x, norm.y);
+                actx.save();
+                if (tool === 'highlighter') {
+                    if (pts.length % 20 === 0) {
+                        if (_dnAnnotLayer._snapshot) actx.putImageData(_dnAnnotLayer._snapshot, 0, 0);
+                        else actx.clearRect(0, 0, cw, annotCanvas.height);
+                        const pxPts = pts.map(p => _dnFromNorm(p.x, p.y));
+                        const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+                        actx.globalAlpha = 0.35; actx.globalCompositeOperation = 'multiply';
+                        actx.strokeStyle = color; actx.lineWidth = lw;
+                        actx.lineCap = 'butt'; actx.lineJoin = 'round';
+                        actx.beginPath();
+                        pxPts.forEach((p, i) => i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y));
+                        actx.stroke();
+                    } else {
+                        const lw = Math.max(sizeScaled * 6, 24 * (cw / displayW));
+                        actx.globalAlpha = 0.35; actx.globalCompositeOperation = 'multiply';
+                        actx.strokeStyle = color; actx.lineWidth = lw;
+                        actx.lineCap = 'round'; actx.lineJoin = 'round';
+                        actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+                    }
+                } else if (tool === 'eraser') {
+                    actx.globalCompositeOperation = 'destination-out';
+                    actx.lineWidth = sizeScaled * 2; actx.lineCap = 'round';
+                    actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+                } else {
+                    actx.strokeStyle = color; actx.lineWidth = sizeScaled;
+                    actx.lineCap = 'round'; actx.lineJoin = 'round';
+                    actx.beginPath(); actx.moveTo(pPrev.x, pPrev.y); actx.lineTo(pCur.x, pCur.y); actx.stroke();
+                }
+                actx.restore();
+            },
+            endStroke() {
+                if (!_dnIsDrawing || !_dnCurStroke) return;
+                _dnIsDrawing = false;
+                if (_dnCurStroke.pts.length === 1) _dnCurStroke.dot = true;
+                _dnAnnotLayer.redoHistory = [];
+                _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                if (_dnAnnotLayer.history.length > 30) _dnAnnotLayer.history.shift();
+                _dnAnnotLayer.strokes.push(_dnCurStroke);
+                _dnCurStroke = null;
+                _dnInvalidateSnapshot();   // invalider le snapshot vide AVANT de redessiner
+                _dnRedrawAnnotations();
+                setTimeout(() => { _dnSyncLocked = false; }, 100);
+            },
+            undo() {
+                if (_dnAnnotLayer.history.length > 0) {
+                    _dnAnnotLayer.redoHistory.push([..._dnAnnotLayer.strokes]);
+                    _dnAnnotLayer.strokes = _dnAnnotLayer.history.pop();
+                } else if (_dnAnnotLayer.strokes.length > 0) {
+                    _dnAnnotLayer.redoHistory.push([..._dnAnnotLayer.strokes]);
+                    _dnAnnotLayer.strokes.pop();
+                }
+                _dnAnnotLayer._snapshot = null;
+                _dnRedrawAnnotations();
+            },
+            redo() {
+                if (_dnAnnotLayer.redoHistory.length > 0) {
+                    _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                    _dnAnnotLayer.strokes = _dnAnnotLayer.redoHistory.pop();
+                    _dnAnnotLayer._snapshot = null;
+                    _dnRedrawAnnotations();
+                }
+            },
+            clear() {
+                if (_dnAnnotLayer.strokes.length > 0) _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                _dnAnnotLayer.strokes = [];
+                _dnAnnotLayer._snapshot = null;
+                _dnAnnotLayer.redoHistory = [];
+                _dnRedrawAnnotations();
+            },
+            getAnnotCanvas()  { return annotCanvas; },
+            getPdfDoc()       { return null; },
+            getTotalPages()   { return 1; },
+            getAnnotLayers()  { return { 1: _dnAnnotLayer }; },
+            drawStrokeOn(ctx, stroke) { _dnDrawStroke(ctx, stroke); },
+            addTextStroke(text, color, size, px, py) {
+                const norm = _dnToNorm(px, py);
+                const stroke = { tool: 'text', color, size, text, nx: norm.x, ny: norm.y };
+                _dnAnnotLayer.redoHistory = [];
+                _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                if (_dnAnnotLayer.history.length > 30) _dnAnnotLayer.history.shift();
+                _dnAnnotLayer.strokes.push(stroke);
+                _dnRedrawAnnotations();
+            },
+            previewFigure(color, size, pts, fillColor, fillOpacity) {
+                _dnRedrawAnnotations();
+                const cw = annotCanvas.width;
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const sizeScaled = size * cw / displayW;
+                actx.save();
+                actx.strokeStyle = color; actx.lineWidth = sizeScaled;
+                actx.lineCap = 'round'; actx.lineJoin = 'round';
+                actx.setLineDash([6, 4]); actx.globalAlpha = 0.7;
+                actx.beginPath();
+                pts.forEach((p, i) => i === 0 ? actx.moveTo(p.x, p.y) : actx.lineTo(p.x, p.y));
+                if (fillColor && fillOpacity > 0) {
+                    actx.save(); actx.globalAlpha = fillOpacity * 0.7;
+                    actx.fillStyle = fillColor; actx.setLineDash([]); actx.fill(); actx.restore();
+                    actx.setLineDash([6, 4]);
+                }
+                actx.stroke(); actx.setLineDash([]); actx.restore();
+            },
+            addFigureStroke(color, size, pts, fillColor, fillOpacity) {
+                const normPts = pts.map(p => _dnToNorm(p.x, p.y));
+                const stroke = { tool: 'figure', color, size, pts: normPts };
+                if (fillColor && fillOpacity > 0) { stroke.fillColor = fillColor; stroke.fillOpacity = fillOpacity; }
+                _dnAnnotLayer.redoHistory = [];
+                _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                if (_dnAnnotLayer.history.length > 30) _dnAnnotLayer.history.shift();
+                _dnAnnotLayer.strokes.push(stroke); _dnRedrawAnnotations(); _dnInvalidateSnapshot();
+            },
+            previewEraser(px, py, r) {
+                if (_dnAnnotLayer._snapshot) actx.putImageData(_dnAnnotLayer._snapshot, 0, 0);
+                else _dnRedrawAnnotations();
+                const cw = annotCanvas.width;
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const rScaled = r * cw / displayW;
+                actx.save(); actx.globalCompositeOperation = 'source-over';
+                actx.beginPath(); actx.arc(px, py, rScaled, 0, Math.PI * 2);
+                actx.strokeStyle = 'rgba(80,80,80,0.9)'; actx.lineWidth = 1.5;
+                actx.setLineDash([4, 3]); actx.stroke();
+                actx.beginPath(); actx.arc(px, py, 2, 0, Math.PI * 2);
+                actx.fillStyle = 'rgba(80,80,80,0.7)'; actx.fill();
+                actx.setLineDash([]); actx.restore();
+            },
+            eraseAt(px, py, r) {
+                const cw = annotCanvas.width;
+                const displayW = annotCanvas.getBoundingClientRect().width || 600;
+                const rScaled = r * cw / displayW;
+                actx.save(); actx.globalCompositeOperation = 'destination-out';
+                actx.beginPath(); actx.arc(px, py, rScaled, 0, Math.PI * 2);
+                actx.fill(); actx.restore();
+            },
+            saveEraserSnapshot() {
+                const imgData = actx.getImageData(0, 0, annotCanvas.width, annotCanvas.height);
+                _dnAnnotLayer._snapshot = imgData;
+                _dnAnnotLayer.strokes = [];
+            },
+            redrawAnnotations() { _dnRedrawAnnotations(); },
+            drawTextSelection(index) {
+                const s = _dnAnnotLayer.strokes[index];
+                if (!s || s.tool !== 'text') return;
+                if (_dnAnnotLayer._snapshot) actx.putImageData(_dnAnnotLayer._snapshot, 0, 0);
+                else _dnRedrawAnnotations();
+                _dnDrawStroke(actx, s);
+            },
+            moveTextStroke(index, px, py) {
+                const norm = _dnToNorm(px, py);
+                if (!_dnAnnotLayer.strokes[index]) return;
+                _dnAnnotLayer.strokes[index] = { ..._dnAnnotLayer.strokes[index], nx: norm.x, ny: norm.y };
+                if (_dnAnnotLayer._snapshot) { actx.putImageData(_dnAnnotLayer._snapshot, 0, 0); _dnDrawStroke(actx, _dnAnnotLayer.strokes[index]); }
+                else _dnRedrawAnnotations();
+            },
+            saveTextMove(index) {
+                if (!_dnAnnotLayer.strokes[index]) return;
+                _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                if (_dnAnnotLayer.history.length > 30) _dnAnnotLayer.history.shift();
+                _dnInvalidateSnapshot();
+            },
+            rotateTextStroke(index, angle) {
+                if (!_dnAnnotLayer.strokes[index]) return;
+                _dnAnnotLayer.strokes[index] = { ..._dnAnnotLayer.strokes[index], rotation: angle };
+                if (_dnAnnotLayer._snapshot) { actx.putImageData(_dnAnnotLayer._snapshot, 0, 0); _dnDrawStroke(actx, _dnAnnotLayer.strokes[index]); }
+                else _dnRedrawAnnotations();
+            },
+            saveTextTransform(index) {
+                if (!_dnAnnotLayer.strokes[index]) return;
+                _dnAnnotLayer.history.push([..._dnAnnotLayer.strokes]);
+                if (_dnAnnotLayer.history.length > 30) _dnAnnotLayer.history.shift();
+                _dnInvalidateSnapshot();
+            },
+            detachNativeEvents() {},
+        };
+
+        // Sync canvas taille via ResizeObserver.
+        // Quand les dimensions changent, on sauvegarde le contenu via ImageData
+        // avant de redimensionner, puis on restaure — le canvas n'est jamais vidé.
+        requestAnimationFrame(() => _dnSyncAnnotCanvas());
+        const _dnResizeObs = new ResizeObserver(() => _dnSyncAnnotCanvas());
+        _dnResizeObs.observe(widget);
+
+        // Activation / desactivation du mode annotation
+        // draw.js ajoute la classe 'pdf-annot-target' sur le widget quand il active l'annotation.
+        function _dnEnterAnnotMode() {
+            _dnAnnotOverlay.style.pointerEvents = 'auto';
+            svgWrap.style.pointerEvents = 'none';
+            tokensZone.style.pointerEvents = 'none';
+            controls.style.pointerEvents = 'none';
+        }
+        function _dnLeaveAnnotMode() {
+            _dnAnnotOverlay.style.pointerEvents = 'none';
+            svgWrap.style.pointerEvents = '';
+            tokensZone.style.pointerEvents = '';
+            controls.style.pointerEvents = '';
+        }
+        const _dnAnnotObserver = new MutationObserver(() => {
+            if (widget.classList.contains('pdf-annot-target')) {
+                _dnEnterAnnotMode();
+            } else {
+                _dnLeaveAnnotMode();
+            }
+        });
+        _dnAnnotObserver.observe(widget, { attributes: true, attributeFilter: ['class'] });
+
+        // =========================================================================
         // ÉTAT INTERNE
         // =========================================================================
         let config = {
-            min: -10, max: 10, pas: 1, subdivisions: 0,
+            min: 0, max: 10, pas: 1, subdivisions: 0,
             typeNombre: 'entiers', fracDen: 4,
             tokensStr: '',
             mode: 'jetons',     // 'jetons' | 'libre'
@@ -1201,7 +1578,7 @@
             const hPct = parseFloat(widget.dataset.contentHPercent);
             if (wPct > 0) container.style.width  = (wPct / 100) * curW  + 'px';
             if (hPct > 0) container.style.height = (hPct / 100) * curVH + 'px';
-            if (!container.style.height) container.style.height = '280px';
+            if (!container.style.height) container.style.height = '700px';
 
             if (savedData) {
                 widget._dnSetData(savedData);
