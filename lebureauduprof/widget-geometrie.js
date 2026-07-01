@@ -64,6 +64,7 @@ const STYLE = `
 .geo-tool-btn:hover { background: #3a3a4a; border-color: #7ab8f5; }
 .geo-tool-btn.active { background: #1a3a5a; border-color: #6aaee8; color: #6aaee8; }
 .geo-tool-btn .ico { font-size: 18px; }
+.geo-tool-btn .ico svg { display: block; width: 18px; height: 18px; }
 .geo-close-btn {
     margin-left: auto;
     background: #6c757d;
@@ -183,7 +184,23 @@ bar.innerHTML = `
         <span class="ico">📐</span><span>Équerre</span>
     </button>
     <button class="geo-tool-btn" id="geo-btn-compas"  onclick="geoSpawnTool('compas')">
-        <span class="ico">⭕</span><span>Compas</span>
+        <span class="ico">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <!-- Poignée -->
+                <circle cx="11.8" cy="2.6" r="1.2" fill="#e0a94a"/>
+                <line x1="11.8" y1="3.8" x2="11.8" y2="5.4" stroke="#e0a94a" stroke-width="1.6" stroke-linecap="round"/>
+                <!-- Charnière -->
+                <circle cx="11.8" cy="6.2" r="1.8" fill="#d5d5d5"/>
+                <!-- Branche gauche + pointe métallique -->
+                <line x1="11.8" y1="7.6" x2="7.2" y2="20.1" stroke="#c2c2c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polygon points="6.1,20.1 8.3,20.1 7.2,22.7" fill="#e6e6e6"/>
+                <!-- Branche droite (coude) + mine -->
+                <line x1="11.8" y1="7.6" x2="15.1" y2="15.4" stroke="#c2c2c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="15.1" y1="15.4" x2="16.6" y2="20.1" stroke="#c2c2c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="16.6" cy="20.1" r="1.3" fill="#e74c3c"/>
+            </svg>
+        </span>
+        <span>Compas</span>
     </button>
 `;
 document.body.appendChild(bar);
