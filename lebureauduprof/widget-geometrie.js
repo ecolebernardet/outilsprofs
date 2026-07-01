@@ -1945,16 +1945,108 @@ function spawnCompas(board, cx, cy) {
     // Pivot de rotation = la pointe du compas (même point que celui gardé fixe
     // lors du redimensionnement), recalculé dynamiquement car sa position
     // locale dépend du rayon courant.
-    const compassPivotFn = () => {
+    function _compassPivotLocal() {
         const ha = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
         return {
             x: PIV_X - Math.sin(ha) * ARM_LEN,
             y: PIV_Y + Math.cos(ha) * ARM_LEN
         };
+    }
+
+    // Position actuelle du pivot dans le même repère que overlay.style.left/top
+    // (repère board, ou repère écran en mode "fixed").
+    // Calcul autonome (n'utilise PAS getOverlayTransform/offsetWidth) pour être
+    // rigoureusement cohérent avec _applyLeftTopForPivot, qui utilise les mêmes
+    // constantes OVW/OVH — toute divergence entre les deux sources (DOM vs JS)
+    // introduirait un petit décalage cumulé entre capture et restauration du pivot.
+    function _pivWorldBoard() {
+        const ox = parseFloat(overlay.style.left || 0);
+        const oy = parseFloat(overlay.style.top  || 0);
+        const angleRad = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
+        const cx = ox + OVW / 2, cy = oy + OVH / 2;
+        const loc = _compassPivotLocal();
+        return rotatePoint(ox + loc.x, oy + loc.y, cx, cy, angleRad);
+    }
+
+    // Repositionne l'overlay (left/top) pour que le pivot local courant
+    // coïncide avec pivWorld, pour l'angle donné. On suppose une rotation
+    // CSS autour du centre de la boîte (transform-origin par défaut, jamais
+    // modifié) — exactement la même hypothèse que le tracé d'arc à la mine,
+    // ce qui garantit que les deux mécanismes restent cohérents entre eux.
+    function _applyLeftTopForPivot(pivWorld, angleDeg) {
+        const loc = _compassPivotLocal();
+        const angleRad = angleDeg * Math.PI / 180;
+        const cos = Math.cos(angleRad), sin = Math.sin(angleRad);
+        const ow = OVW, oh = OVH;
+        const dx = cos * (loc.x - ow / 2) - sin * (loc.y - oh / 2);
+        const dy = sin * (loc.x - ow / 2) + cos * (loc.y - oh / 2);
+        overlay.style.left = (pivWorld.x - ow / 2 - dx) + 'px';
+        overlay.style.top  = (pivWorld.y - oh / 2 - dy) + 'px';
+    }
+
+    // Double-clic sur la poignée : reset de l'angle en gardant la pointe fixe
+    rotH.ondblclick = function (e) {
+        e.preventDefault(); e.stopPropagation();
+        const pivWorld = _pivWorldBoard();
+        overlay.style.transform = '';
+        overlay.dataset.angle = '0';
+        _applyLeftTopForPivot(pivWorld, 0);
     };
 
+    function _startCompassRotate(clientX, clientY) {
+        const pivWorld = _pivWorldBoard();
+        const isFixedOv = overlay.dataset.geoFixed === 'true' || overlay.style.position === 'fixed';
+        const bRect     = (!isFixedOv && board) ? board.getBoundingClientRect() : { left: 0, top: 0 };
+        const pivScreenX = pivWorld.x + bRect.left;
+        const pivScreenY = pivWorld.y + bRect.top;
+
+        const startAngle = Math.atan2(clientY - pivScreenY, clientX - pivScreenX);
+        const startRot   = parseFloat(overlay.dataset.angle || 0);
+        const indicator  = document.getElementById('rotation-indicator');
+
+        function onMove(ev) {
+            const px = ev.touches ? ev.touches[0].clientX : ev.clientX;
+            const py = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            const newRot  = startRot + (Math.atan2(py - pivScreenY, px - pivScreenX) - startAngle) * 180 / Math.PI;
+            const snapped = geoSnapRotation(newRot);
+            overlay.style.transform = `rotate(${snapped}deg)`;
+            overlay.dataset.angle   = snapped;
+            _applyLeftTopForPivot(pivWorld, snapped);
+            if (indicator) {
+                const deg = Math.round(((snapped % 360) + 360) % 360);
+                const rotDeg = document.getElementById('rot-deg');
+                if (rotDeg) rotDeg.textContent = deg + '°';
+                indicator.style.display = 'block';
+                indicator.style.left = px + 16 + 'px';
+                indicator.style.top  = py + 'px';
+                const hint = indicator.querySelector('.rot-reset-hint');
+                if (hint) hint.style.display = (deg === 0) ? 'none' : 'inline';
+            }
+        }
+        function onEnd() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend',  onEnd);
+            const ind = document.getElementById('rotation-indicator');
+            if (ind) ind.style.display = 'none';
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend',  onEnd);
+    }
+
+    rotH.onmousedown = function (e) {
+        e.preventDefault(); e.stopPropagation();
+        _startCompassRotate(e.clientX, e.clientY);
+    };
+    rotH.addEventListener('touchstart', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        _startCompassRotate(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+
     makeDraggableGeo(overlay, null);
-    makeRotatableGeo(overlay, rotH, compassPivotFn);
 }
 
 // ── Fermer la barre géo quand la barre dessin se ferme ────────────────────
