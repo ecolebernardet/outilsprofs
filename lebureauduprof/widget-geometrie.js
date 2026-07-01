@@ -530,7 +530,7 @@ function makeDraggableGeo(overlay, onDragEnd) {
     }, { passive: false });
 }
 
-function makeRotatableGeo(overlay, rotHandle) {
+function makeRotatableGeo(overlay, rotHandle, pivotFn) {
     rotHandle.ondblclick = function (e) {
         e.preventDefault(); e.stopPropagation();
         overlay.style.transform = '';
@@ -539,8 +539,26 @@ function makeRotatableGeo(overlay, rotHandle) {
 
     function startGeoRotate(clientX, clientY) {
         const rect = overlay.getBoundingClientRect();
-        const cx = rect.left + rect.width  / 2;
-        const cy = rect.top  + rect.height / 2;
+        let cx, cy;
+        if (pivotFn) {
+            // pivotFn() retourne {x, y} en coordonnées locales de l'overlay (px depuis le coin haut-gauche)
+            // On convertit en coordonnées écran en tenant compte du scale éventuel
+            const scaleX = rect.width  / overlay.offsetWidth;
+            const scaleY = rect.height / overlay.offsetHeight;
+            const piv = pivotFn();
+            cx = rect.left + piv.x * scaleX;
+            cy = rect.top  + piv.y * scaleY;
+        } else {
+            cx = rect.left + rect.width  / 2;
+            cy = rect.top  + rect.height / 2;
+        }
+        // Appliquer le transform-origin au pivot voulu
+        if (pivotFn) {
+            const piv = pivotFn();
+            overlay.style.transformOrigin = `${piv.x}px ${piv.y}px`;
+        } else {
+            overlay.style.transformOrigin = '';
+        }
         const startAngle = Math.atan2(clientY - cy, clientX - cx);
         const startRot   = parseFloat(overlay.dataset.angle || 0);
         const indicator  = document.getElementById('rotation-indicator');
@@ -615,8 +633,16 @@ function getOverlayTransform(overlay) {
     // Lire l'angle depuis style.transform (cohérent avec makeRotatableGeo)
     const m = overlay.style.transform && overlay.style.transform.match(/rotate\(([-\d.]+)deg\)/);
     const angle = m ? parseFloat(m[1]) * Math.PI / 180 : 0;
-    const cx = x + overlay.offsetWidth  / 2;
-    const cy = y + overlay.offsetHeight / 2;
+    // Respecter le transform-origin si défini (ex: équerre pivote sur son angle droit)
+    let cx, cy;
+    if (overlay.style.transformOrigin && overlay.style.transformOrigin !== '') {
+        const parts = overlay.style.transformOrigin.split(' ');
+        cx = x + parseFloat(parts[0]);
+        cy = y + parseFloat(parts[1]);
+    } else {
+        cx = x + overlay.offsetWidth  / 2;
+        cy = y + overlay.offsetHeight / 2;
+    }
     return { x, y, angle, cx, cy };
 }
 
@@ -1049,8 +1075,12 @@ function spawnEquerre(board, cx, cy) {
     overlay.appendChild(traceBtnBar);
     board.appendChild(overlay);
 
+    // Le sommet angle droit est à (OX, OY) dans l'overlay
+    const equPivotFn = () => ({ x: OX, y: OY });
+    overlay.style.transformOrigin = `${OX}px ${OY}px`;
+
     makeDraggableGeo(overlay, null);
-    makeRotatableGeo(overlay, rotH);
+    makeRotatableGeo(overlay, rotH, equPivotFn);
 }
 
 // ── COMPAS ────────────────────────────────────────────────────────────────
@@ -1560,8 +1590,8 @@ function spawnCompas(board, cx, cy) {
             const ovLeft = parseFloat(overlay.style.left || 0);
             const ovTop  = parseFloat(overlay.style.top  || 0);
             const haOld  = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
-            const pivBX  = ovLeft + PIV_X - Math.sin(haOld) * ARM_LEN;
-            const pivBY  = ovTop  + PIV_Y + Math.cos(haOld) * ARM_LEN;
+            const oldLx  = PIV_X - Math.sin(haOld) * ARM_LEN;
+            const oldLy  = PIV_Y + Math.cos(haOld) * ARM_LEN;
 
             radius = newR;
 
@@ -1569,8 +1599,21 @@ function spawnCompas(board, cx, cy) {
             const newLx = PIV_X - Math.sin(haNew) * ARM_LEN;
             const newLy = PIV_Y + Math.cos(haNew) * ARM_LEN;
 
-            overlay.style.left = (pivBX - newLx) + 'px';
-            overlay.style.top  = (pivBY - newLy) + 'px';
+            // Décalage de la pointe dans le repère LOCAL (non tourné) de l'overlay
+            const dLocalX = oldLx - newLx;
+            const dLocalY = oldLy - newLy;
+
+            // L'overlay peut être pivoté (dataset.angle) : ce décalage local doit
+            // être converti dans le repère MONDE avant d'être appliqué à left/top,
+            // sinon la pointe (le centre du compas) se déplace dès que le compas
+            // a déjà tourné.
+            const angleRad = parseFloat(overlay.dataset.angle || 0) * Math.PI / 180;
+            const cosA = Math.cos(angleRad), sinA = Math.sin(angleRad);
+            const dWorldX = cosA * dLocalX - sinA * dLocalY;
+            const dWorldY = sinA * dLocalX + cosA * dLocalY;
+
+            overlay.style.left = (ovLeft + dWorldX) + 'px';
+            overlay.style.top  = (ovTop  + dWorldY) + 'px';
 
             updateSvg();
             _showRadiusLabel(); // mettre à jour le label
@@ -1899,8 +1942,19 @@ function spawnCompas(board, cx, cy) {
     // Exposer updateSvg pour le refresh couleur depuis cpickDispatch
     overlay._geoUpdateSvg = updateSvg;
 
+    // Pivot de rotation = la pointe du compas (même point que celui gardé fixe
+    // lors du redimensionnement), recalculé dynamiquement car sa position
+    // locale dépend du rayon courant.
+    const compassPivotFn = () => {
+        const ha = Math.min(Math.asin(Math.min(radius / (2 * ARM_LEN), 1)), Math.PI / 2);
+        return {
+            x: PIV_X - Math.sin(ha) * ARM_LEN,
+            y: PIV_Y + Math.cos(ha) * ARM_LEN
+        };
+    };
+
     makeDraggableGeo(overlay, null);
-    makeRotatableGeo(overlay, rotH);
+    makeRotatableGeo(overlay, rotH, compassPivotFn);
 }
 
 // ── Fermer la barre géo quand la barre dessin se ferme ────────────────────
