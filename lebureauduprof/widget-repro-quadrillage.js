@@ -217,6 +217,27 @@
             margin: 0 2px;
             flex-shrink: 0;
         }
+        .rq-fillcolor-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .rq-fillcolor-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1.5px solid #d1d5db;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            transition: border-color .12s, transform .1s, box-shadow .12s;
+        }
+        .rq-fillcolor-btn:hover { transform: scale(1.1); }
+        .rq-fillcolor-btn.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+        }
         .rq-gridsize-wrap {
             display: flex;
             align-items: center;
@@ -483,6 +504,10 @@ function createReproQuadrillageWidget(savedData) {
         <button class="rq-tool-btn active" data-tool="line" title="Tracer une ligne">📏</button>
         <button class="rq-tool-btn" data-tool="circle" title="Tracer un cercle">⭕</button>
         <button class="rq-tool-btn" data-tool="fill" title="Remplir une zone">🎨</button>
+        <div class="rq-fillcolor-wrap">
+            <button type="button" class="rq-fillcolor-btn active" data-fillcolor="light" title="Gris clair" style="background:#d9d9d9;"></button>
+            <button type="button" class="rq-fillcolor-btn" data-fillcolor="dark" title="Gris foncé" style="background:#8a8f98;"></button>
+        </div>
         <div class="rq-toolbar-sep"></div>
         <button class="rq-tool-btn" id="rq-undo-btn" title="Annuler">↩</button>
         <button class="rq-tool-btn" id="rq-redo-btn" title="Refaire">↪</button>
@@ -540,6 +565,8 @@ function createReproQuadrillageWidget(savedData) {
     let isGommeActive = false;
     let lastPoint     = null;
     let fillPoints    = [];
+    let currentFillColor = 'light';
+    const RQ_FILL_COLORS = { light: 'rgba(0,0,0,0.15)', dark: 'rgba(0,0,0,0.5)' };
     let undoStack     = [];
     let redoStack     = [];
     let helpLayer     = {};
@@ -663,7 +690,7 @@ function createReproQuadrillageWidget(savedData) {
                     const d = fillPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
                     const group = createSVGEl('g', { class: 'rq-line-group' });
                     group.appendChild(createSVGEl('path', { d, fill: 'transparent', class: 'rq-eraser-zone', style: 'pointer-events:all;' }));
-                    group.appendChild(createSVGEl('path', { d, fill: 'rgba(0,0,0,0.2)', stroke: 'black', 'stroke-width': '4', 'stroke-linejoin': 'round', style: 'pointer-events:all;' }));
+                    group.appendChild(createSVGEl('path', { d, fill: RQ_FILL_COLORS[currentFillColor] || RQ_FILL_COLORS.light, stroke: 'black', 'stroke-width': '4', 'stroke-linejoin': 'round', style: 'pointer-events:all;' }));
                     svg.insertBefore(group, helpLayerEl);
                     undoStack.push({ type: 'draw', element: group });
                     fillPoints = [];
@@ -943,6 +970,18 @@ function createReproQuadrillageWidget(savedData) {
             const cur  = parseInt(gridSizeInput.value) || 10;
             const next = Math.min(max, Math.max(min, cur + step));
             if (next !== cur) { gridSizeInput.value = next; applyGridSize(); btn._rqStepDone = true; }
+        });
+        btn.addEventListener('pointerdown', e => e.stopPropagation());
+        btn.addEventListener('mousedown',   e => e.stopPropagation());
+    });
+
+    // Couleur de remplissage (gris clair / gris foncé)
+    toolbar.querySelectorAll('.rq-fillcolor-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); e.preventDefault();
+            currentFillColor = btn.dataset.fillcolor;
+            toolbar.querySelectorAll('.rq-fillcolor-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         });
         btn.addEventListener('pointerdown', e => e.stopPropagation());
         btn.addEventListener('mousedown',   e => e.stopPropagation());
