@@ -138,8 +138,13 @@
             /* height libre, fixée par JS via resize */
         }
 
-        /* Les deux zones s'étirent verticalement si le container est agrandi */
-        .alpha-pool-zone, .alpha-drop-zone {
+        /* La zone de dépôt s'étire pour occuper l'espace supplémentaire ;
+           la zone des mots à classer garde une hauteur liée à son contenu */
+        .alpha-pool-zone {
+            flex: 0 0 auto;
+            min-height: 46px;
+        }
+        .alpha-drop-zone {
             flex: 1;
             min-height: 46px;
         }
@@ -186,6 +191,43 @@
         .alpha-level-badge.facile    { background: #d4edda; color: #1a7a3a; }
         .alpha-level-badge.moyen     { background: #fff3cd; color: #8a5c00; }
         .alpha-level-badge.difficile { background: #f8d7da; color: #842029; }
+
+        /* ── Badge numéro de liste ── */
+        .alpha-list-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: #6b7280;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 2px 8px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* ── Sélecteur de liste ── */
+        .alpha-list-select-wrap {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .alpha-list-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #666;
+        }
+        .alpha-list-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #f5f5f5;
+            font-size: 10px;
+            font-weight: 700;
+            color: #374151;
+            cursor: pointer;
+            max-width: 110px;
+        }
+        .alpha-list-select:hover { background: #e0e0e0; }
 
         /* ── Contrôles ── */
         .alpha-controls {
@@ -240,10 +282,11 @@
         }
         .alpha-pool-zone.drag-over { background: #f0f0f0; border-color: #9ca3af; }
 
-        /* ── Zone réponse : grille fixe 6 colonnes, 1 seule ligne ── */
+        /* ── Zone réponse : grille fixe 6 colonnes, 1 seule ligne qui occupe toute la hauteur ── */
         .alpha-drop-zone {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: 1fr;
             gap: 6px;
             padding: 8px;
             background: #f0f7ff;
@@ -253,7 +296,7 @@
         }
         .alpha-drop-zone.drag-over { background: #dbeafe; border-color: #3b82f6; border-style: solid; }
 
-        /* ── Slot individuel ── */
+        /* ── Slot individuel : remplit toute la hauteur de sa ligne ── */
         .alpha-answer-slot {
             display: flex;
             flex-direction: column;
@@ -265,7 +308,8 @@
             background: white;
             border: 1.5px dashed #bfdbfe;
             transition: background .15s, border-color .15s;
-            min-height: 0;
+            min-height: 40px;
+            box-sizing: border-box;
             overflow: hidden;
         }
         .alpha-answer-slot.drag-over-slot {
@@ -407,6 +451,7 @@
   <div class="alpha-header">
     <span class="alpha-title">🔤 L'ordre alphabétique</span>
     <span class="alpha-level-badge facile">😊 Facile</span>
+    <span class="alpha-list-badge">📋 Liste 1/20</span>
     <div class="wf-btns" style="margin-left:auto">
       <button class="alpha-help-btn" title="Aide sur les niveaux">?</button>
       <button class="wf-btn wf-btn-min"   data-role="wf-min"   title="Réduire"></button>
@@ -419,6 +464,10 @@
   <div class="alpha-controls">
     <button class="alpha-btn alpha-btn-new">🔄 Nouveau</button>
     <button class="alpha-btn alpha-btn-show">👁 Voir la correction</button>
+    <div class="alpha-list-select-wrap">
+      <label class="alpha-list-label">📋 Liste</label>
+      <select class="alpha-list-select"></select>
+    </div>
     <div class="alpha-level-btns">
       <button class="alpha-lvl-btn active-facile" data-level="1">😊 Facile</button>
       <button class="alpha-lvl-btn"               data-level="2">😐 Moyen</button>
@@ -471,17 +520,31 @@
     // BANQUES DE MOTS PAR NIVEAU
     // =========================================================================
 
-    const WORDS_LVL1 = [
-        'banane','cerise','datte','étoile','forêt','girafe','hibou','igloo','jonquille','kimono',
-        'lavande','mammouth','nuage','orange','papillon','quasar','rivière','savane','tulipe',
-        'univers','vague','wagon','xylophone','yacht','zèbre','avion','bison','citron','dune',
-        'escargot','fusée','grenade','hyène','île','jungle','koala','lune','mouton','neige',
-        'ourson','puma','quiche','ravin','soleil','tigre','usine','volcan','wombat','zéphyr',
-        'armoire','bougie','canard','dessin','éléphant','feuille','guépard','herbe','iris',
-        'jardin','képi','lièvre','marmotte','noisette','orage','plume','queue','ruche','sable',
-        'trompette','urne','vinaigre','wapiti','xénon','yourte','zircon'
+    // Niveau facile : 20 listes numérotées de 6 mots, tous d'initiales différentes
+    const WORDS_LVL1_GROUPS = [
+        ['avion','banane','cerise','datte','étoile','forêt'],
+        ['girafe','hibou','iris','jardin','lune','mouton'],
+        ['neige','orange','papillon','renard','savane','tulipe'],
+        ['univers','vague','wagon','xylophone','yacht','zèbre'],
+        ['arbre','bateau','cheval','dauphin','écureuil','fusée'],
+        ['gâteau','herbe','image','jungle','lapin','maison'],
+        ['nuage','ourson','puma','ruche','sable','tigre'],
+        ['koala','quiche','valise','robot','soleil','tortue'],
+        ['ananas','ballon','canard','dessin','éléphant','fleur'],
+        ['guitare','hérisson','insecte','jouet','livre','marmotte'],
+        ['nid','oiseau','plume','queue','sapin','trompette'],
+        ['usine','volcan','wombat','xénon','yourte','zircon'],
+        ['armoire','biscuit','citron','domino','escargot','fraise'],
+        ['grenouille','hutte','île','jonquille','lampe','montagne'],
+        ['noisette','orage','panda','radis','souris','tambour'],
+        ['kangourou','quartier','uniforme','verre','week-end','zéphyr'],
+        ['abeille','brosse','coccinelle','drapeau','épée','feuille'],
+        ['genou','hache','ketchup','licorne','melon','navire'],
+        ['ombre','poire','requin','sirène','toboggan','vélo'],
+        ['gorille','journal','kiwi','moto','plage','train'],
     ];
 
+    // Niveau moyen : 20 listes numérotées, 6 mots partageant la même initiale
     const WORDS_LVL2_GROUPS = [
         ['balcon','bateau','bison','bleu','bonbon','brevet'],
         ['cabane','cactus','canard','castor','cerise','coton'],
@@ -498,8 +561,14 @@
         ['tabac','tablier','tacite','taille','talon','tambour'],
         ['valeur','valise','vampire','vapeur','varié','vase'],
         ['wagon','walrus','wapiti','warcraft','wasabi','wombat'],
+        ['abeille','acacia','agneau','aigle','ananas','armoire'],
+        ['écharpe','éléphant','émotion','épée','escalier','étoile'],
+        ['habit','herbe','hibou','horloge','humain','hyène'],
+        ['objet','oiseau','ombre','orage','ourson','olive'],
+        ['idée','île','image','igloo','insecte','iris'],
     ];
 
+    // Niveau difficile : 20 listes numérotées, 6 mots partageant les 3 premières lettres
     const WORDS_LVL3_GROUPS = [
         ['abricot','abrité','abreuver','abrupt','abréviation','abricotier'],
         ['charmant','charnière','charbon','charpente','charrue','chartreuse'],
@@ -516,6 +585,11 @@
         ['premier','prendre','prénom','présent','presque','prêter'],
         ['serveur','service','servile','servant','servante','serviette'],
         ['trancher','tranche','transit','transporter','transaction','transparent'],
+        ['garçon','garage','garantie','garder','gare','gardien'],
+        ['poupée','poulain','poulet','poumon','poupe','pouce'],
+        ['cheval','chemin','chemise','chercher','cheveu','chèvre'],
+        ['classe','clair','clairière','clameur','clapier','claquer'],
+        ['montagne','monde','monnaie','montage','montre','monument'],
     ];
 
     // =========================================================================
@@ -531,23 +605,22 @@
         return a;
     }
 
-    function pickWords(level) {
-        if (level === 1) {
-            const shuffled = shuffle(WORDS_LVL1);
-            const picked = [], initials = new Set();
-            for (const w of shuffled) {
-                const ini = w[0].toLowerCase();
-                if (!initials.has(ini)) { initials.add(ini); picked.push(w); }
-                if (picked.length === 6) break;
-            }
-            return picked;
-        } else if (level === 2) {
-            const group = WORDS_LVL2_GROUPS[Math.floor(Math.random() * WORDS_LVL2_GROUPS.length)];
-            return shuffle(group).slice(0, 6);
-        } else {
-            const group = WORDS_LVL3_GROUPS[Math.floor(Math.random() * WORDS_LVL3_GROUPS.length)];
-            return shuffle(group).slice(0, 6);
-        }
+    const GROUPS_BY_LEVEL = {
+        1: WORDS_LVL1_GROUPS,
+        2: WORDS_LVL2_GROUPS,
+        3: WORDS_LVL3_GROUPS,
+    };
+    const LISTS_PER_LEVEL = 20;
+
+    // listIndex : index 0-based de la liste voulue, ou null/undefined pour un tirage aléatoire
+    // Retourne { words, listIndex } pour pouvoir afficher le numéro de liste utilisé
+    function pickWords(level, listIndex) {
+        const groups = GROUPS_BY_LEVEL[level];
+        const idx = (listIndex === null || listIndex === undefined || isNaN(listIndex))
+            ? Math.floor(Math.random() * groups.length)
+            : Math.max(0, Math.min(groups.length - 1, listIndex));
+        const group = groups[idx];
+        return { words: shuffle(group).slice(0, 6), listIndex: idx };
     }
 
     function sortAlpha(words) {
@@ -578,11 +651,37 @@
         const helpBtn      = widget.querySelector('.alpha-help-btn');
         const helpPopup    = widget.querySelector('.alpha-help-popup');
         const resizeHandle = widget.querySelector('.alpha-resize-handle');
+        const listSelect   = widget.querySelector('.alpha-list-select');
+        const listBadge    = widget.querySelector('.alpha-list-badge');
 
-        let currentLevel    = 1;
-        let currentWords    = [];
-        let solutionOrder   = [];
-        let correctionShown = false;
+        let currentLevel     = 1;
+        let currentWords     = [];
+        let solutionOrder    = [];
+        let correctionShown  = false;
+        let currentListIndex = null;
+        // Mémorise la liste choisie (ou 'random') séparément pour chaque niveau
+        const selectByLevel  = { 1: 'random', 2: 'random', 3: 'random' };
+
+        // ── Remplit le sélecteur de liste (1 à 20 + Aléatoire) ────────────
+        if (listSelect) {
+            let optsHtml = '<option value="random">🎲 Aléatoire</option>';
+            for (let i = 0; i < LISTS_PER_LEVEL; i++) {
+                optsHtml += '<option value="' + i + '">Liste ' + (i + 1) + '</option>';
+            }
+            listSelect.innerHTML = optsHtml;
+            listSelect.addEventListener('click', (e) => e.stopPropagation());
+            listSelect.addEventListener('change', () => {
+                selectByLevel[currentLevel] = listSelect.value;
+                newGame();
+            });
+        }
+
+        // ── Affiche le numéro de la liste utilisée ────────────────────────
+        function updateListBadge() {
+            if (listBadge && currentListIndex !== null) {
+                listBadge.textContent = '📋 Liste ' + (currentListIndex + 1) + '/' + LISTS_PER_LEVEL;
+            }
+        }
 
         // ── Taille de police de référence (à 540px de large) ─────────────
         const BASE_W   = 540;
@@ -593,10 +692,31 @@
         // ── Recalcule la font-size des étiquettes selon la largeur ────────
         function applyCardScale() {
             const w  = container.offsetWidth || BASE_W;
-            // Scale proportionnel à la largeur uniquement
-            const fs = Math.max(MIN_FS, Math.min(MAX_FS, Math.round(BASE_FS * w / BASE_W)));
+            // Scale proportionnel à la largeur du widget
+            let fs = Math.max(MIN_FS, Math.min(MAX_FS, Math.round(BASE_FS * w / BASE_W)));
             container.style.setProperty('--alpha-fs', fs + 'px');
             container.style.setProperty('--alpha-ghost-fs', fs + 'px');
+
+            // Vérifie que le mot le plus long tient bien dans une case de la zone
+            // de dépôt (6 colonnes de largeur égale) ; sinon on réduit la police.
+            const slot = dropZone.querySelector('.alpha-answer-slot');
+            if (slot) {
+                const slotStyle = getComputedStyle(slot);
+                const slotContentWidth = slot.clientWidth
+                    - parseFloat(slotStyle.paddingLeft || 0) - parseFloat(slotStyle.paddingRight || 0);
+
+                let maxCardWidth = 0;
+                widget.querySelectorAll('.alpha-word-card').forEach(c => {
+                    maxCardWidth = Math.max(maxCardWidth, c.scrollWidth);
+                });
+
+                if (maxCardWidth > 0 && slotContentWidth > 0 && maxCardWidth > slotContentWidth) {
+                    const ratio = slotContentWidth / maxCardWidth;
+                    fs = Math.max(MIN_FS, Math.floor(fs * ratio * 0.95));
+                    container.style.setProperty('--alpha-fs', fs + 'px');
+                    container.style.setProperty('--alpha-ghost-fs', fs + 'px');
+                }
+            }
         }
 
         // ── Changement de niveau ─────────────────────────────────────────
@@ -609,6 +729,7 @@
                 b.className = 'alpha-lvl-btn';
                 if (parseInt(b.dataset.level) === level) b.classList.add('active-' + info.key);
             });
+            if (listSelect) listSelect.value = selectByLevel[level];
             newGame();
         }
 
@@ -626,10 +747,16 @@
             corrText.textContent = '';
             corrText.classList.remove('show');
 
-            currentWords  = pickWords(currentLevel);
+            const requested  = selectByLevel[currentLevel];
+            const listIndex  = (requested === 'random') ? null : parseInt(requested, 10);
+            const result     = pickWords(currentLevel, listIndex);
+            currentWords     = result.words;
+            currentListIndex = result.listIndex;
             solutionOrder = sortAlpha(currentWords);
             renderPool(shuffle(currentWords));
             renderDropZone();
+            updateListBadge();
+            applyCardScale();
         }
 
         // ── Rendu pool ───────────────────────────────────────────────────
@@ -771,8 +898,6 @@
                 resultText.textContent = '❌ Essaie encore !';
                 resultText.style.color = '#dc3545';
                 resultText.classList.add('show');
-                corrText.textContent = '📋 Ordre : ' + solutionOrder.join(' → ');
-                corrText.classList.add('show');
                 slots.forEach((slot, i) => {
                     const card = slot.querySelector('.alpha-word-card');
                     if (card) {
