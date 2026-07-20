@@ -446,6 +446,7 @@
         <option value="9000">🐢 Facile</option>
         <option value="6500" selected>🚶 Moyen</option>
         <option value="4200">🚀 Rapide</option>
+        <option value="2200">🔥 Extrême</option>
         <option value="progressive">⚡ Progressif (accélère toutes les 10 bonnes réponses)</option>
       </select>
     </div>
@@ -479,7 +480,7 @@
     <h4>💡 Comment utiliser ce widget ?</h4>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">⚙ Le bouton Paramètres</p>
     <p style="margin:0 0 6px"><b>Tables à réviser</b> — Coche ou décoche les tables (de 2 à 9 ; les tables du 0 et du 1 ne sont pas proposées) que tu veux voir apparaître dans le jeu.</p>
-    <p style="margin:0 0 10px"><b>Vitesse de chute</b> — Choisis la vitesse à laquelle les boules tombent : Facile, Moyen, Rapide, ou <b>Progressif</b> (la vitesse augmente automatiquement toutes les 10 bonnes réponses, et peut finir par dépasser le mode Rapide).</p>
+    <p style="margin:0 0 10px"><b>Vitesse de chute</b> — Choisis la vitesse à laquelle les boules tombent : Facile, Moyen, Rapide, Extrême, ou <b>Progressif</b> (la vitesse augmente automatiquement toutes les 10 bonnes réponses, et peut finir par dépasser même le mode Extrême).</p>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">🎮 Comment jouer ?</p>
     <p style="margin:0 0 6px">Des boules tombent du ciel avec une opération (ex. 7 × 8). Les 3 résultats proposés apparaissent tout de suite au niveau du sol, de la même couleur que la boule à laquelle ils correspondent. Clique sur le bon résultat avant que la boule n'atteigne ses réponses.</p>
     <p style="margin:0 0 6px">Une bonne réponse rapporte un point. Une mauvaise réponse ou une boule non traitée fait perdre une vie ❤️. Un chrono ⏱️ affiche le temps écoulé depuis le début de la partie.</p>
