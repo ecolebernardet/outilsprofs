@@ -939,6 +939,8 @@
             running = true;
             paused = false;
             hideOverlay();
+            paramsPanel.classList.remove('show');
+            paramsBtn.classList.remove('active');
             pauseBtn.textContent = '⏸ Pause';
             lastTime = null;
             if (!rafId) rafId = requestAnimationFrame(gameLoop);
@@ -1042,6 +1044,8 @@
             applyFontScale();
             updateHUD();
             resetGame();
+            paramsPanel.classList.add('show');
+            paramsBtn.classList.add('active');
             rafId = requestAnimationFrame(gameLoop);
         }));
 
