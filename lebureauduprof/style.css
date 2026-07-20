@@ -1963,6 +1963,9 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     gap: 10px;
     margin-bottom: 10px;
 }
+#jeux-panel-content .act-grid {
+    grid-template-columns: repeat(4, 1fr);   /* nombre de colonnes propre au panneau Jeux */
+}
 .act-card {
     background: #1a1a1a;
     border: 1px solid #333;
