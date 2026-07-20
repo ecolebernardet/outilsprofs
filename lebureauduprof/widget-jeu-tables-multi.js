@@ -970,6 +970,13 @@
             // Taille par défaut si aucune dimension sauvegardée
             if (!container.style.height) container.style.height = '520px';
 
+            // Ouvrir directement en plein écran board (mémorise la taille normale
+            // pour pouvoir revenir dessus via le bouton ⤢)
+            _savedW = container.style.width;
+            _savedH = container.style.height;
+            _isMax = true;
+            container.classList.add('wf-fullboard');
+
             applyFontScale();
             updateHUD();
             resetGame();
