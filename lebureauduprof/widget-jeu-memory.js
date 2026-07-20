@@ -216,13 +216,13 @@
         .jmm-params-row label {
             font-size: 11px; font-weight: 600; color: #374151; white-space: nowrap;
         }
-        .jmm-content-select, .jmm-pairs-select {
+        .jmm-content-select, .jmm-pairs-select, .jmm-color-select {
             padding: 5px 10px; border-radius: 7px;
             border: 1px solid #d1d5db; font-size: 12px;
             font-family: 'Segoe UI', system-ui, sans-serif;
             outline: none; cursor: pointer; background: white;
         }
-        .jmm-content-select:focus, .jmm-pairs-select:focus { border-color: #4a90e2; }
+        .jmm-content-select:focus, .jmm-pairs-select:focus, .jmm-color-select:focus { border-color: #4a90e2; }
         .jmm-custom-row { display: none; flex-direction: column; align-items: stretch; gap: 4px; }
         .jmm-custom-row.show { display: flex; }
         .jmm-custom-textarea {
@@ -331,6 +331,19 @@
         .jmm-card-front-flag {
             font-size: calc(var(--jmm-fs, 15px) * 2.4);
         }
+        .jmm-frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.15;
+        }
+        .jmm-frac-num {
+            border-bottom: 2px solid currentColor;
+            padding: 0 4px 2px;
+        }
+        .jmm-frac-den {
+            padding: 2px 4px 0;
+        }
         .jmm-card.matched .jmm-card-front {
             animation: jmm-pop .35s ease;
         }
@@ -427,7 +440,12 @@
       <label>Contenu des paires :</label>
       <select class="jmm-content-select">
         <option value="tables">✖️ Tables de multiplication</option>
-        <option value="doubles">➗ Doubles</option>
+        <option value="division">➗ Divisions</option>
+        <option value="doubles">✳️ Doubles</option>
+        <option value="decimaux">🔢 Fractions décimales et nombres décimaux</option>
+        <option value="romains">🏛️ Nombres romains</option>
+        <option value="nature">🔤 Nature des mots</option>
+        <option value="conjugaison">📖 Conjugaison</option>
         <option value="capitales">🌍 Pays et capitales</option>
         <option value="drapeaux">🚩 Drapeaux et pays</option>
         <option value="synonymes">🔗 Synonymes</option>
@@ -440,6 +458,11 @@
         <option value="8" selected>8</option>
         <option value="10">10</option>
         <option value="12">12</option>
+      </select>
+      <label>Cartes :</label>
+      <select class="jmm-color-select">
+        <option value="colored" selected>🎨 Colorées</option>
+        <option value="plain">⬜ Sans couleur</option>
       </select>
     </div>
     <div class="jmm-params-row jmm-custom-row">
@@ -476,8 +499,9 @@
   <div class="jmm-help-popup">
     <h4>💡 Comment utiliser ce widget ?</h4>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">⚙ Le bouton Paramètres</p>
-    <p style="margin:0 0 6px"><b>Contenu des paires</b> — Tables de multiplication (opération / résultat), Doubles (nombre / son double), Pays et capitales, Drapeaux et pays, Synonymes, Antonymes, ou Personnalisé (tape tes propres paires, une par ligne, au format « recto ; verso »).</p>
+    <p style="margin:0 0 6px"><b>Contenu des paires</b> — Tables de multiplication (opération / résultat), Divisions (opération / résultat, inverse des tables), Doubles (nombre / son double), Fractions décimales et nombres décimaux (ex. 7/10 / 0,7), Nombres romains (ex. XIV / 14), Nature des mots (mot / classe grammaticale), Conjugaison (infinitif + pronom / forme conjuguée au présent), Pays et capitales, Drapeaux et pays, Synonymes, Antonymes, ou Personnalisé (tape tes propres paires, une par ligne, au format « recto ; verso »).</p>
     <p style="margin:0 0 10px"><b>Nombre de paires</b> — Choisis la taille de la grille (6 à 12 paires, soit 12 à 24 cartes). Non applicable en mode Personnalisé : le nombre de paires dépend alors de ce que tu as saisi.</p>
+    <p style="margin:0 0 10px"><b>Cartes</b> — En mode <i>Colorées</i>, chaque paire a sa propre couleur une fois retournée, ce qui peut aider à repérer les paires. Choisis <i>Sans couleur</i> pour un jeu plus exigeant, où seul le contenu compte.</p>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">🎮 Comment jouer ?</p>
     <p style="margin:0 0 6px">Clique sur deux cartes pour les retourner. Si elles forment une paire, elles restent révélées. Sinon, elles se retournent après un court instant.</p>
     <p style="margin:0 0 6px">Le nombre d'essais et le temps écoulé sont affichés en haut. Retrouve toutes les paires pour gagner !</p>
@@ -501,6 +525,7 @@
         const paramsPanel     = widget.querySelector('.jmm-params-panel');
         const contentSelect   = widget.querySelector('.jmm-content-select');
         const pairsSelect     = widget.querySelector('.jmm-pairs-select');
+        const colorSelect     = widget.querySelector('.jmm-color-select');
         const customRow       = widget.querySelector('.jmm-custom-row');
         const customTextarea  = widget.querySelector('.jmm-custom-textarea');
         const customHint      = widget.querySelector('.jmm-custom-hint');
@@ -568,14 +593,14 @@
 
         function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-        // ── Paramètres ──────────────────────────────────────────────────
-        makeTap(paramsBtn, () => {
-            const open = paramsPanel.classList.toggle('show');
-            paramsBtn.classList.toggle('active', open);
-        });
+        // ── Paramètres (toujours affichés) ──────────────────────────────
+        paramsPanel.classList.add('show');
+        paramsBtn.classList.add('active');
+        if (paramsBtn) paramsBtn.style.display = 'none';
         paramsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
         contentSelect.addEventListener('pointerdown', (e) => e.stopPropagation());
         pairsSelect.addEventListener('pointerdown', (e) => e.stopPropagation());
+        colorSelect.addEventListener('pointerdown', (e) => e.stopPropagation());
         customTextarea.addEventListener('pointerdown', (e) => e.stopPropagation());
 
         function refreshCustomVisibility() {
@@ -814,6 +839,60 @@
             ['avant', 'après'], ['dedans', 'dehors'], ['dessus', 'dessous'],
         ];
 
+        // ── Banque de conjugaisons (pour le mode "📖 Conjugaison") — présent de l'indicatif ──
+        const CONJUGATIONS = [
+            ['aimer (je)', "j'aime"], ['aimer (tu)', 'tu aimes'], ['aimer (il)', 'il aime'],
+            ['aimer (nous)', 'nous aimons'], ['aimer (vous)', 'vous aimez'], ['aimer (ils)', 'ils aiment'],
+            ['chanter (nous)', 'nous chantons'], ['jouer (ils)', 'ils jouent'], ['manger (je)', 'je mange'],
+            ['manger (nous)', 'nous mangeons'],
+            ['finir (je)', 'je finis'], ['finir (tu)', 'tu finis'], ['finir (nous)', 'nous finissons'],
+            ['finir (ils)', 'ils finissent'], ['choisir (je)', 'je choisis'], ['choisir (vous)', 'vous choisissez'],
+            ['être (je)', 'je suis'], ['être (tu)', 'tu es'], ['être (il)', 'il est'],
+            ['être (nous)', 'nous sommes'], ['être (vous)', 'vous êtes'], ['être (ils)', 'ils sont'],
+            ['avoir (je)', "j'ai"], ['avoir (tu)', 'tu as'], ['avoir (il)', 'il a'],
+            ['avoir (nous)', 'nous avons'], ['avoir (vous)', 'vous avez'], ['avoir (ils)', 'ils ont'],
+            ['aller (je)', 'je vais'], ['aller (tu)', 'tu vas'], ['aller (il)', 'il va'],
+            ['aller (nous)', 'nous allons'], ['aller (ils)', 'ils vont'],
+            ['faire (je)', 'je fais'], ['faire (il)', 'il fait'], ['faire (nous)', 'nous faisons'],
+            ['faire (ils)', 'ils font'],
+            ['venir (je)', 'je viens'], ['venir (il)', 'il vient'], ['venir (nous)', 'nous venons'],
+            ['pouvoir (je)', 'je peux'], ['pouvoir (il)', 'il peut'], ['pouvoir (ils)', 'ils peuvent'],
+            ['vouloir (je)', 'je veux'], ['vouloir (il)', 'il veut'],
+            ['dire (je)', 'je dis'], ['dire (il)', 'il dit'], ['dire (vous)', 'vous dites'],
+            ['prendre (je)', 'je prends'], ['prendre (il)', 'il prend'], ['prendre (nous)', 'nous prenons'],
+            ['voir (je)', 'je vois'], ['voir (il)', 'il voit'],
+            ['savoir (je)', 'je sais'], ['savoir (il)', 'il sait'],
+        ];
+
+        // ── Banque « nature des mots » (pour le mode "🔤 Nature des mots") ──
+        const WORD_NATURES = [
+            ['chien', 'nom commun'], ['table', 'nom commun'], ['bonheur', 'nom commun'],
+            ['Paris', 'nom propre'], ['Léa', 'nom propre'], ['France', 'nom propre'],
+            ['courir', 'verbe'], ['manger', 'verbe'], ['réfléchir', 'verbe'], ['partir', 'verbe'],
+            ['bleu', 'adjectif'], ['grand', 'adjectif'], ['joyeux', 'adjectif'], ['rapide', 'adjectif'],
+            ['rapidement', 'adverbe'], ['souvent', 'adverbe'], ['ici', 'adverbe'], ['très', 'adverbe'],
+            ['il', 'pronom'], ['nous', 'pronom'], ['celui-ci', 'pronom'], ['qui', 'pronom'],
+            ['le', 'article'], ['une', 'article'], ['des', 'article'],
+            ['dans', 'préposition'], ['sur', 'préposition'], ['avec', 'préposition'], ['chez', 'préposition'],
+            ['et', 'conjonction'], ['mais', 'conjonction'], ['ou', 'conjonction'], ['parce que', 'conjonction'],
+            ['wahou', 'interjection'], ['aïe', 'interjection'],
+            ['mon', 'déterminant possessif'], ['ce', 'déterminant démonstratif'],
+        ];
+
+        // Convertit un entier (1-3999) en chiffres romains
+        function toRoman(num) {
+            const table = [
+                [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+                [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+                [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+            ];
+            let n = num, result = '';
+            for (const [value, symbol] of table) {
+                while (n >= value) { result += symbol; n -= value; }
+            }
+            return result;
+        }
+
         // Sélectionne n paires distinctes au hasard dans une banque [terme, terme]
         function pickRandomPairs(bank, n) {
             const indices = bank.map((_, i) => i);
@@ -837,6 +916,23 @@
             }
 
             if (mode === 'synonymes') return pickRandomPairs(SYNONYMS, n);
+            if (mode === 'conjugaison') return pickRandomPairs(CONJUGATIONS, n);
+            if (mode === 'nature') return pickRandomPairs(WORD_NATURES, n);
+
+            if (mode === 'romains') {
+                const usedN = new Set();
+                let guard = 0;
+                while (pool.length < n && guard < 500) {
+                    guard++;
+                    const num = randInt(1, 100);
+                    if (usedN.has(num)) continue;
+                    const a = toRoman(num), b = String(num);
+                    if (usedTexts.has(a) || usedTexts.has(b)) continue;
+                    usedN.add(num); usedTexts.add(a); usedTexts.add(b);
+                    pool.push([a, b]);
+                }
+                return pool;
+            }
             if (mode === 'antonymes') return pickRandomPairs(ANTONYMS, n);
 
             if (mode === 'drapeaux') {
@@ -869,6 +965,45 @@
                     const a = String(num), b = String(num * 2);
                     if (usedTexts.has(a) || usedTexts.has(b)) continue;
                     usedN.add(num); usedTexts.add(a); usedTexts.add(b);
+                    pool.push([a, b]);
+                }
+                return pool;
+            }
+
+            if (mode === 'division') {
+                const usedOps = new Set();
+                let guard = 0;
+                while (pool.length < n && guard < 500) {
+                    guard++;
+                    const x = randInt(2, 9), y = randInt(2, 9);
+                    const key = x + 'x' + y;
+                    if (usedOps.has(key)) continue;
+                    const dividend = x * y;
+                    const a = dividend + ' : ' + x, b = String(y);
+                    if (usedTexts.has(a) || usedTexts.has(b)) continue;
+                    usedOps.add(key); usedTexts.add(a); usedTexts.add(b);
+                    pool.push([a, b]);
+                }
+                return pool;
+            }
+
+            if (mode === 'decimaux') {
+                const usedFrac = new Set();
+                let guard = 0;
+                const denomChoices = [10, 100, 1000];
+                while (pool.length < n && guard < 500) {
+                    guard++;
+                    const denom = denomChoices[randInt(0, denomChoices.length - 1)];
+                    const decimals = denom === 10 ? 1 : (denom === 100 ? 2 : 3);
+                    const maxNum = denom === 10 ? 99 : (denom === 100 ? 250 : 2500);
+                    const num = randInt(1, maxNum);
+                    if (num % denom === 0) continue; // évite les fractions valant un nombre entier (trop simples)
+                    const key = num + '/' + denom;
+                    if (usedFrac.has(key)) continue;
+                    const a = num + '/' + denom;
+                    const b = (num / denom).toFixed(decimals).replace('.', ',');
+                    if (usedTexts.has(a) || usedTexts.has(b)) continue;
+                    usedFrac.add(key); usedTexts.add(a); usedTexts.add(b);
                     pool.push([a, b]);
                 }
                 return pool;
@@ -930,10 +1065,19 @@
                 back.textContent = '❓';
                 const front = document.createElement('div');
                 front.className = 'jmm-card-face jmm-card-front';
-                front.textContent = card.text;
-                front.style.setProperty('--jmm-card-bg', card.color.bg);
-                front.style.setProperty('--jmm-card-border', card.color.border);
-                front.style.setProperty('--jmm-card-text', card.color.text);
+                const fracMatch = /^(\d+)\/(\d+)$/.exec(card.text);
+                if (fracMatch) {
+                    front.innerHTML = '<span class="jmm-frac"><span class="jmm-frac-num"></span><span class="jmm-frac-den"></span></span>';
+                    front.querySelector('.jmm-frac-num').textContent = fracMatch[1];
+                    front.querySelector('.jmm-frac-den').textContent = fracMatch[2];
+                } else {
+                    front.textContent = card.text;
+                }
+                if (colorSelect.value === 'colored') {
+                    front.style.setProperty('--jmm-card-bg', card.color.bg);
+                    front.style.setProperty('--jmm-card-border', card.color.border);
+                    front.style.setProperty('--jmm-card-text', card.color.text);
+                }
                 // Les drapeaux (emoji) sont peu lisibles à la taille de police normale
                 if (/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(card.text)) {
                     front.classList.add('jmm-card-front-flag');
@@ -1017,8 +1161,6 @@
             running = true;
             paused = false;
             hideOverlay();
-            paramsPanel.classList.remove('show');
-            paramsBtn.classList.remove('active');
             pauseBtn.textContent = '⏸ Pause';
             lastTime = null;
             if (!rafId) rafId = requestAnimationFrame(gameLoop);
