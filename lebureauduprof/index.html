@@ -116,6 +116,8 @@
         }
 
         /* Masquer les éléments inutiles en mode page-garde */
+        body.mode-pagegarde #jeux-panel,
+        body.mode-pagegarde #jeux-panel-tab,
         body.mode-pagegarde #activities-panel,
         body.mode-pagegarde #activities-panel-tab,
         body.mode-pagegarde #projects-panel,
@@ -990,6 +992,7 @@ if (typeof closeMainMenu === 'undefined') {
 <script src="widget-nature-gramm.js"></script>
 <script src="widget-musique-clavier.js"></script>
 <script src="widget-loto-multi.js"></script>
+<script src="widget-jeu-tables-multi.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
@@ -1058,6 +1061,93 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 <button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF"><span class="act-tab-lbl">PDF</span><span class="act-tab-ico">📋</span></button>
 
 <script src="pdf-library.js"></script>
+
+<!-- ── Panneau latéral Jeux ──────────────────────────────────────── -->
+<div id="jeux-panel">
+    <div id="jeux-panel-resize-handle" title="Redimensionner le panneau"></div>
+    <div id="jeux-panel-header">
+        <h3>🎮 Jeux</h3>
+        <button id="jeux-panel-close" onclick="toggleJeuxPanel()" title="Fermer">✕</button>
+    </div>
+    <div id="jeux-panel-content">
+        <div class="act-section-label">🎮 Jeux en autonomie</div>
+        <div class="act-grid">
+            <div class="act-card" onclick="createWidget('jeu-tables-multi');toggleJeuxPanel()">
+                <div class="act-card-ico" style="display:flex;align-items:center;justify-content:center;font-size:2.6em;">🎯</div>
+                <div class="act-card-name">Jeu des tables de multiplication</div>
+                <div class="act-card-desc">Cliquer sur le bon résultat avant que la boule ne touche le sol</div>
+            </div>
+			<div class="act-card" onclick="createWidget('mots-alpha');toggleJeuxPanel()">
+                <div class="act-card-ico"><img src="pics/activites-ordrealpha6.jpeg" alt="Ordre alphabétique" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Ordre alphabétique</div>
+                <div class="act-card-desc">Classer des mots dans l'ordre alphabétique</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Onglet déclencheur sur le bord gauche -->
+<button id="jeux-panel-tab" onclick="toggleJeuxPanel()" title="Jeux"><span class="act-tab-lbl">Jeux</span><span class="act-tab-ico">🎮</span></button>
+
+<script>
+// ── Panneau Jeux ─────────────────────────────────────────────────
+(function() {
+    var JEUX_W_KEY = 'jeux-panel-w';
+
+    function toggleJeuxPanel() {
+        var panel = document.getElementById('jeux-panel');
+        var tab   = document.getElementById('jeux-panel-tab');
+        if (!panel) return;
+        var isOpen = panel.classList.contains('jeux-panel-open');
+        if (isOpen) {
+            panel.classList.remove('jeux-panel-open');
+            tab.classList.remove('jeux-panel-tab-open');
+        } else {
+            panel.classList.add('jeux-panel-open');
+            tab.classList.add('jeux-panel-tab-open');
+        }
+    }
+    window.toggleJeuxPanel = toggleJeuxPanel;
+
+    // Resize du panneau
+    document.addEventListener('DOMContentLoaded', function() {
+        var handle = document.getElementById('jeux-panel-resize-handle');
+        var panel  = document.getElementById('jeux-panel');
+        var tab    = document.getElementById('jeux-panel-tab');
+        if (!handle || !panel) return;
+
+        // Restaurer la largeur sauvegardée (en px), sinon utiliser 50% de la fenêtre
+        var savedW = localStorage.getItem(JEUX_W_KEY);
+        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
+        panel.style.width = initW + 'px';
+        document.documentElement.style.setProperty('--jeux-panel-w', initW + 'px');
+
+        var dragging = false, startX = 0, startW = 0;
+        handle.addEventListener('mousedown', function(e) {
+            dragging = true; startX = e.clientX;
+            startW = panel.offsetWidth;
+            panel.classList.add('jeux-panel-resizing');
+            tab.classList.add('jeux-panel-resizing');
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var maxW = Math.round(window.innerWidth * 0.5);
+            var w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
+            panel.style.width = w + 'px';
+            document.documentElement.style.setProperty('--jeux-panel-w', w + 'px');
+        });
+        document.addEventListener('mouseup', function() {
+            if (!dragging) return;
+            dragging = false;
+            panel.classList.remove('jeux-panel-resizing');
+            tab.classList.remove('jeux-panel-resizing');
+            document.body.style.cursor = '';
+            localStorage.setItem(JEUX_W_KEY, panel.offsetWidth);
+        });
+    });
+})();
+</script>
 
 <!-- ── Panneau latéral Activités ─────────────────────────────────── -->
 <div id="activities-panel">
@@ -1838,7 +1928,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
 
         // Fermeture croisée : display/history se ferment quand un autre panneau s'ouvre
         var _origPanels = [
-            'toggleActivitiesPanel','toggleToolsPanel','toggleWidgetsPanel',
+            'toggleJeuxPanel','toggleActivitiesPanel','toggleToolsPanel','toggleWidgetsPanel',
             'toggleProjectsPanel','togglePdfLibrary','toggleImagePanel','toggleStickerPanel'
         ];
         _origPanels.forEach(function(fname) {
@@ -1867,6 +1957,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
             var closers = [
                 { panelId: 'display-panel',    openClass: 'display-panel-open',    tabId: 'display-panel-tab',    tabClass: 'display-panel-tab-open' },
                 { panelId: 'history-panel',    openClass: 'history-panel-open',    tabId: 'history-panel-tab',    tabClass: 'history-panel-tab-open' },
+                { panelId: 'jeux-panel',       openClass: 'jeux-panel-open',       tabId: 'jeux-panel-tab',       tabClass: 'jeux-panel-tab-open' },
                 { panelId: 'activities-panel', openClass: 'act-panel-open',        tabId: 'activities-panel-tab', tabClass: 'act-panel-tab-open' },
                 { panelId: 'tools-panel',      openClass: 'tools-panel-open',      tabId: 'tools-panel-tab',      tabClass: 'tools-panel-tab-open' },
                 { panelId: 'widgets-panel',    openClass: 'widgets-panel-open',    tabId: 'widgets-panel-tab',    tabClass: 'widgets-panel-tab-open' },
@@ -2058,6 +2149,7 @@ document.addEventListener('pointerdown', function(e) {
 // ── Fermeture des panneaux latéraux au clic en dehors ─────────────────
 document.addEventListener('pointerdown', function(e) {
     var panels = [
+        { panel: 'jeux-panel',       tab: 'jeux-panel-tab',       openClass: 'jeux-panel-open',      tabClass: 'jeux-panel-tab-open' },
         { panel: 'activities-panel', tab: 'activities-panel-tab', openClass: 'act-panel-open',       tabClass: 'act-panel-tab-open' },
         { panel: 'tools-panel',      tab: 'tools-panel-tab',      openClass: 'tools-panel-open',     tabClass: 'tools-panel-tab-open' },
         { panel: 'widgets-panel',    tab: 'widgets-panel-tab',    openClass: 'widgets-panel-open',   tabClass: 'widgets-panel-tab-open' },
@@ -2424,6 +2516,7 @@ function toggleMediaCollapse(container) {
 (function() {
     // [id, classe CSS panneau ouvert, emoji, label]
     const TABS = [
+        ['jeux-panel-tab',       'jeux-panel-tab-open',         '🎮', 'Jeux'],
         ['activities-panel-tab', 'act-panel-tab-open',          '🎲', 'Activités'],
         ['tools-panel-tab',      'tools-panel-tab-open',        '🧰', 'Outils'],
         ['widgets-panel-tab',    'widgets-panel-tab-open',      '📦', 'Widgets'],
