@@ -261,6 +261,7 @@
             padding: 0 2px;
         }
         .jtm-score { color: #2e7d32; }
+        .jtm-timer { color: #374151; font-variant-numeric: tabular-nums; }
         .jtm-lives { letter-spacing: 2px; font-size: 15px; }
 
         /* ── Ciel de jeu ── */
@@ -445,6 +446,7 @@
         <option value="9000">🐢 Facile</option>
         <option value="6500" selected>🚶 Moyen</option>
         <option value="4200">🚀 Rapide</option>
+        <option value="progressive">⚡ Progressif (accélère toutes les 10 bonnes réponses)</option>
       </select>
     </div>
   </div>
@@ -452,6 +454,7 @@
   <!-- HUD -->
   <div class="jtm-hud">
     <span class="jtm-score">⭐ Score : 0</span>
+    <span class="jtm-timer">⏱️ 00:00</span>
     <span class="jtm-lives">❤️❤️❤️</span>
   </div>
 
@@ -476,10 +479,10 @@
     <h4>💡 Comment utiliser ce widget ?</h4>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">⚙ Le bouton Paramètres</p>
     <p style="margin:0 0 6px"><b>Tables à réviser</b> — Coche ou décoche les tables (de 2 à 9 ; les tables du 0 et du 1 ne sont pas proposées) que tu veux voir apparaître dans le jeu.</p>
-    <p style="margin:0 0 10px"><b>Vitesse de chute</b> — Choisis la vitesse à laquelle les boules tombent.</p>
+    <p style="margin:0 0 10px"><b>Vitesse de chute</b> — Choisis la vitesse à laquelle les boules tombent : Facile, Moyen, Rapide, ou <b>Progressif</b> (la vitesse augmente automatiquement toutes les 10 bonnes réponses, et peut finir par dépasser le mode Rapide).</p>
     <p style="margin:0 0 8px;font-weight:700;color:#374151">🎮 Comment jouer ?</p>
     <p style="margin:0 0 6px">Des boules tombent du ciel avec une opération (ex. 7 × 8). Les 3 résultats proposés apparaissent tout de suite au niveau du sol, de la même couleur que la boule à laquelle ils correspondent. Clique sur le bon résultat avant que la boule n'atteigne ses réponses.</p>
-    <p style="margin:0 0 6px">Une bonne réponse rapporte un point. Une mauvaise réponse ou une boule non traitée fait perdre une vie ❤️.</p>
+    <p style="margin:0 0 6px">Une bonne réponse rapporte un point. Une mauvaise réponse ou une boule non traitée fait perdre une vie ❤️. Un chrono ⏱️ affiche le temps écoulé depuis le début de la partie.</p>
     <p style="margin:0 0 0;font-style:italic;color:#888">La partie se termine quand les 3 vies sont perdues. Clique sur <b>🔄 Réinitialiser</b> pour rejouer.</p>
   </div>
 
@@ -504,6 +507,7 @@
         const helpPopup      = widget.querySelector('.jtm-help-popup');
         const resizeHandle   = widget.querySelector('.jtm-resize-handle');
         const scoreEl        = widget.querySelector('.jtm-score');
+        const timerEl         = widget.querySelector('.jtm-timer');
         const livesEl         = widget.querySelector('.jtm-lives');
         const sky             = widget.querySelector('.jtm-sky');
         const overlay         = widget.querySelector('.jtm-overlay');
@@ -516,7 +520,7 @@
         // ── État du jeu ──────────────────────────────────────────────────
         const MAX_LIVES = 3;
         let activeTables   = new Set([2,3,4,5,6,7,8,9]); // tables du 0 et du 1 exclues (trop triviales)
-        let fallDuration   = 6500; // ms
+        let fallDuration   = 6500; // ms (vitesse effective courante)
         let score          = 0;
         let lives          = MAX_LIVES;
         let running        = false; // partie démarrée (avant game over)
@@ -527,6 +531,17 @@
         let rafId          = null;
         let destroyed      = false;
         let ballDiameterPx = 110;  // tenu à jour par applyFontScale()
+
+        // ── Mode de vitesse progressive : accélère toutes les 10 bonnes réponses ──
+        const PROGRESSIVE_START_DURATION = 7500;  // ms, vitesse de départ (≈ Facile)
+        const PROGRESSIVE_MIN_DURATION   = 900;   // ms, plancher (bien plus rapide que Difficile)
+        const PROGRESSIVE_DECAY          = 0.75;  // facteur multiplicatif appliqué tous les 10 points (-25% à chaque palier)
+        let isProgressiveMode = false;
+        let lastProgressiveMilestone = 0; // dernier palier de 10 points déjà appliqué
+
+        // ── Chrono de la partie ───────────────────────────────────────────
+        let elapsedMs = 0;
+        let lastShownSeconds = -1;
 
         // ── Couloirs de chute : chaque boule occupe un couloir dédié pour
         //    que les groupes de réponses (fixés au sol) ne se chevauchent jamais ──
@@ -615,8 +630,31 @@
         paramsPanel.addEventListener('pointerdown', (e) => e.stopPropagation());
         speedSelect.addEventListener('pointerdown', (e) => e.stopPropagation());
         speedSelect.addEventListener('change', () => {
-            fallDuration = parseInt(speedSelect.value, 10) || 6500;
+            applySpeedSelection();
         });
+
+        function applySpeedSelection() {
+            if (speedSelect.value === 'progressive') {
+                isProgressiveMode = true;
+                fallDuration = PROGRESSIVE_START_DURATION;
+                lastProgressiveMilestone = 0;
+            } else {
+                isProgressiveMode = false;
+                fallDuration = parseInt(speedSelect.value, 10) || 6500;
+            }
+        }
+
+        // Vérifie si un nouveau palier de 10 bonnes réponses est atteint et,
+        // si oui, augmente la vitesse (réduit la durée de chute), sans jamais
+        // descendre sous le plancher défini.
+        function maybeAdvanceProgressiveSpeed() {
+            if (!isProgressiveMode) return;
+            const milestone = Math.floor(score / 10);
+            if (milestone > lastProgressiveMilestone) {
+                lastProgressiveMilestone = milestone;
+                fallDuration = Math.max(PROGRESSIVE_MIN_DURATION, Math.round(PROGRESSIVE_START_DURATION * Math.pow(PROGRESSIVE_DECAY, milestone)));
+            }
+        }
 
         // ── Aide ─────────────────────────────────────────────────────────
         makeTap(helpBtn, () => { helpPopup.classList.toggle('show'); });
@@ -715,9 +753,23 @@
         // LOGIQUE DU JEU
         // =====================================================================
 
+        function formatTime(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const mm = Math.floor(totalSec / 60).toString().padStart(2, '0');
+            const ss = (totalSec % 60).toString().padStart(2, '0');
+            return mm + ':' + ss;
+        }
+
         function updateHUD() {
             scoreEl.textContent = '⭐ Score : ' + score;
             livesEl.textContent = '❤️'.repeat(Math.max(0, lives)) + '🤍'.repeat(Math.max(0, MAX_LIVES - lives));
+        }
+
+        function updateTimerDisplay(force) {
+            const sec = Math.floor(elapsedMs / 1000);
+            if (!force && sec === lastShownSeconds) return;
+            lastShownSeconds = sec;
+            timerEl.textContent = '⏱️ ' + formatTime(elapsedMs);
         }
 
         function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -816,6 +868,7 @@
             if (isCorrect) {
                 score++;
                 ballObj.el.classList.add('correct');
+                maybeAdvanceProgressiveSpeed();
             } else {
                 lives--;
                 ballObj.el.classList.add('wrong');
@@ -878,7 +931,10 @@
             if (running && !paused) return;
             if (!running) {
                 score = 0; lives = MAX_LIVES; clearAllBalls();
+                elapsedMs = 0; lastShownSeconds = -1;
+                applySpeedSelection();
                 updateHUD();
+                updateTimerDisplay(true);
             }
             running = true;
             paused = false;
@@ -917,9 +973,12 @@
         function resetGame() {
             clearAllBalls();
             computeLanes();
+            applySpeedSelection();
             score = 0; lives = MAX_LIVES; running = false; paused = true;
             spawnAccum = 0; lastTime = null;
+            elapsedMs = 0; lastShownSeconds = -1;
             updateHUD();
+            updateTimerDisplay(true);
             showOverlay('🎯 Tables de multiplication', 'Clique sur le bon résultat avant que la boule touche le sol !', '▶ Démarrer');
         }
 
@@ -930,6 +989,9 @@
             lastTime = now;
 
             if (running && !paused) {
+                elapsedMs += dt;
+                updateTimerDisplay(false);
+
                 spawnAccum += dt;
                 const curSpawnInterval = Math.max(1300, fallDuration / 2.6);
                 if (spawnAccum >= curSpawnInterval) {
