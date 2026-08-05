@@ -994,6 +994,7 @@ if (typeof closeMainMenu === 'undefined') {
 <script src="widget-loto-multi.js"></script>
 <script src="widget-jeu-tables-multi.js"></script>
 <script src="widget-jeu-memory.js"></script>
+<script src="widget-jeu-conju.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
@@ -1087,6 +1088,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/jeux-memory.png" alt="Memory" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Jeu de memory</div>
                 <div class="act-card-desc">Retrouver les paires (tables, doubles, ou contenu personnalisé)</div>
+            </div>
+			<div class="act-card" onclick="createWidget('jeu-conju');toggleJeuxPanel()">
+                <div class="act-card-ico"><img src="pics/jeux-conju.png" alt="Conju" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Jeu de conjugaison</div>
+                <div class="act-card-desc">Glisser les verbes conjugués dans le bon temps (présent, futur, imparfait, passé composé)</div>
             </div>
         </div>
     </div>
