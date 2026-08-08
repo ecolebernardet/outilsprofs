@@ -139,7 +139,8 @@
             box-shadow: 0 4px 18px rgba(0,0,0,0.12);
             position: relative;
             user-select: none;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             width: 620px;
         }
         .ceb-container input, .ceb-container select, .ceb-container textarea {
@@ -161,6 +162,10 @@
             border-radius: 0 !important;
             overflow-y: auto;
             padding-left: 40px !important;
+        }
+        .ceb-container.wf-fullboard .ceb-history-zone {
+            max-height: none;
+            overflow-y: visible;
         }
 
         /* ── En-tête ── */
@@ -302,33 +307,53 @@
         .ceb-tile.grand.selected { background: #fed7aa; border-color: #c2410c; color: #7c2d12; }
 
         /* ── Zone opérations (calcul en cours) ── */
+        .ceb-solution-host {
+            position: relative;
+        }
+        .ceb-solution-content {
+            display: flex;
+            flex-direction: column;
+            gap: calc(10px * var(--ceb-s));
+            transition: filter .15s;
+        }
+        .ceb-solution-content.ceb-blur-behind {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
         .ceb-ops-zone {
             display: flex;
             flex-direction: column;
-            gap: calc(6px * var(--ceb-s));
+            align-items: center;
+            gap: calc(8px * var(--ceb-s));
+            min-height: calc(120px * var(--ceb-s));
+            justify-content: center;
         }
         .ceb-ops-title {
-            font-size: calc(11px * var(--ceb-s));
+            font-size: calc(13px * var(--ceb-s));
             font-weight: 700;
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.4px;
+            text-align: center;
         }
         .ceb-op-row {
             display: flex;
             align-items: center;
-            gap: calc(6px * var(--ceb-s));
+            justify-content: center;
+            gap: calc(8px * var(--ceb-s));
             flex-wrap: wrap;
+            width: 100%;
         }
         .ceb-op-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: calc(50px * var(--ceb-s));
-            height: calc(40px * var(--ceb-s));
-            padding: 0 calc(10px * var(--ceb-s));
-            border-radius: calc(8px * var(--ceb-s));
-            font-size: calc(18px * var(--ceb-s));
+            min-width: calc(64px * var(--ceb-s));
+            height: calc(52px * var(--ceb-s));
+            padding: 0 calc(12px * var(--ceb-s));
+            border-radius: calc(10px * var(--ceb-s));
+            font-size: calc(24px * var(--ceb-s));
             font-weight: 800;
             background: #f3f4f6;
             border: calc(1.5px * var(--ceb-s)) dashed #d1d5db;
@@ -345,19 +370,19 @@
             background: #eff6ff;
             border-color: #93c5fd;
             color: #1d4ed8;
-            font-size: calc(16px * var(--ceb-s));
+            font-size: calc(22px * var(--ceb-s));
         }
         .ceb-op-btns {
             display: flex;
-            gap: calc(4px * var(--ceb-s));
+            gap: calc(6px * var(--ceb-s));
         }
         .ceb-op-btn {
-            width: calc(36px * var(--ceb-s));
-            height: calc(36px * var(--ceb-s));
-            border-radius: calc(8px * var(--ceb-s));
+            width: calc(46px * var(--ceb-s));
+            height: calc(46px * var(--ceb-s));
+            border-radius: calc(10px * var(--ceb-s));
             border: calc(1.5px * var(--ceb-s)) solid #d1d5db;
             background: white;
-            font-size: calc(18px * var(--ceb-s));
+            font-size: calc(22px * var(--ceb-s));
             font-weight: 900;
             color: #374151;
             cursor: pointer;
@@ -373,26 +398,33 @@
         .ceb-history-zone {
             display: flex;
             flex-direction: column;
-            gap: calc(4px * var(--ceb-s));
-            max-height: calc(150px * var(--ceb-s));
+            align-items: center;
+            gap: calc(6px * var(--ceb-s));
+            max-height: calc(190px * var(--ceb-s));
             overflow-y: auto;
+            scroll-behavior: smooth;
+            padding-bottom: calc(2px * var(--ceb-s));
+            width: 100%;
         }
         .ceb-history-step {
             display: flex;
             align-items: center;
-            gap: calc(8px * var(--ceb-s));
-            padding: calc(5px * var(--ceb-s)) calc(10px * var(--ceb-s));
+            gap: calc(10px * var(--ceb-s));
+            padding: calc(7px * var(--ceb-s)) calc(14px * var(--ceb-s));
             background: #f8f9fa;
             border: 1px solid #e5e7eb;
-            border-radius: calc(8px * var(--ceb-s));
-            font-size: calc(13px * var(--ceb-s));
+            border-radius: calc(10px * var(--ceb-s));
+            font-size: calc(16px * var(--ceb-s));
+            width: 90%;
+            max-width: calc(420px * var(--ceb-s));
+            box-sizing: border-box;
         }
         .ceb-history-step .step-expr { font-weight: 700; color: #374151; flex: 1; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
-        .ceb-history-step .step-result { font-weight: 800; color: #1d4ed8; min-width: calc(42px * var(--ceb-s)); text-align: right; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
+        .ceb-history-step .step-result { font-weight: 800; color: #1d4ed8; min-width: calc(48px * var(--ceb-s)); text-align: right; font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; }
         .ceb-history-step .step-del {
-            width: calc(18px * var(--ceb-s)); height: calc(18px * var(--ceb-s)); border-radius: 50%;
+            width: calc(20px * var(--ceb-s)); height: calc(20px * var(--ceb-s)); border-radius: 50%;
             border: none; background: #fee2e2; color: #dc3545;
-            font-size: calc(11px * var(--ceb-s)); font-weight: 900; cursor: pointer;
+            font-size: calc(12px * var(--ceb-s)); font-weight: 900; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; transition: background .1s;
         }
@@ -404,9 +436,12 @@
         .ceb-result-zone {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: calc(8px * var(--ceb-s));
             min-height: calc(30px * var(--ceb-s));
             flex-wrap: wrap;
+            text-align: center;
+            width: 100%;
         }
         .ceb-result-text {
             font-size: calc(20px * var(--ceb-s));
@@ -419,19 +454,39 @@
         .ceb-result-text.proche { color: #d97706; }
         .ceb-result-text.loin   { color: #dc3545; }
 
-        /* ── Zone solution (révélée) ── */
+        /* ── Zone solution (révélée) — superposée à l'opération en cours ── */
         .ceb-solution-zone {
             display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: auto;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: calc(10px * var(--ceb-s));
+            z-index: 5;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
             padding: calc(10px * var(--ceb-s));
+        }
+        .ceb-solution-zone.show { display: flex; }
+        .ceb-solution-card {
             background: #f0fff4;
             border: 1px solid #86efac;
             border-radius: calc(10px * var(--ceb-s));
-            font-size: calc(12px * var(--ceb-s));
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            padding: calc(16px * var(--ceb-s)) calc(22px * var(--ceb-s));
+            font-size: calc(23px * var(--ceb-s));
             color: #166534;
-            line-height: 1.7;
+            line-height: 1.8;
+            text-align: center;
+            max-width: 100%;
+            box-sizing: border-box;
         }
-        .ceb-solution-zone.show { display: block; }
-        .ceb-solution-zone strong { font-size: calc(13px * var(--ceb-s)); }
+        .ceb-solution-card strong { font-size: calc(24px * var(--ceb-s)); }
 
         /* ── Bouton aide ── */
         .ceb-help-btn {
@@ -761,35 +816,41 @@
             <!-- Plaques tirées -->
             <div class="ceb-tiles-zone"></div>
 
-            <!-- Opération en cours -->
-            <div class="ceb-ops-zone">
-                <div class="ceb-ops-title">Opération en cours</div>
-                <div class="ceb-op-row">
-                    <div class="ceb-op-box" data-role="op-a">?</div>
-                    <div class="ceb-op-btns">
-                        <button class="ceb-op-btn" data-op="+">+</button>
-                        <button class="ceb-op-btn" data-op="−">−</button>
-                        <button class="ceb-op-btn" data-op="×">×</button>
-                        <button class="ceb-op-btn" data-op="÷">÷</button>
+            <!-- Opération en cours + Historique + Résultat, avec superposition solution -->
+            <div class="ceb-solution-host">
+                <div class="ceb-solution-content">
+                    <!-- Opération en cours -->
+                    <div class="ceb-ops-zone">
+                        <div class="ceb-ops-title">Opération en cours</div>
+                        <div class="ceb-op-row">
+                            <div class="ceb-op-box" data-role="op-a">?</div>
+                            <div class="ceb-op-btns">
+                                <button class="ceb-op-btn" data-op="+">+</button>
+                                <button class="ceb-op-btn" data-op="−">−</button>
+                                <button class="ceb-op-btn" data-op="×">×</button>
+                                <button class="ceb-op-btn" data-op="÷">÷</button>
+                            </div>
+                            <div class="ceb-op-box" data-role="op-b">?</div>
+                            <div style="font-size:18px;font-weight:900;color:#9ca3af">=</div>
+                            <div class="ceb-op-box result" data-role="op-result">?</div>
+                            <button class="ceb-btn" id="ceb-validate-btn" style="background:#16a34a;color:white;display:none">✓ Valider</button>
+                        </div>
                     </div>
-                    <div class="ceb-op-box" data-role="op-b">?</div>
-                    <div style="font-size:18px;font-weight:900;color:#9ca3af">=</div>
-                    <div class="ceb-op-box result" data-role="op-result">?</div>
-                    <button class="ceb-btn" id="ceb-validate-btn" style="background:#16a34a;color:white;display:none">✓ Valider</button>
+
+                    <!-- Historique -->
+                    <div class="ceb-ops-title" style="font-size:calc(13px * var(--ceb-s));font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.4px;text-align:center">Mes calculs</div>
+                    <div class="ceb-history-zone"></div>
+
+                    <!-- Résultat -->
+                    <div class="ceb-result-zone">
+                        <span class="ceb-result-text"></span>
+                    </div>
+                </div>
+                <!-- Solution révélée (superposée à l'opération en cours + historique + résultat) -->
+                <div class="ceb-solution-zone">
+                    <div class="ceb-solution-card"></div>
                 </div>
             </div>
-
-            <!-- Historique -->
-            <div class="ceb-ops-title" style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.4px">Mes calculs</div>
-            <div class="ceb-history-zone"></div>
-
-            <!-- Résultat -->
-            <div class="ceb-result-zone">
-                <span class="ceb-result-text"></span>
-            </div>
-
-            <!-- Solution révélée -->
-            <div class="ceb-solution-zone"></div>
 
             <!-- Popup aide -->
             <div class="ceb-help-popup">
@@ -845,6 +906,8 @@
         const historyZone = container.querySelector('.ceb-history-zone');
         const resultText  = container.querySelector('.ceb-result-text');
         const solutionZone= container.querySelector('.ceb-solution-zone');
+        const solutionCard= container.querySelector('.ceb-solution-card');
+        const opsZone     = container.querySelector('.ceb-solution-content');
         const helpBtn     = container.querySelector('.ceb-help-btn');
         const helpPopup   = container.querySelector('.ceb-help-popup');
 
@@ -885,7 +948,8 @@
             solBtn.textContent = '👁 Voir la solution';
             solBtn.classList.remove('revealed');
             solutionZone.classList.remove('show');
-            solutionZone.innerHTML = '';
+            solutionCard.innerHTML = '';
+            opsZone.classList.remove('ceb-blur-behind');
 
             // Initialiser les tuiles disponibles
             nextId = 100;
@@ -1113,6 +1177,8 @@
                 row.querySelector('.step-del').addEventListener('click', () => undoStep(i));
                 historyZone.appendChild(row);
             });
+            // Faire défiler vers le bas pour que la dernière opération soit toujours entièrement visible
+            historyZone.scrollTop = historyZone.scrollHeight;
         }
 
         // ── Vérifier si on a gagné / afficher le meilleur résultat ─────────
@@ -1183,16 +1249,31 @@
                     const header = diff === 0
                         ? `<strong>✅ Solution exacte :</strong>`
                         : `<strong>⚠️ Meilleure approche trouvée (à ${diff} près) :</strong>`;
-                    solutionZone.innerHTML = header + '<br>' + sol.steps.map(s => `<span>→ ${s}</span>`).join('<br>');
+                    solutionCard.innerHTML = header + '<br>' + sol.steps.map(s => `<span>→ ${s}</span>`).join('<br>');
                 } else {
-                    solutionZone.innerHTML = '<strong>Aucune solution trouvée.</strong>';
+                    solutionCard.innerHTML = '<strong>Aucune solution trouvée.</strong>';
                 }
                 solutionZone.classList.add('show');
+                opsZone.classList.add('ceb-blur-behind');
+                // Le conteneur solution-host a une hauteur automatique basée sur son
+                // contenu normal (opération + historique + résultat). Comme un % de
+                // hauteur ne fonctionne pas sur un enfant absolu dont l'ancêtre n'a
+                // pas de hauteur explicite, on fixe la hauteur de la superposition
+                // en JS pour qu'elle couvre TOUJOURS au moins tout ce contenu (et
+                // davantage si la carte solution est elle-même plus haute), afin
+                // que rien ne reste net/visible en dessous.
+                requestAnimationFrame(() => {
+                    const contentH = opsZone.offsetHeight;
+                    const cardH = solutionCard.offsetHeight + 20; // + padding de la superposition
+                    solutionZone.style.height = Math.max(contentH, cardH) + 'px';
+                });
             } else {
                 solutionShown = false;
                 solBtn.textContent = '👁 Voir la solution';
                 solBtn.classList.remove('revealed');
                 solutionZone.classList.remove('show');
+                solutionZone.style.height = '';
+                opsZone.classList.remove('ceb-blur-behind');
             }
         });
 
