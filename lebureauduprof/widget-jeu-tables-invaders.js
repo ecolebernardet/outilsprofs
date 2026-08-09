@@ -288,37 +288,64 @@
             padding: 2px 12px;
         }
 
-        /* ── Espace de jeu (ciel clair étoilé, façon jour de lancement) ── */
+        /* ── Espace de jeu (fond noir étoilé façon arcade Space Invaders) ── */
         .jti-space {
             flex: 1;
             min-height: 120px;
             position: relative;
             border-radius: 12px;
-            background: linear-gradient(180deg, #dbe9ff 0%, #eaf2ff 55%, #f3f0ff 100%);
-            border: 1.5px solid #c3d6f5;
+            background: radial-gradient(ellipse at 50% 0%, #0d0d1f 0%, #05050c 55%, #000000 100%);
+            border: 1.5px solid #2a2a3e;
             overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
         }
+        /* Couche 1 : petites étoiles scintillantes */
         .jti-space::before {
             content: '';
             position: absolute; inset: 0;
             background-image:
-                radial-gradient(1.6px 1.6px at 20px 30px, #b9c9f2, transparent),
-                radial-gradient(1.2px 1.2px at 90px 80px, #b9c9f2, transparent),
-                radial-gradient(1.6px 1.6px at 150px 20px, #b9c9f2, transparent),
-                radial-gradient(1.2px 1.2px at 200px 95px, #b9c9f2, transparent),
-                radial-gradient(1.2px 1.2px at 260px 40px, #b9c9f2, transparent),
-                radial-gradient(1.6px 1.6px at 320px 110px, #b9c9f2, transparent);
+                radial-gradient(1.6px 1.6px at 20px 30px, #ffffff, transparent),
+                radial-gradient(1.2px 1.2px at 90px 80px, #ffffff, transparent),
+                radial-gradient(1.6px 1.6px at 150px 20px, #ffffff, transparent),
+                radial-gradient(1.2px 1.2px at 200px 95px, #ffffff, transparent),
+                radial-gradient(1.2px 1.2px at 260px 40px, #ffffff, transparent),
+                radial-gradient(1.6px 1.6px at 320px 110px, #ffffff, transparent),
+                radial-gradient(1.3px 1.3px at 40px 130px, #ffffff, transparent),
+                radial-gradient(1.5px 1.5px at 280px 15px, #ffffff, transparent);
             background-repeat: repeat;
             background-size: 340px 150px;
-            opacity: 0.6;
+            opacity: 0.85;
             pointer-events: none;
+            animation: jti-twinkle 3.2s ease-in-out infinite;
+        }
+        /* Couche 2 : étoiles plus fines, décalées, clignotement différent (profondeur) */
+        .jti-space::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(1px 1px at 60px 10px, #9ad8ff, transparent),
+                radial-gradient(1px 1px at 130px 70px, #9ad8ff, transparent),
+                radial-gradient(1px 1px at 190px 30px, #ffffff, transparent),
+                radial-gradient(1px 1px at 250px 100px, #9ad8ff, transparent),
+                radial-gradient(1px 1px at 305px 60px, #ffffff, transparent),
+                radial-gradient(1px 1px at 10px 90px, #9ad8ff, transparent);
+            background-repeat: repeat;
+            background-size: 260px 140px;
+            opacity: 0.5;
+            pointer-events: none;
+            animation: jti-twinkle 4.4s ease-in-out infinite 1.1s;
+        }
+        @keyframes jti-twinkle {
+            0%, 100% { opacity: 0.35; }
+            50% { opacity: 0.95; }
         }
         .jti-ground {
             position: absolute;
             left: 0; right: 0; bottom: 0;
             height: 14px;
-            background: repeating-linear-gradient(90deg, #c9b8ff 0 14px, #b7a3f2 14px 28px);
-            border-top: 2px solid #8a6fe0;
+            background: repeating-linear-gradient(90deg, #39ff6a 0 14px, #1fb84e 14px 28px);
+            border-top: 2px solid #0d7a2e;
+            box-shadow: 0 0 10px rgba(57,255,106,0.35);
         }
         .jti-ground.flash { animation: jti-ground-flash .4s ease; }
         @keyframes jti-ground-flash {

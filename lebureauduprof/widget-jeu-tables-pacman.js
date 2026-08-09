@@ -297,27 +297,29 @@
             min-height: 160px;
             position: relative;
             border-radius: 12px;
-            background: #eef1fb;
-            border: 1.5px solid #c3cdf5;
+            background: #000000;
+            border: 1.5px solid #10102a;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             touch-action: none;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.7);
         }
         .jtp-maze-layer {
             position: relative;
-            background-color: #f7f8fd;
-            background-image: radial-gradient(#cfd6f7 1.4px, transparent 1.4px);
+            background-color: #000000;
+            background-image: radial-gradient(#ffd400 1.3px, transparent 1.3px);
+            background-size: 22px 22px;
             border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(74,123,240,0.12);
+            box-shadow: 0 0 0 1px #0b0b2a, inset 0 0 24px rgba(33,54,255,0.15);
             flex-shrink: 0;
         }
         .jtp-wall {
             position: absolute;
-            background: linear-gradient(145deg, #7b8cf0, #4a5bd0);
+            background: linear-gradient(145deg, #3947ff, #1015b0);
             border-radius: 4px;
-            box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.25);
+            box-shadow: inset 0 0 0 1.5px rgba(140,160,255,0.55), 0 0 6px rgba(51,84,255,0.75), 0 0 1px rgba(180,195,255,0.9);
         }
 
         /* ── Pac-Man ── */
@@ -330,7 +332,7 @@
             position: absolute; inset: 0;
             border-radius: 50%;
             background: #ffd400;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+            box-shadow: 0 0 10px rgba(255,212,0,0.7), 0 2px 5px rgba(0,0,0,0.4);
             animation: jtp-chomp 0.32s linear infinite;
         }
         @keyframes jtp-chomp {
@@ -341,9 +343,9 @@
         /* ── Fantôme ── */
         .jtp-ghost {
             position: absolute;
-            border-radius: 50% 50% 0 0 / 62% 62% 0 0;
-            background: linear-gradient(160deg, #ff8ba0, #e94560);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+            clip-path: polygon(0% 45%, 6% 20%, 22% 3%, 50% 0%, 78% 3%, 94% 20%, 100% 45%, 100% 100%, 85% 82%, 70% 100%, 55% 82%, 45% 82%, 30% 100%, 15% 82%, 0% 100%);
+            background: linear-gradient(160deg, #ff5c68, #e02030);
+            box-shadow: 0 0 8px rgba(224,32,48,0.6);
             z-index: 4;
             box-sizing: border-box;
             animation: jtp-bob 0.5s ease-in-out infinite alternate;
@@ -351,33 +353,33 @@
         .jtp-ghost::before, .jtp-ghost::after {
             content: '';
             position: absolute;
-            top: 32%;
-            width: 22%; height: 22%;
-            background: #fff;
+            top: 30%;
+            width: 24%; height: 24%;
+            background: radial-gradient(circle at 50% 62%, #1a2ad0 24%, #ffffff 27%);
             border-radius: 50%;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
         }
-        .jtp-ghost::before { left: 20%; }
-        .jtp-ghost::after  { right: 20%; }
+        .jtp-ghost::before { left: 16%; }
+        .jtp-ghost::after  { right: 16%; }
         @keyframes jtp-bob {
             0% { transform: translateY(0); }
             100% { transform: translateY(-3%); }
         }
-        .jtp-ghost.hit { filter: grayscale(0.5) brightness(1.3); }
+        .jtp-ghost.hit { filter: grayscale(0.4) brightness(1.5) hue-rotate(160deg); }
 
         /* ── Pastille-résultat ── */
         .jtp-pellet {
             position: absolute;
             border-radius: 50%;
             background: #fffdf5;
-            border: 2.5px solid #f4b400;
+            border: 2.5px solid #ffd400;
             color: #8a6d00;
             font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+            box-shadow: 0 0 10px rgba(255,212,0,0.55), 0 2px 5px rgba(0,0,0,0.35);
             z-index: 3;
             transition: transform .18s ease, opacity .3s ease;
         }
@@ -1079,6 +1081,7 @@
                     ghost.row = GHOST_START.r; ghost.col = GHOST_START.c; ghost.dir = null;
                     positionEntity(pacmanEl, pacman.row, pacman.col, true);
                     positionEntity(ghostEl, ghost.row, ghost.col, true);
+                    applyTransitionDurations();
                     pacmanEl.style.transform = 'rotate(0deg)';
                     ghostEl.classList.remove('hit');
                     invulnerable = false;
