@@ -259,14 +259,10 @@ function _buildImagePanel() {
     // Onglet actif par défaut = première catégorie
     _imagePanelActiveTab = window.IMAGE_CATEGORIES[0]?.id || null;
 
-    const panel = document.createElement('div');
-    panel.id = 'image-panel';
-    panel.innerHTML = `
-        <div id="image-panel-resize-handle" title="Redimensionner le panneau"></div>
-        <div id="image-panel-header">
-            <h3>🖼️ Images</h3>
-            <button id="image-panel-close" title="Fermer">×</button>
-        </div>
+    const section = document.getElementById('sp-images-section');
+    if (!section) return; // panneau Visuels absent de la page
+
+    section.innerHTML = `
         <div id="image-panel-search">
             <input type="text" id="image-search-input" placeholder="🔍 Rechercher une image…">
         </div>
@@ -281,46 +277,6 @@ function _buildImagePanel() {
             <input type="file" id="image-upload-input" accept="image/*" multiple>
         </div>
     `;
-    document.body.appendChild(panel);
-
-    // ── Resize du panneau images ──────────────────────────────────────
-    (function() {
-        const IP_W_KEY = 'image-panel-w';
-        const handle = document.getElementById('image-panel-resize-handle');
-        const tab    = document.getElementById('image-panel-tab');
-        if (!handle) return;
-
-        const savedW = localStorage.getItem(IP_W_KEY);
-        const initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.3);
-        panel.style.width = initW + 'px';
-        document.documentElement.style.setProperty('--image-panel-w', initW + 'px');
-
-        let dragging = false, startX = 0, startW = 0;
-        handle.addEventListener('mousedown', function(e) {
-            dragging = true; startX = e.clientX; startW = panel.offsetWidth;
-            panel.classList.add('image-panel-resizing');
-            if (tab) tab.classList.add('image-panel-resizing');
-            document.body.style.cursor = 'ew-resize';
-            e.preventDefault();
-        });
-        document.addEventListener('mousemove', function(e) {
-            if (!dragging) return;
-            const maxW = Math.round(window.innerWidth * 0.5);
-            const w = Math.max(260, Math.min(maxW, startW + e.clientX - startX));
-            panel.style.width = w + 'px';
-            document.documentElement.style.setProperty('--image-panel-w', w + 'px');
-        });
-        document.addEventListener('mouseup', function() {
-            if (!dragging) return;
-            dragging = false;
-            panel.classList.remove('image-panel-resizing');
-            if (tab) tab.classList.remove('image-panel-resizing');
-            document.body.style.cursor = '';
-            localStorage.setItem(IP_W_KEY, panel.offsetWidth);
-        });
-    })();
-
-    document.getElementById('image-panel-close').addEventListener('click', closeImagePanel);
 
     // Onglets — un bouton par catégorie
     const tabsContainer = document.getElementById('image-panel-tabs');
@@ -987,45 +943,31 @@ function _restoreAnchoredImages() {
 }
 
 // ── Ouverture / fermeture du panneau ─────────────────────────────────────
+// Le panneau Images est désormais fusionné dans le panneau "Visuels"
+// (#sticker-panel), sous forme de 3e mode aux côtés de Animés/Classiques.
+// Ces fonctions restent disponibles pour compatibilité (ex : postMessage
+// depuis la page de garde) et pilotent le panneau fusionné.
 function toggleImagePanel() {
-    _buildImagePanel();
-    const panel = document.getElementById('image-panel');
-    if (!panel) return;
-    const isOpen = panel.classList.contains('active');
-    if (isOpen) {
-        closeImagePanel();
-    } else {
-        // Fermer les autres panneaux latéraux si nécessaire
-        const stickerPanel = document.getElementById('sticker-panel');
-        if (stickerPanel && stickerPanel.classList.contains('active')) {
-            stickerPanel.classList.remove('active');
-            const sb = document.getElementById('sticker-btn');
-            if (sb) sb.classList.remove('active-tool');
-            const st = document.getElementById('sticker-panel-tab');
-            if (st) st.classList.remove('active');
-        }
-        panel.classList.add('active');
-        const tab = document.getElementById('image-panel-tab');
-        if (tab) tab.classList.add('active');
+    const panel = document.getElementById('sticker-panel');
+    const section = document.getElementById('sp-images-section');
+    const isOpenOnImages = !!(panel && panel.classList.contains('active') && section && section.style.display === 'flex');
+    if (isOpenOnImages) {
+        if (typeof toggleStickerPanel === 'function') toggleStickerPanel();
+        return;
     }
+    if (!panel || !panel.classList.contains('active')) {
+        if (typeof toggleStickerPanel === 'function') toggleStickerPanel();
+    }
+    if (typeof setVisuelsMode === 'function') setVisuelsMode('images');
 }
 
 function closeImagePanel() {
-    const panel = document.getElementById('image-panel');
-    if (panel) panel.classList.remove('active');
-    const tab = document.getElementById('image-panel-tab');
-    if (tab) tab.classList.remove('active');
+    // Le panneau Images est fusionné dans le panneau Visuels (#sticker-panel).
+    // stickers.js appelle closeImagePanel() à CHAQUE ouverture du panneau Visuels
+    // (héritage de l'époque où il existait un panneau images séparé) — si cette
+    // fonction fermait le panneau, elle l'ouvrirait puis le refermerait aussitôt.
+    // On la garde en no-op uniquement pour compatibilité.
 }
-
-// Fermer le panneau au clic en dehors
-document.addEventListener('mousedown', (e) => {
-    const panel = document.getElementById('image-panel');
-    if (!panel || !panel.classList.contains('active')) return;
-    if (panel.contains(e.target)) return;
-    if (e.target.closest('#image-panel-btn')) return;
-    if (e.target.closest('#image-panel-tab')) return;
-    closeImagePanel();
-});
 
 // ── Injection CSS menu contextuel image ───────────────────────────────────
 (function _injectImgCtxMenuCSS() {
@@ -1105,14 +1047,3 @@ document.addEventListener('DOMContentLoaded', () => {
 // Filet de sécurité sur document en capture
 document.addEventListener('contextmenu', _handleImageWidgetContextMenu, true);
 
-// Créer l'onglet déclencheur dès le chargement de la page
-document.addEventListener('DOMContentLoaded', () => {
-    if (!document.getElementById('image-panel-tab')) {
-        const tab = document.createElement('button');
-        tab.id = 'image-panel-tab';
-        tab.title = 'Images';
-        tab.innerHTML = '<span class="act-tab-lbl">Images</span><span class="act-tab-ico">🖼️</span>';
-        tab.addEventListener('click', toggleImagePanel);
-        document.body.appendChild(tab);
-    }
-});

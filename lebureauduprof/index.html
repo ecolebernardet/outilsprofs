@@ -122,8 +122,6 @@
         body.mode-pagegarde #activities-panel-tab,
         body.mode-pagegarde #projects-panel,
         body.mode-pagegarde #projects-panel-tab,
-        body.mode-pagegarde #pdf-library-panel,
-        body.mode-pagegarde #pdf-library-tab,
         body.mode-pagegarde #tools-panel,
         body.mode-pagegarde #tools-panel-tab,
         body.mode-pagegarde #pres-mode-tab,
@@ -142,7 +140,6 @@
         body.mode-pagegarde #widgets-panel-tab,
         body.mode-pagegarde #sticker-panel-tab,
         body.mode-pagegarde #display-panel-tab,
-        body.mode-pagegarde #image-panel-tab,
         body.mode-pagegarde #draw-fab-btn,
         body.mode-pagegarde #sticker-mode-bar,
         body.mode-pagegarde #sp-animated-section {
@@ -652,19 +649,20 @@ if (typeof closeMainMenu === 'undefined') {
 
 <!-- === PANNEAU STICKERS ANIMÉS NOTO === -->
 <!-- Onglet déclencheur stickers -->
-<button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Stickers &amp; Émojis"><span class="act-tab-lbl">Stickers</span><span class="act-tab-ico">🤓</span></button>
+<button id="sticker-panel-tab" onclick="toggleStickerPanel()" title="Visuels — Stickers, Émojis &amp; Images"><span class="act-tab-lbl">Visuels</span><span class="act-tab-ico">🎨</span></button>
 
 <div id="sticker-panel">
 	<div id="sticker-panel-resize-handle" title="Redimensionner le panneau"></div>
 	<!-- Header -->
 	<div id="sticker-panel-header">
-		<h3>✨ Stickers &amp; Émojis</h3>
+		<h3>🎨 Visuels</h3>
 		<button class="sp-close" onclick="toggleStickerPanel()" title="Fermer">✖</button>
 	</div>
-	<!-- Bascule Animés / Classiques -->
+	<!-- Bascule Animés / Classiques / Images -->
 	<div id="sticker-mode-bar">
-		<button id="sp-mode-animated" class="sp-mode-btn active" onclick="setStickerMode('animated')" title="Émojis animés Noto — connexion internet requise">🌐 Stickers animés</button>
-		<button id="sp-mode-classic" class="sp-mode-btn" onclick="setStickerMode('classic')" title="Émojis classiques — fonctionne hors-ligne">📴 Émojis classiques</button>
+		<button id="sp-mode-animated" class="sp-mode-btn active" onclick="setVisuelsMode('animated')" title="Émojis animés Noto — connexion internet requise">🌐 Animés</button>
+		<button id="sp-mode-classic" class="sp-mode-btn" onclick="setVisuelsMode('classic')" title="Émojis classiques — fonctionne hors-ligne">📴 Classiques</button>
+		<button id="sp-mode-images" class="sp-mode-btn" onclick="setVisuelsMode('images')" title="Images à insérer sur le tableau">🖼️ Images</button>
 		<span id="sp-offline-badge" style="display:none;background:#ff4757;color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;">HORS-LIGNE</span>
 	</div>
 	<!-- Onglets catégories (barre horizontale scrollable) -->
@@ -703,7 +701,37 @@ if (typeof closeMainMenu === 'undefined') {
 	</div>
 	<!-- Contenu défilable -->
 	<div id="sp-content"></div>
+	<!-- Section Images (fusionnée dans l'onglet Visuels) -->
+	<div id="sp-images-section"></div>
 </div>
+
+<script>
+/* ── Bascule entre les 3 modes du panneau Visuels : animated / classic / images ── */
+function setVisuelsMode(mode) {
+    const imagesSection = document.getElementById('sp-images-section');
+    const tabsBar   = document.getElementById('sticker-panel-tabs');
+    const searchBar = document.getElementById('sticker-panel-search');
+    const content   = document.getElementById('sp-content');
+    const btnImg    = document.getElementById('sp-mode-images');
+
+    if (mode === 'images') {
+        if (tabsBar)   tabsBar.style.display   = 'none';
+        if (searchBar) searchBar.style.display = 'none';
+        if (content)   content.style.display   = 'none';
+        if (imagesSection) imagesSection.style.display = 'flex';
+        document.querySelectorAll('#sticker-mode-bar .sp-mode-btn').forEach(function(b) { b.classList.remove('active'); });
+        if (btnImg) btnImg.classList.add('active');
+        if (typeof _buildImagePanel === 'function') _buildImagePanel();
+    } else {
+        if (imagesSection) imagesSection.style.display = 'none';
+        if (tabsBar)   tabsBar.style.display   = '';
+        if (searchBar) searchBar.style.display = '';
+        if (content)   content.style.display   = '';
+        if (btnImg) btnImg.classList.remove('active');
+        if (typeof setStickerMode === 'function') setStickerMode(mode);
+    }
+}
+</script>
 
 <div id="modal-overlay">
     <div class="modal-content">
@@ -1048,25 +1076,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
     window.electronAPI.notifyReady();
 }
 </script>
-<!-- ── Bibliothèque PDF ──────────────────────────────────────────────── -->
-<div id="pdf-library-panel">
-    <div id="pdf-library-resize-handle" title="Redimensionner le panneau"></div>
-    <div id="pdf-library-header">
-        <span>📚 Bibliothèque PDF</span>
-        <button id="pdf-library-close" onclick="togglePdfLibrary()" title="Fermer">✕</button>
-    </div>
-    <div id="pdf-library-breadcrumb"></div>
-    <div id="pdf-library-list"></div>
-    <div id="pdf-library-footer">
-        <div id="pdf-library-status">Aucun dossier sélectionné</div>
-        <button id="pdf-library-choose" onclick="pdfLibChooseFolder()">📂 Choisir un dossier…</button>
-    </div>
-</div>
-<!-- Onglet déclencheur sur le bord droit -->
-<button id="pdf-library-tab" onclick="togglePdfLibrary()" title="Bibliothèque PDF"><span class="act-tab-lbl">PDF</span><span class="act-tab-ico">📋</span></button>
-
-<script src="pdf-library.js"></script>
-
 <!-- ── Panneau latéral Jeux ──────────────────────────────────────── -->
 <div id="jeux-panel">
     <div id="jeux-panel-resize-handle" title="Redimensionner le panneau"></div>
@@ -1965,7 +1974,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         // Fermeture croisée : display/history se ferment quand un autre panneau s'ouvre
         var _origPanels = [
             'toggleJeuxPanel','toggleActivitiesPanel','toggleToolsPanel','toggleWidgetsPanel',
-            'toggleProjectsPanel','togglePdfLibrary','toggleImagePanel','toggleStickerPanel'
+            'toggleProjectsPanel','toggleImagePanel','toggleStickerPanel'
         ];
         _origPanels.forEach(function(fname) {
             document.addEventListener('DOMContentLoaded', function() {}); // no-op guard
@@ -1998,8 +2007,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 { panelId: 'tools-panel',      openClass: 'tools-panel-open',      tabId: 'tools-panel-tab',      tabClass: 'tools-panel-tab-open' },
                 { panelId: 'widgets-panel',    openClass: 'widgets-panel-open',    tabId: 'widgets-panel-tab',    tabClass: 'widgets-panel-tab-open' },
                 { panelId: 'projects-panel',   openClass: 'proj-panel-open',       tabId: 'projects-panel-tab',   tabClass: 'proj-panel-tab-open' },
-                { panelId: 'pdf-library-panel',openClass: 'pdf-lib-open',          tabId: 'pdf-library-tab',      tabClass: 'pdf-lib-tab-open' },
-                { panelId: 'image-panel',      openClass: 'active',                tabId: 'image-panel-tab',      tabClass: 'active' },
             ];
 
             var closed = false;
@@ -2556,9 +2563,7 @@ function toggleMediaCollapse(container) {
         ['activities-panel-tab', 'act-panel-tab-open',          '🎲', 'Activités'],
         ['tools-panel-tab',      'tools-panel-tab-open',        '🧰', 'Outils'],
         ['widgets-panel-tab',    'widgets-panel-tab-open',      '📦', 'Widgets'],
-        ['sticker-panel-tab',    'active',                      '🤓', 'Stickers'],
-        ['image-panel-tab',      'active',                      '🖼️', 'Images'],
-        ['pdf-library-tab',      'pdf-lib-tab-open',            '📋', 'PDF'],
+        ['sticker-panel-tab',    'active',                      '🎨', 'Visuels'],
         ['projects-panel-tab',   'proj-panel-tab-open',         '📁', 'Tableaux'],
         ['pres-mode-tab',        '',                            '📽️', 'Présentation'],
         ['display-panel-tab',    'display-panel-tab-open',      '🖥️', 'Écran'],
@@ -2781,10 +2786,10 @@ document.addEventListener('DOMContentLoaded', function() {
             '    background: white !important; }',
             '  body > *:not(#board) { display: none !important; }',
             '  #toolbar-container, #toolbar-container * { display: none !important; }',
-            '  #sticker-panel-tab, #pdf-library-tab, #activities-panel-tab,',
+            '  #sticker-panel-tab, #activities-panel-tab,',
             '  #widgets-panel-tab, #tools-panel-tab, #projects-panel-tab,',
             '  #pres-mode-tab, #display-panel-tab { display: none !important; }',
-            '  #sticker-panel, #pdf-library-panel, #activities-panel,',
+            '  #sticker-panel, #activities-panel,',
             '  #widgets-panel, #tools-panel, #projects-panel,',
             '  #display-panel, #shape-edit-panel { display: none !important; }',
             '  #draw-toolbar, #shape-toolbar, #global-toolbar,',

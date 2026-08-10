@@ -1368,10 +1368,10 @@
 body.presentation-mode #sticker-panel-tab { display: none !important; }
 		#sticker-panel-tab {
 			position: fixed;
-			left: -35px; top: calc(50% - 40px);
+			left: -35px; top: calc(50% + 40px);
 			transform: translateY(-50%) rotate(-90deg);
 			transform-origin: center center;
-			width: 62px; height: 80px;
+			width: 80px; height: 65px;
 			background: #111;
 			border: 1px solid #2e2e3a;
 			border-right: none;
@@ -1420,10 +1420,10 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 			color: #ddd;
 		}
 
-		/* Boutons bascule Animés/Classiques */
+		/* Boutons bascule Animés/Classiques/Images */
 		#sticker-mode-bar {
 			display: grid;
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: repeat(3, 1fr);
 			gap: 6px;
 			padding: 10px 10px 10px 50px;
 			border-bottom: 1px solid #2e2e3a;
@@ -1497,6 +1497,15 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 		#sp-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 		#sp-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 
+		/* Section Images fusionnée dans le panneau Visuels */
+		#sp-images-section {
+			display: none;
+			flex-direction: column;
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+		}
+
 		/* Grille émojis animés Noto */
 		.sp-grid-anim { display: grid; grid-template-columns: repeat(6, 1fr);
 			gap: 4px; }
@@ -1557,10 +1566,10 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
 
 #widgets-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 105px);
+    left: -35px; top: calc(50% - 45px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1694,10 +1703,10 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #tools-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 170px);
+    left: -35px; top: calc(50% - 130px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1842,10 +1851,10 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #activities-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 235px);
+    left: -35px; top: calc(50% - 215px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1952,7 +1961,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 #jeux-panel-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 
 .act-section-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1px; color: rgba(255,255,255,0.35);
     padding: 0px 0 0px; margin-bottom: 4px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -2044,7 +2053,7 @@ body.presentation-mode #jeux-panel-tab { display: none !important; }
     left: -35px; top: calc(50% - 300px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2299,10 +2308,10 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #projects-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 155px);
+    left: -35px; top: calc(50% + 125px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid rgba(255,255,255,0.1);
     border-right: none;
@@ -2339,7 +2348,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* ── Onglet Mode Présentation (8e onglet) ─────────────────────── */
 #pres-mode-tab {
     position: fixed;
-    left: -25px; top: calc(50% + 285px);
+    left: -25px; top: calc(50% + 300px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
     width: 50px; height: 75px;
@@ -2394,10 +2403,10 @@ body.presentation-mode #pres-mode-tab {
 /* ── Onglet Affichage (9e onglet) ─────────────────────── */
 #display-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 220px);
+    left: -35px; top: calc(50% + 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 62px; height: 80px;
+    width: 80px; height: 65px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2451,7 +2460,7 @@ body.menu-light #display-panel-tab.display-panel-tab-open { display: none !impor
 /* ── Onglet Historique (10e onglet) ─────────────────────── */
 #history-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 263px);
+    left: -35px; top: calc(50% + 253px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
     width: 70px; height: 50px;
