@@ -1024,6 +1024,7 @@ function setVisuelsMode(mode) {
 <script src="widget-jeu-tables-invaders.js"></script>
 <script src="widget-jeu-tables-pacman.js"></script>
 <script src="widget-jeu-tables-serpent.js"></script>
+<script src="widget-jeu-tables-taupe.js"></script>
 <script src="widget-jeu-memory.js"></script>
 <script src="widget-jeu-conju.js"></script>
 <script src="widget-de.js"></script>
@@ -1105,6 +1106,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/jeux-tables-serpent.png" alt="Serpent des tables" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Serpent des tables</div>
                 <div class="act-card-desc">Diriger le serpent vers le bon résultat en évitant les mauvais nombres, les bords et son corps</div>
+            </div>
+            <div class="act-card" onclick="createWidget('jeu-tables-taupe');toggleJeuxPanel()">
+                <div class="act-card-ico"><img src="pics/jeux-tables-taupes.png" alt="Serpent des tables" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Multi Taupes</div>
+                <div class="act-card-desc">Taper sur la taupe qui porte le bon résultat avant qu'elle ne redescende dans son trou</div>
             </div>
 		</div>
 		<div class="act-section-label">🎮 Jeux de français</div>
