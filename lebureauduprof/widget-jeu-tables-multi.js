@@ -270,7 +270,7 @@
             min-height: 120px;
             position: relative;
             border-radius: 12px;
-            background: linear-gradient(180deg, #bfe3ff 0%, #eaf6ff 75%, #d7f3d0 100%);
+            background: linear-gradient(180deg, #6fc3e8 0%, #bfe9f6 55%, #eaf9f0 85%, #d7f3d0 100%);
             border: 1.5px solid #b7dcf5;
             overflow: hidden;
         }
@@ -282,16 +282,55 @@
             border-top: 2px solid #4f9c4a;
         }
 
-        /* ── Boule qui tombe (couleur propre à son couloir) ── */
+        /* ── Nuages décoratifs dans le ciel ── */
+        .jtm-clouds {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .jtm-cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.92);
+            border-radius: 30px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+            animation: jtm-cloud-bob 7s ease-in-out infinite;
+        }
+        .jtm-cloud::before, .jtm-cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+        .jtm-cloud-sm { width: 46px; height: 16px; }
+        .jtm-cloud-sm::before { width: 22px; height: 22px; top: -11px; left: 4px; }
+        .jtm-cloud-sm::after  { width: 18px; height: 16px; top: -7px;  left: 24px; }
+
+        .jtm-cloud-md { width: 66px; height: 22px; }
+        .jtm-cloud-md::before { width: 32px; height: 32px; top: -15px; left: 6px; }
+        .jtm-cloud-md::after  { width: 26px; height: 22px; top: -9px;  left: 36px; }
+
+        .jtm-cloud-lg { width: 88px; height: 28px; }
+        .jtm-cloud-lg::before { width: 42px; height: 42px; top: -19px; left: 8px; }
+        .jtm-cloud-lg::after  { width: 34px; height: 28px; top: -11px; left: 48px; }
+
+        @keyframes jtm-cloud-bob {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(6px); }
+        }
+
+        /* ── Boule qui tombe, en forme de ballon de baudruche (couleur propre à son couloir) ── */
         .jtm-ball {
             position: absolute;
             top: -110px;
             width: var(--jtm-ball-w, 110px);
-            height: var(--jtm-ball-w, 110px);
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, var(--jtm-ball-from, #90cdf4), var(--jtm-ball-mid, #3182ce) 70%, var(--jtm-ball-to, #2c5282));
+            height: var(--jtm-ball-h, 126px);
+            /* galbe ovoïde façon ballon de baudruche : haut bien rond, base légèrement resserrée */
+            border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
+            background: radial-gradient(circle at 32% 26%, var(--jtm-ball-from, #90cdf4), var(--jtm-ball-mid, #3182ce) 68%, var(--jtm-ball-to, #2c5282));
             border: 3px solid var(--jtm-ball-border, #2b6cb0);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25), inset 0 -6px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.22), inset -8px -10px 16px rgba(0,0,0,0.16), inset 6px 8px 10px rgba(255,255,255,0.25);
             color: white;
             font-weight: 800;
             font-size: var(--jtm-fs, 20px);
@@ -300,22 +339,95 @@
             justify-content: center;
             text-align: center;
             box-sizing: border-box;
-            transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-3deg);
+            animation: jtm-sway 2.6s ease-in-out infinite;
             will-change: top;
         }
+        /* Reflet brillant façon latex gonflé */
+        .jtm-ball::before {
+            content: '';
+            position: absolute;
+            top: 16%;
+            left: 20%;
+            width: 26%;
+            height: 16%;
+            background: rgba(255,255,255,0.55);
+            border-radius: 50%;
+            filter: blur(1px);
+            transform: rotate(-25deg);
+            pointer-events: none;
+        }
+        /* Petit noeud du ballon */
+        .jtm-ball::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 10px solid var(--jtm-ball-border, #2b6cb0);
+            transform: translateX(-50%);
+            filter: brightness(0.85);
+            pointer-events: none;
+        }
         .jtm-ball.correct {
-            background: radial-gradient(circle at 35% 30%, #9ae6a0, #2f8f48 70%, #1e5e2e);
             border-color: #1e5e2e;
-            animation: jtm-pop .35s ease;
+            animation: jtm-burst .3s cubic-bezier(.4,0,.6,1) forwards;
+            pointer-events: none;
         }
         .jtm-ball.wrong {
-            background: radial-gradient(circle at 35% 30%, #feb2b2, #c53030 70%, #822727);
+            background: radial-gradient(circle at 32% 26%, #feb2b2, #c53030 68%, #822727);
             border-color: #822727;
             animation: jtm-shake .35s ease;
         }
         .jtm-ball.missed {
-            background: radial-gradient(circle at 35% 30%, #d1d5db, #6b7280 70%, #374151);
+            background: radial-gradient(circle at 32% 26%, #d1d5db, #6b7280 68%, #374151);
             border-color: #4b5563;
+        }
+        @keyframes jtm-sway {
+            0%, 100% { transform: translateX(-50%) rotate(-3deg); }
+            50%      { transform: translateX(-50%) rotate(3deg); }
+        }
+
+        /* ── Effet d'éclatement du ballon (bonne réponse) ── */
+        @keyframes jtm-burst {
+            0%   { transform: translateX(-50%) scale(1);    opacity: 1; }
+            35%  { transform: translateX(-50%) scale(1.3);  opacity: 1; }
+            60%  { transform: translateX(-50%) scale(1.45); opacity: 0.7; }
+            100% { transform: translateX(-50%) scale(0.15); opacity: 0; }
+        }
+        /* Flash / onde de choc au moment de l'éclatement */
+        .jtm-burst-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.9);
+            background: radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 70%);
+            transform: translate(-50%, -50%) scale(0.3);
+            pointer-events: none;
+            z-index: 6;
+            animation: jtm-ring-expand .4s ease-out forwards;
+        }
+        @keyframes jtm-ring-expand {
+            0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
+            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+        }
+        /* Petits éclats de baudruche qui s'envolent */
+        .jtm-burst-shard {
+            position: absolute;
+            width: 9px;
+            height: 13px;
+            border-radius: 3px 3px 8px 8px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 6;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            animation: jtm-shard-fly .5s ease-out forwards;
+        }
+        @keyframes jtm-shard-fly {
+            0%   { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(0.4); opacity: 0; }
         }
 
         /* ── Groupe des 3 réponses, fixé au niveau du sol (même couleur que la boule) ── */
@@ -350,11 +462,6 @@
         .jtm-choice-btn.chosen-correct { background: #dcfce7 !important; border-color: #2f8f48 !important; color: #166534 !important; }
         .jtm-choice-btn.chosen-wrong   { background: #fee2e2 !important; border-color: #c53030 !important; color: #822727 !important; }
 
-        @keyframes jtm-pop {
-            0%   { transform: translateX(-50%) scale(1); }
-            50%  { transform: translateX(-50%) scale(1.25); }
-            100% { transform: translateX(-50%) scale(1); opacity: 0; }
-        }
         @keyframes jtm-shake {
             0%,100% { transform: translateX(-50%); }
             25%     { transform: translateX(calc(-50% - 6px)); }
@@ -461,6 +568,12 @@
 
   <!-- Ciel de jeu -->
   <div class="jtm-sky">
+    <div class="jtm-clouds">
+      <div class="jtm-cloud jtm-cloud-md" style="top:6%; left:8%; animation-delay:-1s;"></div>
+      <div class="jtm-cloud jtm-cloud-sm" style="top:14%; left:62%; animation-delay:-3.5s;"></div>
+      <div class="jtm-cloud jtm-cloud-lg" style="top:4%; left:36%; animation-delay:-5s;"></div>
+      <div class="jtm-cloud jtm-cloud-sm" style="top:22%; left:84%; animation-delay:-2s;"></div>
+    </div>
     <div class="jtm-ground"></div>
     <div class="jtm-overlay">
       <div class="jtm-overlay-title">🎯 Tables de multiplication</div>
@@ -531,7 +644,8 @@
         let lastTime       = null;
         let rafId          = null;
         let destroyed      = false;
-        let ballDiameterPx = 110;  // tenu à jour par applyFontScale()
+        let ballDiameterPx = 110;  // tenu à jour par applyFontScale() (largeur du ballon)
+        const BALL_HEIGHT_RATIO = 1.15; // galbe ovoïde du ballon (hauteur = largeur * ratio)
 
         // ── Mode de vitesse progressive : accélère toutes les 10 bonnes réponses ──
         const PROGRESSIVE_START_DURATION = 7500;  // ms, vitesse de départ (≈ Facile)
@@ -669,9 +783,11 @@
             const bw  = Math.max(80, Math.min(160, Math.round(110 * w / 700)));
             const btnMinW = Math.max(52, Math.min(76, Math.round(58 * w / 700)));
             ballDiameterPx = bw;
+            const bh = Math.round(bw * BALL_HEIGHT_RATIO);
             container.style.setProperty('--jtm-fs', fs + 'px');
             container.style.setProperty('--jtm-fs-choice', fsc + 'px');
             container.style.setProperty('--jtm-ball-w', bw + 'px');
+            container.style.setProperty('--jtm-ball-h', bh + 'px');
             container.style.setProperty('--jtm-btn-min-w', btnMinW + 'px');
             maybeRecomputeLanes();
         }
@@ -823,7 +939,7 @@
             el.className = 'jtm-ball';
             el.textContent = a + ' × ' + b;
             el.style.left = cx + 'px';
-            el.style.top = (-ballDiameterPx - 10) + 'px';
+            el.style.top = (-Math.round(ballDiameterPx * BALL_HEIGHT_RATIO) - 10) + 'px';
             el.style.setProperty('--jtm-ball-from', color.from);
             el.style.setProperty('--jtm-ball-mid', color.mid);
             el.style.setProperty('--jtm-ball-to', color.to);
@@ -837,7 +953,7 @@
             groupEl.style.setProperty('--jtm-accent-border', color.accentBorder);
             groupEl.style.setProperty('--jtm-accent-text', color.accentText);
 
-            const ballObj = { el, groupEl, laneIdx, progress: 0, duration: fallDuration, finalTop: 0, answered: false };
+            const ballObj = { el, groupEl, laneIdx, progress: 0, duration: fallDuration, finalTop: 0, answered: false, color };
 
             choices.forEach(val => {
                 const btn = document.createElement('button');
@@ -855,8 +971,49 @@
             // La boule s'arrête juste au-dessus du groupe de réponses (mesuré après ajout au DOM)
             const skyH = sky.clientHeight || 300;
             const groupH = groupEl.offsetHeight || 56;
-            const gapBallToAnswers = 10;
-            ballObj.finalTop = skyH - groupH - gapBallToAnswers - ballDiameterPx;
+            const gapBallToAnswers = 22; // espace pour laisser voir le petit noeud du ballon
+            const ballHeightPx = Math.round(ballDiameterPx * BALL_HEIGHT_RATIO);
+            ballObj.finalTop = skyH - groupH - gapBallToAnswers - ballHeightPx;
+        }
+
+        // ── Effet d'éclatement du ballon (flash + éclats de baudruche) ──────
+        function spawnBurstEffect(ballObj) {
+            const skyRect  = sky.getBoundingClientRect();
+            const ballRect = ballObj.el.getBoundingClientRect();
+            const cx = ballRect.left + ballRect.width  / 2 - skyRect.left;
+            const cy = ballRect.top  + ballRect.height / 2 - skyRect.top;
+            const c  = ballObj.color || {};
+            const shardColor = c.mid || '#3182ce';
+
+            // Onde de choc / flash
+            const ring = document.createElement('div');
+            ring.className = 'jtm-burst-ring';
+            const ringSize = Math.round(ballDiameterPx * 1.3);
+            ring.style.left = cx + 'px';
+            ring.style.top = cy + 'px';
+            ring.style.width = ringSize + 'px';
+            ring.style.height = ringSize + 'px';
+            sky.appendChild(ring);
+            setTimeout(() => ring.remove(), 420);
+
+            // Petits éclats de latex qui s'envolent dans toutes les directions
+            const shardCount = 9;
+            for (let i = 0; i < shardCount; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'jtm-burst-shard';
+                const angle = (Math.PI * 2 * i / shardCount) + (Math.random() * 0.5 - 0.25);
+                const dist  = ballDiameterPx * (0.35 + Math.random() * 0.35);
+                const dx = Math.round(Math.cos(angle) * dist);
+                const dy = Math.round(Math.sin(angle) * dist);
+                shard.style.left = cx + 'px';
+                shard.style.top = cy + 'px';
+                shard.style.setProperty('--dx', dx + 'px');
+                shard.style.setProperty('--dy', dy + 'px');
+                shard.style.setProperty('--rot', Math.round(Math.random() * 360) + 'deg');
+                shard.style.background = shardColor;
+                sky.appendChild(shard);
+                setTimeout(() => shard.remove(), 520);
+            }
         }
 
         function onChoice(ballObj, btn) {
@@ -869,6 +1026,7 @@
             if (isCorrect) {
                 score++;
                 ballObj.el.classList.add('correct');
+                spawnBurstEffect(ballObj);
                 maybeAdvanceProgressiveSpeed();
             } else {
                 lives--;
@@ -1004,7 +1162,7 @@
                 balls.forEach(ballObj => {
                     if (ballObj.answered) return;
                     ballObj.progress += dt / ballObj.duration;
-                    const startTop = -ballDiameterPx - 10;
+                    const startTop = -Math.round(ballDiameterPx * BALL_HEIGHT_RATIO) - 10;
                     if (ballObj.progress >= 1) {
                         ballObj.progress = 1;
                         ballObj.el.style.top = ballObj.finalTop + 'px';
