@@ -121,6 +121,19 @@
           d'où le décalage visible sur mobile.)
     ════════════════════════════════════════════════════════ */
 
+    /* Sur desktop, ces onglets sont volontairement à moitié hors-écran
+       (left négatif) et ne se dévoilent en entier qu'au survol de la
+       souris (.tab-js-hover). Sur téléphone il n'y a pas de survol, mais
+       on garde le même principe visuel : l'onglet dépasse légèrement du
+       bord gauche du board plutôt que d'être totalement plaqué dedans.
+       Attention à la rotation -90° (héritée du CSS desktop) : la
+       propriété CSS "width" du bouton devient, une fois tourné, la
+       hauteur visible à l'écran (l'espace de LECTURE du texte, empilé
+       verticalement) ; "height" devient la largeur visible (l'épaisseur
+       de l'onglet, donc ce qui dépasse du bord). Pour calculer le
+       débordement : avec left=L, width=W, height=H, le bord gauche
+       visible de l'onglet (une fois tourné) est à L + W/2 − H/2. On veut
+       cette valeur légèrement négative (ex. −15px) pour qu'il dépasse. */
     #jeux-panel-tab,
     #activities-panel-tab,
     #tools-panel-tab,
@@ -129,9 +142,9 @@
     #projects-panel-tab,
     #display-panel-tab,
     #pres-mode-tab {
-        left: -22px !important;
-        width: 40px !important;
-        height: 60px !important;
+        left: -28px !important;
+        width: 64px !important;
+        height: 58px !important;
     }
 
     #jeux-panel-tab.tab-js-hover,
@@ -147,18 +160,41 @@
         padding-left: 34px !important;
     }
 
-    /* 8 emplacements réguliers (pas de 44px, 308px d'étendue totale) */
-    #jeux-panel-tab       { top: calc(50% - 154px) !important; }
-    #activities-panel-tab { top: calc(50% - 110px) !important; }
-    #tools-panel-tab      { top: calc(50% - 66px)  !important; }
-    #widgets-panel-tab    { top: calc(50% - 22px)  !important; }
-    #sticker-panel-tab    { top: calc(50% + 22px)  !important; }
-    #projects-panel-tab   { top: calc(50% + 66px)  !important; }
-    #display-panel-tab    { top: calc(50% + 110px) !important; }
-    #pres-mode-tab        { top: calc(50% + 154px) !important; }
+    /* 8 emplacements réguliers (pas de 66px, 462px d'étendue totale) */
+    #jeux-panel-tab       { top: calc(50% - 231px) !important; }
+    #activities-panel-tab { top: calc(50% - 165px) !important; }
+    #tools-panel-tab      { top: calc(50% - 99px)  !important; }
+    #widgets-panel-tab    { top: calc(50% - 33px)  !important; }
+    #sticker-panel-tab    { top: calc(50% + 33px)  !important; }
+    #projects-panel-tab   { top: calc(50% + 99px)  !important; }
+    #display-panel-tab    { top: calc(50% + 165px) !important; }
+    #pres-mode-tab        { top: calc(50% + 231px) !important; }
 
-    .tab-emoji { font-size: 30px !important; }
-    .tab-label { font-size: 13px !important; }
+    /* Correction : .tab-emoji/.tab-label ne sont utilisées que par le
+       script de survol souris (jamais déclenché au toucher) — les vraies
+       classes toujours visibles sur mobile sont .act-tab-ico/.act-tab-lbl.
+       Cibler les premières n'avait donc aucun effet sur téléphone. */
+    #jeux-panel-tab .act-tab-ico,
+    #activities-panel-tab .act-tab-ico,
+    #tools-panel-tab .act-tab-ico,
+    #widgets-panel-tab .act-tab-ico,
+    #sticker-panel-tab .act-tab-ico,
+    #projects-panel-tab .act-tab-ico,
+    #display-panel-tab .act-tab-ico,
+    #pres-mode-tab .act-tab-ico {
+        font-size: 22px !important;
+    }
+
+    #jeux-panel-tab .act-tab-lbl,
+    #activities-panel-tab .act-tab-lbl,
+    #tools-panel-tab .act-tab-lbl,
+    #widgets-panel-tab .act-tab-lbl,
+    #sticker-panel-tab .act-tab-lbl,
+    #projects-panel-tab .act-tab-lbl,
+    #display-panel-tab .act-tab-lbl,
+    #pres-mode-tab .act-tab-lbl {
+        font-size: 11px !important;
+    }
 
 
     /* ════════════════════════════════════════════════════════
@@ -451,19 +487,19 @@
     #projects-panel-tab,
     #display-panel-tab,
     #pres-mode-tab {
-        left: -18px !important;
-        width: 32px !important;
+        left: -12px !important;
+        width: 48px !important;
         height: 44px !important;
     }
 
-    #jeux-panel-tab       { top: calc(50% - 112px) !important; }
-    #activities-panel-tab { top: calc(50% - 80px)  !important; }
-    #tools-panel-tab      { top: calc(50% - 48px)  !important; }
-    #widgets-panel-tab    { top: calc(50% - 16px)  !important; }
-    #sticker-panel-tab    { top: calc(50% + 16px)  !important; }
-    #projects-panel-tab   { top: calc(50% + 48px)  !important; }
-    #display-panel-tab    { top: calc(50% + 80px)  !important; }
-    #pres-mode-tab        { top: calc(50% + 112px) !important; }
+    #jeux-panel-tab       { top: calc(50% - 175px) !important; }
+    #activities-panel-tab { top: calc(50% - 125px) !important; }
+    #tools-panel-tab      { top: calc(50% - 75px)  !important; }
+    #widgets-panel-tab    { top: calc(50% - 25px)  !important; }
+    #sticker-panel-tab    { top: calc(50% + 25px)  !important; }
+    #projects-panel-tab   { top: calc(50% + 75px)  !important; }
+    #display-panel-tab    { top: calc(50% + 125px) !important; }
+    #pres-mode-tab        { top: calc(50% + 175px) !important; }
 
     #main-menu {
         max-height: 90vh !important;
