@@ -159,6 +159,20 @@
             padding-left: 52px !important;
         }
 
+        /* ── État plein écran, adapté au téléphone ──
+           Le padding-left de 52px (pensé pour dégager les onglets
+           latéraux desktop) prend trop de place sur un petit écran, mais
+           il en faut quand même un peu : les onglets latéraux (Jeux,
+           Activités, etc. — voir style-phone.css) débordent d'environ
+           33px sur le bord gauche de l'écran même en fullboard, il ne
+           faut donc pas descendre en dessous pour ne pas les recouvrir. */
+        .jti-container.wf-fullboard.jti-mobile {
+            padding-left: calc(40px + env(safe-area-inset-left)) !important;
+            padding-right: calc(8px + env(safe-area-inset-right)) !important;
+            padding-top: calc(8px + env(safe-area-inset-top)) !important;
+            padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+        }
+
         /* ── En-tête ── */
         .jti-header {
             display: flex;
@@ -819,6 +833,7 @@
                 if (_isMax) {
                     _isMax = false;
                     container.classList.remove('wf-fullboard');
+                    container.classList.remove('jti-mobile');
                     if (_savedW) container.style.width  = _savedW;
                     if (_savedH) container.style.height = _savedH;
                     applyFontScale();
@@ -834,9 +849,13 @@
                 if (_isMax) {
                     _savedW = container.style.width;
                     _savedH = container.style.height;
+                    if (typeof isMobileBoardMode === 'function' && isMobileBoardMode()) {
+                        container.classList.add('jti-mobile');
+                    }
                     container.classList.add('wf-fullboard');
                 } else {
                     container.classList.remove('wf-fullboard');
+                    container.classList.remove('jti-mobile');
                     if (_savedW) container.style.width  = _savedW;
                     if (_savedH) container.style.height = _savedH;
                 }
@@ -1197,16 +1216,33 @@
         requestAnimationFrame(() => requestAnimationFrame(() => {
             const curW  = window.innerWidth;
             const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
-            const wPct = parseFloat(widget.dataset.widthPercent);
-            const hPct = parseFloat(widget.dataset.contentHPercent);
-            if (wPct > 0) container.style.width  = (wPct / 100) * curW  + 'px';
-            if (hPct > 0) container.style.height = (hPct / 100) * curVH + 'px';
-            if (!container.style.height) container.style.height = '520px';
+            const isMobile = typeof isMobileBoardMode === 'function' && isMobileBoardMode();
+
+            if (isMobile) {
+                const wPct = parseFloat(widget.dataset.widthPercent);
+                const hPct = parseFloat(widget.dataset.contentHPercent);
+                if (wPct > 0) container.style.width  = (wPct / 100) * curW  + 'px';
+                if (hPct > 0) container.style.height = (hPct / 100) * curVH + 'px';
+                if (!container.style.height) container.style.height = '520px';
+            } else {
+                // Sur PC, le jeu démarre toujours à 1000×800px.
+                container.style.width  = '1000px';
+                container.style.height = '800px';
+            }
 
             _savedW = container.style.width;
             _savedH = container.style.height;
-            _isMax = true;
-            container.classList.add('wf-fullboard');
+
+            // Le lancement automatique en plein écran (fullboard) ne se fait
+            // que sur téléphone, où le jeu a besoin de toute la place. Sur
+            // PC, le widget démarre à sa taille normale, comme les autres
+            // widgets — l'utilisateur peut toujours l'agrandir manuellement
+            // via le bouton "maximiser".
+            if (isMobile) {
+                container.classList.add('jti-mobile');
+                _isMax = true;
+                container.classList.add('wf-fullboard');
+            }
 
             applyFontScale();
             updateHUD();
