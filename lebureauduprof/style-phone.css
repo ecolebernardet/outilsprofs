@@ -1,27 +1,53 @@
 /* ══════════════════════════════════════════════════════════════════════
    STYLE-PHONE.CSS — Adaptations mobiles pour Le Bureau du Prof
-   À charger APRÈS style.css dans index.html :
-       <link rel="stylesheet" href="style-phone.css" media="(max-width: 768px)">
+   Chargé sans condition dans index.html (le ciblage se fait ici, via les
+   @media internes, pour couvrir aussi le mode paysage des smartphones) :
+       <link rel="stylesheet" href="style-phone.css">
    ══════════════════════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
+/* Déclenche les adaptations mobiles pour :
+   - tout écran étroit (portrait téléphone/petite tablette) : max-width 768px
+   - tout écran bas + tactile (téléphone en mode paysage, même > 768px de large) */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
 
     /* ════════════════════════════════════════════════════════
        1. BOARD & BODY
     ════════════════════════════════════════════════════════ */
 
-    body, html {
+    html {
+        /* Empêche le rebond/scroll global du navigateur (élastique iOS) */
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body {
         overflow: hidden; /* évite le scroll parasite sur mobile */
         height: 100%;
         width: 100%;
-        /* Empêche le zoom involontaire au double-tap */
+        /* Empêche le zoom involontaire au double-tap, garde le pincer-zoomer */
         touch-action: manipulation;
+        /* Zones sûres (encoche / barre d'accueil iPhone) */
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+                 env(safe-area-inset-bottom) env(safe-area-inset-left);
+        box-sizing: border-box;
     }
 
     #board {
-        /* Le board occupe toute la hauteur en soustrayant la bottom-bar */
-        min-height: calc(100vh - 60px) !important;
-        width: 100vw !important;
+        /* La taille/position réelle du board est calculée par board.js
+           (applyBoardRatio / virtualH), qui bascule maintenant lui-même
+           en plein écran vertical sur téléphone — voir board.js. Cette
+           règle CSS ne sert que de filet de sécurité avant l'exécution
+           du JS (évite un flash de mauvaise taille au chargement). */
+        min-height: 100vh;
+        min-height: 100dvh;
+        width: 100vw;
+    }
+
+    /* Empêche l'input zoom-forcé de Safari iOS : tout champ avec une
+       taille de police < 16px déclenche un zoom automatique au focus,
+       ce qui casse toute la mise en page tant que le champ est actif. */
+    input, select, textarea {
+        font-size: max(16px, 1em) !important;
     }
 
 
@@ -34,16 +60,16 @@
         width: 44px !important;
         height: 44px !important;
         font-size: 28px !important;
-        bottom: 14px !important;
-        left: 14px !important;
+        bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        left: calc(14px + env(safe-area-inset-left)) !important;
     }
 
     #draw-fab-btn {
         width: 44px !important;
         height: 44px !important;
         font-size: 19px !important;
-        bottom: 14px !important;
-        right: 14px !important;
+        bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        right: calc(14px + env(safe-area-inset-right)) !important;
     }
 
 
@@ -53,9 +79,12 @@
     ════════════════════════════════════════════════════════ */
 
     #main-menu {
-        bottom: 68px !important;
-        left: 10px !important;
+        bottom: calc(68px + env(safe-area-inset-bottom)) !important;
+        left: calc(10px + env(safe-area-inset-left)) !important;
         gap: 3px !important;
+        max-height: 78vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 
     .mm-item {
@@ -81,115 +110,55 @@
 
     /* ════════════════════════════════════════════════════════
        4. ONGLETS LATÉRAUX (tabs des panneaux)
-          Réduits en taille, repositionnés pour mobile
+          8 onglets réels : Jeux, Activités, Outils, Widgets,
+          Visuels (stickers), Tableaux (projects), Écran (display),
+          Présentation (pres-mode, affiche "On"/"Off").
+          (Correction : pdf-library-tab et image-panel-tab
+          n'existent pas comme boutons dans le HTML — seules des
+          règles CSS orphelines existent dans style.css. Les
+          cibler ne servait à rien : Jeux et Présentation, eux,
+          gardaient leur position desktop (-300px / +300px),
+          d'où le décalage visible sur mobile.)
     ════════════════════════════════════════════════════════ */
 
-    /* Onglet stickers */
-    #sticker-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
+    #jeux-panel-tab,
+    #activities-panel-tab,
+    #tools-panel-tab,
+    #widgets-panel-tab,
+    #sticker-panel-tab,
+    #projects-panel-tab,
+    #display-panel-tab,
+    #pres-mode-tab {
+        left: -22px !important;
+        width: 40px !important;
+        height: 60px !important;
     }
 
-    #sticker-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
+    #jeux-panel-tab.tab-js-hover,
+    #activities-panel-tab.tab-js-hover,
+    #tools-panel-tab.tab-js-hover,
+    #widgets-panel-tab.tab-js-hover,
+    #sticker-panel-tab.tab-js-hover,
+    #projects-panel-tab.tab-js-hover,
+    #display-panel-tab.tab-js-hover,
+    #pres-mode-tab.tab-js-hover {
+        width: 150px !important;
+        height: 70px !important;
+        padding-left: 34px !important;
     }
 
-    /* Onglet widgets */
-    #widgets-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
+    /* 8 emplacements réguliers (pas de 44px, 308px d'étendue totale) */
+    #jeux-panel-tab       { top: calc(50% - 154px) !important; }
+    #activities-panel-tab { top: calc(50% - 110px) !important; }
+    #tools-panel-tab      { top: calc(50% - 66px)  !important; }
+    #widgets-panel-tab    { top: calc(50% - 22px)  !important; }
+    #sticker-panel-tab    { top: calc(50% + 22px)  !important; }
+    #projects-panel-tab   { top: calc(50% + 66px)  !important; }
+    #display-panel-tab    { top: calc(50% + 110px) !important; }
+    #pres-mode-tab        { top: calc(50% + 154px) !important; }
 
-    #widgets-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet activités */
-    #activities-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #activities-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet outils */
-    #tools-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #tools-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet affichage */
-    #display-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #display-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet projets */
-    #projects-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #projects-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet PDF */
-    #pdf-library-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #pdf-library-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    /* Onglet images */
-    #image-panel-tab {
-        left: -28px !important;
-        width: 58px !important;
-        height: 65px !important;
-    }
-
-    #image-panel-tab.tab-js-hover {
-        width: 160px !important;
-        height: 80px !important;
-        padding-left: 40px !important;
-    }
-
-    .tab-emoji { font-size: 36px !important; }
-    .tab-label { font-size: 14px !important; }
+    .tab-emoji { font-size: 30px !important; }
+    .tab-label { font-size: 13px !important; }
 
 
     /* ════════════════════════════════════════════════════════
@@ -294,13 +263,13 @@
     /* ════════════════════════════════════════════════════════
        9. TOOLBAR CONTAINER & BOTTOM BAR
           Réduits en hauteur, boutons plus accessibles
+          Note : #toolbar-container n'a pas de règle de mise en
+          page propre (ni ici, ni dans style.css) — c'est un
+          conteneur DOM pour des sous-barres positionnées en
+          fixed par board.js/draw.js. Lui forcer une min-height
+          créait un bloc vide de ~50px dans le flux normal du
+          document ; supprimé pour éviter tout décalage indésirable.
     ════════════════════════════════════════════════════════ */
-
-    #toolbar-container {
-        height: auto !important;
-        min-height: 50px !important;
-        padding: 4px 6px !important;
-    }
 
     .tool-btn {
         padding: 6px 8px !important;
@@ -463,6 +432,48 @@
     }
 
 } /* fin @media (max-width: 768px) */
+
+
+/* ════════════════════════════════════════════════════════
+   TÉLÉPHONE EN MODE PAYSAGE (hauteur très réduite)
+   Ex. iPhone en paysage (~375-430px de haut). L'espacement
+   des onglets latéraux ci-dessus (420px d'étendue) est encore
+   trop grand pour ces hauteurs : on resserre davantage.
+════════════════════════════════════════════════════════ */
+
+@media (max-height: 480px) and (pointer: coarse) {
+
+    #jeux-panel-tab,
+    #activities-panel-tab,
+    #tools-panel-tab,
+    #widgets-panel-tab,
+    #sticker-panel-tab,
+    #projects-panel-tab,
+    #display-panel-tab,
+    #pres-mode-tab {
+        left: -18px !important;
+        width: 32px !important;
+        height: 44px !important;
+    }
+
+    #jeux-panel-tab       { top: calc(50% - 112px) !important; }
+    #activities-panel-tab { top: calc(50% - 80px)  !important; }
+    #tools-panel-tab      { top: calc(50% - 48px)  !important; }
+    #widgets-panel-tab    { top: calc(50% - 16px)  !important; }
+    #sticker-panel-tab    { top: calc(50% + 16px)  !important; }
+    #projects-panel-tab   { top: calc(50% + 48px)  !important; }
+    #display-panel-tab    { top: calc(50% + 80px)  !important; }
+    #pres-mode-tab        { top: calc(50% + 112px) !important; }
+
+    #main-menu {
+        max-height: 90vh !important;
+    }
+
+    #fab-btn, #draw-fab-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+}
 
 
 /* ════════════════════════════════════════════════════════

@@ -190,8 +190,18 @@ function applyBackground(value) {
         board.style.backgroundImage    = '';
         board.style.backgroundSize     = '';
         board.style.background         = value;
-        board.style.backgroundSize     = '100% auto';
-        board.style.backgroundPosition = 'top center';
+        if (typeof isMobileBoardMode === 'function' && isMobileBoardMode()
+            && !document.body.classList.contains('a4-mode')) {
+            // Sur téléphone, le board est vertical (portrait) alors que ces
+            // images de fond sont pensées pour un tableau large (paysage).
+            // 'cover' remplit toute la hauteur du board au lieu de laisser
+            // une bande "100% auto" centrée avec du vide au-dessus/dessous.
+            board.style.backgroundSize     = 'cover';
+            board.style.backgroundPosition = 'center';
+        } else {
+            board.style.backgroundSize     = '100% auto';
+            board.style.backgroundPosition = 'top center';
+        }
         board.style.backgroundRepeat   = 'no-repeat';
     }
 }

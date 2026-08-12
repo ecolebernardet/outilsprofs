@@ -36,7 +36,7 @@
 
     <link rel="icon" type="image/x-icon" href="icon.ico">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style-phone.css" media="(max-width: 768px)">
+    <link rel="stylesheet" href="style-phone.css">
     <style>
         @font-face {
             font-family: 'Nunito';
@@ -1166,11 +1166,30 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
         var tab    = document.getElementById('jeux-panel-tab');
         if (!handle || !panel) return;
 
-        // Restaurer la largeur sauvegardée (en px), sinon utiliser 50% de la fenêtre
+        // Ne fige une largeur en px que si l'utilisateur a déjà redimensionné
+        // le panneau manuellement. Sinon, on laisse le CSS (--jeux-panel-w:
+        // 50vw, défini dans style.css) gérer la largeur de façon responsive,
+        // exactement comme les autres panneaux (Widgets, Outils, Activités).
+        // Avant ce correctif, une largeur en px était calculée et appliquée
+        // à CHAQUE chargement (même sans réglage manuel), ce qui figeait le
+        // panneau à la largeur de l'écran du moment — d'où un panneau Jeux
+        // plus étroit que les autres si ce calcul avait eu lieu sur un petit
+        // écran (ou tout simplement s'il ne se remettait pas à jour après un
+        // redimensionnement de la fenêtre).
         var savedW = localStorage.getItem(JEUX_W_KEY);
-        var initW = savedW ? parseInt(savedW) : Math.round(window.innerWidth * 0.5);
-        panel.style.width = initW + 'px';
-        document.documentElement.style.setProperty('--jeux-panel-w', initW + 'px');
+        if (savedW) {
+            var initW = parseInt(savedW);
+            // Garde-fou : si la valeur sauvegardée est absurde pour l'écran
+            // actuel (ex. sauvegardée sur téléphone, rouverte sur PC), on
+            // l'ignore et on repasse sur le comportement responsive par défaut.
+            var maxReasonableW = Math.round(window.innerWidth * 0.5);
+            if (initW >= 260 && initW <= maxReasonableW) {
+                panel.style.width = initW + 'px';
+                document.documentElement.style.setProperty('--jeux-panel-w', initW + 'px');
+            } else {
+                localStorage.removeItem(JEUX_W_KEY);
+            }
+        }
 
         var dragging = false, startX = 0, startW = 0;
         handle.addEventListener('mousedown', function(e) {

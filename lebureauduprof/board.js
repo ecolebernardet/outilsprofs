@@ -180,6 +180,13 @@ let currentActiveWidget = null;
 const RATIO = 16 / 9;
 let _lastW = window.innerWidth;
 
+// Même seuil que style-phone.css : écran étroit (portrait téléphone) ou
+// bas + tactile (téléphone en paysage), pour rester cohérent avec le CSS.
+function isMobileBoardMode() {
+    return window.matchMedia('(max-width: 768px), (max-height: 500px) and (pointer: coarse)').matches;
+}
+let _wasMobileBoardMode = isMobileBoardMode();
+
 // =========================================================================
 // INIT
 // =========================================================================
@@ -508,7 +515,15 @@ function _showCopyFeedback(count) {
 }
 
 
-function virtualH(w) { return w / RATIO; }
+function virtualH(w) {
+    // Sur téléphone (hors mode A4, géré séparément), le board doit rester
+    // vertical : il occupe toute la hauteur visible de l'écran au lieu de
+    // suivre le ratio 16/9 pensé pour un écran large en paysage.
+    if (isMobileBoardMode() && !document.body.classList.contains('a4-mode')) {
+        return window.innerHeight;
+    }
+    return w / RATIO;
+}
 
 function applyBoardRatio(newW) {
     if (document.body.classList.contains('a4-mode')) return;
@@ -573,6 +588,14 @@ function getToolbarHeight(container) {
 function handleWindowResize() {
     const newW = window.innerWidth;
     const factor = newW / _lastW;
+    // Si on franchit la frontière mobile ↔ desktop (ex. rotation du téléphone),
+    // réappliquer le fond d'écran pour qu'il bascule cover/100% auto correctement.
+    const nowMobile = isMobileBoardMode();
+    if (nowMobile !== _wasMobileBoardMode) {
+        _wasMobileBoardMode = nowMobile;
+        const currentBg = localStorage.getItem('boardBackground');
+        if (currentBg && typeof applyBackground === 'function') applyBackground(currentBg);
+    }
     // En mode A4, recalculer les dimensions A4 au lieu du ratio normal
     if (document.body.classList.contains('a4-mode')) {
         const h = Math.round(newW * 1.4142);

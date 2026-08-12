@@ -1922,7 +1922,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 #pres-mode-tab .act-tab-ico,
 #display-panel-tab .act-tab-ico,
 #image-panel-tab .act-tab-ico {
-    font-size: 18px;
+    font-size: 20px;
 }
 
 /* En-tête */
