@@ -180,6 +180,19 @@
             border-radius: 0 !important;
             padding-left: 40px !important;
         }
+
+        /* ── État plein écran, adapté au téléphone ──
+           Les onglets latéraux (Jeux, Activités, etc. — voir
+           style-phone.css) débordent d'environ 33px sur le bord gauche
+           de l'écran même en fullboard ; on garde une marge suffisante
+           pour ne pas les recouvrir, et on tient compte des zones sûres
+           (encoche / barre d'accueil) et de la barre du bas de l'app. */
+        .alpha-container.wf-fullboard.jti-mobile {
+            padding-left: calc(40px + env(safe-area-inset-left)) !important;
+            padding-right: calc(8px + env(safe-area-inset-right)) !important;
+            padding-top: calc(8px + env(safe-area-inset-top)) !important;
+            padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+        }
         .alpha-level-badge {
             font-size: 10px;
             font-weight: 700;
@@ -960,9 +973,13 @@
                 if (_isMax) {
                     _savedW = container.style.width;
                     _savedH = container.style.height;
+                    if (typeof isMobileBoardMode === 'function' && isMobileBoardMode()) {
+                        container.classList.add('jti-mobile');
+                    }
                     container.classList.add('wf-fullboard');
                 } else {
                     container.classList.remove('wf-fullboard');
+                    container.classList.remove('jti-mobile');
                     if (_savedW) container.style.width  = _savedW;
                     if (_savedH) container.style.height = _savedH;
                 }
@@ -1029,6 +1046,12 @@
         // ── Init ──────────────────────────────────────────────────────────
         requestAnimationFrame(() => requestAnimationFrame(() => {
             setLevel(1);
+            // Sur téléphone, ouvrir directement en plein écran board (le
+            // widget n'a pas de taille par défaut adaptée à un petit écran).
+            // Sur PC, il garde sa taille normale, comme avant.
+            if (typeof isMobileBoardMode === 'function' && isMobileBoardMode() && wfMax) {
+                wfMax.click();
+            }
             applyCardScale();
         }));
     };
