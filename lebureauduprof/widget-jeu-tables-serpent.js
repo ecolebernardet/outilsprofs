@@ -172,6 +172,8 @@
            33px sur le bord gauche de l'écran même en fullboard, il ne
            faut donc pas descendre en dessous pour ne pas les recouvrir. */
         .jts-container.wf-fullboard.jti-mobile {
+            min-width: unset !important;
+            width: 100% !important;
             padding-left: calc(40px + env(safe-area-inset-left)) !important;
             padding-right: calc(8px + env(safe-area-inset-right)) !important;
             padding-top: calc(8px + env(safe-area-inset-top)) !important;
