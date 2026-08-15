@@ -1016,6 +1016,7 @@ function setVisuelsMode(mode) {
 <button id="exit-presentation-btn" onclick="togglePresentationMode()" title="Quitter le mode présentation">📽️</button>
 <script src="widgets.js"></script>
 <script src="widget-compte-est-bon.js"></script>
+<script src="widget-nombres-chiffres-lettres.js"></script>
 <script src="widget-mots-alpha.js"></script>
 <script src="widget-nature-gramm.js"></script>
 <script src="widget-musique-clavier.js"></script>
@@ -1243,6 +1244,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/activites-compteestbon6.jpeg" alt="Le compte est bon" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Le compte est bon</div>
                 <div class="act-card-desc">Viser un nombre cible avec les opérations</div>
+            </div>
+            <div class="act-card" onclick="createNombresLettresWidget();toggleActivitiesPanel()">
+                <div class="act-card-ico"><img src="pics/activites-nombre-chiffres-lettres.jpeg" alt="Le compte est bon" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Nombres en chiffres/lettres</div>
+                <div class="act-card-desc">Écrire un nombre en lettres ou en chiffres avec des étiquettes</div>
             </div>
 			<div class="act-card" onclick="createWidget('loto-multi');toggleActivitiesPanel()">
                 <div class="act-card-ico"><img src="pics/activites-loto6.jpeg" alt="Fractions" style="width:100%;height:100%;object-fit:contain;"></div>
