@@ -203,12 +203,14 @@
         .ncl-target-label { font-size: calc(12px * var(--ncl-s)); color: #888; font-weight: 600; white-space: nowrap; }
         .ncl-target-input {
             font-size: calc(28px * var(--ncl-s)); font-weight: 900; color: #dc3545;
-            line-height: 1.2; text-align: center; background: transparent;
+            line-height: 1.25; text-align: center; background: transparent;
             border: none; border-bottom: calc(2px * var(--ncl-s)) dashed #d1d5db;
-            outline: none; min-width: calc(160px * var(--ncl-s)); max-width: 100%;
+            outline: none; min-width: calc(160px * var(--ncl-s)); width: 100%; max-width: 100%;
             font-family: 'Segoe UI', system-ui, sans-serif; padding: calc(2px * var(--ncl-s)) calc(4px * var(--ncl-s));
+            resize: none; overflow: hidden; white-space: pre-wrap; word-break: break-word;
+            box-sizing: border-box; display: block;
         }
-        .ncl-target-input::placeholder { color: #bbb; font-weight: 700; font-size: calc(20px * var(--ncl-s)); }
+        .ncl-target-input::placeholder { color: #bbb; font-weight: 700; font-size: calc(10px * var(--ncl-s)); }
         .ncl-target-input:focus { border-bottom-color: #4a90e2; }
         .ncl-target-input.invalid { border-bottom-color: #dc3545; color: #b91c1c; }
 
@@ -224,15 +226,26 @@
         }
         .ncl-tile {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: calc(42px * var(--ncl-s)); height: calc(38px * var(--ncl-s));
+            min-width: calc(38px * var(--ncl-s)); height: calc(30px * var(--ncl-s));
             padding: 0 calc(8px * var(--ncl-s)); border-radius: calc(8px * var(--ncl-s));
-            font-size: calc(13px * var(--ncl-s)); font-weight: 700; cursor: grab;
+            font-size: calc(12px * var(--ncl-s)); font-weight: 700; cursor: grab;
             border: calc(1.5px * var(--ncl-s)) solid #d1d5db; background: white; color: #1e3a5f;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08); transition: background .12s, border-color .12s, transform .1s;
             user-select: none; touch-action: none;
         }
         .ncl-tile:hover { border-color: #4a90e2; background: #eff6ff; }
         .ncl-tile:active { cursor: grabbing; transform: scale(0.95); }
+        .ncl-tile.word-tile {
+            flex-direction: column; height: auto;
+            min-height: calc(28px * var(--ncl-s));
+            padding: calc(2px * var(--ncl-s)) calc(8px * var(--ncl-s));
+            line-height: 1.05; gap: 0;
+        }
+        .ncl-tile-word { pointer-events: none; }
+        .ncl-tile-num {
+            font-size: calc(8px * var(--ncl-s)); font-weight: 600; opacity: 0.6;
+            pointer-events: none;
+        }
         .ncl-tile.digit-tile {
             min-width: calc(38px * var(--ncl-s)); font-size: calc(17px * var(--ncl-s));
             font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif;
@@ -264,7 +277,8 @@
             border-radius: calc(10px * var(--ncl-s));
         }
         .ncl-answer-zone.digits-mode {
-            flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-start;
+            flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-end;
+            padding-right: calc(20px * var(--ncl-s));
         }
         .ncl-answer-zone.drag-over { background: #fff8e1; border-color: #d4a017; }
         .ncl-answer-empty { font-size: calc(11px * var(--ncl-s)); color: #bbb; font-style: italic; }
@@ -279,7 +293,7 @@
         .ncl-answer-tile:hover { background: #fee2e2; border-color: #dc3545; color: #dc3545; }
         .ncl-answer-tile.digit-tile {
             font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; font-size: calc(16px * var(--ncl-s));
-            min-width: calc(28px * var(--ncl-s)); padding: 0 calc(5px * var(--ncl-s));
+            min-width: calc(30px * var(--ncl-s)); padding: 0 calc(5px * var(--ncl-s));
         }
         .ncl-answer-sep { color: #d4a017; font-weight: 900; font-size: calc(14px * var(--ncl-s)); flex-shrink: 0; }
         .ncl-answer-groupsep { display: inline-block; width: calc(10px * var(--ncl-s)); flex-shrink: 0; }
@@ -354,6 +368,17 @@
         ['cent','cents','mille','million','millions','milliard','milliards','et']
     ];
     const DIGIT_TILES = ['0','1','2','3','4','5','6','7','8','9'];
+
+    // Valeur numérique affichée sous chaque étiquette-mot (entre parenthèses)
+    const WORD_TILE_VALUES = {
+        un: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9,
+        dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14, quinze: 15, seize: 16,
+        vingt: 20, vingts: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60,
+        cent: 100, cents: 100, mille: 1000,
+        million: 1000000, millions: 1000000,
+        milliard: 1000000000, milliards: 1000000000
+        // "et" n'a pas de valeur numérique propre
+    };
 
     const NCL_UNITS = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
     const NCL_TEENS = { 10: 'dix', 11: 'onze', 12: 'douze', 13: 'treize', 14: 'quatorze', 15: 'quinze', 16: 'seize' };
@@ -564,7 +589,7 @@
 
             <div class="ncl-target-zone">
                 <label class="ncl-target-label">Nombre proposé :</label>
-                <input type="text" class="ncl-target-input" inputmode="numeric" autocomplete="off" placeholder="Tape un nombre, ex : 123" />
+                <textarea class="ncl-target-input" rows="1" inputmode="numeric" autocomplete="off" placeholder="Tape un nombre, ex : 123"></textarea>
             </div>
 
        
@@ -632,6 +657,7 @@
         let targetTokens = null;          // tableau d'étiquettes attendues (mode c2l)
         let targetDigits = null;          // chaîne de chiffres attendue (mode l2c)
         let studentTiles = [];            // étiquettes placées par l'élève (dans l'ordre)
+        let targetTooLong = false;        // true si le nombre tapé dépasse 12 chiffres
 
         // ── Scale proportionnel ───────────────────────────────────────────
         const BASE_W = 720;
@@ -639,6 +665,7 @@
             const w = container.offsetWidth || BASE_W;
             const sc = Math.max(0.5, Math.min(3, w / BASE_W));
             container.style.setProperty('--ncl-s', sc.toFixed(4));
+            autoGrowTarget();
         }
 
         // ── Rendu palette ──────────────────────────────────────────────────
@@ -650,9 +677,19 @@
                     rowEl.className = 'ncl-palette-row';
                     row.forEach(val => {
                         const el = document.createElement('div');
-                        el.className = 'ncl-tile ncl-tile-row' + rowIdx;
-                        el.textContent = val;
+                        el.className = 'ncl-tile ncl-tile-row' + rowIdx + ' word-tile';
                         el.dataset.value = val;
+                        const wordSpan = document.createElement('span');
+                        wordSpan.className = 'ncl-tile-word';
+                        wordSpan.textContent = val;
+                        el.appendChild(wordSpan);
+                        const num = WORD_TILE_VALUES[val];
+                        if (num !== undefined) {
+                            const numSpan = document.createElement('span');
+                            numSpan.className = 'ncl-tile-num';
+                            numSpan.textContent = '(' + num.toLocaleString('fr-FR') + ')';
+                            el.appendChild(numSpan);
+                        }
                         attachDragBehavior(el, val);
                         rowEl.appendChild(el);
                     });
@@ -773,11 +810,17 @@
         }
 
         // ── Calcul de la cible à partir de la saisie du professeur ─────────
+        function autoGrowTarget() {
+            inputEl.style.height = 'auto';
+            inputEl.style.height = inputEl.scrollHeight + 'px';
+        }
         function updateTarget() {
+            autoGrowTarget();
             const raw = inputEl.value;
             resultText.classList.remove('show', 'exact', 'faux');
             resultText.textContent = '';
             inputEl.classList.remove('invalid');
+            targetTooLong = false;
             if (currentMode === 'c2l') {
                 const cleaned = raw.replace(/\s+/g, '');
                 const n = cleaned === '' ? NaN : parseInt(cleaned, 10);
@@ -786,12 +829,24 @@
                     if (cleaned) inputEl.classList.add('invalid');
                     return;
                 }
+                if (cleaned.length > 12) {
+                    targetTokens = null;
+                    targetTooLong = true;
+                    inputEl.classList.add('invalid');
+                    return;
+                }
                 targetTokens = nclNumberToTokens(n);
                 if (!targetTokens) { inputEl.classList.add('invalid'); return; }
             } else {
                 if (!raw || !raw.trim()) { targetDigits = null; return; }
                 const n = nclParseWordsToNumber(raw);
                 if (n === null) { targetDigits = null; inputEl.classList.add('invalid'); return; }
+                if (String(n).length > 12) {
+                    targetDigits = null;
+                    targetTooLong = true;
+                    inputEl.classList.add('invalid');
+                    return;
+                }
                 targetDigits = String(n);
             }
         }
@@ -831,6 +886,7 @@
 
         inputEl.addEventListener('pointerdown', (e) => e.stopPropagation());
         inputEl.addEventListener('mousedown', (e) => e.stopPropagation());
+        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
         inputEl.addEventListener('input', () => { updateTarget(); if (typeof saveBoard === 'function') saveBoard(); });
 
         clearBtn.addEventListener('click', (e) => {
@@ -862,7 +918,10 @@
                 ok = targetDigits !== null && studentTiles.join('') === targetDigits;
             }
             resultText.classList.remove('exact', 'faux');
-            if (targetTokens === null && targetDigits === null) {
+            if (targetTooLong) {
+                resultText.textContent = '⚠️ Nombre limité à 12 chiffres maximum.';
+                resultText.classList.add('faux');
+            } else if (targetTokens === null && targetDigits === null) {
                 resultText.textContent = '⚠️ Le professeur doit d\'abord taper un nombre.';
                 resultText.classList.add('faux');
             } else if (ok) {
@@ -885,7 +944,9 @@
                 solutionTiles = targetDigits.split('');
             }
             if (!solutionTiles) {
-                resultText.textContent = '⚠️ Le professeur doit d\'abord taper un nombre.';
+                resultText.textContent = targetTooLong
+                    ? '⚠️ Nombre limité à 12 chiffres maximum.'
+                    : '⚠️ Le professeur doit d\'abord taper un nombre.';
                 resultText.classList.add('show');
                 return;
             }
