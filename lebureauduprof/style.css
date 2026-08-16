@@ -4120,3 +4120,67 @@ body.menu-light .disp-block-actions .disp-section-label  { color: rgba(0, 0, 0, 
 body.menu-light .disp-block-theme   .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
 body.menu-light .disp-block-capture .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
 body.menu-light .disp-block-fonds   .disp-section-label  { color: rgba(0, 0, 0, 0.9);  border-bottom-color: rgba(0, 0, 0, 0.2); }
+
+/* ══════════════════════════════════════════════════════════════════
+   ACCÈS RAPIDE AU TABLEAU : mini-menu contextuel + glisser-déposer PDF
+══════════════════════════════════════════════════════════════════ */
+
+/* Halo léger sur le board pendant qu'on survole avec un fichier à déposer */
+#board.board-pdf-dragover {
+    outline: 3px dashed #4a90e2;
+    outline-offset: -3px;
+    background-color: rgba(74, 144, 226, 0.06);
+}
+
+/* Mini-menu contextuel (clic droit / appui long) */
+#board-quick-menu {
+    position: fixed;
+    z-index: 60000;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    min-width: 150px;
+}
+#board-quick-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    touch-action: manipulation;
+}
+#board-quick-menu button:hover,
+#board-quick-menu button:active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+#board-quick-menu .bqm-ico { font-size: 16px; line-height: 1; }
+#board-quick-menu .bqm-lbl { flex: 1; }
+
+/* Mode clair */
+body.menu-light #board-quick-menu {
+    background: var(--panel-light-bg, #fff);
+    border-color: var(--panel-light-border, rgba(0,0,0,0.15));
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+}
+body.menu-light #board-quick-menu button {
+    color: var(--panel-light-muted, rgba(0,0,0,0.7));
+}
+body.menu-light #board-quick-menu button:hover,
+body.menu-light #board-quick-menu button:active {
+    background: rgba(0,0,0,0.06);
+    color: var(--panel-light-text, #000);
+}

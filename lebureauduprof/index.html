@@ -2738,6 +2738,155 @@ function lancerTracesGeometriques() {
 
 <script src="widget-page-garde.js"></script>
 
+<!-- ═══════════════════════════════════════════════════════════════════
+     ACCÈS RAPIDE AU TABLEAU : menu contextuel + glisser-déposer PDF
+     - Clic droit (ou appui long) sur une zone vide du tableau → mini-menu
+     - Glisser-déposer un fichier .pdf sur le tableau → widget PDF créé
+       et chargé automatiquement, sans passer par aucun panneau/onglet.
+═══════════════════════════════════════════════════════════════════ -->
+<div id="board-quick-menu" style="display:none;">
+    <button data-action="pdf" title="Ouvrir un PDF"><span class="bqm-ico">📄</span><span class="bqm-lbl">PDF</span></button>
+    <button data-action="text" title="Ajouter un texte"><span class="bqm-ico">🔤</span><span class="bqm-lbl">Texte</span></button>
+    <button data-action="homework" title="Devoirs à noter"><span class="bqm-ico">📝</span><span class="bqm-lbl">Devoirs à noter</span></button>
+    <button data-action="agenda" title="Planning de la journée"><span class="bqm-ico">🗓️</span><span class="bqm-lbl">Planning du jour</span></button>
+    <button data-action="minuteur" title="Minuteur et chrono"><span class="bqm-ico">⏱️</span><span class="bqm-lbl">Minuteur / Chrono</span></button>
+    <button data-action="deficalme" title="Défi calme"><span class="bqm-ico">🧘</span><span class="bqm-lbl">Défi calme</span></button>
+</div>
+
+<script>
+(function() {
+    var board = document.getElementById('board');
+    var menu  = document.getElementById('board-quick-menu');
+    if (!board || !menu) return;
+
+    /* ── Ouverture / fermeture du mini-menu ──────────────────────────── */
+    function openQuickMenu(x, y) {
+        menu.style.display = 'flex';
+        // Le menu doit rester dans l'écran (évite qu'il sorte à droite/en bas)
+        var mw = 190, mh = 250; // estimation avant mesure réelle
+        requestAnimationFrame(function() {
+            var rect = menu.getBoundingClientRect();
+            mw = rect.width  || mw;
+            mh = rect.height || mh;
+            var left = Math.min(x, window.innerWidth  - mw - 8);
+            var top  = Math.min(y, window.innerHeight - mh - 8);
+            menu.style.left = Math.max(8, left) + 'px';
+            menu.style.top  = Math.max(8, top)  + 'px';
+        });
+    }
+    function closeQuickMenu() {
+        menu.style.display = 'none';
+    }
+
+    menu.addEventListener('click', function(e) {
+        var btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        closeQuickMenu();
+        if (action === 'pdf' && typeof createWidget === 'function') {
+            createWidget('pdf');
+        } else if (action === 'text' && typeof createWidget === 'function') {
+            window._nextTextOpenCreate = true;
+            createWidget('text');
+        } else if (action === 'homework' && typeof createWidget === 'function') {
+            createWidget('homework');
+        } else if (action === 'agenda' && typeof createWidget === 'function') {
+            createWidget('agenda');
+        } else if (action === 'minuteur' && typeof createWidget === 'function') {
+            createWidget('minuteur');
+        } else if (action === 'deficalme' && typeof createDeficalmeWidget === 'function') {
+            createDeficalmeWidget();
+        }
+    });
+
+    document.addEventListener('pointerdown', function(e) {
+        if (menu.style.display !== 'none' && !menu.contains(e.target)) closeQuickMenu();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeQuickMenu();
+    });
+    board.addEventListener('scroll', closeQuickMenu, { passive: true });
+    window.addEventListener('resize', closeQuickMenu);
+
+    /* ── Clic droit (desktop) sur une zone vide du board ─────────────── */
+    board.addEventListener('contextmenu', function(e) {
+        if (e.target !== board) return; // clic droit sur un widget → comportement normal (pas de menu rapide)
+        e.preventDefault();
+        openQuickMenu(e.clientX, e.clientY);
+    });
+
+    /* ── Appui long (tactile/stylet) sur une zone vide du board ──────── */
+    var longPressTimer = null;
+    var longPressStart  = null;
+    var LONG_PRESS_MS   = 500;
+    var MOVE_TOLERANCE  = 12;
+
+    board.addEventListener('pointerdown', function(e) {
+        if (e.pointerType === 'mouse') return; // le clic droit gère déjà le desktop
+        if (e.target !== board) return;        // pas sur un widget
+        longPressStart = { x: e.clientX, y: e.clientY };
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(function() {
+            longPressTimer = null;
+            openQuickMenu(longPressStart.x, longPressStart.y);
+        }, LONG_PRESS_MS);
+    }, { passive: true });
+
+    function cancelLongPress(e) {
+        if (!longPressTimer) return;
+        if (e && longPressStart) {
+            var dx = e.clientX - longPressStart.x;
+            var dy = e.clientY - longPressStart.y;
+            if (Math.sqrt(dx * dx + dy * dy) < MOVE_TOLERANCE) return; // léger tremblement toléré
+        }
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+    board.addEventListener('pointermove',  cancelLongPress, { passive: true });
+    board.addEventListener('pointerup',    function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
+    board.addEventListener('pointercancel',function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
+
+    /* ── Glisser-déposer un PDF directement sur le tableau ────────────── */
+    function isPdfFile(file) {
+        return file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+    }
+
+    board.addEventListener('dragover', function(e) {
+        if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') === -1) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        board.classList.add('board-pdf-dragover');
+    });
+    board.addEventListener('dragleave', function(e) {
+        if (e.target === board) board.classList.remove('board-pdf-dragover');
+    });
+    board.addEventListener('drop', function(e) {
+        board.classList.remove('board-pdf-dragover');
+        if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
+        var pdfFile = Array.prototype.find.call(e.dataTransfer.files, isPdfFile);
+        if (!pdfFile) return; // pas un PDF : on laisse la gestion existante (images, etc.) faire son travail
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (typeof createWidget !== 'function') return;
+        var widget = createWidget('pdf');
+        if (!widget) return;
+        // Réutilise l'input file caché du widget PDF fraîchement créé,
+        // pour déclencher exactement le même chargement que "Ouvrir PDF".
+        var fileInput = widget.querySelector('input[type="file"]');
+        if (!fileInput) return;
+        try {
+            var dt = new DataTransfer();
+            dt.items.add(pdfFile);
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (err) {
+            console.error('[PDF drop] Erreur lors du chargement du fichier :', err);
+        }
+    });
+})();
+</script>
+
 <!-- Template vide pour que createWidget('page-garde') ne produise pas "Type inconnu" -->
 <template id="template-page-garde"></template>
 
