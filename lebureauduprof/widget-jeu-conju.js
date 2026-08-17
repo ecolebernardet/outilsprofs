@@ -817,9 +817,11 @@
         // poignée de déplacement.
         pool.addEventListener('mousedown', (e) => e.stopPropagation());
         pool.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+        pool.addEventListener('pointerdown', (e) => e.stopPropagation());
         zones.forEach(z => {
             z.addEventListener('mousedown', (e) => e.stopPropagation());
             z.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+            z.addEventListener('pointerdown', (e) => e.stopPropagation());
         });
 
         // ── Aide ─────────────────────────────────────────────────────────
@@ -989,7 +991,7 @@
         // touchmove/touchend sont posés sur document, exactement comme dans
         // le widget mots-alpha qui fonctionne sans conflit avec le
         // déplacement du widget lui-même.
-        function startDrag(tag, startX, startY) {
+        function startDrag(tag, startX, startY, pointerId) {
             const ghost = document.createElement('div');
             ghost.className = 'jcj-drag-ghost';
             ghost.textContent = tag.textContent;
@@ -1003,8 +1005,8 @@
             let lastZone = null;
 
             function onMove(e) {
-                const cx = e.touches ? e.touches[0].clientX : e.clientX;
-                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                if (pointerId != null && e.pointerId !== pointerId) return;
+                const cx = e.clientX, cy = e.clientY;
                 ghost.style.left = cx + 'px';
                 ghost.style.top  = cy + 'px';
                 const under = document.elementFromPoint(cx, cy);
@@ -1017,44 +1019,37 @@
             }
 
             function onUp(e) {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup',   onUp);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend',  onUp);
-                document.removeEventListener('touchcancel', onUp);
+                if (pointerId != null && e.pointerId !== pointerId) return;
+                document.removeEventListener('pointermove',   onMove);
+                document.removeEventListener('pointerup',     onUp);
+                document.removeEventListener('pointercancel', onUp);
                 ghost.remove();
                 tag.classList.remove('is-dragging');
                 clearZoneHover();
 
-                const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-                const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                const cx = e.clientX, cy = e.clientY;
                 const under = document.elementFromPoint(cx, cy);
                 const zone = under ? under.closest('.jcj-zone') : null;
                 evaluateDrop(tag, zone);
             }
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup',   onUp);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend',  onUp);
-            document.addEventListener('touchcancel', onUp);
+            document.addEventListener('pointermove',   onMove);
+            document.addEventListener('pointerup',     onUp);
+            document.addEventListener('pointercancel', onUp);
         }
 
         function attachDragHandlers(tag) {
-            tag.addEventListener('mousedown', (e) => {
+            // Pointer Events uniquement : couvre souris, doigt ET stylet en un
+            // seul système (évite qu'un stylet, qui ne déclenche pas toujours
+            // mousedown/touchstart de façon fiable, fasse remonter l'événement
+            // jusqu'au déplacement du widget entier).
+            tag.addEventListener('pointerdown', (e) => {
                 if (tag.dataset.locked === 'true') return;
                 if (!running || paused) return;
                 e.stopPropagation();
                 e.preventDefault();
-                startDrag(tag, e.clientX, e.clientY);
+                startDrag(tag, e.clientX, e.clientY, e.pointerId);
             });
-            tag.addEventListener('touchstart', (e) => {
-                if (tag.dataset.locked === 'true') return;
-                if (!running || paused) return;
-                e.stopPropagation();
-                e.preventDefault();
-                startDrag(tag, e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: false });
         }
 
         function clearZones() {
