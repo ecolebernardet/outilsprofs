@@ -1027,7 +1027,6 @@ function setVisuelsMode(mode) {
 <script src="widget-jeu-tables-serpent.js"></script>
 <script src="widget-jeu-tables-taupe.js"></script>
 <script src="widget-jeu-memory.js"></script>
-<script src="widget-jeu-sudoku.js"></script>
 <script src="widget-jeu-conju.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
@@ -1134,11 +1133,6 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/jeux-memory.png" alt="Memory" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Jeu de memory</div>
                 <div class="act-card-desc">Retrouver les paires (tables, doubles, ou contenu personnalisé)</div>
-            </div>
-			<div class="act-card" onclick="createWidget('jeu-sudoku');toggleJeuxPanel()">
-                <div class="act-card-ico"><img src="pics/jeux-sudokus.png" alt="Memory" style="width:100%;height:100%;object-fit:contain;"></div>
-                <div class="act-card-name">Sudoku</div>
-                <div class="act-card-desc">Glisser les étiquettes-chiffres dans les cases vides (4×4, 6×6 ou 9×9)</div>
             </div>
 		</div>
     </div>
@@ -2752,6 +2746,7 @@ function lancerTracesGeometriques() {
 ═══════════════════════════════════════════════════════════════════ -->
 <div id="board-quick-menu" style="display:none;">
     <button data-action="pdf" title="Ouvrir un PDF"><span class="bqm-ico">📄</span><span class="bqm-lbl">PDF</span></button>
+    <button data-action="seyes" title="Écriture Seyes"><span class="bqm-ico">✏️</span><span class="bqm-lbl">Écriture Seyes</span></button>
     <button data-action="text" title="Ajouter un texte"><span class="bqm-ico">🔤</span><span class="bqm-lbl">Texte</span></button>
     <button data-action="homework" title="Devoirs à noter"><span class="bqm-ico">📝</span><span class="bqm-lbl">Devoirs à noter</span></button>
     <button data-action="agenda" title="Planning de la journée"><span class="bqm-ico">🗓️</span><span class="bqm-lbl">Planning du jour</span></button>
@@ -2769,7 +2764,7 @@ function lancerTracesGeometriques() {
     function openQuickMenu(x, y) {
         menu.style.display = 'flex';
         // Le menu doit rester dans l'écran (évite qu'il sorte à droite/en bas)
-        var mw = 190, mh = 250; // estimation avant mesure réelle
+        var mw = 190, mh = 288; // estimation avant mesure réelle
         requestAnimationFrame(function() {
             var rect = menu.getBoundingClientRect();
             mw = rect.width  || mw;
@@ -2791,6 +2786,8 @@ function lancerTracesGeometriques() {
         closeQuickMenu();
         if (action === 'pdf' && typeof createWidget === 'function') {
             createWidget('pdf');
+        } else if (action === 'seyes' && typeof createSeyesWidget === 'function') {
+            createSeyesWidget();
         } else if (action === 'text' && typeof createWidget === 'function') {
             window._nextTextOpenCreate = true;
             createWidget('text');
