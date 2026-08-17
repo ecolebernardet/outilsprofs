@@ -287,6 +287,11 @@ function buildBoardState() {
         if ((w.dataset.type === 'droite-num' || w.dataset.subtype === 'droite-num') && typeof w._dnGetData === 'function') {
             dnData = w._dnGetData();
         }
+        // Données propres au widget nombres en chiffres/lettres
+        let nclData = null;
+        if (w.dataset.type === 'nombres-chiffres-lettres' && typeof w._nclGetData === 'function') {
+            nclData = w._nclGetData();
+        }
         widgets.push({
 			type: w.dataset.subtype === 'seyes' ? 'seyes' : w.dataset.subtype === 'droite-num' ? 'droite-num' : w.dataset.type, topPercent: tP, leftPercent: lP, widthPercent: wP, contentHPercent: hP,
 			html, content: html, iframeSrc: iframe?.src || null,
@@ -331,7 +336,8 @@ function buildBoardState() {
 			rqData,
 			saData,
 			mmData,
-			dnData
+			dnData,
+			nclData
 		});
     });
     const shapes = [];
@@ -740,6 +746,12 @@ function restoreBoardFromJSON(json) {
         } else if (w.type === 'musique-clavier') {
             widget = createWidget('musique-clavier', '100px', '100px', false);
             // Les dimensions sont restaurées via widthPercent/contentHPercent et l'init du widget
+        } else if (w.type === 'nombres-chiffres-lettres') {
+            if (typeof createNombresLettresWidget === 'function') {
+                widget = createNombresLettresWidget(w.nclData || null);
+            } else {
+                widget = createWidget(w.type, '100px', '100px', false);
+            }
         } else {
             widget = createWidget(w.type, '100px', '100px', false);
         }

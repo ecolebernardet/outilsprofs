@@ -1027,6 +1027,7 @@ function setVisuelsMode(mode) {
 <script src="widget-jeu-tables-serpent.js"></script>
 <script src="widget-jeu-tables-taupe.js"></script>
 <script src="widget-jeu-memory.js"></script>
+<script src="widget-jeu-sudoku.js"></script>
 <script src="widget-jeu-conju.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
@@ -1133,6 +1134,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/jeux-memory.png" alt="Memory" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Jeu de memory</div>
                 <div class="act-card-desc">Retrouver les paires (tables, doubles, ou contenu personnalisé)</div>
+            </div>
+			<div class="act-card" onclick="createWidget('jeu-sudoku');toggleJeuxPanel()">
+                <div class="act-card-ico"><img src="pics/jeux-sudokus.png" alt="Memory" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Sudoku</div>
+                <div class="act-card-desc">Glisser les étiquettes-chiffres dans les cases vides (4×4, 6×6 ou 9×9)</div>
             </div>
 		</div>
     </div>
