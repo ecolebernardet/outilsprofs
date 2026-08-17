@@ -189,7 +189,7 @@
             flex-shrink: 0;
         }
         .jtt-title {
-            font-family: 'Marelle', 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             font-size: 15px;
             font-weight: 800;
             color: #7a4a10;
@@ -290,7 +290,6 @@
             gap: 8px;
         }
         .jtt-score {
-            font-family: 'Marelle', 'Segoe UI', system-ui, sans-serif;
             font-size: 13px;
             font-weight: 800;
             color: #ffe28a;
@@ -1317,6 +1316,12 @@
             const curW  = window.innerWidth;
             const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
             const isMobile = typeof isMobileBoardMode === 'function' && isMobileBoardMode();
+
+            if (!isMobile) {
+                // Le widget s'ouvre à 100px du bord gauche du board.
+                widget.style.left = '100px';
+                widget.dataset.leftPercent = (100 / curW) * 100;
+            }
 
             if (isMobile) {
                 const wPct = parseFloat(widget.dataset.widthPercent);
