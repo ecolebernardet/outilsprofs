@@ -171,9 +171,9 @@
         }
         .ncl-mode-btns { display: flex; gap: calc(4px * var(--ncl-s)); }
         .ncl-mode-btn {
-            padding: calc(5px * var(--ncl-s)) calc(10px * var(--ncl-s));
+            padding: calc(2px * var(--ncl-s)) calc(10px * var(--ncl-s));
             border-radius: calc(8px * var(--ncl-s)); border: 1px solid #ddd; background: #f5f5f5;
-            font-size: calc(9px * var(--ncl-s)); font-weight: 700; cursor: pointer;
+            font-size: calc(7px * var(--ncl-s)); font-weight: 700; cursor: pointer;
             color: #666; transition: background .15s; white-space: nowrap;
         }
         .ncl-mode-btn:hover { background: #e0e0e0; }
@@ -181,9 +181,9 @@
         .ncl-mode-btn.active-l2c { background: #ffedd5; color: #9a3412; border-color: #fdba74; }
 
         .ncl-btn {
-            padding: calc(5px * var(--ncl-s)) calc(12px * var(--ncl-s));
+            padding: calc(2px * var(--ncl-s)) calc(12px * var(--ncl-s));
             border-radius: calc(8px * var(--ncl-s)); border: none;
-            font-size: calc(9px * var(--ncl-s)); font-weight: 700; cursor: pointer;
+            font-size: calc(8px * var(--ncl-s)); font-weight: 700; cursor: pointer;
             transition: background .15s, transform .1s; white-space: nowrap;
             background: #f0f0f0; color: #333; border: 1px solid #ddd;
         }
@@ -197,7 +197,7 @@
 
         .ncl-target-zone {
             display: flex; align-items: center; justify-content: center; gap: calc(10px * var(--ncl-s));
-            padding: calc(10px * var(--ncl-s)); background: #f8f9fa; border: 1px solid #e5e7eb;
+            padding: 2px 10px; background: #f8f9fa; border: 1px solid #e5e7eb;
             border-radius: calc(10px * var(--ncl-s)); flex-wrap: wrap; text-align: center;
         }
         .ncl-target-label { font-size: calc(12px * var(--ncl-s)); color: #888; font-weight: 600; white-space: nowrap; }
@@ -272,7 +272,7 @@
         .ncl-answer-label { font-size: calc(11px * var(--ncl-s)); color: #888; font-weight: 700; }
         .ncl-answer-zone {
             display: flex; flex-wrap: wrap; align-items: center; gap: calc(4px * var(--ncl-s));
-            min-height: calc(52px * var(--ncl-s)); padding: calc(8px * var(--ncl-s)) calc(10px * var(--ncl-s));
+            min-height: calc(52px * var(--ncl-s)); padding: calc(3px * var(--ncl-s)) calc(10px * var(--ncl-s));
             background: #fffdf5; border: calc(2px * var(--ncl-s)) dashed #e5c97a;
             border-radius: calc(10px * var(--ncl-s));
         }
@@ -315,7 +315,7 @@
         .ncl-result-text.faux  { color: #dc3545; }
 
         .ncl-help-btn {
-            width: calc(22px * var(--ncl-s)); height: calc(22px * var(--ncl-s)); border-radius: 50%;
+            width: calc(18px * var(--ncl-s)); height: calc(18px * var(--ncl-s)); border-radius: 50%;
             border: 1px solid #bbb; background: #f5f5f5; color: #666; font-size: calc(12px * var(--ncl-s));
             font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; transition: background .15s;
@@ -714,6 +714,10 @@
         function attachDragBehavior(el, value) {
             el.addEventListener('pointerdown', (e) => {
                 e.stopPropagation(); e.preventDefault();
+                // Capture le pointeur sur la tuile : sur écran tactile / vidéoprojecteur
+                // interactif, ça évite que le geste soit réinterprété comme un scroll
+                // et coupé en cours de route.
+                try { el.setPointerCapture(e.pointerId); } catch (err) {}
                 const startX = e.clientX, startY = e.clientY;
                 let moved = false;
                 let ghost = null;
@@ -739,23 +743,36 @@
                         }
                     }
                 };
-                const onUp = (ev) => {
+                const cleanup = () => {
                     document.removeEventListener('pointermove', onMove);
                     document.removeEventListener('pointerup', onUp);
+                    document.removeEventListener('pointercancel', onCancel);
+                    try { el.releasePointerCapture(e.pointerId); } catch (err) {}
                     answerZone.classList.remove('drag-over');
-                    if (ghost) ghost.remove();
+                    if (ghost) { ghost.remove(); ghost = null; }
+                };
+                const onUp = (ev) => {
                     if (!moved) {
+                        cleanup();
                         // Simple clic/tap : ajoute directement à la réponse
                         addTileToAnswer(value);
                         return;
                     }
                     const dropTarget = document.elementFromPoint(ev.clientX, ev.clientY);
+                    cleanup();
                     if (dropTarget && dropTarget.closest('.ncl-answer-zone')) {
                         addTileToAnswer(value);
                     }
                 };
+                const onCancel = () => {
+                    // Le pointeur a été annulé par le navigateur (ex: geste réinterprété
+                    // en scroll sur un écran tactile). On annule proprement le drag en cours
+                    // plutôt que de laisser le fantôme et les listeners orphelins.
+                    cleanup();
+                };
                 document.addEventListener('pointermove', onMove);
                 document.addEventListener('pointerup', onUp);
+                document.addEventListener('pointercancel', onCancel);
             });
         }
 
