@@ -1209,6 +1209,12 @@
             const curVH = typeof virtualH === 'function' ? virtualH(curW) : window.innerHeight;
             const isMobile = typeof isMobileBoardMode === 'function' && isMobileBoardMode();
 
+            if (!isMobile) {
+                // Le widget s'ouvre à 100px du bord gauche du board.
+                widget.style.left = '100px';
+                widget.dataset.leftPercent = (100 / curW) * 100;
+            }
+
             if (isMobile) {
                 const wPct = parseFloat(widget.dataset.widthPercent);
                 const hPct = parseFloat(widget.dataset.contentHPercent);
