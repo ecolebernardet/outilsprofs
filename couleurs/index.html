@@ -504,7 +504,7 @@
                     <strong>${code}</strong> ${descP[i-1]} <span>${state==1?'⏳':(state==2?'✅':'')}</span>
                 </div>`;
             }
-            for(let i=1; i<=10; i++) {
+            for(let i=1; i<=9; i++) {
                 let code = 'T'+i; let state = student.rewards[code] || 0;
                 tItems += `<div class="reward-item ${state==1?'target':(state==2?'done':'')}" onclick="toggleReward(${sIdx},'${code}',this)">
                     <strong>${code}</strong> ${descT[i-1]} <span>${state==1?'⏳':(state==2?'✅':'')}</span>
