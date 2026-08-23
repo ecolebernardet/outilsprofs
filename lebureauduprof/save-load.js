@@ -859,6 +859,9 @@ function restoreBoardFromJSON(json) {
             }
             const iframe = widget.querySelector('iframe');
             if (w.iframeSrc && iframe) iframe.src = w.iframeSrc;
+            if (w.type === 'carte' && typeof _carteApplyBackgroundState === 'function') {
+                _carteApplyBackgroundState(widget);
+            }
             // Restaurer le PDF depuis IndexedDB si disponible
             if (w.type === 'pdf' && w.pdfId) {
                 const _pdfContainer = widget.querySelector('.editor-container');

@@ -770,6 +770,25 @@ function setVisuelsMode(mode) {
         <iframe src="" style="flex-grow:1;border:none;background:white;" allow="microphone;camera;display-capture;autoplay"></iframe>
     </div>
 </template>
+<template id="template-carte">
+    <div class="editor-container" style="height:800px;width:1000px;" data-carte-zoom="18">
+        <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
+        <div class="editor-toolbar" style="flex-wrap:wrap;gap:4px;">
+            <span style="font-size:12px;font-weight:700;color:#555;pointer-events:none;white-space:nowrap;">🗺️ Google Maps</span>
+            <input type="text" class="carte-address-input" placeholder="Adresse ou lieu..." value="HVGX+8GJ Chambéry" style="flex-grow:1;min-width:120px;" onchange="loadCarteAddress(this)" onkeydown="if(event.key==='Enter')loadCarteAddress(this)">
+            <button onclick="carteZoom(this,-1)" title="Zoom arrière">➖</button>
+            <button onclick="carteZoom(this,1)" title="Zoom avant">➕</button>
+            <button class="carte-wallpaper-btn" onclick="carteToggleWallpaper(this)" title="Occuper tout le fond du board (vue live, derrière les autres widgets)">🖼️</button>
+            <button onclick="toggleFullScreen(this.closest('.editor-container'))" title="Plein écran navigateur">⛶</button>
+            <div class="wf-btns">
+                <button class="wf-btn wf-btn-min"   title="Réduire"          onclick="toggleMediaCollapse(this.closest('.editor-container'))"></button>
+                <button class="wf-btn wf-btn-max"   title="Plein écran board" onclick="toggleMediaBoardFullscreen(this.closest('.editor-container'))"></button>
+                <button class="wf-btn wf-btn-close" title="Fermer"            onclick="snapshotNow();this.closest('.widget').remove();saveBoard();"></button>
+            </div>
+        </div>
+        <iframe class="carte-frame" src="https://www.google.com/maps?q=HVGX%2B8GJ+Chamb%C3%A9ry&z=18&t=k&output=embed" style="flex-grow:1;border:none;background:white;" allow="fullscreen"></iframe>
+    </div>
+</template>
 <template id="template-outilsprofs">
     <div class="editor-container outilsprofs-container" style="height:500px;width:800px;">
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
@@ -1444,6 +1463,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="widgets-card-ico"><img src="pics/widget-youtube.jpeg" alt="Ouvrir une vidéo Youtube" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="widgets-card-name">YouTube</div>
                 <div class="widgets-card-desc">Intégrer une vidéo YouTube</div>
+            </div>
+            <div class="widgets-card" onclick="createWidget('carte');toggleWidgetsPanel()">
+                <div class="widgets-card-ico"><img src="pics/widget-carte.jpeg" alt="Ouvrir une carte Google Maps" style="width:100%;height:100%;object-fit:contain;">️</div>
+                <div class="widgets-card-name">Carte</div>
+                <div class="widgets-card-desc">Ouvrir Google Maps</div>
             </div>
         </div>
         <div class="widgets-section-label">🕒 Temps & Météo</div>

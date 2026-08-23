@@ -59,6 +59,12 @@ function sendToBack(widget) {
         widget.classList.remove('pinned');
         widget.dataset.background = "true";
     }
+    // Widget carte (iframe) : une iframe reste cliquable même derrière les
+    // autres widgets (z-index seul ne suffit pas), on neutralise ses clics
+    // tant qu'elle est en fond.
+    if (widget.dataset.type === 'carte' && typeof _carteApplyBackgroundState === 'function') {
+        _carteApplyBackgroundState(widget);
+    }
     saveBoard();
 }
 
@@ -495,8 +501,8 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
         }
     }
 
-    // Widget iframe : la barre de titre (editor-toolbar) sert de poignée de déplacement
-    if (type === 'iframe') {
+    // Widget iframe / carte : la barre de titre (editor-toolbar) sert de poignée de déplacement
+    if (type === 'iframe' || type === 'carte') {
         // Initialiser les datasets de taille dès la création pour que saveBoard() les retrouve
         requestAnimationFrame(() => {
             const c = widget.querySelector('.editor-container');
@@ -818,7 +824,7 @@ function makeDraggable(elmnt) {
 
     } else {
         // Curseur move sur les widgets non-texte (sauf types avec leur propre poignée de déplacement)
-        const _NO_WIDGET_CURSOR = ['youtube', 'iframe', 'pdf', 'outilsprofs'];
+        const _NO_WIDGET_CURSOR = ['youtube', 'iframe', 'carte', 'pdf', 'outilsprofs'];
         if (!_NO_WIDGET_CURSOR.includes(elmnt.dataset.type)) {
             elmnt.style.cursor = 'move';
         }
