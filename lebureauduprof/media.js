@@ -39,6 +39,22 @@ function loadIframe(input) {
     iframe.src = url; saveBoard();
 }
 // ── Widget Carte (Google Maps, vue satellite) ───────────────────────
+const CARTE_PRESETS = {
+    chambery: { address: 'HVGX+8GJ Chambéry', zoom: 18 },
+    france:   { address: 'France',            zoom: 6  },
+    monde:    { address: '0,0',               zoom: 2  }
+};
+
+function carteSetPreset(select) {
+    const container = select.closest('.editor-container');
+    const preset = CARTE_PRESETS[select.value];
+    if (!preset || !container) return;
+    const input = container.querySelector('.carte-address-input');
+    if (input) input.value = preset.address;
+    container.dataset.carteZoom = preset.zoom;
+    if (input) loadCarteAddress(input);
+}
+
 function loadCarteAddress(input) {
     const container = input.closest('.editor-container');
     const iframe = container.querySelector('iframe.carte-frame');

@@ -775,6 +775,11 @@ function setVisuelsMode(mode) {
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
         <div class="editor-toolbar" style="flex-wrap:wrap;gap:4px;">
             <span style="font-size:12px;font-weight:700;color:#555;pointer-events:none;white-space:nowrap;">🗺️ Google Maps</span>
+            <select class="carte-preset-select" onchange="carteSetPreset(this)" title="Lieu prédéfini">
+                <option value="chambery" selected>📍 Chambéry</option>
+                <option value="france">🇫🇷 France entière</option>
+                <option value="monde">🌍 Monde</option>
+            </select>
             <input type="text" class="carte-address-input" placeholder="Adresse ou lieu..." value="HVGX+8GJ Chambéry" style="flex-grow:1;min-width:120px;" onchange="loadCarteAddress(this)" onkeydown="if(event.key==='Enter')loadCarteAddress(this)">
             <button onclick="carteZoom(this,-1)" title="Zoom arrière">➖</button>
             <button onclick="carteZoom(this,1)" title="Zoom avant">➕</button>

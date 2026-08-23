@@ -62,6 +62,8 @@
         .widget:focus-within { border-color: var(--primary-color); box-shadow: 0 12px 30px rgba(74, 144, 226, 0.3); }
         .widget[data-type="homework"]:focus-within { border-color: #ff4757; }
         .widget[data-type="iframe"]:focus-within { border-color: #2bcbba; }
+        .widget[data-type="carte"]:focus-within { border-color: #34a853; }
+        .carte-wallpaper-btn.active { background:#e6f4ea;border-color:#34a853;color:#1e7e34;font-weight:600; }
         .widget[data-transparent="true"] { border: none !important; box-shadow: none !important; background: transparent !important; }
         .widget[data-transparent="true"]:hover, .widget[data-transparent="true"]:focus-within { background: rgba(74, 144, 226, 0.05) !important; }
         /* Widgets ancrés : aucun effet visuel de focus/survol/sélection */
@@ -645,6 +647,7 @@
 		.yt-lib-empty { color:#666;font-size:12px;text-align:center;padding:24px;grid-column:1/-1; }
 		.widget[data-type="iframe"] .editor-toolbar,
 		.widget[data-type="youtube"] .editor-toolbar,
+		.widget[data-type="carte"] .editor-toolbar,
 		.widget[data-type="pdf"] .editor-toolbar,
 		.widget[data-type="deficalme"] .editor-toolbar,
 		.widget[data-type="outilsprofs"] .editor-toolbar { visibility: visible; opacity: 1; }

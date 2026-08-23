@@ -349,6 +349,8 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
                 x = (last.offsetLeft + 50) + 'px';
                 y = (last.offsetTop  + 50) + 'px';
             }
+        } else if (type === 'carte') {
+            x = '100px'; y = '100px';
         } else {
             const p = findFreePosition(); x = p.x + 'px'; y = p.y + 'px';
         }
