@@ -339,6 +339,13 @@
         <button id="toggleBtn" class="btn-main" onclick="toggleAllClasses()" style="background:var(--gray);">▼ Tout<br>Déplier</button>
 
         <div class="dropdown">
+            <button class="btn-main" style="background:var(--dark); width:auto; padding:0 10px;" onclick="toggleYearMenu(event)">
+                <i class="fas fa-calendar-alt"></i> <span id="schoolYearLabel">2026-2027</span> ▾
+            </button>
+            <div id="yearMenu" class="dropdown-content"></div>
+        </div>
+
+        <div class="dropdown">
             <button class="btn-main" style="background:var(--blue)" onclick="toggleGestionMenu(event)">
                 <i class="fas fa-cog"></i> Gestion ▾
             </button>
@@ -550,12 +557,53 @@
 
     let schoolData=[], excludedDates=[], activeMonth=null, draggedItem=null, draggedClassIdx=null;
 
-    const monthConfigs=[
-        {name:"Septembre",m:8,y:2025},{name:"Octobre",m:9,y:2025},{name:"Novembre",m:10,y:2025},
-        {name:"Décembre",m:11,y:2025},{name:"Janvier",m:0,y:2026},{name:"Février",m:1,y:2026},
-        {name:"Mars",m:2,y:2026},{name:"Avril",m:3,y:2026},{name:"Mai",m:4,y:2026},
-        {name:"Juin",m:5,y:2026},{name:"Juillet",m:6,y:2026}
-    ];
+    const DEFAULT_SCHOOL_YEAR_START = 2026;
+    function generateMonthConfigs(startYear){
+        return [
+            {name:"Septembre",m:8,y:startYear},{name:"Octobre",m:9,y:startYear},{name:"Novembre",m:10,y:startYear},
+            {name:"Décembre",m:11,y:startYear},{name:"Janvier",m:0,y:startYear+1},{name:"Février",m:1,y:startYear+1},
+            {name:"Mars",m:2,y:startYear+1},{name:"Avril",m:3,y:startYear+1},{name:"Mai",m:4,y:startYear+1},
+            {name:"Juin",m:5,y:startYear+1},{name:"Juillet",m:6,y:startYear+1}
+        ];
+    }
+    let schoolYearStart = DEFAULT_SCHOOL_YEAR_START;
+    let monthConfigs = generateMonthConfigs(schoolYearStart);
+
+    function updateSchoolYearLabel(){
+        const el=document.getElementById('schoolYearLabel');
+        if(el) el.textContent = `${schoolYearStart}-${schoolYearStart+1}`;
+    }
+
+    function renderYearMenu(){
+        const menu=document.getElementById('yearMenu');
+        if(!menu) return;
+        const years=[];
+        for(let y=DEFAULT_SCHOOL_YEAR_START;y<=DEFAULT_SCHOOL_YEAR_START+10;y++) years.push(y);
+        menu.innerHTML = years.map(y=>{
+            const active = y===schoolYearStart;
+            return `<a href="javascript:void(0)" onclick="selectSchoolYear(${y})" style="${active?'font-weight:bold;color:var(--blue);':''}"><i class="fas ${active?'fa-check-circle':'fa-calendar'}"></i> ${y}-${y+1}</a>`;
+        }).join('');
+    }
+
+    function toggleYearMenu(event){event.stopPropagation();renderYearMenu();document.getElementById("yearMenu").classList.toggle("show");}
+
+    async function selectSchoolYear(year){
+        const menu=document.getElementById('yearMenu');
+        if(menu) menu.classList.remove('show');
+        if(year===schoolYearStart) return;
+        const ok=await showConfirm(`Passer à l'année scolaire <b>${year}-${year+1}</b> ?<br><br>Les classes, élèves, absences et vacances actuellement enregistrés seront <b>définitivement effacés</b> pour démarrer une nouvelle année vierge.`,{title:"Changer d'année scolaire",type:'warning',icon:'📅',labelOk:'Changer et effacer',labelCancel:'Annuler',okStyle:'danger'});
+        if(!ok) return;
+        schoolYearStart=year;
+        monthConfigs=generateMonthConfigs(schoolYearStart);
+        schoolData=[];
+        excludedDates=[];
+        activeMonth=null;
+        updateSchoolYearLabel();
+        refreshSchoolMonths();
+        await _doSave();
+        renderAll();
+        showToast(`Année scolaire ${year}-${year+1} activée`,'success',4000);
+    }
     const dayLabels=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
     let schoolMonths=[];
 
@@ -689,6 +737,9 @@
                 }
                 schoolData=decrypted.schoolData||[];
                 excludedDates=decrypted.excludedDates||[];
+                schoolYearStart=decrypted.schoolYearStart||DEFAULT_SCHOOL_YEAR_START;
+                monthConfigs=generateMonthConfigs(schoolYearStart);
+                updateSchoolYearLabel();
                 _lastKnownDataCount=schoolData.length;
                 if(migrateOldKeys())console.log("Migration clés demi-journées OK.");
                 if(decrypted.sharedNote!==undefined){
@@ -722,7 +773,7 @@
         _isSaving=true;_pendingSave=false;
         try{
             const cn=document.getElementById('noteContent').value;
-            const content=await encryptData({schoolData,excludedDates,sharedNote:cn});
+            const content=await encryptData({schoolData,excludedDates,sharedNote:cn,schoolYearStart});
             await _supabase.from('absences_data').upsert({id:1,content});
             _lastKnownDataCount=schoolData.length;
             document.getElementById('syncIndicator').innerText="✅ Synchronisé 🔒";
@@ -1405,7 +1456,7 @@
         if(_realtimeChannel)_supabase.removeChannel(_realtimeChannel);
         _realtimeChannel=_supabase.channel('absences-realtime-index-'+Date.now())
             .on('postgres_changes',{event:'UPDATE',schema:'public',table:'absences_data'},async payload=>{
-                try{const d=await decryptData(payload.new.content);if(!d||!d.schoolData)return;if(_isSaving||_pendingSave)return;schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();document.getElementById('syncIndicator').innerText="✅ Synchronisé";}catch(e){console.error("Realtime decrypt error:",e);}
+                try{const d=await decryptData(payload.new.content);if(!d||!d.schoolData)return;if(_isSaving||_pendingSave)return;schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.schoolYearStart&&d.schoolYearStart!==schoolYearStart){schoolYearStart=d.schoolYearStart;monthConfigs=generateMonthConfigs(schoolYearStart);updateSchoolYearLabel();activeMonth=null;}if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();document.getElementById('syncIndicator').innerText="✅ Synchronisé";}catch(e){console.error("Realtime decrypt error:",e);}
             })
             .on('system',{},status=>{
                 if(status==='SUBSCRIBED'){hideOfflineBanner();document.getElementById('syncIndicator').innerText="✅ Connecté";clearTimeout(_reconnectTimer);}
@@ -1416,7 +1467,7 @@
 
     window._reconnectRealtime=async function(){
         document.getElementById('syncIndicator').innerText="🔄 Reconnexion…";clearTimeout(_reconnectTimer);
-        if(_encryptionKey){try{const{data}=await _supabase.from('absences_data').select('content').eq('id',1).single();if(data){const d=await decryptData(data.content);if(d&&d.schoolData&&d.schoolData.length>0){schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();}}}catch(e){console.error("Erreur rechargement:",e);}}
+        if(_encryptionKey){try{const{data}=await _supabase.from('absences_data').select('content').eq('id',1).single();if(data){const d=await decryptData(data.content);if(d&&d.schoolData&&d.schoolData.length>0){schoolData=d.schoolData;excludedDates=d.excludedDates||[];if(d.schoolYearStart&&d.schoolYearStart!==schoolYearStart){schoolYearStart=d.schoolYearStart;monthConfigs=generateMonthConfigs(schoolYearStart);updateSchoolYearLabel();activeMonth=null;}if(d.sharedNote!==undefined){document.getElementById('noteContent').value=d.sharedNote;updateStickyDot(d.sharedNote);}refreshSchoolMonths();renderAll();}}}catch(e){console.error("Erreur rechargement:",e);}}
         _setupRealtimeChannel();
     };
 
