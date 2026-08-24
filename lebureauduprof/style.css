@@ -64,6 +64,7 @@
         .widget[data-type="iframe"]:focus-within { border-color: #2bcbba; }
         .widget[data-type="carte"]:focus-within { border-color: #34a853; }
         .carte-wallpaper-btn.active { background:#e6f4ea;border-color:#34a853;color:#1e7e34;font-weight:600; }
+        .carte-preset-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
         .widget[data-transparent="true"] { border: none !important; box-shadow: none !important; background: transparent !important; }
         .widget[data-transparent="true"]:hover, .widget[data-transparent="true"]:focus-within { background: rgba(74, 144, 226, 0.05) !important; }
         /* Widgets ancrés : aucun effet visuel de focus/survol/sélection */

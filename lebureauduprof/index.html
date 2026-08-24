@@ -775,11 +775,9 @@ function setVisuelsMode(mode) {
         <button class="exit-fs-btn" onclick="document.exitFullscreen()">✖ Quitter Plein Écran</button>
         <div class="editor-toolbar" style="flex-wrap:wrap;gap:4px;">
             <span style="font-size:12px;font-weight:700;color:#555;pointer-events:none;white-space:nowrap;">🗺️ Google Maps</span>
-            <select class="carte-preset-select" onchange="carteSetPreset(this)" title="Lieu prédéfini">
-                <option value="chambery" selected>📍 Chambéry</option>
-                <option value="france">🇫🇷 France entière</option>
-                <option value="monde">🌍 Monde</option>
-            </select>
+            <button class="carte-preset-btn active" onclick="carteSetPreset(this,'chambery')" title="Chambéry">📍 Chambéry</button>
+            <button class="carte-preset-btn" onclick="carteSetPreset(this,'france')" title="France entière">🇫🇷 France</button>
+            <button class="carte-preset-btn" onclick="carteSetPreset(this,'monde')" title="Monde">🌍 Monde</button>
             <input type="text" class="carte-address-input" placeholder="Adresse ou lieu..." value="HVGX+8GJ Chambéry" style="flex-grow:1;min-width:120px;" onchange="loadCarteAddress(this)" onkeydown="if(event.key==='Enter')loadCarteAddress(this)">
             <button onclick="carteZoom(this,-1)" title="Zoom arrière">➖</button>
             <button onclick="carteZoom(this,1)" title="Zoom avant">➕</button>
@@ -1470,7 +1468,7 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="widgets-card-desc">Intégrer une vidéo YouTube</div>
             </div>
             <div class="widgets-card" onclick="createWidget('carte');toggleWidgetsPanel()">
-                <div class="widgets-card-ico"><img src="pics/widget-carte.jpeg" alt="Ouvrir une carte Google Maps" style="width:100%;height:100%;object-fit:contain;">️</div>
+                <div class="widgets-card-ico" style="display:flex;align-items:center;justify-content:center;font-size:32px;">🗺️</div>
                 <div class="widgets-card-name">Carte</div>
                 <div class="widgets-card-desc">Ouvrir Google Maps</div>
             </div>

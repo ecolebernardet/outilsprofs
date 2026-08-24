@@ -45,10 +45,12 @@ const CARTE_PRESETS = {
     monde:    { address: '0,0',               zoom: 2  }
 };
 
-function carteSetPreset(select) {
-    const container = select.closest('.editor-container');
-    const preset = CARTE_PRESETS[select.value];
+function carteSetPreset(btn, key) {
+    const container = btn.closest('.editor-container');
+    const preset = CARTE_PRESETS[key];
     if (!preset || !container) return;
+    container.querySelectorAll('.carte-preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     const input = container.querySelector('.carte-address-input');
     if (input) input.value = preset.address;
     container.dataset.carteZoom = preset.zoom;
