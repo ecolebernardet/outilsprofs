@@ -2882,6 +2882,23 @@ function lancerTracesGeometriques() {
     board.addEventListener('pointerup',    function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
     board.addEventListener('pointercancel',function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
 
+    /* ── Désélection explicite au clic sur une zone vide du board ────────
+       Le menu d'un widget (fermer, épingler, ancrer...) s'affiche via
+       :focus-within en CSS. Avec une souris, cliquer ailleurs déclenche
+       nativement le blur du widget précédemment focus. Mais avec le
+       stylet d'un vidéoprojecteur/écran interactif, ce blur natif n'est
+       pas toujours déclenché par le navigateur : on le force donc ici
+       manuellement, pour tous les types de pointeur. ─────────────────── */
+    board.addEventListener('pointerdown', function(e) {
+        if (e.target !== board) return; // clic sur un widget : on ne touche à rien
+        var active = document.activeElement;
+        if (active && active !== document.body &&
+            typeof active.closest === 'function' &&
+            active.closest('.widget, .shape-widget')) {
+            active.blur();
+        }
+    }, { passive: true });
+
     /* ── Glisser-déposer un PDF ou une image directement sur le tableau ── */
     function isPdfFile(file) {
         return file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
