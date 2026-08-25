@@ -2882,9 +2882,15 @@ function lancerTracesGeometriques() {
     board.addEventListener('pointerup',    function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
     board.addEventListener('pointercancel',function(){ clearTimeout(longPressTimer); longPressTimer = null; }, { passive: true });
 
-    /* ── Glisser-déposer un PDF directement sur le tableau ────────────── */
+    /* ── Glisser-déposer un PDF ou une image directement sur le tableau ── */
     function isPdfFile(file) {
         return file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+    }
+    function isImageFile(file) {
+        return file && (
+            (file.type && file.type.indexOf('image/') === 0) ||
+            /\.(png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(file.name)
+        );
     }
 
     board.addEventListener('dragover', function(e) {
@@ -2899,26 +2905,49 @@ function lancerTracesGeometriques() {
     board.addEventListener('drop', function(e) {
         board.classList.remove('board-pdf-dragover');
         if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
-        var pdfFile = Array.prototype.find.call(e.dataTransfer.files, isPdfFile);
-        if (!pdfFile) return; // pas un PDF : on laisse la gestion existante (images, etc.) faire son travail
-        e.preventDefault();
-        e.stopPropagation();
 
-        if (typeof createWidget !== 'function') return;
-        var widget = createWidget('pdf');
-        if (!widget) return;
-        // Réutilise l'input file caché du widget PDF fraîchement créé,
-        // pour déclencher exactement le même chargement que "Ouvrir PDF".
-        var fileInput = widget.querySelector('input[type="file"]');
-        if (!fileInput) return;
-        try {
-            var dt = new DataTransfer();
-            dt.items.add(pdfFile);
-            fileInput.files = dt.files;
-            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-        } catch (err) {
-            console.error('[PDF drop] Erreur lors du chargement du fichier :', err);
+        var pdfFile = Array.prototype.find.call(e.dataTransfer.files, isPdfFile);
+        if (pdfFile) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (typeof createWidget !== 'function') return;
+            var widget = createWidget('pdf');
+            if (!widget) return;
+            // Réutilise l'input file caché du widget PDF fraîchement créé,
+            // pour déclencher exactement le même chargement que "Ouvrir PDF".
+            var fileInput = widget.querySelector('input[type="file"]');
+            if (!fileInput) return;
+            try {
+                var dt = new DataTransfer();
+                dt.items.add(pdfFile);
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (err) {
+                console.error('[PDF drop] Erreur lors du chargement du fichier :', err);
+            }
+            return;
         }
+
+        var imageFiles = Array.prototype.filter.call(e.dataTransfer.files, isImageFile);
+        if (imageFiles.length) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (typeof _insertImageWidget !== 'function') return;
+            imageFiles.forEach(function(imgFile) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    _insertImageWidget(ev.target.result, imgFile.name);
+                };
+                reader.onerror = function(err) {
+                    console.error('[Image drop] Erreur lors du chargement du fichier :', err);
+                };
+                reader.readAsDataURL(imgFile);
+            });
+            return;
+        }
+        // Ni PDF ni image reconnue : on laisse la gestion existante faire son travail
     });
 })();
 </script>
