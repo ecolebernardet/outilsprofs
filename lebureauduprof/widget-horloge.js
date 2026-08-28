@@ -130,7 +130,7 @@ function createHorlogeWidget() {
         .hrlg-hand { stroke-linecap: round; pointer-events: none; }
         .hrlg-hand-hour   { stroke: #ef4444; stroke-width: 5; }
         .hrlg-hand-minute { stroke: #3b82f6; stroke-width: 3; }
-        .hrlg-drag-hour, .hrlg-drag-minute { stroke: transparent; stroke-width: 18; }
+        .hrlg-drag-hour, .hrlg-drag-minute { stroke: transparent; stroke-width: 18; touch-action: none; }
         .hrlg-center { fill: #6366f1; filter: drop-shadow(0 0 3px rgba(99,102,241,.8)); }
         .hrlg-digital-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.55em; width: 100%; }
         .hrlg-digital {
@@ -730,35 +730,56 @@ function _initHorlogeWidget(widget) {
 
     function _makeDrag(onMove) {
         return function(e) {
-            e.preventDefault(); e.stopPropagation();
-            const move = (ev) => { onMove(_getAngleFromEvent(ev)); _render(); };
-            const up   = () => {
-                document.removeEventListener('mousemove', move);
-                document.removeEventListener('mouseup',   up);
-                document.removeEventListener('touchmove', move);
-                document.removeEventListener('touchend',  up);
+            // Bloque toute remontée vers un éventuel gestionnaire de déplacement
+            // du widget (mousedown/pointerdown), essentiel avec un stylet de
+            // vidéoprojecteur qui émet des Pointer Events plutôt que des
+            // événements souris/tactile classiques.
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+
+            // Capture le pointeur sur la poignée : le drag continue de suivre
+            // ce pointeur précis même si le stylet quitte la zone de l'aiguille.
+            if (e.pointerId !== undefined && e.target && typeof e.target.setPointerCapture === 'function') {
+                try { e.target.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+            }
+
+            const move = (ev) => {
+                ev.preventDefault();
+                onMove(_getAngleFromEvent(ev));
+                _render();
+            };
+            const up = (ev) => {
+                if (ev) ev.preventDefault();
+                document.removeEventListener('mousemove',   move);
+                document.removeEventListener('mouseup',     up);
+                document.removeEventListener('touchmove',   move);
+                document.removeEventListener('touchend',    up);
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup',   up);
+                document.removeEventListener('pointercancel', up);
                 if (typeof snapshotNow === 'function') snapshotNow();
                 if (typeof saveBoard   === 'function') saveBoard();
             };
-            document.addEventListener('mousemove', move);
-            document.addEventListener('mouseup',   up);
-            document.addEventListener('touchmove', move, { passive: false });
-            document.addEventListener('touchend',  up);
+            document.addEventListener('mousemove',   move);
+            document.addEventListener('mouseup',     up);
+            document.addEventListener('touchmove',   move, { passive: false });
+            document.addEventListener('touchend',    up);
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup',   up);
+            document.addEventListener('pointercancel', up);
         };
     }
 
-    dragHour.addEventListener('mousedown',  _makeDrag(a => {
+    function _dragHourMove(a) {
         const h12 = Math.floor(a / 30); // 0–11
         const offset = state.hours >= 12 ? 12 : 0; // conserver matin/après-midi
         state.hours = h12 + offset;
         state.minutes = Math.round((a % 30) / 30 * 60) % 60;
-    }));
-    dragHour.addEventListener('touchstart', _makeDrag(a => {
-        const h12 = Math.floor(a / 30);
-        const offset = state.hours >= 12 ? 12 : 0;
-        state.hours = h12 + offset;
-        state.minutes = Math.round((a % 30) / 30 * 60) % 60;
-    }), { passive: false });
+    }
+    dragHour.addEventListener('mousedown',  _makeDrag(_dragHourMove));
+    dragHour.addEventListener('touchstart', _makeDrag(_dragHourMove), { passive: false });
+    dragHour.addEventListener('pointerdown', _makeDrag(_dragHourMove));
 
     // Drag des minutes : détecte le passage 59→0 (avance) et 0→59 (recule) pour changer d'heure
     let _lastMinAngle = null;
@@ -784,8 +805,9 @@ function _initHorlogeWidget(widget) {
             _makeDrag(onMove)(e);
         };
     }
-    dragMin.addEventListener('mousedown',  _dragMinStart(_dragMinMove));
-    dragMin.addEventListener('touchstart', _dragMinStart(_dragMinMove), { passive: false });
+    dragMin.addEventListener('mousedown',   _dragMinStart(_dragMinMove));
+    dragMin.addEventListener('touchstart',  _dragMinStart(_dragMinMove), { passive: false });
+    dragMin.addEventListener('pointerdown', _dragMinStart(_dragMinMove));
 
     toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation(); state.showTime = !state.showTime; _render();
