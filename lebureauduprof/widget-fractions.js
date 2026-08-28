@@ -315,6 +315,11 @@
             min-width: 0;
         }
 
+        /* ── Le cercle a un ratio 1:1, il grossit trop vite en % : on plafonne sa taille ── */
+        .frac-col.shape-circle .frac-inner {
+            max-width: min(var(--frac-circle-max, 320px), 90%);
+        }
+
         /* ── Zone figure : prend tout l'espace disponible ── */
         .frac-figures {
             flex: 1;
@@ -578,7 +583,7 @@
         let fractions  = [];
 
         function defaultFrac() {
-            return { num: 1, den: 4, colored: new Set([0]), cols: 4, rows: 1, color: fillColor };
+            return { num: 1, den: 4, colored: new Set([0]), cols: 4, rows: 1, color: fillColor, labelVisible: showLabel };
         }
 
         function initFractions() {
@@ -791,27 +796,24 @@
                 btnP.style.cssText = 'width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;touch-action:manipulation;';
 
                 function makeStepHandler(fn) {
+                    // Dédup par horodatage (au lieu d'un simple drapeau _done) : robuste
+                    // même quand un stylet/écran interactif émet un pointerup en trop
+                    // ou dans un ordre inattendu par rapport au click.
+                    let _last = 0;
+                    function fire() {
+                        const now = Date.now();
+                        if (now - _last < 300) return;
+                        _last = now;
+                        fn();
+                        valEl.textContent = getValue();
+                        if (!skipSync) syncDenFromGrid(frac, figIdx);
+                        renderFigure(figIdx);
+                        syncInputs(figIdx);
+                        if (typeof saveBoard === 'function') saveBoard();
+                    }
                     return {
-                        onPointerUp: function(e) {
-                            e.stopPropagation();
-                            fn();
-                            valEl.textContent = getValue();
-                            if (!skipSync) syncDenFromGrid(frac, figIdx);
-                            renderFigure(figIdx);
-                            syncInputs(figIdx);
-                            if (typeof saveBoard === 'function') saveBoard();
-                            this._done = true;
-                        },
-                        onClick: function(e) {
-                            e.stopPropagation(); e.preventDefault();
-                            if (this._done) { this._done = false; return; }
-                            fn();
-                            valEl.textContent = getValue();
-                            if (!skipSync) syncDenFromGrid(frac, figIdx);
-                            renderFigure(figIdx);
-                            syncInputs(figIdx);
-                            if (typeof saveBoard === 'function') saveBoard();
-                        }
+                        onPointerUp: function(e) { e.stopPropagation(); fire(); },
+                        onClick: function(e) { e.stopPropagation(); e.preventDefault(); fire(); }
                     };
                 }
                 const handlerM = makeStepHandler(onMinus);
@@ -829,13 +831,53 @@
                 return wrap;
             }
 
+            // Label fraction AU-DESSUS de la figure + bouton œil
+            const lblWrap = document.createElement('div');
+            lblWrap.className = 'frac-label-wrap';
+
+            const fracLabelVisible = frac.labelVisible !== undefined ? frac.labelVisible : showLabel;
+
+            const eyeBtn = document.createElement('button');
+            eyeBtn.className = 'frac-eye-btn' + (fracLabelVisible ? '' : ' hidden');
+            eyeBtn.title = fracLabelVisible ? 'Cacher la fraction' : 'Afficher la fraction';
+            eyeBtn.textContent = '👁';
+
+            const lbl = document.createElement('div');
+            lbl.className = 'frac-fig-label';
+            const num = Math.max(0, Math.min(frac.num, frac.den));
+            const den = Math.max(1, frac.den);
+            lbl.innerHTML = `<span class="fn">${num}</span><div class="fb"></div><span class="fd">${den}</span>`;
+            lbl.style.visibility = fracLabelVisible ? '' : 'hidden';
+
+            let _eyeDone = false;
+            function toggleLabel(e) {
+                e.stopPropagation(); e.preventDefault();
+                const visible = lbl.style.visibility !== 'hidden';
+                lbl.style.visibility = visible ? 'hidden' : '';
+                eyeBtn.classList.toggle('hidden', visible);
+                eyeBtn.title = visible ? 'Afficher la fraction' : 'Cacher la fraction';
+                frac.labelVisible = !visible;
+                if (typeof saveBoard === 'function') saveBoard();
+            }
+            eyeBtn.addEventListener('pointerup', (e) => { toggleLabel(e); _eyeDone = true; });
+            eyeBtn.addEventListener('click',     (e) => { if (_eyeDone) { _eyeDone = false; return; } toggleLabel(e); });
+            eyeBtn.addEventListener('pointerdown', e => e.stopPropagation());
+            eyeBtn.addEventListener('mousedown',   e => e.stopPropagation());
+
+            lblWrap.appendChild(eyeBtn);
+            lblWrap.appendChild(lbl);
+            figDiv.appendChild(lblWrap);
+
+            // Figure (SVG)
+            const svgEl = shape === 'rect' ? buildRectSVG(frac, figIdx, 1) : buildCircleSVG(frac, figIdx, 1);
+            figDiv.appendChild(svgEl);
+
+            // Contrôles SOUS la figure : couleur + lignes/colonnes (ou parts pour le cercle)
             if (shape === 'rect') {
-                // 1) Swatches couleur
                 figDiv.appendChild(makeSwatches());
 
-                // 2) Contrôles lignes/colonnes
                 const gridCtrl = document.createElement('div');
-                gridCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:4px;justify-content:center;flex-wrap:wrap;';
+                gridCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-top:4px;justify-content:center;flex-wrap:wrap;';
 
                 const rowCtrl = makeAxisCtrl('lignes',
                     () => frac.rows,
@@ -857,12 +899,10 @@
                 figDiv.appendChild(gridCtrl);
 
             } else if (shape === 'circle') {
-                // Swatches couleur au-dessus du cercle
                 figDiv.appendChild(makeSwatches());
 
-                // Sélecteur nombre de parts
                 const circleCtrl = document.createElement('div');
-                circleCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:4px;justify-content:center;';
+                circleCtrl.style.cssText = 'display:flex;gap:10px;align-items:center;margin-top:4px;justify-content:center;';
                 const partsCtrl = makeAxisCtrl('parts',
                     () => frac.den,
                     () => {
@@ -879,43 +919,6 @@
                 circleCtrl.appendChild(partsCtrl);
                 figDiv.appendChild(circleCtrl);
             }
-
-            const svgEl = shape === 'rect' ? buildRectSVG(frac, figIdx, 1) : buildCircleSVG(frac, figIdx, 1);
-            figDiv.appendChild(svgEl);
-
-            // Label fraction sous la figure + bouton œil
-            const lblWrap = document.createElement('div');
-            lblWrap.className = 'frac-label-wrap';
-
-            const eyeBtn = document.createElement('button');
-            eyeBtn.className = 'frac-eye-btn' + (showLabel ? '' : ' hidden');
-            eyeBtn.title = showLabel ? 'Cacher la fraction' : 'Afficher la fraction';
-            eyeBtn.textContent = '👁';
-
-            const lbl = document.createElement('div');
-            lbl.className = 'frac-fig-label';
-            const num = Math.max(0, Math.min(frac.num, frac.den));
-            const den = Math.max(1, frac.den);
-            lbl.innerHTML = `<span class="fn">${num}</span><div class="fb"></div><span class="fd">${den}</span>`;
-            lbl.style.visibility = showLabel ? '' : 'hidden';
-
-            let _eyeDone = false;
-            function toggleLabel(e) {
-                e.stopPropagation(); e.preventDefault();
-                const visible = lbl.style.visibility !== 'hidden';
-                lbl.style.visibility = visible ? 'hidden' : '';
-                eyeBtn.classList.toggle('hidden', visible);
-                eyeBtn.title = visible ? 'Afficher la fraction' : 'Cacher la fraction';
-                if (typeof saveBoard === 'function') saveBoard();
-            }
-            eyeBtn.addEventListener('pointerup', (e) => { toggleLabel(e); _eyeDone = true; });
-            eyeBtn.addEventListener('click',     (e) => { if (_eyeDone) { _eyeDone = false; return; } toggleLabel(e); });
-            eyeBtn.addEventListener('pointerdown', e => e.stopPropagation());
-            eyeBtn.addEventListener('mousedown',   e => e.stopPropagation());
-
-            lblWrap.appendChild(eyeBtn);
-            lblWrap.appendChild(lbl);
-            figDiv.appendChild(lblWrap);
 
             // Click sur une part (pointerup + click avec dédup pour éviter double déclenchement)
             let _lastPartEvent = 0;
@@ -983,36 +986,33 @@
                 btnP.className = 'frac-step-btn';
                 btnP.textContent = '+';
 
+                // Dédup par horodatage (au lieu d'un drapeau _done) : robuste même
+                // quand un stylet/écran interactif émet un pointerup en trop.
+                let _lastM = 0, _lastP = 0;
                 const handlerM = {
-                    onPointerUp(e) {
-                        e.stopPropagation(); onMinus();
-                        valEl.textContent = getVal(); this._done = true;
-                        renderFigure(figIdx); syncInputs(figIdx);
-                        if (typeof saveBoard === 'function') saveBoard();
-                    },
-                    onClick(e) {
-                        e.stopPropagation(); e.preventDefault();
-                        if (this._done) { this._done = false; return; }
-                        onMinus(); valEl.textContent = getVal();
-                        renderFigure(figIdx); syncInputs(figIdx);
-                        if (typeof saveBoard === 'function') saveBoard();
-                    }
+                    onPointerUp(e) { e.stopPropagation(); _fireM(); },
+                    onClick(e) { e.stopPropagation(); e.preventDefault(); _fireM(); }
                 };
+                function _fireM() {
+                    const now = Date.now();
+                    if (now - _lastM < 300) return;
+                    _lastM = now;
+                    onMinus(); valEl.textContent = getVal();
+                    renderFigure(figIdx); syncInputs(figIdx);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
                 const handlerP = {
-                    onPointerUp(e) {
-                        e.stopPropagation(); onPlus();
-                        valEl.textContent = getVal(); this._done = true;
-                        renderFigure(figIdx); syncInputs(figIdx);
-                        if (typeof saveBoard === 'function') saveBoard();
-                    },
-                    onClick(e) {
-                        e.stopPropagation(); e.preventDefault();
-                        if (this._done) { this._done = false; return; }
-                        onPlus(); valEl.textContent = getVal();
-                        renderFigure(figIdx); syncInputs(figIdx);
-                        if (typeof saveBoard === 'function') saveBoard();
-                    }
+                    onPointerUp(e) { e.stopPropagation(); _fireP(); },
+                    onClick(e) { e.stopPropagation(); e.preventDefault(); _fireP(); }
                 };
+                function _fireP() {
+                    const now = Date.now();
+                    if (now - _lastP < 300) return;
+                    _lastP = now;
+                    onPlus(); valEl.textContent = getVal();
+                    renderFigure(figIdx); syncInputs(figIdx);
+                    if (typeof saveBoard === 'function') saveBoard();
+                }
 
                 [btnM, btnP].forEach(b => {
                     b.addEventListener('mousedown',   e => e.stopPropagation());
@@ -1098,16 +1098,37 @@
             }
         }
 
+        // ── Cercle : diamètre max ≈ largeur du widget ÷ nombre de formes (comme le rectangle) ──
+        // mais sans jamais dépasser la hauteur disponible (le cercle est carré, contrairement au rectangle)
+        function updateCircleMax() {
+            const n = Math.max(1, fractions.length);
+            const zoneW = mainZone.offsetWidth  || container.offsetWidth  || 0;
+            const zoneH = mainZone.offsetHeight || container.offsetHeight || 0;
+            if (!zoneW) return;
+            // Facteur plus réduit quand il y a peu de cercles (sinon ils paraissent trop grands)
+            const widthFactor = n === 1 ? 0.32 : n === 2 ? 0.60 : 0.92;
+            const widthBased = (zoneW / n) * widthFactor;
+            // On réserve de la place pour le label au-dessus et les contrôles en dessous de la figure
+            const RESERVED_V = 110;
+            const heightBased = Math.max(60, zoneH - RESERVED_V);
+            const px = Math.max(90, Math.round(Math.min(widthBased, heightBased)));
+            mainZone.style.setProperty('--frac-circle-max', px + 'px');
+        }
+        if (!widget._wfCircleResizeObs && typeof ResizeObserver === 'function') {
+            widget._wfCircleResizeObs = new ResizeObserver(() => updateCircleMax());
+            widget._wfCircleResizeObs.observe(mainZone);
+        }
+
         // ── Rendu complet — toutes les fractions côte à côte ─────────────
         // ── Rendu complet — N colonnes selon le nombre de fractions actives ──
         function renderAll() {
             mainZone.innerHTML = '';
             mainZone.style.setProperty('--frac-cols', fractions.length);
-            const innerW = fractions.length === 1 ? '55%' : fractions.length === 2 ? '90%' : '95%';
+            const innerW = fractions.length === 1 ? '45%' : fractions.length === 2 ? '80%' : '95%';
             mainZone.style.setProperty('--frac-inner-w', innerW);
             fractions.forEach((frac, i) => {
                 const col = document.createElement('div');
-                col.className = 'frac-col';
+                col.className = 'frac-col shape-' + shape;
                 col.dataset.colIdx = i;
 
                 const inner = document.createElement('div');
@@ -1121,6 +1142,7 @@
                 col.appendChild(inner);
                 mainZone.appendChild(col);
             });
+            updateCircleMax();
         }
 
         // ── Mettre à jour la couleur sans tout rerender ────────────────────
@@ -1283,7 +1305,8 @@
                     splitDir: f.splitDir || 'v',
                     cols: f.cols || 1,
                     rows: f.rows || 1,
-                    color: f.color || fillColor
+                    color: f.color || fillColor,
+                    labelVisible: f.labelVisible !== undefined ? f.labelVisible : showLabel
                 })),
                 containerW: container.offsetWidth,
                 containerH: container.offsetHeight,
@@ -1322,7 +1345,8 @@
                     splitDir: f.splitDir || 'v',
                     cols: f.cols || f.den || 1,
                     rows: f.rows || 1,
-                    color: f.color || fillColor
+                    color: f.color || fillColor,
+                    labelVisible: f.labelVisible !== undefined ? f.labelVisible : showLabel
                 }));
                 fracCount = fractions.length;
                 countBtns.forEach(b => {
