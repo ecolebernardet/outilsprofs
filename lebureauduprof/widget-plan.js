@@ -622,6 +622,15 @@ function createPlanWidget() {
     btnClear.title = 'Vider tout le plan';
     btnClear.textContent = '🗑️';
 
+    // Séparateur + bouton miroir (retourner le plan haut/bas)
+    const sepFlip = document.createElement('div');
+    sepFlip.className = 'plan-sep';
+
+    const btnFlip = document.createElement('button');
+    btnFlip.className = 'plan-btn';
+    btnFlip.title = 'Retourner le plan (vue depuis le mur opposé)';
+    btnFlip.textContent = '🪞';
+
     // Séparateur + boutons zoom
     const sep3 = document.createElement('div');
     sep3.className = 'plan-sep';
@@ -672,6 +681,8 @@ function createPlanWidget() {
     toolbar.appendChild(btnExportJson);
     toolbar.appendChild(btnImportJson);
     toolbar.appendChild(btnClear);
+    toolbar.appendChild(sepFlip);
+    toolbar.appendChild(btnFlip);
     toolbar.appendChild(sep3);
     toolbar.appendChild(btnZoomIn);
     toolbar.appendChild(btnZoomReset);
@@ -1332,6 +1343,32 @@ function createPlanWidget() {
         syncAndSave();
     }
 
+    // ── Miroir horizontal + vertical (= retourner le plan à 180°) ──────────
+    // Le plan mesure 1800x1800 (viewBox SVG). On applique en même temps :
+    //   - le miroir horizontal (haut ↔ bas)  : y → 1800 - y
+    //   - le miroir vertical    (gauche ↔ droite) : x → 1800 - x
+    // Combiner les deux revient mathématiquement à une rotation de 180° de
+    // TOUT le plan (deux réflexions successives = une rotation), donc :
+    //   r → r + 180
+    // C'est plus fidèle qu'un miroir sur un seul axe : ça ne dépend pas de
+    // la symétrie gauche-droite des meubles (porte, tableau, etc.) et ça
+    // correspond à "regarder la classe depuis le mur opposé" plutôt qu'à
+    // une image inversée. Le texte reste lisible automatiquement grâce à la
+    // logique existante qui le redresse pour les angles "inversés".
+    // Cliquer une seconde fois annule l'opération (c'est une symétrie).
+    function flipVertical() {
+        if (!planData.length) return;
+        pushHistory();
+        planData.forEach(item => {
+            item.x = 1800 - (item.x || 900);
+            item.y = 1800 - (item.y || 900);
+            item.r = ((item.r || 0) + 180) % 360;
+        });
+        selectedIndex = null;
+        swapIndex = null;
+        syncAndSave();
+    }
+
     // ── Verrouillage ──────────────────────────────────────────────────────
     function toggleLock() {
         isLocked = !isLocked;
@@ -1416,6 +1453,7 @@ function createPlanWidget() {
 
     // ── Listeners boutons toolbar ─────────────────────────────────────────
     btnLock.addEventListener('click', (e) => { e.stopPropagation(); toggleLock(); });
+    btnFlip.addEventListener('click', (e) => { e.stopPropagation(); flipVertical(); });
     btnUndo.addEventListener('click', (e) => { e.stopPropagation(); undo(); });
     btnRedo.addEventListener('click', (e) => { e.stopPropagation(); redo(); });
     btnDelete.addEventListener('click', (e) => { e.stopPropagation(); deleteSelected(); });
