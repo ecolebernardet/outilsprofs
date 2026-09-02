@@ -1051,6 +1051,11 @@
             // Sur PC, il garde sa taille normale, comme avant.
             if (typeof isMobileBoardMode === 'function' && isMobileBoardMode() && wfMax) {
                 wfMax.click();
+            } else {
+                // Le widget s'ouvre à 100px du bord gauche du board.
+                const curW = window.innerWidth;
+                widget.style.left = '100px';
+                widget.dataset.leftPercent = (100 / curW) * 100;
             }
             applyCardScale();
         }));
