@@ -225,7 +225,8 @@ function createSolide3DWidget() {
     widget.tabIndex = 0;
 
     const pos = typeof findFreePosition === 'function' ? findFreePosition(300, 420) : { x: 200, y: 100 };
-    widget.style.left   = pos.x + 'px';
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.left   = '100px';
     widget.style.top    = pos.y + 'px';
     widget.style.width  = '450px';
     widget.style.height = '630px';
