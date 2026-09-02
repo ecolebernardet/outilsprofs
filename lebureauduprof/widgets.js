@@ -248,10 +248,8 @@ function findFreePosition(widgetW, widgetH) {
 // Centre le widget horizontalement en haut du board.
 function snapWidgetToTopRight(widget) {
     requestAnimationFrame(() => {
-        const curW = window.innerWidth;
-        const wW = widget.offsetWidth || 320;
-        const left = Math.round((curW - wW) / 2);
-        widget.style.left = Math.max(0, left) + 'px';
+        // Le widget s'ouvre à 100px du bord gauche du board.
+        widget.style.left = '100px';
         widget.style.top  = '20px';
     });
 }
@@ -342,15 +340,17 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             const all = Array.from(document.querySelectorAll('.widget[data-type="pdf"]'));
             if (all.length === 0) {
                 // Le PDF sera recentré après rendu via snapWidgetToTopRight
-                x = Math.round(window.innerWidth * 0.5) + 'px';
+                x = '100px';
                 y = '20px';
             } else {
                 const last = all[all.length - 1];
-                x = (last.offsetLeft + 50) + 'px';
+                x = '100px';
                 y = (last.offsetTop  + 50) + 'px';
             }
         } else if (type === 'carte') {
             x = '100px'; y = '100px';
+        } else if (type === 'iframe' || type === 'youtube' || type === 'outilsprofs') {
+            const p = findFreePosition(); x = '100px'; y = p.y + 'px';
         } else {
             const p = findFreePosition(); x = p.x + 'px'; y = p.y + 'px';
         }
