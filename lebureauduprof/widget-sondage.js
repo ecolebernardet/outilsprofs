@@ -321,7 +321,8 @@ function createSondageWidget() {
     const p = (typeof findFreePosition === 'function') ? findFreePosition() : { x: 100, y: 100 };
     const initW = 800;
     const initH = 600;
-    widget.style.cssText = `left:${p.x}px; top:${p.y}px; overflow:visible;`;
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.cssText = `left:100px; top:${p.y}px; overflow:visible;`;
 
     widget.addEventListener('mousedown', () => {
         if (typeof isDrawMode   !== 'undefined' && isDrawMode)   return;

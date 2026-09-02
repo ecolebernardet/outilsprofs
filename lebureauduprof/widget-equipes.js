@@ -1324,7 +1324,8 @@
         widget.className = 'widget';
         widget.dataset.type = 'equipes';
         widget.dataset.transparent = 'true';
-        widget.style.cssText = `left:${pos.x}px; top:${pos.y}px;`;
+        // Le widget s'ouvre à 100px du bord gauche du board.
+        widget.style.cssText = `left:100px; top:${pos.y}px;`;
         widget.tabIndex = 0;
 
         widget.innerHTML = `
