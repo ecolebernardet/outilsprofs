@@ -349,7 +349,7 @@ function createWidget(type, x = null, y = null, doSnapshot = true) {
             }
         } else if (type === 'carte') {
             x = '100px'; y = '100px';
-        } else if (type === 'iframe' || type === 'youtube' || type === 'outilsprofs') {
+        } else if (type === 'iframe' || type === 'youtube' || type === 'outilsprofs' || type === 'date' || type === 'time' || type === 'homework' || type === 'agenda') {
             const p = findFreePosition(); x = '100px'; y = p.y + 'px';
         } else {
             const p = findFreePosition(); x = p.x + 'px'; y = p.y + 'px';
