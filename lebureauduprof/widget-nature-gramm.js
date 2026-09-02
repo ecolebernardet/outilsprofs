@@ -1385,6 +1385,9 @@
 
             renderCorrectionTokens();
             initGame();
+            // Le widget s'ouvre à 100px du bord gauche du board.
+            widget.style.left = '100px';
+            widget.dataset.leftPercent = (100 / curW) * 100;
         }));
     };
 

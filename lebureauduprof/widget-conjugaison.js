@@ -480,7 +480,8 @@ function createConjugaisonWidget() {
     widget.className = 'widget';
     widget.dataset.type = 'conjugaison';
     widget.dataset.transparent = 'true';
-    widget.style.cssText = `left:${pos.x}px; top:${pos.y}px; overflow:visible; flex-direction:row;`;
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.cssText = `left:100px; top:${pos.y}px; overflow:visible; flex-direction:row;`;
     widget.tabIndex = 0;
 
     widget.innerHTML = `

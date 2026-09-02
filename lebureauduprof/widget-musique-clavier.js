@@ -858,6 +858,9 @@
             if (hPct > 0) container.style.height = (hPct / 100) * curVH + 'px';
 
             buildKeyboard();
+            // Le widget s'ouvre à 100px du bord gauche du board.
+            widget.style.left = '100px';
+            widget.dataset.leftPercent = (100 / curW) * 100;
         }));
     };
 
