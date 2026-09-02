@@ -236,9 +236,10 @@ function createHorlogeWidget() {
     widget.tabIndex = 0;
 
     const p = (typeof findFreePosition === 'function') ? findFreePosition() : { x: 80, y: 80 };
-    widget.style.left  = p.x + 'px';
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.left  = '100px';
     widget.style.top   = p.y + 'px';
-    widget.style.cssText = `left:${p.x}px; top:${p.y}px; overflow:visible; flex-direction:row;`;
+    widget.style.cssText = `left:100px; top:${p.y}px; overflow:visible; flex-direction:row;`;
 
     widget.addEventListener('mousedown', () => {
         if (typeof isDrawMode   !== 'undefined' && isDrawMode)   return;
