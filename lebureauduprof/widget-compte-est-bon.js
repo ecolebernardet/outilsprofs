@@ -1425,6 +1425,10 @@
         requestAnimationFrame(() => requestAnimationFrame(() => {
             setLevel('facile');
             applyScale();
+            // Le widget s'ouvre à 100px du bord gauche du board.
+            const curW = window.innerWidth;
+            widget.style.left = '100px';
+            widget.dataset.leftPercent = (100 / curW) * 100;
         }));
 
         widget._setLevel = setLevel;
