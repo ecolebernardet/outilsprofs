@@ -761,7 +761,8 @@ function createCalendrierWidget() {
     widget.tabIndex = 0;
 
     const p = findFreePosition(720, 800);
-    widget.style.left   = p.x + 'px';
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.left   = '100px';
     widget.style.top    = p.y + 'px';
     widget.style.width  = '720px';
     // Pas de height fixe : le système de resize pilote l'editor-container,

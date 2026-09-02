@@ -119,6 +119,13 @@ async function fetchMeteo(city) {
 }
 
 function initMeteoWidget(widget) {
+    // ── Le widget s'ouvre à 100px du bord gauche du board ──────────────
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        const curW = window.innerWidth;
+        widget.style.left = '100px';
+        widget.dataset.leftPercent = (100 / curW) * 100;
+    }));
+
     const container = widget.querySelector('.meteo-container');
     const cityNameEl = widget.querySelector('.meteo-city-name');
     const iconEl     = widget.querySelector('.meteo-icon');

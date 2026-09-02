@@ -218,6 +218,13 @@
             flex-wrap: wrap;
         }
 
+        .dc-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
         .dc-label {
             font-size: 9px;
             font-weight: 900;
@@ -335,6 +342,61 @@
         .dc-action-btn.dc-stop { background: #ef4444; }
         .dc-action-btn.dc-new  { background: #10b981; }
 
+        /* Boutons action flottants (sur l'image, transparents hors survol) */
+        .dc-action-row {
+            position: absolute;
+            bottom: 8px;
+            left: 15px;
+            z-index: 15;
+            display: flex;
+            gap: 6px;
+        }
+        .dc-float-action-btn {
+            background: rgba(0,0,0,0.0);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.55);
+            font-size: 9px;
+            font-weight: 900;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+        .dc-float-action-btn:hover {
+            background: rgba(0,0,0,0.8);
+            border-color: rgba(255,255,255,0.8);
+            color: #fff;
+        }
+        .dc-float-action-btn:active { transform: scale(0.96); }
+        .dc-float-action-btn.dc-stop:hover { border-color: #ef4444; color: #ef4444; }
+        .dc-float-action-btn.dc-hidden { display: none !important; }
+        /* Le bouton Démarrer / Reprendre reste bien visible hors phase de lecture */
+        .dc-float-action-btn.dc-start {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: #fff !important;
+        }
+        .dc-float-action-btn.dc-start:hover {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: #fff !important;
+            opacity: 0.88;
+        }
+        /* Le bouton "Nouveau défi" reste bien visible une fois le défi stoppé */
+        .dc-float-action-btn.dc-new {
+            background: #10b981 !important;
+            border-color: #10b981 !important;
+            color: #fff !important;
+        }
+        .dc-float-action-btn.dc-new:hover {
+            background: #10b981 !important;
+            border-color: #10b981 !important;
+            color: #fff !important;
+            opacity: 0.88;
+        }
+
         /* Image URL input */
         .dc-url-input {
             flex: 1;
@@ -399,7 +461,8 @@ function createDeficalmeWidget() {
     widget.className = 'widget';
     widget.dataset.type = 'deficalme';
     widget.dataset.transparent = 'true';
-    widget.style.cssText = `left:${pos.x}px; top:${pos.y}px; overflow:visible; flex-direction:row;`;
+    // Le widget s'ouvre à 100px du bord gauche du board.
+    widget.style.cssText = `left:100px; top:${pos.y}px; overflow:visible; flex-direction:row;`;
     widget.tabIndex = 0;
 
     widget.innerHTML = `
@@ -490,7 +553,6 @@ function createDeficalmeWidget() {
 
     const durLabel = document.createElement('span');
     durLabel.className = 'dc-label';
-    durLabel.style.marginLeft = 'auto';
     durLabel.textContent = 'Durée';
 
     const timePill = document.createElement('div');
@@ -512,31 +574,56 @@ function createDeficalmeWidget() {
     timePill.appendChild(timeVal);
     timePill.appendChild(timePlus);
 
-    row1.appendChild(modeLabel);
-    row1.appendChild(modeWrap);
-    row1.appendChild(durLabel);
-    row1.appendChild(timePill);
-
-    // Ligne 2 : Sensibilité
-    const row2 = document.createElement('div');
-    row2.className = 'dc-row';
-
+    // Tolérance (placée entre le choix des modes et le choix de la durée)
     const sensLabel = document.createElement('span');
     sensLabel.className = 'dc-label';
     sensLabel.textContent = 'Tolérance';
 
-    const sensSlider = document.createElement('input');
-    sensSlider.type = 'range';
-    sensSlider.className = 'dc-slider';
-    sensSlider.min = 1; sensSlider.max = 100; sensSlider.value = 40;
+    const sensPill = document.createElement('div');
+    sensPill.className = 'dc-time-pill';
+
+    const sensMinus = document.createElement('button');
+    sensMinus.className = 'dc-time-btn';
+    sensMinus.textContent = '−';
 
     const sensVal = document.createElement('span');
-    sensVal.className = 'dc-sens-val';
+    sensVal.className = 'dc-time-val';
     sensVal.textContent = '40';
 
-    row2.appendChild(sensLabel);
-    row2.appendChild(sensSlider);
-    row2.appendChild(sensVal);
+    const sensPlus = document.createElement('button');
+    sensPlus.className = 'dc-time-btn';
+    sensPlus.textContent = '+';
+
+    sensPill.appendChild(sensMinus);
+    sensPill.appendChild(sensVal);
+    sensPill.appendChild(sensPlus);
+
+    row1.style.justifyContent = 'space-between';
+
+    const groupMode = document.createElement('div');
+    groupMode.className = 'dc-group';
+    groupMode.style.flex = '1';
+    groupMode.style.justifyContent = 'flex-start';
+    groupMode.appendChild(modeLabel);
+    groupMode.appendChild(modeWrap);
+
+    const groupSens = document.createElement('div');
+    groupSens.className = 'dc-group';
+    groupSens.style.flex = '1';
+    groupSens.style.justifyContent = 'center';
+    groupSens.appendChild(sensLabel);
+    groupSens.appendChild(sensPill);
+
+    const groupDur = document.createElement('div');
+    groupDur.className = 'dc-group';
+    groupDur.style.flex = '1';
+    groupDur.style.justifyContent = 'flex-end';
+    groupDur.appendChild(durLabel);
+    groupDur.appendChild(timePill);
+
+    row1.appendChild(groupMode);
+    row1.appendChild(groupSens);
+    row1.appendChild(groupDur);
 
     // Ligne 3 : Image URL
     const row3 = document.createElement('div');
@@ -589,30 +676,29 @@ function createDeficalmeWidget() {
     row3.appendChild(btnApercu);
     row3.appendChild(btnTransp);
 
-    // Ligne 4 : Boutons action
+    // Boutons action (flottants, sur l'image en bas à gauche)
     const btnRow = document.createElement('div');
-    btnRow.className = 'dc-btn-row';
+    btnRow.className = 'dc-action-row';
 
     const btnStart = document.createElement('button');
-    btnStart.className = 'dc-action-btn';
+    btnStart.className = 'dc-float-action-btn dc-start';
     btnStart.textContent = '▶ Démarrer';
 
     const btnStop = document.createElement('button');
-    btnStop.className = 'dc-action-btn dc-stop dc-hidden';
+    btnStop.className = 'dc-float-action-btn dc-stop dc-hidden';
     btnStop.textContent = '■ Stop';
 
     const btnReset = document.createElement('button');
-    btnReset.className = 'dc-action-btn dc-new dc-hidden';
+    btnReset.className = 'dc-float-action-btn dc-new dc-hidden';
     btnReset.textContent = '🔄 Nouveau défi';
 
     btnRow.appendChild(btnStart);
     btnRow.appendChild(btnStop);
     btnRow.appendChild(btnReset);
+    imageZone.appendChild(btnRow);
 
     controls.appendChild(row1);
-    controls.appendChild(row2);
     controls.appendChild(row3);
-    controls.appendChild(btnRow);
 
     // Poignée resize
     const resizeHandle = document.createElement('div');
@@ -632,6 +718,7 @@ function createDeficalmeWidget() {
     let lastTime = 0;
     let currentMode = 'pixels';
     let totalSeconds = 600;
+    let sensValue = 40;
     let pixelsOrder = [];
 
     // Audio
@@ -648,6 +735,12 @@ function createDeficalmeWidget() {
         totalSeconds = Math.max(DC_CONFIG.minTimeSeconds, Math.min(DC_CONFIG.maxTimeSeconds, totalSeconds + delta * DC_CONFIG.timeAdjustUnit));
         timeVal.textContent = formatTime(totalSeconds);
         generateGrid();
+    }
+
+    // ── Tolérance ─────────────────────────────────────────────────────────
+    function adjustSens(delta) {
+        sensValue = Math.max(1, Math.min(100, sensValue + delta));
+        sensVal.textContent = sensValue;
     }
 
     // ── Grille pixels ─────────────────────────────────────────────────────
@@ -681,7 +774,7 @@ function createDeficalmeWidget() {
     function updateMicBar(vol) {
         micBarFill.style.width = Math.min(vol * DC_CONFIG.volumeMultiplier, 100) + '%';
         // Couleur : vert si calme, rouge si trop fort
-        const threshold = DC_CONFIG.baseThreshold - (parseInt(sensSlider.value) * DC_CONFIG.sensitivityFactor);
+        const threshold = DC_CONFIG.baseThreshold - (sensValue * DC_CONFIG.sensitivityFactor);
         micBarFill.style.background = vol < threshold ? '#22c55e' : '#ef4444';
     }
 
@@ -755,7 +848,7 @@ function createDeficalmeWidget() {
         const vol = getVolume();
         updateMicBar(vol);
 
-        const threshold = DC_CONFIG.baseThreshold - (parseInt(sensSlider.value) * DC_CONFIG.sensitivityFactor);
+        const threshold = DC_CONFIG.baseThreshold - (sensValue * DC_CONFIG.sensitivityFactor);
         const speed = 100 / totalSeconds;
 
         if (vol < threshold) {
@@ -786,11 +879,13 @@ function createDeficalmeWidget() {
             msgStart.style.display = 'none';
             rafId = requestAnimationFrame(gameLoop);
             btnStart.textContent = '⏸ Pause';
+            btnStart.classList.remove('dc-start');
             btnStop.classList.remove('dc-hidden');
         } else {
             isPlaying = false;
             if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
             btnStart.textContent = '▶ Reprendre';
+            btnStart.classList.add('dc-start');
         }
     }
 
@@ -803,6 +898,7 @@ function createDeficalmeWidget() {
         updateUI();
         btnStart.textContent = '▶ Démarrer';
         btnStart.classList.add('dc-hidden');
+        btnStart.classList.add('dc-start');
         btnStop.classList.add('dc-hidden');
         btnReset.classList.remove('dc-hidden');
         msgStart.style.display = 'flex';
@@ -826,6 +922,7 @@ function createDeficalmeWidget() {
         updateUI();
         generateGrid();
         btnStart.textContent = '▶ Démarrer';
+        btnStart.classList.add('dc-start');
         btnStart.classList.remove('dc-hidden');
         btnStop.classList.add('dc-hidden');
         btnReset.classList.add('dc-hidden');
@@ -992,8 +1089,34 @@ function createDeficalmeWidget() {
         window.addEventListener('touchend', stop, { once: true });
     }, { passive: true });
 
-    sensSlider.addEventListener('input', () => { sensVal.textContent = sensSlider.value; });
-    sensSlider.addEventListener('mousedown', (e) => e.stopPropagation());
+    sensMinus.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        adjustSens(-1);
+        const iv = setInterval(() => adjustSens(-1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('mouseup', stop, { once: true });
+    });
+    sensMinus.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        adjustSens(-1);
+        const iv = setInterval(() => adjustSens(-1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('touchend', stop, { once: true });
+    }, { passive: true });
+    sensPlus.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        adjustSens(1);
+        const iv = setInterval(() => adjustSens(1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('mouseup', stop, { once: true });
+    });
+    sensPlus.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        adjustSens(1);
+        const iv = setInterval(() => adjustSens(1), 120);
+        const stop = () => clearInterval(iv);
+        window.addEventListener('touchend', stop, { once: true });
+    }, { passive: true });
 
     urlInput.addEventListener('mousedown', (e) => e.stopPropagation());
     urlInput.addEventListener('keydown', (e) => {
