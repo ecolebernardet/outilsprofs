@@ -268,8 +268,8 @@
             border-radius: calc(10px * var(--ncl-s));
         }
         .ncl-answer-zone.digits-mode {
-            flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-end;
-            padding-right: calc(20px * var(--ncl-s));
+            flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-start;
+            padding-left: calc(20px * var(--ncl-s));
         }
 
         .ncl-answer-empty { font-size: calc(11px * var(--ncl-s)); color: #bbb; font-style: italic; }
@@ -419,6 +419,13 @@
         ['cent','cents','mille','million','millions','milliard','milliards','et']
     ];
     const DIGIT_TILES = ['0','1','2','3','4','5','6','7','8','9'];
+    // Disposition façon cadran de téléphone : 1-2-3 / 4-5-6 / 7-8-9 / 0
+    const DIGIT_KEYPAD_ROWS = [
+        ['1','2','3'],
+        ['4','5','6'],
+        ['7','8','9'],
+        ['0']
+    ];
 
     // Valeur numérique affichée sous chaque étiquette-mot (entre parenthèses)
     const WORD_TILE_VALUES = {
@@ -779,17 +786,19 @@
                     paletteZone.appendChild(rowEl);
                 });
             } else {
-                const rowEl = document.createElement('div');
-                rowEl.className = 'ncl-palette-row';
-                DIGIT_TILES.forEach(val => {
-                    const el = document.createElement('div');
-                    el.className = 'ncl-tile digit-tile';
-                    el.textContent = val;
-                    el.dataset.value = val;
-                    attachDragBehavior(el, val);
-                    rowEl.appendChild(el);
+                DIGIT_KEYPAD_ROWS.forEach(row => {
+                    const rowEl = document.createElement('div');
+                    rowEl.className = 'ncl-palette-row';
+                    row.forEach(val => {
+                        const el = document.createElement('div');
+                        el.className = 'ncl-tile digit-tile';
+                        el.textContent = val;
+                        el.dataset.value = val;
+                        attachDragBehavior(el, val);
+                        rowEl.appendChild(el);
+                    });
+                    paletteZone.appendChild(rowEl);
                 });
-                paletteZone.appendChild(rowEl);
             }
         }
 
