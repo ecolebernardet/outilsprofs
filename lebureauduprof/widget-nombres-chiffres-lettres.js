@@ -1,7 +1,7 @@
 // =========================================================================
 // WIDGET NOMBRES EN CHIFFRES / LETTRES — Le Bureau du Prof
 // Le professeur tape un nombre (en chiffres ou en lettres) et l'élève doit
-// glisser les étiquettes pour former ce nombre dans l'autre écriture.
+// cliquer sur les étiquettes pour former ce nombre dans l'autre écriture.
 //
 // Dépendances : board, findFreePosition(), makeDraggable(),
 //   makeDraggableRotate(), bringToFront(), snapshotNow(), saveBoard()
@@ -226,7 +226,7 @@
         }
         .ncl-tile {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: calc(38px * var(--ncl-s)); height: calc(30px * var(--ncl-s));
+            min-width: calc(38px * var(--ncl-s)); height: calc(25px * var(--ncl-s));
             padding: 0 calc(8px * var(--ncl-s)); border-radius: calc(8px * var(--ncl-s));
             font-size: calc(12px * var(--ncl-s)); font-weight: 700; cursor: grab;
             border: calc(1.5px * var(--ncl-s)) solid #d1d5db; background: white; color: #1e3a5f;
@@ -237,8 +237,8 @@
         .ncl-tile:active { cursor: grabbing; transform: scale(0.95); }
         .ncl-tile.word-tile {
             flex-direction: column; height: auto;
-            min-height: calc(28px * var(--ncl-s));
-            padding: calc(2px * var(--ncl-s)) calc(8px * var(--ncl-s));
+            min-height: calc(23px * var(--ncl-s));
+            padding: calc(1px * var(--ncl-s)) calc(8px * var(--ncl-s));
             line-height: 1.05; gap: 0;
         }
         .ncl-tile-word { pointer-events: none; }
@@ -259,15 +259,6 @@
         .ncl-tile-row2:hover { background: #ddd6fe; border-color: #a78bfa; }
         .ncl-tile-row3 { background: #ffedd5; border-color: #fdba74; color: #9a3412; } /* cent..milliards, et : orange */
         .ncl-tile-row3:hover { background: #fed7aa; border-color: #fb923c; }
-        .ncl-tile-ghost {
-            position: fixed; pointer-events: none; z-index: 99999;
-            display: inline-flex; align-items: center; justify-content: center;
-            min-width: 42px; height: 38px; padding: 0 10px; border-radius: 8px;
-            font-size: 14px; font-weight: 700; background: #eff6ff; color: #1d4ed8;
-            border: 1.5px solid #4a90e2; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-            transform: translate(-50%, -50%); opacity: 0.92;
-        }
-
         .ncl-answer-host { display: flex; flex-direction: column; gap: calc(6px * var(--ncl-s)); }
         .ncl-answer-label { font-size: calc(11px * var(--ncl-s)); color: #888; font-weight: 700; }
         .ncl-answer-zone {
@@ -280,17 +271,31 @@
             flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-end;
             padding-right: calc(20px * var(--ncl-s));
         }
-        .ncl-answer-zone.drag-over { background: #fff8e1; border-color: #d4a017; }
+
         .ncl-answer-empty { font-size: calc(11px * var(--ncl-s)); color: #bbb; font-style: italic; }
         .ncl-answer-tile {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: calc(38px * var(--ncl-s)); height: calc(36px * var(--ncl-s));
+            min-width: calc(38px * var(--ncl-s)); height: calc(30px * var(--ncl-s));
             padding: 0 calc(9px * var(--ncl-s)); border-radius: calc(8px * var(--ncl-s));
             font-size: calc(13px * var(--ncl-s)); font-weight: 700; cursor: pointer;
             border: calc(1.5px * var(--ncl-s)) solid #f9a8d4; background: #fce7f3; color: #9d174d;
             flex-shrink: 0;
         }
         .ncl-answer-tile:hover { background: #fee2e2; border-color: #dc3545; color: #dc3545; }
+        .ncl-answer-tile.ncl-answer-tile-wrong {
+            background: #fee2e2 !important;
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+            box-shadow: 0 0 0 calc(3px * var(--ncl-s)) rgba(220,53,69,0.28);
+            animation: nclWrongShake .4s ease;
+        }
+        @keyframes nclWrongShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-4px); }
+            40% { transform: translateX(4px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
         .ncl-answer-tile.digit-tile {
             font-family: 'MarelleBaton', 'Segoe UI', system-ui, sans-serif; font-size: calc(16px * var(--ncl-s));
             min-width: calc(30px * var(--ncl-s)); padding: 0 calc(5px * var(--ncl-s));
@@ -313,6 +318,52 @@
         .ncl-result-text.show { opacity: 1; }
         .ncl-result-text.exact { color: #16a34a; }
         .ncl-result-text.faux  { color: #dc3545; }
+
+        /* ── Overlay de félicitations (par-dessus les étiquettes, qui se floutent) ── */
+        .ncl-tiles-wrap { position: relative; }
+        .ncl-tiles-wrap > .ncl-answer-host,
+        .ncl-tiles-wrap > .ncl-palette-zone {
+            transition: filter .35s ease;
+        }
+        .ncl-tiles-wrap.ncl-success-active > .ncl-answer-host,
+        .ncl-tiles-wrap.ncl-success-active > .ncl-palette-zone {
+            filter: blur(6px);
+            pointer-events: none;
+        }
+        .ncl-success-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: calc(8px * var(--ncl-s));
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+            transition: opacity .35s ease, transform .35s ease;
+            z-index: 6;
+        }
+        .ncl-success-overlay.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .ncl-success-emoji {
+            font-size: calc(46px * var(--ncl-s));
+            line-height: 1;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18));
+        }
+        .ncl-success-msg {
+            font-size: calc(26px * var(--ncl-s));
+            font-weight: 900;
+            color: #16a34a;
+            background: rgba(255,255,255,0.92);
+            padding: calc(8px * var(--ncl-s)) calc(22px * var(--ncl-s));
+            border-radius: calc(14px * var(--ncl-s));
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            text-align: center;
+            white-space: nowrap;
+        }
 
         .ncl-help-btn {
             width: calc(18px * var(--ncl-s)); height: calc(18px * var(--ncl-s)); border-radius: 50%;
@@ -594,12 +645,18 @@
 
        
 
-            <div class="ncl-answer-host">
-                <div class="ncl-answer-label">Ta réponse :</div>
-                <div class="ncl-answer-zone"><span class="ncl-answer-empty">Dépose ici les étiquettes…</span></div>
-            </div>
+            <div class="ncl-tiles-wrap">
+                <div class="ncl-answer-host">
+                    <div class="ncl-answer-zone"><span class="ncl-answer-empty">Clique sur les étiquettes…</span></div>
+                </div>
 
-            <div class="ncl-palette-zone"></div>
+                <div class="ncl-palette-zone"></div>
+
+                <div class="ncl-success-overlay">
+                    <span class="ncl-success-emoji">🎉</span>
+                    <span class="ncl-success-msg">Bravo, c'est exact !</span>
+                </div>
+            </div>
 
             <div class="ncl-result-zone">
                 <button class="ncl-btn ncl-btn-validate">✓ Valider</button>
@@ -612,12 +669,12 @@
                 <div class="help-mode">
                     <span class="help-badge-ncl c2l">🔢➜🔤 Chiffres → Lettres</span><br>
                     Le professeur tape un nombre en chiffres.<br>
-                    L'élève glisse les étiquettes-mots pour l'écrire en lettres, séparées par des traits d'union.
+                    L'élève clique sur les étiquettes-mots pour l'écrire en lettres, séparées par des traits d'union.
                 </div>
                 <div class="help-mode">
                     <span class="help-badge-ncl l2c">🔤➜🔢 Lettres → Chiffres</span><br>
                     Le professeur tape un nombre en lettres (ex : cent vingt-trois).<br>
-                    L'élève glisse les étiquettes-chiffres pour former ce nombre.
+                    L'élève clique sur les étiquettes-chiffres pour former ce nombre.
                 </div>
                 <div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;font-size:10px;color:#888">
                     Astuce : clique sur une étiquette de ta réponse pour la retirer.
@@ -651,6 +708,32 @@
         const resultText    = container.querySelector('.ncl-result-text');
         const helpBtn       = container.querySelector('.ncl-help-btn');
         const helpPopup      = container.querySelector('.ncl-help-popup');
+        const tilesWrap        = container.querySelector('.ncl-tiles-wrap');
+        const successOverlay   = container.querySelector('.ncl-success-overlay');
+
+        function hideSuccessOverlay() {
+            successOverlay.classList.remove('show');
+            tilesWrap.classList.remove('ncl-success-active');
+        }
+        function showSuccessOverlay() {
+            successOverlay.classList.add('show');
+            tilesWrap.classList.add('ncl-success-active');
+        }
+        function clearWrongTiles() {
+            answerZone.querySelectorAll('.ncl-answer-tile-wrong').forEach(el => el.classList.remove('ncl-answer-tile-wrong'));
+        }
+        // Surligne, parmi les étiquettes déposées, celles qui ne correspondent pas
+        // à la bonne étiquette attendue à cette position (mauvaise étiquette ou
+        // étiquette en trop).
+        function highlightWrongTiles() {
+            const expected = currentMode === 'c2l' ? (targetTokens || []) : (targetDigits ? targetDigits.split('') : []);
+            const tileEls = answerZone.querySelectorAll('.ncl-answer-tile');
+            tileEls.forEach((el, i) => {
+                if (studentTiles[i] !== expected[i]) {
+                    el.classList.add('ncl-answer-tile-wrong');
+                }
+            });
+        }
 
         // ── État interne ───────────────────────────────────────────────────
         let currentMode = 'c2l';          // 'c2l' (chiffres->lettres) | 'l2c' (lettres->chiffres)
@@ -710,69 +793,11 @@
             }
         }
 
-        // ── Glisser-déposer d'une étiquette ────────────────────────────────
+        // ── Clic sur une étiquette : l'ajoute à la réponse ──────────────────
         function attachDragBehavior(el, value) {
             el.addEventListener('pointerdown', (e) => {
                 e.stopPropagation(); e.preventDefault();
-                // Capture le pointeur sur la tuile : sur écran tactile / vidéoprojecteur
-                // interactif, ça évite que le geste soit réinterprété comme un scroll
-                // et coupé en cours de route.
-                try { el.setPointerCapture(e.pointerId); } catch (err) {}
-                const startX = e.clientX, startY = e.clientY;
-                let moved = false;
-                let ghost = null;
-
-                const ensureGhost = () => {
-                    if (ghost) return;
-                    ghost = document.createElement('div');
-                    ghost.className = 'ncl-tile-ghost' + (currentMode === 'l2c' ? ' digit-tile' : '');
-                    ghost.textContent = value;
-                    document.body.appendChild(ghost);
-                };
-
-                const onMove = (ev) => {
-                    const dx = ev.clientX - startX, dy = ev.clientY - startY;
-                    if (!moved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) { moved = true; ensureGhost(); }
-                    if (ghost) { ghost.style.left = ev.clientX + 'px'; ghost.style.top = ev.clientY + 'px'; }
-                    if (moved) {
-                        const overAnswer = document.elementFromPoint(ev.clientX, ev.clientY);
-                        if (overAnswer && overAnswer.closest('.ncl-answer-zone')) {
-                            answerZone.classList.add('drag-over');
-                        } else {
-                            answerZone.classList.remove('drag-over');
-                        }
-                    }
-                };
-                const cleanup = () => {
-                    document.removeEventListener('pointermove', onMove);
-                    document.removeEventListener('pointerup', onUp);
-                    document.removeEventListener('pointercancel', onCancel);
-                    try { el.releasePointerCapture(e.pointerId); } catch (err) {}
-                    answerZone.classList.remove('drag-over');
-                    if (ghost) { ghost.remove(); ghost = null; }
-                };
-                const onUp = (ev) => {
-                    if (!moved) {
-                        cleanup();
-                        // Simple clic/tap : ajoute directement à la réponse
-                        addTileToAnswer(value);
-                        return;
-                    }
-                    const dropTarget = document.elementFromPoint(ev.clientX, ev.clientY);
-                    cleanup();
-                    if (dropTarget && dropTarget.closest('.ncl-answer-zone')) {
-                        addTileToAnswer(value);
-                    }
-                };
-                const onCancel = () => {
-                    // Le pointeur a été annulé par le navigateur (ex: geste réinterprété
-                    // en scroll sur un écran tactile). On annule proprement le drag en cours
-                    // plutôt que de laisser le fantôme et les listeners orphelins.
-                    cleanup();
-                };
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', onUp);
-                document.addEventListener('pointercancel', onCancel);
+                addTileToAnswer(value);
             });
         }
 
@@ -836,6 +861,7 @@
             const raw = inputEl.value;
             resultText.classList.remove('show', 'exact', 'faux');
             resultText.textContent = '';
+            hideSuccessOverlay();
             inputEl.classList.remove('invalid');
             targetTooLong = false;
             if (currentMode === 'c2l') {
@@ -881,11 +907,11 @@
             if (mode === 'c2l') {
                 inputEl.placeholder = 'Tape un nombre, ex : 123';
                 inputEl.inputMode = 'numeric';
-                if (consigneEl) consigneEl.textContent = "Glisse les étiquettes-mots pour former ce nombre en lettres (elles seront séparées par des traits d'union).";
+                if (consigneEl) consigneEl.textContent = "Clique sur les étiquettes-mots pour former ce nombre en lettres (elles seront séparées par des traits d'union).";
             } else {
                 inputEl.placeholder = 'Tape un nombre en lettres, ex : cent vingt-trois';
                 inputEl.inputMode = 'text';
-                if (consigneEl) consigneEl.textContent = 'Glisse les étiquettes-chiffres pour former ce nombre.';
+                if (consigneEl) consigneEl.textContent = 'Clique sur les étiquettes-chiffres pour former ce nombre.';
             }
             renderPalette();
             renderAnswer();
@@ -911,6 +937,7 @@
             studentTiles = [];
             renderAnswer();
             resultText.classList.remove('show', 'exact', 'faux');
+            hideSuccessOverlay();
             if (typeof saveBoard === 'function') saveBoard();
         });
 
@@ -922,6 +949,7 @@
             renderAnswer();
             updateTarget();
             resultText.classList.remove('show', 'exact', 'faux');
+            hideSuccessOverlay();
             inputEl.focus();
             if (typeof saveBoard === 'function') saveBoard();
         });
@@ -935,25 +963,31 @@
                 ok = targetDigits !== null && studentTiles.join('') === targetDigits;
             }
             resultText.classList.remove('exact', 'faux');
+            hideSuccessOverlay();
+            clearWrongTiles();
             if (targetTooLong) {
                 resultText.textContent = '⚠️ Nombre limité à 12 chiffres maximum.';
                 resultText.classList.add('faux');
+                resultText.classList.add('show');
             } else if (targetTokens === null && targetDigits === null) {
                 resultText.textContent = '⚠️ Le professeur doit d\'abord taper un nombre.';
                 resultText.classList.add('faux');
+                resultText.classList.add('show');
             } else if (ok) {
-                resultText.textContent = '✅ Bravo, c\'est exact !';
-                resultText.classList.add('exact');
+                resultText.textContent = '';
+                showSuccessOverlay();
             } else {
                 resultText.textContent = '❌ Ce n\'est pas encore ça, réessaie.';
                 resultText.classList.add('faux');
+                resultText.classList.add('show');
+                highlightWrongTiles();
             }
-            resultText.classList.add('show');
         });
 
         solutionBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             resultText.classList.remove('exact', 'faux');
+            hideSuccessOverlay();
             let solutionTiles = null;
             if (currentMode === 'c2l' && targetTokens) {
                 solutionTiles = targetTokens.slice();
@@ -1103,10 +1137,10 @@
                 modeBadge.textContent = currentMode === 'c2l' ? 'Chiffres → Lettres' : 'Lettres → Chiffres';
                 if (currentMode === 'c2l') {
                     inputEl.placeholder = 'Tape un nombre, ex : 123';
-                    if (consigneEl) consigneEl.textContent = "Glisse les étiquettes-mots pour former ce nombre en lettres (elles seront séparées par des traits d'union).";
+                    if (consigneEl) consigneEl.textContent = "Clique sur les étiquettes-mots pour former ce nombre en lettres (elles seront séparées par des traits d'union).";
                 } else {
                     inputEl.placeholder = 'Tape un nombre en lettres, ex : cent vingt-trois';
-                    if (consigneEl) consigneEl.textContent = 'Glisse les étiquettes-chiffres pour former ce nombre.';
+                    if (consigneEl) consigneEl.textContent = 'Clique sur les étiquettes-chiffres pour former ce nombre.';
                 }
                 renderPalette();
                 inputEl.value = savedData.profValue || '';
