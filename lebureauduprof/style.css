@@ -1380,7 +1380,7 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 			left: -35px; top: calc(50% + 70px);
 			transform: translateY(-50%) rotate(-90deg);
 			transform-origin: center center;
-			width: 65px; height: 75px;
+			width: 65px; height: 80px;
 			background: #111;
 			border: 1px solid #2e2e3a;
 			border-right: none;
@@ -1584,7 +1584,7 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     left: -35px; top: calc(50% - 0px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1721,7 +1721,7 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
     left: -35px; top: calc(50% - 70px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1869,7 +1869,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     left: -35px; top: calc(50% - 140px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2068,7 +2068,7 @@ body.presentation-mode #jeux-panel-tab { display: none !important; }
     left: -35px; top: calc(50% - 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2326,7 +2326,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     left: -35px; top: calc(50% + 140px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid rgba(255,255,255,0.1);
     border-right: none;
@@ -2366,7 +2366,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     left: -25px; top: calc(50% + 280px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 50px; height: 70px;
+    width: 50px; height: 75px;
     background: #1a2a3b;
     border: 0px solid rgba(255,120,50,0.35);
     border-right: none;
@@ -2421,7 +2421,7 @@ body.presentation-mode #pres-mode-tab {
     left: -35px; top: calc(50% + 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 65px; height: 75px;
+    width: 65px; height: 80px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
