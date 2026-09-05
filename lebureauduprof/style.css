@@ -1377,10 +1377,10 @@
 body.presentation-mode #sticker-panel-tab { display: none !important; }
 		#sticker-panel-tab {
 			position: fixed;
-			left: -35px; top: calc(50% + 40px);
+			left: -35px; top: calc(50% + 70px);
 			transform: translateY(-50%) rotate(-90deg);
 			transform-origin: center center;
-			width: 80px; height: 65px;
+			width: 65px; height: 75px;
 			background: #111;
 			border: 1px solid #2e2e3a;
 			border-right: none;
@@ -1393,13 +1393,13 @@ body.presentation-mode #sticker-panel-tab { display: none !important; }
 			transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
 			letter-spacing: 1px;
 			box-shadow: 0px 0px 10px rgba(0,0,0,1);
-			opacity: 0.5;
+			opacity: 0.75;
 			white-space: nowrap;
 			flex-direction: column-reverse;
 		}
 		#sticker-panel-tab.tab-js-hover {
 			background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-			width: 178px; height: 88px;
+			width: 178px; height: 80px;
 			padding: 0;
 			transform: translateY(-50%) rotate(0deg);
 			flex-direction: column;
@@ -1581,10 +1581,10 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
 
 #widgets-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 45px);
+    left: -35px; top: calc(50% - 0px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1597,14 +1597,14 @@ body.presentation-mode #widgets-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
 }
 #widgets-panel-tab.tab-js-hover {
     background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -1718,10 +1718,10 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #tools-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 130px);
+    left: -35px; top: calc(50% - 70px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1734,14 +1734,14 @@ body.presentation-mode #tools-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
 }
 #tools-panel-tab.tab-js-hover {
     background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -1866,10 +1866,10 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #activities-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 215px);
+    left: -35px; top: calc(50% - 140px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -1882,14 +1882,14 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 0.5px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
 }
 #activities-panel-tab.tab-js-hover {
     background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -2065,10 +2065,10 @@ body.presentation-mode #jeux-panel-tab { display: none !important; }
 /* Onglet déclencheur — tout en haut de la pile d'onglets latéraux */
 #jeux-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% - 300px);
+    left: -35px; top: calc(50% - 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2081,14 +2081,14 @@ body.presentation-mode #jeux-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 0.5px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
 }
 #jeux-panel-tab.tab-js-hover {
     background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -2169,7 +2169,7 @@ body.presentation-mode #pdf-library-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-	opacity: 0.5;
+	opacity: 0.75;
 	white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
@@ -2323,10 +2323,10 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* Onglet déclencheur */
 #projects-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 125px);
+    left: -35px; top: calc(50% + 140px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid rgba(255,255,255,0.1);
     border-right: none;
@@ -2339,14 +2339,14 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
 }
 #projects-panel-tab.tab-js-hover {
     background: #1a1a1a; color: rgba(255,255,255,0.88); opacity: 1;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -2363,10 +2363,10 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
 /* ── Onglet Mode Présentation (8e onglet) ─────────────────────── */
 #pres-mode-tab {
     position: fixed;
-    left: -25px; top: calc(50% + 300px);
+    left: -25px; top: calc(50% + 280px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 50px; height: 75px;
+    width: 50px; height: 70px;
     background: #1a2a3b;
     border: 0px solid rgba(255,120,50,0.35);
     border-right: none;
@@ -2379,7 +2379,7 @@ body.presentation-mode #projects-panel-tab { display: none !important; }
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(255,255,255,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
@@ -2421,7 +2421,7 @@ body.presentation-mode #pres-mode-tab {
     left: -35px; top: calc(50% + 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 80px; height: 65px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
@@ -2434,7 +2434,7 @@ body.presentation-mode #pres-mode-tab {
     transition: width 0.05s, height 0.05s, transform 0.05s, opacity 0.1s, color 0.1s, background 0.1s;
     letter-spacing: 1px;
     box-shadow: 0px 0px 10px rgba(0,0,0,1);
-    opacity: 0.5;
+    opacity: 0.75;
     white-space: nowrap;
     flex-direction: column-reverse;
     gap: 2px;
@@ -2444,7 +2444,7 @@ body.presentation-mode #pres-mode-tab {
     color: rgba(255,255,255,0.88);
     opacity: 1;
     z-index: 50020;
-    width: 178px; height: 88px;
+    width: 178px; height: 80px;
     padding: 0;
     transform: translateY(-50%) rotate(0deg);
     flex-direction: column;
@@ -2475,10 +2475,10 @@ body.menu-light #display-panel-tab.display-panel-tab-open { display: none !impor
 /* ── Onglet Historique (10e onglet) ─────────────────────── */
 #history-panel-tab {
     position: fixed;
-    left: -35px; top: calc(50% + 253px);
+    left: -35px; top: calc(50% + 210px);
     transform: translateY(-50%) rotate(-90deg);
     transform-origin: center center;
-    width: 70px; height: 50px;
+    width: 65px; height: 75px;
     background: #111;
     border: 1px solid #2e2e3a;
     border-right: none;
