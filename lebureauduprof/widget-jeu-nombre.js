@@ -121,6 +121,8 @@
         const s = document.createElement('style');
         s.id = 'widget-jn-style';
         s.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap');
+
         .widget[data-type="jeu-nombre"] {
             min-width: unset;
             background: transparent !important;
@@ -130,22 +132,35 @@
 
         .jn-container {
             --jn-s: 1;
-            background: #ffffff;
-            border: 1.5px solid #d1d5db;
-            border-radius: calc(16px * var(--jn-s));
-            padding: calc(14px * var(--jn-s)) calc(16px * var(--jn-s)) calc(12px * var(--jn-s));
+            background:
+                radial-gradient(circle at 100% 0%, rgba(255,110,199,0.10), transparent 55%),
+                radial-gradient(circle at 0% 100%, rgba(53,208,186,0.10), transparent 55%),
+                linear-gradient(180deg, #fdfcff 0%, #f3efff 100%);
+            border: 1.5px solid #e4dbff;
+            border-radius: calc(20px * var(--jn-s));
+            padding: calc(16px * var(--jn-s)) calc(18px * var(--jn-s)) calc(14px * var(--jn-s));
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: calc(9px * var(--jn-s));
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+            gap: calc(10px * var(--jn-s));
+            font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+            box-shadow: 0 12px 34px rgba(124,92,255,0.20), 0 2px 8px rgba(0,0,0,0.06);
             position: relative;
             user-select: none;
             overflow-y: auto;
             overflow-x: hidden;
             width: 640px;
         }
+        .jn-container::before {
+            content: '';
+            position: absolute; top: 0; left: calc(18px * var(--jn-s)); right: calc(18px * var(--jn-s));
+            height: 5px; border-radius: 0 0 8px 8px; pointer-events: none;
+            background: linear-gradient(90deg, #7c5cff, #ff6ec7, #ffb648, #35d0ba, #7c5cff);
+            background-size: 300% 100%;
+            animation: jnRainbowSlide 7s linear infinite;
+            opacity: 0.85;
+        }
+        @keyframes jnRainbowSlide { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
         .jn-container.wf-fullboard {
             position: fixed !important;
             inset: 0 !important;
@@ -160,100 +175,125 @@
 
         /* ── En-tête ── */
         .jn-header { display: flex; align-items: center; gap: calc(8px * var(--jn-s)); flex-wrap: wrap; }
-        .jn-title { font-size: calc(15px * var(--jn-s)); font-weight: 800; color: #374151; white-space: nowrap; }
-        .jn-params-btn, .jn-help-btn {
-            width: calc(22px * var(--jn-s)); height: calc(22px * var(--jn-s)); border-radius: 50%;
-            border: 1px solid #bbb; background: #f5f5f5; color: #666; font-size: calc(12px * var(--jn-s));
-            font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: background .15s;
+        .jn-title {
+            font-size: calc(16px * var(--jn-s)); font-weight: 800; white-space: nowrap;
+            background: linear-gradient(90deg, #6c5ce7, #ff6ec7);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            letter-spacing: 0.2px;
         }
-        .jn-params-btn:hover, .jn-help-btn:hover { background: #e0e0e0; color: #333; }
-        .jn-params-btn.active { background: #6c5ce7; color: white; border-color: #5546c8; }
+        .jn-params-btn, .jn-help-btn {
+            width: calc(24px * var(--jn-s)); height: calc(24px * var(--jn-s)); border-radius: 50%;
+            border: 1.5px solid #e4dbff; background: #ffffff; color: #6c5ce7; font-size: calc(12px * var(--jn-s));
+            font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: transform .15s, box-shadow .15s, background .15s;
+            box-shadow: 0 2px 6px rgba(108,92,231,0.18);
+        }
+        .jn-params-btn:hover, .jn-help-btn:hover { transform: translateY(-1px) scale(1.06); box-shadow: 0 4px 10px rgba(108,92,231,0.3); }
+        .jn-params-btn.active { background: linear-gradient(135deg,#7c5cff,#6c5ce7); color: white; border-color: #5546c8; }
 
         /* ── Panneau de paramètres ── */
         .jn-params-panel {
-            background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: calc(10px * var(--jn-s));
+            background: linear-gradient(180deg,#ffffff,#f7f5ff); border: 1.5px solid #e9e2ff; border-radius: calc(12px * var(--jn-s));
             padding: calc(10px * var(--jn-s)) calc(14px * var(--jn-s));
             display: none; flex-direction: column; gap: calc(8px * var(--jn-s)); flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(108,92,231,0.08);
         }
         .jn-params-panel.show { display: flex; }
-        .jn-params-title { font-size: calc(11px * var(--jn-s)); font-weight: 700; color: #374151; }
+        .jn-params-title { font-size: calc(11px * var(--jn-s)); font-weight: 700; color: #4c3fae; }
         .jn-params-grid { display: flex; flex-wrap: wrap; gap: calc(6px * var(--jn-s)); }
         .jn-class-check {
             display: flex; align-items: center; gap: 4px;
-            padding: calc(4px * var(--jn-s)) calc(10px * var(--jn-s)); border-radius: 20px;
+            padding: calc(4px * var(--jn-s)) calc(11px * var(--jn-s)); border-radius: 20px;
             border: 1.5px solid transparent; background: #e0f0ff; color: #1565c0;
             cursor: pointer; font-size: calc(11px * var(--jn-s)); font-weight: 700;
-            transition: all .15s; user-select: none;
+            transition: all .15s; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .jn-class-check input[type=checkbox] { display: none; }
-        .jn-class-check.checked { border-color: currentColor; }
+        .jn-class-check.checked { border-color: currentColor; box-shadow: 0 3px 8px rgba(0,0,0,0.12); transform: scale(1.03); }
         .jn-class-check:not(.checked) { opacity: 0.4; }
-        .jn-class-check:hover { opacity: 1; }
+        .jn-class-check:hover { opacity: 1; transform: scale(1.05); }
         .jn-class-check.c-unites   { background: #dbeafe; color: #1d4ed8; }
         .jn-class-check.c-mille    { background: #d1fae5; color: #065f46; }
         .jn-class-check.c-million  { background: #ede9fe; color: #5b21b6; }
         .jn-class-check.c-milliard { background: #ffedd5; color: #9a3412; }
         .jn-params-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .jn-params-row label { font-size: calc(11px * var(--jn-s)); font-weight: 600; color: #374151; white-space: nowrap; }
+        .jn-params-row label { font-size: calc(11px * var(--jn-s)); font-weight: 700; color: #4c3fae; white-space: nowrap; }
         .jn-select {
-            padding: 5px 10px; border-radius: 7px; border: 1px solid #d1d5db; font-size: calc(12px * var(--jn-s));
-            font-family: 'Segoe UI', system-ui, sans-serif; outline: none; cursor: pointer; background: white; color: #374151;
+            padding: 5px 10px; border-radius: 8px; border: 1.5px solid #e4dbff; font-size: calc(12px * var(--jn-s));
+            font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif; font-weight: 600; outline: none; cursor: pointer;
+            background: white; color: #374151; transition: border-color .15s, box-shadow .15s;
         }
-        .jn-select:focus { border-color: #6c5ce7; }
+        .jn-select:focus { border-color: #6c5ce7; box-shadow: 0 0 0 3px rgba(108,92,231,0.15); }
+        .jn-select:hover { border-color: #b9a8ff; }
 
         .jn-controls { display: flex; gap: calc(6px * var(--jn-s)); flex-shrink: 0; }
 
         /* ── HUD ── */
         .jn-hud {
             display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-            gap: 6px; font-size: calc(13px * var(--jn-s)); font-weight: 800; color: #374151; flex-shrink: 0;
+            gap: calc(6px * var(--jn-s)); font-size: calc(12px * var(--jn-s)); font-weight: 800; flex-shrink: 0;
         }
-        .jn-score  { color: #2e7d32; }
-        .jn-streak { color: #d4a017; }
-        .jn-timer  { font-variant-numeric: tabular-nums; }
-        .jn-timer.low { color: #dc3545; }
-        .jn-lives { letter-spacing: 2px; font-size: calc(14px * var(--jn-s)); }
+        .jn-hud > span {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: calc(4px * var(--jn-s)) calc(10px * var(--jn-s)); border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06); background: white; transition: transform .15s;
+        }
+        .jn-hud > span:hover { transform: translateY(-1px); }
+        .jn-score  { color: #1a7a34; background: linear-gradient(180deg,#eafff1,#d7f7e3) !important; }
+        .jn-streak { color: #b8790a; background: linear-gradient(180deg,#fff8e6,#ffedc0) !important; }
+        .jn-timer  { font-variant-numeric: tabular-nums; color: #375ba8; background: linear-gradient(180deg,#eef4ff,#dde9ff) !important; }
+        .jn-timer.low { color: #dc3545; background: linear-gradient(180deg,#fff0f0,#ffd9d9) !important; animation: jnPulseSoft 1s ease-in-out infinite; }
+        .jn-lives { letter-spacing: 2px; font-size: calc(13px * var(--jn-s)); background: linear-gradient(180deg,#fff0f5,#ffe1ec) !important; }
+        @keyframes jnPulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
         .jn-timerbar {
-            height: calc(6px * var(--jn-s)); background: #eee; border-radius: 4px; overflow: hidden; flex-shrink: 0;
+            height: calc(7px * var(--jn-s)); background: #ece9fb; border-radius: 6px; overflow: hidden; flex-shrink: 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
         }
         .jn-timerbar-fill {
-            height: 100%; width: 100%; background: linear-gradient(90deg,#4a90e2,#6c5ce7);
+            height: 100%; width: 100%; background: linear-gradient(90deg,#4a90e2,#6c5ce7,#ff6ec7);
+            background-size: 200% 100%;
+            box-shadow: 0 0 8px rgba(108,92,231,0.5);
             transition: width .25s linear, background .25s;
         }
-        .jn-timerbar-fill.low { background: linear-gradient(90deg,#dc3545,#f97316); }
+        .jn-timerbar-fill.low { background: linear-gradient(90deg,#dc3545,#f97316); box-shadow: 0 0 8px rgba(220,53,69,0.55); }
 
         /* ── Zone d'énoncé (le nombre à écrire) ── */
         .jn-prompt-zone {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            background: #f3f6ff; border: 1.5px solid #c7d7f7; border-radius: calc(12px * var(--jn-s));
-            padding: calc(10px * var(--jn-s)) calc(10px * var(--jn-s)); flex-shrink: 0; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+            background: linear-gradient(180deg,#f6f4ff,#eef2ff);
+            border: 1.5px solid #d3c9ff; border-radius: calc(14px * var(--jn-s));
+            padding: calc(12px * var(--jn-s)) calc(12px * var(--jn-s)); flex-shrink: 0; text-align: center;
+            box-shadow: 0 4px 16px rgba(108,92,231,0.14), inset 0 1px 0 rgba(255,255,255,0.6);
+            position: relative;
         }
         .jn-prompt-badge {
-            font-size: calc(10px * var(--jn-s)); font-weight: 700; color: #4a5568;
-            background: #e5ecff; padding: 2px 10px; border-radius: 10px;
+            font-size: calc(10px * var(--jn-s)); font-weight: 800; color: white;
+            background: linear-gradient(135deg,#7c5cff,#ff6ec7); padding: 3px 12px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(108,92,231,0.35); letter-spacing: 0.3px;
         }
         .jn-prompt-value {
-            font-size: calc(26px * var(--jn-s)); font-weight: 900; color: #1e3a5f;
+            font-size: calc(28px * var(--jn-s)); font-weight: 900; color: #2b2560;
             letter-spacing: 0.5px; word-break: break-word;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.7);
         }
-        .jn-prompt-value.words { font-size: calc(19px * var(--jn-s)); font-style: italic; }
+        .jn-prompt-value.words { font-size: calc(19px * var(--jn-s)); font-style: italic; color: #4c3fae; }
 
         /* ── Étiquettes (palette + réponse), repris du widget Nombres en chiffres/lettres ── */
         .jn-palette-zone { display: flex; flex-direction: column; gap: calc(4px * var(--jn-s)); }
         .jn-palette-row { display: flex; flex-wrap: wrap; gap: calc(4px * var(--jn-s)); align-items: center; justify-content: center; }
         .jn-tile {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: calc(38px * var(--jn-s)); height: calc(25px * var(--jn-s));
-            padding: 0 calc(8px * var(--jn-s)); border-radius: calc(8px * var(--jn-s));
+            min-width: calc(38px * var(--jn-s)); height: calc(26px * var(--jn-s));
+            padding: 0 calc(8px * var(--jn-s)); border-radius: calc(9px * var(--jn-s));
             font-size: calc(12px * var(--jn-s)); font-weight: 700; cursor: pointer;
             border: calc(1.5px * var(--jn-s)) solid #d1d5db; background: white; color: #1e3a5f;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08); transition: background .12s, border-color .12s, transform .1s;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.06), 0 3px 6px rgba(0,0,0,0.08);
+            transition: background .12s, border-color .12s, transform .12s, box-shadow .12s;
             user-select: none; touch-action: manipulation;
         }
-        .jn-tile:hover { border-color: #4a90e2; background: #eff6ff; }
-        .jn-tile:active { transform: scale(0.95); }
+        .jn-tile:hover { border-color: #4a90e2; background: #eff6ff; transform: translateY(-2px); box-shadow: 0 4px 0 rgba(0,0,0,0.06), 0 6px 10px rgba(74,144,226,0.25); }
+        .jn-tile:active { transform: scale(0.94) translateY(0); box-shadow: 0 1px 0 rgba(0,0,0,0.06); }
         .jn-tile.word-tile {
             flex-direction: column; height: auto; min-height: calc(23px * var(--jn-s));
             padding: calc(1px * var(--jn-s)) calc(8px * var(--jn-s)); line-height: 1.05; gap: 0;
@@ -268,21 +308,24 @@
         .jn-palette-row-digits .jn-tile.digit-tile {
             width: calc(46px * var(--jn-s)); min-width: calc(46px * var(--jn-s));
             height: calc(38px * var(--jn-s)); font-size: calc(19px * var(--jn-s));
+            border-radius: calc(11px * var(--jn-s));
         }
-        .jn-tile-row0 { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
-        .jn-tile-row0:hover { background: #bfdbfe; border-color: #60a5fa; }
-        .jn-tile-row1 { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
-        .jn-tile-row1:hover { background: #a7f3d0; border-color: #34d399; }
-        .jn-tile-row2 { background: #ede9fe; border-color: #c4b5fd; color: #5b21b6; }
-        .jn-tile-row2:hover { background: #ddd6fe; border-color: #a78bfa; }
-        .jn-tile-row3 { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
-        .jn-tile-row3:hover { background: #fed7aa; border-color: #fb923c; }
+        .jn-tile-row0 { background: linear-gradient(180deg,#eaf3ff,#dbeafe); border-color: #93c5fd; color: #1e40af; }
+        .jn-tile-row0:hover { background: linear-gradient(180deg,#dceeff,#bfdbfe); border-color: #60a5fa; }
+        .jn-tile-row1 { background: linear-gradient(180deg,#e2fbf0,#d1fae5); border-color: #6ee7b7; color: #065f46; }
+        .jn-tile-row1:hover { background: linear-gradient(180deg,#c9f7e2,#a7f3d0); border-color: #34d399; }
+        .jn-tile-row2 { background: linear-gradient(180deg,#f2eeff,#ede9fe); border-color: #c4b5fd; color: #5b21b6; }
+        .jn-tile-row2:hover { background: linear-gradient(180deg,#e6ddff,#ddd6fe); border-color: #a78bfa; }
+        .jn-tile-row3 { background: linear-gradient(180deg,#fff2e0,#ffedd5); border-color: #fdba74; color: #9a3412; }
+        .jn-tile-row3:hover { background: linear-gradient(180deg,#ffe4c2,#fed7aa); border-color: #fb923c; }
 
         .jn-answer-zone {
             display: flex; flex-wrap: wrap; align-items: center; gap: calc(4px * var(--jn-s));
             min-height: calc(44px * var(--jn-s)); padding: calc(3px * var(--jn-s)) calc(10px * var(--jn-s));
-            background: #fffdf5; border: calc(2px * var(--jn-s)) dashed #e5c97a;
-            border-radius: calc(10px * var(--jn-s));
+            background: linear-gradient(180deg,#fffef8,#fffaef);
+            border: calc(2px * var(--jn-s)) dashed #e5c97a;
+            border-radius: calc(12px * var(--jn-s));
+            box-shadow: inset 0 1px 4px rgba(229,201,122,0.18);
         }
         .jn-answer-zone.digits-mode {
             flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; justify-content: flex-start;
@@ -292,12 +335,13 @@
         .jn-answer-tile {
             display: inline-flex; align-items: center; justify-content: center;
             min-width: calc(38px * var(--jn-s)); height: calc(30px * var(--jn-s));
-            padding: 0 calc(9px * var(--jn-s)); border-radius: calc(8px * var(--jn-s));
+            padding: 0 calc(9px * var(--jn-s)); border-radius: calc(9px * var(--jn-s));
             font-size: calc(13px * var(--jn-s)); font-weight: 700; cursor: pointer;
-            border: calc(1.5px * var(--jn-s)) solid #f9a8d4; background: #fce7f3; color: #9d174d;
-            flex-shrink: 0;
+            border: calc(1.5px * var(--jn-s)) solid #f9a8d4; background: linear-gradient(180deg,#fff0f8,#fce7f3); color: #9d174d;
+            box-shadow: 0 2px 5px rgba(157,23,77,0.14);
+            flex-shrink: 0; transition: background .12s, border-color .12s, transform .12s;
         }
-        .jn-answer-tile:hover { background: #fee2e2; border-color: #dc3545; color: #dc3545; }
+        .jn-answer-tile:hover { background: #fee2e2; border-color: #dc3545; color: #dc3545; transform: translateY(-1px); }
         .jn-answer-tile.jn-answer-tile-wrong {
             background: #fee2e2 !important; border-color: #dc3545 !important; color: #dc3545 !important;
             box-shadow: 0 0 0 calc(3px * var(--jn-s)) rgba(220,53,69,0.28);
@@ -334,12 +378,20 @@
             pointer-events: none; transition: opacity .35s ease, transform .35s ease; z-index: 6;
         }
         .jn-success-overlay.show { opacity: 1; transform: scale(1); }
-        .jn-success-emoji { font-size: calc(44px * var(--jn-s)); line-height: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18)); }
+        .jn-success-overlay.show .jn-success-emoji { animation: jnSuccessBounce .6s ease .05s 1; }
+        .jn-success-emoji { font-size: calc(46px * var(--jn-s)); line-height: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18)); }
+        @keyframes jnSuccessBounce {
+            0% { transform: scale(0.4) rotate(-15deg); }
+            50% { transform: scale(1.25) rotate(8deg); }
+            75% { transform: scale(0.95) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
         .jn-success-msg {
             font-size: calc(24px * var(--jn-s)); font-weight: 900; color: #16a34a;
-            background: rgba(255,255,255,0.92); padding: calc(7px * var(--jn-s)) calc(20px * var(--jn-s));
-            border-radius: calc(14px * var(--jn-s)); box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            text-align: center; white-space: nowrap;
+            background: rgba(255,255,255,0.95);
+            padding: calc(7px * var(--jn-s)) calc(22px * var(--jn-s));
+            border-radius: calc(14px * var(--jn-s)); box-shadow: 0 8px 24px rgba(22,163,74,0.25);
+            text-align: center; white-space: nowrap; border: 1.5px solid #bbf7d0;
         }
 
         /* ── Zone résultat / boutons d'action ── */
@@ -348,18 +400,20 @@
             min-height: calc(28px * var(--jn-s)); flex-wrap: wrap; text-align: center; flex-shrink: 0;
         }
         .jn-btn {
-            padding: calc(6px * var(--jn-s)) calc(14px * var(--jn-s)); border-radius: calc(8px * var(--jn-s));
-            border: 1px solid #d1d5db; background: #f0f0f0; color: #333; font-size: calc(12px * var(--jn-s));
-            font-weight: 700; cursor: pointer; transition: background .15s, transform .1s;
+            padding: calc(6px * var(--jn-s)) calc(15px * var(--jn-s)); border-radius: calc(9px * var(--jn-s));
+            border: 1.5px solid #d1d5db; background: linear-gradient(180deg,#ffffff,#f0f0f0); color: #333;
+            font-size: calc(12px * var(--jn-s)); font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+            font-weight: 700; cursor: pointer; transition: background .15s, transform .12s, box-shadow .15s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         }
-        .jn-btn:hover { background: #e0e0e0; }
+        .jn-btn:hover { background: linear-gradient(180deg,#f5f5f5,#e6e6e6); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
         .jn-btn:active { transform: scale(0.96); }
-        .jn-btn-validate { background: #16a34a; color: white; border: none; }
-        .jn-btn-validate:hover { background: #128a3e; }
-        .jn-btn-continue { background: #4a90e2; color: white; border: none; }
-        .jn-btn-continue:hover { background: #357abd; }
+        .jn-btn-validate { background: linear-gradient(180deg,#22c55e,#16a34a); color: white; border: none; box-shadow: 0 3px 8px rgba(22,163,74,0.35); }
+        .jn-btn-validate:hover { background: linear-gradient(180deg,#16c157,#128a3e); }
+        .jn-btn-continue { background: linear-gradient(180deg,#5ea2ec,#4a90e2); color: white; border: none; box-shadow: 0 3px 8px rgba(74,144,226,0.35); }
+        .jn-btn-continue:hover { background: linear-gradient(180deg,#4a90e2,#357abd); }
         .jn-btn-continue.hidden { display: none; }
-        .jn-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .jn-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
         .jn-answer-tile.jn-answer-tile-solution {
             background: #e0ecff !important; border-color: #93c5fd !important; color: #1d4ed8 !important;
             cursor: default;
@@ -371,12 +425,12 @@
 
         /* ── Aide ── */
         .jn-help-popup {
-            display: none; position: absolute; top: 36px; right: 10px; background: #fff;
-            border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: none; position: absolute; top: 36px; right: 10px; background: linear-gradient(180deg,#ffffff,#faf9ff);
+            border: 1.5px solid #e4dbff; border-radius: 12px; box-shadow: 0 8px 24px rgba(108,92,231,0.2);
             padding: 12px 14px; width: 300px; font-size: 11px; color: #444; z-index: 20; line-height: 1.5;
         }
         .jn-help-popup.show { display: block; }
-        .jn-help-popup h4 { margin: 0 0 8px; font-size: 12px; color: #374151; }
+        .jn-help-popup h4 { margin: 0 0 8px; font-size: 12px; color: #4c3fae; }
 
         /* ── Zone de jeu (enveloppe l'overlay démarrer/pause/fin, pour ne jamais
            masquer l'en-tête, le HUD ni le panneau de paramètres) ── */
@@ -388,18 +442,35 @@
         /* ── Overlay démarrer / pause / fin de partie ── */
         .jn-overlay {
             position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.92); border-radius: calc(12px * var(--jn-s));
+            background: radial-gradient(circle at 30% 20%, rgba(124,92,255,0.10), transparent 55%),
+                        radial-gradient(circle at 80% 80%, rgba(255,110,199,0.10), transparent 55%),
+                        rgba(255,255,255,0.94);
+            border-radius: calc(14px * var(--jn-s));
             transition: opacity .2s; padding: 16px;
         }
         .jn-overlay.hidden { display: none; }
-        .jn-overlay-card { text-align: center; max-width: 360px; }
-        .jn-overlay-title { font-size: calc(20px * var(--jn-s)); font-weight: 900; color: #374151; margin-bottom: 6px; }
-        .jn-overlay-sub { font-size: calc(12px * var(--jn-s)); color: #666; margin-bottom: 14px; line-height: 1.5; }
-        .jn-overlay-btn {
-            padding: 10px 26px; border-radius: 10px; border: none; background: #6c5ce7; color: white;
-            font-size: calc(14px * var(--jn-s)); font-weight: 800; cursor: pointer; transition: background .15s;
+        .jn-overlay-card {
+            text-align: center; max-width: 360px; background: #ffffff;
+            border: 1.5px solid #e9e2ff; border-radius: calc(16px * var(--jn-s));
+            padding: calc(20px * var(--jn-s)) calc(24px * var(--jn-s));
+            box-shadow: 0 14px 34px rgba(108,92,231,0.22);
         }
-        .jn-overlay-btn:hover { background: #5546c8; }
+        .jn-overlay-title {
+            font-size: calc(21px * var(--jn-s)); font-weight: 900; margin-bottom: 6px;
+            background: linear-gradient(90deg,#6c5ce7,#ff6ec7);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .jn-overlay-sub { font-size: calc(12px * var(--jn-s)); color: #666; margin-bottom: 16px; line-height: 1.5; }
+        .jn-overlay-btn {
+            padding: 10px 28px; border-radius: 12px; border: none;
+            background: linear-gradient(135deg,#7c5cff,#6c5ce7); color: white;
+            font-size: calc(14px * var(--jn-s)); font-weight: 800; cursor: pointer;
+            font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+            box-shadow: 0 6px 16px rgba(108,92,231,0.4);
+            transition: background .15s, transform .12s, box-shadow .15s;
+        }
+        .jn-overlay-btn:hover { background: linear-gradient(135deg,#8a6dff,#5546c8); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(108,92,231,0.5); }
+        .jn-overlay-btn:active { transform: scale(0.96); }
 
         .jn-rh { position: absolute; z-index: 20; opacity: 0; transition: opacity .2s; }
         .widget[data-type="jeu-nombre"]:hover .jn-rh { opacity: 1; }
@@ -529,6 +600,33 @@
     ];
 
     function jnRandInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    // Renvoie l'ensemble des indices de `student` qui font partie de la plus longue
+    // sous-séquence commune avec `expected` (ordre respecté, mais pas forcément la
+    // même position). Permet de ne signaler comme fausses que les étiquettes vraiment
+    // fautives, sans faire "décaler" et marquer en rouge toutes celles qui suivent
+    // une étiquette en trop ou manquante.
+    function jnLCSMatchedIndices(student, expected) {
+        const n = student.length, m = expected.length;
+        const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+        for (let i = n - 1; i >= 0; i--) {
+            for (let j = m - 1; j >= 0; j--) {
+                dp[i][j] = student[i] === expected[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+            }
+        }
+        const matched = new Set();
+        let i = 0, j = 0;
+        while (i < n && j < m) {
+            if (student[i] === expected[j] && dp[i][j] === dp[i + 1][j + 1] + 1) {
+                matched.add(i); i++; j++;
+            } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+        return matched;
+    }
 
     // =========================================================================
     // CRÉATION DU WIDGET
@@ -711,6 +809,7 @@
         let targetTokens = null;           // réponse attendue en mode c2l (mots)
         let targetDigits = null;           // réponse attendue en mode l2c (chiffres)
         let studentTiles = [];
+        let insertCursor = null;           // position où insérer la prochaine étiquette (null = à la fin)
         let solutionShown = false;         // true tant que la solution est affichée, en attente du clic sur Continuer
         let timerDuration = 30;            // secondes, 0 = pas de chrono
         let timerRemaining = 0;
@@ -796,10 +895,22 @@
         }
         function highlightWrongTiles() {
             const expected = currentMode === 'c2l' ? (targetTokens || []) : (targetDigits ? targetDigits.split('') : []);
+            const matched = jnLCSMatchedIndices(studentTiles, expected);
             const tileEls = answerZone.querySelectorAll('.jn-answer-tile');
             tileEls.forEach((el, i) => {
-                if (studentTiles[i] !== expected[i]) el.classList.add('jn-answer-tile-wrong');
+                if (!matched.has(i)) el.classList.add('jn-answer-tile-wrong');
             });
+        }
+
+        // ── Insertion d'une étiquette : comble en priorité le trou laissé par une
+        // étiquette retirée (insertCursor), sinon l'ajoute à la fin comme avant ──
+        function insertStudentTile(val) {
+            if (insertCursor !== null && insertCursor >= 0 && insertCursor <= studentTiles.length) {
+                studentTiles.splice(insertCursor, 0, val);
+                insertCursor = null; // une étiquette comble le trou, on repasse en mode "ajout à la fin"
+            } else {
+                studentTiles.push(val);
+            }
         }
 
         // ── Rendu palette ────────────────────────────────────────────────────
@@ -828,7 +939,7 @@
                         el.addEventListener('click', (e) => {
                             e.stopPropagation();
                             if (!running || solutionShown) return;
-                            studentTiles.push(val);
+                            insertStudentTile(val);
                             renderAnswer(true);
                             if (typeof saveBoard === 'function') saveBoard();
                         });
@@ -849,7 +960,7 @@
                         el.addEventListener('click', (e) => {
                             e.stopPropagation();
                             if (!running || solutionShown) return;
-                            studentTiles.push(val);
+                            insertStudentTile(val);
                             renderAnswer(true);
                             if (typeof saveBoard === 'function') saveBoard();
                         });
@@ -888,6 +999,7 @@
                     e.stopPropagation(); e.preventDefault();
                     if (!running || solutionShown) return;
                     studentTiles.splice(idx, 1);
+                    insertCursor = idx;
                     renderAnswer();
                     if (typeof saveBoard === 'function') saveBoard();
                 });
@@ -1002,6 +1114,7 @@
             targetDigits = String(currentNumber);
             targetTokens = jnNumberToTokens(currentNumber);
             studentTiles = [];
+            insertCursor = null;
 
             if (currentMode === 'c2l') {
                 promptBadge.textContent = '🔢➜🔤 Écris ce nombre en lettres';
@@ -1104,6 +1217,7 @@
             e.stopPropagation();
             if (!running || solutionShown) return;
             studentTiles = [];
+            insertCursor = null;
             renderAnswer();
             resultText.classList.remove('show', 'exact', 'faux');
             hideSuccessOverlay();
@@ -1216,6 +1330,7 @@
             pauseBtn.textContent = '⏸ Pause';
             score = 0; streak = 0; lives = maxLives = parseInt(livesSelect.value, 10) || 3;
             studentTiles = [];
+            insertCursor = null;
             solutionShown = false;
             validateBtn.disabled = false;
             clearBtn.disabled = false;

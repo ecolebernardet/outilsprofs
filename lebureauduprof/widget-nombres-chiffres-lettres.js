@@ -595,6 +595,33 @@
     // CRÉATION DU WIDGET
     // =========================================================================
 
+    // Renvoie l'ensemble des indices de `student` qui font partie de la plus longue
+    // sous-séquence commune avec `expected` (ordre respecté, mais pas forcément la
+    // même position). Permet de ne signaler comme fausses que les étiquettes vraiment
+    // fautives, sans faire "décaler" et marquer en rouge toutes celles qui suivent
+    // une étiquette en trop ou manquante.
+    function nclLCSMatchedIndices(student, expected) {
+        const n = student.length, m = expected.length;
+        const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+        for (let i = n - 1; i >= 0; i--) {
+            for (let j = m - 1; j >= 0; j--) {
+                dp[i][j] = student[i] === expected[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+            }
+        }
+        const matched = new Set();
+        let i = 0, j = 0;
+        while (i < n && j < m) {
+            if (student[i] === expected[j] && dp[i][j] === dp[i + 1][j + 1] + 1) {
+                matched.add(i); i++; j++;
+            } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+        return matched;
+    }
+
     window.createNombresLettresWidget = function (savedData) {
         if (typeof snapshotNow === 'function') snapshotNow();
         const pos = findFreePosition();
@@ -734,9 +761,10 @@
         // étiquette en trop).
         function highlightWrongTiles() {
             const expected = currentMode === 'c2l' ? (targetTokens || []) : (targetDigits ? targetDigits.split('') : []);
+            const matched = nclLCSMatchedIndices(studentTiles, expected);
             const tileEls = answerZone.querySelectorAll('.ncl-answer-tile');
             tileEls.forEach((el, i) => {
-                if (studentTiles[i] !== expected[i]) {
+                if (!matched.has(i)) {
                     el.classList.add('ncl-answer-tile-wrong');
                 }
             });
@@ -747,6 +775,7 @@
         let targetTokens = null;          // tableau d'étiquettes attendues (mode c2l)
         let targetDigits = null;          // chaîne de chiffres attendue (mode l2c)
         let studentTiles = [];            // étiquettes placées par l'élève (dans l'ordre)
+        let insertCursor = null;          // position où insérer la prochaine étiquette (null = à la fin)
         let targetTooLong = false;        // true si le nombre tapé dépasse 12 chiffres
 
         // ── Scale proportionnel ───────────────────────────────────────────
@@ -811,7 +840,12 @@
         }
 
         function addTileToAnswer(value) {
-            studentTiles.push(value);
+            if (insertCursor !== null && insertCursor >= 0 && insertCursor <= studentTiles.length) {
+                studentTiles.splice(insertCursor, 0, value);
+                insertCursor = null; // une étiquette comble le trou, on repasse en mode "ajout à la fin"
+            } else {
+                studentTiles.push(value);
+            }
             renderAnswer();
             if (typeof saveBoard === 'function') saveBoard();
         }
@@ -842,6 +876,7 @@
                 el.addEventListener('pointerdown', (e) => {
                     e.stopPropagation(); e.preventDefault();
                     studentTiles.splice(idx, 1);
+                    insertCursor = idx;
                     renderAnswer();
                     if (typeof saveBoard === 'function') saveBoard();
                 });
@@ -907,6 +942,7 @@
         function setMode(mode) {
             currentMode = mode;
             studentTiles = [];
+            insertCursor = null;
             inputEl.value = '';
             targetTokens = null; targetDigits = null;
             modeBtns.forEach(b => b.classList.toggle('active-c2l', mode === 'c2l' && b.dataset.mode === 'c2l'));
@@ -944,6 +980,7 @@
         clearBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             studentTiles = [];
+            insertCursor = null;
             renderAnswer();
             resultText.classList.remove('show', 'exact', 'faux');
             hideSuccessOverlay();
@@ -954,6 +991,7 @@
             e.stopPropagation();
             inputEl.value = '';
             studentTiles = [];
+            insertCursor = null;
             targetTokens = null; targetDigits = null;
             renderAnswer();
             updateTarget();
@@ -1011,6 +1049,7 @@
                 return;
             }
             studentTiles = solutionTiles;
+            insertCursor = null;
             renderAnswer(true);
             resultText.textContent = '💡 Voici la solution !';
             resultText.classList.add('show');
@@ -1155,6 +1194,7 @@
                 inputEl.value = savedData.profValue || '';
                 updateTarget();
                 studentTiles = Array.isArray(savedData.studentTiles) ? savedData.studentTiles.slice() : [];
+                insertCursor = null;
                 renderAnswer();
                 if (savedData.fullboard) {
                     _isMax = true;
