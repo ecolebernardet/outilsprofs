@@ -63,6 +63,11 @@
         .widget[data-type="homework"]:focus-within { border-color: #ff4757; }
         .widget[data-type="iframe"]:focus-within { border-color: #2bcbba; }
         .widget[data-type="carte"]:focus-within { border-color: #34a853; }
+        /* La règle .widget (touch-action:none) bloque le glisser au stylet à
+           l'intérieur de la carte (Google gère son propre pan en JS avec la
+           souris, mais un stylet est traité comme un geste tactile natif
+           qu'il faut explicitement réautoriser dans cette zone). */
+        .widget[data-type="carte"] iframe.carte-frame { touch-action: auto; }
         .carte-wallpaper-btn.active { background:#e6f4ea;border-color:#34a853;color:#1e7e34;font-weight:600; }
         .carte-preset-btn.active { background:#e8f0fe;border-color:#4285f4;color:#1a73e8;font-weight:600; }
         .widget[data-transparent="true"] { border: none !important; box-shadow: none !important; background: transparent !important; }
@@ -1983,7 +1988,7 @@ body.presentation-mode #activities-panel-tab { display: none !important; }
     margin-bottom: 10px;
 }
 #jeux-panel-content .act-grid {
-    grid-template-columns: repeat(5, 1fr);   /* nombre de colonnes propre au panneau Jeux */
+    grid-template-columns: repeat(4, 1fr);   /* nombre de colonnes propre au panneau Jeux */
 }
 .act-card {
     background: #1a1a1a;
