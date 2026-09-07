@@ -1,4 +1,4 @@
-const CACHE_NAME = 'outilsprofs-v7.1';
+const CACHE_NAME = 'outilsprofs-v7.2';
 const ASSETS = [
   './',
   './index.html',
@@ -33,11 +33,38 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim(); // Force l'activation immédiate sur tous les onglets ouverts
 });
 
-// Récupération : Stratégie "Cache First" pour la rapidité
+// Récupération :
+// - Pages HTML (navigation) : stratégie "Network First" -> toujours essayer
+//   d'aller chercher la dernière version sur le serveur, et on ne se
+//   rabat sur le cache que si le réseau est indisponible (hors-ligne).
+// - Autres ressources (images, icônes...) : stratégie "Cache First"
+//   pour rester rapide, car ces fichiers changent rarement.
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const isHTMLRequest =
+    event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') || '').includes('text/html');
+
+  if (isHTMLRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          // On met à jour le cache avec la version fraîche
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => {
+          // Hors-ligne : on sert la dernière version connue en cache
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request);
+      })
+    );
+  }
 });
