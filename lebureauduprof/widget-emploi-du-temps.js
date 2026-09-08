@@ -1246,7 +1246,7 @@ function createEdtWidget() {
     // du cours le plus court, pour garantir qu'aucune case n'a besoin d'être
     // "gonflée" au-delà de sa vraie place (donc plus aucun chevauchement).
     const EDT_FREE_PX_PER_MIN = 0.3; // échelle fixe pour les plages libres pour tous les jours
-    const EDT_BUSY_PX_PER_MIN = 1.7; // échelle fixe pour les plages avec cours
+    const EDT_BUSY_PX_PER_MIN = 1.6; // échelle fixe pour les plages avec cours
     function computePxPerMin() {
         return EDT_BUSY_PX_PER_MIN;
     }
