@@ -241,6 +241,16 @@ function buildBoardState() {
                 items: w._planData ? JSON.stringify(w._planData) : null
             };
         }
+        // Données propres au widget emploi du temps
+        let edtData = null;
+        if (w.dataset.type === 'edt') {
+            const ec = w.querySelector('.edt-container');
+            edtData = {
+                containerW: ec ? ec.offsetWidth  : null,
+                containerH: ec ? ec.offsetHeight : null,
+                data: w._edtData ? JSON.stringify(w._edtData) : null
+            };
+        }
         // Données propres au widget conversion
         let convData = null;
         if (w.dataset.type === 'conversion' && typeof w._convGetData === 'function') {
@@ -321,6 +331,7 @@ function buildBoardState() {
 			animation: w.dataset.animation || null,
 			monnaieData,
 			planData,
+			edtData,
 			heureData,
 			conjData,
 			tableauNumData,
@@ -626,6 +637,18 @@ function restoreBoardFromJSON(json) {
                 // Restaurer les éléments du plan
                 if (w.planData.items && widget._setPlanData) {
                     try { widget._setPlanData(JSON.parse(w.planData.items)); } catch(e) {}
+                }
+            }
+        } else if (w.type === 'edt') {
+            widget = createEdtWidget();
+            // Restaurer les dimensions sauvegardées
+            if (w.edtData) {
+                const ec = widget.querySelector('.edt-container');
+                if (ec && w.edtData.containerW) ec.style.width  = w.edtData.containerW + 'px';
+                if (ec && w.edtData.containerH) ec.style.height = w.edtData.containerH + 'px';
+                // Restaurer les jours / cours / couleurs
+                if (w.edtData.data && widget._setEdtData) {
+                    try { widget._setEdtData(JSON.parse(w.edtData.data)); } catch(e) {}
                 }
             }
         } else if (w.type === 'seyes') {
