@@ -220,6 +220,45 @@
             background: #e0e0e0;
             flex-shrink: 0;
         }
+        .edt-font-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: #f5f5f5;
+        }
+        .edt-font-ctrl-icon {
+            font-size: 11px;
+            font-weight: 800;
+            color: #6b7280;
+        }
+        .edt-font-btn {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 1px solid #d5d5d5;
+            background: #fff;
+            color: #444;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .edt-font-btn:hover { background: #eee; }
+        .edt-font-btn:active { transform: scale(0.92); }
+        .edt-font-val {
+            font-size: 11px;
+            font-weight: 700;
+            color: #374151;
+            min-width: 16px;
+            text-align: center;
+        }
 
         /* ── Menu jours ── */
         .edt-days-menu {
@@ -300,6 +339,7 @@
             flex-shrink: 0;
             border-bottom: 1.5px solid #e5e7eb;
             background: #ffffff;
+            margin-bottom: 6px;
         }
         .edt-axis-spacer { width: 40px; flex-shrink: 0; }
         .edt-day-head {
@@ -368,43 +408,37 @@
             position: absolute;
             border-radius: 6px;
             box-sizing: border-box;
-            padding: 3px 5px;
+            padding: 3px 6px;
             overflow: hidden;
             color: #fff;
-            font-size: 10px;
-            font-weight: 700;
             cursor: pointer;
             box-shadow: 0 1px 3px rgba(0,0,0,0.18);
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
+            text-align: center;
             z-index: 1;
             transition: filter .1s;
         }
-        .edt-block.edt-block-compact {
-            padding: 1px 6px;
-            flex-direction: row;
-            align-items: center;
-        }
-        .edt-block.edt-block-compact .edt-block-name {
-            font-size: 9px;
-            line-height: 1.1;
-        }
         .edt-block:hover { filter: brightness(1.1); z-index: 2; }
         .edt-block-name {
+            font-size: 12px;
+            font-weight: 800;
+            width: 100%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.25;
         }
         .edt-block-time {
-            font-size: 8.5px;
+            font-size: 9.5px;
             font-weight: 600;
-            opacity: .92;
+            opacity: .85;
+            width: 100%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.2;
+            margin-top: 1px;
         }
         .edt-empty-msg {
             position: absolute;
@@ -875,6 +909,21 @@ function createEdtWidget() {
                     <input type="time" class="edt-modal-end" value="09:30">
                 </div>
             </div>
+            <div class="edt-field">
+                <label>Taille du texte</label>
+                <div class="edt-font-ctrl">
+                    <span class="edt-font-ctrl-icon">Aa</span>
+                    <button class="edt-font-btn edt-font-minus" type="button">−</button>
+                    <span class="edt-font-val">12</span>
+                    <button class="edt-font-btn edt-font-plus" type="button">+</button>
+                </div>
+            </div>
+            <div class="edt-field">
+                <label class="edt-modal-day-item" style="font-size:10.5px;font-weight:600;color:#6b7280;">
+                    <input type="checkbox" class="edt-modal-show-time" checked>
+                    afficher les horaires entre parenthèses
+                </label>
+            </div>
             <div class="edt-modal-btns">
                 <button class="edt-modal-delete" style="display:none">Supprimer</button>
                 <button class="edt-modal-cancel">Annuler</button>
@@ -893,6 +942,22 @@ function createEdtWidget() {
     const modalDelete             = modalOverlay.querySelector('.edt-modal-delete');
     const modalCancel              = modalOverlay.querySelector('.edt-modal-cancel');
     const modalOk                    = modalOverlay.querySelector('.edt-modal-ok');
+
+    // ── Taille du texte du cours (propre à chaque cours) ───────────────────
+    const EDT_FONT_MIN = 8, EDT_FONT_MAX = 22;
+    const modalFontMinus = modalOverlay.querySelector('.edt-font-minus');
+    const modalFontPlus  = modalOverlay.querySelector('.edt-font-plus');
+    const modalFontVal   = modalOverlay.querySelector('.edt-font-val');
+    function setModalFontSize(size) {
+        modalFontVal.textContent = Math.max(EDT_FONT_MIN, Math.min(EDT_FONT_MAX, size));
+    }
+    function getModalFontSize() {
+        return parseInt(modalFontVal.textContent, 10) || 12;
+    }
+    modalFontMinus.addEventListener('click', (e) => { e.stopPropagation(); setModalFontSize(getModalFontSize() - 1); });
+    modalFontPlus.addEventListener('click', (e) => { e.stopPropagation(); setModalFontSize(getModalFontSize() + 1); });
+
+    const modalShowTime = modalOverlay.querySelector('.edt-modal-show-time');
 
     // ── Sélecteur de couleur (color-picker.js, grille + hex + natif) ──────
     const cpickId = uid + '-course-color';
@@ -985,6 +1050,8 @@ function createEdtWidget() {
         setModalColor(suggestColorFor(''));
         modalStart.value = '08:30';
         modalEnd.value = '09:30';
+        setModalFontSize(12);
+        modalShowTime.checked = true;
         modalDelete.style.display = 'none';
         refreshSubjectsDatalist();
         modalOverlay.classList.add('show');
@@ -1000,6 +1067,8 @@ function createEdtWidget() {
         setModalColor(suggestColorFor(course.name));
         modalStart.value = course.start;
         modalEnd.value = course.end;
+        setModalFontSize(course.fontSize || 12);
+        modalShowTime.checked = course.showTime !== false;
         modalDelete.style.display = 'inline-block';
         refreshSubjectsDatalist();
         modalOverlay.classList.add('show');
@@ -1015,6 +1084,8 @@ function createEdtWidget() {
         const days = getCheckedDays();
         const start = modalStart.value;
         const end = modalEnd.value;
+        const fontSize = getModalFontSize();
+        const showTime = modalShowTime.checked;
         if (!name) { alert('Indique le nom de la matière ou de l\'activité.'); return; }
         if (days.length === 0) { alert('Coche au moins un jour.'); return; }
         if (!start || !end) { alert('Indique une heure de début et une heure de fin.'); return; }
@@ -1029,7 +1100,7 @@ function createEdtWidget() {
             edtData.courses = edtData.courses.filter(c => c.id !== editingCourseId);
         }
         days.forEach((day, i) => {
-            edtData.courses.push({ id: 'c' + Date.now() + i + Math.floor(Math.random() * 1000), day, name, start, end });
+            edtData.courses.push({ id: 'c' + Date.now() + i + Math.floor(Math.random() * 1000), day, name, start, end, fontSize, showTime });
         });
 
         closeModal();
@@ -1150,7 +1221,7 @@ function createEdtWidget() {
 
     // ── Calcul de la plage horaire affichée ─────────────────────────────────
     function computeRange() {
-        let startHour = 8, endHour = 17;
+        let startMin = 8 * 60, endMin = 17 * 60; // valeurs par défaut si aucun cours saisi
         if (edtData.courses.length > 0) {
             let minStart = Infinity, maxEnd = -Infinity;
             edtData.courses.forEach(c => {
@@ -1158,26 +1229,26 @@ function createEdtWidget() {
                 if (s < minStart) minStart = s;
                 if (e > maxEnd) maxEnd = e;
             });
-            startHour = Math.min(8, Math.floor(minStart / 60));
-            endHour   = Math.max(17, Math.ceil(maxEnd / 60));
+            startMin = minStart;
+            endMin = maxEnd;
         }
-        return { startMin: startHour * 60, endMin: endHour * 60 };
+        return { startMin, endMin };
+    }
+
+    // Formate une minute absolue en libellé horaire ("8h" ou "8h30")
+    function edtFormatMinuteLabel(min) {
+        const h = Math.floor(min / 60);
+        const m = min % 60;
+        return m === 0 ? (h + 'h') : (h + 'h' + String(m).padStart(2, '0'));
     }
 
     // Détermine combien de pixels représente 1 minute, en se basant sur la durée
     // du cours le plus court, pour garantir qu'aucune case n'a besoin d'être
     // "gonflée" au-delà de sa vraie place (donc plus aucun chevauchement).
-    const EDT_MIN_BLOCK_PX = 24; // hauteur cible pour le cours le plus court
-    const EDT_FREE_PX_PER_MIN = 0.25; // échelle réduite sur les plages libres pour tous les jours
+    const EDT_FREE_PX_PER_MIN = 0.3; // échelle fixe pour les plages libres pour tous les jours
+    const EDT_BUSY_PX_PER_MIN = 1.7; // échelle fixe pour les plages avec cours
     function computePxPerMin() {
-        let minDur = Infinity;
-        edtData.courses.forEach(c => {
-            const d = edtParseTime(c.end) - edtParseTime(c.start);
-            if (d > 0 && d < minDur) minDur = d;
-        });
-        if (!isFinite(minDur)) minDur = 60;
-        let px = EDT_MIN_BLOCK_PX / minDur;
-        return Math.max(0.75, Math.min(3, px));
+        return EDT_BUSY_PX_PER_MIN;
     }
 
     // Construit les segments de la plage horaire : "occupé" (au moins un cours ce
@@ -1281,21 +1352,41 @@ function createEdtWidget() {
         const availH = body.clientHeight || 200;
         bodyInner.style.height = Math.max(contentH, availH) + 'px';
 
-        // Axe horaire + lignes de grille
-        for (let h = Math.floor(startMin / 60); h <= Math.ceil(endMin / 60); h++) {
+        // Axe horaire + lignes de grille : heure exacte de début/fin, bornes de chaque
+        // plage libre partagée par tous les jours (ex : pause méridienne), et heures
+        // pleines à l'intérieur des plages occupées uniquement (pas dans les plages libres).
+        const marks = new Map(); // minute -> libellé (Map pour dédoublonner)
+        marks.set(startMin, edtFormatMinuteLabel(startMin));
+        marks.set(endMin, edtFormatMinuteLabel(endMin));
+        segments.forEach(seg => {
+            marks.set(seg.start, edtFormatMinuteLabel(seg.start));
+            marks.set(seg.end, edtFormatMinuteLabel(seg.end));
+        });
+        function isInsideFreeSegment(min) {
+            return segments.some(seg => seg.pxPerMin === EDT_FREE_PX_PER_MIN && min > seg.start + 0.5 && min < seg.end - 0.5);
+        }
+        for (let h = Math.ceil(startMin / 60); h <= Math.floor(endMin / 60); h++) {
             const hMin = h * 60;
-            if (hMin < startMin - 0.5 || hMin > endMin + 0.5) continue;
-            const topPx = edtMinuteToPx(hMin, segments);
+            if (hMin > startMin + 0.5 && hMin < endMin - 0.5 && !isInsideFreeSegment(hMin)) {
+                marks.set(hMin, edtFormatMinuteLabel(hMin));
+            }
+        }
+        Array.from(marks.keys()).sort((a, b) => a - b).forEach(min => {
+            const topPx = edtMinuteToPx(min, segments);
             const lab = document.createElement('div');
             lab.className = 'edt-hour-label';
             lab.style.top = topPx + 'px';
-            lab.textContent = h + 'h';
+            // Le tout premier et le tout dernier repère ne doivent pas être centrés
+            // sur la ligne (sinon la moitié du texte est coupée en haut/bas de la grille)
+            if (min === startMin) lab.style.transform = 'translateY(0)';
+            else if (min === endMin) lab.style.transform = 'translateY(-100%)';
+            lab.textContent = marks.get(min);
             axis.appendChild(lab);
             const line = document.createElement('div');
             line.className = 'edt-grid-line';
             line.style.top = topPx + 'px';
             gridLines.appendChild(line);
-        }
+        });
 
         // Colonnes des jours + cours
         activeDays.forEach(d => {
@@ -1310,9 +1401,7 @@ function createEdtWidget() {
                 const width = (100 / c._totalCols);
                 const left = c._col * width;
                 const block = document.createElement('div');
-                const durationMin = e - s;
-                const compact = heightPx < 28; // pas assez de place pour 2 lignes -> affichage compact
-                block.className = 'edt-block' + (compact ? ' edt-block-compact' : '');
+                block.className = 'edt-block';
                 block.style.top = topPx + 'px';
                 block.style.height = heightPx + 'px';
                 block.style.left = left + '%';
@@ -1320,9 +1409,16 @@ function createEdtWidget() {
                 block.style.background = edtAssignColor(edtData, c.name);
                 block.style.color = edtContrastColor(edtAssignColor(edtData, c.name));
                 block.title = `${c.name} — ${c.start} à ${c.end}`;
-                block.innerHTML = compact
-                    ? `<div class="edt-block-name">${edtEscapeHtml(c.name)}</div>`
-                    : `<div class="edt-block-name">${edtEscapeHtml(c.name)}</div><div class="edt-block-time">${c.start} – ${c.end}</div>`;
+                const nameSize = c.fontSize || 12;
+                const timeSize = Math.max(6, nameSize - 5);
+                // On n'affiche les horaires (sous le nom) que si la case est assez haute
+                // pour les deux lignes ; sinon, seul le nom (centré) est affiché.
+                const neededForTwoLines = nameSize * 1.15 + timeSize * 1.15 + 7; // + marge/padding approximative
+                const canShowTime = (c.showTime !== false) && heightPx >= neededForTwoLines;
+                const timeHtml = canShowTime
+                    ? `<div class="edt-block-time" style="font-size:${timeSize}px">(${c.start}–${c.end})</div>`
+                    : '';
+                block.innerHTML = `<div class="edt-block-name" style="font-size:${nameSize}px">${edtEscapeHtml(c.name)}</div>${timeHtml}`;
                 block.addEventListener('click', (e2) => { e2.stopPropagation(); openEditModal(c); });
                 col.appendChild(block);
             });
