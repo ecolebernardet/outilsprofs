@@ -274,26 +274,46 @@
         }
         .jti-speed-select:focus { border-color: #6c5ce7; }
 
-        /* ── HUD (score / vies) ── */
+        /* ── HUD (score / question / chrono / vies) — tout sur une seule ligne
+               pour libérer un maximum de hauteur au profit de l'espace de jeu ── */
         .jti-hud {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 10px;
             font-size: 14px;
             font-weight: 800;
             color: #374151;
             flex-shrink: 0;
             padding: 0 2px;
         }
-        .jti-score { color: #2e7d32; }
+        .jti-score {
+            color: #2e7d32;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .jti-hud-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
         .jti-timer { color: #374151; font-variant-numeric: tabular-nums; }
         .jti-lives { letter-spacing: 2px; font-size: 15px; }
 
-        /* ── Ligne opération courante ── */
-        .jti-op-row { text-align: center; flex-shrink: 0; }
+        /* ── Question / opération courante, désormais au centre du HUD ── */
+        .jti-op-row {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
+        }
         .jti-op {
             display: inline-block;
-            font-size: var(--jti-op-fs, 20px);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: var(--jti-op-fs, 18px);
             font-weight: 900;
             color: #1b5e20;
             font-family: 'Courier New', monospace;
@@ -591,13 +611,15 @@
     </div>
   </div>
 
-  <!-- HUD -->
+  <!-- HUD : score, question et chrono/vies regroupés sur une seule ligne -->
   <div class="jti-hud">
     <span class="jti-score">🚀 Score : 0</span>
-    <span class="jti-timer">⏱️ 00:00</span>
-    <span class="jti-lives">❤️❤️❤️</span>
+    <div class="jti-op-row"><span class="jti-op">❓ …</span></div>
+    <span class="jti-hud-right">
+      <span class="jti-timer">⏱️ 00:00</span>
+      <span class="jti-lives">❤️❤️❤️</span>
+    </span>
   </div>
-  <div class="jti-op-row"><span class="jti-op">❓ …</span></div>
 
   <!-- Espace de jeu -->
   <div class="jti-space">
