@@ -1053,6 +1053,7 @@ function setVisuelsMode(mode) {
 <script src="widget-jeu-memory.js"></script>
 <script src="widget-jeu-sudoku.js"></script>
 <script src="widget-jeu-conju.js"></script>
+<script src="widget-jeu-nature-mots-pacman.js"></script>
 <script src="widget-de.js"></script>
 <script src="widget-fractions.js"></script>
 <script src="widget-minuteur-chrono.js"></script>
@@ -1155,6 +1156,11 @@ if (window.electronAPI && typeof window.electronAPI.onOpenPdf === 'function') {
                 <div class="act-card-ico"><img src="pics/jeux-conju.png" alt="Conju" style="width:100%;height:100%;object-fit:contain;"></div>
                 <div class="act-card-name">Jeu de conjugaison</div>
                 <div class="act-card-desc">Glisser les verbes conjugués dans le bon temps (présent, futur, imparfait, passé composé)</div>
+            </div>
+			<div class="act-card" onclick="createWidget('jeu-nature-mots-pacman');toggleJeuxPanel()">
+                <div class="act-card-ico"><img src="pics/jeux-nature-mots-pacman.png" alt="Pac-Multi" style="width:100%;height:100%;object-fit:contain;"></div>
+                <div class="act-card-name">Nature-Mots Pac-Man</div>
+                <div class="act-card-desc">Diriger Pac-Man vers le mot de la bonne nature en évitant le fantôme</div>
             </div>
 		</div>
 		<div class="act-section-label">🎮 Jeux divers</div>
