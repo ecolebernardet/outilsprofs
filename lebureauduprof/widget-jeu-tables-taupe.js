@@ -369,7 +369,7 @@
             grid-template-rows: repeat(3, 1fr);
             gap: 14px 10px;
             touch-action: manipulation;
-            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='68' height='68'><text x='0' y='54' font-size='58'>🔨</text></svg>") 6 50, pointer;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 100 100'><g transform='rotate(-35 40 25)'><rect x='34' y='38' width='13' height='55' rx='6' fill='%23a9713c' stroke='%235b3a1e' stroke-width='2'/><rect x='37' y='44' width='3' height='43' rx='1.5' fill='%23c99a5b' opacity='0.55'/><rect x='33' y='33' width='15' height='10' rx='3' fill='%235b3a1e'/><rect x='7' y='10' width='67' height='30' rx='15' fill='%23e5392b' stroke='%237a1810' stroke-width='2.5'/><ellipse cx='36' cy='18' rx='25' ry='5.5' fill='%23ffffff' opacity='0.35'/><rect x='7' y='10' width='67' height='30' rx='15' fill='none' stroke='%23b52a1f' stroke-width='1' opacity='0.4'/></g></svg>") 15 39, pointer;
         }
         .jtt-space::before {
             content: '';
@@ -434,7 +434,7 @@
             opacity: 0;
             transition: transform .22s cubic-bezier(.34,1.4,.64,1), opacity .2s ease;
             z-index: 4;
-            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='68' height='68'><text x='0' y='54' font-size='58'>🔨</text></svg>") 6 50, pointer;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 100 100'><g transform='rotate(-35 40 25)'><rect x='34' y='38' width='13' height='55' rx='6' fill='%23a9713c' stroke='%235b3a1e' stroke-width='2'/><rect x='37' y='44' width='3' height='43' rx='1.5' fill='%23c99a5b' opacity='0.55'/><rect x='33' y='33' width='15' height='10' rx='3' fill='%235b3a1e'/><rect x='7' y='10' width='67' height='30' rx='15' fill='%23e5392b' stroke='%237a1810' stroke-width='2.5'/><ellipse cx='36' cy='18' rx='25' ry='5.5' fill='%23ffffff' opacity='0.35'/><rect x='7' y='10' width='67' height='30' rx='15' fill='none' stroke='%23b52a1f' stroke-width='1' opacity='0.4'/></g></svg>") 15 39, pointer;
         }
         .jtt-mole.up { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
         .jtt-mole.down { transform: translateX(-50%) translateY(65%) scale(0.7); opacity: 0; }
