@@ -240,7 +240,7 @@
 
     /* ── Section label ── */
     .calc-section-label {
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 900;
         letter-spacing: 0.12em;
         color: #333333;
@@ -249,7 +249,7 @@
     }
 
 	.calc-section-nbre {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 900;
         letter-spacing: 0.12em;
         color: #555555;
@@ -339,7 +339,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 7px;
         padding: 7px;
-        font-size: 15px;
+        font-size: 18px;
         font-weight: 700;
         color: #1e293b;
         outline: none;
@@ -420,7 +420,7 @@
     /* ── Bouton démarrer ── */
     .calc-start-btn {
         display: block;
-        margin: 10px auto 0;
+        margin: 30px auto 0;
         padding: 20px 28px;
         border-radius: 50px;
         font-weight: 900;
@@ -489,9 +489,9 @@
         position: absolute;
         top: 4px;
         left: 7px;
-        font-size: 11px;
+        font-size: 15px;
         font-weight: 900;
-        color: #abaeb3;
+        color: #06b6d4;
     }
     .calc-q-text {
         font-size: 28px;
@@ -657,7 +657,7 @@
 
         <!-- Timer -->
         <div style="text-align: center;">
-          <div class="calc-section-label" style="margin-top:15px">⏱ Temps imparti &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;">(0:00 = sans limite)</span></div>
+          <div class="calc-section-label" style="margin-top:25px">⏱ Temps imparti &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;">(0:00 = sans limite)</span></div>
           <div class="calc-timer-wrap" style="gap:8px;display:flex;align-items:center;justify-content:center;">
             <div class="calc-spinner">
               <div class="calc-spinner-label">min</div>
@@ -681,18 +681,17 @@
 
         <!-- Paramètres -->
         <div>
-          <div class="calc-section-label" style="margin-top:15px">Paramètres</div>
           <div class="calc-params-wrap">
             <div class="calc-field-group">
-              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre min<br> dans les calculs</div>
+              <div class="calc-section-nbre" style="margin-top:15px; margin-bottom:2px">Nbre min<br> dans les calculs</div>
               <input type="number" class="calc-field-input" data-role="min-val" value="1" min="0" max="999">
             </div>
             <div class="calc-field-group">
-              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre max<br> dans les calculs</div>
+              <div class="calc-section-nbre" style="margin-top:15px; margin-bottom:2px">Nbre max<br> dans les calculs</div>
               <input type="number" class="calc-field-input" data-role="max-val" value="50" min="1" max="999">
             </div>
             <div class="calc-field-group">
-              <div class="calc-section-nbre" style="margin-top:5px; margin-bottom:2px">Nbre de calculs<br> au total (max 50)</div>
+              <div class="calc-section-nbre" style="margin-top:15px; margin-bottom:2px">Nbre de calculs<br> au total (max 50)</div>
               <input type="number" class="calc-field-input" data-role="nb-val" value="10" min="1" max="50">
             </div>
           </div>

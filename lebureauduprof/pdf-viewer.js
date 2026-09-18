@@ -12,16 +12,38 @@
 // PDF WIDGET (rendu via PDF.js — pas d'iframe, pas d'ouverture navigateur)
 // =========================================================================
 
-// Charger PDF.js depuis CDN si pas encore chargé
+// Charger PDF.js : en priorité en local (fonctionne hors-ligne),
+// avec repli automatique sur le CDN si les fichiers locaux sont absents.
+const PDFJS_LOCAL_LIB    = 'pdf.min.js';
+const PDFJS_LOCAL_WORKER = 'pdf.worker.min.js';
+const PDFJS_CDN_LIB    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_CDN_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 function _ensurePdfJs(cb) {
     if (window.pdfjsLib) { cb(); return; }
+
     const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload = () => {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    let triedFallback = false;
+
+    const onLoaded = (workerSrc) => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
         cb();
     };
+
+    s.onload = () => onLoaded(PDFJS_LOCAL_LIB === s.getAttribute('src') ? PDFJS_LOCAL_WORKER : PDFJS_CDN_WORKER);
+
+    s.onerror = () => {
+        if (triedFallback) {
+            console.error('PDF.js : échec de chargement (local et CDN indisponibles).');
+            return;
+        }
+        triedFallback = true;
+        // Le fichier local n'existe pas ou n'a pas pu être chargé → on tente le CDN
+        s.src = PDFJS_CDN_LIB;
+    };
+
+    // On tente d'abord la copie locale (même dossier que index.html)
+    s.src = PDFJS_LOCAL_LIB;
     document.head.appendChild(s);
 }
 
