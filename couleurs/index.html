@@ -109,6 +109,24 @@
 			align-items: center; justify-content: center; 
 		}
 		.modal-content { background: white; padding: 25px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        /* --- ZONE D'IMPRESSION PDF --- */
+        #printArea { display: none; }
+        @media print {
+            @page { size: A4 portrait; margin: 15mm; }
+            body { background: white; margin: 0; font-size: 12px; }
+            body > *:not(#printArea) { display: none !important; }
+            #printArea { display: block; font-family: 'Segoe UI', sans-serif; color: #000; }
+            #printArea h1 { font-size: 20px; margin: 0 0 4px 0; color: #1a5276; }
+            #printArea .print-date { font-size: 11px; color: #555; margin-bottom: 12px; }
+            #printArea table { width: 100%; border-collapse: collapse; table-layout: auto; }
+            #printArea th, #printArea td { border: 1px solid #999; padding: 6px 8px; text-align: left; white-space: normal; font-size: 12px; }
+            #printArea th { background: #1a5276 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #printArea tr { page-break-inside: avoid; }
+            #printArea tbody tr:nth-child(even) td { background: #f2f6f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #printArea .p-score { text-align: center; width: 60px; font-weight: bold; }
+            #printArea .p-none { color: #999; font-style: italic; }
+        }
     </style>
 </head>
 <body>
@@ -123,6 +141,7 @@
 
         <div style="flex-grow: 1;"></div>
 		<button id="lockBtn" class="btn-main btn-lock" onclick="toggleLock()">🔓 Déverouillé</button>
+        <button style="background:#1a5276; color:white;" class="btn-main" onclick="exportPDF()">📄 Export PDF</button>
         <button style="background:#27ae60; color:white;" class="btn-main" onclick="exportData()">💾 Export JSON</button>
         <button style="background:#8e44ad; color:white;" class="btn-main" onclick="document.getElementById('importFile').click()">📁 Import JSON</button>
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
@@ -523,6 +542,50 @@
         });
 		updateToggleAllButton();
     
+    }
+
+    // --- EXPORT PDF : liste des élèves + objectif(s) choisi(s) (en bleu) ---
+    function exportPDF() {
+        let area = document.getElementById('printArea');
+        if (!area) {
+            area = document.createElement('div');
+            area.id = 'printArea';
+            document.body.appendChild(area);
+        }
+
+        const now = new Date();
+        const dateFr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+        let rows = '';
+        classData.forEach(student => {
+            const objectifs = [];
+            const rewards = student.rewards || {};
+            for (let i = 1; i <= 14; i++) {
+                if (rewards['P' + i] === 1) objectifs.push(`<strong>P${i}</strong> – ${descP[i-1]}`);
+            }
+            for (let i = 1; i <= 9; i++) {
+                if (rewards['T' + i] === 1) objectifs.push(`<strong>T${i}</strong> – ${descT[i-1]}`);
+            }
+            rows += `<tr>
+                <td>${student.name}</td>
+                <td class="p-score">${getNetScore(student)}</td>
+                <td>${objectifs.length ? objectifs.join('<br>') : '<span class="p-none">Aucun objectif choisi</span>'}</td>
+            </tr>`;
+        });
+
+        area.innerHTML = `
+            <h1>🎯 Objectifs de récompense des élèves</h1>
+            <div class="print-date">Édité le ${dateFr}</div>
+            <table>
+                <thead><tr><th>Élève</th><th class="p-score">Score</th><th>Objectif choisi</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+
+        const oldTitle = document.title;
+        const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        document.title = `objectifs_eleves_${dateStr}`; // nom proposé pour le fichier PDF
+        window.print();
+        document.title = oldTitle;
     }
 
     function exportData() {
